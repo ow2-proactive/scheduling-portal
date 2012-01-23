@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project basedir=".">
+
+	<property environment="env" />
+
+	<property name="base.dir" value=".." />
+	<property name="src.dir" value="${base.dir}/src" />
+	<property name="war.dir" value="${base.dir}/war" />
+	<property name="compile.dir" value="${base.dir}/compile" />
+	<property name="dist.dir" value="${base.dir}/dist" />
+
+	<property name="keystore" value="${compile.dir}/keystore" />
+	<property name="keystore.alias" value="ProActiveGridCloudPortal" />
+	<property name="keystore.pwd" value="ProActiveGridCloudPortal" />
+
+	<property name="web-inf.dir" value="${war.dir}/WEB-INF" />
+
+	<property name="classes.dir" value="${web-inf.dir}/classes" />
+	<property name="lib.dir" value="${web-inf.dir}/lib" />
+	<property name="rm.config.file" value="rm.conf" />
+	<property name="sched.config.file" value="scheduler.conf" />
+	<exec executable="svnversion" outputproperty="svnversion" failifexecutionfails="false"/>
+	<condition property="svnversion" value="0">
+	  <not><isset property="svnversion" /></not>
+	</condition>
+
+	<property name="package.name" value="org.ow2.proactive_grid_cloud_portal" />
+	<property name="gwt.args" value="-war ${war.dir} -style OBF" />
+
+	<path id="project.class.path">
+		<pathelement location="${classes.dir}" />
+		<fileset dir="${base.dir}/lib" includes="**/*.jar" />
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+	</path>
+
+	<path id="compile.class.path">
+		<fileset dir="${compile.dir}/lib">
+			<include name="**/*.jar" />
+			<!-- launched by JNLP, contain classes not supported by GWT -->
+			<exclude name="${classes.dir}/org/ow2/proactive_grid_cloud_portal/extra/" />
+		</fileset>
+	</path>
+
+	<path id="formatter.class.path">
+		<fileset dir="${compile.dir}/lib-formatter">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+</project>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='portal'>
+
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name="com.smartgwt.SmartGwt" />
+	<inherits name="com.google.gwt.json.JSON" />
+	<inherits name="com.google.gwt.http.HTTP"/>
+	<inherits name='com.hydro4ge.raphaelgwt.RaphaelGWT' />
+	<inherits name="com.smartgwt.tools.SmartGwtTools"/>
+	
+	<entry-point class='org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerPortal' />
+	
+	<source path='common/client' />
+	<source path='common/shared' />
+	<source path='scheduler/client' />
+	<source path='scheduler/shared' />
+
+</module>

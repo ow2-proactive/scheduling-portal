@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='portal'>
+
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name="com.smartgwt.SmartGwt" />
+	<inherits name="com.google.gwt.json.JSON" />
+	<inherits name="com.google.gwt.http.HTTP"/>
+	<inherits name="com.smartgwt.tools.SmartGwtTools"/>
+	<inherits name='com.google.gwt.visualization.Visualization'/>
+	
+	<entry-point class='org.ow2.proactive_grid_cloud_portal.rm.client.RMPortal' />
+	
+	<source path='common/client' />
+	<source path='common/shared' />
+	<source path='rm/client' />
+	<source path='rm/shared' />
+
+</module>

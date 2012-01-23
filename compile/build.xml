@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="ProActive Grid Cloud Portal" default="wars" basedir=".">
+
+	<import file="common.xml" />
+
+	<target name="javac" description="Compile all Java source files">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${src.dir}" includes="**" encoding="utf-8"
+			   destdir="${classes.dir}" deprecation="on"
+			   source="1.6" target="1.6" nowarn="false"
+			   debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path" />
+		</javac>
+		<copy todir="${classes.dir}">
+			<fileset dir="${src.dir}" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="gwt.scheduler" depends="javac" description="Compile the Scheduler GWT Project">
+		<delete dir="${war.dir}/portal" failonerror="false" />
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+			<classpath>
+				<pathelement location="${src.dir}" />
+				<path refid="compile.class.path" />
+				<path refid="project.class.path" />
+			</classpath>
+			<jvmarg value="-Xmx1024M" />
+			<arg line="${gwt.args}" />
+			<arg value="${package.name}.Scheduler" />
+		</java>
+	</target>
+	
+	<target name="gwt.rm" depends="javac" description="Compile the RM GWT Project">
+		<delete dir="${war.dir}/portal" failonerror="false" />
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+			<classpath>
+				<pathelement location="${src.dir}" />
+				<path refid="compile.class.path" />
+				<path refid="project.class.path" />
+			</classpath>
+			<jvmarg value="-Xmx1024M" />
+			<arg line="${gwt.args}" />
+			<arg value="${package.name}.RM" />
+		</java>
+	</target>
+
+	<target name="visu" depends="javac" description="Create the Remote Visualization jar">
+		<copy todir="${classes.dir}/org/ow2/proactive_grid_cloud_portal/extra/" flatten="true">
+			<fileset dir="${compile.dir}/images/icons/" />
+			<resources>
+				<file file="${compile.dir}/images/header_split.png" />
+				<file file="${compile.dir}/images/folder.png" />
+				<file file="${compile.dir}/images/visu.png" />
+			</resources>
+		</copy>
+		<jar destfile="${war.dir}/visu.jar">
+			<fileset dir="${classes.dir}" includes="**/extra/RemoteViewer.class" />
+			<fileset dir="${classes.dir}" includes="**/extra/*.png" />
+			<manifest>
+				<attribute name="Main-Class" value="org.ow2.proactive_grid_cloud_portal.extra.RemoteViewer" />
+			</manifest>
+		</jar>
+		<signjar jar="${war.dir}/visu.jar" keystore="${keystore}" alias="${keystore.alias}" storepass="${keystore.pwd}" />
+	</target>
+
+	<target name="servers" depends="javac" description="Create the Data Servers jar">
+		<copy todir="${classes.dir}/org/ow2/proactive_grid_cloud_portal/extra/" flatten="true">
+			<fileset dir="${compile.dir}/images/icons/" />
+			<resources>
+				<file file="${compile.dir}/images/header_split.png" />
+				<file file="${compile.dir}/images/folder.png" />
+				<file file="${compile.dir}/images/server.png" />
+			</resources>
+		</copy>
+		<jar destfile="${war.dir}/servers.jar">
+			<fileset dir="${classes.dir}" includes="**/extra/DataServerLauncher*.class" />
+			<fileset dir="${classes.dir}" includes="**/extra/*.png" />
+			<manifest>
+				<attribute name="Main-Class" value="org.ow2.proactive_grid_cloud_portal.extra.DataServerLauncher" />
+			</manifest>
+		</jar>
+		<signjar jar="${war.dir}/servers.jar" keystore="${keystore}" alias="${keystore.alias}" storepass="${keystore.pwd}" />
+	</target>
+
+	<target name="war.scheduler" depends="gwt.scheduler,visu,servers"
+		description="Create a distributable .war for the Scheduler application">
+		<mkdir dir="${dist.dir}" />
+		<propertyfile file="${war.dir}/${sched.config.file}">
+		  <entry key="sched.revision" value="${svnversion}" />
+		</propertyfile>
+		<copy file="${web-inf.dir}/web.scheduler.xml" tofile="${web-inf.dir}/web.xml" />
+		<zip destfile="${dist.dir}/scheduler.war"
+			basedir="${war.dir}"
+			excludes="${rm.config.file}, **/rm/, **/extra/,
+					  **/web.scheduler.xml, **/web.rm.xml" />
+		<delete file="${web-inf.dir}/web.xml" />
+	</target>
+
+	<target name="war.rm" depends="gwt.rm"
+		description="Create a distributable .war for the RM application">
+		<mkdir dir="${dist.dir}" />
+		<propertyfile file="${war.dir}/${rm.config.file}">
+		  <entry key="rm.revision" value="${svnversion}" />
+		</propertyfile>
+		<copy file="${web-inf.dir}/web.rm.xml" tofile="${web-inf.dir}/web.xml" />
+		<zip destfile="${dist.dir}/rm.war"
+			basedir="${war.dir}"
+			excludes="${sched.config.file}, servers.jar, visu.jar,
+					  **/scheduler/, **/extra/,
+					  **/web.scheduler.xml, **/web.rm.xml" />
+		<delete file="${web-inf.dir}/web.xml" />
+	</target>
+
+	<target name="wars" depends="war.scheduler, war.rm"
+		description="Build distributable .war for the Scheduler and RM applications" />
+
+	<target name="clean" description="Cleans this project">
+		<delete dir="${classes.dir}" failonerror="false" />
+		<delete dir="${test.classes.dir}" failonerror="false" />
+		<delete dir="${dist.dir}" failonerror="false" />
+		<delete dir="${war.dir}/portal" failonerror="false" />
+		<delete file="${war.dir}/visu.jar" failonerror="false" />
+		<delete file="${war.dir}/servers.jar" failonerror="false" />
+		<delete dir="${web-inf.dir}/classes" failonerror="false" />
+		<delete dir="${web-inf.dir}/deploy" failonerror="false" />
+		<delete file="${compile.dir}/eclipse_formatter_config.properties" failonerror="false" />
+	</target>
+
+	<macrodef name="eclipse_format_m">
+		<attribute name="loglevel" default="WARN" />
+		<element name="sourcefileset" optional="false" />
+		<sequential>
+			<taskdef name="javaformatter" classname="org.hibernate.tool.ant.JavaFormatterTask">
+				<classpath refid="formatter.class.path" />
+			</taskdef>
+			<copy file="${compile.dir}/eclipse_formatter_config.xml" tofile="${compile.dir}/eclipse_formatter_config.properties" />
+			<replaceregexp file="${compile.dir}/eclipse_formatter_config.properties" match='^&lt;(.xml|/?profile).*' replace="" byline="true" />
+			<replaceregexp file="${compile.dir}/eclipse_formatter_config.properties" match='.*\"(.*)\".*\"(.*)\".*' replace="\1=\2" byline="true" />
+			<javaformatter configurationFile="eclipse_formatter_config.properties">
+				<sourcefileset />
+			</javaformatter>
+		</sequential>
+	</macrodef>
+
+	<target name="format" description="hibernate's eclipse-based formatter">
+		<eclipse_format_m>
+			<sourcefileset>
+				<fileset dir="${src.dir}" includes="**/*.java" />
+			</sourcefileset>
+		</eclipse_format_m>
+	</target>
+</project>
