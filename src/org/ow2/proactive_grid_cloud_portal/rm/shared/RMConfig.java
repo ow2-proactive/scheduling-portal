@@ -86,6 +86,14 @@ public class RMConfig extends Config {
 	public static final String MOTD_URL = "rm.motd.url";
 	private static final String d_MOTD_URL = "";
 
+	/** the protocol for jmx nodes communication (default or proactive) */ 	
+	public static final String MONITORING_PROTOCOL = "rm.monitoring.protocol";
+	public static final String MONITORING_PROTOCOL_DEFAULT = "default";
+	
+	/** refresh period in milliseconds */
+	public static final String MONITORING_PERIOD = "rm.monitoring.period";
+	public static final String MONITORING_PERIOD_DEFAULT = "10000";
+	
 	private static RMConfig instance = null;
 
 	/**
@@ -108,6 +116,8 @@ public class RMConfig extends Config {
 		properties.put(REST_VERSION, d_REST_VERSION);
 		properties.put(STATISTICS_REFRESH_TIME, d_STATISTICS_REFRESH_TIME);
 		properties.put(MOTD_URL, d_MOTD_URL);
+		properties.put(MONITORING_PROTOCOL, MONITORING_PROTOCOL_DEFAULT);
+		properties.put(MONITORING_PERIOD, MONITORING_PERIOD_DEFAULT);
 	}
 
 	@Override
@@ -157,5 +167,19 @@ public class RMConfig extends Config {
 	 */
 	public int getStatisticsRefreshTime() {
 		return Integer.parseInt(properties.get(STATISTICS_REFRESH_TIME));
+	}
+
+	/**
+	 * @return protocol for jmx nodes communication (default or proactive)
+	 */
+	public String getMonitoringProtocol() {
+		return properties.get(MONITORING_PROTOCOL);
+	}
+
+	/**
+	 * @return refresh period in milliseconds
+	 */
+	public int getMonitoringPeriod() {
+		return Integer.parseInt(properties.get(MONITORING_PERIOD));
 	}
 }

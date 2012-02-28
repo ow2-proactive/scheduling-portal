@@ -306,5 +306,4 @@ public class InfoView implements NodeSelectedListener, NodesListener {
 		this.selNS = null;
 		this.selNode = null;
 	}
-
 }

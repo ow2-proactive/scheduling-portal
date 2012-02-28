@@ -559,6 +559,54 @@ public class RMServiceImpl extends Service implements RMService {
 	}
 
 	@Override
+	public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl,
+			String objectName, List<String> attrs)
+			throws RestServerException, ServiceException {
+		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+		ClientResponse<InputStream> clientResponse = null;
+		try {
+			clientResponse = client.getNodeMBeanInfo(sessionId, nodeJmxUrl, objectName, attrs);
+			int code = clientResponse.getStatus();
+			String ret = convertToString(clientResponse.getEntity());
+
+			switch (code) {
+				case 200:
+					return ret;
+				default:
+					throw new RestServerException(code, ret);
+			}
+		} catch (IOException e) {
+			throw new ServiceException("Failed to read server response", e);
+		} finally {
+			clientResponse.releaseConnection();
+		}
+	}
+
+	@Override
+	public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl,
+			String objectNames, List<String> attrs)
+			throws RestServerException, ServiceException {
+		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+		ClientResponse<InputStream> clientResponse = null;
+		try {
+			clientResponse = client.getNodeMBeansInfo(sessionId, nodeJmxUrl, objectNames, attrs);
+			int code = clientResponse.getStatus();
+			String ret = convertToString(clientResponse.getEntity());
+
+			switch (code) {
+				case 200:
+					return ret;
+				default:
+					throw new RestServerException(code, ret);
+			}
+		} catch (IOException e) {
+			throw new ServiceException("Failed to read server response", e);
+		} finally {
+			clientResponse.releaseConnection();
+		}
+	}
+	
+	@Override
 	public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
 		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
 		ClientResponse<InputStream> clientResponse = null;
@@ -613,5 +661,4 @@ public class RMServiceImpl extends Service implements RMService {
 		 */
 		return;
 	}
-
 }

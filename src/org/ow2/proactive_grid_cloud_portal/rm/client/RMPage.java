@@ -97,6 +97,8 @@ public class RMPage implements LogListener {
 	private TreeView treeView = null;
 	/** bot left pane : selected node info */
 	private InfoView infoView = null;
+	/** bot left pane : selected node monitoring */
+	private MonitoringView monitoringView = null;
 	/** bot right pane : graphical list of nodes */
 	private CompactView compactView = null;
 	/** bot left pane : node count */
@@ -335,10 +337,12 @@ public class RMPage implements LogListener {
 		hl.setHeight100();
 
 		this.infoView = new InfoView(controller);
+		this.monitoringView = new MonitoringView(controller);
 		this.statsView = new StatisticsView(controller);
 		this.rmStatsView = new RMStatsView(controller);
 
 		Canvas infoCanvas = this.infoView.build();
+		Canvas monitoringCanvas = this.monitoringView.build();
 		Canvas statsCanvas = this.statsView.build();
 		Canvas rmStatsCanvas = this.rmStatsView.build();
 
@@ -346,11 +350,13 @@ public class RMPage implements LogListener {
 		t1.setPane(infoCanvas);
 		Tab t2 = new Tab("Nodes");
 		t2.setPane(statsCanvas);
+		Tab t3 = new Tab("Monitoring");
+		t3.setPane(monitoringCanvas);
 
 		TabSet leftTabs = new TabSet();
 		leftTabs.setWidth("50%");
 		leftTabs.setShowResizeBar(true);
-		leftTabs.setTabs(t1, t2);
+		leftTabs.setTabs(t1, t2, t3);
 		rmStatsCanvas.setWidth("50%");
 
 		hl.addMember(leftTabs);

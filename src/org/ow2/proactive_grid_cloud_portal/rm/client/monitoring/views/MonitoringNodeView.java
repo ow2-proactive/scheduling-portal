@@ -1,0 +1,192 @@
+/*
+ * ################################################################
+ *
+ * ProActive Parallel Suite(TM): The Java(TM) library for
+ *    Parallel, Distributed, Multi-Core Computing for
+ *    Enterprise Grids & Clouds
+ *
+ * Copyright (C) 1997-2011 INRIA/University of
+ *                 Nice-Sophia Antipolis/ActiveEon
+ * Contact: proactive@ow2.org or contact@activeeon.com
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation; version 3 of
+ * the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ *
+ * If needed, contact us to obtain a release under GPL Version 2 or 3
+ * or a different license than the AGPL.
+ *
+ *  Initial developer(s):               The ProActive Team
+ *                        http://proactive.inria.fr/team_members.htm
+ *  Contributor(s):
+ *
+ * ################################################################
+ * $$PROACTIVE_INITIAL_DEV$$
+ */
+package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ClassesAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMCpuUsageAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMMemoryAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.tab.Tab;
+import com.smartgwt.client.widgets.tab.TabSet;
+
+/**
+ * Node monitoring view.
+ */
+public class MonitoringNodeView extends VLayout implements AsyncCallback<String> {
+	
+	private Timer updater = null;
+	private List<Reloadable> reloadables = new LinkedList<Reloadable>();
+	private TabSet tabs;
+	private Label status;
+	
+	private RMController controller;
+	
+	public MonitoringNodeView(RMController controller) {
+		this.controller = controller;
+	}
+	
+	public void init(Node node) {
+		
+		if (node.getNodeState() == NodeState.BUSY || 
+			node.getNodeState() == NodeState.FREE || 
+			node.getNodeState() == NodeState.LOCKED) {
+			// good
+		} else {
+			// cannot monitor the node
+			return;
+		}
+		
+		setWidth100();
+		String nodeUrl = node.getDefaultJMXUrl();
+		if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
+			nodeUrl = node.getProactiveJMXUrl();
+		}
+		
+		MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
+		MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
+		MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
+		MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
+
+		String[] jvmAttrs = {"ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
+				"VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath"};
+		
+		MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
+		jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
+		jvmDetails.setWidth100();
+		
+		reloadables.add(heapMemory);
+		reloadables.add(threads);
+		reloadables.add(classes);
+		reloadables.add(cpuUsage);
+		
+		HLayout firstRow = new HLayout();
+		HLayout secondRow = new HLayout();
+		
+		firstRow.addMember(heapMemory);
+		firstRow.addMember(threads);
+		secondRow.addMember(classes);
+		secondRow.addMember(cpuUsage);
+		
+		Layout graphs = new VLayout();
+		graphs.addMember(firstRow);
+		graphs.addMember(secondRow);
+		
+		if (status != null) {
+			removeMember(status);
+		}
+		
+		status = new Label("Retreiving data");
+		status.setWidth100();
+		status.setAlign(Alignment.CENTER);
+		
+		Tab t1 = new Tab("Overview");
+		t1.setPane(graphs);
+		Tab t2 = new Tab("JVM Summary");
+		t2.setPane(jvmDetails);
+
+		tabs = new TabSet();
+		tabs.setWidth100();
+		tabs.setHeight100();
+		tabs.setShowResizeBar(true);
+		tabs.setTabs(t1, t2);
+		tabs.hide();
+
+		addMember(status);
+		
+		updater = new Timer() {
+			@Override
+			public void run() {
+				for (Reloadable reloadable: reloadables) {
+					reloadable.reload();
+				}					
+			}
+		};
+		updater.schedule(1);			
+		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());			
+	}
+
+	public void close() {
+		try {
+			if (updater != null) {
+				updater.cancel();
+				updater = null;
+			}
+			
+			if (tabs != null) {
+				removeMember(tabs);				
+				reloadables.clear();
+				tabs.destroy();
+				tabs = null;
+			}
+		} catch (Exception e) {
+			// ignore it
+		}
+	}
+
+	@Override
+	public void onFailure(Throwable caught) {
+		close();
+		status.setContents(RMController.getJsonErrorMessage(caught));
+	}
+
+	@Override
+	public void onSuccess(String result) {
+		removeMember(status);
+		status.destroy();
+		addMember(tabs);
+		tabs.show();
+	}
+}

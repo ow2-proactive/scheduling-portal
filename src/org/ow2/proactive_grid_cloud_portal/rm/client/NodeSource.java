@@ -92,7 +92,7 @@ public class NodeSource {
 		return nodeSourceAdmin;
 	}
 
-	static class Host {
+	public static class Host {
 
 		/** all nodes deployed on this host for one specific nodesource*/
 		private HashMap<String, Node> nodes;
@@ -137,7 +137,7 @@ public class NodeSource {
 			return sourceName + "-host-" + hostName;
 		}
 
-		static class Node {
+		public static class Node {
 
 			/** deployed node URL */
 			private String nodeUrl;
@@ -159,10 +159,14 @@ public class NodeSource {
 			private String vmName;
 			/** toString() of the remote RMNode */
 			private String description;
+			/** default node JMX url */
+			private String defaultJMXUrl;
+			/** proactive node JMX url */
+			private String proactiveJMXUrl;
 
 			Node(String nodeUrl, String nodeState, String nodeInfo, String timeStampFormatted,
 					String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
-					String description) {
+					String description, String defaultJMXUrl, String proactiveJMXUrl) {
 				this.nodeUrl = nodeUrl;
 				this.nodeState = NodeState.parse(nodeState);
 				this.nodeInfo = nodeInfo;
@@ -173,6 +177,8 @@ public class NodeSource {
 				this.hostName = hostName;
 				this.vmName = vmName;
 				this.description = description;
+				this.defaultJMXUrl = defaultJMXUrl;
+				this.proactiveJMXUrl = proactiveJMXUrl;				
 			}
 
 			public String getNodeUrl() {
@@ -213,6 +219,14 @@ public class NodeSource {
 
 			public String getDescription() {
 				return description;
+			}
+
+			public String getDefaultJMXUrl() {
+				return defaultJMXUrl;
+			}
+
+			public String getProactiveJMXUrl() {
+				return proactiveJMXUrl;
 			}
 		}
 	}

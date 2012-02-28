@@ -189,7 +189,7 @@ public interface RMService extends RemoteService {
 	/**
 	 * Query a list of attributes from a specific RM MBean
 	 * @param sessionId current session
-	 * @param name name of the JMX management bean
+	 * @param name of the JMX management bean
 	 * @param attrs attributes to fetch in the specified MBean
 	 * @return JSON object with attribute names as key
 	 * @throws RestServerException
@@ -198,6 +198,32 @@ public interface RMService extends RemoteService {
 	String getMBeanInfo(String sessionId, String name, List<String> attrs) throws RestServerException,
 			ServiceException;
 
+	/**
+     * Retrieves attributes of the specified mbean.
+	 * 
+	 * @param sessionId current session
+	 * @param name of mbean
+	 * @param nodeJmxUrl mbean server url
+	 * @param attrs set of mbean attributes
+	 * 
+	 * @return mbean attributes values
+	 */
+	String getNodeMBeanInfo(String sessionId, String nodeJmxUrl,
+			String objectName, List<String> attrs) throws RestServerException, ServiceException;
+
+	/**
+     * Retrieves attributes of the specified mbeans.
+	 * 
+	 * @param sessionId current session
+	 * @param objectNames mbean names (@see ObjectName format)
+	 * @param nodeJmxUrl mbean server url
+	 * @param attrs set of mbean attributes
+	 * 
+	 * @return mbean attributes values
+	 */
+	String getNodeMBeansInfo(String sessionId, String nodeJmxUrl,
+			String objectNames, List<String> attrs) throws RestServerException, ServiceException;
+	
 	/**
 	 * Statistic history for the following values:<pre>
 	 * 	{ "BusyNodesCount",

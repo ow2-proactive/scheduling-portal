@@ -509,9 +509,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 				JSONString descStr = nodeObj.get("nodeInfo").isString();
 				if (descStr != null)
 					description = descStr.stringValue();
+				String defaultJMXUrl = nodeObj.get("defaultJMXUrl").isString().stringValue();
+				String proactiveJMXUrl = nodeObj.get("proactiveJMXUrl").isString().stringValue();
 
 				Node n = new Node(nodeUrl, nodeState, nodeInfo, timeStampFormatted, nodeProvider, nodeOwner,
-					nss, hostName, vmName, description);
+					nss, hostName, vmName, description, defaultJMXUrl, proactiveJMXUrl);
 
 				// deploying node
 				if (hostName == null || hostName.length() == 0) {
@@ -866,7 +868,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 		win.show();
 	}
 
-	RMServiceAsync getRMService() {
+	public RMServiceAsync getRMService() {
 		return this.rm;
 	}
 

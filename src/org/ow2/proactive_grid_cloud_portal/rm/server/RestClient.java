@@ -154,6 +154,20 @@ public interface RestClient {
 	List<String> attrs);
 
 	@GET
+	@Produces("application/json")
+	@Path("/rm/node/mbean")
+    public ClientResponse<InputStream> getNodeMBeanInfo(@HeaderParam("sessionid") String sessionId,
+    		@QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectName, 
+    		@QueryParam("attrs") List<String> attrs);
+
+	@GET
+	@Produces("application/json")
+	@Path("/rm/node/mbeans")
+    public ClientResponse<InputStream> getNodeMBeansInfo(@HeaderParam("sessionid") String sessionId,
+    		@QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectNames, 
+    		@QueryParam("attrs") List<String> attrs);
+	
+	@GET
 	@GZIP
 	@Path("/rm/stathistory")
 	@Produces("application/json")

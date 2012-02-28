@@ -144,5 +144,4 @@ public abstract class Config {
 	 * @return URL of the service to GET for the MOTD
 	 */
 	public abstract String getMotdUrl();
-
 }
