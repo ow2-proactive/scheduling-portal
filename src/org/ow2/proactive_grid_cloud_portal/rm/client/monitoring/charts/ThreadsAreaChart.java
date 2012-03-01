@@ -46,5 +46,4 @@ public class ThreadsAreaChart extends MBeanTimeAreaChart {
 	public ThreadsAreaChart(RMController controller, String jmxServerUrl) {
 		super(controller, jmxServerUrl, "java.lang:type=Threading", "ThreadCount", "Threads");
 	}
-
 }

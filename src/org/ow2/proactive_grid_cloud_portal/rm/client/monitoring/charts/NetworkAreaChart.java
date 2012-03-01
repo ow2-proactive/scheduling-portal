@@ -63,7 +63,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 				"RxBytes", "Network");
 
 		AxisOptions vAxis = AxisOptions.create();
-		vAxis.setTitle("MB/sec");
+		vAxis.set("format", "#.# Mb/s");
 		loadOpts.setVAxisOptions(vAxis);
 	}
 

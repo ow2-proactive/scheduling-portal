@@ -47,6 +47,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
+import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
@@ -62,6 +63,11 @@ public class MBeanTimeAreaChart extends MBeanChart {
 	public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes, String title) {
 		super(controller, jmxServerUrl, mbean, attributes, title);
 
+		AxisOptions vAxis = AxisOptions.create();
+		vAxis.setMinValue(0);
+		vAxis.set("format", "#");
+		loadOpts.setVAxisOptions(vAxis);
+		
 		loadTable.addColumn(ColumnType.STRING);
 		for (int i = 0; i < attributes.length; i++) {
 			loadTable.addColumn(ColumnType.NUMBER, attributes[i]);			
@@ -82,15 +88,11 @@ public class MBeanTimeAreaChart extends MBeanChart {
 			// getting primitive values of all attributes
 			for (int i = 0; i < attrs.length; i++) {
 				double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-				loadTable.setValue(loadTable.getNumberOfRows()-1, i+1, formatNumber(attrs[i], value));
+				loadTable.setValue(loadTable.getNumberOfRows()-1, i+1, value);
 			}
 			
 			loadChart.draw(loadTable, loadOpts);
 		}
-	}
-
-	protected Long formatNumber(String attr, double value) {
-		return (long)value;
 	}
 
 	@Override

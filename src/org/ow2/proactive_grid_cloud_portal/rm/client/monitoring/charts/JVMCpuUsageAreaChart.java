@@ -49,14 +49,7 @@ public class JVMCpuUsageAreaChart extends MBeanTimeAreaChart {
 		super(controller, jmxServerUrl, "java.lang:type=OperatingSystem", "SystemLoadAverage", "Cpu Usage");
 		
 		AxisOptions vAxis = AxisOptions.create();
-		vAxis.setTitle("Percentage");
+		vAxis.set("format", "#%");
 		loadOpts.setVAxisOptions(vAxis);
 	}
-	
-	protected Long formatNumber(String attr, double value) {
-		if (attr.equals("SystemLoadAverage")) {
-			return (long)(value * 100);
-		}
-		return (long)value;
-	}	
 }

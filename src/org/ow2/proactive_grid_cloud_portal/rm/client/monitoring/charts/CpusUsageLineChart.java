@@ -63,8 +63,10 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 				"Combined", "Load History");
 		
 		AxisOptions vAxis = AxisOptions.create();
-		vAxis.setTitle("Persentage");
+		vAxis.set("format", "#%");
 		loadOpts.setVAxisOptions(vAxis);
+		chartContainer.setHeight("300px");
+		loadChart.setHeight("300px");
 	}
 
 	@Override
@@ -89,8 +91,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 				}
 				
 				double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
-				long percentage = (long) (value * 100);
-				loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, percentage);
+				loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
 			}
 
 			loadChart.draw(loadTable, loadOpts);

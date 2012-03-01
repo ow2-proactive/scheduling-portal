@@ -72,8 +72,6 @@ public class Overview extends VLayout implements Reloadable {
 		network = new NetworkAreaChart(controller, url);
 		disk = new DiskPieChart(controller, url);
 
-		osInfo.setHeight("100px");
-				
 		VLayout osInfoRow = new VLayout();
 		HLayout cpuMemRow = new HLayout();
 		HLayout netFileSysRow = new HLayout();
@@ -83,6 +81,7 @@ public class Overview extends VLayout implements Reloadable {
 		osInfoRow.addMember(osLabel);
 		osInfoRow.addMember(osInfo);
 		osInfoRow.setWidth("50%");
+		osInfoRow.setHeight("120px");
 		
 		cpuMemRow.addMember(cpuUsage);
 		cpuMemRow.addMember(memory);

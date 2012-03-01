@@ -68,6 +68,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 	protected CoreChart loadChart;
 	protected DataTable loadTable;
 	protected Options loadOpts;
+	protected AbsolutePanel chartContainer;
 	
 	public MBeanChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
 		this.controller = controller;
@@ -95,15 +96,15 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 			addMember(label);		
 		}
 		
-		final AbsolutePanel pane = new AbsolutePanel();
-		pane.setWidth("100%");
-		pane.setHeight("200px");
+		chartContainer = new AbsolutePanel();
+		chartContainer.setWidth("100%");
+		chartContainer.setHeight("200px");
 		
 		loadChart = createChart(loadTable, loadOpts);
 		loadChart.setWidth("100%");
 		loadChart.setHeight("200px");
-		pane.add(loadChart);
-		addMember(pane);
+		chartContainer.add(loadChart);
+		addMember(chartContainer);
 	}
 
 	@Override

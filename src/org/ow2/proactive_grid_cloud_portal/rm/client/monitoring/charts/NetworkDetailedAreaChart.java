@@ -63,7 +63,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 		time = new long[2];
 		
 		AxisOptions vAxis = AxisOptions.create();
-		vAxis.setTitle("MB/sec");
+		vAxis.set("format", "#.# Mb/s");
 		loadOpts.setVAxisOptions(vAxis);
 		loadOpts.setLegend(LegendPosition.RIGHT);
 		loadTable.setColumnLabel(1, "RX");

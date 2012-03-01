@@ -46,17 +46,9 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 public class CpuUsageAreaChart extends MBeanTimeAreaChart {
 	
 	public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=LoadAverage", "LastMinute", "Cpu Usage");
+		super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
 		AxisOptions vAxis = AxisOptions.create();
-		vAxis.setTitle("Percentage");
-		vAxis.setMaxValue(100);
-		loadOpts.setVAxisOptions(vAxis);		
+		vAxis.set("format", "#%");
+		loadOpts.setVAxisOptions(vAxis);
 	}
-	
-	protected Long formatNumber(String attr, double value) {
-		if (attr.equals("LastMinute")) {
-			return (long)(value * 100);
-		}
-		return (long)value;
-	}	
 }

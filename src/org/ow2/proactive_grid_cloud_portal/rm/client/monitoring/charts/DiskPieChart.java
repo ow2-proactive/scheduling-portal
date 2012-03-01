@@ -45,6 +45,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
+import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
@@ -59,10 +60,8 @@ public class DiskPieChart extends MBeansChart {
 				new String[] {"Total"}, "File System, Mb");
 
 		loadOpts.setLegend(LegendPosition.RIGHT);
-		
 		loadTable.addColumn(ColumnType.STRING, "Type");
 		loadTable.addColumn(ColumnType.NUMBER, "Mb");
-		
 	}
 
 	@Override
