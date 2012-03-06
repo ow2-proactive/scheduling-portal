@@ -63,6 +63,8 @@ public class Overview extends VLayout implements Reloadable {
 	private MBeanChart network;
 	private MBeanChart disk;
 	
+	private ReloadableChain chain;
+
 	public Overview(RMController controller, String url, AsyncCallback<String> extraCallback) {
 
 		osInfo = new MBeanDetailedView(extraCallback);
@@ -71,7 +73,11 @@ public class Overview extends VLayout implements Reloadable {
 		memory = new MemoryLineChart(controller, url);
 		network = new NetworkAreaChart(controller, url);
 		disk = new DiskPieChart(controller, url);
+		
+		disk.reload();
 
+		chain = new ReloadableChain(new Reloadable[] {cpuUsage, memory, network});
+		
 		VLayout osInfoRow = new VLayout();
 		HLayout cpuMemRow = new HLayout();
 		HLayout netFileSysRow = new HLayout();
@@ -95,9 +101,15 @@ public class Overview extends VLayout implements Reloadable {
 
 	@Override
 	public void reload() {
-		cpuUsage.reload();
-		memory.reload();
-		network.reload();
-		disk.reload();
+		chain.reload();
+	}
+
+	@Override
+	public void onFinish(final Runnable callback) {
+		chain.onFinish(new Runnable() {
+			public void run() {
+				callback.run();
+			}
+		});
 	}
 }

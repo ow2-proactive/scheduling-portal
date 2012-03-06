@@ -70,6 +70,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 	protected Options loadOpts;
 	protected AbsolutePanel chartContainer;
 	
+	protected Runnable onFinish;
+	
 	public MBeanChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
 		this.controller = controller;
 		this.jmxServerUrl = jmxServerUrl;
@@ -115,14 +117,20 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
 		rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), new AsyncCallback<String>() {
 			public void onSuccess(String result) {
+				if (onFinish != null) {
+					onFinish.run();					
+				}
 				if (!model.isLoggedIn())
 					return;
-
+				
 				model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " + (System.currentTimeMillis() - t) + "ms");
 				processResult(result);
 			}
 
 			public void onFailure(Throwable caught) {
+				if (onFinish != null) {
+					onFinish.run();					
+				}
 				if (RMController.getJsonErrorCode(caught) == 401) {
 					model.logMessage("You have been disconnected from the server.");
 				} else {
@@ -142,4 +150,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 	public abstract CoreChart createChart(DataTable data, Options opts);
 	
 	public abstract void processResult(String result);
+
+	public void onFinish(Runnable onFinish) {
+		this.onFinish = onFinish;
+	}
 }

@@ -36,9 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -58,6 +55,8 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
+import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
+import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 /**
  * Host monitoring view.
@@ -65,7 +64,7 @@ import com.smartgwt.client.widgets.tab.TabSet;
 public class MonitoringHostView extends VLayout implements AsyncCallback<String> {
 	
 	private Timer updater = null;
-	private List<Reloadable> reloadables = new LinkedList<Reloadable>();
+	private ReloadableChain chain;
 	private Overview overview;
 	private CpuView cpuView;
 	private MemoryView memoryView;
@@ -106,18 +105,12 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		setWidth100();
 
 		overview = new Overview(controller, hostMonitoringUrl, this);
-		reloadables.add(overview);
-		
 		cpuView = new CpuView(controller, hostMonitoringUrl);
-		reloadables.add(cpuView);
-		
 		memoryView = new MemoryView(controller, hostMonitoringUrl);
-		reloadables.add(memoryView);
-
 		fsView = new FileSystemView(controller, hostMonitoringUrl);
-		
 		networkView = new NetworkView(controller, hostMonitoringUrl);
-		reloadables.add(networkView);
+		
+		chain = new ReloadableChain(new Reloadable[] {overview, cpuView, memoryView, networkView});		
 		
 		// to not add to to automatic reloadable views (use a dedicated button for this)
 		processesView = new ProcessesView(controller, hostMonitoringUrl);
@@ -151,7 +144,18 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		refresh.setIcon(RMImages.instance.refresh().getSafeUri().asString());
 		refresh.setIconAlign("center");
 		refresh.setWidth(25);
-		refresh.setTooltip("Refresh processes list");
+		refresh.setTooltip("Refresh processes");
+		refresh.hide();
+		
+		tabs.addTabSelectedHandler(new TabSelectedHandler() {
+			public void onTabSelected(TabSelectedEvent event) {
+				if (event.getTab() == t6) {
+					refresh.show();
+				} else {
+					refresh.hide();
+				}
+			}
+		});
 		
 		tabs.setTabBarControls(TabBarControls.TAB_SCROLLER, TabBarControls.TAB_PICKER, refresh);
 		
@@ -170,9 +174,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		updater = new Timer() {
 			@Override
 			public void run() {
-				for (Reloadable reloadable: reloadables) {
-					reloadable.reload();
-				}					
+				chain.reload();
 			}
 		};
 		updater.schedule(1);
@@ -188,7 +190,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 			
 			if (tabs != null) {
 				removeMember(tabs);
-				reloadables.clear();
+				chain.stopReloading();
 				tabs.destroy();
 				tabs = null;
 			}
@@ -208,5 +210,5 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		removeMember(status);
 		addMember(tabs);
 		tabs.show();
-	}
+	}	
 }

@@ -97,4 +97,9 @@ public class CpuView extends VLayout implements Reloadable {
 	public void reload() {
 		cpusUsage.reload();
 	}
+
+	@Override
+	public void onFinish(Runnable onFinish) {
+		cpusUsage.onFinish(onFinish);
+	}
 }

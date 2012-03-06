@@ -61,6 +61,9 @@ public abstract class MBeansChart extends MBeanChart {
 
 		rm.getNodeMBeansInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), new AsyncCallback<String>() {
 			public void onSuccess(String result) {
+				if (onFinish != null) {
+					onFinish.run();					
+				}
 				if (!model.isLoggedIn())
 					return;
 
@@ -69,6 +72,9 @@ public abstract class MBeansChart extends MBeanChart {
 			}
 
 			public void onFailure(Throwable caught) {
+				if (onFinish != null) {
+					onFinish.run();					
+				}
 				if (RMController.getJsonErrorCode(caught) == 401) {
 					model.logMessage("You have been disconnected from the server.");
 				} else {

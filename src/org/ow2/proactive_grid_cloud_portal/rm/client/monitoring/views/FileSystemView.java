@@ -124,6 +124,15 @@ public class FileSystemView extends VLayout {
 					        	pieData.setValue(pieData.getNumberOfRows()-1, 0, name);
 				        		pieData.setValue(pieData.getNumberOfRows()-1, 1, properties.get(i).isObject().get("value").isNumber().doubleValue());
 				        	}
+				        	
+				        	if (name.equals("Free") || name.equals("Used") || name.equals("Total")) {
+				        		int inMb = Integer.parseInt(value) / 1024;
+				        		if (inMb > 1024) {
+				        			value = (inMb/1024) + " Gb";
+				        		} else {
+					        		value = inMb + " Mb";				        			
+				        		}
+				        	}
 							dv.setAttribute(name, value);				        	
 				        }
 						details.setData(new DetailViewerRecord[] { dv });

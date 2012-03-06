@@ -93,7 +93,7 @@ public class MBeanDetailedView extends DetailViewer {
 				if (!model.isLoggedIn())
 					return;
 
-				model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");					
+				model.logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");					
 				JSONArray array = JSONParser.parseStrict(result).isArray();
 				if (array != null) {
 					DetailViewerRecord dv = new DetailViewerRecord();

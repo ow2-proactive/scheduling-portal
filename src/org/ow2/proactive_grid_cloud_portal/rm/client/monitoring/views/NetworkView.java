@@ -63,7 +63,8 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  */
 public class NetworkView extends VLayout implements Reloadable { 
 
-	private List<Reloadable> charts = new LinkedList<Reloadable>();
+	private Runnable onFinish;	
+	private ReloadableChain chain;
 	
 	public NetworkView(final RMController controller, final String url) {
 		setWidth100();
@@ -104,6 +105,7 @@ public class NetworkView extends VLayout implements Reloadable {
 		final RMServiceAsync rm = controller.getRMService();
 		final RMModel model = controller.getModel();
 		final long t = System.currentTimeMillis();
+		final List<Reloadable> charts = new LinkedList<Reloadable>();
 		
 		// loading runtime info
 		rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=NetInterface,Name=*", interfacesAttrs, new AsyncCallback<String>() {
@@ -143,6 +145,12 @@ public class NetworkView extends VLayout implements Reloadable {
 						addMember(pane);
 					}
 					
+					synchronized (NetworkView.this) {
+						chain = new ReloadableChain(charts.toArray(new Reloadable[] {}));
+						if (onFinish!=null) {
+							chain.onFinish(onFinish);
+						}						
+					}
 				}
 			}
 
@@ -159,8 +167,14 @@ public class NetworkView extends VLayout implements Reloadable {
 
 	@Override
 	public void reload() {
-		for (Reloadable chart: charts) {
-			chart.reload();
+		chain.reload();
+	}
+
+	@Override
+	public synchronized void onFinish(Runnable onFinish) {		
+		this.onFinish = onFinish;
+		if (chain!=null) {
+			chain.onFinish(onFinish);			
 		}
 	}
 }

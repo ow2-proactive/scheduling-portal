@@ -37,8 +37,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -68,7 +66,7 @@ import com.smartgwt.client.widgets.tab.TabSet;
 public class MonitoringNodeView extends VLayout implements AsyncCallback<String> {
 	
 	private Timer updater = null;
-	private List<Reloadable> reloadables = new LinkedList<Reloadable>();
+	private ReloadableChain chain;
 	private TabSet tabs;
 	private Label status;
 	
@@ -95,10 +93,10 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 			nodeUrl = node.getProactiveJMXUrl();
 		}
 		
-		MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
-		MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
-		MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
-		MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
+		final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
+		final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
+		final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
+		final MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
 
 		String[] jvmAttrs = {"ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
 				"VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath"};
@@ -107,10 +105,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 		jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
 		jvmDetails.setWidth100();
 		
-		reloadables.add(heapMemory);
-		reloadables.add(threads);
-		reloadables.add(classes);
-		reloadables.add(cpuUsage);
+		chain = new ReloadableChain(new Reloadable[] {heapMemory, threads, classes, cpuUsage});
 		
 		HLayout firstRow = new HLayout();
 		HLayout secondRow = new HLayout();
@@ -149,9 +144,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 		updater = new Timer() {
 			@Override
 			public void run() {
-				for (Reloadable reloadable: reloadables) {
-					reloadable.reload();
-				}					
+				chain.reload();
 			}
 		};
 		updater.schedule(1);			
@@ -167,7 +160,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 			
 			if (tabs != null) {
 				removeMember(tabs);				
-				reloadables.clear();
+				chain.stopReloading();
 				tabs.destroy();
 				tabs = null;
 			}

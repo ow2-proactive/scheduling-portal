@@ -36,47 +36,67 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MemoryLineChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.SwapLineChart;
-
-import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
- * Memory tab in host monitoring.
+ * Reloads components one after another
  */
-public class MemoryView extends VLayout implements Reloadable {
+public class ReloadableChain implements Reloadable {
 
-	private MBeanChart ram;
-	private MBeanChart swap;
+	private Reloadable[] reloadables;
+	private boolean reloading = false;
 	
-	private ReloadableChain chain;
+	private Runnable onFinish;
 	
-	public MemoryView(RMController controller, String url) {
-		// memory view
-		ram = new MemoryLineChart(controller, url);
-		swap = new SwapLineChart(controller, url);
-
-		chain = new ReloadableChain(new Reloadable[] {ram, swap});
+	public ReloadableChain(Reloadable[] reloadables) {
+		this.reloadables = reloadables;
 		
-		setWidth100();
-		addMember(ram);
-		addMember(swap);
-	}
-
-	@Override
-	public void reload() {
-		chain.reload();
-	}
-
-	@Override
-	public void onFinish(final Runnable onFinish) {
-		chain.onFinish(new Runnable() {
+		for (int i = 0; i < reloadables.length-1; i++) {
+			final int index = i;
+			reloadables[i].onFinish(new Runnable() {
+				public void run() {
+					boolean continueReloading = false;
+					synchronized (ReloadableChain.this) {
+						if (reloading) {
+							continueReloading = true;
+						}
+					}
+					
+					if (continueReloading) {
+						ReloadableChain.this.reloadables[index+1].reload();						
+					}
+				}
+			});
+		}
+		reloadables[reloadables.length-1].onFinish(new Runnable() {
 			public void run() {
-				onFinish.run();
+				synchronized (ReloadableChain.this) {
+					reloading = false;
+					if (onFinish != null) {
+						onFinish.run();
+					}
+				}
 			}
 		});
 	}
+
+	public synchronized void stopReloading() {
+		reloading = false;
+	}
+
+	public void reload() {
+		synchronized (this) {
+			if (reloading) {
+				return;
+			}
+			reloading = true;
+		}
+		reloadables[0].reload();		
+	}
+
+	@Override
+	public void onFinish(Runnable onFinish) {
+		this.onFinish = onFinish;
+	}
+
 }

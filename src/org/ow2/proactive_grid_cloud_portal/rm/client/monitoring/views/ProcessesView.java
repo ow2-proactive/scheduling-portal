@@ -98,7 +98,7 @@ public class ProcessesView extends VLayout implements Reloadable {
 			public void onSuccess(String result) {
 				if (!model.isLoggedIn())
 					return;
-
+				
 				model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
 
 				//[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
@@ -142,6 +142,11 @@ public class ProcessesView extends VLayout implements Reloadable {
 		processesGrid.setData(new ListGridRecord[0]);
 		processesGrid.draw();
 		load();
-	}		
+	}
+
+	@Override
+	public void onFinish(Runnable callback) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
 }
 
