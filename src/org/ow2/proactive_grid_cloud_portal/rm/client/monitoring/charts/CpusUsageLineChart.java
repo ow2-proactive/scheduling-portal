@@ -44,6 +44,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
@@ -71,7 +72,6 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
 	@Override
 	public void processResult(String result) {
-		
 		JSONObject object = JSONParser.parseStrict(result).isObject();
 		if (object != null) {
 			
@@ -90,7 +90,11 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 					loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
 				}
 				
-				double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
+				double value = 0;
+				JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
+				if (jsonVal != null && jsonVal.isNumber() != null) {
+					value = jsonVal.isNumber().doubleValue();
+				}
 				loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
 			}
 
