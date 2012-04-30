@@ -214,7 +214,7 @@ public class SubmitWindow {
 		formWrapper.addChild(formPanel);
 
 		// error messages when applicable
-		final Label label = new Label("Submit an XML Job Descriptor:");
+		final Label label = new Label("Submit an XML Job Descriptor or a Job Archive:");
 		label.setHeight(30);
 		label.setWidth100();
 
