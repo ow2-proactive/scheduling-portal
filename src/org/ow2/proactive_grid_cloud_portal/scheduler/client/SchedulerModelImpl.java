@@ -354,7 +354,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 	 * @param taskId
 	 * @param output
 	 */
-	void setTaskOutput(int jobId, int taskId, String output) {
+	void setTaskOutput(int jobId, long finishedTime, String output) {
 		JobStatus stat = null;
 		for (Job j : this.jobs.values()) {
 			if (jobId == j.getId())
@@ -365,8 +365,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 				" for which there is no local representation");
 		}
 
-		Map<Integer, String> tasks = new HashMap<Integer, String>();
-		tasks.put(taskId, output);
+		Map<Long, String> tasks = new HashMap<Long, String>();
+		tasks.put(finishedTime, output);
 
 		List<String> lines = new ArrayList<String>();
 
@@ -386,10 +386,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
 		if (this.output.get(jobId) == null) {
 			JobOutput jo = new JobOutput(jobId);
-			jo.update(taskId, lines);
+			jo.update(finishedTime, lines);
 			this.output.put(jobId, jo);
 		} else {
-			this.output.get(jobId).update(taskId, lines);
+			this.output.get(jobId).update(finishedTime, lines);
 		}
 
 		this.updateOutput(jobId);

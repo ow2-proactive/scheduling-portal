@@ -368,7 +368,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 		if (this.taskSelect.getValueAsString().equals(TASKS_ALL)) {
 			// alternate bgcolors for each entry
 			boolean even = false;
-			for (Entry<Integer, List<String>> tl : out.getLines().entrySet()) {
+			for (Entry<Long, List<String>> tl : out.getLines().entrySet()) {
 				String style = "";
 				if (even) {
 					style = "background-color:#FAFAFA; border-bottom: 1px solid #EDEDED; border-top: 1px solid #EDEDED;";

@@ -54,8 +54,9 @@ import java.util.TreeMap;
  */
 public class JobOutput {
 
-	/** the output content, split by task and line */
-	private SortedMap<Integer, List<String>> lines;
+	/** the output content, split by task and line
+	 * key is timestamp for task finish time for sorting */
+	private SortedMap<Long, List<String>> lines;
 
 	/** id of the job */
 	private int jobId;
@@ -67,30 +68,30 @@ public class JobOutput {
 	 */
 	public JobOutput(int jobId) {
 		this.jobId = jobId;
-		this.lines = new TreeMap<Integer, List<String>>();
+		this.lines = new TreeMap<Long, List<String>>();
 	}
 
 	/**
 	 * Update the output for a single task
 	 * 
-	 * @param taskId id of the task
+	 * @param finishedTime
 	 * @param output output for this task
 	 */
-	public void update(int taskId, List<String> output) {
-		List<String> tl = this.lines.get(taskId);
+	public void update(long finishedTime, List<String> output) {
+		List<String> tl = this.lines.get(finishedTime);
 		if (tl != null) {
 			tl.clear();
 		} else {
 			tl = new ArrayList<String>();
-			this.lines.put(taskId, tl);
+			this.lines.put(finishedTime, tl);
 		}
 		tl.addAll(output);
 	}
 
 	/**
-	 * @return the output lines, exploded in a list, per task
+	 * @return the output lines, exploded in a list, per task (finished time as key for sorting)
 	 */
-	public SortedMap<Integer, List<String>> getLines() {
+	public SortedMap<Long, List<String>> getLines() {
 		return this.lines;
 	}
 
