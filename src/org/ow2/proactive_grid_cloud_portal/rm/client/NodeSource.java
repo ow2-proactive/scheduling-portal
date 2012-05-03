@@ -178,7 +178,7 @@ public class NodeSource {
 				this.vmName = vmName;
 				this.description = description;
 				this.defaultJMXUrl = defaultJMXUrl;
-				this.proactiveJMXUrl = proactiveJMXUrl;				
+				this.proactiveJMXUrl = proactiveJMXUrl;
 			}
 
 			public String getNodeUrl() {

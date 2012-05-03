@@ -58,19 +58,20 @@ import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
+
 /**
  * Network tab in host monitoring.
  */
-public class NetworkView extends VLayout implements Reloadable { 
+public class NetworkView extends VLayout implements Reloadable {
 
-	private Runnable onFinish;	
+	private Runnable onFinish;
 	private ReloadableChain chain;
-	
+
 	public NetworkView(final RMController controller, final String url) {
 		setWidth100();
-		
+
 		final List<String> attrs = new ArrayList<String>();
-		
+
 		attrs.add("DefaultGateway");
 		attrs.add("DomainName");
 		attrs.add("FQDN");
@@ -84,13 +85,13 @@ public class NetworkView extends VLayout implements Reloadable {
 		summary.load(controller, url, "sigar:Type=NetInfo", attrs);
 		addMember(label);
 		addMember(summary);
-		
+
 		label = new Label("<nobr style='font-weight:bold;'>Interfaces<nobr>");
 		label.setHeight(50);
-		addMember(label);					
+		addMember(label);
 
 		final List<String> interfacesAttrs = new ArrayList<String>();
-		
+
 		interfacesAttrs.add("Name");
 		interfacesAttrs.add("Address");
 		interfacesAttrs.add("Broadcast");
@@ -101,68 +102,73 @@ public class NetworkView extends VLayout implements Reloadable {
 		interfacesAttrs.add("Hwaddr");
 		interfacesAttrs.add("Flags");
 		interfacesAttrs.add("Metric");
-		
+
 		final RMServiceAsync rm = controller.getRMService();
 		final RMModel model = controller.getModel();
 		final long t = System.currentTimeMillis();
 		final List<Reloadable> charts = new LinkedList<Reloadable>();
-		
+
 		// loading runtime info
-		rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=NetInterface,Name=*", interfacesAttrs, new AsyncCallback<String>() {
-			public void onSuccess(String result) {
-				if (!model.isLoggedIn())
-					return;
+		rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=NetInterface,Name=*", interfacesAttrs,
+				new AsyncCallback<String>() {
+					public void onSuccess(String result) {
+						if (!model.isLoggedIn())
+							return;
 
-				model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
-		
-				JSONObject object = JSONParser.parseStrict(result).isObject();
-				if (object != null) {												
-					for (String network: object.keySet()) {
-						DetailViewer details = new DetailViewer();
-						DetailViewerRecord dv = new DetailViewerRecord();
-						DetailViewerField[] fields = new DetailViewerField[interfacesAttrs.size()];
-						for (int i=0; i<fields.length; i++) {
-							fields[i] = new DetailViewerField(interfacesAttrs.get(i));
+						model
+								.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
+									"ms");
+
+						JSONObject object = JSONParser.parseStrict(result).isObject();
+						if (object != null) {
+							for (String network : object.keySet()) {
+								DetailViewer details = new DetailViewer();
+								DetailViewerRecord dv = new DetailViewerRecord();
+								DetailViewerField[] fields = new DetailViewerField[interfacesAttrs.size()];
+								for (int i = 0; i < fields.length; i++) {
+									fields[i] = new DetailViewerField(interfacesAttrs.get(i));
+								}
+								details.setFields(fields);
+
+								JSONArray properties = object.get(network).isArray();
+
+								for (int i = 0; i < properties.size(); i++) {
+									String name = properties.get(i).isObject().get("name").isString()
+											.stringValue();
+									String value = properties.get(i).isObject().get("value").toString();
+									dv.setAttribute(name, value);
+								}
+								details.setData(new DetailViewerRecord[] { dv });
+								details.setWidth("45%");
+
+								HLayout pane = new HLayout();
+								pane.addMember(details);
+								NetworkDetailedAreaChart chart = new NetworkDetailedAreaChart(controller,
+									url, network);
+								chart.setWidth("45%");
+								charts.add(chart);
+								pane.addMember(chart);
+								addMember(pane);
+							}
+
+							synchronized (NetworkView.this) {
+								chain = new ReloadableChain(charts.toArray(new Reloadable[] {}));
+								if (onFinish != null) {
+									chain.onFinish(onFinish);
+								}
+							}
 						}
-						details.setFields(fields);
-				        
-				        JSONArray properties = object.get(network).isArray();
-				        
-				        for (int i = 0; i < properties.size(); i++) {
-				        	String name = properties.get(i).isObject().get("name").isString().stringValue();					        	
-				        	String value = properties.get(i).isObject().get("value").toString();
-							dv.setAttribute(name, value);				        	
-				        }
-						details.setData(new DetailViewerRecord[] { dv });
-						details.setWidth("45%");
-						
-						HLayout pane = new HLayout();
-						pane.addMember(details);
-						NetworkDetailedAreaChart chart = new NetworkDetailedAreaChart(controller, url, network);
-						chart.setWidth("45%");
-						charts.add(chart);
-						pane.addMember(chart);
-						addMember(pane);
 					}
-					
-					synchronized (NetworkView.this) {
-						chain = new ReloadableChain(charts.toArray(new Reloadable[] {}));
-						if (onFinish!=null) {
-							chain.onFinish(onFinish);
-						}						
-					}
-				}
-			}
 
-			public void onFailure(Throwable caught) {
-				if (RMController.getJsonErrorCode(caught) == 401) {
-					model.logMessage("You have been disconnected from the server.");
-				} else {
-					//error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
-				}
-			}
-		});
-		
+					public void onFailure(Throwable caught) {
+						if (RMController.getJsonErrorCode(caught) == 401) {
+							model.logMessage("You have been disconnected from the server.");
+						} else {
+							//error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
+						}
+					}
+				});
+
 	}
 
 	@Override
@@ -171,10 +177,10 @@ public class NetworkView extends VLayout implements Reloadable {
 	}
 
 	@Override
-	public synchronized void onFinish(Runnable onFinish) {		
+	public synchronized void onFinish(Runnable onFinish) {
 		this.onFinish = onFinish;
-		if (chain!=null) {
-			chain.onFinish(onFinish);			
+		if (chain != null) {
+			chain.onFinish(onFinish);
 		}
 	}
 }

@@ -73,11 +73,11 @@ public class JSUtil {
 	}
 
 	private native static void createCallbackFunction(JSCallback obj, String callbackName)/*-{
-					tmpcallback = function(j) {
-						obj.@org.ow2.proactive_grid_cloud_portal.common.client.JSUtil.JSCallback::execute(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
-					};
-					$wnd[callbackName] = tmpcallback;
-				}-*/;
+							tmpcallback = function(j) {
+								obj.@org.ow2.proactive_grid_cloud_portal.common.client.JSUtil.JSCallback::execute(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
+							};
+							$wnd[callbackName] = tmpcallback;
+						}-*/;
 
 	/**
 	 * load a new script in the document

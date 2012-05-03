@@ -45,20 +45,23 @@ import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
+
 /**
  * Chart that retrieves information from several MBeans and shows time on Y axis.
  */
 public abstract class MBeansTimeAreaChart extends MBeansChart {
-	
+
 	private boolean initializing = true;
-	
-	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute, String title) {
-		this(controller, jmxServerUrl, mbean, new String[] {attribute}, title);
+
+	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
+			String title) {
+		this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
 	}
-	
-	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes, String title) {
+
+	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean,
+			String[] attributes, String title) {
 		super(controller, jmxServerUrl, mbean, attributes, title);
-		
+
 		loadOpts.setLegend(LegendPosition.RIGHT);
 		loadTable.addColumn(ColumnType.STRING);
 		// fake column to draw the chart properly
@@ -76,10 +79,10 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
 
 		return false;
 	}
-	
+
 	@Override
 	public CoreChart createChart(DataTable data, Options opts) {
 		return new AreaChart(data, opts);
 	}
-	
+
 }

@@ -38,12 +38,13 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
+
 /**
  * Shows the number of loaded classes in JVM.
  */
 public class ClassesAreaChart extends MBeanTimeAreaChart {
-	
+
 	public ClassesAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "java.lang:type=ClassLoading", "LoadedClassCount", "Classes");		
+		super(controller, jmxServerUrl, "java.lang:type=ClassLoading", "LoadedClassCount", "Classes");
 	}
 }

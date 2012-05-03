@@ -60,73 +60,73 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 
+
 /**
  * Node monitoring view.
  */
 public class MonitoringNodeView extends VLayout implements AsyncCallback<String> {
-	
+
 	private Timer updater = null;
 	private ReloadableChain chain;
 	private TabSet tabs;
 	private Label status;
-	
+
 	private RMController controller;
-	
+
 	public MonitoringNodeView(RMController controller) {
 		this.controller = controller;
 	}
-	
+
 	public void init(Node node) {
-		
-		if (node.getNodeState() == NodeState.BUSY || 
-			node.getNodeState() == NodeState.FREE || 
+
+		if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE ||
 			node.getNodeState() == NodeState.LOCKED) {
 			// good
 		} else {
 			// cannot monitor the node
 			return;
 		}
-		
+
 		setWidth100();
 		String nodeUrl = node.getDefaultJMXUrl();
 		if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
 			nodeUrl = node.getProactiveJMXUrl();
 		}
-		
+
 		final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
 		final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
 		final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
 		final MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
 
-		String[] jvmAttrs = {"ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
-				"VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath"};
-		
+		String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime",
+				"Uptime", "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
+
 		MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
 		jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
 		jvmDetails.setWidth100();
-		
-		chain = new ReloadableChain(new Reloadable[] {heapMemory, threads, classes, cpuUsage});
-		
+
+		chain = new ReloadableChain(new Reloadable[] { heapMemory, threads, classes, cpuUsage });
+
 		HLayout firstRow = new HLayout();
 		HLayout secondRow = new HLayout();
-		
+
 		firstRow.addMember(heapMemory);
 		firstRow.addMember(threads);
 		secondRow.addMember(classes);
 		secondRow.addMember(cpuUsage);
-		
+
 		Layout graphs = new VLayout();
 		graphs.addMember(firstRow);
 		graphs.addMember(secondRow);
-		
+
 		if (status != null) {
 			removeMember(status);
 		}
-		
+
 		status = new Label("Retreiving data");
 		status.setWidth100();
 		status.setAlign(Alignment.CENTER);
-		
+
 		Tab t1 = new Tab("Overview");
 		t1.setPane(graphs);
 		Tab t2 = new Tab("JVM Summary");
@@ -140,15 +140,15 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 		tabs.hide();
 
 		addMember(status);
-		
+
 		updater = new Timer() {
 			@Override
 			public void run() {
 				chain.reload();
 			}
 		};
-		updater.schedule(1);			
-		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());			
+		updater.schedule(1);
+		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
 	}
 
 	public void close() {
@@ -157,9 +157,9 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 				updater.cancel();
 				updater = null;
 			}
-			
+
 			if (tabs != null) {
-				removeMember(tabs);				
+				removeMember(tabs);
 				chain.stopReloading();
 				tabs.destroy();
 				tabs = null;

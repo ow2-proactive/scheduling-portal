@@ -559,8 +559,7 @@ public class RMServiceImpl extends Service implements RMService {
 	}
 
 	@Override
-	public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl,
-			String objectName, List<String> attrs)
+	public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
 			throws RestServerException, ServiceException {
 		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
 		ClientResponse<InputStream> clientResponse = null;
@@ -583,9 +582,8 @@ public class RMServiceImpl extends Service implements RMService {
 	}
 
 	@Override
-	public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl,
-			String objectNames, List<String> attrs)
-			throws RestServerException, ServiceException {
+	public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames,
+			List<String> attrs) throws RestServerException, ServiceException {
 		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
 		ClientResponse<InputStream> clientResponse = null;
 		try {
@@ -605,7 +603,7 @@ public class RMServiceImpl extends Service implements RMService {
 			clientResponse.releaseConnection();
 		}
 	}
-	
+
 	@Override
 	public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
 		RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());

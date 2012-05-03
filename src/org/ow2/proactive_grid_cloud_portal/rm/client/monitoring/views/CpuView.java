@@ -48,32 +48,33 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDeta
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.VLayout;
 
+
 /**
  * CPU tab in host monitoring.
  */
 public class CpuView extends VLayout implements Reloadable {
-	
+
 	private MBeanDetailedView overview;
 	private MBeanChart cpusUsage;
-	
+
 	public CpuView(RMController controller, String nodeUrl) {
-		
+
 		setWidth100();
 		Label label = new Label("<nobr style='font-weight:bold;'>Details<nobr>");
 		label.setHeight(50);
-		
+
 		overview = new MBeanDetailedView();
 		overview.setWidth100();
-		
+
 		// cpu graph
 		cpusUsage = new CpusUsageLineChart(controller, nodeUrl);
-		
+
 		addMember(cpusUsage);
-		addMember(label);		
+		addMember(label);
 		addMember(overview);
-		
+
 		List<String> attrs = new ArrayList<String>();
-		
+
 		attrs.add("CacheSize");
 		attrs.add("CoresPerSocket");
 		attrs.add("Idle");
@@ -89,7 +90,7 @@ public class CpuView extends VLayout implements Reloadable {
 		attrs.add("User");
 		attrs.add("Vendor");
 		attrs.add("Wait");
-		
+
 		overview.load(controller, nodeUrl, "sigar:Type=Cpu", attrs);
 	}
 

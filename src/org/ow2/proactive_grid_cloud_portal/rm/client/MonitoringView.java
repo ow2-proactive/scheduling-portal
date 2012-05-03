@@ -65,7 +65,7 @@ public class MonitoringView implements NodeSelectedListener {
 
 	private Layout hostCanvas = null;
 	private Label hostLabel = null;
-	
+
 	private RMController controller;
 
 	MonitoringView(RMController controller) {
@@ -87,7 +87,7 @@ public class MonitoringView implements NodeSelectedListener {
 
 		this.nodeCanvas = new VLayout();
 		this.nodeCanvas.setWidth100();
-		this.nodeCanvas.setHeight100();		
+		this.nodeCanvas.setHeight100();
 		this.nodeLabel = new Label();
 		this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
 		this.nodeLabel.setHeight(16);
@@ -97,11 +97,11 @@ public class MonitoringView implements NodeSelectedListener {
 
 		this.hostMonitoring = new MonitoringHostView(controller);
 		this.hostMonitoring.setOverflow(Overflow.AUTO);
-		this.hostMonitoring.setWidth100();		
-		
+		this.hostMonitoring.setWidth100();
+
 		this.hostCanvas = new VLayout();
 		this.hostCanvas.setWidth100();
-		this.hostCanvas.setHeight100();		
+		this.hostCanvas.setHeight100();
 		this.hostLabel = new Label();
 		this.hostLabel.setHeight(16);
 		this.hostLabel.setIcon(RMImages.instance.host_16().getSafeUri().asString());
@@ -132,13 +132,13 @@ public class MonitoringView implements NodeSelectedListener {
 	 * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
 	 */
 	public void nodeSelected(Node node) {
-		
+
 		this.nodeLabel.setIcon(node.getNodeState().getIcon());
 
 		this.label.hide();
 		this.hostCanvas.hide();
 
-		this.nodeLabel.setContents("<h3>"+node.getNodeUrl()+"</h3>");
+		this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
 		this.hostMonitoring.close();
 		this.nodeMonitoring.close();
 		this.nodeMonitoring.init(node);
@@ -160,8 +160,8 @@ public class MonitoringView implements NodeSelectedListener {
 	public void hostSelected(Host h) {
 		this.label.hide();
 		this.nodeCanvas.hide();
-		
-		this.hostLabel.setContents("<h3>"+h.getHostName()+"</h3>");
+
+		this.hostLabel.setContents("<h3>" + h.getHostName() + "</h3>");
 		this.nodeMonitoring.close();
 		this.hostMonitoring.close();
 		this.hostMonitoring.init(h);

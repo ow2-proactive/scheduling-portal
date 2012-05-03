@@ -175,7 +175,7 @@ public interface RMServiceAsync {
 	void getMBeanInfo(String sessionId, String name, List<String> attrs, AsyncCallback<String> callback);
 
 	/**
-     * Retrieves attributes of the specified mbean.
+	 * Retrieves attributes of the specified mbean.
 	 * 
 	 * @param sessionId current session
 	 * @param name of mbean
@@ -188,7 +188,7 @@ public interface RMServiceAsync {
 			AsyncCallback<String> callback);
 
 	/**
-     * Retrieves attributes of the specified mbeans.
+	 * Retrieves attributes of the specified mbeans.
 	 * 
 	 * @param sessionId current session
 	 * @param objectNames mbean names (@see ObjectName format)
@@ -199,7 +199,7 @@ public interface RMServiceAsync {
 	 */
 	void getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames, List<String> attrs,
 			AsyncCallback<String> callback);
-	
+
 	/**
 	 * Statistic history for the following values:<pre>
 	 * 	{ "BusyNodesCount",

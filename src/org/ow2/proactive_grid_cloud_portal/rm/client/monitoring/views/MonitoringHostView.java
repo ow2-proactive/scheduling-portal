@@ -58,11 +58,12 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
+
 /**
  * Host monitoring view.
  */
 public class MonitoringHostView extends VLayout implements AsyncCallback<String> {
-	
+
 	private Timer updater = null;
 	private ReloadableChain chain;
 	private Overview overview;
@@ -76,17 +77,16 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 	private Label status;
 
 	private RMController controller;
-	
+
 	public MonitoringHostView(RMController controller) {
 		this.controller = controller;
 	}
-	
+
 	public void init(Host host) {
-		
+
 		// selecting the node that will be used as an entry point to the host
-		for (Node n: host.getNodes().values()) {
-			if (n.getNodeState() == NodeState.BUSY || 
-				n.getNodeState() == NodeState.FREE || 
+		for (Node n : host.getNodes().values()) {
+			if (n.getNodeState() == NodeState.BUSY || n.getNodeState() == NodeState.FREE ||
 				n.getNodeState() == NodeState.LOCKED) {
 				node = n;
 				break;
@@ -96,12 +96,12 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		if (node == null) {
 			return;
 		}
-		
+
 		String hostMonitoringUrl = node.getDefaultJMXUrl();
 		if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
 			hostMonitoringUrl = node.getProactiveJMXUrl();
 		}
-		
+
 		setWidth100();
 
 		overview = new Overview(controller, hostMonitoringUrl, this);
@@ -109,20 +109,20 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		memoryView = new MemoryView(controller, hostMonitoringUrl);
 		fsView = new FileSystemView(controller, hostMonitoringUrl);
 		networkView = new NetworkView(controller, hostMonitoringUrl);
-		
-		chain = new ReloadableChain(new Reloadable[] {overview, cpuView, memoryView, networkView});		
-		
+
+		chain = new ReloadableChain(new Reloadable[] { overview, cpuView, memoryView, networkView });
+
 		// to not add to to automatic reloadable views (use a dedicated button for this)
 		processesView = new ProcessesView(controller, hostMonitoringUrl);
-		
+
 		if (status != null) {
 			removeMember(status);
 		}
-		
+
 		status = new Label("Retreiving data");
 		status.setWidth100();
 		status.setAlign(Alignment.CENTER);
-		
+
 		Tab t1 = new Tab("Overview");
 		t1.setPane(overview);
 		Tab t2 = new Tab("CPU");
@@ -146,7 +146,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		refresh.setWidth(25);
 		refresh.setTooltip("Refresh processes");
 		refresh.hide();
-		
+
 		tabs.addTabSelectedHandler(new TabSelectedHandler() {
 			public void onTabSelected(TabSelectedEvent event) {
 				if (event.getTab() == t6) {
@@ -156,21 +156,21 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 				}
 			}
 		});
-		
+
 		tabs.setTabBarControls(TabBarControls.TAB_SCROLLER, TabBarControls.TAB_PICKER, refresh);
-		
+
 		refresh.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				processesView.reload();
 			}
 		});
-		
+
 		tabs.setTabs(t1, t2, t3, t4, t5, t6);
 		tabs.hide();
-		
+
 		addMember(status);
-		
+
 		updater = new Timer() {
 			@Override
 			public void run() {
@@ -178,16 +178,16 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 			}
 		};
 		updater.schedule(1);
-		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());			
+		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
 	}
-		
+
 	public void close() {
 		try {
 			if (updater != null) {
 				updater.cancel();
 				updater = null;
 			}
-			
+
 			if (tabs != null) {
 				removeMember(tabs);
 				chain.stopReloading();
@@ -210,5 +210,5 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 		removeMember(status);
 		addMember(tabs);
 		tabs.show();
-	}	
+	}
 }

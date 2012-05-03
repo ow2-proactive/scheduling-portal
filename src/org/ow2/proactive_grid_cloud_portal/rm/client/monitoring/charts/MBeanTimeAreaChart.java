@@ -51,46 +51,50 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
+
 /**
  * Chart that retrieves information from MBean and shows time on Y axis.
  */
 public class MBeanTimeAreaChart extends MBeanChart {
-	
-	public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute, String title) {
-		this(controller, jmxServerUrl, mbean, new String[] {attribute}, title);
+
+	public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
+			String title) {
+		this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
 	}
-	
-	public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes, String title) {
+
+	public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean,
+			String[] attributes, String title) {
 		super(controller, jmxServerUrl, mbean, attributes, title);
 
 		AxisOptions vAxis = AxisOptions.create();
 		vAxis.setMinValue(0);
 		vAxis.set("format", "#");
 		loadOpts.setVAxisOptions(vAxis);
-		
+
 		loadTable.addColumn(ColumnType.STRING);
 		for (int i = 0; i < attributes.length; i++) {
-			loadTable.addColumn(ColumnType.NUMBER, attributes[i]);			
+			loadTable.addColumn(ColumnType.NUMBER, attributes[i]);
 		}
-		
+
 		addRow();
 	}
-	
+
 	@Override
 	public void processResult(String result) {
 		JSONArray array = JSONParser.parseStrict(result).isArray();
 		if (array != null) {
-			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(System.currentTimeMillis()));
+			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+					new Date(System.currentTimeMillis()));
 			addRow();
-			
-			loadTable.setValue(loadTable.getNumberOfRows()-1, 0, timeStamp);
-			
+
+			loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+
 			// getting primitive values of all attributes
 			for (int i = 0; i < attrs.length; i++) {
 				double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-				loadTable.setValue(loadTable.getNumberOfRows()-1, i+1, value);
+				loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, value);
 			}
-			
+
 			loadChart.draw(loadTable, loadOpts);
 		}
 	}

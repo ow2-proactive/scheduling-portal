@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.SwapLineC
 
 import com.smartgwt.client.widgets.layout.VLayout;
 
+
 /**
  * Memory tab in host monitoring.
  */
@@ -51,16 +52,16 @@ public class MemoryView extends VLayout implements Reloadable {
 
 	private MBeanChart ram;
 	private MBeanChart swap;
-	
+
 	private ReloadableChain chain;
-	
+
 	public MemoryView(RMController controller, String url) {
 		// memory view
 		ram = new MemoryLineChart(controller, url);
 		swap = new SwapLineChart(controller, url);
 
-		chain = new ReloadableChain(new Reloadable[] {ram, swap});
-		
+		chain = new ReloadableChain(new Reloadable[] { ram, swap });
+
 		setWidth100();
 		addMember(ram);
 		addMember(swap);

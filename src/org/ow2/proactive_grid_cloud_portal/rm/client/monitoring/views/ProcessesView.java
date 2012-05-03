@@ -54,19 +54,20 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
 
+
 /**
  * Processes tab in host monitoring.
  */
 public class ProcessesView extends VLayout implements Reloadable {
 	private ListGrid processesGrid = new ListGrid();
-	private RMController controller; 
+	private RMController controller;
 	private String url;
-	
+
 	public ProcessesView(RMController controller, String url) {
-		
+
 		this.controller = controller;
 		this.url = url;
-		
+
 		ListGridField pid = new ListGridField("pid", "pid");
 		pid.setType(ListGridFieldType.INTEGER);
 		ListGridField owner = new ListGridField("owner", "owner");
@@ -77,7 +78,8 @@ public class ProcessesView extends VLayout implements Reloadable {
 		ListGridField cpuTime = new ListGridField("cpuTime", "Cpu Time");
 		ListGridField state = new ListGridField("state", "state");
 		ListGridField description = new ListGridField("description", "description");
-		processesGrid.setFields(pid, owner, startTime, memSize, memRss, memShare, cpuTime, state, description);
+		processesGrid
+				.setFields(pid, owner, startTime, memSize, memRss, memShare, cpuTime, state, description);
 
 		setWidth100();
 		addMember(processesGrid);
@@ -85,59 +87,64 @@ public class ProcessesView extends VLayout implements Reloadable {
 	}
 
 	public void load() {
-		
+
 		final List<String> attrs = new ArrayList<String>();
 		attrs.add("Processes");
-		
+
 		final RMServiceAsync rm = controller.getRMService();
 		final RMModel model = controller.getModel();
 		final long t = System.currentTimeMillis();
-		
+
 		// loading runtime info
-		rm.getNodeMBeanInfo(model.getSessionId(), url, "sigar:Type=Processes", attrs, new AsyncCallback<String>() {
-			public void onSuccess(String result) {
-				if (!model.isLoggedIn())
-					return;
-				
-				model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
+		rm.getNodeMBeanInfo(model.getSessionId(), url, "sigar:Type=Processes", attrs,
+				new AsyncCallback<String>() {
+					public void onSuccess(String result) {
+						if (!model.isLoggedIn())
+							return;
 
-				//[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
+						model
+								.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
+									"ms");
 
-				JSONArray processes = JSONParser.parseStrict(result).isArray().get(0).isObject().get("value").isArray();
-				if (processes != null) {
-					ListGridRecord[] records = new ListGridRecord[processes.size()];
-					for (int i=0; i < processes.size(); i++) {
-						records[i] = new ListGridRecord();
-						JSONObject process = processes.get(i).isObject();
-						try {
-							for (String key: process.keySet()) {
-								ListGridField lgf = processesGrid.getField(key);
-								if (lgf.getType() == ListGridFieldType.INTEGER) {
-									records[i].setAttribute(key, Integer.parseInt(process.get(key).toString()));									
-								} else {
-									records[i].setAttribute(key, process.get(key).toString());									
+						//[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
+
+						JSONArray processes = JSONParser.parseStrict(result).isArray().get(0).isObject().get(
+								"value").isArray();
+						if (processes != null) {
+							ListGridRecord[] records = new ListGridRecord[processes.size()];
+							for (int i = 0; i < processes.size(); i++) {
+								records[i] = new ListGridRecord();
+								JSONObject process = processes.get(i).isObject();
+								try {
+									for (String key : process.keySet()) {
+										ListGridField lgf = processesGrid.getField(key);
+										if (lgf.getType() == ListGridFieldType.INTEGER) {
+											records[i].setAttribute(key, Integer.parseInt(process.get(key)
+													.toString()));
+										} else {
+											records[i].setAttribute(key, process.get(key).toString());
+										}
+									}
+								} catch (RuntimeException ex) {
+									continue;
 								}
 							}
-						} catch (RuntimeException ex) {
-							continue;
+							processesGrid.setData(records);
 						}
 					}
-					processesGrid.setData(records);
-				}
-			}
 
-			public void onFailure(Throwable caught) {
-				if (RMController.getJsonErrorCode(caught) == 401) {
-					model.logMessage("You have been disconnected from the server.");
-				} else {
-					//error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
-				}
-			}
-		});
-		
+					public void onFailure(Throwable caught) {
+						if (RMController.getJsonErrorCode(caught) == 401) {
+							model.logMessage("You have been disconnected from the server.");
+						} else {
+							//error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
+						}
+					}
+				});
+
 		processesGrid.draw();
 	}
-	
+
 	public void reload() {
 		processesGrid.setData(new ListGridRecord[0]);
 		processesGrid.draw();
@@ -149,4 +156,3 @@ public class ProcessesView extends VLayout implements Reloadable {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 }
-

@@ -54,15 +54,15 @@ import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
+
 /**
  * Shows the CPU usage per core.
  */
 public class CpusUsageLineChart extends MBeansTimeAreaChart {
-	
+
 	public CpusUsageLineChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=CpuCoreUsage,Name=*",
-				"Combined", "Load History");
-		
+		super(controller, jmxServerUrl, "sigar:Type=CpuCoreUsage,Name=*", "Combined", "Load History");
+
 		AxisOptions vAxis = AxisOptions.create();
 		vAxis.set("format", "#%");
 		loadOpts.setVAxisOptions(vAxis);
@@ -74,22 +74,21 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 	public void processResult(String result) {
 		JSONObject object = JSONParser.parseStrict(result).isObject();
 		if (object != null) {
-			
-			String timeStamp = DateTimeFormat.getFormat(
-					PredefinedFormat.HOUR24_MINUTE).format(
+
+			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
 					new Date(System.currentTimeMillis()));
-			
+
 			addRow();
 			loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
 
 			boolean initColumns = super.initColumns();
 			int colIndex = 1;
-			for (String key: object.keySet()) {
-				
+			for (String key : object.keySet()) {
+
 				if (initColumns) {
 					loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
 				}
-				
+
 				double value = 0;
 				JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
 				if (jsonVal != null && jsonVal.isNumber() != null) {
@@ -101,12 +100,12 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 			loadChart.draw(loadTable, loadOpts);
 		}
 	}
-	
+
 	private String beautifyName(String mbeanName) {
 		// sigar:Name=lo,Type=NetInterface
 		String patternStr = "sigar:Name=(.*),Type=CpuCore";
 		RegExp pattern = RegExp.compile(patternStr);
-		MatchResult matcher = pattern.exec(mbeanName);		
+		MatchResult matcher = pattern.exec(mbeanName);
 		return matcher.getGroup(1);
 	}
 

@@ -8,7 +8,7 @@ public interface Reloadable {
 	 * Launches the reloading of the component
 	 */
 	public void reload();
-	
+
 	/**
 	 * Executes runnable when the reload is finished
 	 * 

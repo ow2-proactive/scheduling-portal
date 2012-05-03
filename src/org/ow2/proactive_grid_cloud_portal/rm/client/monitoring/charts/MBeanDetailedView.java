@@ -51,65 +51,66 @@ import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
+
 /**
  * Detailed view that retrieves information from MBean.
  */
 public class MBeanDetailedView extends DetailViewer {
 
 	private AsyncCallback<String> extraCallback;
-	
+
 	public MBeanDetailedView() {
 	}
 
 	public MBeanDetailedView(AsyncCallback<String> extraCallback) {
 		this.extraCallback = extraCallback;
 	}
-	
+
 	public MBeanDetailedView(RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
 		load(controller, jmxServerUrl, mbean, attrs);
 	}
-	
+
 	public void load(RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
 		DetailViewerField[] fields = new DetailViewerField[attrs.size()];
-		
-		for (int i=0; i<fields.length; i++) {
+
+		for (int i = 0; i < fields.length; i++) {
 			fields[i] = new DetailViewerField(attrs.get(i));
 		}
-		
+
 		setFields(fields);
-		
+
 		final RMServiceAsync rm = controller.getRMService();
 		final RMModel model = controller.getModel();
 		final long t = System.currentTimeMillis();
-		
+
 		// loading runtime info
 		rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbean, attrs, new AsyncCallback<String>() {
 			public void onSuccess(String result) {
-				
+
 				if (extraCallback != null) {
 					extraCallback.onSuccess(result);
 				}
-				
+
 				if (!model.isLoggedIn())
 					return;
 
-				model.logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");					
+				model.logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
 				JSONArray array = JSONParser.parseStrict(result).isArray();
 				if (array != null) {
 					DetailViewerRecord dv = new DetailViewerRecord();
-					for (int i=0; i<array.size(); i++) {
+					for (int i = 0; i < array.size(); i++) {
 						try {
 							JSONObject property = array.get(i).isObject();
 							String name = property.get("name").isString().stringValue();
 							JSONValue value = property.get("value");
 							String valueStr = "";
-							
+
 							if (value.isString() != null) {
 								valueStr = value.isString().stringValue();
 							} else if (value.isNumber() != null) {
 								valueStr = value.isNumber().toString();
 							}
-								
+
 							dv.setAttribute(name, valueStr);
 						} catch (Exception e) {
 							// ignore it
@@ -117,14 +118,14 @@ public class MBeanDetailedView extends DetailViewer {
 					}
 					setData(new DetailViewerRecord[] { dv });
 				}
-				
+
 			}
 
 			public void onFailure(Throwable caught) {
 				if (extraCallback != null) {
 					extraCallback.onFailure(caught);
 				}
-				
+
 				if (RMController.getJsonErrorCode(caught) == 401) {
 					model.logMessage("You have been disconnected from the server.");
 				} else {

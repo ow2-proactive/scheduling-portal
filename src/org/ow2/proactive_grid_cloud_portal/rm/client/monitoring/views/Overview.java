@@ -52,6 +52,7 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
+
 /**
  * Overview tab in host monitoring.
  */
@@ -62,38 +63,39 @@ public class Overview extends VLayout implements Reloadable {
 	private MBeanChart memory;
 	private MBeanChart network;
 	private MBeanChart disk;
-	
+
 	private ReloadableChain chain;
 
 	public Overview(RMController controller, String url, AsyncCallback<String> extraCallback) {
 
 		osInfo = new MBeanDetailedView(extraCallback);
-		osInfo.load(controller, url, "java.lang:type=OperatingSystem", Arrays.asList("Name", "Arch", "Version"));
+		osInfo.load(controller, url, "java.lang:type=OperatingSystem", Arrays.asList("Name", "Arch",
+				"Version"));
 		cpuUsage = new CpuUsageAreaChart(controller, url);
 		memory = new MemoryLineChart(controller, url);
 		network = new NetworkAreaChart(controller, url);
 		disk = new DiskPieChart(controller, url);
-		
+
 		disk.reload();
 
-		chain = new ReloadableChain(new Reloadable[] {cpuUsage, memory, network});
-		
+		chain = new ReloadableChain(new Reloadable[] { cpuUsage, memory, network });
+
 		VLayout osInfoRow = new VLayout();
 		HLayout cpuMemRow = new HLayout();
 		HLayout netFileSysRow = new HLayout();
-		
+
 		Label osLabel = new Label("<nobr style='font-weight:bold;'>Operating system<nobr>");
 		osLabel.setHeight(50);
 		osInfoRow.addMember(osLabel);
 		osInfoRow.addMember(osInfo);
 		osInfoRow.setWidth("50%");
 		osInfoRow.setHeight("120px");
-		
+
 		cpuMemRow.addMember(cpuUsage);
 		cpuMemRow.addMember(memory);
 		netFileSysRow.addMember(network);
 		netFileSysRow.addMember(disk);
-		
+
 		addMember(osInfoRow);
 		addMember(cpuMemRow);
 		addMember(netFileSysRow);

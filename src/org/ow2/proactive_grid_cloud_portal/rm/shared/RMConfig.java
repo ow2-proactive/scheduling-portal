@@ -86,14 +86,14 @@ public class RMConfig extends Config {
 	public static final String MOTD_URL = "rm.motd.url";
 	private static final String d_MOTD_URL = "";
 
-	/** the protocol for jmx nodes communication (default or proactive) */ 	
+	/** the protocol for jmx nodes communication (default or proactive) */
 	public static final String MONITORING_PROTOCOL = "rm.monitoring.protocol";
 	public static final String MONITORING_PROTOCOL_DEFAULT = "default";
-	
+
 	/** refresh period in milliseconds */
 	public static final String MONITORING_PERIOD = "rm.monitoring.period";
 	public static final String MONITORING_PERIOD_DEFAULT = "10000";
-	
+
 	private static RMConfig instance = null;
 
 	/**

@@ -38,6 +38,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 
+
 /**
  * Reloads components one after another
  */
@@ -45,13 +46,13 @@ public class ReloadableChain implements Reloadable {
 
 	private Reloadable[] reloadables;
 	private boolean reloading = false;
-	
+
 	private Runnable onFinish;
-	
+
 	public ReloadableChain(Reloadable[] reloadables) {
 		this.reloadables = reloadables;
-		
-		for (int i = 0; i < reloadables.length-1; i++) {
+
+		for (int i = 0; i < reloadables.length - 1; i++) {
 			final int index = i;
 			reloadables[i].onFinish(new Runnable() {
 				public void run() {
@@ -61,14 +62,14 @@ public class ReloadableChain implements Reloadable {
 							continueReloading = true;
 						}
 					}
-					
+
 					if (continueReloading) {
-						ReloadableChain.this.reloadables[index+1].reload();						
+						ReloadableChain.this.reloadables[index + 1].reload();
 					}
 				}
 			});
 		}
-		reloadables[reloadables.length-1].onFinish(new Runnable() {
+		reloadables[reloadables.length - 1].onFinish(new Runnable() {
 			public void run() {
 				synchronized (ReloadableChain.this) {
 					reloading = false;
@@ -91,7 +92,7 @@ public class ReloadableChain implements Reloadable {
 			}
 			reloading = true;
 		}
-		reloadables[0].reload();		
+		reloadables[0].reload();
 	}
 
 	@Override

@@ -46,11 +46,12 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
+
 /**
  * Shows the JVM memory consumption.
  */
 public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
-	
+
 	public JVMMemoryAreaChart(RMController controller, String jmxServerUrl) {
 		super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
 		AxisOptions vAxis = AxisOptions.create();
@@ -62,12 +63,14 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 	public void processResult(String result) {
 		JSONArray array = JSONParser.parseStrict(result).isArray();
 		if (array != null) {
-			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(System.currentTimeMillis()));
-			double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
-			
+			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+					new Date(System.currentTimeMillis()));
+			double value = array.get(0).isObject().get("value").isObject().get("used").isNumber()
+					.doubleValue();
+
 			addRow();
-			loadTable.setValue(loadTable.getNumberOfRows()-1, 0, timeStamp);
-			loadTable.setValue(loadTable.getNumberOfRows()-1, 1, value/(1024*1024));
+			loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+			loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, value / (1024 * 1024));
 			loadChart.draw(loadTable, loadOpts);
 		}
 	}

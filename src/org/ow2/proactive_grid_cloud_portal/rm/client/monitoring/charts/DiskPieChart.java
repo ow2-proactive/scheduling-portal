@@ -49,14 +49,15 @@ import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 
+
 /**
  * Shows the disks total space in MB.
  */
 public class DiskPieChart extends MBeansChart {
 
 	public DiskPieChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*",
-				new String[] {"Total"}, "File System, Mb");
+		super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" },
+				"File System, Mb");
 
 		loadOpts.setLegend(LegendPosition.RIGHT);
 		loadTable.addColumn(ColumnType.STRING, "Type");
@@ -65,15 +66,16 @@ public class DiskPieChart extends MBeansChart {
 
 	@Override
 	public void processResult(String result) {
-		
+
 		JSONObject object = JSONParser.parseStrict(result).isObject();
 		if (object != null) {
-			
+
 			loadTable.removeRows(0, loadTable.getNumberOfRows());
-			for (String key: object.keySet()) {				
+			for (String key : object.keySet()) {
 				addRow();
 
-				double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
+				double value = object.get(key).isArray().get(0).isObject().get("value").isNumber()
+						.doubleValue();
 				long inMB = (long) (value / 1024);
 				loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, beautifyName(key));
 				loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
@@ -82,12 +84,12 @@ public class DiskPieChart extends MBeansChart {
 			loadChart.draw(loadTable, loadOpts);
 		}
 	}
-	
+
 	private String beautifyName(String mbeanName) {
 		// sigar:Name=lo,Type=NetInterface
 		String patternStr = "sigar:Name=(.*),Type=FileSystem";
 		RegExp pattern = RegExp.compile(patternStr);
-		MatchResult matcher = pattern.exec(mbeanName);		
+		MatchResult matcher = pattern.exec(mbeanName);
 		return matcher.getGroup(1);
 	}
 

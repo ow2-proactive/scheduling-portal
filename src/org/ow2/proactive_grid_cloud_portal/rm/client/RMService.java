@@ -199,7 +199,7 @@ public interface RMService extends RemoteService {
 			ServiceException;
 
 	/**
-     * Retrieves attributes of the specified mbean.
+	 * Retrieves attributes of the specified mbean.
 	 * 
 	 * @param sessionId current session
 	 * @param name of mbean
@@ -208,11 +208,11 @@ public interface RMService extends RemoteService {
 	 * 
 	 * @return mbean attributes values
 	 */
-	String getNodeMBeanInfo(String sessionId, String nodeJmxUrl,
-			String objectName, List<String> attrs) throws RestServerException, ServiceException;
+	String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
+			throws RestServerException, ServiceException;
 
 	/**
-     * Retrieves attributes of the specified mbeans.
+	 * Retrieves attributes of the specified mbeans.
 	 * 
 	 * @param sessionId current session
 	 * @param objectNames mbean names (@see ObjectName format)
@@ -221,9 +221,9 @@ public interface RMService extends RemoteService {
 	 * 
 	 * @return mbean attributes values
 	 */
-	String getNodeMBeansInfo(String sessionId, String nodeJmxUrl,
-			String objectNames, List<String> attrs) throws RestServerException, ServiceException;
-	
+	String getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames, List<String> attrs)
+			throws RestServerException, ServiceException;
+
 	/**
 	 * Statistic history for the following values:<pre>
 	 * 	{ "BusyNodesCount",
