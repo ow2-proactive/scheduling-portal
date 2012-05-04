@@ -36,10 +36,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
@@ -172,9 +172,10 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
 		curDetails.setAttribute(RUNNING_TASKS_ATTR, job.getRunningTasks());
 		curDetails.setAttribute(FINISHED_TASKS_ATTR, job.getFinishedTasks());
 		curDetails.setAttribute(TOTAL_TASKS_ATTR, job.getTotalTasks());
-		curDetails.setAttribute(SUBMITTED_TIME_ATTR, new Date(submitTime));
-		curDetails.setAttribute(STARTED_TIME_ATTR, (startTime > submitTime) ? new Date(startTime) : "");
-		curDetails.setAttribute(FINISHED_TIME_ATTR, (finishTime > startTime) ? new Date(finishTime) : "");
+		curDetails.setAttribute(SUBMITTED_TIME_ATTR, JSUtil.getTime(submitTime));
+		curDetails.setAttribute(STARTED_TIME_ATTR, (startTime > submitTime) ? JSUtil.getTime(startTime) : "");
+		curDetails.setAttribute(FINISHED_TIME_ATTR, (finishTime > startTime) ? JSUtil.getTime(finishTime)
+				: "");
 		curDetails.setAttribute(PENDING_DURATION_ATTR, pendingDuration);
 		curDetails.setAttribute(EXEC_DURATION_ATTR, execDuration);
 		curDetails.setAttribute(TOTAL_DURATION_ATTR, totalDuration);

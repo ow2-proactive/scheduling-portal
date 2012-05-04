@@ -36,10 +36,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
@@ -127,9 +127,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 			setAttribute(NODE_COUNT_ATTR, t.getNodeCount());
 
 			if (t.getStartTime() > 0)
-				setAttribute(START_TIME_ATTR, new Date(t.getStartTime()));
+				setAttribute(START_TIME_ATTR, JSUtil.getTime(t.getStartTime()));
 			if (t.getFinishTime() > t.getStartTime())
-				setAttribute(FINISHED_TIME_ATTR, new Date(t.getFinishTime()));
+				setAttribute(FINISHED_TIME_ATTR, JSUtil.getTime(t.getFinishTime()));
 		}
 
 		public Task getTask() {
