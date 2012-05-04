@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -503,7 +504,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 			if (node.getNodeOwner().trim().length() > 0) {
 				str += "Used by: " + node.getNodeOwner() + "<br>";
 			}
-			str += node.getNodeState().toString() + " since " + node.getTimeStampFormatted();
+			str += node.getNodeState().toString() + " since " + JSUtil.getTime(node.getTimeStamp());
 			this.hoverLabel.setContents(str);
 		}
 

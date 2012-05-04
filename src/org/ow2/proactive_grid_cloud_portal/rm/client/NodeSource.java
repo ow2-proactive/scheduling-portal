@@ -145,6 +145,8 @@ public class NodeSource {
 			private NodeState nodeState;
 			/** multiline String describing the node */
 			private String nodeInfo;
+			/** timestamp */
+			private long timeStamp;
 			/** time when the node changed to this nodeState*/
 			private String timeStampFormatted;
 			/** user that created the node */
@@ -164,9 +166,10 @@ public class NodeSource {
 			/** proactive node JMX url */
 			private String proactiveJMXUrl;
 
-			Node(String nodeUrl, String nodeState, String nodeInfo, String timeStampFormatted,
-					String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
-					String description, String defaultJMXUrl, String proactiveJMXUrl) {
+			Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp,
+					String timeStampFormatted, String nodeProvider, String nodeOwner, String sourceName,
+					String hostName, String vmName, String description, String defaultJMXUrl,
+					String proactiveJMXUrl) {
 				this.nodeUrl = nodeUrl;
 				this.nodeState = NodeState.parse(nodeState);
 				this.nodeInfo = nodeInfo;
@@ -174,6 +177,7 @@ public class NodeSource {
 				this.nodeProvider = nodeProvider;
 				this.nodeOwner = nodeOwner;
 				this.sourceName = sourceName;
+				this.timeStamp = timeStamp;
 				this.hostName = hostName;
 				this.vmName = vmName;
 				this.description = description;
@@ -191,6 +195,10 @@ public class NodeSource {
 
 			public String getNodeInfo() {
 				return nodeInfo;
+			}
+
+			public long getTimeStamp() {
+				return timeStamp;
 			}
 
 			public String getTimeStampFormatted() {

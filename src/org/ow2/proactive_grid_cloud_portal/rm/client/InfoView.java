@@ -38,6 +38,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -230,7 +231,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
 
 		dv.setAttribute("nodeUrl", node.getNodeUrl());
 		dv.setAttribute("nodeState", node.getNodeState().toString() + " since " +
-			node.getTimeStampFormatted());
+			JSUtil.getTime(node.getTimeStamp()));
 		dv.setAttribute("nodeProvider", node.getNodeProvider());
 		dv.setAttribute("nodeOwner", node.getNodeOwner());
 		dv.setAttribute("hostName", node.getHostName());

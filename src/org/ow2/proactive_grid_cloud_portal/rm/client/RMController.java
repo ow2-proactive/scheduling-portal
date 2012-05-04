@@ -496,6 +496,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 				String nodeState = nodeObj.get("nodeState").isString().stringValue();
 				String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
 				String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
+				long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
 				String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
 				String nodeOwner = "";
 				JSONString nodeOwnerStr = nodeObj.get("nodeOwner").isString();
@@ -512,8 +513,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 				String defaultJMXUrl = nodeObj.get("defaultJMXUrl").isString().stringValue();
 				String proactiveJMXUrl = nodeObj.get("proactiveJMXUrl").isString().stringValue();
 
-				Node n = new Node(nodeUrl, nodeState, nodeInfo, timeStampFormatted, nodeProvider, nodeOwner,
-					nss, hostName, vmName, description, defaultJMXUrl, proactiveJMXUrl);
+				Node n = new Node(nodeUrl, nodeState, nodeInfo, timeStamp, timeStampFormatted, nodeProvider,
+					nodeOwner, nss, hostName, vmName, description, defaultJMXUrl, proactiveJMXUrl);
 
 				// deploying node
 				if (hostName == null || hostName.length() == 0) {
