@@ -42,163 +42,163 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
  * @author The ProActive Team
  */
 public enum JobPriority implements java.io.Serializable {
-	/** Lowest priority*/
-	IDLE("Idle", 0),
-	/** Lowest priority */
-	LOWEST("Lowest", 1),
-	/** Low priority */
-	LOW("Low", 2),
-	/** Normal Priority */
-	NORMAL("Normal", 3),
-	/** High priority*/
-	HIGH("High", 4),
-	/** Highest priority*/
-	HIGHEST("Highest", 5);
+    /** Lowest priority*/
+    IDLE("Idle", 0),
+    /** Lowest priority */
+    LOWEST("Lowest", 1),
+    /** Low priority */
+    LOW("Low", 2),
+    /** Normal Priority */
+    NORMAL("Normal", 3),
+    /** High priority*/
+    HIGH("High", 4),
+    /** Highest priority*/
+    HIGHEST("Highest", 5);
 
-	public enum PriorityComparator {
-		LOWER("<", -2), LOWER_EQUAL("<=", -1), EQUAL("=", 0), GREATER_EQUAL("=>", 1), GREATER(">", 2);
+    public enum PriorityComparator {
+        LOWER("<", -2), LOWER_EQUAL("<=", -1), EQUAL("=", 0), GREATER_EQUAL("=>", 1), GREATER(">", 2);
 
-		private String symbol;
-		private int value;
+        private String symbol;
+        private int value;
 
-		PriorityComparator(String symbol, int value) {
-			this.symbol = symbol;
-			this.value = value;
-		}
+        PriorityComparator(String symbol, int value) {
+            this.symbol = symbol;
+            this.value = value;
+        }
 
-		/**
-		 * @return the symbol of the comparator
-		 */
-		public String getSymbol() {
-			return this.symbol;
-		}
+        /**
+         * @return the symbol of the comparator
+         */
+        public String getSymbol() {
+            return this.symbol;
+        }
 
-		/**
-		 * @return the value of the comparator
-		 */
-		public int getValue() {
-			return this.value;
-		}
+        /**
+         * @return the value of the comparator
+         */
+        public int getValue() {
+            return this.value;
+        }
 
-		/**
-		 * Finds the priority comparator corresponding to the given symbol
-		 *
-		 * @param symbol symbol of the comparator
-		 * @return the corresponding comparator
-		 */
-		public static PriorityComparator findPriorityComparator(String symbol) {
+        /**
+         * Finds the priority comparator corresponding to the given symbol
+         *
+         * @param symbol symbol of the comparator
+         * @return the corresponding comparator
+         */
+        public static PriorityComparator findPriorityComparator(String symbol) {
 
-			if (symbol.equals(LOWER.getSymbol()))
-				return LOWER;
+            if (symbol.equals(LOWER.getSymbol()))
+                return LOWER;
 
-			if (symbol.equals(LOWER_EQUAL.getSymbol()))
-				return LOWER_EQUAL;
+            if (symbol.equals(LOWER_EQUAL.getSymbol()))
+                return LOWER_EQUAL;
 
-			if (symbol.equals(EQUAL.getSymbol()))
-				return EQUAL;
+            if (symbol.equals(EQUAL.getSymbol()))
+                return EQUAL;
 
-			if (symbol.equals(GREATER_EQUAL.getSymbol()))
-				return GREATER_EQUAL;
+            if (symbol.equals(GREATER_EQUAL.getSymbol()))
+                return GREATER_EQUAL;
 
-			if (symbol.equals(GREATER.getSymbol()))
-				return GREATER;
+            if (symbol.equals(GREATER.getSymbol()))
+                return GREATER;
 
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 
-	/** Name of the priority */
-	private String name;
+    /** Name of the priority */
+    private String name;
 
-	/** Priority representing by an integer */
-	private int priority;
+    /** Priority representing by an integer */
+    private int priority;
 
-	/**
-	 * Implicit constructor of job priority.
-	 *
-	 * @param name the name of the priority.
-	 * @param priority the integer representing the priority.
-	 */
-	JobPriority(String name, int priority) {
-		this.name = name;
-		this.priority = priority;
-	}
+    /**
+     * Implicit constructor of job priority.
+     *
+     * @param name the name of the priority.
+     * @param priority the integer representing the priority.
+     */
+    JobPriority(String name, int priority) {
+        this.name = name;
+        this.priority = priority;
+    }
 
-	/**
-	 * @see java.lang.Enum#toString()
-	 */
-	@Override
-	public String toString() {
-		return name;
-	}
+    /**
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+        return name;
+    }
 
-	/**
-	 * Return the integer representing the priority.
-	 *
-	 * @return the integer representing the priority.
-	 */
-	public int getPriority() {
-		return priority;
-	}
+    /**
+     * Return the integer representing the priority.
+     *
+     * @return the integer representing the priority.
+     */
+    public int getPriority() {
+        return priority;
+    }
 
-	/**
-	 * Get the priority associated with the given name.
-	 *
-	 * @param name the name of the priority to find as a string.
-	 * @return the job priority corresponding to the string or the NORMAL priority if not found.
-	 */
-	public static JobPriority findPriority(String name) {
-		if (name.equalsIgnoreCase(IDLE.toString())) {
-			return IDLE;
-		}
+    /**
+     * Get the priority associated with the given name.
+     *
+     * @param name the name of the priority to find as a string.
+     * @return the job priority corresponding to the string or the NORMAL priority if not found.
+     */
+    public static JobPriority findPriority(String name) {
+        if (name.equalsIgnoreCase(IDLE.toString())) {
+            return IDLE;
+        }
 
-		if (name.equalsIgnoreCase(LOWEST.toString())) {
-			return LOWEST;
-		}
+        if (name.equalsIgnoreCase(LOWEST.toString())) {
+            return LOWEST;
+        }
 
-		if (name.equalsIgnoreCase(LOW.toString())) {
-			return LOW;
-		}
+        if (name.equalsIgnoreCase(LOW.toString())) {
+            return LOW;
+        }
 
-		if (name.equalsIgnoreCase(HIGH.toString())) {
-			return HIGH;
-		}
+        if (name.equalsIgnoreCase(HIGH.toString())) {
+            return HIGH;
+        }
 
-		if (name.equalsIgnoreCase(HIGHEST.toString())) {
-			return HIGHEST;
-		}
+        if (name.equalsIgnoreCase(HIGHEST.toString())) {
+            return HIGHEST;
+        }
 
-		return NORMAL;
-	}
+        return NORMAL;
+    }
 
-	/**
-	 * Get the priority associated with the given priorityValue.
-	 *
-	 * @param priorityValue the priority value to find.
-	 * @return the job priority corresponding to the value or the NORMAL priority if not found.
-	 */
-	public static JobPriority findPriority(int priorityValue) {
-		if (priorityValue == IDLE.getPriority()) {
-			return IDLE;
-		}
+    /**
+     * Get the priority associated with the given priorityValue.
+     *
+     * @param priorityValue the priority value to find.
+     * @return the job priority corresponding to the value or the NORMAL priority if not found.
+     */
+    public static JobPriority findPriority(int priorityValue) {
+        if (priorityValue == IDLE.getPriority()) {
+            return IDLE;
+        }
 
-		if (priorityValue == LOWEST.getPriority()) {
-			return LOWEST;
-		}
+        if (priorityValue == LOWEST.getPriority()) {
+            return LOWEST;
+        }
 
-		if (priorityValue == LOW.getPriority()) {
-			return LOW;
-		}
+        if (priorityValue == LOW.getPriority()) {
+            return LOW;
+        }
 
-		if (priorityValue == HIGH.getPriority()) {
-			return HIGH;
-		}
+        if (priorityValue == HIGH.getPriority()) {
+            return HIGH;
+        }
 
-		if (priorityValue == HIGHEST.getPriority()) {
-			return HIGHEST;
-		}
+        if (priorityValue == HIGHEST.getPriority()) {
+            return HIGHEST;
+        }
 
-		return NORMAL;
-	}
+        return NORMAL;
+    }
 
 }

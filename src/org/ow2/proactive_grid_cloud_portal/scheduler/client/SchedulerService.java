@@ -57,281 +57,281 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("scheduler")
 public interface SchedulerService extends RemoteService {
 
-	/**
-	 * Logout from the scheduler.
-	 * 
-	 * @param sessionId the user session id used to logout from the scheduler.
-	 * @throws LogoutException exception thrown if problems occurred during the logout process. 
-	 */
-	void logout(String sessionId) throws RestServerException;
+    /**
+     * Logout from the scheduler.
+     * 
+     * @param sessionId the user session id used to logout from the scheduler.
+     * @throws LogoutException exception thrown if problems occurred during the logout process. 
+     */
+    void logout(String sessionId) throws RestServerException;
 
-	/**
-	 * Get the user that is logged in.
-	 * 
-	 * @param sessionId The user session id
-	 * @return The user that is logged in.
-	 */
-	User getUser(String sessionId);
+    /**
+     * Get the user that is logged in.
+     * 
+     * @param sessionId The user session id
+     * @return The user that is logged in.
+     */
+    User getUser(String sessionId);
 
-	/**
-	 * Removes several jobs from the scheduler.
-	 * @param sessionId the session id of the user that removes the job
-	 * @param jobIdList the list of the job ids that are to be removed
-	 * @return number of removed jobs
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	int removeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException;
+    /**
+     * Removes several jobs from the scheduler.
+     * @param sessionId the session id of the user that removes the job
+     * @param jobIdList the list of the job ids that are to be removed
+     * @return number of removed jobs
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    int removeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException;
 
-	/**
-	 * Pauses a job.
-	 * @param sessionId the session id of the user that pauses the job
-	 * @param list the list of the job ids that are to be paused 
-	 * @return number of paused jobs
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	int pauseJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
+    /**
+     * Pauses a job.
+     * @param sessionId the session id of the user that pauses the job
+     * @param list the list of the job ids that are to be paused 
+     * @return number of paused jobs
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    int pauseJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
-	/**
-	 * Resumes a job.
-	 * @param sessionId the session id of the user that resumes the job
-	 * @param list the list of the job ids that are to be resumed
-	 * @return number of resumed jobs
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	int resumeJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
+    /**
+     * Resumes a job.
+     * @param sessionId the session id of the user that resumes the job
+     * @param list the list of the job ids that are to be resumed
+     * @return number of resumed jobs
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    int resumeJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
-	/**
-	 * Kills several jobs.
-	 * @param sessionId the session id of the user that resumes the job
-	 * @param list the list of the job ids that are to be resumed
-	 * @return number of killed jobs
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	int killJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
+    /**
+     * Kills several jobs.
+     * @param sessionId the session id of the user that resumes the job
+     * @param list the list of the job ids that are to be resumed
+     * @return number of killed jobs
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    int killJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
-	/**
-	 * Gets the list of tasks that correspond to a job.
-	 * @param sessionId the session if of the user that asks for the tasks
-	 * @param jobId the id of the job for which its task list is asked 
-	 * @return the list of tasks as raw json
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException;
+    /**
+     * Gets the list of tasks that correspond to a job.
+     * @param sessionId the session if of the user that asks for the tasks
+     * @param jobId the id of the job for which its task list is asked 
+     * @return the list of tasks as raw json
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException;
 
-	/**
-	 * Gets the properties needed by the client. When loading properties we can only
-	 * change properties value on the server side. For changing properties on the client
-	 * side, the client has to send a request for getting these values and then set
-	 * them on his side.
-	 * @return the list of properties
-	 */
-	Map<String, String> getProperties();
+    /**
+     * Gets the properties needed by the client. When loading properties we can only
+     * change properties value on the server side. For changing properties on the client
+     * side, the client has to send a request for getting these values and then set
+     * them on his side.
+     * @return the list of properties
+     */
+    Map<String, String> getProperties();
 
-	/**
-	 * Gets the job details.
-	 * @param sessionId the session id of the user which is logged in.
-	 * @param jobId the job id for which the details are asked.
-	 * @return the job detailed information as json
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 * 
-	 */
-	String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException;
+    /**
+     * Gets the job details.
+     * @param sessionId the session id of the user which is logged in.
+     * @param jobId the job id for which the details are asked.
+     * @return the job detailed information as json
+     * @throws RestServerException 
+     * @throws ServiceException 
+     * 
+     */
+    String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException;
 
-	/**
-	 * Changes the priority for a job.
-	 * @param sessionId the session id of the user which is logged in
-	 * @param list the list of the job ids which are going to have their priority changed
-	 * @param priorityName the name of the new priority
-	 * @return number of priority set
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	void setPriorityByName(String sessionId, List<Integer> list, String priorityName)
-			throws RestServerException, ServiceException;
+    /**
+     * Changes the priority for a job.
+     * @param sessionId the session id of the user which is logged in
+     * @param list the list of the job ids which are going to have their priority changed
+     * @param priorityName the name of the new priority
+     * @return number of priority set
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    void setPriorityByName(String sessionId, List<Integer> list, String priorityName)
+            throws RestServerException, ServiceException;
 
-	/**
-	 * Pauses the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the pause was successfully, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean pauseScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Pauses the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the pause was successfully, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean pauseScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Resumes the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the resume was successfully, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean resumeScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Resumes the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the resume was successfully, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean resumeScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Removes the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the freezing was successfully, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean freezeScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Removes the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the freezing was successfully, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean freezeScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Kills the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the scheduler was successfully killed, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean killScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Kills the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the scheduler was successfully killed, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean killScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Starts the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the scheduler was successfully started, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean startScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Starts the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the scheduler was successfully started, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean startScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Stops the Scheduler.
-	 * @param sessionId the session id of the user which is logged in
-	 * @return true if the scheduler was successfully stopped, false otherwise.
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	boolean stopScheduler(final String sessionId) throws RestServerException, ServiceException;
+    /**
+     * Stops the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the scheduler was successfully stopped, false otherwise.
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    boolean stopScheduler(final String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * Gets the output of a single task in a job
-	 * @param sessionId the session id of the user which is logged in
-	 * @param jobId the id of the job
-	 * @param taskName the name of the task, not the id
-	 * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-	 * 	 {@link SchedulerServiceAsync#LOG_OUT}
-	 * @return the output of the task
-	 * @throws RestServerException
-	 * @throws ServiceException 
-	 */
-	String getTaskOutput(final String sessionId, final String jobId, final String taskName, final int logMode)
-			throws RestServerException, ServiceException;
+    /**
+     * Gets the output of a single task in a job
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job
+     * @param taskName the name of the task, not the id
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
+     * 	 {@link SchedulerServiceAsync#LOG_OUT}
+     * @return the output of the task
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    String getTaskOutput(final String sessionId, final String jobId, final String taskName, final int logMode)
+            throws RestServerException, ServiceException;
 
-	/**
-	 * Gets the output of a job even for tasks that have not terminated yet
-	 * @param sessionId current session id
-	 * @param jobId id of the job for which logs should be fetched
-	 * @return console output for the whole job
-	 * @throws RestServerException
-	 * @throws ServiceException 
-	 */
-	String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
-			ServiceException;
+    /**
+     * Gets the output of a job even for tasks that have not terminated yet
+     * @param sessionId current session id
+     * @param jobId id of the job for which logs should be fetched
+     * @return console output for the whole job
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
+            ServiceException;
 
-	/**
-	 * Gets the number of bytes available in the job output stream for the given job id,
-	 * might be used to determine if fetch is necessary
-	 * @param sessionId current session id
-	 * @param jobId id of the job for which logs should be fetched
-	 * @return number of bytes available in the log for the given job
-	 * @throws RestServerException
-	 */
-	int getLiveLogJobAvailable(final String sessionId, final String jobId) throws RestServerException;
+    /**
+     * Gets the number of bytes available in the job output stream for the given job id,
+     * might be used to determine if fetch is necessary
+     * @param sessionId current session id
+     * @param jobId id of the job for which logs should be fetched
+     * @return number of bytes available in the log for the given job
+     * @throws RestServerException
+     */
+    int getLiveLogJobAvailable(final String sessionId, final String jobId) throws RestServerException;
 
-	/**
-	 * Clean the remote live log object
-	 * @param sessionId current session id
-	 * @param jobId id of the job for which live logs should be cleaned
-	 * @throws RestServerException
-	 */
-	public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
-			ServiceException;
+    /**
+     * Clean the remote live log object
+     * @param sessionId current session id
+     * @param jobId id of the job for which live logs should be cleaned
+     * @throws RestServerException
+     */
+    public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
+            ServiceException;
 
-	public String getStatistics(String sessionId) throws RestServerException, ServiceException;
+    public String getStatistics(String sessionId) throws RestServerException, ServiceException;
 
-	public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException;
+    public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	* Returns the revision number of the scheduler state
-	* @param sessionId a valid session id.
-	* @return the revision of the scheduler state
-	* @throws RestServerException
-	*/
-	public long schedulerStateRevision(String sessionId) throws RestServerException;
+    /**
+    * Returns the revision number of the scheduler state
+    * @param sessionId a valid session id.
+    * @return the revision of the scheduler state
+    * @throws RestServerException
+    */
+    public long schedulerStateRevision(String sessionId) throws RestServerException;
 
-	/**
-	 * Returns a map containing one entry with the revision id as key and the
-	 * list of UserJobInfo as value.
-	 * each jobs is described using
-	 *   - its id
-	 *   - its owner
-	 *   - the JobInfo class
-	 * @param sessionId a valid session id
-	 * @param index offset
-	 * @param range max size of the result set
-	 * @param myJobs fetch only my jobs
-	 * @param pending fetch pending jobs
-	 * @param running fetch running jobs
-	 * @param finished fetch finished jobs
-	 * @return the raw json jobinfo from the rest api
-	 * @throws RestServerException 
-	 * @throws ServiceException 
-	 */
-	public String revisionAndjobsinfo(@HeaderParam("sessionid")
-	String sessionId, @QueryParam("index")
-	int index, @QueryParam("range")
-	int range, @QueryParam("myjobs")
-	boolean myJobs, boolean pending, boolean running, boolean finished) throws RestServerException,
-			ServiceException;
+    /**
+     * Returns a map containing one entry with the revision id as key and the
+     * list of UserJobInfo as value.
+     * each jobs is described using
+     *   - its id
+     *   - its owner
+     *   - the JobInfo class
+     * @param sessionId a valid session id
+     * @param index offset
+     * @param range max size of the result set
+     * @param myJobs fetch only my jobs
+     * @param pending fetch pending jobs
+     * @param running fetch running jobs
+     * @param finished fetch finished jobs
+     * @return the raw json jobinfo from the rest api
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    public String revisionAndjobsinfo(@HeaderParam("sessionid")
+    String sessionId, @QueryParam("index")
+    int index, @QueryParam("range")
+    int range, @QueryParam("myjobs")
+    boolean myJobs, boolean pending, boolean running, boolean finished) throws RestServerException,
+            ServiceException;
 
-	/**
-	 * Image representing the job as designed in the WF studio when applicable
-	 * @param sessionId current session
-	 * @param jobId id of the job
-	 * @return path of the image on the server
-	 * @throws ServiceException 
-	 */
-	public String getJobImage(@HeaderParam("sessionid")
-	String sessionId, String jobId) throws RestServerException, ServiceException;
+    /**
+     * Image representing the job as designed in the WF studio when applicable
+     * @param sessionId current session
+     * @param jobId id of the job
+     * @return path of the image on the server
+     * @throws ServiceException 
+     */
+    public String getJobImage(@HeaderParam("sessionid")
+    String sessionId, String jobId) throws RestServerException, ServiceException;
 
-	/**
-	 * Textual representation of the graphical info returned by {@link #getJobImage(String, String)}
-	 * @param sessionId current session
-	 * @param jobId id of a job
-	 * @return an XML map of task coordinates
-	 * @throws RestServerException
-	 * @throws ServiceException 
-	 */
-	public JobVisuMap getJobMap(@HeaderParam("sessionid")
-	String sessionId, String jobId) throws RestServerException, ServiceException;
+    /**
+     * Textual representation of the graphical info returned by {@link #getJobImage(String, String)}
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @return an XML map of task coordinates
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    public JobVisuMap getJobMap(@HeaderParam("sessionid")
+    String sessionId, String jobId) throws RestServerException, ServiceException;
 
-	/**
-	 * Returns the Scheduler status as a JSON String 
-	 * @param sessionId a valid session id
-	 * @return the current scheduler status
-	 * @throws RestServerException
-	 */
-	public String getSchedulerStatus(@HeaderParam("sessionid")
-	String sessionId) throws RestServerException;
+    /**
+     * Returns the Scheduler status as a JSON String 
+     * @param sessionId a valid session id
+     * @return the current scheduler status
+     * @throws RestServerException
+     */
+    public String getSchedulerStatus(@HeaderParam("sessionid")
+    String sessionId) throws RestServerException;
 
-	/**
-	 * returns the list of users currently connected to the scheduler
-	 * @param sessionId current session id
-	 * @return list of users as json array
-	 * @throws RestServerException
-	 * @throws ServiceException 
-	 */
-	public String getSchedulerUsers(@HeaderParam("sessionid")
-	String sessionId) throws RestServerException, ServiceException;
+    /**
+     * returns the list of users currently connected to the scheduler
+     * @param sessionId current session id
+     * @return list of users as json array
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    public String getSchedulerUsers(@HeaderParam("sessionid")
+    String sessionId) throws RestServerException, ServiceException;
 
-	/**
-	 * @return version string of the REST api
-	 */
-	String getVersion() throws RestServerException, ServiceException;
+    /**
+     * @return version string of the REST api
+     */
+    String getVersion() throws RestServerException, ServiceException;
 }

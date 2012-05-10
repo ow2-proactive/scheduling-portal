@@ -52,79 +52,79 @@ import java.util.List;
  */
 public class PluginDescriptor {
 
-	private String pluginName;
-	private String pluginDescription;
+    private String pluginName;
+    private String pluginDescription;
 
-	private List<Field> configurableFields;
+    private List<Field> configurableFields;
 
-	public static class Field {
-		private String name;
-		private String value;
-		private String description;
-		private boolean password;
-		private boolean credential;
-		private boolean file;
+    public static class Field {
+        private String name;
+        private String value;
+        private String description;
+        private boolean password;
+        private boolean credential;
+        private boolean file;
 
-		Field(String name, String value) {
-			this(name, value, "");
-		}
+        Field(String name, String value) {
+            this(name, value, "");
+        }
 
-		Field(String name, String value, String description) {
-			this(name, value, description, false, false, false);
-		}
+        Field(String name, String value, String description) {
+            this(name, value, description, false, false, false);
+        }
 
-		Field(String name, String value, String description, boolean password, boolean credential,
-				boolean file) {
-			this.name = name;
-			this.value = value;
-			this.description = description;
-			this.password = password;
-			this.credential = credential;
-			this.file = file;
-		}
+        Field(String name, String value, String description, boolean password, boolean credential,
+                boolean file) {
+            this.name = name;
+            this.value = value;
+            this.description = description;
+            this.password = password;
+            this.credential = credential;
+            this.file = file;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public String getValue() {
-			return value;
-		}
+        public String getValue() {
+            return value;
+        }
 
-		public String getDescription() {
-			return description;
-		}
+        public String getDescription() {
+            return description;
+        }
 
-		public boolean isPassword() {
-			return password;
-		}
+        public boolean isPassword() {
+            return password;
+        }
 
-		public boolean isCredential() {
-			return credential;
-		}
+        public boolean isCredential() {
+            return credential;
+        }
 
-		public boolean isFile() {
-			return file;
-		}
+        public boolean isFile() {
+            return file;
+        }
 
-	}
+    }
 
-	PluginDescriptor(String pluginName, String pluginDescription) {
-		this.pluginDescription = pluginDescription;
-		this.pluginName = pluginName;
-		this.configurableFields = new ArrayList<Field>();
-	}
+    PluginDescriptor(String pluginName, String pluginDescription) {
+        this.pluginDescription = pluginDescription;
+        this.pluginName = pluginName;
+        this.configurableFields = new ArrayList<Field>();
+    }
 
-	public String getPluginName() {
-		return pluginName;
-	}
+    public String getPluginName() {
+        return pluginName;
+    }
 
-	public String getPluginDescription() {
-		return pluginDescription;
-	}
+    public String getPluginDescription() {
+        return pluginDescription;
+    }
 
-	public List<Field> getConfigurableFields() {
-		return configurableFields;
-	}
+    public List<Field> getConfigurableFields() {
+        return configurableFields;
+    }
 
 }

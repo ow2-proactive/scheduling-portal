@@ -49,19 +49,19 @@ import java.io.Serializable;
  */
 @SuppressWarnings("serial")
 class TaskPos implements Serializable {
-	int x;
-	int y;
-	int w;
-	int h;
+    int x;
+    int y;
+    int w;
+    int h;
 
-	public TaskPos() {
-		this(0, 0, 0, 0);
-	}
+    public TaskPos() {
+        this(0, 0, 0, 0);
+    }
 
-	public TaskPos(int x, int y, int w, int h) {
-		this.x = x;
-		this.y = y;
-		this.w = w;
-		this.h = h;
-	}
+    public TaskPos(int x, int y, int w, int h) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+    }
 }

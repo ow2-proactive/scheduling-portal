@@ -40,105 +40,105 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso( { IfElseRecord.class, ReplicatedRecord.class, LoopRecord.class })
 public abstract class FlowControlRecord {
 
-	protected String type;
-	protected PositionRecord position;
-	protected SizeRecord size;
-	protected ContinuationRecord continuation;
+    protected String type;
+    protected PositionRecord position;
+    protected SizeRecord size;
+    protected ContinuationRecord continuation;
 
-	/**
-	 * Gets the value of the type property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Gets the value of the type property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getType() {
+        return type;
+    }
 
-	/**
-	 * Sets the value of the type property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setType(String value) {
-		this.type = value;
-	}
+    /**
+     * Sets the value of the type property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setType(String value) {
+        this.type = value;
+    }
 
-	/**
-	 * Gets the value of the position property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link PositionRecord }
-	 *     
-	 */
-	public PositionRecord getPosition() {
-		return position;
-	}
+    /**
+     * Gets the value of the position property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link PositionRecord }
+     *     
+     */
+    public PositionRecord getPosition() {
+        return position;
+    }
 
-	/**
-	 * Sets the value of the position property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link PositionRecord }
-	 *     
-	 */
-	public void setPosition(PositionRecord value) {
-		this.position = value;
-	}
+    /**
+     * Sets the value of the position property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link PositionRecord }
+     *     
+     */
+    public void setPosition(PositionRecord value) {
+        this.position = value;
+    }
 
-	/**
-	 * Gets the value of the size property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link SizeRecord }
-	 *     
-	 */
-	public SizeRecord getSize() {
-		return size;
-	}
+    /**
+     * Gets the value of the size property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SizeRecord }
+     *     
+     */
+    public SizeRecord getSize() {
+        return size;
+    }
 
-	/**
-	 * Sets the value of the size property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link SizeRecord }
-	 *     
-	 */
-	public void setSize(SizeRecord value) {
-		this.size = value;
-	}
+    /**
+     * Sets the value of the size property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SizeRecord }
+     *     
+     */
+    public void setSize(SizeRecord value) {
+        this.size = value;
+    }
 
-	/**
-	 * Gets the value of the continuation property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link ContinuationRecord }
-	 *     
-	 */
-	public ContinuationRecord getContinuation() {
-		return continuation;
-	}
+    /**
+     * Gets the value of the continuation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ContinuationRecord }
+     *     
+     */
+    public ContinuationRecord getContinuation() {
+        return continuation;
+    }
 
-	/**
-	 * Sets the value of the continuation property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link ContinuationRecord }
-	 *     
-	 */
-	public void setContinuation(ContinuationRecord value) {
-		this.continuation = value;
-	}
+    /**
+     * Sets the value of the continuation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ContinuationRecord }
+     *     
+     */
+    public void setContinuation(ContinuationRecord value) {
+        this.continuation = value;
+    }
 
 }

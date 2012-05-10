@@ -57,66 +57,66 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.V
  */
 public interface SchedulerEventDispatcher extends EventDispatcher {
 
-	/**
-	 * register a new listener for JobsUpdated events
-	 *
-	 * @param listener
-	 */
-	public abstract void addJobsUpdatedListener(JobsUpdatedListener listener);
+    /**
+     * register a new listener for JobsUpdated events
+     *
+     * @param listener
+     */
+    public abstract void addJobsUpdatedListener(JobsUpdatedListener listener);
 
-	/**
-	 * register a new listener for JobSelected events
-	 *
-	 * @param listener
-	 */
-	public abstract void addJobSelectedListener(JobSelectedListener listener);
+    /**
+     * register a new listener for JobSelected events
+     *
+     * @param listener
+     */
+    public abstract void addJobSelectedListener(JobSelectedListener listener);
 
-	/**
-	 * register a new listener for TasksUpdated events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addTasksUpdatedListener(TasksUpdatedListener listener);
+    /**
+     * register a new listener for TasksUpdated events
+     * 
+     * @param listener
+     */
+    public abstract void addTasksUpdatedListener(TasksUpdatedListener listener);
 
-	/**
-	 * register a new listener for SchedulerState events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addSchedulerStatusListener(SchedulerStatusListener listener);
+    /**
+     * register a new listener for SchedulerState events
+     * 
+     * @param listener
+     */
+    public abstract void addSchedulerStatusListener(SchedulerStatusListener listener);
 
-	/**
-	 * Register a new listener for job output events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addJobOutputListener(JobOutputListener listener);
+    /**
+     * Register a new listener for job output events
+     * 
+     * @param listener
+     */
+    public abstract void addJobOutputListener(JobOutputListener listener);
 
-	/**
-	 * register a new listener for scheduler users events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addUsersListener(UsersListener listener);
+    /**
+     * register a new listener for scheduler users events
+     * 
+     * @param listener
+     */
+    public abstract void addUsersListener(UsersListener listener);
 
-	/**
-	 * register a new listener for statistics events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addStatisticsListener(StatisticsListener listener);
+    /**
+     * register a new listener for statistics events
+     * 
+     * @param listener
+     */
+    public abstract void addStatisticsListener(StatisticsListener listener);
 
-	/**
-	 * register a new remote hint listener
-	 * 
-	 * @param listener
-	 */
-	public abstract void addRemoteHintListener(RemoteHintListener listener);
+    /**
+     * register a new remote hint listener
+     * 
+     * @param listener
+     */
+    public abstract void addRemoteHintListener(RemoteHintListener listener);
 
-	/**
-	 * register a new visualization listener
-	 * 
-	 * @param listener
-	 */
-	public abstract void addVisualizationListener(VisualizationListener listener);
+    /**
+     * register a new visualization listener
+     * 
+     * @param listener
+     */
+    public abstract void addVisualizationListener(VisualizationListener listener);
 }

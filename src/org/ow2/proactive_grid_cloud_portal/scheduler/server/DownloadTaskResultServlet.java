@@ -56,51 +56,51 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 @SuppressWarnings("serial")
 public class DownloadTaskResultServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		download(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        download(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		download(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        download(request, response);
+    }
 
-	private void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String jobId = request.getParameter("jobId");
-		String taskId = request.getParameter("taskId");
-		String media = request.getParameter("media");
-		String sessionId = request.getParameter("sessionId");
+    private void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String jobId = request.getParameter("jobId");
+        String taskId = request.getParameter("taskId");
+        String media = request.getParameter("media");
+        String sessionId = request.getParameter("sessionId");
 
-		InputStream is = null;
-		ServletOutputStream out = null;
-		try {
+        InputStream is = null;
+        ServletOutputStream out = null;
+        try {
 
-			response.setContentType(media);
-			if (!media.equals("text/plain")) {
-				response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
-					"_result");
-			}
-			response.setHeader("Location", "job" + jobId + "_" + taskId + ".result");
+            response.setContentType(media);
+            if (!media.equals("text/plain")) {
+                response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
+                    "_result");
+            }
+            response.setHeader("Location", "job" + jobId + "_" + taskId + ".result");
 
-			out = response.getOutputStream();
+            out = response.getOutputStream();
 
-			is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
+            is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
 
-			int buf;
-			while ((buf = is.read()) != -1) {
-				out.write(buf);
-			}
+            int buf;
+            while ((buf = is.read()) != -1) {
+                out.write(buf);
+            }
 
-		} catch (Throwable t) {
-			t.printStackTrace();
-			String str = "Failed to download result: " + Controller.getJsonErrorMessage(t);
-			out.write(str.getBytes());
-		} finally {
-			if (is != null)
-				is.close();
-			out.flush();
-			out.close();
-		}
-	}
+        } catch (Throwable t) {
+            t.printStackTrace();
+            String str = "Failed to download result: " + Controller.getJsonErrorMessage(t);
+            out.write(str.getBytes());
+        } finally {
+            if (is != null)
+                is.close();
+            out.flush();
+            out.close();
+        }
+    }
 }

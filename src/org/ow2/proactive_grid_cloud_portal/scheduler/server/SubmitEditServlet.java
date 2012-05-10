@@ -85,137 +85,137 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("serial")
 public class SubmitEditServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	private void upload(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("text/html");
+    private void upload(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("text/html");
 
-		String sessionId = null;
-		String job = null;
-		HashMap<String, String> varMap = new HashMap<String, String>();
-		File editedJob = null;
-		File jobDesc = null;
+        String sessionId = null;
+        String job = null;
+        HashMap<String, String> varMap = new HashMap<String, String>();
+        File editedJob = null;
+        File jobDesc = null;
 
-		@SuppressWarnings("rawtypes")
-		Enumeration e = request.getParameterNames();
-		while (e.hasMoreElements()) {
-			Object o = e.nextElement();
-			String key = o.toString();
-			String val = request.getParameter(key);
+        @SuppressWarnings("rawtypes")
+        Enumeration e = request.getParameterNames();
+        while (e.hasMoreElements()) {
+            Object o = e.nextElement();
+            String key = o.toString();
+            String val = request.getParameter(key);
 
-			if (key.equals("job")) {
-				job = val;
-			} else if (key.equals("sessionId")) {
-				sessionId = val;
-			} else if (key.startsWith("var_")) {
-				String name = key.substring(4);
-				varMap.put(name, val);
-			}
-		}
+            if (key.equals("job")) {
+                job = val;
+            } else if (key.equals("sessionId")) {
+                sessionId = val;
+            } else if (key.startsWith("var_")) {
+                String name = key.substring(4);
+                varMap.put(name, val);
+            }
+        }
 
-		try {
-			if (job == null) {
-				response.getWriter().write("Parameter 'job' is null");
-				return;
-			}
-			if (sessionId == null) {
-				response.getWriter().write("Parameter 'sessionId' is null");
-				return;
-			}
+        try {
+            if (job == null) {
+                response.getWriter().write("Parameter 'job' is null");
+                return;
+            }
+            if (sessionId == null) {
+                response.getWriter().write("Parameter 'sessionId' is null");
+                return;
+            }
 
-			try {
-				jobDesc = File.createTempFile("portal_job_edit", "xml");
-				jobDesc.deleteOnExit();
-				IOUtils.write(job, new FileOutputStream(jobDesc));
+            try {
+                jobDesc = File.createTempFile("portal_job_edit", "xml");
+                jobDesc.deleteOnExit();
+                IOUtils.write(job, new FileOutputStream(jobDesc));
 
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-				Document doc = docBuilder.parse(jobDesc);
+                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(jobDesc);
 
-				Node vars = doc.getElementsByTagName("variables").item(0);
+                Node vars = doc.getElementsByTagName("variables").item(0);
 
-				/* edit the job variables using XML DOM */
-				if (vars != null) {
-					NodeList varChildren = vars.getChildNodes();
-					for (int i = 0; i < varChildren.getLength(); i++) {
-						Node var = varChildren.item(i);
-						if (var != null) {
-							if (var.getAttributes() != null) {
+                /* edit the job variables using XML DOM */
+                if (vars != null) {
+                    NodeList varChildren = vars.getChildNodes();
+                    for (int i = 0; i < varChildren.getLength(); i++) {
+                        Node var = varChildren.item(i);
+                        if (var != null) {
+                            if (var.getAttributes() != null) {
 
-								String name = null;
-								Node nodeVal = null;
-								for (int j = 0; j < var.getAttributes().getLength(); j++) {
-									Node attr = var.getAttributes().item(j);
+                                String name = null;
+                                Node nodeVal = null;
+                                for (int j = 0; j < var.getAttributes().getLength(); j++) {
+                                    Node attr = var.getAttributes().item(j);
 
-									if (attr.getNodeName().equals("name")) {
-										name = attr.getNodeValue();
-									}
-									if (attr.getNodeName().equals("value")) {
-										nodeVal = attr;
-									}
-								}
+                                    if (attr.getNodeName().equals("name")) {
+                                        name = attr.getNodeValue();
+                                    }
+                                    if (attr.getNodeName().equals("value")) {
+                                        nodeVal = attr;
+                                    }
+                                }
 
-								String match = varMap.get(name);
-								if (match != null && nodeVal != null) {
-									nodeVal.setNodeValue(match);
-								}
-							}
-						}
-					}
-				}
+                                String match = varMap.get(name);
+                                if (match != null && nodeVal != null) {
+                                    nodeVal.setNodeValue(match);
+                                }
+                            }
+                        }
+                    }
+                }
 
-				// write the document to a string
-				try {
-					Transformer transformer = TransformerFactory.newInstance().newTransformer();
-					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-					editedJob = File.createTempFile("portal_edit_res", "xml");
-					editedJob.deleteOnExit();
-					StreamResult result = new StreamResult(editedJob);
-					DOMSource source = new DOMSource(doc);
-					transformer.transform(source, result);
-				} catch (Exception e1) {
-					response.getWriter().write(
-							"Error while writing the job descriptor's DOM: " + e1.getMessage());
-				}
+                // write the document to a string
+                try {
+                    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    editedJob = File.createTempFile("portal_edit_res", "xml");
+                    editedJob.deleteOnExit();
+                    StreamResult result = new StreamResult(editedJob);
+                    DOMSource source = new DOMSource(doc);
+                    transformer.transform(source, result);
+                } catch (Exception e1) {
+                    response.getWriter().write(
+                            "Error while writing the job descriptor's DOM: " + e1.getMessage());
+                }
 
-			} catch (ParserConfigurationException e1) {
-				response.getWriter().write("Error initializing DOM parser " + e1.getMessage());
-			} catch (SAXException e1) {
-				response.getWriter().write("Error parsing job descriptor: " + e1.getMessage());
-			}
+            } catch (ParserConfigurationException e1) {
+                response.getWriter().write("Error initializing DOM parser " + e1.getMessage());
+            } catch (SAXException e1) {
+                response.getWriter().write("Error parsing job descriptor: " + e1.getMessage());
+            }
 
-			// submission at last....
-			try {
-				String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
-				if (responseS == null || responseS.length() == 0) {
-					response.getWriter().write("Job submission returned without a value!");
-				} else {
-					response.getWriter().write(responseS);
-				}
-			} catch (RestServerException e1) {
-				String msg = e1.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-				response.getWriter().print(msg);
-			} catch (ServiceException e2) {
-				String msg = e2.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-				response.getWriter().print(msg);
-			}
+            // submission at last....
+            try {
+                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
+                if (responseS == null || responseS.length() == 0) {
+                    response.getWriter().write("Job submission returned without a value!");
+                } else {
+                    response.getWriter().write(responseS);
+                }
+            } catch (RestServerException e1) {
+                String msg = e1.getMessage().replace("<", "&lt;").replace(">", "&gt;");
+                response.getWriter().print(msg);
+            } catch (ServiceException e2) {
+                String msg = e2.getMessage().replace("<", "&lt;").replace(">", "&gt;");
+                response.getWriter().print(msg);
+            }
 
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} finally {
-			if (jobDesc != null)
-				jobDesc.delete();
-			if (editedJob != null)
-				editedJob.delete();
-		}
-	}
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } finally {
+            if (jobDesc != null)
+                jobDesc.delete();
+            if (editedJob != null)
+                editedJob.delete();
+        }
+    }
 
 }

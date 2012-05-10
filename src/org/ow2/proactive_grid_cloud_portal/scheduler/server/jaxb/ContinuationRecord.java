@@ -48,111 +48,111 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "continuationRecord", propOrder = { "target", "listPoint" })
 public class ContinuationRecord {
 
-	protected String target;
-	protected ContinuationRecord.ListPoint listPoint;
+    protected String target;
+    protected ContinuationRecord.ListPoint listPoint;
 
-	/**
-	 * Gets the value of the target property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getTarget() {
-		return target;
-	}
+    /**
+     * Gets the value of the target property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTarget() {
+        return target;
+    }
 
-	/**
-	 * Sets the value of the target property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setTarget(String value) {
-		this.target = value;
-	}
+    /**
+     * Sets the value of the target property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTarget(String value) {
+        this.target = value;
+    }
 
-	/**
-	 * Gets the value of the listPoint property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link ContinuationRecord.ListPoint }
-	 *     
-	 */
-	public ContinuationRecord.ListPoint getListPoint() {
-		return listPoint;
-	}
+    /**
+     * Gets the value of the listPoint property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ContinuationRecord.ListPoint }
+     *     
+     */
+    public ContinuationRecord.ListPoint getListPoint() {
+        return listPoint;
+    }
 
-	/**
-	 * Sets the value of the listPoint property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link ContinuationRecord.ListPoint }
-	 *     
-	 */
-	public void setListPoint(ContinuationRecord.ListPoint value) {
-		this.listPoint = value;
-	}
+    /**
+     * Sets the value of the listPoint property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ContinuationRecord.ListPoint }
+     *     
+     */
+    public void setListPoint(ContinuationRecord.ListPoint value) {
+        this.listPoint = value;
+    }
 
-	/**
-	 * <p>Java class for anonymous complex type.
-	 * 
-	 * <p>The following schema fragment specifies the expected content contained within this class.
-	 * 
-	 * <pre>
-	 * &lt;complexType>
-	 *   &lt;complexContent>
-	 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-	 *       &lt;sequence>
-	 *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
-	 *       &lt;/sequence>
-	 *     &lt;/restriction>
-	 *   &lt;/complexContent>
-	 * &lt;/complexType>
-	 * </pre>
-	 * 
-	 * 
-	 */
-	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name = "", propOrder = { "point" })
-	public static class ListPoint {
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = { "point" })
+    public static class ListPoint {
 
-		protected List<PositionRecord> point;
+        protected List<PositionRecord> point;
 
-		/**
-		 * Gets the value of the point property.
-		 * 
-		 * <p>
-		 * This accessor method returns a reference to the live list,
-		 * not a snapshot. Therefore any modification you make to the
-		 * returned list will be present inside the JAXB object.
-		 * This is why there is not a <CODE>set</CODE> method for the point property.
-		 * 
-		 * <p>
-		 * For example, to add a new item, do as follows:
-		 * <pre>
-		 *    getPoint().add(newItem);
-		 * </pre>
-		 * 
-		 * 
-		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link PositionRecord }
-		 * 
-		 * 
-		 */
-		public List<PositionRecord> getPoint() {
-			if (point == null) {
-				point = new ArrayList<PositionRecord>();
-			}
-			return this.point;
-		}
+        /**
+         * Gets the value of the point property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the point property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getPoint().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link PositionRecord }
+         * 
+         * 
+         */
+        public List<PositionRecord> getPoint() {
+            if (point == null) {
+                point = new ArrayList<PositionRecord>();
+            }
+            return this.point;
+        }
 
-	}
+    }
 
 }

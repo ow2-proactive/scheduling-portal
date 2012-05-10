@@ -54,53 +54,53 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class CpuView extends VLayout implements Reloadable {
 
-	private MBeanDetailedView overview;
-	private MBeanChart cpusUsage;
+    private MBeanDetailedView overview;
+    private MBeanChart cpusUsage;
 
-	public CpuView(RMController controller, String nodeUrl) {
+    public CpuView(RMController controller, String nodeUrl) {
 
-		setWidth100();
-		Label label = new Label("<nobr style='font-weight:bold;'>Details<nobr>");
-		label.setHeight(50);
+        setWidth100();
+        Label label = new Label("<nobr style='font-weight:bold;'>Details<nobr>");
+        label.setHeight(50);
 
-		overview = new MBeanDetailedView();
-		overview.setWidth100();
+        overview = new MBeanDetailedView();
+        overview.setWidth100();
 
-		// cpu graph
-		cpusUsage = new CpusUsageLineChart(controller, nodeUrl);
+        // cpu graph
+        cpusUsage = new CpusUsageLineChart(controller, nodeUrl);
 
-		addMember(cpusUsage);
-		addMember(label);
-		addMember(overview);
+        addMember(cpusUsage);
+        addMember(label);
+        addMember(overview);
 
-		List<String> attrs = new ArrayList<String>();
+        List<String> attrs = new ArrayList<String>();
 
-		attrs.add("CacheSize");
-		attrs.add("CoresPerSocket");
-		attrs.add("Idle");
-		attrs.add("Irq");
-		attrs.add("Mhz");
-		attrs.add("Model");
-		attrs.add("Nice");
-		attrs.add("SoftIrq");
-		attrs.add("Sys");
-		attrs.add("Total");
-		attrs.add("TotalCores");
-		attrs.add("TotalSockets");
-		attrs.add("User");
-		attrs.add("Vendor");
-		attrs.add("Wait");
+        attrs.add("CacheSize");
+        attrs.add("CoresPerSocket");
+        attrs.add("Idle");
+        attrs.add("Irq");
+        attrs.add("Mhz");
+        attrs.add("Model");
+        attrs.add("Nice");
+        attrs.add("SoftIrq");
+        attrs.add("Sys");
+        attrs.add("Total");
+        attrs.add("TotalCores");
+        attrs.add("TotalSockets");
+        attrs.add("User");
+        attrs.add("Vendor");
+        attrs.add("Wait");
 
-		overview.load(controller, nodeUrl, "sigar:Type=Cpu", attrs);
-	}
+        overview.load(controller, nodeUrl, "sigar:Type=Cpu", attrs);
+    }
 
-	@Override
-	public void reload() {
-		cpusUsage.reload();
-	}
+    @Override
+    public void reload() {
+        cpusUsage.reload();
+    }
 
-	@Override
-	public void onFinish(Runnable onFinish) {
-		cpusUsage.onFinish(onFinish);
-	}
+    @Override
+    public void onFinish(Runnable onFinish) {
+        cpusUsage.onFinish(onFinish);
+    }
 }

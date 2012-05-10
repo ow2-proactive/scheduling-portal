@@ -52,190 +52,190 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
  */
 public class NodeSource {
 
-	/** nodes are grouped per host, each nodesource can hold nodes on different hosts */
-	private HashMap<String, Host> hosts;
-	/** currently _deploying_ nodes are not yet on any host */
-	private HashMap<String, Node> deploying;
+    /** nodes are grouped per host, each nodesource can hold nodes on different hosts */
+    private HashMap<String, Host> hosts;
+    /** currently _deploying_ nodes are not yet on any host */
+    private HashMap<String, Node> deploying;
 
-	/** Unique name of the nodesource */
-	private String sourceName;
-	/** describes the infrastructure and policy used */
-	private String sourceDescription;
-	/** login of the user that created the NS */
-	private String nodeSourceAdmin;
+    /** Unique name of the nodesource */
+    private String sourceName;
+    /** describes the infrastructure and policy used */
+    private String sourceDescription;
+    /** login of the user that created the NS */
+    private String nodeSourceAdmin;
 
-	NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin) {
-		this.sourceDescription = sourceDescription;
-		this.sourceName = sourceName;
-		this.nodeSourceAdmin = nodeSourceAdmin;
-		this.hosts = new HashMap<String, Host>();
-		this.deploying = new HashMap<String, Node>();
-	}
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin) {
+        this.sourceDescription = sourceDescription;
+        this.sourceName = sourceName;
+        this.nodeSourceAdmin = nodeSourceAdmin;
+        this.hosts = new HashMap<String, Host>();
+        this.deploying = new HashMap<String, Node>();
+    }
 
-	public Map<String, Host> getHosts() {
-		return hosts;
-	}
+    public Map<String, Host> getHosts() {
+        return hosts;
+    }
 
-	public Map<String, Node> getDeploying() {
-		return deploying;
-	}
+    public Map<String, Node> getDeploying() {
+        return deploying;
+    }
 
-	public String getSourceName() {
-		return sourceName;
-	}
+    public String getSourceName() {
+        return sourceName;
+    }
 
-	public String getSourceDescription() {
-		return sourceDescription;
-	}
+    public String getSourceDescription() {
+        return sourceDescription;
+    }
 
-	public String getNodeSourceAdmin() {
-		return nodeSourceAdmin;
-	}
+    public String getNodeSourceAdmin() {
+        return nodeSourceAdmin;
+    }
 
-	public static class Host {
+    public static class Host {
 
-		/** all nodes deployed on this host for one specific nodesource*/
-		private HashMap<String, Node> nodes;
-		/** name of the host ; not unique ! */
-		private String hostName;
-		/** parent nodesource name */
-		private String sourceName;
-		/** true if one of the contained nodes contains 'VIRT' in its URL */
-		private boolean virtual = false;
+        /** all nodes deployed on this host for one specific nodesource*/
+        private HashMap<String, Node> nodes;
+        /** name of the host ; not unique ! */
+        private String hostName;
+        /** parent nodesource name */
+        private String sourceName;
+        /** true if one of the contained nodes contains 'VIRT' in its URL */
+        private boolean virtual = false;
 
-		Host(String hostName, String sourceName) {
-			this.hostName = hostName;
-			this.nodes = new HashMap<String, Node>();
-			this.sourceName = sourceName;
-		}
+        Host(String hostName, String sourceName) {
+            this.hostName = hostName;
+            this.nodes = new HashMap<String, Node>();
+            this.sourceName = sourceName;
+        }
 
-		public HashMap<String, Node> getNodes() {
-			return nodes;
-		}
+        public HashMap<String, Node> getNodes() {
+            return nodes;
+        }
 
-		public String getHostName() {
-			return hostName;
-		}
+        public String getHostName() {
+            return hostName;
+        }
 
-		public String getSourceName() {
-			return sourceName;
-		}
+        public String getSourceName() {
+            return sourceName;
+        }
 
-		public boolean isVirtual() {
-			return virtual;
-		}
+        public boolean isVirtual() {
+            return virtual;
+        }
 
-		public void setVirtual(boolean virtual) {
-			this.virtual = virtual;
-		}
+        public void setVirtual(boolean virtual) {
+            this.virtual = virtual;
+        }
 
-		/**
-		 * @return a unique ID to differentiate each NS+host couple,
-		 * 		 since several NS can deploy on the same node
-		 */
-		public String getId() {
-			return sourceName + "-host-" + hostName;
-		}
+        /**
+         * @return a unique ID to differentiate each NS+host couple,
+         * 		 since several NS can deploy on the same node
+         */
+        public String getId() {
+            return sourceName + "-host-" + hostName;
+        }
 
-		public static class Node {
+        public static class Node {
 
-			/** deployed node URL */
-			private String nodeUrl;
-			/** current state of the node */
-			private NodeState nodeState;
-			/** multiline String describing the node */
-			private String nodeInfo;
-			/** timestamp */
-			private long timeStamp;
-			/** time when the node changed to this nodeState*/
-			private String timeStampFormatted;
-			/** user that created the node */
-			private String nodeProvider;
-			/** user currently using the node */
-			private String nodeOwner;
-			/** name of the source containing this node */
-			private String sourceName;
-			/** name of the host containing this node */
-			private String hostName;
-			/** name of the JVM running this node */
-			private String vmName;
-			/** toString() of the remote RMNode */
-			private String description;
-			/** default node JMX url */
-			private String defaultJMXUrl;
-			/** proactive node JMX url */
-			private String proactiveJMXUrl;
+            /** deployed node URL */
+            private String nodeUrl;
+            /** current state of the node */
+            private NodeState nodeState;
+            /** multiline String describing the node */
+            private String nodeInfo;
+            /** timestamp */
+            private long timeStamp;
+            /** time when the node changed to this nodeState*/
+            private String timeStampFormatted;
+            /** user that created the node */
+            private String nodeProvider;
+            /** user currently using the node */
+            private String nodeOwner;
+            /** name of the source containing this node */
+            private String sourceName;
+            /** name of the host containing this node */
+            private String hostName;
+            /** name of the JVM running this node */
+            private String vmName;
+            /** toString() of the remote RMNode */
+            private String description;
+            /** default node JMX url */
+            private String defaultJMXUrl;
+            /** proactive node JMX url */
+            private String proactiveJMXUrl;
 
-			Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp,
-					String timeStampFormatted, String nodeProvider, String nodeOwner, String sourceName,
-					String hostName, String vmName, String description, String defaultJMXUrl,
-					String proactiveJMXUrl) {
-				this.nodeUrl = nodeUrl;
-				this.nodeState = NodeState.parse(nodeState);
-				this.nodeInfo = nodeInfo;
-				this.timeStampFormatted = timeStampFormatted;
-				this.nodeProvider = nodeProvider;
-				this.nodeOwner = nodeOwner;
-				this.sourceName = sourceName;
-				this.timeStamp = timeStamp;
-				this.hostName = hostName;
-				this.vmName = vmName;
-				this.description = description;
-				this.defaultJMXUrl = defaultJMXUrl;
-				this.proactiveJMXUrl = proactiveJMXUrl;
-			}
+            Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp,
+                    String timeStampFormatted, String nodeProvider, String nodeOwner, String sourceName,
+                    String hostName, String vmName, String description, String defaultJMXUrl,
+                    String proactiveJMXUrl) {
+                this.nodeUrl = nodeUrl;
+                this.nodeState = NodeState.parse(nodeState);
+                this.nodeInfo = nodeInfo;
+                this.timeStampFormatted = timeStampFormatted;
+                this.nodeProvider = nodeProvider;
+                this.nodeOwner = nodeOwner;
+                this.sourceName = sourceName;
+                this.timeStamp = timeStamp;
+                this.hostName = hostName;
+                this.vmName = vmName;
+                this.description = description;
+                this.defaultJMXUrl = defaultJMXUrl;
+                this.proactiveJMXUrl = proactiveJMXUrl;
+            }
 
-			public String getNodeUrl() {
-				return nodeUrl;
-			}
+            public String getNodeUrl() {
+                return nodeUrl;
+            }
 
-			public NodeState getNodeState() {
-				return nodeState;
-			}
+            public NodeState getNodeState() {
+                return nodeState;
+            }
 
-			public String getNodeInfo() {
-				return nodeInfo;
-			}
+            public String getNodeInfo() {
+                return nodeInfo;
+            }
 
-			public long getTimeStamp() {
-				return timeStamp;
-			}
+            public long getTimeStamp() {
+                return timeStamp;
+            }
 
-			public String getTimeStampFormatted() {
-				return timeStampFormatted;
-			}
+            public String getTimeStampFormatted() {
+                return timeStampFormatted;
+            }
 
-			public String getNodeProvider() {
-				return nodeProvider;
-			}
+            public String getNodeProvider() {
+                return nodeProvider;
+            }
 
-			public String getNodeOwner() {
-				return nodeOwner;
-			}
+            public String getNodeOwner() {
+                return nodeOwner;
+            }
 
-			public String getSourceName() {
-				return sourceName;
-			}
+            public String getSourceName() {
+                return sourceName;
+            }
 
-			public String getHostName() {
-				return hostName;
-			}
+            public String getHostName() {
+                return hostName;
+            }
 
-			public String getVmName() {
-				return vmName;
-			}
+            public String getVmName() {
+                return vmName;
+            }
 
-			public String getDescription() {
-				return description;
-			}
+            public String getDescription() {
+                return description;
+            }
 
-			public String getDefaultJMXUrl() {
-				return defaultJMXUrl;
-			}
+            public String getDefaultJMXUrl() {
+                return defaultJMXUrl;
+            }
 
-			public String getProactiveJMXUrl() {
-				return proactiveJMXUrl;
-			}
-		}
-	}
+            public String getProactiveJMXUrl() {
+                return proactiveJMXUrl;
+            }
+        }
+    }
 }

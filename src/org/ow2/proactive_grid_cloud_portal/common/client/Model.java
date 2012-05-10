@@ -54,123 +54,123 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  */
 public interface Model {
 
-	/**
-	 * @return true if a user is currently logged in
-	 */
-	public abstract boolean isLoggedIn();
+    /**
+     * @return true if a user is currently logged in
+     */
+    public abstract boolean isLoggedIn();
 
-	/**
-	 * @return the username of the currently logged in user, if available, or null
-	 */
-	public abstract String getLogin();
+    /**
+     * @return the username of the currently logged in user, if available, or null
+     */
+    public abstract String getLogin();
 
-	/**
-	 * @return session id of the currently logged in user
-	 */
-	public abstract String getSessionId();
+    /**
+     * @return session id of the currently logged in user
+     */
+    public abstract String getSessionId();
 
-	/**
-	 * Contains one single statistic history source,
-	 * stored with values, name and time range
-	 */
-	public static class StatHistory {
-		/**
-		 * time range for the statistic values
-		 */
-		public enum Range {
-			MINUTE_1("1 minute", 'a', 60, 5, PredefinedFormat.MINUTE_SECOND), //
-			MINUTE_10("10 minutes", 'm', 60 * 10, 20, PredefinedFormat.HOUR24_MINUTE), //
-			HOUR_1("1 hour", 'h', 60 * 60, 60, PredefinedFormat.HOUR24_MINUTE), //
-			HOUR_8("8 hours", 'H', 60 * 60 * 8, 60 * 10, PredefinedFormat.HOUR24_MINUTE), //
-			DAY_1("1 day", 'd', 60 * 60 * 24, 60 * 30, PredefinedFormat.HOUR24_MINUTE), //
-			WEEK_1("1 week", 'w', 60 * 60 * 24 * 7, 60 * 60 * 3, PredefinedFormat.MONTH_NUM_DAY), //
-			MONTH_1("1 month", 'M', 60 * 60 * 24 * 28, 60 * 60 * 8, PredefinedFormat.MONTH_NUM_DAY), //
-			YEAR_1("1 year", 'y', 60 * 60 * 24 * 365, 60 * 60 * 24, PredefinedFormat.MONTH);
+    /**
+     * Contains one single statistic history source,
+     * stored with values, name and time range
+     */
+    public static class StatHistory {
+        /**
+         * time range for the statistic values
+         */
+        public enum Range {
+            MINUTE_1("1 minute", 'a', 60, 5, PredefinedFormat.MINUTE_SECOND), //
+            MINUTE_10("10 minutes", 'm', 60 * 10, 20, PredefinedFormat.HOUR24_MINUTE), //
+            HOUR_1("1 hour", 'h', 60 * 60, 60, PredefinedFormat.HOUR24_MINUTE), //
+            HOUR_8("8 hours", 'H', 60 * 60 * 8, 60 * 10, PredefinedFormat.HOUR24_MINUTE), //
+            DAY_1("1 day", 'd', 60 * 60 * 24, 60 * 30, PredefinedFormat.HOUR24_MINUTE), //
+            WEEK_1("1 week", 'w', 60 * 60 * 24 * 7, 60 * 60 * 3, PredefinedFormat.MONTH_NUM_DAY), //
+            MONTH_1("1 month", 'M', 60 * 60 * 24 * 28, 60 * 60 * 8, PredefinedFormat.MONTH_NUM_DAY), //
+            YEAR_1("1 year", 'y', 60 * 60 * 24 * 365, 60 * 60 * 24, PredefinedFormat.MONTH);
 
-			private char charValue;
-			private String stringValue;
-			private long duration;
-			private long updateFreq;
-			private PredefinedFormat format;
+            private char charValue;
+            private String stringValue;
+            private long duration;
+            private long updateFreq;
+            private PredefinedFormat format;
 
-			Range(String str, char c, long duration, long updateFreq, PredefinedFormat format) {
-				this.stringValue = str;
-				this.charValue = c;
-				this.duration = duration;
-				this.updateFreq = updateFreq;
-				this.format = format;
-			}
+            Range(String str, char c, long duration, long updateFreq, PredefinedFormat format) {
+                this.stringValue = str;
+                this.charValue = c;
+                this.duration = duration;
+                this.updateFreq = updateFreq;
+                this.format = format;
+            }
 
-			public String getString() {
-				return this.stringValue;
-			}
+            public String getString() {
+                return this.stringValue;
+            }
 
-			public char getChar() {
-				return this.charValue;
-			}
+            public char getChar() {
+                return this.charValue;
+            }
 
-			public long getDuration() {
-				return this.duration;
-			}
+            public long getDuration() {
+                return this.duration;
+            }
 
-			public long getUpdateFrequency() {
-				return this.updateFreq;
-			}
+            public long getUpdateFrequency() {
+                return this.updateFreq;
+            }
 
-			public PredefinedFormat getFormat() {
-				return this.format;
-			}
+            public PredefinedFormat getFormat() {
+                return this.format;
+            }
 
-			public static Range create(char c) {
-				for (Range r : Range.values()) {
-					if (r.charValue == c)
-						return r;
-				}
-				return Range.MINUTE_1;
-			}
-		}
+            public static Range create(char c) {
+                for (Range r : Range.values()) {
+                    if (r.charValue == c)
+                        return r;
+                }
+                return Range.MINUTE_1;
+            }
+        }
 
-		public List<Double> values;
-		public String source;
-		public Range range;
+        public List<Double> values;
+        public String source;
+        public Range range;
 
-		public StatHistory(String source, List<Double> values, Range range) {
-			this.values = values;
-			this.source = source;
-			this.range = range;
-		}
-	}
+        public StatHistory(String source, List<Double> values, Range range) {
+            this.values = values;
+            this.source = source;
+            this.range = range;
+        }
+    }
 
-	/**
-	 * @param source name of the statistic value to fetch
-	 * @return the statistic values of the requested source, or null. Values may contain Double.NaN
-	 */
-	public abstract StatHistory getStatHistory(String source);
+    /**
+     * @param source name of the statistic value to fetch
+     * @return the statistic values of the requested source, or null. Values may contain Double.NaN
+     */
+    public abstract StatHistory getStatHistory(String source);
 
-	/**
-	 * @return complete statistic values for all sources
-	 */
-	public abstract Map<String, StatHistory> getStatHistory();
+    /**
+     * @return complete statistic values for all sources
+     */
+    public abstract Map<String, StatHistory> getStatHistory();
 
-	/**
-	 * @param source source name of the statistic value to fetch
-	 * @return the Range that will be requested in future server communications for this statistics source
-	 */
-	public abstract Range getRequestedStatHistoryRange(String source);
+    /**
+     * @param source source name of the statistic value to fetch
+     * @return the Range that will be requested in future server communications for this statistics source
+     */
+    public abstract Range getRequestedStatHistoryRange(String source);
 
-	/**
-	 * @param message issue a log message
-	 */
-	public abstract void logMessage(String message);
+    /**
+     * @param message issue a log message
+     */
+    public abstract void logMessage(String message);
 
-	/**
-	 * @param error issue an important message
-	 */
-	public abstract void logImportantMessage(String message);
+    /**
+     * @param error issue an important message
+     */
+    public abstract void logImportantMessage(String message);
 
-	/**
-	 * @param error issue a critical message
-	 */
-	public abstract void logCriticalMessage(String message);
+    /**
+     * @param error issue a critical message
+     */
+    public abstract void logCriticalMessage(String message);
 
 }

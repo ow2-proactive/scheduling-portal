@@ -30,158 +30,158 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-	private final static QName _MapRecord_QNAME = new QName("", "mapRecord");
+    private final static QName _MapRecord_QNAME = new QName("", "mapRecord");
 
-	/**
-	 * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.ow2.proactive_grid_cloud_portal.server.jaxb
-	 * 
-	 */
-	public ObjectFactory() {
-	}
+    /**
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.ow2.proactive_grid_cloud_portal.server.jaxb
+     * 
+     */
+    public ObjectFactory() {
+    }
 
-	/**
-	 * Create an instance of {@link ContinuationRecord.ListPoint }
-	 * 
-	 */
-	public ContinuationRecord.ListPoint createContinuationRecordListPoint() {
-		return new ContinuationRecord.ListPoint();
-	}
+    /**
+     * Create an instance of {@link ContinuationRecord.ListPoint }
+     * 
+     */
+    public ContinuationRecord.ListPoint createContinuationRecordListPoint() {
+        return new ContinuationRecord.ListPoint();
+    }
 
-	/**
-	 * Create an instance of {@link ReplicatedRecord.Connector }
-	 * 
-	 */
-	public ReplicatedRecord.Connector createReplicatedRecordConnector() {
-		return new ReplicatedRecord.Connector();
-	}
+    /**
+     * Create an instance of {@link ReplicatedRecord.Connector }
+     * 
+     */
+    public ReplicatedRecord.Connector createReplicatedRecordConnector() {
+        return new ReplicatedRecord.Connector();
+    }
 
-	/**
-	 * Create an instance of {@link LoopRecord.Connector }
-	 * 
-	 */
-	public LoopRecord.Connector createLoopRecordConnector() {
-		return new LoopRecord.Connector();
-	}
+    /**
+     * Create an instance of {@link LoopRecord.Connector }
+     * 
+     */
+    public LoopRecord.Connector createLoopRecordConnector() {
+        return new LoopRecord.Connector();
+    }
 
-	/**
-	 * Create an instance of {@link MapRecord }
-	 * 
-	 */
-	public MapRecord createMapRecord() {
-		return new MapRecord();
-	}
+    /**
+     * Create an instance of {@link MapRecord }
+     * 
+     */
+    public MapRecord createMapRecord() {
+        return new MapRecord();
+    }
 
-	/**
-	 * Create an instance of {@link PositionRecord }
-	 * 
-	 */
-	public PositionRecord createPositionRecord() {
-		return new PositionRecord();
-	}
+    /**
+     * Create an instance of {@link PositionRecord }
+     * 
+     */
+    public PositionRecord createPositionRecord() {
+        return new PositionRecord();
+    }
 
-	/**
-	 * Create an instance of {@link ConnectionRecord }
-	 * 
-	 */
-	public ConnectionRecord createConnectionRecord() {
-		return new ConnectionRecord();
-	}
+    /**
+     * Create an instance of {@link ConnectionRecord }
+     * 
+     */
+    public ConnectionRecord createConnectionRecord() {
+        return new ConnectionRecord();
+    }
 
-	/**
-	 * Create an instance of {@link TaskRecord.Connections }
-	 * 
-	 */
-	public TaskRecord.Connections createTaskRecordConnections() {
-		return new TaskRecord.Connections();
-	}
+    /**
+     * Create an instance of {@link TaskRecord.Connections }
+     * 
+     */
+    public TaskRecord.Connections createTaskRecordConnections() {
+        return new TaskRecord.Connections();
+    }
 
-	/**
-	 * Create an instance of {@link IfElseRecord.ConnectorElse }
-	 * 
-	 */
-	public IfElseRecord.ConnectorElse createIfElseRecordConnectorElse() {
-		return new IfElseRecord.ConnectorElse();
-	}
+    /**
+     * Create an instance of {@link IfElseRecord.ConnectorElse }
+     * 
+     */
+    public IfElseRecord.ConnectorElse createIfElseRecordConnectorElse() {
+        return new IfElseRecord.ConnectorElse();
+    }
 
-	/**
-	 * Create an instance of {@link ConnectionRecord.Connector }
-	 * 
-	 */
-	public ConnectionRecord.Connector createConnectionRecordConnector() {
-		return new ConnectionRecord.Connector();
-	}
+    /**
+     * Create an instance of {@link ConnectionRecord.Connector }
+     * 
+     */
+    public ConnectionRecord.Connector createConnectionRecordConnector() {
+        return new ConnectionRecord.Connector();
+    }
 
-	/**
-	 * Create an instance of {@link ContinuationRecord }
-	 * 
-	 */
-	public ContinuationRecord createContinuationRecord() {
-		return new ContinuationRecord();
-	}
+    /**
+     * Create an instance of {@link ContinuationRecord }
+     * 
+     */
+    public ContinuationRecord createContinuationRecord() {
+        return new ContinuationRecord();
+    }
 
-	/**
-	 * Create an instance of {@link LoopRecord }
-	 * 
-	 */
-	public LoopRecord createLoopRecord() {
-		return new LoopRecord();
-	}
+    /**
+     * Create an instance of {@link LoopRecord }
+     * 
+     */
+    public LoopRecord createLoopRecord() {
+        return new LoopRecord();
+    }
 
-	/**
-	 * Create an instance of {@link IfElseRecord }
-	 * 
-	 */
-	public IfElseRecord createIfElseRecord() {
-		return new IfElseRecord();
-	}
+    /**
+     * Create an instance of {@link IfElseRecord }
+     * 
+     */
+    public IfElseRecord createIfElseRecord() {
+        return new IfElseRecord();
+    }
 
-	/**
-	 * Create an instance of {@link MapRecord.Map }
-	 * 
-	 */
-	public MapRecord.Map createMapRecordMap() {
-		return new MapRecord.Map();
-	}
+    /**
+     * Create an instance of {@link MapRecord.Map }
+     * 
+     */
+    public MapRecord.Map createMapRecordMap() {
+        return new MapRecord.Map();
+    }
 
-	/**
-	 * Create an instance of {@link IfElseRecord.ConnectorIf }
-	 * 
-	 */
-	public IfElseRecord.ConnectorIf createIfElseRecordConnectorIf() {
-		return new IfElseRecord.ConnectorIf();
-	}
+    /**
+     * Create an instance of {@link IfElseRecord.ConnectorIf }
+     * 
+     */
+    public IfElseRecord.ConnectorIf createIfElseRecordConnectorIf() {
+        return new IfElseRecord.ConnectorIf();
+    }
 
-	/**
-	 * Create an instance of {@link ReplicatedRecord }
-	 * 
-	 */
-	public ReplicatedRecord createReplicatedRecord() {
-		return new ReplicatedRecord();
-	}
+    /**
+     * Create an instance of {@link ReplicatedRecord }
+     * 
+     */
+    public ReplicatedRecord createReplicatedRecord() {
+        return new ReplicatedRecord();
+    }
 
-	/**
-	 * Create an instance of {@link SizeRecord }
-	 * 
-	 */
-	public SizeRecord createSizeRecord() {
-		return new SizeRecord();
-	}
+    /**
+     * Create an instance of {@link SizeRecord }
+     * 
+     */
+    public SizeRecord createSizeRecord() {
+        return new SizeRecord();
+    }
 
-	/**
-	 * Create an instance of {@link TaskRecord }
-	 * 
-	 */
-	public TaskRecord createTaskRecord() {
-		return new TaskRecord();
-	}
+    /**
+     * Create an instance of {@link TaskRecord }
+     * 
+     */
+    public TaskRecord createTaskRecord() {
+        return new TaskRecord();
+    }
 
-	/**
-	 * Create an instance of {@link JAXBElement }{@code <}{@link MapRecord }{@code >}}
-	 * 
-	 */
-	@XmlElementDecl(namespace = "", name = "mapRecord")
-	public JAXBElement<MapRecord> createMapRecord(MapRecord value) {
-		return new JAXBElement<MapRecord>(_MapRecord_QNAME, MapRecord.class, null, value);
-	}
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link MapRecord }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "", name = "mapRecord")
+    public JAXBElement<MapRecord> createMapRecord(MapRecord value) {
+        return new JAXBElement<MapRecord>(_MapRecord_QNAME, MapRecord.class, null, value);
+    }
 
 }

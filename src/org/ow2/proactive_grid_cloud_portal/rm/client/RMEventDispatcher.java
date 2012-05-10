@@ -50,18 +50,18 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
  */
 public interface RMEventDispatcher extends EventDispatcher {
 
-	/**
-	 * register a new listener for nodes list updates
-	 * 
-	 * @param listener
-	 */
-	public abstract void addNodesListener(NodesListener listener);
+    /**
+     * register a new listener for nodes list updates
+     * 
+     * @param listener
+     */
+    public abstract void addNodesListener(NodesListener listener);
 
-	/**
-	 * register a new listener for node selection events
-	 * 
-	 * @param listener
-	 */
-	public abstract void addNodeSelectedListener(NodeSelectedListener listener);
+    /**
+     * register a new listener for node selection events
+     * 
+     * @param listener
+     */
+    public abstract void addNodeSelectedListener(NodeSelectedListener listener);
 
 }

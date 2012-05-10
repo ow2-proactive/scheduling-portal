@@ -70,192 +70,192 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
-	private static final String OPT_TEXT = "View as text";
-	private static final String OPT_BIN = "Download as binary";
+    private static final String OPT_TEXT = "View as text";
+    private static final String OPT_BIN = "Download as binary";
 
-	private Layout root = null;
+    private Layout root = null;
 
-	private SelectItem taskSelect = null;
+    private SelectItem taskSelect = null;
 
-	private SchedulerController controller = null;
+    private SchedulerController controller = null;
 
-	private Label label = null;
+    private Label label = null;
 
-	private Layout formPane = null;
-	private Layout visuPane = null;
-	private IButton visuButton = null;
+    private Layout formPane = null;
+    private Layout visuPane = null;
+    private IButton visuButton = null;
 
-	private String jobId = null;
+    private String jobId = null;
 
-	/**
-	 * Default constructor
-	 * 
-	 * @param controller
-	 */
-	public ResultView(SchedulerController controller) {
-		this.controller = controller;
-		controller.getEventDispatcher().addTasksUpdatedListener(this);
-		controller.getEventDispatcher().addJobSelectedListener(this);
-	}
+    /**
+     * Default constructor
+     * 
+     * @param controller
+     */
+    public ResultView(SchedulerController controller) {
+        this.controller = controller;
+        controller.getEventDispatcher().addTasksUpdatedListener(this);
+        controller.getEventDispatcher().addJobSelectedListener(this);
+    }
 
-	/**
-	 * Create the widget and return it
-	 * 
-	 * @return the ResultView widget ready to be added in a container
-	 */
-	public Layout build() {
-		this.root = new VLayout();
-		this.root.setWidth100();
-		this.root.setHeight100();
+    /**
+     * Create the widget and return it
+     * 
+     * @return the ResultView widget ready to be added in a container
+     */
+    public Layout build() {
+        this.root = new VLayout();
+        this.root.setWidth100();
+        this.root.setHeight100();
 
-		this.label = new Label("No job selected");
-		this.label.setAlign(Alignment.CENTER);
-		this.label.setWidth100();
-		this.label.setHeight100();
+        this.label = new Label("No job selected");
+        this.label.setAlign(Alignment.CENTER);
+        this.label.setWidth100();
+        this.label.setHeight100();
 
-		this.taskSelect = new SelectItem("tid", "Task result");
+        this.taskSelect = new SelectItem("tid", "Task result");
 
-		final RadioGroupItem radio = new RadioGroupItem("type", "Type");
-		radio.setValueMap(OPT_TEXT, OPT_BIN);
-		radio.setValue("Text");
+        final RadioGroupItem radio = new RadioGroupItem("type", "Type");
+        radio.setValueMap(OPT_TEXT, OPT_BIN);
+        radio.setValue("Text");
 
-		final HiddenItem sess = new HiddenItem("sessionId");
-		sess.setValue(controller.getModel().getSessionId());
+        final HiddenItem sess = new HiddenItem("sessionId");
+        sess.setValue(controller.getModel().getSessionId());
 
-		final HiddenItem job = new HiddenItem("jobId");
-		final HiddenItem media = new HiddenItem("media");
-		final HiddenItem task = new HiddenItem("taskId");
+        final HiddenItem job = new HiddenItem("jobId");
+        final HiddenItem media = new HiddenItem("media");
+        final HiddenItem task = new HiddenItem("taskId");
 
-		final DynamicForm form = new DynamicForm();
-		form.setWidth(250);
-		form.setMethod(FormMethod.POST);
-		form.setTarget("_blank");
-		form.setFields(taskSelect, radio, sess, job, media, task);
-		form.setAction(GWT.getModuleBaseURL() + "downloader");
+        final DynamicForm form = new DynamicForm();
+        form.setWidth(250);
+        form.setMethod(FormMethod.POST);
+        form.setTarget("_blank");
+        form.setFields(taskSelect, radio, sess, job, media, task);
+        form.setAction(GWT.getModuleBaseURL() + "downloader");
 
-		final IButton dl = new IButton("Download");
-		dl.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				String val = radio.getValueAsString();
-				if (OPT_TEXT.equals(val)) {
-					media.setValue("text/plain");
-				} else if (OPT_BIN.equals(val)) {
-					media.setValue("application/octet-stream");
-				} else {
-					return;
-				}
-				task.setValue(taskSelect.getValueAsString());
-				job.setValue(jobId);
-				form.submitForm();
-			}
-		});
-		formPane = new HLayout();
-		formPane.setMembersMargin(10);
-		formPane.setWidth100();
-		formPane.setMembers(form, dl);
+        final IButton dl = new IButton("Download");
+        dl.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                String val = radio.getValueAsString();
+                if (OPT_TEXT.equals(val)) {
+                    media.setValue("text/plain");
+                } else if (OPT_BIN.equals(val)) {
+                    media.setValue("application/octet-stream");
+                } else {
+                    return;
+                }
+                task.setValue(taskSelect.getValueAsString());
+                job.setValue(jobId);
+                form.submitForm();
+            }
+        });
+        formPane = new HLayout();
+        formPane.setMembersMargin(10);
+        formPane.setWidth100();
+        formPane.setMembers(form, dl);
 
-		visuButton = new IButton("Activate");
-		visuButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				ResultView.this.controller.getLiveOutput();
-				visuButton.setDisabled(true);
-			}
-		});
+        visuButton = new IButton("Activate");
+        visuButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                ResultView.this.controller.getLiveOutput();
+                visuButton.setDisabled(true);
+            }
+        });
 
-		Label visuLabel = new Label(
-			"<span style='text-align:center;color:#003168'>Remote Visualization :</span>");
-		visuLabel.setAlign(Alignment.RIGHT);
-		visuLabel.setWidth(150);
+        Label visuLabel = new Label(
+            "<span style='text-align:center;color:#003168'>Remote Visualization :</span>");
+        visuLabel.setAlign(Alignment.RIGHT);
+        visuLabel.setWidth(150);
 
-		visuPane = new HLayout();
-		visuPane.setMembersMargin(20);
-		visuPane.setHeight(22);
-		visuPane.setWidth100();
-		visuPane.setMembers(visuLabel, visuButton);
+        visuPane = new HLayout();
+        visuPane.setMembersMargin(20);
+        visuPane.setHeight(22);
+        visuPane.setWidth100();
+        visuPane.setMembers(visuLabel, visuButton);
 
-		this.root.setMembersMargin(30);
-		this.root.setMembers(label, visuPane, formPane);
-		root.hideMember(formPane);
+        this.root.setMembersMargin(30);
+        this.root.setMembers(label, visuPane, formPane);
+        root.hideMember(formPane);
 
-		return this.root;
-	}
+        return this.root;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
-	 */
-	public void tasksUpdating(boolean jobChanged) {
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
+     */
+    public void tasksUpdating(boolean jobChanged) {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org.ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
-	 */
-	public void tasksUpdated(List<Task> tasks) {
-		if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
-			return;
-		}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org.ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
+     */
+    public void tasksUpdated(List<Task> tasks) {
+        if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
+            return;
+        }
 
-		String[] values = new String[tasks.size()];
-		int i = 0;
-		String defaultVal = "";
+        String[] values = new String[tasks.size()];
+        int i = 0;
+        String defaultVal = "";
 
-		for (Task t : tasks) {
-			switch (t.getStatus()) {
-				/*
-					case SKIPPED:
-					case PENDING:
-					case SUBMITTED:
-					case NOT_STARTED:
-						break;
-				 */
-				default:
-					defaultVal = t.getName();
-					values[i] = t.getName();
-					i++;
-					break;
-			}
-		}
-		this.taskSelect.setValueMap(values);
-		this.taskSelect.setValue(defaultVal);
-	}
+        for (Task t : tasks) {
+            switch (t.getStatus()) {
+                /*
+                	case SKIPPED:
+                	case PENDING:
+                	case SUBMITTED:
+                	case NOT_STARTED:
+                		break;
+                 */
+                default:
+                    defaultVal = t.getName();
+                    values[i] = t.getName();
+                    i++;
+                    break;
+            }
+        }
+        this.taskSelect.setValueMap(values);
+        this.taskSelect.setValue(defaultVal);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
-	 */
-	public void tasksUpdatedFailure(String message) {
-		this.tasksUpdated(new ArrayList<Task>());
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
+     */
+    public void tasksUpdatedFailure(String message) {
+        this.tasksUpdated(new ArrayList<Task>());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.shared.job.Job)
-	 */
-	public void jobSelected(Job job) {
-		taskSelect.setValues(new String[] {});
-		this.jobId = (job != null) ? "" + job.getId() : "";
-		root.showMember(formPane);
-		root.showMember(visuPane);
-		root.hideMember(label);
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.shared.job.Job)
+     */
+    public void jobSelected(Job job) {
+        taskSelect.setValues(new String[] {});
+        this.jobId = (job != null) ? "" + job.getId() : "";
+        root.showMember(formPane);
+        root.showMember(visuPane);
+        root.hideMember(label);
 
-		Job j = controller.getModel().getSelectedJob();
-		if (j != null && controller.getModel().isLiveOutput("" + j.getId())) {
-			visuButton.setDisabled(true);
-		} else {
-			visuButton.setDisabled(false);
-		}
-	}
+        Job j = controller.getModel().getSelectedJob();
+        if (j != null && controller.getModel().isLiveOutput("" + j.getId())) {
+            visuButton.setDisabled(true);
+        } else {
+            visuButton.setDisabled(false);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
-	 */
-	public void jobUnselected() {
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
+     */
+    public void jobUnselected() {
 
-		root.hideMember(formPane);
-		root.hideMember(visuPane);
-		root.showMember(label);
-	}
+        root.hideMember(formPane);
+        root.hideMember(visuPane);
+        root.showMember(label);
+    }
 
 }

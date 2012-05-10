@@ -46,10 +46,10 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
  */
 public class CpuUsageAreaChart extends MBeanTimeAreaChart {
 
-	public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
-		AxisOptions vAxis = AxisOptions.create();
-		vAxis.set("format", "#%");
-		loadOpts.setVAxisOptions(vAxis);
-	}
+    public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
+        AxisOptions vAxis = AxisOptions.create();
+        vAxis.set("format", "#%");
+        loadOpts.setVAxisOptions(vAxis);
+    }
 }

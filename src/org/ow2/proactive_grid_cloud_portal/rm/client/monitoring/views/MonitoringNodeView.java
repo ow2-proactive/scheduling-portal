@@ -66,120 +66,120 @@ import com.smartgwt.client.widgets.tab.TabSet;
  */
 public class MonitoringNodeView extends VLayout implements AsyncCallback<String> {
 
-	private Timer updater = null;
-	private ReloadableChain chain;
-	private TabSet tabs;
-	private Label status;
+    private Timer updater = null;
+    private ReloadableChain chain;
+    private TabSet tabs;
+    private Label status;
 
-	private RMController controller;
+    private RMController controller;
 
-	public MonitoringNodeView(RMController controller) {
-		this.controller = controller;
-	}
+    public MonitoringNodeView(RMController controller) {
+        this.controller = controller;
+    }
 
-	public void init(Node node) {
+    public void init(Node node) {
 
-		if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE ||
-			node.getNodeState() == NodeState.LOCKED) {
-			// good
-		} else {
-			// cannot monitor the node
-			return;
-		}
+        if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE ||
+            node.getNodeState() == NodeState.LOCKED) {
+            // good
+        } else {
+            // cannot monitor the node
+            return;
+        }
 
-		setWidth100();
-		String nodeUrl = node.getDefaultJMXUrl();
-		if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
-			nodeUrl = node.getProactiveJMXUrl();
-		}
+        setWidth100();
+        String nodeUrl = node.getDefaultJMXUrl();
+        if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
+            nodeUrl = node.getProactiveJMXUrl();
+        }
 
-		final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
-		final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
-		final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
-		final MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
+        final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
+        final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
+        final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
+        final MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
 
-		String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime",
-				"Uptime", "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
+        String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime",
+                "Uptime", "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
 
-		MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
-		jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
-		jvmDetails.setWidth100();
+        MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
+        jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
+        jvmDetails.setWidth100();
 
-		chain = new ReloadableChain(new Reloadable[] { heapMemory, threads, classes, cpuUsage });
+        chain = new ReloadableChain(new Reloadable[] { heapMemory, threads, classes, cpuUsage });
 
-		HLayout firstRow = new HLayout();
-		HLayout secondRow = new HLayout();
+        HLayout firstRow = new HLayout();
+        HLayout secondRow = new HLayout();
 
-		firstRow.addMember(heapMemory);
-		firstRow.addMember(threads);
-		secondRow.addMember(classes);
-		secondRow.addMember(cpuUsage);
+        firstRow.addMember(heapMemory);
+        firstRow.addMember(threads);
+        secondRow.addMember(classes);
+        secondRow.addMember(cpuUsage);
 
-		Layout graphs = new VLayout();
-		graphs.addMember(firstRow);
-		graphs.addMember(secondRow);
+        Layout graphs = new VLayout();
+        graphs.addMember(firstRow);
+        graphs.addMember(secondRow);
 
-		if (status != null) {
-			removeMember(status);
-		}
+        if (status != null) {
+            removeMember(status);
+        }
 
-		status = new Label("Retreiving data");
-		status.setWidth100();
-		status.setAlign(Alignment.CENTER);
+        status = new Label("Retreiving data");
+        status.setWidth100();
+        status.setAlign(Alignment.CENTER);
 
-		Tab t1 = new Tab("Overview");
-		t1.setPane(graphs);
-		Tab t2 = new Tab("JVM Summary");
-		t2.setPane(jvmDetails);
+        Tab t1 = new Tab("Overview");
+        t1.setPane(graphs);
+        Tab t2 = new Tab("JVM Summary");
+        t2.setPane(jvmDetails);
 
-		tabs = new TabSet();
-		tabs.setWidth100();
-		tabs.setHeight100();
-		tabs.setShowResizeBar(true);
-		tabs.setTabs(t1, t2);
-		tabs.hide();
+        tabs = new TabSet();
+        tabs.setWidth100();
+        tabs.setHeight100();
+        tabs.setShowResizeBar(true);
+        tabs.setTabs(t1, t2);
+        tabs.hide();
 
-		addMember(status);
+        addMember(status);
 
-		updater = new Timer() {
-			@Override
-			public void run() {
-				chain.reload();
-			}
-		};
-		updater.schedule(1);
-		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
-	}
+        updater = new Timer() {
+            @Override
+            public void run() {
+                chain.reload();
+            }
+        };
+        updater.schedule(1);
+        updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
+    }
 
-	public void close() {
-		try {
-			if (updater != null) {
-				updater.cancel();
-				updater = null;
-			}
+    public void close() {
+        try {
+            if (updater != null) {
+                updater.cancel();
+                updater = null;
+            }
 
-			if (tabs != null) {
-				removeMember(tabs);
-				chain.stopReloading();
-				tabs.destroy();
-				tabs = null;
-			}
-		} catch (Exception e) {
-			// ignore it
-		}
-	}
+            if (tabs != null) {
+                removeMember(tabs);
+                chain.stopReloading();
+                tabs.destroy();
+                tabs = null;
+            }
+        } catch (Exception e) {
+            // ignore it
+        }
+    }
 
-	@Override
-	public void onFailure(Throwable caught) {
-		close();
-		status.setContents(RMController.getJsonErrorMessage(caught));
-	}
+    @Override
+    public void onFailure(Throwable caught) {
+        close();
+        status.setContents(RMController.getJsonErrorMessage(caught));
+    }
 
-	@Override
-	public void onSuccess(String result) {
-		removeMember(status);
-		status.destroy();
-		addMember(tabs);
-		tabs.show();
-	}
+    @Override
+    public void onSuccess(String result) {
+        removeMember(status);
+        status.destroy();
+        addMember(tabs);
+        tabs.show();
+    }
 }

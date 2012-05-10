@@ -59,49 +59,49 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 @SuppressWarnings("serial")
 public class MotdServlet extends HttpServlet {
 
-	private static long lastModified = 0L;
-	private static String fileContent = "";
-	private static final String motdFileName = "motd.txt";
+    private static long lastModified = 0L;
+    private static String fileContent = "";
+    private static final String motdFileName = "motd.txt";
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-		response.setContentType("text/html");
+        response.setContentType("text/html");
 
-		try {
+        try {
 
-			String url = Config.get().getMotdUrl();
+            String url = Config.get().getMotdUrl();
 
-			// no MOTD URL : use local file
-			if (url == null || url.trim().length() == 0) {
+            // no MOTD URL : use local file
+            if (url == null || url.trim().length() == 0) {
 
-				File f = new File(this.getServletContext().getRealPath(motdFileName));
-				long ft = f.lastModified();
-				if (ft != lastModified) {
-					lastModified = ft;
-					try {
-						fileContent = FileUtils.readFileToString(f);
-					} catch (IOException e) {
-						e.printStackTrace();
-						response.getWriter().write("");
-						return;
-					}
-				}
-				response.getWriter().write(fileContent);
+                File f = new File(this.getServletContext().getRealPath(motdFileName));
+                long ft = f.lastModified();
+                if (ft != lastModified) {
+                    lastModified = ft;
+                    try {
+                        fileContent = FileUtils.readFileToString(f);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        response.getWriter().write("");
+                        return;
+                    }
+                }
+                response.getWriter().write(fileContent);
 
-			} else {
-				HttpClient httpClient = new HttpClient();
-				GetMethod get = new GetMethod(url);
+            } else {
+                HttpClient httpClient = new HttpClient();
+                GetMethod get = new GetMethod(url);
 
-				int status = httpClient.executeMethod(get);
-				String ret = get.getResponseBodyAsString();
+                int status = httpClient.executeMethod(get);
+                String ret = get.getResponseBodyAsString();
 
-				response.setStatus(status);
-				response.getWriter().write(ret);
-			}
+                response.setStatus(status);
+                response.getWriter().write(ret);
+            }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

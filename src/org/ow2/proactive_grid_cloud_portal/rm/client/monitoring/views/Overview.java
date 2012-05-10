@@ -58,60 +58,60 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class Overview extends VLayout implements Reloadable {
 
-	private MBeanDetailedView osInfo;
-	private MBeanChart cpuUsage;
-	private MBeanChart memory;
-	private MBeanChart network;
-	private MBeanChart disk;
+    private MBeanDetailedView osInfo;
+    private MBeanChart cpuUsage;
+    private MBeanChart memory;
+    private MBeanChart network;
+    private MBeanChart disk;
 
-	private ReloadableChain chain;
+    private ReloadableChain chain;
 
-	public Overview(RMController controller, String url, AsyncCallback<String> extraCallback) {
+    public Overview(RMController controller, String url, AsyncCallback<String> extraCallback) {
 
-		osInfo = new MBeanDetailedView(extraCallback);
-		osInfo.load(controller, url, "java.lang:type=OperatingSystem", Arrays.asList("Name", "Arch",
-				"Version"));
-		cpuUsage = new CpuUsageAreaChart(controller, url);
-		memory = new MemoryLineChart(controller, url);
-		network = new NetworkAreaChart(controller, url);
-		disk = new DiskPieChart(controller, url);
+        osInfo = new MBeanDetailedView(extraCallback);
+        osInfo.load(controller, url, "java.lang:type=OperatingSystem", Arrays.asList("Name", "Arch",
+                "Version"));
+        cpuUsage = new CpuUsageAreaChart(controller, url);
+        memory = new MemoryLineChart(controller, url);
+        network = new NetworkAreaChart(controller, url);
+        disk = new DiskPieChart(controller, url);
 
-		disk.reload();
+        disk.reload();
 
-		chain = new ReloadableChain(new Reloadable[] { cpuUsage, memory, network });
+        chain = new ReloadableChain(new Reloadable[] { cpuUsage, memory, network });
 
-		VLayout osInfoRow = new VLayout();
-		HLayout cpuMemRow = new HLayout();
-		HLayout netFileSysRow = new HLayout();
+        VLayout osInfoRow = new VLayout();
+        HLayout cpuMemRow = new HLayout();
+        HLayout netFileSysRow = new HLayout();
 
-		Label osLabel = new Label("<nobr style='font-weight:bold;'>Operating system<nobr>");
-		osLabel.setHeight(50);
-		osInfoRow.addMember(osLabel);
-		osInfoRow.addMember(osInfo);
-		osInfoRow.setWidth("50%");
-		osInfoRow.setHeight("120px");
+        Label osLabel = new Label("<nobr style='font-weight:bold;'>Operating system<nobr>");
+        osLabel.setHeight(50);
+        osInfoRow.addMember(osLabel);
+        osInfoRow.addMember(osInfo);
+        osInfoRow.setWidth("50%");
+        osInfoRow.setHeight("120px");
 
-		cpuMemRow.addMember(cpuUsage);
-		cpuMemRow.addMember(memory);
-		netFileSysRow.addMember(network);
-		netFileSysRow.addMember(disk);
+        cpuMemRow.addMember(cpuUsage);
+        cpuMemRow.addMember(memory);
+        netFileSysRow.addMember(network);
+        netFileSysRow.addMember(disk);
 
-		addMember(osInfoRow);
-		addMember(cpuMemRow);
-		addMember(netFileSysRow);
-	}
+        addMember(osInfoRow);
+        addMember(cpuMemRow);
+        addMember(netFileSysRow);
+    }
 
-	@Override
-	public void reload() {
-		chain.reload();
-	}
+    @Override
+    public void reload() {
+        chain.reload();
+    }
 
-	@Override
-	public void onFinish(final Runnable callback) {
-		chain.onFinish(new Runnable() {
-			public void run() {
-				callback.run();
-			}
-		});
-	}
+    @Override
+    public void onFinish(final Runnable callback) {
+        chain.onFinish(new Runnable() {
+            public void run() {
+                callback.run();
+            }
+        });
+    }
 }

@@ -64,126 +64,126 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class SettingsWindow {
 
-	private Window window;
+    private Window window;
 
-	private SchedulerController controller;
+    private SchedulerController controller;
 
-	public SettingsWindow(SchedulerController controller) {
-		this.controller = controller;
-		this.build();
-	}
+    public SettingsWindow(SchedulerController controller) {
+        this.controller = controller;
+        this.build();
+    }
 
-	public void show() {
-		this.window.show();
-	}
+    public void show() {
+        this.window.show();
+    }
 
-	public void destroy() {
-		this.window.destroy();
-	}
+    public void destroy() {
+        this.window.destroy();
+    }
 
-	private void build() {
+    private void build() {
 
-		DataSourceIntegerField refreshTime = new DataSourceIntegerField("refreshTime",
-			"Job list refresh rate (ms)");
-		refreshTime.setRequired(true);
-		IntegerRangeValidator refreshValidator = new IntegerRangeValidator();
-		refreshValidator.setMin(500);
-		refreshValidator.setMax(60000);
-		refreshTime.setValidators(new IsIntegerValidator(), refreshValidator);
+        DataSourceIntegerField refreshTime = new DataSourceIntegerField("refreshTime",
+            "Job list refresh rate (ms)");
+        refreshTime.setRequired(true);
+        IntegerRangeValidator refreshValidator = new IntegerRangeValidator();
+        refreshValidator.setMin(500);
+        refreshValidator.setMax(60000);
+        refreshTime.setValidators(new IsIntegerValidator(), refreshValidator);
 
-		DataSourceIntegerField liveLogTime = new DataSourceIntegerField("logTime",
-			"Live log refresh rate (ms)");
-		liveLogTime.setRequired(true);
-		IntegerRangeValidator liveLogValidator = new IntegerRangeValidator();
-		liveLogValidator.setMin(100);
-		liveLogValidator.setMax(10000);
-		liveLogTime.setValidators(new IsIntegerValidator(), liveLogValidator);
+        DataSourceIntegerField liveLogTime = new DataSourceIntegerField("logTime",
+            "Live log refresh rate (ms)");
+        liveLogTime.setRequired(true);
+        IntegerRangeValidator liveLogValidator = new IntegerRangeValidator();
+        liveLogValidator.setMin(100);
+        liveLogValidator.setMax(10000);
+        liveLogTime.setValidators(new IsIntegerValidator(), liveLogValidator);
 
-		DataSourceIntegerField pageSize = new DataSourceIntegerField("pageSize", "Jobs page size");
-		pageSize.setRequired(true);
-		IntegerRangeValidator pageValidator = new IntegerRangeValidator();
-		pageValidator.setMin(5);
-		pageValidator.setMax(5000);
-		pageSize.setValidators(new IsIntegerValidator(), pageValidator);
+        DataSourceIntegerField pageSize = new DataSourceIntegerField("pageSize", "Jobs page size");
+        pageSize.setRequired(true);
+        IntegerRangeValidator pageValidator = new IntegerRangeValidator();
+        pageValidator.setMin(5);
+        pageValidator.setMax(5000);
+        pageSize.setValidators(new IsIntegerValidator(), pageValidator);
 
-		final DataSource ds = new DataSource();
-		ds.setFields(refreshTime, liveLogTime, pageSize);
+        final DataSource ds = new DataSource();
+        ds.setFields(refreshTime, liveLogTime, pageSize);
 
-		final DynamicForm form = new DynamicForm();
-		form.setDataSource(ds);
-		form.setColWidths("120", "230");
-		form.setWidth(350);
-		form.setMargin(10);
-		form.setValue("refreshTime", SchedulerConfig.get().getClientRefreshTime());
-		form.setValue("pageSize", SchedulerConfig.get().getJobsPageSize());
-		form.setValue("logTime", SchedulerConfig.get().getLivelogsRefreshTime());
+        final DynamicForm form = new DynamicForm();
+        form.setDataSource(ds);
+        form.setColWidths("120", "230");
+        form.setWidth(350);
+        form.setMargin(10);
+        form.setValue("refreshTime", SchedulerConfig.get().getClientRefreshTime());
+        form.setValue("pageSize", SchedulerConfig.get().getJobsPageSize());
+        form.setValue("logTime", SchedulerConfig.get().getLivelogsRefreshTime());
 
-		final IButton applyButton = new IButton("Ok");
-		applyButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-		applyButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				if (!form.validate())
-					return;
+        final IButton applyButton = new IButton("Ok");
+        applyButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        applyButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                if (!form.validate())
+                    return;
 
-				String refreshTime = form.getValueAsString("refreshTime");
-				String pageSize = form.getValueAsString("pageSize");
-				String livelog = form.getValueAsString("logTime");
+                String refreshTime = form.getValueAsString("refreshTime");
+                String pageSize = form.getValueAsString("pageSize");
+                String livelog = form.getValueAsString("logTime");
 
-				controller.setUserSettings(refreshTime, pageSize, livelog, false);
-				window.hide();
-			}
-		});
+                controller.setUserSettings(refreshTime, pageSize, livelog, false);
+                window.hide();
+            }
+        });
 
-		final IButton resetButton = new IButton("Reset");
-		resetButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				SchedulerConfig.get().reload();
-				int refresh = SchedulerConfig.get().getClientRefreshTime();
-				int page = SchedulerConfig.get().getJobsPageSize();
-				int log = SchedulerConfig.get().getLivelogsRefreshTime();
+        final IButton resetButton = new IButton("Reset");
+        resetButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                SchedulerConfig.get().reload();
+                int refresh = SchedulerConfig.get().getClientRefreshTime();
+                int page = SchedulerConfig.get().getJobsPageSize();
+                int log = SchedulerConfig.get().getLivelogsRefreshTime();
 
-				form.setValue("refreshTime", refresh);
-				form.setValue("pageSize", page);
-				form.setValue("logTime", log);
+                form.setValue("refreshTime", refresh);
+                form.setValue("pageSize", page);
+                form.setValue("logTime", log);
 
-				controller.setUserSettings("" + refresh, "" + page, "" + log, true);
-			}
-		});
+                controller.setUserSettings("" + refresh, "" + page, "" + log, true);
+            }
+        });
 
-		final IButton cancelButton = new IButton("Cancel");
-		cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-		cancelButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				window.hide();
-			}
-		});
+        final IButton cancelButton = new IButton("Cancel");
+        cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                window.hide();
+            }
+        });
 
-		HLayout vl = new HLayout();
-		vl.setAlign(Alignment.RIGHT);
-		vl.setLayoutLeftMargin(5);
-		vl.setHeight(applyButton.getHeight());
-		vl.setWidth100();
-		vl.setMembersMargin(5);
-		vl.setMargin(5);
-		vl.setMembers(resetButton, applyButton, cancelButton);
+        HLayout vl = new HLayout();
+        vl.setAlign(Alignment.RIGHT);
+        vl.setLayoutLeftMargin(5);
+        vl.setHeight(applyButton.getHeight());
+        vl.setWidth100();
+        vl.setMembersMargin(5);
+        vl.setMargin(5);
+        vl.setMembers(resetButton, applyButton, cancelButton);
 
-		VLayout layout = new VLayout();
-		layout.setMembersMargin(20);
-		layout.addMember(form);
-		layout.addMember(vl);
+        VLayout layout = new VLayout();
+        layout.setMembersMargin(20);
+        layout.addMember(form);
+        layout.addMember(vl);
 
-		this.window = new Window();
-		this.window.setTitle("Settings");
-		this.window.setShowMinimizeButton(false);
-		this.window.setIsModal(true);
-		this.window.setShowModalMask(true);
-		this.window.addItem(layout);
-		this.window.setWidth(380);
-		this.window.setHeight(190);
-		this.window.setCanDragResize(true);
-		this.window.centerInPage();
+        this.window = new Window();
+        this.window.setTitle("Settings");
+        this.window.setShowMinimizeButton(false);
+        this.window.setIsModal(true);
+        this.window.setShowModalMask(true);
+        this.window.addItem(layout);
+        this.window.setWidth(380);
+        this.window.setHeight(190);
+        this.window.setCanDragResize(true);
+        this.window.centerInPage();
 
-	}
+    }
 
 }

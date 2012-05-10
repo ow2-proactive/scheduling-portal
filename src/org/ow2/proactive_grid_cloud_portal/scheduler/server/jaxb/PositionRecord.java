@@ -36,39 +36,39 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "positionRecord", propOrder = { "x", "y" })
 public class PositionRecord {
 
-	protected int x;
-	protected int y;
+    protected int x;
+    protected int y;
 
-	/**
-	 * Gets the value of the x property.
-	 * 
-	 */
-	public int getX() {
-		return x;
-	}
+    /**
+     * Gets the value of the x property.
+     * 
+     */
+    public int getX() {
+        return x;
+    }
 
-	/**
-	 * Sets the value of the x property.
-	 * 
-	 */
-	public void setX(int value) {
-		this.x = value;
-	}
+    /**
+     * Sets the value of the x property.
+     * 
+     */
+    public void setX(int value) {
+        this.x = value;
+    }
 
-	/**
-	 * Gets the value of the y property.
-	 * 
-	 */
-	public int getY() {
-		return y;
-	}
+    /**
+     * Gets the value of the y property.
+     * 
+     */
+    public int getY() {
+        return y;
+    }
 
-	/**
-	 * Sets the value of the y property.
-	 * 
-	 */
-	public void setY(int value) {
-		this.y = value;
-	}
+    /**
+     * Sets the value of the y property.
+     * 
+     */
+    public void setY(int value) {
+        this.y = value;
+    }
 
 }

@@ -64,105 +64,105 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  */
 public class FileSystemView extends VLayout {
 
-	public FileSystemView(RMController controller, String url) {
-		setWidth100();
+    public FileSystemView(RMController controller, String url) {
+        setWidth100();
 
-		final List<String> attrs = new ArrayList<String>();
+        final List<String> attrs = new ArrayList<String>();
 
-		attrs.add("DevName");
-		attrs.add("DirName");
-		attrs.add("Files");
-		attrs.add("Options");
-		attrs.add("SysTypeName");
-		attrs.add("Free");
-		attrs.add("Used");
-		attrs.add("Total");
+        attrs.add("DevName");
+        attrs.add("DirName");
+        attrs.add("Files");
+        attrs.add("Options");
+        attrs.add("SysTypeName");
+        attrs.add("Free");
+        attrs.add("Used");
+        attrs.add("Total");
 
-		final RMServiceAsync rm = controller.getRMService();
-		final RMModel model = controller.getModel();
-		final long t = System.currentTimeMillis();
+        final RMServiceAsync rm = controller.getRMService();
+        final RMModel model = controller.getModel();
+        final long t = System.currentTimeMillis();
 
-		// loading runtime info
-		rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=FileSystem,Name=*", attrs,
-				new AsyncCallback<String>() {
-					public void onSuccess(String result) {
-						if (!model.isLoggedIn())
-							return;
+        // loading runtime info
+        rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=FileSystem,Name=*", attrs,
+                new AsyncCallback<String>() {
+                    public void onSuccess(String result) {
+                        if (!model.isLoggedIn())
+                            return;
 
-						model
-								.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
-									"ms");
+                        model
+                                .logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
+                                    "ms");
 
-						//{"sigar:Name=/boot,Type=FileSystem":[{"name":"DevName","value":"/dev/sda1"},{"name":"DirName","value":"/boot"},{"name":"Files","value":76912},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":236558},{"name":"Used","value":60927},{"name":"Total","value":297485}],"sigar:Name=/,Type=FileSystem":[{"name":"DevName","value":"/dev/sda2"},{"name":"DirName","value":"/"},{"name":"Files","value":1921360},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":15705152},{"name":"Used","value":14532496},{"name":"Total","value":30237648}],"sigar:Name=/local,Type=FileSystem":[{"name":"DevName","value":"/dev/sda5"},{"name":"DirName","value":"/local"},{"name":"Files","value":58851328},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":916766088},{"name":"Used","value":9996480},{"name":"Total","value":926762568}]}
+                        //{"sigar:Name=/boot,Type=FileSystem":[{"name":"DevName","value":"/dev/sda1"},{"name":"DirName","value":"/boot"},{"name":"Files","value":76912},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":236558},{"name":"Used","value":60927},{"name":"Total","value":297485}],"sigar:Name=/,Type=FileSystem":[{"name":"DevName","value":"/dev/sda2"},{"name":"DirName","value":"/"},{"name":"Files","value":1921360},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":15705152},{"name":"Used","value":14532496},{"name":"Total","value":30237648}],"sigar:Name=/local,Type=FileSystem":[{"name":"DevName","value":"/dev/sda5"},{"name":"DirName","value":"/local"},{"name":"Files","value":58851328},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":916766088},{"name":"Used","value":9996480},{"name":"Total","value":926762568}]}
 
-						Options opts = Options.create();
-						opts.setLegend(LegendPosition.NONE);
-						opts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
-								"#ef2929", "#000000");
+                        Options opts = Options.create();
+                        opts.setLegend(LegendPosition.NONE);
+                        opts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
+                                "#ef2929", "#000000");
 
-						JSONObject object = JSONParser.parseStrict(result).isObject();
-						if (object != null) {
+                        JSONObject object = JSONParser.parseStrict(result).isObject();
+                        if (object != null) {
 
-							for (String disk : object.keySet()) {
+                            for (String disk : object.keySet()) {
 
-								HLayout diskLayout = new HLayout();
+                                HLayout diskLayout = new HLayout();
 
-								DataTable pieData = DataTable.create();
-								pieData.addColumn(ColumnType.STRING, "Type");
-								pieData.addColumn(ColumnType.NUMBER, "Bytes");
+                                DataTable pieData = DataTable.create();
+                                pieData.addColumn(ColumnType.STRING, "Type");
+                                pieData.addColumn(ColumnType.NUMBER, "Bytes");
 
-								DetailViewer details = new DetailViewer();
-								DetailViewerRecord dv = new DetailViewerRecord();
-								DetailViewerField[] fields = new DetailViewerField[attrs.size()];
-								for (int i = 0; i < fields.length; i++) {
-									fields[i] = new DetailViewerField(attrs.get(i));
-								}
-								details.setFields(fields);
+                                DetailViewer details = new DetailViewer();
+                                DetailViewerRecord dv = new DetailViewerRecord();
+                                DetailViewerField[] fields = new DetailViewerField[attrs.size()];
+                                for (int i = 0; i < fields.length; i++) {
+                                    fields[i] = new DetailViewerField(attrs.get(i));
+                                }
+                                details.setFields(fields);
 
-								JSONArray properties = object.get(disk).isArray();
+                                JSONArray properties = object.get(disk).isArray();
 
-								for (int i = 0; i < properties.size(); i++) {
-									String name = properties.get(i).isObject().get("name").isString()
-											.stringValue();
-									String value = properties.get(i).isObject().get("value").toString();
-									if (name.equals("Free") || name.equals("Used")) {
-										pieData.addRow();
-										pieData.setValue(pieData.getNumberOfRows() - 1, 0, name);
-										pieData.setValue(pieData.getNumberOfRows() - 1, 1, properties.get(i)
-												.isObject().get("value").isNumber().doubleValue());
-									}
+                                for (int i = 0; i < properties.size(); i++) {
+                                    String name = properties.get(i).isObject().get("name").isString()
+                                            .stringValue();
+                                    String value = properties.get(i).isObject().get("value").toString();
+                                    if (name.equals("Free") || name.equals("Used")) {
+                                        pieData.addRow();
+                                        pieData.setValue(pieData.getNumberOfRows() - 1, 0, name);
+                                        pieData.setValue(pieData.getNumberOfRows() - 1, 1, properties.get(i)
+                                                .isObject().get("value").isNumber().doubleValue());
+                                    }
 
-									if (name.equals("Free") || name.equals("Used") || name.equals("Total")) {
-										int inMb = Integer.parseInt(value) / 1024;
-										if (inMb > 1024) {
-											value = (inMb / 1024) + " Gb";
-										} else {
-											value = inMb + " Mb";
-										}
-									}
-									dv.setAttribute(name, value);
-								}
-								details.setData(new DetailViewerRecord[] { dv });
-								details.setWidth("50%");
+                                    if (name.equals("Free") || name.equals("Used") || name.equals("Total")) {
+                                        int inMb = Integer.parseInt(value) / 1024;
+                                        if (inMb > 1024) {
+                                            value = (inMb / 1024) + " Gb";
+                                        } else {
+                                            value = inMb + " Mb";
+                                        }
+                                    }
+                                    dv.setAttribute(name, value);
+                                }
+                                details.setData(new DetailViewerRecord[] { dv });
+                                details.setWidth("50%");
 
-								PieChart pie = new PieChart(pieData, opts);
-								pie.setWidth("50%");
-								pie.draw(pieData, opts);
-								diskLayout.addMember(details);
-								diskLayout.addMember(pie);
-								addMember(diskLayout);
-							}
+                                PieChart pie = new PieChart(pieData, opts);
+                                pie.setWidth("50%");
+                                pie.draw(pieData, opts);
+                                diskLayout.addMember(details);
+                                diskLayout.addMember(pie);
+                                addMember(diskLayout);
+                            }
 
-						}
-					}
+                        }
+                    }
 
-					public void onFailure(Throwable caught) {
-						if (RMController.getJsonErrorCode(caught) == 401) {
-							model.logMessage("You have been disconnected from the server.");
-						} else {
-							//error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
-						}
-					}
-				});
-	}
+                    public void onFailure(Throwable caught) {
+                        if (RMController.getJsonErrorCode(caught) == 401) {
+                            model.logMessage("You have been disconnected from the server.");
+                        } else {
+                            //error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
+                        }
+                    }
+                });
+    }
 }

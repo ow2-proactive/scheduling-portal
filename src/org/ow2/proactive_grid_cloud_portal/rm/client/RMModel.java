@@ -52,104 +52,104 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
  */
 public abstract class RMModel implements Model {
 
-	/**
-	 * @return most up to date view of the nodes on the remote RM
-	 */
-	public abstract Map<String, NodeSource> getNodes();
+    /**
+     * @return most up to date view of the nodes on the remote RM
+     */
+    public abstract Map<String, NodeSource> getNodes();
 
-	/**
-	 * @return node currently selected among all views, or null
-	 */
-	public abstract Node getSelectedNode();
+    /**
+     * @return node currently selected among all views, or null
+     */
+    public abstract Node getSelectedNode();
 
-	/**
-	 * @return host currently selected among all views, or null
-	 */
-	public abstract Host getSelectedHost();
+    /**
+     * @return host currently selected among all views, or null
+     */
+    public abstract Host getSelectedHost();
 
-	/**
-	 * @return nodesource currently selected among all views, or null
-	 */
-	public abstract NodeSource getSelectedNodeSource();
+    /**
+     * @return nodesource currently selected among all views, or null
+     */
+    public abstract NodeSource getSelectedNodeSource();
 
-	/**
-	 * @return a list of supported infrastructure managers and their parameters
-	 */
-	public abstract Map<String, PluginDescriptor> getSupportedInfrastructures();
+    /**
+     * @return a list of supported infrastructure managers and their parameters
+     */
+    public abstract Map<String, PluginDescriptor> getSupportedInfrastructures();
 
-	/**
-	 * @return a list of supported policies and their parameters
-	 */
-	public abstract Map<String, PluginDescriptor> getSupportedPolicies();
+    /**
+     * @return a list of supported policies and their parameters
+     */
+    public abstract Map<String, PluginDescriptor> getSupportedPolicies();
 
-	/**
-	 * @return number of deploying nodes
-	 */
-	public abstract int getNumDeploying();
+    /**
+     * @return number of deploying nodes
+     */
+    public abstract int getNumDeploying();
 
-	/**
-	 * @return number of lost nodes
-	 */
-	public abstract int getNumLost();
+    /**
+     * @return number of lost nodes
+     */
+    public abstract int getNumLost();
 
-	/**
-	 * @return number of configuring nodes
-	 */
-	public abstract int getNumConfiguring();
+    /**
+     * @return number of configuring nodes
+     */
+    public abstract int getNumConfiguring();
 
-	/**
-	 * @return number of free nodes
-	 */
-	public abstract int getNumFree();
+    /**
+     * @return number of free nodes
+     */
+    public abstract int getNumFree();
 
-	/**
-	 * @return max number of free nodes since RM is running
-	 */
-	public abstract int getMaxNumFree();
+    /**
+     * @return max number of free nodes since RM is running
+     */
+    public abstract int getMaxNumFree();
 
-	/**
-	 * @return number of locked nodes
-	 */
-	public abstract int getNumLocked();
+    /**
+     * @return number of locked nodes
+     */
+    public abstract int getNumLocked();
 
-	/**
-	 * @return number of busy nodes
-	 */
-	public abstract int getNumBusy();
+    /**
+     * @return number of busy nodes
+     */
+    public abstract int getNumBusy();
 
-	/**
-	 * @return max number of busy nodes since RM is running
-	 */
-	public abstract int getMaxNumBusy();
+    /**
+     * @return max number of busy nodes since RM is running
+     */
+    public abstract int getMaxNumBusy();
 
-	/**
-	 * @return number of down nodes
-	 */
-	public abstract int getNumDown();
+    /**
+     * @return number of down nodes
+     */
+    public abstract int getNumDown();
 
-	/**
-	 * @return max number of down nodes since RM is running
-	 */
-	public abstract int getMaxNumDown();
+    /**
+     * @return max number of down nodes since RM is running
+     */
+    public abstract int getMaxNumDown();
 
-	/**
-	 * @return number of nodes to be removed
-	 */
-	public abstract int getNumToBeRemoved();
+    /**
+     * @return number of nodes to be removed
+     */
+    public abstract int getNumToBeRemoved();
 
-	/**
-	 * @return number of nodes
-	 */
-	public abstract int getNumNodes();
+    /**
+     * @return number of nodes
+     */
+    public abstract int getNumNodes();
 
-	/**
-	 * @return number of physical hosts ; hosts which contain no node that URL matches 'VIRT'
-	 */
-	public abstract int getNumPhysicalHosts();
+    /**
+     * @return number of physical hosts ; hosts which contain no node that URL matches 'VIRT'
+     */
+    public abstract int getNumPhysicalHosts();
 
-	/**
-	 * @return number of physical hosts ; hosts which contain at least one node that URL matches 'VIRT'
-	 */
-	public abstract int getNumVirtualHosts();
+    /**
+     * @return number of physical hosts ; hosts which contain at least one node that URL matches 'VIRT'
+     */
+    public abstract int getNumVirtualHosts();
 
 }

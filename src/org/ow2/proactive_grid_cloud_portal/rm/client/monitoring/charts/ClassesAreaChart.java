@@ -44,7 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
  */
 public class ClassesAreaChart extends MBeanTimeAreaChart {
 
-	public ClassesAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "java.lang:type=ClassLoading", "LoadedClassCount", "Classes");
-	}
+    public ClassesAreaChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "java.lang:type=ClassLoading", "LoadedClassCount", "Classes");
+    }
 }

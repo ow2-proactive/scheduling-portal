@@ -12,16 +12,16 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 @SuppressWarnings("serial")
 public class ServiceException extends Exception {
 
-	public ServiceException() {
-		super();
-	}
+    public ServiceException() {
+        super();
+    }
 
-	public ServiceException(String message) {
-		super(message);
-	}
+    public ServiceException(String message) {
+        super(message);
+    }
 
-	public ServiceException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

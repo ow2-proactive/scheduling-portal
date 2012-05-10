@@ -55,66 +55,66 @@ import com.google.gwt.storage.client.Storage;
  */
 public class Settings {
 
-	private static Settings instance = null;
+    private static Settings instance = null;
 
-	public static Settings get() {
-		if (instance == null) {
-			Settings.instance = new Settings();
-		}
-		return Settings.instance;
-	}
+    public static Settings get() {
+        if (instance == null) {
+            Settings.instance = new Settings();
+        }
+        return Settings.instance;
+    }
 
-	/**
-	 * Load settings by reading persistent storage and loading values into the global Config
-	 * Config must have been created before this can be called
-	 */
-	public static void load() {
-		for (String key : Config.get().getProperties().keySet()) {
-			String val = Settings.get().getSetting(key);
-			if (val != null && val.trim().length() > 0) {
-				Config.get().set(key, val);
-			}
-		}
-	}
+    /**
+     * Load settings by reading persistent storage and loading values into the global Config
+     * Config must have been created before this can be called
+     */
+    public static void load() {
+        for (String key : Config.get().getProperties().keySet()) {
+            String val = Settings.get().getSetting(key);
+            if (val != null && val.trim().length() > 0) {
+                Config.get().set(key, val);
+            }
+        }
+    }
 
-	private Storage store = null;
+    private Storage store = null;
 
-	public Settings() {
-		this.store = Storage.getLocalStorageIfSupported();
-	}
+    public Settings() {
+        this.store = Storage.getLocalStorageIfSupported();
+    }
 
-	/**
-	 * @param key
-	 * @return the associated value if HTML5 Storage is supported, or null
-	 * @see com.google.gwt.storage.client.Storage
-	 */
-	public String getSetting(String key) {
-		if (this.store != null)
-			return store.getItem(key);
-		return null;
-	}
+    /**
+     * @param key
+     * @return the associated value if HTML5 Storage is supported, or null
+     * @see com.google.gwt.storage.client.Storage
+     */
+    public String getSetting(String key) {
+        if (this.store != null)
+            return store.getItem(key);
+        return null;
+    }
 
-	/**
-	 * Store a value in a global persistent storage
-	 * Does nothing if HTML5 Storage is not supported
-	 * @param key
-	 * @param value
-	 * @see com.google.gwt.storage.client.Storage
-	 */
-	public void setSetting(String key, String value) {
-		if (this.store != null) {
-			this.store.setItem(key, value);
-		}
-	}
+    /**
+     * Store a value in a global persistent storage
+     * Does nothing if HTML5 Storage is not supported
+     * @param key
+     * @param value
+     * @see com.google.gwt.storage.client.Storage
+     */
+    public void setSetting(String key, String value) {
+        if (this.store != null) {
+            this.store.setItem(key, value);
+        }
+    }
 
-	/**
-	 * Clear the value associated with this key from the persistent storage
-	 * @param key
-	 */
-	public void clearSetting(String key) {
-		if (this.store != null) {
-			this.store.removeItem(key);
-		}
-	}
+    /**
+     * Clear the value associated with this key from the persistent storage
+     * @param key
+     */
+    public void clearSetting(String key) {
+        if (this.store != null) {
+            this.store.removeItem(key);
+        }
+    }
 
 }

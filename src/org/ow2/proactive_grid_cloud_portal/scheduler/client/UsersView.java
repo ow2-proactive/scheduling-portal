@@ -59,96 +59,96 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class UsersView implements UsersListener {
 
-	private static final String HOST_ATTR = "hostName";
-	private static final String USER_ATTR = "userName";
-	private static final String CONN_TIME_ATTR = "connectionTime";
-	private static final String SUBMIT_TIME_ATTR = "submitTime";
-	private static final String SUBMIT_NUM_ATTR = "submitNumber";
+    private static final String HOST_ATTR = "hostName";
+    private static final String USER_ATTR = "userName";
+    private static final String CONN_TIME_ATTR = "connectionTime";
+    private static final String SUBMIT_TIME_ATTR = "submitTime";
+    private static final String SUBMIT_NUM_ATTR = "submitNumber";
 
-	/**
-	 * entries in the grid
-	 *
-	 */
-	private class UserRecord extends ListGridRecord {
-		public UserRecord(SchedulerUser user) {
-			setAttribute(HOST_ATTR, user.getHostName());
-			setAttribute(USER_ATTR, user.getUsername());
+    /**
+     * entries in the grid
+     *
+     */
+    private class UserRecord extends ListGridRecord {
+        public UserRecord(SchedulerUser user) {
+            setAttribute(HOST_ATTR, user.getHostName());
+            setAttribute(USER_ATTR, user.getUsername());
 
-			if (user.getConnectionTime() > 0)
-				setAttribute(CONN_TIME_ATTR, getDate(user.getConnectionTime()));
-			if (user.getLastSubmitTime() > 0)
-				setAttribute(SUBMIT_TIME_ATTR, getDate(user.getLastSubmitTime()));
+            if (user.getConnectionTime() > 0)
+                setAttribute(CONN_TIME_ATTR, getDate(user.getConnectionTime()));
+            if (user.getLastSubmitTime() > 0)
+                setAttribute(SUBMIT_TIME_ATTR, getDate(user.getLastSubmitTime()));
 
-			setAttribute(SUBMIT_NUM_ATTR, user.getSubmitNumber());
-		}
-	}
+            setAttribute(SUBMIT_NUM_ATTR, user.getSubmitNumber());
+        }
+    }
 
-	private String getDate(long d) {
-		return DateTimeFormat.getFormat("MM/dd hh:mm:ss").format(new Date(d));
-	}
+    private String getDate(long d) {
+        return DateTimeFormat.getFormat("MM/dd hh:mm:ss").format(new Date(d));
+    }
 
-	/** contains this view's widgets */
-	private Layout root = null;
-	/** contains the users info */
-	private ListGrid usersGrid = null;
+    /** contains this view's widgets */
+    private Layout root = null;
+    /** contains the users info */
+    private ListGrid usersGrid = null;
 
-	/**
-	 * Default constructor
-	 * 
-	 * @param controller
-	 */
-	public UsersView(SchedulerController controller) {
-		controller.getEventDispatcher().addUsersListener(this);
-	}
+    /**
+     * Default constructor
+     * 
+     * @param controller
+     */
+    public UsersView(SchedulerController controller) {
+        controller.getEventDispatcher().addUsersListener(this);
+    }
 
-	/**
-	 * Create and return the view's widgets
-	 * 
-	 * @return a widget to add in the container that should display this view
-	 */
-	public Layout build() {
-		this.root = new VLayout();
-		this.root.setWidth100();
-		this.root.setHeight100();
+    /**
+     * Create and return the view's widgets
+     * 
+     * @return a widget to add in the container that should display this view
+     */
+    public Layout build() {
+        this.root = new VLayout();
+        this.root.setWidth100();
+        this.root.setHeight100();
 
-		this.usersGrid = new ListGrid();
-		this.usersGrid.setWidth100();
-		this.usersGrid.setHeight100();
-		this.usersGrid.setCanFreezeFields(true);
-		this.usersGrid.setSelectionType(SelectionStyle.NONE);
+        this.usersGrid = new ListGrid();
+        this.usersGrid.setWidth100();
+        this.usersGrid.setHeight100();
+        this.usersGrid.setCanFreezeFields(true);
+        this.usersGrid.setSelectionType(SelectionStyle.NONE);
 
-		ListGridField hostField = new ListGridField(HOST_ATTR, "Hostname");
+        ListGridField hostField = new ListGridField(HOST_ATTR, "Hostname");
 
-		ListGridField userField = new ListGridField(USER_ATTR, "User");
-		userField.setWidth(80);
+        ListGridField userField = new ListGridField(USER_ATTR, "User");
+        userField.setWidth(80);
 
-		ListGridField connField = new ListGridField(CONN_TIME_ATTR, "Connected at");
+        ListGridField connField = new ListGridField(CONN_TIME_ATTR, "Connected at");
 
-		ListGridField subTimeField = new ListGridField(SUBMIT_TIME_ATTR, "Last submit");
+        ListGridField subTimeField = new ListGridField(SUBMIT_TIME_ATTR, "Last submit");
 
-		ListGridField subNumField = new ListGridField(SUBMIT_NUM_ATTR, "Jobs");
-		subNumField.setWidth(60);
+        ListGridField subNumField = new ListGridField(SUBMIT_NUM_ATTR, "Jobs");
+        subNumField.setWidth(60);
 
-		this.usersGrid.setFields(userField, subNumField, connField, subTimeField, hostField);
+        this.usersGrid.setFields(userField, subNumField, connField, subTimeField, hostField);
 
-		this.root.addMember(this.usersGrid);
+        this.root.addMember(this.usersGrid);
 
-		return this.root;
-	}
+        return this.root;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.UsersListener#usersUpdated(java.util.List)
-	 */
-	public void usersUpdated(List<SchedulerUser> users) {
-		// not many entries, not called often ; don't bother doing something pretty
-		ListGridRecord[] data = new ListGridRecord[users.size()];
-		int i = 0;
-		for (SchedulerUser user : users) {
-			data[i] = new UserRecord(user);
-			i++;
-		}
-		this.usersGrid.setData(data);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.UsersListener#usersUpdated(java.util.List)
+     */
+    public void usersUpdated(List<SchedulerUser> users) {
+        // not many entries, not called often ; don't bother doing something pretty
+        ListGridRecord[] data = new ListGridRecord[users.size()];
+        int i = 0;
+        for (SchedulerUser user : users) {
+            data[i] = new UserRecord(user);
+            i++;
+        }
+        this.usersGrid.setData(data);
+    }
 
 }

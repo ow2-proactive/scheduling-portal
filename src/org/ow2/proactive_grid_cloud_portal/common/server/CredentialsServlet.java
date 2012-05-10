@@ -61,68 +61,68 @@ import org.apache.commons.io.IOUtils;
 @SuppressWarnings("serial")
 public class CredentialsServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		login(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        login(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		login(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        login(request, response);
+    }
 
-	private void login(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("text/html");
+    private void login(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("text/html");
 
-		try {
-			DiskFileItemFactory factory = new DiskFileItemFactory();
-			factory.setSizeThreshold(4096);
-			factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setSizeMax(1000000);
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(4096);
+            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setSizeMax(1000000);
 
-			List<?> fileItems = upload.parseRequest(request);
-			Iterator<?> i = fileItems.iterator();
+            List<?> fileItems = upload.parseRequest(request);
+            Iterator<?> i = fileItems.iterator();
 
-			String user = "";
-			String pass = "";
-			String sshKey = "";
+            String user = "";
+            String pass = "";
+            String sshKey = "";
 
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
+            while (i.hasNext()) {
+                FileItem fi = (FileItem) i.next();
 
-				if (fi.isFormField()) {
-					String name = fi.getFieldName();
-					String value = fi.getString();
+                if (fi.isFormField()) {
+                    String name = fi.getFieldName();
+                    String value = fi.getString();
 
-					if (name.equals("username")) {
-						user = value;
-					} else if (name.equals("password")) {
-						pass = value;
-					}
-				} else {
-					String field = fi.getFieldName();
-					byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
-					if (field.equals("sshkey")) {
-						sshKey = new String(bytes);
-					}
-				}
-				fi.delete();
-			}
+                    if (name.equals("username")) {
+                        user = value;
+                    } else if (name.equals("password")) {
+                        pass = value;
+                    }
+                } else {
+                    String field = fi.getFieldName();
+                    byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                    if (field.equals("sshkey")) {
+                        sshKey = new String(bytes);
+                    }
+                }
+                fi.delete();
+            }
 
-			String responseS = Service.get().createCredentials(user, pass, sshKey);
-			response.setHeader("Content-disposition", "attachment; filename=" + user + "_cred.txt");
-			response.setHeader("Location", "" + user + ".cred.txt");
-			response.getWriter().write(responseS);
+            String responseS = Service.get().createCredentials(user, pass, sshKey);
+            response.setHeader("Content-disposition", "attachment; filename=" + user + "_cred.txt");
+            response.setHeader("Location", "" + user + ".cred.txt");
+            response.getWriter().write(responseS);
 
-		} catch (Throwable t) {
-			try {
-				response.getWriter().write(t.getMessage());
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				t.printStackTrace();
-			}
-		}
-	}
+        } catch (Throwable t) {
+            try {
+                response.getWriter().write(t.getMessage());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                t.printStackTrace();
+            }
+        }
+    }
 
 }

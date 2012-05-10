@@ -54,65 +54,65 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class RemoteVisuServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		visu(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        visu(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		visu(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        visu(request, response);
+    }
 
-	private void visu(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void visu(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		String codebase = request.getParameter("codebase");
-		String type = request.getParameter("apptype");
-		String argument = request.getParameter("argument");
+        String codebase = request.getParameter("codebase");
+        String type = request.getParameter("apptype");
+        String argument = request.getParameter("argument");
 
-		ServletOutputStream out = response.getOutputStream();
+        ServletOutputStream out = response.getOutputStream();
 
-		if (type == null) {
-			out.println("Missing parameter : type");
-			out.close();
-			return;
-		}
-		if (argument == null) {
-			out.println("Missing parameter : argument");
-			out.close();
-			return;
-		}
+        if (type == null) {
+            out.println("Missing parameter : type");
+            out.close();
+            return;
+        }
+        if (argument == null) {
+            out.println("Missing parameter : argument");
+            out.close();
+            return;
+        }
 
-		response.setContentType("application/x-java-jnlp-file");
-		response.setHeader("Content-disposition", "attachment; filename=visu.jnlp");
-		response.setHeader("Location", "visu.jnlp");
+        response.setContentType("application/x-java-jnlp-file");
+        response.setHeader("Content-disposition", "attachment; filename=visu.jnlp");
+        response.setHeader("Location", "visu.jnlp");
 
-		String ret = "<?xml version='1.0' encoding='UTF-8'?>\n" + "<jnlp spec='1.0+' codebase='" +
-			codebase +
-			"' href=''>\n" //
-			+
-			"  <information>\n" //
-			+ "    <title>ProActive Web Portal Remote Visualization</title>\n" +
-			"    <vendor>INRIA</vendor>\n" // 
-			+ "    <homepage href='http://proactive.inria.fr'/>\n" //
-			+ "    <offline-allowed />\n" //
-			+ "  </information>\n" //
-			+ "  <resources>\n" //
-			+ "    <j2se version='1.5+'" //
-			+ "    href='http://java.sun.com/products/autodl/j2se'/>\n" //
-			+ "    <jar href='visu.jar' main='true' />\n" + "  </resources>\n" //
-			+ "  <security>\n" // 
-			+ "    <all-permissions/>\n" // 
-			+ "  </security>\n" // 
-			+ "  <application-desc" //
-			+ "   name='Remote Visualization'" //
-			+ "   main-class='org.ow2.proactive_grid_cloud_portal.extra.RemoteViewer'>\n" //
-			+ "  <argument>" + type + "</argument>\n" //
-			+ "  <argument>" + argument + "</argument>\n" //
-			+ "  </application-desc>\n" //
-			+ "</jnlp>\n";
+        String ret = "<?xml version='1.0' encoding='UTF-8'?>\n" + "<jnlp spec='1.0+' codebase='" +
+            codebase +
+            "' href=''>\n" //
+            +
+            "  <information>\n" //
+            + "    <title>ProActive Web Portal Remote Visualization</title>\n" +
+            "    <vendor>INRIA</vendor>\n" // 
+            + "    <homepage href='http://proactive.inria.fr'/>\n" //
+            + "    <offline-allowed />\n" //
+            + "  </information>\n" //
+            + "  <resources>\n" //
+            + "    <j2se version='1.5+'" //
+            + "    href='http://java.sun.com/products/autodl/j2se'/>\n" //
+            + "    <jar href='visu.jar' main='true' />\n" + "  </resources>\n" //
+            + "  <security>\n" // 
+            + "    <all-permissions/>\n" // 
+            + "  </security>\n" // 
+            + "  <application-desc" //
+            + "   name='Remote Visualization'" //
+            + "   main-class='org.ow2.proactive_grid_cloud_portal.extra.RemoteViewer'>\n" //
+            + "  <argument>" + type + "</argument>\n" //
+            + "  <argument>" + argument + "</argument>\n" //
+            + "  </application-desc>\n" //
+            + "</jnlp>\n";
 
-		out.println(ret);
-		out.close();
-	}
+        out.println(ret);
+        out.close();
+    }
 }

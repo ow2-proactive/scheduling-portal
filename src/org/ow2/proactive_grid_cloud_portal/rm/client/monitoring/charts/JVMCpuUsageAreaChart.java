@@ -52,41 +52,41 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
  */
 public class JVMCpuUsageAreaChart extends MBeanTimeAreaChart {
 
-	long prevCpu = 0;
-	long prevTime = 0;
+    long prevCpu = 0;
+    long prevTime = 0;
 
-	public JVMCpuUsageAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "java.lang:type=OperatingSystem", "ProcessCpuTime", "Cpu Usage");
+    public JVMCpuUsageAreaChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "java.lang:type=OperatingSystem", "ProcessCpuTime", "Cpu Usage");
 
-		AxisOptions vAxis = AxisOptions.create();
-		vAxis.set("format", "#%");
-		loadOpts.setVAxisOptions(vAxis);
-	}
+        AxisOptions vAxis = AxisOptions.create();
+        vAxis.set("format", "#%");
+        loadOpts.setVAxisOptions(vAxis);
+    }
 
-	@Override
-	public void processResult(String result) {
-		JSONArray array = JSONParser.parseStrict(result).isArray();
-		if (array != null) {
-			long curTime = System.currentTimeMillis();
-			long curCpu = (long) array.get(0).isObject().get("value").isNumber().doubleValue();
+    @Override
+    public void processResult(String result) {
+        JSONArray array = JSONParser.parseStrict(result).isArray();
+        if (array != null) {
+            long curTime = System.currentTimeMillis();
+            long curCpu = (long) array.get(0).isObject().get("value").isNumber().doubleValue();
 
-			if (prevTime > 0) {
-				addRow();
+            if (prevTime > 0) {
+                addRow();
 
-				String formattedTime = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
-						new Date(curTime));
-				double cpuPercent = (curCpu - prevCpu) / (10000 * (curTime - prevTime));
-				// as it will be formatted to percents divide by 100
-				cpuPercent /= 100;
-				loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, formattedTime);
-				loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, cpuPercent);
-			}
+                String formattedTime = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                        new Date(curTime));
+                double cpuPercent = (curCpu - prevCpu) / (10000 * (curTime - prevTime));
+                // as it will be formatted to percents divide by 100
+                cpuPercent /= 100;
+                loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, formattedTime);
+                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, cpuPercent);
+            }
 
-			prevCpu = curCpu;
-			prevTime = curTime;
+            prevCpu = curCpu;
+            prevTime = curTime;
 
-			loadChart.draw(loadTable, loadOpts);
-		}
-	}
+            loadChart.draw(loadTable, loadOpts);
+        }
+    }
 
 }

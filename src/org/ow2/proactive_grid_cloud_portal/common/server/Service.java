@@ -59,47 +59,47 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public abstract class Service extends RemoteServiceServlet {
 
-	private static Service instance = null;
+    private static Service instance = null;
 
-	/**
-	 * @return current static Service instance, if it has been created
-	 * @throws IllegalStateException Service was not created
-	 */
-	public static Service get() {
-		if (instance == null) {
-			throw new IllegalStateException("Service has not been loaded");
-		}
-		return instance;
-	}
+    /**
+     * @return current static Service instance, if it has been created
+     * @throws IllegalStateException Service was not created
+     */
+    public static Service get() {
+        if (instance == null) {
+            throw new IllegalStateException("Service has not been loaded");
+        }
+        return instance;
+    }
 
-	public Service() {
-		instance = this;
-	}
+    public Service() {
+        instance = this;
+    }
 
-	/**
-	 * Attempt login through the REST API
-	 * <p>
-	 * username and password may be null if credential is valid,
-	 * credential may be null if username and password are valid,
-	 * private ssh key may always be null
-	 * 
-	 * @param login username
-	 * @param pass password
-	 * @param cred credential file in its base64 form
-	 * @param ssh private ssh key
-	 */
-	public abstract String login(String login, String pass, File cred, String ssh)
-			throws RestServerException, ServiceException;
+    /**
+     * Attempt login through the REST API
+     * <p>
+     * username and password may be null if credential is valid,
+     * credential may be null if username and password are valid,
+     * private ssh key may always be null
+     * 
+     * @param login username
+     * @param pass password
+     * @param cred credential file in its base64 form
+     * @param ssh private ssh key
+     */
+    public abstract String login(String login, String pass, File cred, String ssh)
+            throws RestServerException, ServiceException;
 
-	/**
-	 * Create a Credentials file with the provided authentication parameters
-	 * 
-	 * @param login username
-	 * @param pass password
-	 * @param ssh private ssh key
-	 * @return the the Credentials file as a base64 String
-	 * @throws ServiceException
-	 */
-	public abstract String createCredentials(String login, String pass, String ssh)
-			throws RestServerException, ServiceException;
+    /**
+     * Create a Credentials file with the provided authentication parameters
+     * 
+     * @param login username
+     * @param pass password
+     * @param ssh private ssh key
+     * @return the the Credentials file as a base64 String
+     * @throws ServiceException
+     */
+    public abstract String createCredentials(String login, String pass, String ssh)
+            throws RestServerException, ServiceException;
 }

@@ -50,17 +50,17 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class VisuTaskStatus implements Serializable {
 
-	int finished = 0;
-	int running = 0;
-	int failed = 0;
+    int finished = 0;
+    int running = 0;
+    int failed = 0;
 
-	public VisuTaskStatus() {
-		this(0, 0, 0);
-	}
+    public VisuTaskStatus() {
+        this(0, 0, 0);
+    }
 
-	public VisuTaskStatus(int finished, int running, int failed) {
-		this.finished = finished;
-		this.running = running;
-		this.failed = failed;
-	}
+    public VisuTaskStatus(int finished, int running, int failed) {
+        this.finished = finished;
+        this.running = running;
+        this.failed = failed;
+    }
 }

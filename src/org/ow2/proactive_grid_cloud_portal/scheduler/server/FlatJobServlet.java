@@ -62,104 +62,104 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 @SuppressWarnings("serial")
 public class FlatJobServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	private void upload(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("text/html");
+    private void upload(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("text/html");
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		factory.setSizeThreshold(4096);
-		factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(4096);
+        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
 
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		upload.setSizeMax(1000000);
-		String callbackName = null;
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(1000000);
+        String callbackName = null;
 
-		try {
-			List<?> fileItems = upload.parseRequest(request);
-			Iterator<?> i = fileItems.iterator();
+        try {
+            List<?> fileItems = upload.parseRequest(request);
+            Iterator<?> i = fileItems.iterator();
 
-			String commandFile = null;
-			String name = null;
-			String selectionScript = null;
-			String selectionScriptExtension = null;
-			String sessionId = null;
+            String commandFile = null;
+            String name = null;
+            String selectionScript = null;
+            String selectionScriptExtension = null;
+            String sessionId = null;
 
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
+            while (i.hasNext()) {
+                FileItem fi = (FileItem) i.next();
 
-				if (fi.isFormField()) {
-					if (fi.getFieldName().equals("jobName")) {
-						name = fi.getString();
-						if (name.trim().length() == 0)
-							name = null;
-					} else if (fi.getFieldName().equals("sessionId")) {
-						sessionId = fi.getString();
-					} else if (fi.getFieldName().equals("flatCallback")) {
-						callbackName = fi.getString();
-					}
-				} else {
-					if (fi.getFieldName().equals("commandFile")) {
-						commandFile = IOUtils.toString(fi.getInputStream());
-						if (commandFile.trim().length() == 0)
-							commandFile = null;
-					} else if (fi.getFieldName().equals("selectionScript")) {
-						if (fi.getName().indexOf('.') == -1) {
-							selectionScriptExtension = "js";
-						} else {
-							selectionScriptExtension = fi.getName().substring(
-									fi.getName().lastIndexOf('.') + 1);
-						}
-						selectionScript = IOUtils.toString(fi.getInputStream());
-						if (selectionScript.trim().length() == 0)
-							selectionScript = null;
-					}
-				}
-			}
+                if (fi.isFormField()) {
+                    if (fi.getFieldName().equals("jobName")) {
+                        name = fi.getString();
+                        if (name.trim().length() == 0)
+                            name = null;
+                    } else if (fi.getFieldName().equals("sessionId")) {
+                        sessionId = fi.getString();
+                    } else if (fi.getFieldName().equals("flatCallback")) {
+                        callbackName = fi.getString();
+                    }
+                } else {
+                    if (fi.getFieldName().equals("commandFile")) {
+                        commandFile = IOUtils.toString(fi.getInputStream());
+                        if (commandFile.trim().length() == 0)
+                            commandFile = null;
+                    } else if (fi.getFieldName().equals("selectionScript")) {
+                        if (fi.getName().indexOf('.') == -1) {
+                            selectionScriptExtension = "js";
+                        } else {
+                            selectionScriptExtension = fi.getName().substring(
+                                    fi.getName().lastIndexOf('.') + 1);
+                        }
+                        selectionScript = IOUtils.toString(fi.getInputStream());
+                        if (selectionScript.trim().length() == 0)
+                            selectionScript = null;
+                    }
+                }
+            }
 
-			String ret;
-			if (commandFile == null) {
-				ret = "{ \"errorMessage\" : \"Missing parameter: command file\" }";
-			} else if (sessionId == null) {
-				ret = "{ \"errorMessage\" : \"Missing parameter: sessionId\" }";
-			} else if (name == null) {
-				ret = "{ \"errorMessage\" : \"Missing parameter: job name\" }";
-			} else {
-				ret = ((SchedulerServiceImpl) SchedulerServiceImpl.get()).submitFlatJob(sessionId,
-						commandFile, name, selectionScript, selectionScriptExtension);
-			}
-			/* writing the callback name in as an inlined script,
-			 * so that the browser, upon receiving it, will evaluate
-			 * the JS and call the function */
-			response.getWriter().write("<script type='text/javascript'>");
-			response.getWriter().write("window.top." + callbackName + "(" + ret + ");");
-			response.getWriter().write("</script>");
+            String ret;
+            if (commandFile == null) {
+                ret = "{ \"errorMessage\" : \"Missing parameter: command file\" }";
+            } else if (sessionId == null) {
+                ret = "{ \"errorMessage\" : \"Missing parameter: sessionId\" }";
+            } else if (name == null) {
+                ret = "{ \"errorMessage\" : \"Missing parameter: job name\" }";
+            } else {
+                ret = ((SchedulerServiceImpl) SchedulerServiceImpl.get()).submitFlatJob(sessionId,
+                        commandFile, name, selectionScript, selectionScriptExtension);
+            }
+            /* writing the callback name in as an inlined script,
+             * so that the browser, upon receiving it, will evaluate
+             * the JS and call the function */
+            response.getWriter().write("<script type='text/javascript'>");
+            response.getWriter().write("window.top." + callbackName + "(" + ret + ");");
+            response.getWriter().write("</script>");
 
-		} catch (RestServerException e) {
-			try {
-				response.getWriter().write("<script type='text/javascript'>");
-				response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
-				response.getWriter().write("</script>");
-			} catch (Throwable e1) {
-				e1.printStackTrace();
-			}
-		} catch (Exception e) {
-			try {
-				String tw = "<script type='text/javascript'>";
-				tw += "window.top." + callbackName + "({ \"errorMessage\" : \"" + e.getMessage() + "\" });";
-				tw += "</script>";
-				response.getWriter().write(tw);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
+        } catch (RestServerException e) {
+            try {
+                response.getWriter().write("<script type='text/javascript'>");
+                response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
+                response.getWriter().write("</script>");
+            } catch (Throwable e1) {
+                e1.printStackTrace();
+            }
+        } catch (Exception e) {
+            try {
+                String tw = "<script type='text/javascript'>";
+                tw += "window.top." + callbackName + "({ \"errorMessage\" : \"" + e.getMessage() + "\" });";
+                tw += "</script>";
+                response.getWriter().write(tw);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
 }

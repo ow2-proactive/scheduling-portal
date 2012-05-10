@@ -53,101 +53,101 @@ import com.google.gwt.dom.client.ScriptElement;
  */
 public class JSUtil {
 
-	public interface JSCallback {
-		public void execute(JavaScriptObject obj);
-	}
+    public interface JSCallback {
+        public void execute(JavaScriptObject obj);
+    }
 
-	private static int requestCounter = 0;
+    private static int requestCounter = 0;
 
-	/**
-	* Register a native JS callback to the document
-	* for asynchronous callback in SmartGWT forms that do not support it
-	* 
-	* Simply register the function, keep the name and recall it later
-	* 	
-	* @param callback
-	* @return name of the callback
-	*/
-	public static String register(JSCallback callback) {
-		String callbackName = "callback" + (requestCounter++);
-		createCallbackFunction(callback, callbackName);
-		return callbackName;
-	}
+    /**
+    * Register a native JS callback to the document
+    * for asynchronous callback in SmartGWT forms that do not support it
+    * 
+    * Simply register the function, keep the name and recall it later
+    * 	
+    * @param callback
+    * @return name of the callback
+    */
+    public static String register(JSCallback callback) {
+        String callbackName = "callback" + (requestCounter++);
+        createCallbackFunction(callback, callbackName);
+        return callbackName;
+    }
 
-	private native static void createCallbackFunction(JSCallback obj, String callbackName)/*-{
-			tmpcallback = function(j) {
-				obj.@org.ow2.proactive_grid_cloud_portal.common.client.JSUtil.JSCallback::execute(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
-			};
-			$wnd[callbackName] = tmpcallback;
-		}-*/;
+    private native static void createCallbackFunction(JSCallback obj, String callbackName)/*-{
+    				tmpcallback = function(j) {
+    					obj.@org.ow2.proactive_grid_cloud_portal.common.client.JSUtil.JSCallback::execute(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
+    				};
+    				$wnd[callbackName] = tmpcallback;
+    			}-*/;
 
-	/**
-	 * load a new script in the document
-	 * 
-	 * @param path relative path to the JS
-	 */
-	public static void addScript(String path) {
-		Element head = Document.get().getElementsByTagName("head").getItem(0);
-		ScriptElement script = Document.get().createScriptElement();
-		script.setType("text/javascript");
-		script.setLang("javascript");
-		script.setSrc(path);
-		head.appendChild(script);
-	}
+    /**
+     * load a new script in the document
+     * 
+     * @param path relative path to the JS
+     */
+    public static void addScript(String path) {
+        Element head = Document.get().getElementsByTagName("head").getItem(0);
+        ScriptElement script = Document.get().createScriptElement();
+        script.setType("text/javascript");
+        script.setLang("javascript");
+        script.setSrc(path);
+        head.appendChild(script);
+    }
 
-	/**
-	 * @return available screen width in pixels
-	 */
-	public static int getScreenWidth() {
-		return Integer.parseInt(getAvailWidth());
-	}
+    /**
+     * @return available screen width in pixels
+     */
+    public static int getScreenWidth() {
+        return Integer.parseInt(getAvailWidth());
+    }
 
-	/**
-	 * @return available screen height in pixels
-	 */
-	public static int getScreenHeight() {
-		return Integer.parseInt(getAvailHeight());
-	}
+    /**
+     * @return available screen height in pixels
+     */
+    public static int getScreenHeight() {
+        return Integer.parseInt(getAvailHeight());
+    }
 
-	private static native String getAvailHeight() /*-{
-		var screenHeight = screen.availHeight + "";
-		return screenHeight;
-	}-*/;
+    private static native String getAvailHeight() /*-{
+    	var screenHeight = screen.availHeight + "";
+    	return screenHeight;
+    }-*/;
 
-	private static native String getAvailWidth() /*-{
-		var screenWidth = screen.availWidth + "";
-		return screenWidth;
-	}-*/;
+    private static native String getAvailWidth() /*-{
+    	var screenWidth = screen.availWidth + "";
+    	return screenWidth;
+    }-*/;
 
-	public static String getTime(long time) {
-		StringBuilder ret = new StringBuilder();
-		ret.append(new Date(time).toString());
-		ret.append(", ");
+    public static String getTime(long time) {
+        StringBuilder ret = new StringBuilder();
+        ret.append(new Date(time).toString());
+        ret.append(", ");
 
-		long seconds = (System.currentTimeMillis() - time) / 1000;
-		long day, hou, min, sec;
+        long seconds = (System.currentTimeMillis() - time) / 1000;
+        long day, hou, min, sec;
 
-		day = seconds / (3600 * 24);
-		seconds -= day * (3600 * 24);
-		hou = seconds / 3600;
-		seconds -= hou * 3600;
-		min = seconds / 60;
-		sec = seconds % 60;
+        day = seconds / (3600 * 24);
+        seconds -= day * (3600 * 24);
+        hou = seconds / 3600;
+        seconds -= hou * 3600;
+        min = seconds / 60;
+        sec = seconds % 60;
 
-		if (day > 0) {
-			ret.append(day + "d ");
-			ret.append(hou + "h ");
-		} else if (hou > 0) {
-			ret.append(hou + "h");
-			ret.append(min + "mn ");
-		} else if (min > 0) {
-			ret.append(min + "mn ");
-		} else {
-			ret.append(sec + "s ");
-		}
+        if (day > 0) {
+            ret.append(day + "d ");
+            ret.append(hou + "h ");
+        } else if (hou > 0) {
+            ret.append(hou + "h");
+            ret.append(min + "mn ");
+        } else if (min > 0) {
+            ret.append(min + "mn ");
+        } else {
+            ret.append(sec + "s ");
+        }
 
-		ret.append("ago");
+        ret.append("ago");
 
-		return ret.toString();
-	}
+        return ret.toString();
+    }
 }

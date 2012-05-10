@@ -52,96 +52,96 @@ import java.util.Map;
  */
 public abstract class Config {
 
-	protected Map<String, String> properties = null;
+    protected Map<String, String> properties = null;
 
-	private Map<String, String> backup = null;
+    private Map<String, String> backup = null;
 
-	private static Config instance = null;
+    private static Config instance = null;
 
-	protected Config() {
-		this.properties = new HashMap<String, String>();
-		this.backup = new HashMap<String, String>();
-		instance = this;
-	}
+    protected Config() {
+        this.properties = new HashMap<String, String>();
+        this.backup = new HashMap<String, String>();
+        instance = this;
+    }
 
-	/**
-	 * @return the static Config object containing generic configuration info
-	 * @throws IllegalStateException config was not created
-	 */
-	public static Config get() {
-		if (instance == null)
-			throw new IllegalStateException("Config has not been created");
-		return instance;
-	}
+    /**
+     * @return the static Config object containing generic configuration info
+     * @throws IllegalStateException config was not created
+     */
+    public static Config get() {
+        if (instance == null)
+            throw new IllegalStateException("Config has not been created");
+        return instance;
+    }
 
-	/**
-	 * Load a set of properties
-	 * This set of properties will be reset if {@link #reload()} is called
-	 * @param props a set of key/value pairs
-	 */
-	public void load(Map<String, String> props) {
-		properties.putAll(props);
-		backup.putAll(props);
-	}
+    /**
+     * Load a set of properties
+     * This set of properties will be reset if {@link #reload()} is called
+     * @param props a set of key/value pairs
+     */
+    public void load(Map<String, String> props) {
+        properties.putAll(props);
+        backup.putAll(props);
+    }
 
-	/**
-	 * Set a single property
-	 * @param key
-	 * @param value
-	 */
-	public void set(String key, String value) {
-		properties.put(key, value);
-	}
+    /**
+     * Set a single property
+     * @param key
+     * @param value
+     */
+    public void set(String key, String value) {
+        properties.put(key, value);
+    }
 
-	/**
-	 * Reset the properties as they were last time {@link #load(Map)} was called
-	 */
-	public void reload() {
-		if (backup == null)
-			return;
-		load(backup);
-	}
+    /**
+     * Reset the properties as they were last time {@link #load(Map)} was called
+     */
+    public void reload() {
+        if (backup == null)
+            return;
+        load(backup);
+    }
 
-	/**
-	 * @return current properties
-	 */
-	public Map<String, String> getProperties() {
-		return this.properties;
-	}
+    /**
+     * @return current properties
+     */
+    public Map<String, String> getProperties() {
+        return this.properties;
+    }
 
-	/**
-	 * @return the currently used Rest URL
-	 */
-	public abstract String getRestUrl();
+    /**
+     * @return the currently used Rest URL
+     */
+    public abstract String getRestUrl();
 
-	/**
-	 * @return the REST server version string
-	 */
-	public abstract String getRestVersion();
+    /**
+     * @return the REST server version string
+     */
+    public abstract String getRestVersion();
 
-	/**
-	 * @return the application (scheduler/rm) version string
-	 */
-	public abstract String getApplicationVersion();
+    /**
+     * @return the application (scheduler/rm) version string
+     */
+    public abstract String getApplicationVersion();
 
-	/**
-	 * @return name of the application, ie "Scheduler"
-	 */
-	public abstract String getApplicationName();
+    /**
+     * @return name of the application, ie "Scheduler"
+     */
+    public abstract String getApplicationName();
 
-	/**
-	 * @return version string of the application
-	 */
-	public abstract String getVersion();
+    /**
+     * @return version string of the application
+     */
+    public abstract String getVersion();
 
-	/**
-	 * @return SCM revision of the application build
-	 * 		for finer grained version control
-	 */
-	public abstract String getRevision();
+    /**
+     * @return SCM revision of the application build
+     * 		for finer grained version control
+     */
+    public abstract String getRevision();
 
-	/**
-	 * @return URL of the service to GET for the MOTD
-	 */
-	public abstract String getMotdUrl();
+    /**
+     * @return URL of the service to GET for the MOTD
+     */
+    public abstract String getMotdUrl();
 }

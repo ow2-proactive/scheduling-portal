@@ -57,38 +57,38 @@ import com.smartgwt.client.util.SC;
  */
 public class RMPortal implements EntryPoint {
 
-	private final RMServiceAsync rmService = GWT.create(RMService.class);
+    private final RMServiceAsync rmService = GWT.create(RMService.class);
 
-	/**
-	 * Entry point
-	 */
-	public void onModuleLoad() {
-		Runnable startup = new Runnable() {
-			@Override
-			public void run() {
-				loadProperties();
-			}
-		};
-		// the Javascript code for Google Visualization MUST be hosted by Google
-		// and fetched dynamically. Right now, the page won't load if
-		// the JS cannot be fetched.
-		VisualizationUtils.loadVisualizationApi(startup, CoreChart.PACKAGE);
-	}
+    /**
+     * Entry point
+     */
+    public void onModuleLoad() {
+        Runnable startup = new Runnable() {
+            @Override
+            public void run() {
+                loadProperties();
+            }
+        };
+        // the Javascript code for Google Visualization MUST be hosted by Google
+        // and fetched dynamically. Right now, the page won't load if
+        // the JS cannot be fetched.
+        VisualizationUtils.loadVisualizationApi(startup, CoreChart.PACKAGE);
+    }
 
-	private void loadProperties() {
-		rmService.getProperties(new AsyncCallback<Map<String, String>>() {
+    private void loadProperties() {
+        rmService.getProperties(new AsyncCallback<Map<String, String>>() {
 
-			public void onSuccess(Map<String, String> result) {
-				RMConfig.get().load(result);
-				Settings.load();
-				RMController c = new RMController(rmService);
-				GWT.setUncaughtExceptionHandler(c);
-			}
+            public void onSuccess(Map<String, String> result) {
+                RMConfig.get().load(result);
+                Settings.load();
+                RMController c = new RMController(rmService);
+                GWT.setUncaughtExceptionHandler(c);
+            }
 
-			public void onFailure(Throwable caught) {
-				SC.warn("Unable to get the client properties:<br>" + caught.getMessage());
-			}
-		});
-	}
+            public void onFailure(Throwable caught) {
+                SC.warn("Unable to get the client properties:<br>" + caught.getMessage());
+            }
+        });
+    }
 
 }

@@ -54,242 +54,242 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "taskRecord", propOrder = { "name", "position", "size", "connections", "ifElse", "loop",
-		"replicate" })
+        "replicate" })
 public class TaskRecord {
 
-	protected String name;
-	protected PositionRecord position;
-	protected SizeRecord size;
-	protected TaskRecord.Connections connections;
-	@XmlElement(name = "IfElse")
-	protected IfElseRecord ifElse;
-	@XmlElement(name = "Loop")
-	protected LoopRecord loop;
-	@XmlElement(name = "Replicate")
-	protected ReplicatedRecord replicate;
+    protected String name;
+    protected PositionRecord position;
+    protected SizeRecord size;
+    protected TaskRecord.Connections connections;
+    @XmlElement(name = "IfElse")
+    protected IfElseRecord ifElse;
+    @XmlElement(name = "Loop")
+    protected LoopRecord loop;
+    @XmlElement(name = "Replicate")
+    protected ReplicatedRecord replicate;
 
-	/**
-	 * Gets the value of the name property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * Sets the value of the name property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setName(String value) {
-		this.name = value;
-	}
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
 
-	/**
-	 * Gets the value of the position property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link PositionRecord }
-	 *     
-	 */
-	public PositionRecord getPosition() {
-		return position;
-	}
+    /**
+     * Gets the value of the position property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link PositionRecord }
+     *     
+     */
+    public PositionRecord getPosition() {
+        return position;
+    }
 
-	/**
-	 * Sets the value of the position property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link PositionRecord }
-	 *     
-	 */
-	public void setPosition(PositionRecord value) {
-		this.position = value;
-	}
+    /**
+     * Sets the value of the position property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link PositionRecord }
+     *     
+     */
+    public void setPosition(PositionRecord value) {
+        this.position = value;
+    }
 
-	/**
-	 * Gets the value of the size property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link SizeRecord }
-	 *     
-	 */
-	public SizeRecord getSize() {
-		return size;
-	}
+    /**
+     * Gets the value of the size property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SizeRecord }
+     *     
+     */
+    public SizeRecord getSize() {
+        return size;
+    }
 
-	/**
-	 * Sets the value of the size property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link SizeRecord }
-	 *     
-	 */
-	public void setSize(SizeRecord value) {
-		this.size = value;
-	}
+    /**
+     * Sets the value of the size property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SizeRecord }
+     *     
+     */
+    public void setSize(SizeRecord value) {
+        this.size = value;
+    }
 
-	/**
-	 * Gets the value of the connections property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link TaskRecord.Connections }
-	 *     
-	 */
-	public TaskRecord.Connections getConnections() {
-		return connections;
-	}
+    /**
+     * Gets the value of the connections property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TaskRecord.Connections }
+     *     
+     */
+    public TaskRecord.Connections getConnections() {
+        return connections;
+    }
 
-	/**
-	 * Sets the value of the connections property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link TaskRecord.Connections }
-	 *     
-	 */
-	public void setConnections(TaskRecord.Connections value) {
-		this.connections = value;
-	}
+    /**
+     * Sets the value of the connections property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TaskRecord.Connections }
+     *     
+     */
+    public void setConnections(TaskRecord.Connections value) {
+        this.connections = value;
+    }
 
-	/**
-	 * Gets the value of the ifElse property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link IfElseRecord }
-	 *     
-	 */
-	public IfElseRecord getIfElse() {
-		return ifElse;
-	}
+    /**
+     * Gets the value of the ifElse property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link IfElseRecord }
+     *     
+     */
+    public IfElseRecord getIfElse() {
+        return ifElse;
+    }
 
-	/**
-	 * Sets the value of the ifElse property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link IfElseRecord }
-	 *     
-	 */
-	public void setIfElse(IfElseRecord value) {
-		this.ifElse = value;
-	}
+    /**
+     * Sets the value of the ifElse property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link IfElseRecord }
+     *     
+     */
+    public void setIfElse(IfElseRecord value) {
+        this.ifElse = value;
+    }
 
-	/**
-	 * Gets the value of the loop property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link LoopRecord }
-	 *     
-	 */
-	public LoopRecord getLoop() {
-		return loop;
-	}
+    /**
+     * Gets the value of the loop property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link LoopRecord }
+     *     
+     */
+    public LoopRecord getLoop() {
+        return loop;
+    }
 
-	/**
-	 * Sets the value of the loop property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link LoopRecord }
-	 *     
-	 */
-	public void setLoop(LoopRecord value) {
-		this.loop = value;
-	}
+    /**
+     * Sets the value of the loop property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link LoopRecord }
+     *     
+     */
+    public void setLoop(LoopRecord value) {
+        this.loop = value;
+    }
 
-	/**
-	 * Gets the value of the replicate property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link ReplicatedRecord }
-	 *     
-	 */
-	public ReplicatedRecord getReplicate() {
-		return replicate;
-	}
+    /**
+     * Gets the value of the replicate property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ReplicatedRecord }
+     *     
+     */
+    public ReplicatedRecord getReplicate() {
+        return replicate;
+    }
 
-	/**
-	 * Sets the value of the replicate property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link ReplicatedRecord }
-	 *     
-	 */
-	public void setReplicate(ReplicatedRecord value) {
-		this.replicate = value;
-	}
+    /**
+     * Sets the value of the replicate property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ReplicatedRecord }
+     *     
+     */
+    public void setReplicate(ReplicatedRecord value) {
+        this.replicate = value;
+    }
 
-	/**
-	 * <p>Java class for anonymous complex type.
-	 * 
-	 * <p>The following schema fragment specifies the expected content contained within this class.
-	 * 
-	 * <pre>
-	 * &lt;complexType>
-	 *   &lt;complexContent>
-	 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-	 *       &lt;sequence>
-	 *         &lt;element name="connection" type="{}connectionRecord" maxOccurs="unbounded" minOccurs="0"/>
-	 *       &lt;/sequence>
-	 *     &lt;/restriction>
-	 *   &lt;/complexContent>
-	 * &lt;/complexType>
-	 * </pre>
-	 * 
-	 * 
-	 */
-	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name = "", propOrder = { "connection" })
-	public static class Connections {
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="connection" type="{}connectionRecord" maxOccurs="unbounded" minOccurs="0"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = { "connection" })
+    public static class Connections {
 
-		protected List<ConnectionRecord> connection;
+        protected List<ConnectionRecord> connection;
 
-		/**
-		 * Gets the value of the connection property.
-		 * 
-		 * <p>
-		 * This accessor method returns a reference to the live list,
-		 * not a snapshot. Therefore any modification you make to the
-		 * returned list will be present inside the JAXB object.
-		 * This is why there is not a <CODE>set</CODE> method for the connection property.
-		 * 
-		 * <p>
-		 * For example, to add a new item, do as follows:
-		 * <pre>
-		 *    getConnection().add(newItem);
-		 * </pre>
-		 * 
-		 * 
-		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link ConnectionRecord }
-		 * 
-		 * 
-		 */
-		public List<ConnectionRecord> getConnection() {
-			if (connection == null) {
-				connection = new ArrayList<ConnectionRecord>();
-			}
-			return this.connection;
-		}
+        /**
+         * Gets the value of the connection property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the connection property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getConnection().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link ConnectionRecord }
+         * 
+         * 
+         */
+        public List<ConnectionRecord> getConnection() {
+            if (connection == null) {
+                connection = new ArrayList<ConnectionRecord>();
+            }
+            return this.connection;
+        }
 
-	}
+    }
 
 }

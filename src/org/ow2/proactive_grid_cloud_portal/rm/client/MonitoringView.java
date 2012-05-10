@@ -56,115 +56,115 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class MonitoringView implements NodeSelectedListener {
 
-	private Label label = null;
+    private Label label = null;
 
-	private MonitoringNodeView nodeMonitoring = null;
-	private MonitoringHostView hostMonitoring = null;
-	private VLayout nodeCanvas = null;
-	private Label nodeLabel = null;
+    private MonitoringNodeView nodeMonitoring = null;
+    private MonitoringHostView hostMonitoring = null;
+    private VLayout nodeCanvas = null;
+    private Label nodeLabel = null;
 
-	private Layout hostCanvas = null;
-	private Label hostLabel = null;
+    private Layout hostCanvas = null;
+    private Label hostLabel = null;
 
-	private RMController controller;
+    private RMController controller;
 
-	MonitoringView(RMController controller) {
-		this.controller = controller;
-		controller.getEventDispatcher().addNodeSelectedListener(this);
-	}
+    MonitoringView(RMController controller) {
+        this.controller = controller;
+        controller.getEventDispatcher().addNodeSelectedListener(this);
+    }
 
-	Canvas build() {
-		VLayout vl = new VLayout();
-		vl.setOverflow(Overflow.AUTO);
+    Canvas build() {
+        VLayout vl = new VLayout();
+        vl.setOverflow(Overflow.AUTO);
 
-		this.label = new Label("No node selected");
-		this.label.setWidth100();
-		this.label.setAlign(Alignment.CENTER);
+        this.label = new Label("No node selected");
+        this.label.setWidth100();
+        this.label.setAlign(Alignment.CENTER);
 
-		this.nodeMonitoring = new MonitoringNodeView(controller);
-		this.nodeMonitoring.setOverflow(Overflow.AUTO);
-		this.nodeMonitoring.setWidth100();
+        this.nodeMonitoring = new MonitoringNodeView(controller);
+        this.nodeMonitoring.setOverflow(Overflow.AUTO);
+        this.nodeMonitoring.setWidth100();
 
-		this.nodeCanvas = new VLayout();
-		this.nodeCanvas.setWidth100();
-		this.nodeCanvas.setHeight100();
-		this.nodeLabel = new Label();
-		this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
-		this.nodeLabel.setHeight(16);
-		this.nodeCanvas.addMember(nodeLabel);
-		this.nodeCanvas.addMember(nodeMonitoring);
-		this.nodeCanvas.hide();
+        this.nodeCanvas = new VLayout();
+        this.nodeCanvas.setWidth100();
+        this.nodeCanvas.setHeight100();
+        this.nodeLabel = new Label();
+        this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
+        this.nodeLabel.setHeight(16);
+        this.nodeCanvas.addMember(nodeLabel);
+        this.nodeCanvas.addMember(nodeMonitoring);
+        this.nodeCanvas.hide();
 
-		this.hostMonitoring = new MonitoringHostView(controller);
-		this.hostMonitoring.setOverflow(Overflow.AUTO);
-		this.hostMonitoring.setWidth100();
+        this.hostMonitoring = new MonitoringHostView(controller);
+        this.hostMonitoring.setOverflow(Overflow.AUTO);
+        this.hostMonitoring.setWidth100();
 
-		this.hostCanvas = new VLayout();
-		this.hostCanvas.setWidth100();
-		this.hostCanvas.setHeight100();
-		this.hostLabel = new Label();
-		this.hostLabel.setHeight(16);
-		this.hostLabel.setIcon(RMImages.instance.host_16().getSafeUri().asString());
-		this.hostCanvas.addMember(hostLabel);
-		this.hostCanvas.addMember(hostMonitoring);
-		this.hostCanvas.hide();
+        this.hostCanvas = new VLayout();
+        this.hostCanvas.setWidth100();
+        this.hostCanvas.setHeight100();
+        this.hostLabel = new Label();
+        this.hostLabel.setHeight(16);
+        this.hostLabel.setIcon(RMImages.instance.host_16().getSafeUri().asString());
+        this.hostCanvas.addMember(hostLabel);
+        this.hostCanvas.addMember(hostMonitoring);
+        this.hostCanvas.hide();
 
-		vl.setMembers(label, nodeCanvas, hostCanvas);
-		return vl;
-	}
+        vl.setMembers(label, nodeCanvas, hostCanvas);
+        return vl;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeUnselected()
-	 */
-	public void nodeUnselected() {
-		this.label.setContents("No node selected");
-		this.label.setAlign(Alignment.CENTER);
-		this.label.show();
-		this.nodeCanvas.hide();
-		this.hostCanvas.hide();
-		this.nodeMonitoring.close();
-		this.hostMonitoring.close();
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeUnselected()
+     */
+    public void nodeUnselected() {
+        this.label.setContents("No node selected");
+        this.label.setAlign(Alignment.CENTER);
+        this.label.show();
+        this.nodeCanvas.hide();
+        this.hostCanvas.hide();
+        this.nodeMonitoring.close();
+        this.hostMonitoring.close();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
-	 */
-	public void nodeSelected(Node node) {
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
+     */
+    public void nodeSelected(Node node) {
 
-		this.nodeLabel.setIcon(node.getNodeState().getIcon());
+        this.nodeLabel.setIcon(node.getNodeState().getIcon());
 
-		this.label.hide();
-		this.hostCanvas.hide();
+        this.label.hide();
+        this.hostCanvas.hide();
 
-		this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
-		this.hostMonitoring.close();
-		this.nodeMonitoring.close();
-		this.nodeMonitoring.init(node);
-		this.nodeCanvas.show();
-	}
+        this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
+        this.hostMonitoring.close();
+        this.nodeMonitoring.close();
+        this.nodeMonitoring.init(node);
+        this.nodeCanvas.show();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
-	 */
-	public void nodeSourceSelected(NodeSource ns) {
-		nodeUnselected();
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
+     */
+    public void nodeSourceSelected(NodeSource ns) {
+        nodeUnselected();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#hostSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
-	 */
-	public void hostSelected(Host h) {
-		this.label.hide();
-		this.nodeCanvas.hide();
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#hostSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
+     */
+    public void hostSelected(Host h) {
+        this.label.hide();
+        this.nodeCanvas.hide();
 
-		this.hostLabel.setContents("<h3>" + h.getHostName() + "</h3>");
-		this.nodeMonitoring.close();
-		this.hostMonitoring.close();
-		this.hostMonitoring.init(h);
-		this.hostCanvas.show();
-	}
+        this.hostLabel.setContents("<h3>" + h.getHostName() + "</h3>");
+        this.nodeMonitoring.close();
+        this.hostMonitoring.close();
+        this.hostMonitoring.init(h);
+        this.hostCanvas.show();
+    }
 }

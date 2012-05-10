@@ -49,40 +49,40 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class RestServerException extends Exception implements Serializable {
 
-	private int status;
-	private String response;
+    private int status;
+    private String response;
 
-	public RestServerException() {
-	}
+    public RestServerException() {
+    }
 
-	public RestServerException(String message) {
-		super(message);
-	}
+    public RestServerException(String message) {
+        super(message);
+    }
 
-	public RestServerException(int status, String message) {
-		super(message);
-		this.status = status;
-	}
+    public RestServerException(int status, String message) {
+        super(message);
+        this.status = status;
+    }
 
-	public RestServerException(int status, String response, String message) {
-		super(message);
-		this.status = status;
-		this.response = response;
-	}
+    public RestServerException(int status, String response, String message) {
+        super(message);
+        this.status = status;
+        this.response = response;
+    }
 
-	public RestServerException(Throwable cause) {
-		super(cause);
-	}
+    public RestServerException(Throwable cause) {
+        super(cause);
+    }
 
-	public RestServerException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public RestServerException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public int getStatus() {
-		return status;
-	}
+    public int getStatus() {
+        return status;
+    }
 
-	public String getResponse() {
-		return response;
-	}
+    public String getResponse() {
+        return response;
+    }
 }

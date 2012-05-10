@@ -55,88 +55,88 @@ import com.google.gwt.json.client.JSONString;
 @SuppressWarnings("serial")
 public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
 
-	private String hostName = null;
+    private String hostName = null;
 
-	private String username = null;
+    private String username = null;
 
-	private long connectionTime;
+    private long connectionTime;
 
-	private long lastSubmitTime;
+    private long lastSubmitTime;
 
-	private int submitNumber;
+    private int submitNumber;
 
-	public SchedulerUser() {
-	}
+    public SchedulerUser() {
+    }
 
-	/**
-	 * Default constructor
-	 * 
-	 * @param hostName hostname of the user's connection endpoint
-	 * @param userName name of the user
-	 * @param connectionTime time when the user joined the scheduler
-	 * @param lastSubmitTime last time the user submitted a job
-	 * @param submitNumber number of jobs this user submitted in this session
-	 */
-	public SchedulerUser(String hostName, String userName, long connectionTime, long lastSubmitTime,
-			int submitNumber) {
-		this.hostName = hostName;
-		this.username = userName;
-		this.connectionTime = connectionTime;
-		this.lastSubmitTime = lastSubmitTime;
-		this.submitNumber = submitNumber;
-	}
+    /**
+     * Default constructor
+     * 
+     * @param hostName hostname of the user's connection endpoint
+     * @param userName name of the user
+     * @param connectionTime time when the user joined the scheduler
+     * @param lastSubmitTime last time the user submitted a job
+     * @param submitNumber number of jobs this user submitted in this session
+     */
+    public SchedulerUser(String hostName, String userName, long connectionTime, long lastSubmitTime,
+            int submitNumber) {
+        this.hostName = hostName;
+        this.username = userName;
+        this.connectionTime = connectionTime;
+        this.lastSubmitTime = lastSubmitTime;
+        this.submitNumber = submitNumber;
+    }
 
-	public String getHostName() {
-		return hostName;
-	}
+    public String getHostName() {
+        return hostName;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public long getConnectionTime() {
-		return connectionTime;
-	}
+    public long getConnectionTime() {
+        return connectionTime;
+    }
 
-	public long getLastSubmitTime() {
-		return lastSubmitTime;
-	}
+    public long getLastSubmitTime() {
+        return lastSubmitTime;
+    }
 
-	public int getSubmitNumber() {
-		return submitNumber;
-	}
+    public int getSubmitNumber() {
+        return submitNumber;
+    }
 
-	public String toString() {
-		return "[" + hostName + ";" + username + ";" + connectionTime + ";" + lastSubmitTime + ";" +
-			submitNumber + "]";
-	}
+    public String toString() {
+        return "[" + hostName + ";" + username + ";" + connectionTime + ";" + lastSubmitTime + ";" +
+            submitNumber + "]";
+    }
 
-	public int compareTo(SchedulerUser o) {
-		if (connectionTime < o.connectionTime)
-			return -1;
-		else if (connectionTime > o.connectionTime)
-			return 1;
-		else
-			return 0;
-	}
+    public int compareTo(SchedulerUser o) {
+        if (connectionTime < o.connectionTime)
+            return -1;
+        else if (connectionTime > o.connectionTime)
+            return 1;
+        else
+            return 0;
+    }
 
-	/**
-	 * @param jsonUser the JSON representation of an user
-	 * @return a POJO equivalent
-	 */
-	public static SchedulerUser parseJson(JSONObject jsonUser) {
-		String host = "";
-		if (jsonUser.containsKey("hostName")) {
-			JSONString str = jsonUser.get("hostName").isString();
-			if (str != null)
-				host = str.stringValue();
-		}
-		String user = jsonUser.get("username").isString().stringValue();
-		long connTime = (long) jsonUser.get("connectionTime").isNumber().doubleValue();
-		long subTime = (long) jsonUser.get("lastSubmitTime").isNumber().doubleValue();
-		int subNum = (int) jsonUser.get("submitNumber").isNumber().doubleValue();
+    /**
+     * @param jsonUser the JSON representation of an user
+     * @return a POJO equivalent
+     */
+    public static SchedulerUser parseJson(JSONObject jsonUser) {
+        String host = "";
+        if (jsonUser.containsKey("hostName")) {
+            JSONString str = jsonUser.get("hostName").isString();
+            if (str != null)
+                host = str.stringValue();
+        }
+        String user = jsonUser.get("username").isString().stringValue();
+        long connTime = (long) jsonUser.get("connectionTime").isNumber().doubleValue();
+        long subTime = (long) jsonUser.get("lastSubmitTime").isNumber().doubleValue();
+        int subNum = (int) jsonUser.get("submitNumber").isNumber().doubleValue();
 
-		return new SchedulerUser(host, user, connTime, subTime, subNum);
-	}
+        return new SchedulerUser(host, user, connTime, subTime, subNum);
+    }
 
 }

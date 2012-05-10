@@ -52,45 +52,45 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
  */
 public class RMListeners {
 
-	public interface NodesListener {
+    public interface NodesListener {
 
-		/**
-		 * The list of nodesources, hosts and nodes has changed
-		 * 
-		 * @param nodes nodesources, hosts and nodes stored hierarchically
-		 */
-		public void nodesUpdated(Map<String, NodeSource> nodes);
+        /**
+         * The list of nodesources, hosts and nodes has changed
+         * 
+         * @param nodes nodesources, hosts and nodes stored hierarchically
+         */
+        public void nodesUpdated(Map<String, NodeSource> nodes);
 
-	}
+    }
 
-	public interface NodeSelectedListener {
+    public interface NodeSelectedListener {
 
-		/**
-		 * Node selection changed
-		 * 
-		 * @param node currently selected node
-		 */
-		public void nodeSelected(Node node);
+        /**
+         * Node selection changed
+         * 
+         * @param node currently selected node
+         */
+        public void nodeSelected(Node node);
 
-		/**
-		 * Cancel node selection
-		 */
-		public void nodeUnselected();
+        /**
+         * Cancel node selection
+         */
+        public void nodeUnselected();
 
-		/**
-		 * Node selection changed,
-		 * 
-		 * @param ns currently selected NS 
-		 */
-		public void nodeSourceSelected(NodeSource ns);
+        /**
+         * Node selection changed,
+         * 
+         * @param ns currently selected NS 
+         */
+        public void nodeSourceSelected(NodeSource ns);
 
-		/**
-		 * Node selection changed
-		 * 
-		 * @param h currently selected host
-		 */
-		public void hostSelected(Host h);
+        /**
+         * Node selection changed
+         * 
+         * @param h currently selected host
+         */
+        public void hostSelected(Host h);
 
-	}
+    }
 
 }

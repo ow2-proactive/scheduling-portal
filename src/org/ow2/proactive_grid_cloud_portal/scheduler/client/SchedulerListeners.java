@@ -54,177 +54,177 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
  */
 public class SchedulerListeners {
 
-	public interface SchedulerStatusListener {
+    public interface SchedulerStatusListener {
 
-		/**
-		 * Called when the scheduler status changed
-		 * 
-		 * @param status the new status
-		 */
-		public void statusChanged(SchedulerStatus status);
+        /**
+         * Called when the scheduler status changed
+         * 
+         * @param status the new status
+         */
+        public void statusChanged(SchedulerStatus status);
 
-	}
+    }
 
-	public interface JobSelectedListener {
+    public interface JobSelectedListener {
 
-		/**
-		 * Called when a Job is selected in the main Scheduler View Grid
-		 *
-		 * @param job the selected job
-		 */
-		public void jobSelected(Job job);
+        /**
+         * Called when a Job is selected in the main Scheduler View Grid
+         *
+         * @param job the selected job
+         */
+        public void jobSelected(Job job);
 
-		/**
-		 * Called when the Job selection in the main Scheduler View Grid is canceled
-		 */
-		public void jobUnselected();
+        /**
+         * Called when the Job selection in the main Scheduler View Grid is canceled
+         */
+        public void jobUnselected();
 
-	}
+    }
 
-	public interface JobsUpdatedListener {
+    public interface JobsUpdatedListener {
 
-		/**
-		 * Called when the Model receives a new JobSet revision
-		 *
-		 * @param jobs the last JobSet received by the model
-		 */
-		public void jobsUpdated(Map<Integer, Job> jobs);
+        /**
+         * Called when the Model receives a new JobSet revision
+         *
+         * @param jobs the last JobSet received by the model
+         */
+        public void jobsUpdated(Map<Integer, Job> jobs);
 
-		/**
-		 * The job list has changed, and the new version is currently being fetched
-		 * <p>
-		 * Views displaying the jobs list should switch to an undeterminate 'loading' state
-		 * and wait for the next call to {@link #jobsUpdated(JobSet)} to actually display jobs
-		 */
-		public void jobsUpdating();
+        /**
+         * The job list has changed, and the new version is currently being fetched
+         * <p>
+         * Views displaying the jobs list should switch to an undeterminate 'loading' state
+         * and wait for the next call to {@link #jobsUpdated(JobSet)} to actually display jobs
+         */
+        public void jobsUpdating();
 
-		/**
-		 * A new job has been submitted by this client
-		 * no info related to this job has been fetched from the server yet,
-		 * still we need to display something to notify the user that the job was submitted
-		 * @param j a fake job displaying some known characteristics of the submitted job
-		 */
-		public void jobSubmitted(Job j);
+        /**
+         * A new job has been submitted by this client
+         * no info related to this job has been fetched from the server yet,
+         * still we need to display something to notify the user that the job was submitted
+         * @param j a fake job displaying some known characteristics of the submitted job
+         */
+        public void jobSubmitted(Job j);
 
-	}
+    }
 
-	public interface TasksUpdatedListener {
+    public interface TasksUpdatedListener {
 
-		/**
-		 * The tasks list has changed, and the new one is currently being fetched.
-		 * <p>
-		 * {@link #tasksUpdated(TaskSet)} will be called when the new tasks are available,
-		 * but in the meantime clients should not rely on the model's task list as it may
-		 * not be coherent with the other views
-		 * 
-		 *  @param jobChanged false when the tasks in the next {@link #tasksUpdated(TaskSet)} event
-		 *  	are part of the same job as the tasks in the last {@link #tasksUpdated(TaskSet)}
-		 */
-		public void tasksUpdating(boolean jobChanged);
+        /**
+         * The tasks list has changed, and the new one is currently being fetched.
+         * <p>
+         * {@link #tasksUpdated(TaskSet)} will be called when the new tasks are available,
+         * but in the meantime clients should not rely on the model's task list as it may
+         * not be coherent with the other views
+         * 
+         *  @param jobChanged false when the tasks in the next {@link #tasksUpdated(TaskSet)} event
+         *  	are part of the same job as the tasks in the last {@link #tasksUpdated(TaskSet)}
+         */
+        public void tasksUpdating(boolean jobChanged);
 
-		/**
-		 * The tasks list has been updated and new values are available
-		 * 
-		 * @param tasks the latest TaskSet received by the model
-		 */
-		public void tasksUpdated(List<Task> tasks);
+        /**
+         * The tasks list has been updated and new values are available
+         * 
+         * @param tasks the latest TaskSet received by the model
+         */
+        public void tasksUpdated(List<Task> tasks);
 
-		/**
-		 * Task update was requested but failed
-		 * <p>
-		 * Failure to update the tasks list is not critical and can happen during normal operation,
-		 * i.e. when user has insufficient rights
-		 * 
-		 * @param message error message explaining failure to the user
-		 */
-		public void tasksUpdatedFailure(String message);
+        /**
+         * Task update was requested but failed
+         * <p>
+         * Failure to update the tasks list is not critical and can happen during normal operation,
+         * i.e. when user has insufficient rights
+         * 
+         * @param message error message explaining failure to the user
+         */
+        public void tasksUpdatedFailure(String message);
 
-	}
+    }
 
-	public interface JobOutputListener {
+    public interface JobOutputListener {
 
-		/**
-		 * The output of a job has been updated, views that are currently
-		 * displaying the output of this job or waiting for it can use it directly
-		 * 
-		 * @param output the output of a job
-		 */
-		public void jobOutputUpdated(JobOutput output);
+        /**
+         * The output of a job has been updated, views that are currently
+         * displaying the output of this job or waiting for it can use it directly
+         * 
+         * @param output the output of a job
+         */
+        public void jobOutputUpdated(JobOutput output);
 
-		/**
-		 * The output of a job that output is being streamed has been
-		 * updated.
-		 * 
-		 * @param jobId id of the job
-		 * @param output live output for the whole job, no per-task separation
-		 */
-		public void liveOutputUpdated(String jobId, String output);
+        /**
+         * The output of a job that output is being streamed has been
+         * updated.
+         * 
+         * @param jobId id of the job
+         * @param output live output for the whole job, no per-task separation
+         */
+        public void liveOutputUpdated(String jobId, String output);
 
-	}
+    }
 
-	public interface UsersListener {
+    public interface UsersListener {
 
-		/**
-		 * The list of users connected to the scheduler has been updated
-		 * 
-		 * @param users users currently connected to the scheduler
-		 */
-		public void usersUpdated(List<SchedulerUser> users);
+        /**
+         * The list of users connected to the scheduler has been updated
+         * 
+         * @param users users currently connected to the scheduler
+         */
+        public void usersUpdated(List<SchedulerUser> users);
 
-	}
+    }
 
-	public interface StatisticsListener {
+    public interface StatisticsListener {
 
-		/**
-		 * Stats regarding the whole scheduler have been updated
-		 * 
-		 * @param stats new stats
-		 */
-		public void schedulerStatsUpdated(HashMap<String, String> stats);
+        /**
+         * Stats regarding the whole scheduler have been updated
+         * 
+         * @param stats new stats
+         */
+        public void schedulerStatsUpdated(HashMap<String, String> stats);
 
-		/**
-		 * Stats regarging the current user have been updated
-		 * 
-		 * @param stats new stats
-		 */
-		public void accountStatsUpdated(HashMap<String, String> stats);
+        /**
+         * Stats regarging the current user have been updated
+         * 
+         * @param stats new stats
+         */
+        public void accountStatsUpdated(HashMap<String, String> stats);
 
-	}
+    }
 
-	public interface RemoteHintListener {
+    public interface RemoteHintListener {
 
-		/**
-		 * a log entry containing PA_REMOTE_CONNECTION was read
-		 * 
-		 * @param hint the log entry, must be parsed
-		 */
-		public void remoteHintRead(RemoteHint hint);
-	}
+        /**
+         * a log entry containing PA_REMOTE_CONNECTION was read
+         * 
+         * @param hint the log entry, must be parsed
+         */
+        public void remoteHintRead(RemoteHint hint);
+    }
 
-	public interface VisualizationListener {
+    public interface VisualizationListener {
 
-		/**
-		 * The image used for job visualization has been updated
-		 * 
-		 * @param jobId id of the job
-		 * @param path Relative path of the image on the server
-		 */
-		public void imageUpdated(String jobId, String path);
+        /**
+         * The image used for job visualization has been updated
+         * 
+         * @param jobId id of the job
+         * @param path Relative path of the image on the server
+         */
+        public void imageUpdated(String jobId, String path);
 
-		/**
-		 * The coordinate map for job visu has been updated
-		 * 
-		 * @param jobId id of the job
-		 * @param map position and size of tasks on the image sent through {@link #imageUpdated(String, String)}
-		 */
-		public void mapUpdated(String jobId, JobVisuMap map);
+        /**
+         * The coordinate map for job visu has been updated
+         * 
+         * @param jobId id of the job
+         * @param map position and size of tasks on the image sent through {@link #imageUpdated(String, String)}
+         */
+        public void mapUpdated(String jobId, JobVisuMap map);
 
-		/**
-		 * No visu available for this job
-		 * 
-		 * @param jobId id of the job
-		 */
-		public void visualizationUnavailable(String jobId);
+        /**
+         * No visu available for this job
+         * 
+         * @param jobId id of the job
+         */
+        public void visualizationUnavailable(String jobId);
 
-	}
+    }
 }

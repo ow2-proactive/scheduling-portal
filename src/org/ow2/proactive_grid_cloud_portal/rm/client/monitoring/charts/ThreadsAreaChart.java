@@ -44,7 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
  */
 public class ThreadsAreaChart extends MBeanTimeAreaChart {
 
-	public ThreadsAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "java.lang:type=Threading", "ThreadCount", "Threads");
-	}
+    public ThreadsAreaChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "java.lang:type=Threading", "ThreadCount", "Threads");
+    }
 }

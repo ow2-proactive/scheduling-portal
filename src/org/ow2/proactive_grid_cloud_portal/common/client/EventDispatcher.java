@@ -50,18 +50,18 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener
  */
 public interface EventDispatcher {
 
-	/**
-	 * Log Listeners will be notified when an event is logged
-	 * 
-	 * @param listener a new listener to register
-	 */
-	public void addLogListener(LogListener listener);
+    /**
+     * Log Listeners will be notified when an event is logged
+     * 
+     * @param listener a new listener to register
+     */
+    public void addLogListener(LogListener listener);
 
-	/**
-	 * Statistics listeners will be notified when history statistics are updated
-	 * 
-	 * @param listener a new listener to register
-	 */
-	public void addStatsListener(StatsListener listener);
+    /**
+     * Statistics listeners will be notified when history statistics are updated
+     * 
+     * @param listener a new listener to register
+     */
+    public void addStatsListener(StatsListener listener);
 
 }

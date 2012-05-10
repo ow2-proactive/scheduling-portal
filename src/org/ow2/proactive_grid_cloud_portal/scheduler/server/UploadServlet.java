@@ -77,118 +77,118 @@ import com.google.gwt.user.server.Base64Utils;
 @SuppressWarnings("serial")
 public class UploadServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		upload(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        upload(request, response);
+    }
 
-	private void upload(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("text/html");
-		File job = null;
+    private void upload(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("text/html");
+        File job = null;
 
-		try {
-			DiskFileItemFactory factory = new DiskFileItemFactory();
-			factory.setSizeThreshold(4096);
-			factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(4096);
+            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
 
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setSizeMax(1000000);
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setSizeMax(1000000);
 
-			List<?> fileItems = upload.parseRequest(request);
-			Iterator<?> i = fileItems.iterator();
+            List<?> fileItems = upload.parseRequest(request);
+            Iterator<?> i = fileItems.iterator();
 
-			String sessionId = null;
-			boolean edit = false;
+            String sessionId = null;
+            boolean edit = false;
 
-			/* 
-			 * * edit=0, simply submit the job descriptor
-			 * * edit=1, open the descriptor and return it as a string 
-			 */
+            /* 
+             * * edit=0, simply submit the job descriptor
+             * * edit=1, open the descriptor and return it as a string 
+             */
 
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
+            while (i.hasNext()) {
+                FileItem fi = (FileItem) i.next();
 
-				if (fi.isFormField()) {
-					if (fi.getFieldName().equals("sessionId")) {
-						sessionId = fi.getString();
-					} else if (fi.getFieldName().equals("edit")) {
-						if (fi.getString().equals("1")) {
-							edit = true;
-						} else {
-							edit = false;
-						}
-					}
-				} else {
-					String fileName = fi.getName();
-					job = new File(System.getProperty("java.io.tmpdir"), fileName);
-					fi.write(job);
-				}
+                if (fi.isFormField()) {
+                    if (fi.getFieldName().equals("sessionId")) {
+                        sessionId = fi.getString();
+                    } else if (fi.getFieldName().equals("edit")) {
+                        if (fi.getString().equals("1")) {
+                            edit = true;
+                        } else {
+                            edit = false;
+                        }
+                    }
+                } else {
+                    String fileName = fi.getName();
+                    job = new File(System.getProperty("java.io.tmpdir"), fileName);
+                    fi.write(job);
+                }
 
-				fi.delete();
-			}
+                fi.delete();
+            }
 
-			boolean isJar = false;
-			try {
-				JarFile jf = new JarFile(job);
-				isJar = (jf != null);
-			} catch (IOException e) {
-				// not a jar;
-			}
+            boolean isJar = false;
+            try {
+                JarFile jf = new JarFile(job);
+                isJar = (jf != null);
+            } catch (IOException e) {
+                // not a jar;
+            }
 
-			if (!isJar && job != null) {
-				// this _loosely_ checks that the file we got is an XML file 
-				try {
-					DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-					DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-					Document doc = docBuilder.parse(job);
+            if (!isJar && job != null) {
+                // this _loosely_ checks that the file we got is an XML file 
+                try {
+                    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                    Document doc = docBuilder.parse(job);
 
-					if (edit) {
-						// don't go on with edition if there are no variables
-						if (doc.getElementsByTagName("variables").getLength() < 1 ||
-							doc.getElementsByTagName("variable").getLength() < 1) {
-							response
-									.getWriter()
-									.write(
-											"This job descriptor contains no variable definition.<br>"
-												+ "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
-							return;
-						}
-					}
-				} catch (Throwable e) {
-					response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
-					return;
-				}
-			}
+                    if (edit) {
+                        // don't go on with edition if there are no variables
+                        if (doc.getElementsByTagName("variables").getLength() < 1 ||
+                            doc.getElementsByTagName("variable").getLength() < 1) {
+                            response
+                                    .getWriter()
+                                    .write(
+                                            "This job descriptor contains no variable definition.<br>"
+                                                + "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
+                            return;
+                        }
+                    }
+                } catch (Throwable e) {
+                    response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
+                    return;
+                }
+            }
 
-			if (edit && !isJar) {
-				String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
-				response.getWriter().write(
-						"{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
-			} else {
-				String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, job);
-				if (responseS == null || responseS.length() == 0) {
-					response.getWriter().write("Job submission returned without a value!");
-				} else {
-					response.getWriter().write(responseS);
-				}
-			}
+            if (edit && !isJar) {
+                String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
+                response.getWriter().write(
+                        "{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
+            } else {
+                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, job);
+                if (responseS == null || responseS.length() == 0) {
+                    response.getWriter().write("Job submission returned without a value!");
+                } else {
+                    response.getWriter().write(responseS);
+                }
+            }
 
-		} catch (Exception e) {
-			try {
-				String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-				response.getWriter().write(msg);
-			} catch (IOException e1) {
-			}
-		} finally {
-			if (job != null)
-				job.delete();
-		}
+        } catch (Exception e) {
+            try {
+                String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
+                response.getWriter().write(msg);
+            } catch (IOException e1) {
+            }
+        } finally {
+            if (job != null)
+                job.delete();
+        }
 
-	}
+    }
 
 }

@@ -55,69 +55,69 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
  */
 public class NetworkAreaChart extends MBeansTimeAreaChart {
 
-	// store last tx bytes & time stamp
-	private long time[];
-	private long txBytes[];
+    // store last tx bytes & time stamp
+    private long time[];
+    private long txBytes[];
 
-	public NetworkAreaChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
+    public NetworkAreaChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
-		AxisOptions vAxis = AxisOptions.create();
-		vAxis.set("format", "#.# Mb/s");
-		loadOpts.setVAxisOptions(vAxis);
-	}
+        AxisOptions vAxis = AxisOptions.create();
+        vAxis.set("format", "#.# Mb/s");
+        loadOpts.setVAxisOptions(vAxis);
+    }
 
-	@Override
-	public void processResult(String result) {
+    @Override
+    public void processResult(String result) {
 
-		// Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
-		JSONObject object = JSONParser.parseStrict(result).isObject();
-		if (object != null) {
+        // Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
+        JSONObject object = JSONParser.parseStrict(result).isObject();
+        if (object != null) {
 
-			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
-					new Date(System.currentTimeMillis()));
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                    new Date(System.currentTimeMillis()));
 
-			addRow();
-			loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+            addRow();
+            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
 
-			boolean initColumns = super.initColumns();
+            boolean initColumns = super.initColumns();
 
-			if (initColumns) {
-				time = new long[object.size()];
-				txBytes = new long[object.size()];
-			}
+            if (initColumns) {
+                time = new long[object.size()];
+                txBytes = new long[object.size()];
+            }
 
-			int colIndex = 1;
-			for (String key : object.keySet()) {
+            int colIndex = 1;
+            for (String key : object.keySet()) {
 
-				if (initColumns) {
-					loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-				}
+                if (initColumns) {
+                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+                }
 
-				long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value")
-						.toString());
-				long t = System.currentTimeMillis();
-				if (txBytes[colIndex - 1] > 0) {
-					double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
-					double mbPerSec = bytePerMilliSec * 1000 / (1024 * 1024);
-					loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
-				}
+                long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value")
+                        .toString());
+                long t = System.currentTimeMillis();
+                if (txBytes[colIndex - 1] > 0) {
+                    double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
+                    double mbPerSec = bytePerMilliSec * 1000 / (1024 * 1024);
+                    loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
+                }
 
-				txBytes[colIndex - 1] = value;
-				time[colIndex - 1] = t;
+                txBytes[colIndex - 1] = value;
+                time[colIndex - 1] = t;
 
-				colIndex++;
-			}
+                colIndex++;
+            }
 
-			loadChart.draw(loadTable, loadOpts);
-		}
-	}
+            loadChart.draw(loadTable, loadOpts);
+        }
+    }
 
-	private String beautifyName(String mbeanName) {
-		// sigar:Name=lo,Type=NetInterface
-		String patternStr = "sigar:Name=(.*),Type=NetInterface";
-		RegExp pattern = RegExp.compile(patternStr);
-		MatchResult matcher = pattern.exec(mbeanName);
-		return matcher.getGroup(1);
-	}
+    private String beautifyName(String mbeanName) {
+        // sigar:Name=lo,Type=NetInterface
+        String patternStr = "sigar:Name=(.*),Type=NetInterface";
+        RegExp pattern = RegExp.compile(patternStr);
+        MatchResult matcher = pattern.exec(mbeanName);
+        return matcher.getGroup(1);
+    }
 }

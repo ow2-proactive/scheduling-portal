@@ -44,104 +44,104 @@ import com.google.gwt.json.client.JSONValue;
 
 public abstract class Controller {
 
-	/**
-	 * @return locally stored data
-	 */
-	public abstract Model getModel();
+    /**
+     * @return locally stored data
+     */
+    public abstract Model getModel();
 
-	/**
-	 * @return event dispatcher, used to register new listeners
-	 */
-	public abstract EventDispatcher getEventDispatcher();
+    /**
+     * @return event dispatcher, used to register new listeners
+     */
+    public abstract EventDispatcher getEventDispatcher();
 
-	/**
-	 * login has been succesfully performed,
-	 * this method sets the pages & model accordingly.
-	 * This does NOT perform a server login call
-	 * 
-	 * @param sessionId
-	 * @param login can be null
-	 */
-	public abstract void login(String sessionId, String login);
+    /**
+     * login has been succesfully performed,
+     * this method sets the pages & model accordingly.
+     * This does NOT perform a server login call
+     * 
+     * @param sessionId
+     * @param login can be null
+     */
+    public abstract void login(String sessionId, String login);
 
-	/**
-	 * @return key of the 'login' setting in the local store, used to pre-fill
-	 *  the login page
-	 */
-	public abstract String getLoginSettingKey();
+    /**
+     * @return key of the 'login' setting in the local store, used to pre-fill
+     *  the login page
+     */
+    public abstract String getLoginSettingKey();
 
-	/**
-	 * @return URL of the small application logo
-	 */
-	public abstract String getLogo32Url();
+    /**
+     * @return URL of the small application logo
+     */
+    public abstract String getLogo32Url();
 
-	/**
-	 * @return URL of the large application logo
-	 */
-	public abstract String getLogo350Url();
+    /**
+     * @return URL of the large application logo
+     */
+    public abstract String getLogo350Url();
 
-	/**
-	 * @param throwable a serialized JSON Exception
-	 * @return the value of the 'errorMessage' key
-	 */
-	public static String getJsonErrorMessage(Throwable throwable) {
-		String msg = throwable.getMessage();
-		return getJsonErrorMessage(msg);
-	}
+    /**
+     * @param throwable a serialized JSON Exception
+     * @return the value of the 'errorMessage' key
+     */
+    public static String getJsonErrorMessage(Throwable throwable) {
+        String msg = throwable.getMessage();
+        return getJsonErrorMessage(msg);
+    }
 
-	/**
-	 * @param throwable a serialized JSON Exception
-	 * @return the value of the 'httpErrorCode' key, or -1
-	 */
-	public static int getJsonErrorCode(Throwable throwable) {
-		String msg = throwable.getMessage();
-		return getJsonErrorCode(msg);
-	}
+    /**
+     * @param throwable a serialized JSON Exception
+     * @return the value of the 'httpErrorCode' key, or -1
+     */
+    public static int getJsonErrorCode(Throwable throwable) {
+        String msg = throwable.getMessage();
+        return getJsonErrorCode(msg);
+    }
 
-	/**
-	 * @param str String representation of a serialized JSON Exception
-	 * @return the value of the 'errorMessage' key
-	 */
-	public static String getJsonErrorMessage(String str) {
-		try {
-			JSONObject exc = JSONParser.parseStrict(str).isObject();
-			if (exc != null && exc.containsKey("errorMessage")) {
-				JSONValue val = exc.get("errorMessage");
-				if (val == null || val.isString() == null) {
-					return "<no reason>";
-				} else {
-					return val.isString().stringValue();
-				}
-			}
-		} catch (JSONException e) {
-			if (str != null) {
-				return str;
-			} else {
-				return "<no reason>";
-			}
-		}
-		return null;
-	}
+    /**
+     * @param str String representation of a serialized JSON Exception
+     * @return the value of the 'errorMessage' key
+     */
+    public static String getJsonErrorMessage(String str) {
+        try {
+            JSONObject exc = JSONParser.parseStrict(str).isObject();
+            if (exc != null && exc.containsKey("errorMessage")) {
+                JSONValue val = exc.get("errorMessage");
+                if (val == null || val.isString() == null) {
+                    return "<no reason>";
+                } else {
+                    return val.isString().stringValue();
+                }
+            }
+        } catch (JSONException e) {
+            if (str != null) {
+                return str;
+            } else {
+                return "<no reason>";
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * @param str String representation of a serialized JSON Exception
-	 * @return the value of the 'httpErrorCode' key, or -1
-	 */
-	public static int getJsonErrorCode(String str) {
-		try {
-			JSONObject exc = JSONParser.parseStrict(str).isObject();
-			if (exc != null && exc.containsKey("httpErrorCode")) {
-				JSONValue val = exc.get("httpErrorCode");
-				if (val == null || val.isNumber() == null) {
-					return -1;
-				} else {
-					return (int) val.isNumber().doubleValue();
-				}
-			}
-		} catch (JSONException e) {
-			return -1;
-		}
-		return -1;
-	}
+    /**
+     * @param str String representation of a serialized JSON Exception
+     * @return the value of the 'httpErrorCode' key, or -1
+     */
+    public static int getJsonErrorCode(String str) {
+        try {
+            JSONObject exc = JSONParser.parseStrict(str).isObject();
+            if (exc != null && exc.containsKey("httpErrorCode")) {
+                JSONValue val = exc.get("httpErrorCode");
+                if (val == null || val.isNumber() == null) {
+                    return -1;
+                } else {
+                    return (int) val.isNumber().doubleValue();
+                }
+            }
+        } catch (JSONException e) {
+            return -1;
+        }
+        return -1;
+    }
 
 }

@@ -43,45 +43,45 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 
 public interface Listeners {
 
-	public interface LogListener {
+    public interface LogListener {
 
-		/**
-		 * Issue a low priority message to be displayed by the listeners
-		 * <p>
-		 * It may be HTML formatted and can be directly inserted in the page
-		 * 
-		 * @param message a text or HTML log entry
-		 */
-		public void logMessage(String message);
+        /**
+         * Issue a low priority message to be displayed by the listeners
+         * <p>
+         * It may be HTML formatted and can be directly inserted in the page
+         * 
+         * @param message a text or HTML log entry
+         */
+        public void logMessage(String message);
 
-		/**
-		 * Issue an important message to be displayed by the listeners
-		 * <p>
-		 * It may be HTML formatted and can be directly inserted in the page
-		 * 
-		 * @param message a text or HTML log entry
-		 */
-		public void logImportantMessage(String message);
+        /**
+         * Issue an important message to be displayed by the listeners
+         * <p>
+         * It may be HTML formatted and can be directly inserted in the page
+         * 
+         * @param message a text or HTML log entry
+         */
+        public void logImportantMessage(String message);
 
-		/**
-		 * Issue a critical message to be displayed by the listeners
-		 * <p>
-		 * It may be HTML formatted and can be directly inserted in the page
-		 * 
-		 * @param message a text or HTML log entry
-		 */
-		public void logCriticalMessage(String message);
+        /**
+         * Issue a critical message to be displayed by the listeners
+         * <p>
+         * It may be HTML formatted and can be directly inserted in the page
+         * 
+         * @param message a text or HTML log entry
+         */
+        public void logCriticalMessage(String message);
 
-	}
+    }
 
-	public interface StatsListener {
+    public interface StatsListener {
 
-		/**
-		 * Statistics for the given value have been updated
-		 * 
-		 * @param key: source name; value: list of values
-		 */
-		public void statsUpdated(Map<String, StatHistory> values);
-	}
+        /**
+         * Statistics for the given value have been updated
+         * 
+         * @param key: source name; value: list of values
+         */
+        public void statsUpdated(Map<String, StatHistory> values);
+    }
 
 }

@@ -48,57 +48,57 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class User implements Serializable {
 
-	private String username;
-	private String sessionId;
+    private String username;
+    private String sessionId;
 
-	/**
-	 * Empty no-arg constructor
-	 */
-	public User() {
-	}
+    /**
+     * Empty no-arg constructor
+     */
+    public User() {
+    }
 
-	/**
-	 * Creates a new instance for the User.
-	 * @param username the username
-	 */
-	public User(String username) {
-		this.username = username;
-	}
+    /**
+     * Creates a new instance for the User.
+     * @param username the username
+     */
+    public User(String username) {
+        this.username = username;
+    }
 
-	/**
-	 * Setter for the user name.
-	 * @param username the user name that is going to be set
-	 */
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    /**
+     * Setter for the user name.
+     * @param username the user name that is going to be set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	/**
-	 * Getter for the user name.
-	 * @return the user name
-	 */
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * Getter for the user name.
+     * @return the user name
+     */
+    public String getUsername() {
+        return username;
+    }
 
-	/**
-	 * Setter of the user's session id.
-	 * @param sessionId
-	 */
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
+    /**
+     * Setter of the user's session id.
+     * @param sessionId
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
-	/**
-	 * Getter for the user's session id.
-	 * @return the user's session id
-	 */
-	public String getSessionID() {
-		return sessionId;
-	}
+    /**
+     * Getter for the user's session id.
+     * @return the user's session id
+     */
+    public String getSessionID() {
+        return sessionId;
+    }
 
-	public String toString() {
-		return "[username = " + this.username + ", " + "sessionId = " + this.sessionId + "]";
-	}
+    public String toString() {
+        return "[username = " + this.username + ", " + "sessionId = " + this.sessionId + "]";
+    }
 
 }

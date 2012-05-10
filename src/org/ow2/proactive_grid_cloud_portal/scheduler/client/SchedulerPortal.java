@@ -50,29 +50,29 @@ import com.smartgwt.client.util.SC;
 
 public class SchedulerPortal implements EntryPoint {
 
-	private final SchedulerServiceAsync rpcService = GWT.create(SchedulerService.class);
+    private final SchedulerServiceAsync rpcService = GWT.create(SchedulerService.class);
 
-	public void onModuleLoad() {
-		JSUtil.addScript("portal/raphael-min.js");
+    public void onModuleLoad() {
+        JSUtil.addScript("portal/raphael-min.js");
 
-		loadProperties();
-	}
+        loadProperties();
+    }
 
-	private void loadProperties() {
+    private void loadProperties() {
 
-		rpcService.getProperties(new AsyncCallback<Map<String, String>>() {
+        rpcService.getProperties(new AsyncCallback<Map<String, String>>() {
 
-			public void onSuccess(Map<String, String> result) {
-				SchedulerConfig.get().load(result);
-				Settings.load();
-				SchedulerController c = new SchedulerController(rpcService);
-				GWT.setUncaughtExceptionHandler(c);
-			}
+            public void onSuccess(Map<String, String> result) {
+                SchedulerConfig.get().load(result);
+                Settings.load();
+                SchedulerController c = new SchedulerController(rpcService);
+                GWT.setUncaughtExceptionHandler(c);
+            }
 
-			public void onFailure(Throwable caught) {
-				SC.warn("Unable to get the client properties:<br>" + caught.getMessage());
-			}
-		});
-	}
+            public void onFailure(Throwable caught) {
+                SC.warn("Unable to get the client properties:<br>" + caught.getMessage());
+            }
+        });
+    }
 
 }

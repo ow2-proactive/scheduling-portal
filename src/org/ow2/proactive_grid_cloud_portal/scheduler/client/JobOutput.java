@@ -54,51 +54,51 @@ import java.util.TreeMap;
  */
 public class JobOutput {
 
-	/** the output content, split by task and line
-	 * key is timestamp for task finish time for sorting */
-	private SortedMap<Long, List<String>> lines;
+    /** the output content, split by task and line
+     * key is timestamp for task finish time for sorting */
+    private SortedMap<Long, List<String>> lines;
 
-	/** id of the job */
-	private int jobId;
+    /** id of the job */
+    private int jobId;
 
-	/**
-	 * Default constructor
-	 * 
-	 * @param jobId id of the job representing this output
-	 */
-	public JobOutput(int jobId) {
-		this.jobId = jobId;
-		this.lines = new TreeMap<Long, List<String>>();
-	}
+    /**
+     * Default constructor
+     * 
+     * @param jobId id of the job representing this output
+     */
+    public JobOutput(int jobId) {
+        this.jobId = jobId;
+        this.lines = new TreeMap<Long, List<String>>();
+    }
 
-	/**
-	 * Update the output for a single task
-	 * 
-	 * @param finishedTime
-	 * @param output output for this task
-	 */
-	public void update(long finishedTime, List<String> output) {
-		List<String> tl = this.lines.get(finishedTime);
-		if (tl != null) {
-			tl.clear();
-		} else {
-			tl = new ArrayList<String>();
-			this.lines.put(finishedTime, tl);
-		}
-		tl.addAll(output);
-	}
+    /**
+     * Update the output for a single task
+     * 
+     * @param finishedTime
+     * @param output output for this task
+     */
+    public void update(long finishedTime, List<String> output) {
+        List<String> tl = this.lines.get(finishedTime);
+        if (tl != null) {
+            tl.clear();
+        } else {
+            tl = new ArrayList<String>();
+            this.lines.put(finishedTime, tl);
+        }
+        tl.addAll(output);
+    }
 
-	/**
-	 * @return the output lines, exploded in a list, per task (finished time as key for sorting)
-	 */
-	public SortedMap<Long, List<String>> getLines() {
-		return this.lines;
-	}
+    /**
+     * @return the output lines, exploded in a list, per task (finished time as key for sorting)
+     */
+    public SortedMap<Long, List<String>> getLines() {
+        return this.lines;
+    }
 
-	/**
-	 * @return the id of the job associated with this output
-	 */
-	public int getJobId() {
-		return this.jobId;
-	}
+    /**
+     * @return the id of the job associated with this output
+     */
+    public int getJobId() {
+        return this.jobId;
+    }
 }

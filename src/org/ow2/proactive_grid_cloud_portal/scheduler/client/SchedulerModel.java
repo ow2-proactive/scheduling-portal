@@ -52,137 +52,137 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
  */
 public abstract class SchedulerModel implements Model {
 
-	/**
-	 * @return the current status of the scheduler
-	 */
-	public abstract SchedulerStatus getSchedulerStatus();
+    /**
+     * @return the current status of the scheduler
+     */
+    public abstract SchedulerStatus getSchedulerStatus();
 
-	/**
-	 * @return local view of all the jobs known by the scheduler server
-	 */
-	public abstract Map<Integer, Job> getJobs();
+    /**
+     * @return local view of all the jobs known by the scheduler server
+     */
+    public abstract Map<Integer, Job> getJobs();
 
-	/**
-	 * @return the number of jobs to be displayed on a page
-	 */
-	public abstract int getJobPageSize();
+    /**
+     * @return the number of jobs to be displayed on a page
+     */
+    public abstract int getJobPageSize();
 
-	/**
-	 * @return the job page currently displayed
-	 */
-	public abstract int getJobPage();
+    /**
+     * @return the job page currently displayed
+     */
+    public abstract int getJobPage();
 
-	/**
-	 * @param jobId the Id of a Job
-	 * @return the corresponding job if known by the Model, or null
-	 */
-	public abstract Job getJob(int jobId);
+    /**
+     * @param jobId the Id of a Job
+     * @return the corresponding job if known by the Model, or null
+     */
+    public abstract Job getJob(int jobId);
 
-	/**
-	 * @return the revision id associated with the currently held JobBag
-	 */
-	public abstract long getJobsRevision();
+    /**
+     * @return the revision id associated with the currently held JobBag
+     */
+    public abstract long getJobsRevision();
 
-	/**
-	 * @return the currently selected job
-	 */
-	public abstract Job getSelectedJob();
+    /**
+     * @return the currently selected job
+     */
+    public abstract Job getSelectedJob();
 
-	/**
-	 * @return the list of tasks corresponding the currently selected job
-	 */
-	public abstract List<Task> getTasks();
+    /**
+     * @return the list of tasks corresponding the currently selected job
+     */
+    public abstract List<Task> getTasks();
 
-	/**
-	 * @return true if the current tasks list does not match the selected job
-	 */
-	public abstract boolean isTasksDirty();
+    /**
+     * @return true if the current tasks list does not match the selected job
+     */
+    public abstract boolean isTasksDirty();
 
-	/**
-	 * If it has been previously stored, the model may have cached the partial or
-	 * complete output of a given job.
-	 * 
-	 * @param jobId id of the job for which the output should be fetched
-	 * @return a wrapper for the job output
-	 */
-	public abstract JobOutput getJobOutput(int jobId);
+    /**
+     * If it has been previously stored, the model may have cached the partial or
+     * complete output of a given job.
+     * 
+     * @param jobId id of the job for which the output should be fetched
+     * @return a wrapper for the job output
+     */
+    public abstract JobOutput getJobOutput(int jobId);
 
-	/**
-	 * The locally stored live log for the given job
-	 * @param jobId id of the job
-	 * @return output of the given job, as stored locally. may not contain
-	 *  the actual output fully
-	 */
-	public abstract String getLiveOutput(String jobId);
+    /**
+     * The locally stored live log for the given job
+     * @param jobId id of the job
+     * @return output of the given job, as stored locally. may not contain
+     *  the actual output fully
+     */
+    public abstract String getLiveOutput(String jobId);
 
-	/**
-	 * @param jobId the id of a job
-	 * @return true if the specified job's output is streamed
-	 */
-	public abstract boolean isLiveOutput(String jobId);
+    /**
+     * @param jobId the id of a job
+     * @return true if the specified job's output is streamed
+     */
+    public abstract boolean isLiveOutput(String jobId);
 
-	/**
-	 * @param jobId the id of a job
-	 * @return the relative path of the image on the server that may be used to construct the image url
-	 */
-	public abstract String getJobImagePath(String jobId);
+    /**
+     * @param jobId the id of a job
+     * @return the relative path of the image on the server that may be used to construct the image url
+     */
+    public abstract String getJobImagePath(String jobId);
 
-	/**
-	 * @param jobId the id of a job
-	 * @return if available, information about the size and position of tasks on the image described by
-	 * 		{@link #getJobImagePath(String)}; or null
-	 */
-	public abstract JobVisuMap getJobVisuMap(String jobId);
+    /**
+     * @param jobId the id of a job
+     * @return if available, information about the size and position of tasks on the image described by
+     * 		{@link #getJobImagePath(String)}; or null
+     */
+    public abstract JobVisuMap getJobVisuMap(String jobId);
 
-	public static class RemoteHint {
-		String taskId;
-		String type;
-		String argument;
-	}
+    public static class RemoteHint {
+        String taskId;
+        String type;
+        String argument;
+    }
 
-	/**
-	 * Return all the remote hints that have been read so far by the model
-	 * this corresponds to all log lines containing 'PA_REMOTE_CONNECTION' that
-	 * were fetched in logs
-	 * If logs for the task were not fetched, remote hints won't be stored here
-	 * 
-	 * @return all remote hints read so far
-	 */
-	public abstract List<RemoteHint> getRemoteHints();
+    /**
+     * Return all the remote hints that have been read so far by the model
+     * this corresponds to all log lines containing 'PA_REMOTE_CONNECTION' that
+     * were fetched in logs
+     * If logs for the task were not fetched, remote hints won't be stored here
+     * 
+     * @return all remote hints read so far
+     */
+    public abstract List<RemoteHint> getRemoteHints();
 
-	/**
-	 * @return true if the model should only store the jobs of the current user
-	 */
-	public abstract boolean isFetchMyJobsOnly();
+    /**
+     * @return true if the model should only store the jobs of the current user
+     */
+    public abstract boolean isFetchMyJobsOnly();
 
-	/**
-	 * @return true if the model should store pending jobs
-	 */
-	public abstract boolean isFetchPendingJobs();
+    /**
+     * @return true if the model should store pending jobs
+     */
+    public abstract boolean isFetchPendingJobs();
 
-	/**
-	 * @return true if the model should store running jobs
-	 */
-	public abstract boolean isFetchRunningJobs();
+    /**
+     * @return true if the model should store running jobs
+     */
+    public abstract boolean isFetchRunningJobs();
 
-	/**
-	 * @return true if the model should store finished jobs
-	 */
-	public abstract boolean isFetchFinishedJobs();
+    /**
+     * @return true if the model should store finished jobs
+     */
+    public abstract boolean isFetchFinishedJobs();
 
-	/**
-	 * @return the list of users connected to the scheduler
-	 */
-	public abstract List<SchedulerUser> getSchedulerUsers();
+    /**
+     * @return the list of users connected to the scheduler
+     */
+    public abstract List<SchedulerUser> getSchedulerUsers();
 
-	/**
-	 * @return statistics for the logged user account
-	 */
-	public abstract HashMap<String, String> getAccountStatistics();
+    /**
+     * @return statistics for the logged user account
+     */
+    public abstract HashMap<String, String> getAccountStatistics();
 
-	/**
-	 * @return statistics for the scheduler
-	 */
-	public abstract HashMap<String, String> getSchedulerStatistics();
+    /**
+     * @return statistics for the scheduler
+     */
+    public abstract HashMap<String, String> getSchedulerStatistics();
 
 }

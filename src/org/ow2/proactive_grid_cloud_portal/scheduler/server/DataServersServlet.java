@@ -54,46 +54,46 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class DataServersServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		servers(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        servers(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		servers(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        servers(request, response);
+    }
 
-	private void servers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void servers(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		String codebase = request.getParameter("codebase");
+        String codebase = request.getParameter("codebase");
 
-		response.setContentType("application/x-java-jnlp-file");
-		response.setHeader("Content-disposition", "attachment; filename=servers.jnlp");
-		response.setHeader("Location", "servers.jnlp");
+        response.setContentType("application/x-java-jnlp-file");
+        response.setHeader("Content-disposition", "attachment; filename=servers.jnlp");
+        response.setHeader("Location", "servers.jnlp");
 
-		ServletOutputStream out = response.getOutputStream();
-		String ret = "<?xml version='1.0' encoding='UTF-8'?>\n" + "<jnlp spec='1.0+' codebase='' href=''>\n" //
-			+ "  <information>\n" //
-			+ "    <title>ProActive Web Portal Data Servers</title>\n" + "    <vendor>INRIA</vendor>\n" // 
-			+ "    <homepage href='http://proactive.inria.fr'/>\n" //
-			+ "    <offline-allowed />\n" //
-			+ "  </information>\n" //
-			+ "  <resources>\n" //
-			+ "    <j2se version='1.5+'" //
-			+ "    href='http://java.sun.com/products/autodl/j2se'/>\n" //
-			+ "    <jar href='" + codebase + "servers.jar' main='true' />\n" + "  </resources>\n" //
-			+ "  <security>\n" // 
-			+ "    <all-permissions/>\n" // 
-			+ "  </security>\n" // 
-			+ "  <application-desc" //
-			+ "   name='Data Servers'" //
-			+ "   main-class='org.ow2.proactive_grid_cloud_portal.extra.DataServerLauncher'>\n" //
-			+ "  </application-desc>\n" //
-			+ "</jnlp>\n";
+        ServletOutputStream out = response.getOutputStream();
+        String ret = "<?xml version='1.0' encoding='UTF-8'?>\n" + "<jnlp spec='1.0+' codebase='' href=''>\n" //
+            + "  <information>\n" //
+            + "    <title>ProActive Web Portal Data Servers</title>\n" + "    <vendor>INRIA</vendor>\n" // 
+            + "    <homepage href='http://proactive.inria.fr'/>\n" //
+            + "    <offline-allowed />\n" //
+            + "  </information>\n" //
+            + "  <resources>\n" //
+            + "    <j2se version='1.5+'" //
+            + "    href='http://java.sun.com/products/autodl/j2se'/>\n" //
+            + "    <jar href='" + codebase + "servers.jar' main='true' />\n" + "  </resources>\n" //
+            + "  <security>\n" // 
+            + "    <all-permissions/>\n" // 
+            + "  </security>\n" // 
+            + "  <application-desc" //
+            + "   name='Data Servers'" //
+            + "   main-class='org.ow2.proactive_grid_cloud_portal.extra.DataServerLauncher'>\n" //
+            + "  </application-desc>\n" //
+            + "</jnlp>\n";
 
-		out.println(ret);
-		out.close();
+        out.println(ret);
+        out.close();
 
-	}
+    }
 }

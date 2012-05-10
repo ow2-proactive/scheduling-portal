@@ -49,56 +49,56 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public interface RMImages extends ClientBundle {
 
-	public static final RMImages instance = GWT.create(RMImages.class);
+    public static final RMImages instance = GWT.create(RMImages.class);
 
-	@Source("images/host_16.png")
-	ImageResource host_16();
+    @Source("images/host_16.png")
+    ImageResource host_16();
 
-	@Source("images/host_virtual_16.png")
-	ImageResource host_virtual_16();
+    @Source("images/host_virtual_16.png")
+    ImageResource host_virtual_16();
 
-	@Source("images/nodesource_16.png")
-	ImageResource nodesource_16();
+    @Source("images/nodesource_16.png")
+    ImageResource nodesource_16();
 
-	@Source("images/node_locked_16.png")
-	ImageResource node_locked_16();
+    @Source("images/node_locked_16.png")
+    ImageResource node_locked_16();
 
-	@Source("images/node_remove_16.png")
-	ImageResource node_remove_16();
+    @Source("images/node_remove_16.png")
+    ImageResource node_remove_16();
 
-	@Source("images/node_add_16.png")
-	ImageResource node_add_16();
+    @Source("images/node_add_16.png")
+    ImageResource node_add_16();
 
-	@Source("images/node_configuring_16.png")
-	ImageResource node_configuring_16();
+    @Source("images/node_configuring_16.png")
+    ImageResource node_configuring_16();
 
-	@Source("images/node_lost_16.png")
-	ImageResource node_lost_16();
+    @Source("images/node_lost_16.png")
+    ImageResource node_lost_16();
 
-	@Source("images/node_free_16.png")
-	ImageResource node_free_16();
+    @Source("images/node_free_16.png")
+    ImageResource node_free_16();
 
-	@Source("images/node_down_16.png")
-	ImageResource node_down_16();
+    @Source("images/node_down_16.png")
+    ImageResource node_down_16();
 
-	@Source("images/node_deploying_16.png")
-	ImageResource node_deploying_16();
+    @Source("images/node_deploying_16.png")
+    ImageResource node_deploying_16();
 
-	@Source("images/node_busy_16.png")
-	ImageResource node_busy_16();
+    @Source("images/node_busy_16.png")
+    ImageResource node_busy_16();
 
-	@Source("images/node_torelease_16.png")
-	ImageResource node_torelease_16();
+    @Source("images/node_torelease_16.png")
+    ImageResource node_torelease_16();
 
-	@Source("images/open_16.png")
-	ImageResource open_16();
+    @Source("images/open_16.png")
+    ImageResource open_16();
 
-	@Source("images/logo_32.png")
-	ImageResource logo_32();
+    @Source("images/logo_32.png")
+    ImageResource logo_32();
 
-	@Source("images/logo_350.png")
-	ImageResource logo_350();
+    @Source("images/logo_350.png")
+    ImageResource logo_350();
 
-	@Source("images/refresh.png")
-	ImageResource refresh();
+    @Source("images/refresh.png")
+    ImageResource refresh();
 }

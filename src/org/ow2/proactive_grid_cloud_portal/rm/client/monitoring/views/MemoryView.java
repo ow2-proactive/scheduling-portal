@@ -50,34 +50,34 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class MemoryView extends VLayout implements Reloadable {
 
-	private MBeanChart ram;
-	private MBeanChart swap;
+    private MBeanChart ram;
+    private MBeanChart swap;
 
-	private ReloadableChain chain;
+    private ReloadableChain chain;
 
-	public MemoryView(RMController controller, String url) {
-		// memory view
-		ram = new MemoryLineChart(controller, url);
-		swap = new SwapLineChart(controller, url);
+    public MemoryView(RMController controller, String url) {
+        // memory view
+        ram = new MemoryLineChart(controller, url);
+        swap = new SwapLineChart(controller, url);
 
-		chain = new ReloadableChain(new Reloadable[] { ram, swap });
+        chain = new ReloadableChain(new Reloadable[] { ram, swap });
 
-		setWidth100();
-		addMember(ram);
-		addMember(swap);
-	}
+        setWidth100();
+        addMember(ram);
+        addMember(swap);
+    }
 
-	@Override
-	public void reload() {
-		chain.reload();
-	}
+    @Override
+    public void reload() {
+        chain.reload();
+    }
 
-	@Override
-	public void onFinish(final Runnable onFinish) {
-		chain.onFinish(new Runnable() {
-			public void run() {
-				onFinish.run();
-			}
-		});
-	}
+    @Override
+    public void onFinish(final Runnable onFinish) {
+        chain.onFinish(new Runnable() {
+            public void run() {
+                onFinish.run();
+            }
+        });
+    }
 }

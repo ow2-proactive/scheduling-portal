@@ -44,60 +44,60 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
  */
 public class ReloadableChain implements Reloadable {
 
-	private Reloadable[] reloadables;
-	private boolean reloading = false;
+    private Reloadable[] reloadables;
+    private boolean reloading = false;
 
-	private Runnable onFinish;
+    private Runnable onFinish;
 
-	public ReloadableChain(Reloadable[] reloadables) {
-		this.reloadables = reloadables;
+    public ReloadableChain(Reloadable[] reloadables) {
+        this.reloadables = reloadables;
 
-		for (int i = 0; i < reloadables.length - 1; i++) {
-			final int index = i;
-			reloadables[i].onFinish(new Runnable() {
-				public void run() {
-					boolean continueReloading = false;
-					synchronized (ReloadableChain.this) {
-						if (reloading) {
-							continueReloading = true;
-						}
-					}
+        for (int i = 0; i < reloadables.length - 1; i++) {
+            final int index = i;
+            reloadables[i].onFinish(new Runnable() {
+                public void run() {
+                    boolean continueReloading = false;
+                    synchronized (ReloadableChain.this) {
+                        if (reloading) {
+                            continueReloading = true;
+                        }
+                    }
 
-					if (continueReloading) {
-						ReloadableChain.this.reloadables[index + 1].reload();
-					}
-				}
-			});
-		}
-		reloadables[reloadables.length - 1].onFinish(new Runnable() {
-			public void run() {
-				synchronized (ReloadableChain.this) {
-					reloading = false;
-					if (onFinish != null) {
-						onFinish.run();
-					}
-				}
-			}
-		});
-	}
+                    if (continueReloading) {
+                        ReloadableChain.this.reloadables[index + 1].reload();
+                    }
+                }
+            });
+        }
+        reloadables[reloadables.length - 1].onFinish(new Runnable() {
+            public void run() {
+                synchronized (ReloadableChain.this) {
+                    reloading = false;
+                    if (onFinish != null) {
+                        onFinish.run();
+                    }
+                }
+            }
+        });
+    }
 
-	public synchronized void stopReloading() {
-		reloading = false;
-	}
+    public synchronized void stopReloading() {
+        reloading = false;
+    }
 
-	public void reload() {
-		synchronized (this) {
-			if (reloading) {
-				return;
-			}
-			reloading = true;
-		}
-		reloadables[0].reload();
-	}
+    public void reload() {
+        synchronized (this) {
+            if (reloading) {
+                return;
+            }
+            reloading = true;
+        }
+        reloadables[0].reload();
+    }
 
-	@Override
-	public void onFinish(Runnable onFinish) {
-		this.onFinish = onFinish;
-	}
+    @Override
+    public void onFinish(Runnable onFinish) {
+        this.onFinish = onFinish;
+    }
 
 }

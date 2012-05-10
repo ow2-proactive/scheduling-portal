@@ -59,245 +59,245 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ifElseRecord", propOrder = { "source", "targetIf", "connectorIf", "targetElse",
-		"connectorElse" })
+        "connectorElse" })
 public class IfElseRecord extends FlowControlRecord {
 
-	protected String source;
-	protected String targetIf;
-	protected IfElseRecord.ConnectorIf connectorIf;
-	protected String targetElse;
-	protected IfElseRecord.ConnectorElse connectorElse;
+    protected String source;
+    protected String targetIf;
+    protected IfElseRecord.ConnectorIf connectorIf;
+    protected String targetElse;
+    protected IfElseRecord.ConnectorElse connectorElse;
 
-	/**
-	 * Gets the value of the source property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getSource() {
-		return source;
-	}
+    /**
+     * Gets the value of the source property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSource() {
+        return source;
+    }
 
-	/**
-	 * Sets the value of the source property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setSource(String value) {
-		this.source = value;
-	}
+    /**
+     * Sets the value of the source property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSource(String value) {
+        this.source = value;
+    }
 
-	/**
-	 * Gets the value of the targetIf property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getTargetIf() {
-		return targetIf;
-	}
+    /**
+     * Gets the value of the targetIf property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTargetIf() {
+        return targetIf;
+    }
 
-	/**
-	 * Sets the value of the targetIf property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setTargetIf(String value) {
-		this.targetIf = value;
-	}
+    /**
+     * Sets the value of the targetIf property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTargetIf(String value) {
+        this.targetIf = value;
+    }
 
-	/**
-	 * Gets the value of the connectorIf property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link IfElseRecord.ConnectorIf }
-	 *     
-	 */
-	public IfElseRecord.ConnectorIf getConnectorIf() {
-		return connectorIf;
-	}
+    /**
+     * Gets the value of the connectorIf property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link IfElseRecord.ConnectorIf }
+     *     
+     */
+    public IfElseRecord.ConnectorIf getConnectorIf() {
+        return connectorIf;
+    }
 
-	/**
-	 * Sets the value of the connectorIf property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link IfElseRecord.ConnectorIf }
-	 *     
-	 */
-	public void setConnectorIf(IfElseRecord.ConnectorIf value) {
-		this.connectorIf = value;
-	}
+    /**
+     * Sets the value of the connectorIf property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link IfElseRecord.ConnectorIf }
+     *     
+     */
+    public void setConnectorIf(IfElseRecord.ConnectorIf value) {
+        this.connectorIf = value;
+    }
 
-	/**
-	 * Gets the value of the targetElse property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link String }
-	 *     
-	 */
-	public String getTargetElse() {
-		return targetElse;
-	}
+    /**
+     * Gets the value of the targetElse property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTargetElse() {
+        return targetElse;
+    }
 
-	/**
-	 * Sets the value of the targetElse property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link String }
-	 *     
-	 */
-	public void setTargetElse(String value) {
-		this.targetElse = value;
-	}
+    /**
+     * Sets the value of the targetElse property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTargetElse(String value) {
+        this.targetElse = value;
+    }
 
-	/**
-	 * Gets the value of the connectorElse property.
-	 * 
-	 * @return
-	 *     possible object is
-	 *     {@link IfElseRecord.ConnectorElse }
-	 *     
-	 */
-	public IfElseRecord.ConnectorElse getConnectorElse() {
-		return connectorElse;
-	}
+    /**
+     * Gets the value of the connectorElse property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link IfElseRecord.ConnectorElse }
+     *     
+     */
+    public IfElseRecord.ConnectorElse getConnectorElse() {
+        return connectorElse;
+    }
 
-	/**
-	 * Sets the value of the connectorElse property.
-	 * 
-	 * @param value
-	 *     allowed object is
-	 *     {@link IfElseRecord.ConnectorElse }
-	 *     
-	 */
-	public void setConnectorElse(IfElseRecord.ConnectorElse value) {
-		this.connectorElse = value;
-	}
+    /**
+     * Sets the value of the connectorElse property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link IfElseRecord.ConnectorElse }
+     *     
+     */
+    public void setConnectorElse(IfElseRecord.ConnectorElse value) {
+        this.connectorElse = value;
+    }
 
-	/**
-	 * <p>Java class for anonymous complex type.
-	 * 
-	 * <p>The following schema fragment specifies the expected content contained within this class.
-	 * 
-	 * <pre>
-	 * &lt;complexType>
-	 *   &lt;complexContent>
-	 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-	 *       &lt;sequence>
-	 *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
-	 *       &lt;/sequence>
-	 *     &lt;/restriction>
-	 *   &lt;/complexContent>
-	 * &lt;/complexType>
-	 * </pre>
-	 * 
-	 * 
-	 */
-	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name = "", propOrder = { "point" })
-	public static class ConnectorElse {
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = { "point" })
+    public static class ConnectorElse {
 
-		protected List<PositionRecord> point;
+        protected List<PositionRecord> point;
 
-		/**
-		 * Gets the value of the point property.
-		 * 
-		 * <p>
-		 * This accessor method returns a reference to the live list,
-		 * not a snapshot. Therefore any modification you make to the
-		 * returned list will be present inside the JAXB object.
-		 * This is why there is not a <CODE>set</CODE> method for the point property.
-		 * 
-		 * <p>
-		 * For example, to add a new item, do as follows:
-		 * <pre>
-		 *    getPoint().add(newItem);
-		 * </pre>
-		 * 
-		 * 
-		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link PositionRecord }
-		 * 
-		 * 
-		 */
-		public List<PositionRecord> getPoint() {
-			if (point == null) {
-				point = new ArrayList<PositionRecord>();
-			}
-			return this.point;
-		}
+        /**
+         * Gets the value of the point property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the point property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getPoint().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link PositionRecord }
+         * 
+         * 
+         */
+        public List<PositionRecord> getPoint() {
+            if (point == null) {
+                point = new ArrayList<PositionRecord>();
+            }
+            return this.point;
+        }
 
-	}
+    }
 
-	/**
-	 * <p>Java class for anonymous complex type.
-	 * 
-	 * <p>The following schema fragment specifies the expected content contained within this class.
-	 * 
-	 * <pre>
-	 * &lt;complexType>
-	 *   &lt;complexContent>
-	 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-	 *       &lt;sequence>
-	 *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
-	 *       &lt;/sequence>
-	 *     &lt;/restriction>
-	 *   &lt;/complexContent>
-	 * &lt;/complexType>
-	 * </pre>
-	 * 
-	 * 
-	 */
-	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name = "", propOrder = { "point" })
-	public static class ConnectorIf {
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="point" type="{}positionRecord" maxOccurs="unbounded" minOccurs="0"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = { "point" })
+    public static class ConnectorIf {
 
-		protected List<PositionRecord> point;
+        protected List<PositionRecord> point;
 
-		/**
-		 * Gets the value of the point property.
-		 * 
-		 * <p>
-		 * This accessor method returns a reference to the live list,
-		 * not a snapshot. Therefore any modification you make to the
-		 * returned list will be present inside the JAXB object.
-		 * This is why there is not a <CODE>set</CODE> method for the point property.
-		 * 
-		 * <p>
-		 * For example, to add a new item, do as follows:
-		 * <pre>
-		 *    getPoint().add(newItem);
-		 * </pre>
-		 * 
-		 * 
-		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link PositionRecord }
-		 * 
-		 * 
-		 */
-		public List<PositionRecord> getPoint() {
-			if (point == null) {
-				point = new ArrayList<PositionRecord>();
-			}
-			return this.point;
-		}
+        /**
+         * Gets the value of the point property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the point property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getPoint().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link PositionRecord }
+         * 
+         * 
+         */
+        public List<PositionRecord> getPoint() {
+            if (point == null) {
+                point = new ArrayList<PositionRecord>();
+            }
+            return this.point;
+        }
 
-	}
+    }
 
 }

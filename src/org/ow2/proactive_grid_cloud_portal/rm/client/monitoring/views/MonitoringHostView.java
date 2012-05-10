@@ -64,151 +64,151 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
  */
 public class MonitoringHostView extends VLayout implements AsyncCallback<String> {
 
-	private Timer updater = null;
-	private ReloadableChain chain;
-	private Overview overview;
-	private CpuView cpuView;
-	private MemoryView memoryView;
-	private FileSystemView fsView;
-	private NetworkView networkView;
-	private ProcessesView processesView;
-	private Node node;
-	private TabSet tabs;
-	private Label status;
+    private Timer updater = null;
+    private ReloadableChain chain;
+    private Overview overview;
+    private CpuView cpuView;
+    private MemoryView memoryView;
+    private FileSystemView fsView;
+    private NetworkView networkView;
+    private ProcessesView processesView;
+    private Node node;
+    private TabSet tabs;
+    private Label status;
 
-	private RMController controller;
+    private RMController controller;
 
-	public MonitoringHostView(RMController controller) {
-		this.controller = controller;
-	}
+    public MonitoringHostView(RMController controller) {
+        this.controller = controller;
+    }
 
-	public void init(Host host) {
+    public void init(Host host) {
 
-		// selecting the node that will be used as an entry point to the host
-		for (Node n : host.getNodes().values()) {
-			if (n.getNodeState() == NodeState.BUSY || n.getNodeState() == NodeState.FREE ||
-				n.getNodeState() == NodeState.LOCKED) {
-				node = n;
-				break;
-			}
-		}
+        // selecting the node that will be used as an entry point to the host
+        for (Node n : host.getNodes().values()) {
+            if (n.getNodeState() == NodeState.BUSY || n.getNodeState() == NodeState.FREE ||
+                n.getNodeState() == NodeState.LOCKED) {
+                node = n;
+                break;
+            }
+        }
 
-		if (node == null) {
-			return;
-		}
+        if (node == null) {
+            return;
+        }
 
-		String hostMonitoringUrl = node.getDefaultJMXUrl();
-		if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
-			hostMonitoringUrl = node.getProactiveJMXUrl();
-		}
+        String hostMonitoringUrl = node.getDefaultJMXUrl();
+        if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
+            hostMonitoringUrl = node.getProactiveJMXUrl();
+        }
 
-		setWidth100();
+        setWidth100();
 
-		overview = new Overview(controller, hostMonitoringUrl, this);
-		cpuView = new CpuView(controller, hostMonitoringUrl);
-		memoryView = new MemoryView(controller, hostMonitoringUrl);
-		fsView = new FileSystemView(controller, hostMonitoringUrl);
-		networkView = new NetworkView(controller, hostMonitoringUrl);
+        overview = new Overview(controller, hostMonitoringUrl, this);
+        cpuView = new CpuView(controller, hostMonitoringUrl);
+        memoryView = new MemoryView(controller, hostMonitoringUrl);
+        fsView = new FileSystemView(controller, hostMonitoringUrl);
+        networkView = new NetworkView(controller, hostMonitoringUrl);
 
-		chain = new ReloadableChain(new Reloadable[] { overview, cpuView, memoryView, networkView });
+        chain = new ReloadableChain(new Reloadable[] { overview, cpuView, memoryView, networkView });
 
-		// to not add to to automatic reloadable views (use a dedicated button for this)
-		processesView = new ProcessesView(controller, hostMonitoringUrl);
+        // to not add to to automatic reloadable views (use a dedicated button for this)
+        processesView = new ProcessesView(controller, hostMonitoringUrl);
 
-		if (status != null) {
-			removeMember(status);
-		}
+        if (status != null) {
+            removeMember(status);
+        }
 
-		status = new Label("Retreiving data");
-		status.setWidth100();
-		status.setAlign(Alignment.CENTER);
+        status = new Label("Retreiving data");
+        status.setWidth100();
+        status.setAlign(Alignment.CENTER);
 
-		Tab t1 = new Tab("Overview");
-		t1.setPane(overview);
-		Tab t2 = new Tab("CPU");
-		t2.setPane(cpuView);
-		Tab t3 = new Tab("Memory");
-		t3.setPane(memoryView);
-		Tab t4 = new Tab("File System");
-		t4.setPane(fsView);
-		Tab t5 = new Tab("Network");
-		t5.setPane(networkView);
-		final Tab t6 = new Tab("Processes");
-		t6.setPane(processesView);
+        Tab t1 = new Tab("Overview");
+        t1.setPane(overview);
+        Tab t2 = new Tab("CPU");
+        t2.setPane(cpuView);
+        Tab t3 = new Tab("Memory");
+        t3.setPane(memoryView);
+        Tab t4 = new Tab("File System");
+        t4.setPane(fsView);
+        Tab t5 = new Tab("Network");
+        t5.setPane(networkView);
+        final Tab t6 = new Tab("Processes");
+        t6.setPane(processesView);
 
-		tabs = new TabSet();
-		tabs.setWidth100();
-		tabs.setShowResizeBar(true);
+        tabs = new TabSet();
+        tabs.setWidth100();
+        tabs.setShowResizeBar(true);
 
-		final IButton refresh = new IButton();
-		refresh.setIcon(RMImages.instance.refresh().getSafeUri().asString());
-		refresh.setIconAlign("center");
-		refresh.setWidth(25);
-		refresh.setTooltip("Refresh processes");
-		refresh.hide();
+        final IButton refresh = new IButton();
+        refresh.setIcon(RMImages.instance.refresh().getSafeUri().asString());
+        refresh.setIconAlign("center");
+        refresh.setWidth(25);
+        refresh.setTooltip("Refresh processes");
+        refresh.hide();
 
-		tabs.addTabSelectedHandler(new TabSelectedHandler() {
-			public void onTabSelected(TabSelectedEvent event) {
-				if (event.getTab() == t6) {
-					refresh.show();
-				} else {
-					refresh.hide();
-				}
-			}
-		});
+        tabs.addTabSelectedHandler(new TabSelectedHandler() {
+            public void onTabSelected(TabSelectedEvent event) {
+                if (event.getTab() == t6) {
+                    refresh.show();
+                } else {
+                    refresh.hide();
+                }
+            }
+        });
 
-		tabs.setTabBarControls(TabBarControls.TAB_SCROLLER, TabBarControls.TAB_PICKER, refresh);
+        tabs.setTabBarControls(TabBarControls.TAB_SCROLLER, TabBarControls.TAB_PICKER, refresh);
 
-		refresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				processesView.reload();
-			}
-		});
+        refresh.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                processesView.reload();
+            }
+        });
 
-		tabs.setTabs(t1, t2, t3, t4, t5, t6);
-		tabs.hide();
+        tabs.setTabs(t1, t2, t3, t4, t5, t6);
+        tabs.hide();
 
-		addMember(status);
+        addMember(status);
 
-		updater = new Timer() {
-			@Override
-			public void run() {
-				chain.reload();
-			}
-		};
-		updater.schedule(1);
-		updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
-	}
+        updater = new Timer() {
+            @Override
+            public void run() {
+                chain.reload();
+            }
+        };
+        updater.schedule(1);
+        updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
+    }
 
-	public void close() {
-		try {
-			if (updater != null) {
-				updater.cancel();
-				updater = null;
-			}
+    public void close() {
+        try {
+            if (updater != null) {
+                updater.cancel();
+                updater = null;
+            }
 
-			if (tabs != null) {
-				removeMember(tabs);
-				chain.stopReloading();
-				tabs.destroy();
-				tabs = null;
-			}
-		} catch (Exception e) {
-			// ignore it
-		}
-	}
+            if (tabs != null) {
+                removeMember(tabs);
+                chain.stopReloading();
+                tabs.destroy();
+                tabs = null;
+            }
+        } catch (Exception e) {
+            // ignore it
+        }
+    }
 
-	@Override
-	public void onFailure(Throwable caught) {
-		close();
-		status.setContents(RMController.getJsonErrorMessage(caught));
-	}
+    @Override
+    public void onFailure(Throwable caught) {
+        close();
+        status.setContents(RMController.getJsonErrorMessage(caught));
+    }
 
-	@Override
-	public void onSuccess(String result) {
-		removeMember(status);
-		addMember(tabs);
-		tabs.show();
-	}
+    @Override
+    public void onSuccess(String result) {
+        removeMember(status);
+        addMember(tabs);
+        tabs.show();
+    }
 }

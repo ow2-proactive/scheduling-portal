@@ -51,38 +51,38 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
  */
 public abstract class MBeansTimeAreaChart extends MBeansChart {
 
-	private boolean initializing = true;
+    private boolean initializing = true;
 
-	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
-			String title) {
-		this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
-	}
+    public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
+            String title) {
+        this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
+    }
 
-	public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean,
-			String[] attributes, String title) {
-		super(controller, jmxServerUrl, mbean, attributes, title);
+    public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean,
+            String[] attributes, String title) {
+        super(controller, jmxServerUrl, mbean, attributes, title);
 
-		loadOpts.setLegend(LegendPosition.RIGHT);
-		loadTable.addColumn(ColumnType.STRING);
-		// fake column to draw the chart properly
-		// with mbeans we don't know how many columns we will have until receive first results
-		loadTable.addColumn(ColumnType.NUMBER);
-	}
+        loadOpts.setLegend(LegendPosition.RIGHT);
+        loadTable.addColumn(ColumnType.STRING);
+        // fake column to draw the chart properly
+        // with mbeans we don't know how many columns we will have until receive first results
+        loadTable.addColumn(ColumnType.NUMBER);
+    }
 
-	public boolean initColumns() {
-		if (initializing) {
-			// removing fake column
-			loadTable.removeColumn(1);
-			initializing = false;
-			return true;
-		}
+    public boolean initColumns() {
+        if (initializing) {
+            // removing fake column
+            loadTable.removeColumn(1);
+            initializing = false;
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	public CoreChart createChart(DataTable data, Options opts) {
-		return new AreaChart(data, opts);
-	}
+    @Override
+    public CoreChart createChart(DataTable data, Options opts) {
+        return new AreaChart(data, opts);
+    }
 
 }

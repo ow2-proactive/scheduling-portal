@@ -49,126 +49,126 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
  */
 public class SchedulerConfig extends Config {
 
-	/**
-	 * Path to the user-defined RM property file, relative
-	 * to the webapp file path
-	 */
-	public static final String CONFIG_PATH = "scheduler.conf";
+    /**
+     * Path to the user-defined RM property file, relative
+     * to the webapp file path
+     */
+    public static final String CONFIG_PATH = "scheduler.conf";
 
-	/** URL of the remote REST service */
-	public static final String REST_URL = "sched.rest.url";
-	private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
+    /** URL of the remote REST service */
+    public static final String REST_URL = "sched.rest.url";
+    private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
 
-	/** client refresh rate in millis */
-	public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
-	private static final String d_CLIENT_REFRESH_TIME = "3000";
+    /** client refresh rate in millis */
+    public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
+    private static final String d_CLIENT_REFRESH_TIME = "3000";
 
-	/** client livelog refresh rate in millis */
-	public static final String LIVELOGS_REFRESH_TIME = "sched.client.livelog.refresh.time";
-	private static final String d_LIVELOGS_REFRESH_TIME = "1000";
+    /** client livelog refresh rate in millis */
+    public static final String LIVELOGS_REFRESH_TIME = "sched.client.livelog.refresh.time";
+    private static final String d_LIVELOGS_REFRESH_TIME = "1000";
 
-	/** job page size */
-	public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
-	private static final String d_JOBS_PAGE_SIZE = "50";
+    /** job page size */
+    public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
+    private static final String d_JOBS_PAGE_SIZE = "50";
 
-	/** release version string */
-	public static final String VERSION = "sched.version";
-	private static final String d_VERSION = "0.0";
+    /** release version string */
+    public static final String VERSION = "sched.version";
+    private static final String d_VERSION = "0.0";
 
-	/** REST version string */
-	public static final String REST_VERSION = "sched.rest.version";
-	private static final String d_REST_VERSION = "0.0";
+    /** REST version string */
+    public static final String REST_VERSION = "sched.rest.version";
+    private static final String d_REST_VERSION = "0.0";
 
-	/** Sched version string */
-	public static final String SCHED_VERSION = "sched.server.version";
-	private static final String d_SCHED_VERSION = "0.0";
+    /** Sched version string */
+    public static final String SCHED_VERSION = "sched.server.version";
+    private static final String d_SCHED_VERSION = "0.0";
 
-	/** SCM revision number */
-	public static final String REVISION = "sched.revision";
-	private static final String d_REVISION = "0";
+    /** SCM revision number */
+    public static final String REVISION = "sched.revision";
+    private static final String d_REVISION = "0";
 
-	/** message of the day service URL */
-	public static final String MOTD_URL = "sched.motd.url";
-	private static final String d_MOTD_URL = "";
+    /** message of the day service URL */
+    public static final String MOTD_URL = "sched.motd.url";
+    private static final String d_MOTD_URL = "";
 
-	private static SchedulerConfig instance = null;
+    private static SchedulerConfig instance = null;
 
-	/**
-	 * @return current static config instance, cannot be null
-	 */
-	public static SchedulerConfig get() {
-		if (instance == null) {
-			instance = new SchedulerConfig();
-			instance.setDefaults();
-		}
-		return instance;
-	}
+    /**
+     * @return current static config instance, cannot be null
+     */
+    public static SchedulerConfig get() {
+        if (instance == null) {
+            instance = new SchedulerConfig();
+            instance.setDefaults();
+        }
+        return instance;
+    }
 
-	private void setDefaults() {
-		properties.put(REST_URL, d_REST_URL);
-		properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
-		properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
-		properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
-		properties.put(VERSION, d_VERSION);
-		properties.put(REVISION, d_REVISION);
-		properties.put(SCHED_VERSION, d_SCHED_VERSION);
-		properties.put(REST_VERSION, d_REST_VERSION);
-		properties.put(MOTD_URL, d_MOTD_URL);
-	}
+    private void setDefaults() {
+        properties.put(REST_URL, d_REST_URL);
+        properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
+        properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
+        properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
+        properties.put(VERSION, d_VERSION);
+        properties.put(REVISION, d_REVISION);
+        properties.put(SCHED_VERSION, d_SCHED_VERSION);
+        properties.put(REST_VERSION, d_REST_VERSION);
+        properties.put(MOTD_URL, d_MOTD_URL);
+    }
 
-	@Override
-	public String getApplicationName() {
-		return "Scheduler";
-	}
+    @Override
+    public String getApplicationName() {
+        return "Scheduler";
+    }
 
-	@Override
-	public String getRestUrl() {
-		return properties.get(REST_URL);
-	}
+    @Override
+    public String getRestUrl() {
+        return properties.get(REST_URL);
+    }
 
-	@Override
-	public String getVersion() {
-		return properties.get(VERSION);
-	}
+    @Override
+    public String getVersion() {
+        return properties.get(VERSION);
+    }
 
-	@Override
-	public String getRevision() {
-		return properties.get(REVISION);
-	}
+    @Override
+    public String getRevision() {
+        return properties.get(REVISION);
+    }
 
-	@Override
-	public String getRestVersion() {
-		return properties.get(REST_VERSION);
-	}
+    @Override
+    public String getRestVersion() {
+        return properties.get(REST_VERSION);
+    }
 
-	@Override
-	public String getApplicationVersion() {
-		return properties.get(SCHED_VERSION);
-	}
+    @Override
+    public String getApplicationVersion() {
+        return properties.get(SCHED_VERSION);
+    }
 
-	@Override
-	public String getMotdUrl() {
-		return properties.get(MOTD_URL);
-	}
+    @Override
+    public String getMotdUrl() {
+        return properties.get(MOTD_URL);
+    }
 
-	/**
-	 * @return the client refresh rate in millis
-	 */
-	public int getClientRefreshTime() {
-		return Integer.parseInt(properties.get(CLIENT_REFRESH_TIME));
-	}
+    /**
+     * @return the client refresh rate in millis
+     */
+    public int getClientRefreshTime() {
+        return Integer.parseInt(properties.get(CLIENT_REFRESH_TIME));
+    }
 
-	/**
-	 * @return number of jobs per page
-	 */
-	public int getJobsPageSize() {
-		return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
-	}
+    /**
+     * @return number of jobs per page
+     */
+    public int getJobsPageSize() {
+        return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
+    }
 
-	/**
-	 * @return refresh rate for live logs in millis
-	 */
-	public int getLivelogsRefreshTime() {
-		return Integer.parseInt(properties.get(LIVELOGS_REFRESH_TIME));
-	}
+    /**
+     * @return refresh rate for live logs in millis
+     */
+    public int getLivelogsRefreshTime() {
+        return Integer.parseInt(properties.get(LIVELOGS_REFRESH_TIME));
+    }
 }

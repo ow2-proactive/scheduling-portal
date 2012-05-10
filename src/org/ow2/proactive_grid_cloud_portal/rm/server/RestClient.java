@@ -57,126 +57,126 @@ import org.jboss.resteasy.client.ClientResponse;
 @Path("/")
 public interface RestClient {
 
-	@POST
-	@Path("/rm/disconnect")
-	@Produces("application/json")
-	public void logout(@HeaderParam("sessionid")
-	String sessionId);
+    @POST
+    @Path("/rm/disconnect")
+    @Produces("application/json")
+    public void logout(@HeaderParam("sessionid")
+    String sessionId);
 
-	@GET
-	@Path("/rm/state")
-	@Produces("application/json")
-	public ClientResponse<InputStream> state(@HeaderParam("sessionid")
-	String sessionId);
+    @GET
+    @Path("/rm/state")
+    @Produces("application/json")
+    public ClientResponse<InputStream> state(@HeaderParam("sessionid")
+    String sessionId);
 
-	@GET
-	@GZIP
-	@Path("/rm/monitoring")
-	@Produces("application/json")
-	public ClientResponse<InputStream> monitoring(@HeaderParam("sessionid")
-	String sessionId);
+    @GET
+    @GZIP
+    @Path("/rm/monitoring")
+    @Produces("application/json")
+    public ClientResponse<InputStream> monitoring(@HeaderParam("sessionid")
+    String sessionId);
 
-	@GET
-	@GZIP
-	@Path("/rm/infrastructures")
-	@Produces("application/json")
-	public ClientResponse<InputStream> infrastructures(@HeaderParam("sessionid")
-	String sessionId);
+    @GET
+    @GZIP
+    @Path("/rm/infrastructures")
+    @Produces("application/json")
+    public ClientResponse<InputStream> infrastructures(@HeaderParam("sessionid")
+    String sessionId);
 
-	@GET
-	@Path("/rm/policies")
-	@GZIP
-	@Produces("application/json")
-	public ClientResponse<InputStream> policies(@HeaderParam("sessionid")
-	String sessionId);
+    @GET
+    @Path("/rm/policies")
+    @GZIP
+    @Produces("application/json")
+    public ClientResponse<InputStream> policies(@HeaderParam("sessionid")
+    String sessionId);
 
-	@POST
-	@Path("/rm/nodesource/create")
-	@Produces("application/json")
-	public ClientResponse<InputStream> createnodeSource(@HeaderParam("sessionId")
-	String sessionId, @FormParam("nodeSourceName")
-	String nodeSourceName, @FormParam("infrastructureType")
-	String infrastructureType, @FormParam("infrastructureParameters")
-	String[] infrastructureParameters, @FormParam("infrastructureFileParameters")
-	String[] infrastructureFileParameters, @FormParam("policyType")
-	String policyType, @FormParam("policyParameters")
-	String[] policyParameters, @FormParam("policyFileParameters")
-	String[] policyFileParameters);
+    @POST
+    @Path("/rm/nodesource/create")
+    @Produces("application/json")
+    public ClientResponse<InputStream> createnodeSource(@HeaderParam("sessionId")
+    String sessionId, @FormParam("nodeSourceName")
+    String nodeSourceName, @FormParam("infrastructureType")
+    String infrastructureType, @FormParam("infrastructureParameters")
+    String[] infrastructureParameters, @FormParam("infrastructureFileParameters")
+    String[] infrastructureFileParameters, @FormParam("policyType")
+    String policyType, @FormParam("policyParameters")
+    String[] policyParameters, @FormParam("policyFileParameters")
+    String[] policyFileParameters);
 
-	@POST
-	@Path("/rm/node/lock")
-	@Produces("application/json")
-	public ClientResponse<InputStream> lockNodes(@HeaderParam("sessionid")
-	String sessionId, @FormParam("nodeurls")
-	Set<String> nodeUrls);
+    @POST
+    @Path("/rm/node/lock")
+    @Produces("application/json")
+    public ClientResponse<InputStream> lockNodes(@HeaderParam("sessionid")
+    String sessionId, @FormParam("nodeurls")
+    Set<String> nodeUrls);
 
-	@POST
-	@Path("/rm/node/unlock")
-	@Produces("application/json")
-	public ClientResponse<InputStream> unlockNodes(@HeaderParam("sessionid")
-	String sessionId, @FormParam("nodeurls")
-	Set<String> nodeUrls);
+    @POST
+    @Path("/rm/node/unlock")
+    @Produces("application/json")
+    public ClientResponse<InputStream> unlockNodes(@HeaderParam("sessionid")
+    String sessionId, @FormParam("nodeurls")
+    Set<String> nodeUrls);
 
-	@POST
-	@Path("/rm/nodesource/remove")
-	@Produces("application/json")
-	public ClientResponse<InputStream> removeNodesource(@HeaderParam("sessionId")
-	String sessionId, @FormParam("name")
-	String nsName, @FormParam("preempt")
-	boolean preempt);
+    @POST
+    @Path("/rm/nodesource/remove")
+    @Produces("application/json")
+    public ClientResponse<InputStream> removeNodesource(@HeaderParam("sessionId")
+    String sessionId, @FormParam("name")
+    String nsName, @FormParam("preempt")
+    boolean preempt);
 
-	@POST
-	@Path("/rm/node/remove")
-	@Produces("application/json")
-	public ClientResponse<InputStream> removeNode(@HeaderParam("sessionId")
-	String sessionId, @FormParam("url")
-	String url, @FormParam("preempt")
-	boolean preempt);
+    @POST
+    @Path("/rm/node/remove")
+    @Produces("application/json")
+    public ClientResponse<InputStream> removeNode(@HeaderParam("sessionId")
+    String sessionId, @FormParam("url")
+    String url, @FormParam("preempt")
+    boolean preempt);
 
-	@POST
-	@Path("/rm/node/release")
-	@Produces("application/json")
-	public ClientResponse<InputStream> releaseNode(@HeaderParam("sessionId")
-	String sessionId, @FormParam("url")
-	String url);
+    @POST
+    @Path("/rm/node/release")
+    @Produces("application/json")
+    public ClientResponse<InputStream> releaseNode(@HeaderParam("sessionId")
+    String sessionId, @FormParam("url")
+    String url);
 
-	@GET
-	@Path("/rm/version")
-	public ClientResponse<InputStream> getVersion();
+    @GET
+    @Path("/rm/version")
+    public ClientResponse<InputStream> getVersion();
 
-	@GET
-	@GZIP
-	@Path("/rm/info/{name}")
-	@Produces("application/json")
-	public ClientResponse<InputStream> getMBeanInfo(@HeaderParam("sessionid")
-	String sessionId, @PathParam("name")
-	ObjectName name, @QueryParam("attr")
-	List<String> attrs);
+    @GET
+    @GZIP
+    @Path("/rm/info/{name}")
+    @Produces("application/json")
+    public ClientResponse<InputStream> getMBeanInfo(@HeaderParam("sessionid")
+    String sessionId, @PathParam("name")
+    ObjectName name, @QueryParam("attr")
+    List<String> attrs);
 
-	@GET
-	@Produces("application/json")
-	@Path("/rm/node/mbean")
-	public ClientResponse<InputStream> getNodeMBeanInfo(@HeaderParam("sessionid")
-	String sessionId, @QueryParam("nodejmxurl")
-	String nodeJmxUrl, @QueryParam("objectname")
-	String objectName, @QueryParam("attrs")
-	List<String> attrs);
+    @GET
+    @Produces("application/json")
+    @Path("/rm/node/mbean")
+    public ClientResponse<InputStream> getNodeMBeanInfo(@HeaderParam("sessionid")
+    String sessionId, @QueryParam("nodejmxurl")
+    String nodeJmxUrl, @QueryParam("objectname")
+    String objectName, @QueryParam("attrs")
+    List<String> attrs);
 
-	@GET
-	@Produces("application/json")
-	@Path("/rm/node/mbeans")
-	public ClientResponse<InputStream> getNodeMBeansInfo(@HeaderParam("sessionid")
-	String sessionId, @QueryParam("nodejmxurl")
-	String nodeJmxUrl, @QueryParam("objectname")
-	String objectNames, @QueryParam("attrs")
-	List<String> attrs);
+    @GET
+    @Produces("application/json")
+    @Path("/rm/node/mbeans")
+    public ClientResponse<InputStream> getNodeMBeansInfo(@HeaderParam("sessionid")
+    String sessionId, @QueryParam("nodejmxurl")
+    String nodeJmxUrl, @QueryParam("objectname")
+    String objectNames, @QueryParam("attrs")
+    List<String> attrs);
 
-	@GET
-	@GZIP
-	@Path("/rm/stathistory")
-	@Produces("application/json")
-	public ClientResponse<InputStream> getStatHistory(@HeaderParam("sessionid")
-	String sessionId, @QueryParam("range")
-	String range);
+    @GET
+    @GZIP
+    @Path("/rm/stathistory")
+    @Produces("application/json")
+    public ClientResponse<InputStream> getStatHistory(@HeaderParam("sessionid")
+    String sessionId, @QueryParam("range")
+    String range);
 
 }

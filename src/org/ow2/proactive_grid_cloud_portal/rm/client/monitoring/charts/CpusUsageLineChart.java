@@ -60,57 +60,57 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
  */
 public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
-	public CpusUsageLineChart(RMController controller, String jmxServerUrl) {
-		super(controller, jmxServerUrl, "sigar:Type=CpuCoreUsage,Name=*", "Combined", "Load History");
+    public CpusUsageLineChart(RMController controller, String jmxServerUrl) {
+        super(controller, jmxServerUrl, "sigar:Type=CpuCoreUsage,Name=*", "Combined", "Load History");
 
-		AxisOptions vAxis = AxisOptions.create();
-		vAxis.set("format", "#%");
-		loadOpts.setVAxisOptions(vAxis);
-		chartContainer.setHeight("300px");
-		loadChart.setHeight("300px");
-	}
+        AxisOptions vAxis = AxisOptions.create();
+        vAxis.set("format", "#%");
+        loadOpts.setVAxisOptions(vAxis);
+        chartContainer.setHeight("300px");
+        loadChart.setHeight("300px");
+    }
 
-	@Override
-	public void processResult(String result) {
-		JSONObject object = JSONParser.parseStrict(result).isObject();
-		if (object != null) {
+    @Override
+    public void processResult(String result) {
+        JSONObject object = JSONParser.parseStrict(result).isObject();
+        if (object != null) {
 
-			String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
-					new Date(System.currentTimeMillis()));
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                    new Date(System.currentTimeMillis()));
 
-			addRow();
-			loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+            addRow();
+            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
 
-			boolean initColumns = super.initColumns();
-			int colIndex = 1;
-			for (String key : object.keySet()) {
+            boolean initColumns = super.initColumns();
+            int colIndex = 1;
+            for (String key : object.keySet()) {
 
-				if (initColumns) {
-					loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-				}
+                if (initColumns) {
+                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+                }
 
-				double value = 0;
-				JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
-				if (jsonVal != null && jsonVal.isNumber() != null) {
-					value = jsonVal.isNumber().doubleValue();
-				}
-				loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
-			}
+                double value = 0;
+                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
+                if (jsonVal != null && jsonVal.isNumber() != null) {
+                    value = jsonVal.isNumber().doubleValue();
+                }
+                loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
+            }
 
-			loadChart.draw(loadTable, loadOpts);
-		}
-	}
+            loadChart.draw(loadTable, loadOpts);
+        }
+    }
 
-	private String beautifyName(String mbeanName) {
-		// sigar:Name=lo,Type=NetInterface
-		String patternStr = "sigar:Name=(.*),Type=CpuCore";
-		RegExp pattern = RegExp.compile(patternStr);
-		MatchResult matcher = pattern.exec(mbeanName);
-		return matcher.getGroup(1);
-	}
+    private String beautifyName(String mbeanName) {
+        // sigar:Name=lo,Type=NetInterface
+        String patternStr = "sigar:Name=(.*),Type=CpuCore";
+        RegExp pattern = RegExp.compile(patternStr);
+        MatchResult matcher = pattern.exec(mbeanName);
+        return matcher.getGroup(1);
+    }
 
-	@Override
-	public CoreChart createChart(DataTable data, Options opts) {
-		return new LineChart(data, opts);
-	}
+    @Override
+    public CoreChart createChart(DataTable data, Options opts) {
+        return new LineChart(data, opts);
+    }
 }

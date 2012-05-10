@@ -58,102 +58,102 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class AboutWindow {
 
-	private Window window = null;
+    private Window window = null;
 
-	/**
-	 * Default constructor
-	 */
-	public AboutWindow() {
-		this.build();
-	}
+    /**
+     * Default constructor
+     */
+    public AboutWindow() {
+        this.build();
+    }
 
-	private void build() {
-		HLayout pane = new HLayout();
-		pane.setWidth100();
-		pane.setHeight(240);
-		pane.setBackgroundColor("#ffffff");
+    private void build() {
+        HLayout pane = new HLayout();
+        pane.setWidth100();
+        pane.setHeight(240);
+        pane.setBackgroundColor("#ffffff");
 
-		String ver = Config.get().getVersion();
-		String str = "<h3>ProActive " +
-			Config.get().getApplicationName() +
-			" Portal</h3>" +
-			"Version: " +
-			ver +
-			"<br><br>" +
-			"Copyright (C) 1997-2011 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
-			"Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
-			"and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
-			"Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a><br><br><br>" +
-			"<table style='color:#404040'>" + "<tr><td>Revision</td><td>" + Config.get().getRevision() +
-			"</td></tr>" + "<tr><td>REST server</td><td>" + Config.get().getRestUrl() + "</td></tr>" +
-			"<tr><td>REST version</td><td>" + Config.get().getRestVersion() + "</td></tr>" + "<tr><td>" +
-			Config.get().getApplicationName() + " version</td><td>" + Config.get().getApplicationVersion() +
-			"</td></tr></table>";
+        String ver = Config.get().getVersion();
+        String str = "<h3>ProActive " +
+            Config.get().getApplicationName() +
+            " Portal</h3>" +
+            "Version: " +
+            ver +
+            "<br><br>" +
+            "Copyright (C) 1997-2011 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
+            "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
+            "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
+            "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a><br><br><br>" +
+            "<table style='color:#404040'>" + "<tr><td>Revision</td><td>" + Config.get().getRevision() +
+            "</td></tr>" + "<tr><td>REST server</td><td>" + Config.get().getRestUrl() + "</td></tr>" +
+            "<tr><td>REST version</td><td>" + Config.get().getRestVersion() + "</td></tr>" + "<tr><td>" +
+            Config.get().getApplicationName() + " version</td><td>" + Config.get().getApplicationVersion() +
+            "</td></tr></table>";
 
-		;
-		HTMLPane text = new HTMLPane();
-		text.setContents(str);
-		text.setWidth100();
+        ;
+        HTMLPane text = new HTMLPane();
+        text.setContents(str);
+        text.setWidth100();
 
-		Img img = new Img(Images.instance.about_115().getSafeUri().asString(), 115, 130);
+        Img img = new Img(Images.instance.about_115().getSafeUri().asString(), 115, 130);
 
-		pane.addMember(img);
-		pane.addMember(text);
+        pane.addMember(img);
+        pane.addMember(text);
 
-		HLayout buttons = new HLayout();
-		buttons.setAlign(Alignment.RIGHT);
-		buttons.setWidth100();
-		buttons.setHeight(20);
-		buttons.setMargin(10);
-		IButton ok = new IButton("Close");
-		ok.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-		ok.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				AboutWindow.this.hide();
-			}
-		});
-		buttons.addMember(ok);
+        HLayout buttons = new HLayout();
+        buttons.setAlign(Alignment.RIGHT);
+        buttons.setWidth100();
+        buttons.setHeight(20);
+        buttons.setMargin(10);
+        IButton ok = new IButton("Close");
+        ok.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        ok.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                AboutWindow.this.hide();
+            }
+        });
+        buttons.addMember(ok);
 
-		VLayout root = new VLayout();
-		root.setBackgroundColor("#dddddd");
-		root.setWidth100();
-		root.setHeight100();
+        VLayout root = new VLayout();
+        root.setBackgroundColor("#dddddd");
+        root.setWidth100();
+        root.setHeight100();
 
-		root.addMember(pane);
-		root.addMember(buttons);
+        root.addMember(pane);
+        root.addMember(buttons);
 
-		this.window = new Window();
-		this.window.setTitle("About");
-		this.window.setShowMinimizeButton(false);
-		this.window.setShowShadow(true);
-		this.window.setIsModal(true);
-		this.window.setShowModalMask(true);
-		this.window.addItem(root);
-		this.window.setWidth(500);
-		this.window.setHeight(320);
-		this.window.centerInPage();
-		this.window.setCanDragReposition(false);
-	}
+        this.window = new Window();
+        this.window.setTitle("About");
+        this.window.setShowMinimizeButton(false);
+        this.window.setShowShadow(true);
+        this.window.setIsModal(true);
+        this.window.setShowModalMask(true);
+        this.window.addItem(root);
+        this.window.setWidth(500);
+        this.window.setHeight(320);
+        this.window.centerInPage();
+        this.window.setCanDragReposition(false);
+    }
 
-	/**
-	 * Bring up the modal window
-	 */
-	public void show() {
-		this.window.show();
-	}
+    /**
+     * Bring up the modal window
+     */
+    public void show() {
+        this.window.show();
+    }
 
-	/**
-	 * Hide the modal window
-	 */
-	public void hide() {
-		this.window.hide();
-	}
+    /**
+     * Hide the modal window
+     */
+    public void hide() {
+        this.window.hide();
+    }
 
-	/**
-	 * Destroy the window; you may null your references to this 
-	 */
-	public void destroy() {
-		this.hide();
-		this.window.destroy();
-	}
+    /**
+     * Destroy the window; you may null your references to this 
+     */
+    public void destroy() {
+        this.hide();
+        this.window.destroy();
+    }
 }

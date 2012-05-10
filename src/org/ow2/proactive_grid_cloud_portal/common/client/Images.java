@@ -49,63 +49,63 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public interface Images extends ClientBundle {
 
-	public static final Images instance = GWT.create(Images.class);
+    public static final Images instance = GWT.create(Images.class);
 
-	@Source("images/about_16.png")
-	ImageResource about_16();
+    @Source("images/about_16.png")
+    ImageResource about_16();
 
-	@Source("images/about_115.png")
-	ImageResource about_115();
+    @Source("images/about_115.png")
+    ImageResource about_115();
 
-	@Source("images/clear_16.png")
-	ImageResource clear_16();
+    @Source("images/clear_16.png")
+    ImageResource clear_16();
 
-	@Source("images/connect_16.png")
-	ImageResource connect_16();
+    @Source("images/connect_16.png")
+    ImageResource connect_16();
 
-	@Source("images/exit_16.png")
-	ImageResource exit_16();
+    @Source("images/exit_16.png")
+    ImageResource exit_16();
 
-	@Source("images/info_32.png")
-	ImageResource info_32();
+    @Source("images/info_32.png")
+    ImageResource info_32();
 
-	@Source("images/key_16.png")
-	ImageResource key_16();
+    @Source("images/key_16.png")
+    ImageResource key_16();
 
-	@Source("images/log_16.png")
-	ImageResource log_16();
+    @Source("images/log_16.png")
+    ImageResource log_16();
 
-	@Source("images/pa_16.png")
-	ImageResource pa_16();
+    @Source("images/pa_16.png")
+    ImageResource pa_16();
 
-	@Source("images/search_16.png")
-	ImageResource search_16();
+    @Source("images/search_16.png")
+    ImageResource search_16();
 
-	@Source("images/server_16.png")
-	ImageResource server_16();
+    @Source("images/server_16.png")
+    ImageResource server_16();
 
-	@Source("images/settings_16.png")
-	ImageResource settings_16();
+    @Source("images/settings_16.png")
+    ImageResource settings_16();
 
-	@Source("images/stats_16.png")
-	ImageResource stats_16();
+    @Source("images/stats_16.png")
+    ImageResource stats_16();
 
-	@Source("images/user_16.png")
-	ImageResource user_16();
+    @Source("images/user_16.png")
+    ImageResource user_16();
 
-	@Source("images/expand_16.png")
-	ImageResource expand_16();
+    @Source("images/expand_16.png")
+    ImageResource expand_16();
 
-	@Source("images/close_16.png")
-	ImageResource close_16();
+    @Source("images/close_16.png")
+    ImageResource close_16();
 
-	@Source("images/ok_16.png")
-	ImageResource ok_16();
+    @Source("images/ok_16.png")
+    ImageResource ok_16();
 
-	@Source("images/cancel_16.png")
-	ImageResource cancel_16();
+    @Source("images/cancel_16.png")
+    ImageResource cancel_16();
 
-	@Source("images/net_error_16.png")
-	ImageResource net_error_16();
+    @Source("images/net_error_16.png")
+    ImageResource net_error_16();
 
 }

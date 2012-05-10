@@ -64,74 +64,74 @@ import org.apache.commons.io.IOUtils;
 @SuppressWarnings("serial")
 public class LoginServlet extends HttpServlet {
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-		login(request, response);
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        login(request, response);
+    }
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		login(request, response);
-	}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        login(request, response);
+    }
 
-	private void login(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("text/html");
-		File cred = null;
-		try {
-			DiskFileItemFactory factory = new DiskFileItemFactory();
-			factory.setSizeThreshold(4096);
-			factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setSizeMax(1000000);
+    private void login(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("text/html");
+        File cred = null;
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(4096);
+            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setSizeMax(1000000);
 
-			List<?> fileItems = upload.parseRequest(request);
-			Iterator<?> i = fileItems.iterator();
+            List<?> fileItems = upload.parseRequest(request);
+            Iterator<?> i = fileItems.iterator();
 
-			String user = "";
-			String pass = "";
-			String sshKey = "";
+            String user = "";
+            String pass = "";
+            String sshKey = "";
 
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
+            while (i.hasNext()) {
+                FileItem fi = (FileItem) i.next();
 
-				if (fi.isFormField()) {
-					String name = fi.getFieldName();
-					String value = fi.getString();
+                if (fi.isFormField()) {
+                    String name = fi.getFieldName();
+                    String value = fi.getString();
 
-					if (name.equals("username")) {
-						user = value;
-					} else if (name.equals("password")) {
-						pass = value;
-					}
-				} else {
-					String field = fi.getFieldName();
+                    if (name.equals("username")) {
+                        user = value;
+                    } else if (name.equals("password")) {
+                        pass = value;
+                    }
+                } else {
+                    String field = fi.getFieldName();
 
-					byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                    byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
 
-					if (field.equals("credential")) {
-						cred = new File(System.getProperty("java.io.tmpdir"), fi.getName());
-						cred.deleteOnExit();
-						fi.write(cred);
-					} else if (field.equals("sshkey")) {
-						sshKey = new String(bytes);
-					}
-				}
+                    if (field.equals("credential")) {
+                        cred = new File(System.getProperty("java.io.tmpdir"), fi.getName());
+                        cred.deleteOnExit();
+                        fi.write(cred);
+                    } else if (field.equals("sshkey")) {
+                        sshKey = new String(bytes);
+                    }
+                }
 
-				fi.delete();
-			}
+                fi.delete();
+            }
 
-			String responseS = Service.get().login(user, pass, cred, sshKey);
-			response.getWriter().write("{ \"sessionId\" : \"" + responseS + "\" }");
-		} catch (Throwable t) {
-			try {
-				response.getWriter().write(t.getMessage());
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				t.printStackTrace();
-			}
-		} finally {
-			if (cred != null)
-				cred.delete();
-		}
-	}
+            String responseS = Service.get().login(user, pass, cred, sshKey);
+            response.getWriter().write("{ \"sessionId\" : \"" + responseS + "\" }");
+        } catch (Throwable t) {
+            try {
+                response.getWriter().write(t.getMessage());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                t.printStackTrace();
+            }
+        } finally {
+            if (cred != null)
+                cred.delete();
+        }
+    }
 }

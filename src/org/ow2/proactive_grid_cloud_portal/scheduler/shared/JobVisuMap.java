@@ -53,42 +53,42 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class JobVisuMap implements Serializable {
 
-	private Map<String, TaskPos> tasks = null;
+    private Map<String, TaskPos> tasks = null;
 
-	public JobVisuMap() {
-		this.tasks = new HashMap<String, TaskPos>();
-	}
+    public JobVisuMap() {
+        this.tasks = new HashMap<String, TaskPos>();
+    }
 
-	public void addTask(int x, int y, int w, int h, String name) {
-		if (name == null || name.trim().length() == 0)
-			throw new IllegalArgumentException();
+    public void addTask(int x, int y, int w, int h, String name) {
+        if (name == null || name.trim().length() == 0)
+            throw new IllegalArgumentException();
 
-		TaskPos t = new TaskPos(x, y, w, h);
-		this.tasks.put(name, t);
-	}
+        TaskPos t = new TaskPos(x, y, w, h);
+        this.tasks.put(name, t);
+    }
 
-	public boolean hasTask(String name) {
-		return this.tasks.containsKey(name);
-	}
+    public boolean hasTask(String name) {
+        return this.tasks.containsKey(name);
+    }
 
-	public Set<String> getNames() {
-		return this.tasks.keySet();
-	}
+    public Set<String> getNames() {
+        return this.tasks.keySet();
+    }
 
-	public int getTaskX(String name) {
-		return this.tasks.get(name).x;
-	}
+    public int getTaskX(String name) {
+        return this.tasks.get(name).x;
+    }
 
-	public int getTaskY(String name) {
-		return this.tasks.get(name).y;
-	}
+    public int getTaskY(String name) {
+        return this.tasks.get(name).y;
+    }
 
-	public int getTaskW(String name) {
-		return this.tasks.get(name).w;
-	}
+    public int getTaskW(String name) {
+        return this.tasks.get(name).w;
+    }
 
-	public int getTaskH(String name) {
-		return this.tasks.get(name).h;
-	}
+    public int getTaskH(String name) {
+        return this.tasks.get(name).h;
+    }
 
 }
