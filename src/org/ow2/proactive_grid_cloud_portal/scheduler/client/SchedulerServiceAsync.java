@@ -105,6 +105,33 @@ public interface SchedulerServiceAsync {
     void killJobs(String sessionId, List<Integer> list, AsyncCallback<Integer> asyncCallback);
 
     /**
+     * Kill a task within a given job
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskname name of the task to kill
+     * @param cb
+     */
+    void killTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+
+    /**
+     * Preempt a task within a given job
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskname name of the task to preempt
+     * @param cb
+     */
+    void preemptTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+
+    /**
+     * Restart a task within a given job
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskname name of the task to restart
+     * @param cb
+     */
+    void restartTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+
+    /**
      * Method used for making an asynchronous call to the server for returning a list of
      * tasks that correspond to a certain job.
      * @param sessionId the session if of the user that asks for the tasks

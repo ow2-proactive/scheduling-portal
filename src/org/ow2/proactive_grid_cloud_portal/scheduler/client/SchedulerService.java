@@ -114,6 +114,42 @@ public interface SchedulerService extends RemoteService {
     int killJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
     /**
+     * Kill a task
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to kill within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean killTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
+     * Preempt a task
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to preempt within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean preemptTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
+     * Restart a task
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean restartTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
      * Gets the list of tasks that correspond to a job.
      * @param sessionId the session if of the user that asks for the tasks
      * @param jobId the id of the job for which its task list is asked 

@@ -167,6 +167,48 @@ public interface RestClient {
     String jobId);
 
     /**
+     * Kill a task
+     * @param sessionId
+     * @param jobId
+     * @param taskName
+     * @return
+     */
+    @PUT
+    @Path("jobs/{jobid}/tasks/{taskname}/kill")
+    public ClientResponse<InputStream> killTask(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("taskname")
+    String taskName);
+
+    /**
+     * Preempt a task
+     * @param sessionId
+     * @param jobId
+     * @param taskName
+     * @return
+     */
+    @PUT
+    @Path("jobs/{jobid}/tasks/{taskname}/preempt")
+    public ClientResponse<InputStream> preemptTask(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("taskname")
+    String taskName);
+
+    /**
+     * Restart a task
+     * @param sessionId
+     * @param jobId
+     * @param taskName
+     * @return
+     */
+    @PUT
+    @Path("jobs/{jobid}/tasks/{taskname}/restart")
+    public ClientResponse<InputStream> restartTask(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("taskname")
+    String taskName);
+
+    /**
      * Gets the list of tasks in a JSON array for a given job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the job id for which the tasks are asked.

@@ -61,9 +61,14 @@ import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.events.CellContextClickEvent;
+import com.smartgwt.client.widgets.grid.events.CellContextClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.menu.Menu;
+import com.smartgwt.client.widgets.menu.MenuItem;
+import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -357,11 +362,78 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.setCanReorderFields(false);
         this.tasksGrid.setCanPickFields(false);
         this.tasksGrid.setCanFreezeFields(false);
-        this.tasksGrid.setSelectionType(SelectionStyle.NONE);
+        this.tasksGrid.setSelectionType(SelectionStyle.SINGLE);
         this.tasksGrid.setShowRecordComponents(true);
         this.tasksGrid.setShowRecordComponentsByCell(true);
         this.ds = new TaskDS("taskds_" + controller.getModel().getSessionId());
         this.tasksGrid.setDataSource(this.ds);
+
+        this.tasksGrid.addCellContextClickHandler(new CellContextClickHandler() {
+            @Override
+            public void onCellContextClick(CellContextClickEvent event) {
+                final int jobId = controller.getModel().getSelectedJob().getId();
+                final String taskName = tasksGrid.getSelectedRecord().getAttributeAsString(NAME_ATTR);
+
+                Menu menu = new Menu();
+                menu.setShowShadow(true);
+                menu.setShadowDepth(10);
+
+                MenuItem restart = new MenuItem("Restart");
+                restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+                    @Override
+                    public void onClick(MenuItemClickEvent event) {
+                        TasksView.this.controller.restartTask(jobId, taskName);
+                    }
+                });
+                MenuItem preempt = new MenuItem("Preempt");
+                preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+                    @Override
+                    public void onClick(MenuItemClickEvent event) {
+                        TasksView.this.controller.preemptTask(jobId, taskName);
+                    }
+                });
+                MenuItem kill = new MenuItem("Kill");
+                kill.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+                    @Override
+                    public void onClick(MenuItemClickEvent event) {
+                        TasksView.this.controller.killTask(jobId, taskName);
+                    }
+                });
+
+                boolean enabled;
+                TaskRecord jr = (TaskRecord) tasksGrid.getSelectedRecord();
+                switch (TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase())) {
+                    case SUBMITTED:
+                    case WAITING_ON_ERROR:
+                    case WAITING_ON_FAILURE:
+                        enabled = false;
+                        break;
+                    case PENDING:
+                    case PAUSED:
+                    case RUNNING:
+                        enabled = true;
+                        break;
+                    case SKIPPED:
+                    case FINISHED:
+                    case FAULTY:
+                    case FAILED:
+                    case ABORTED:
+                    case NOT_STARTED:
+                    case NOT_RESTARTED:
+                        enabled = false;
+                        break;
+                    default:
+                        enabled = false;
+                }
+
+                restart.setEnabled(enabled);
+                kill.setEnabled(enabled);
+                preempt.setEnabled(enabled);
+
+                menu.setItems(restart, preempt, kill);
+                tasksGrid.setContextMenu(menu);
+            }
+        });
 
         ListGridField idField = new ListGridField(ID_ATTR, "Id");
         idField.setType(ListGridFieldType.INTEGER);

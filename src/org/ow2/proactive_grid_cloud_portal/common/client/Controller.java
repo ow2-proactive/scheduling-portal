@@ -36,7 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
-import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -113,7 +112,7 @@ public abstract class Controller {
                     return val.isString().stringValue();
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             if (str != null) {
                 return str;
             } else {
@@ -138,7 +137,7 @@ public abstract class Controller {
                     return (int) val.isNumber().doubleValue();
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             return -1;
         }
         return -1;

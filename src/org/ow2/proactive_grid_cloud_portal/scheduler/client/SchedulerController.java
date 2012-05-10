@@ -471,6 +471,71 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     /**
+     * Kill a task within a job 
+     * @param jobId job id
+     * @param taskName task name
+     */
+    public void killTask(final Integer jobId, final String taskName) {
+
+        this.scheduler.killTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                caught.printStackTrace();
+
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Failed to kill task: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                model.logMessage("Successfully killed task " + taskName + " in job " + jobId);
+            }
+        });
+    }
+
+    /**
+     * Restart a task within a job 
+     * @param jobId job id
+     * @param taskName task name
+     */
+    public void restartTask(final Integer jobId, final String taskName) {
+        this.scheduler.restartTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+                caught.printStackTrace();
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Failed to restart task: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                model.logMessage("Successfully restarted task " + taskName + " in job " + jobId);
+            }
+        });
+    }
+
+    /**
+     * Preempt a task within a job 
+     * @param jobId job id
+     * @param taskName task name
+     */
+    public void preemptTask(final Integer jobId, final String taskName) {
+        this.scheduler.preemptTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Failed to preempt task: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                model.logMessage("Successfully preempted task " + taskName + " in job " + jobId);
+            }
+        });
+    }
+
+    /**
      * Apply the specified priority to the given job
      * 
      * @param jobId id of the job

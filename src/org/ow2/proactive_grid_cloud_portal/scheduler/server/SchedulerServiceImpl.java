@@ -550,6 +550,76 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         return this.users.get(sessionId);
     }
 
+    @Override
+    public boolean killTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException {
+        ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
+        try {
+            clientResponse = client.killTask(sessionId, "" + jobId, taskName);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String info = convertToString(response);
+            switch (status) {
+                case OK:
+                    return true;
+                default:
+                    throw new RestServerException(status.getStatusCode(), info);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
+
+    @Override
+    public boolean restartTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException {
+        ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
+        try {
+            clientResponse = client.restartTask(sessionId, "" + jobId, taskName);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String info = convertToString(response);
+            System.out.println("SchedulerServiceImpl.restartTask() " + status + "//" + info);
+            switch (status) {
+                case OK:
+                    return true;
+                default:
+                    throw new RestServerException(status.getStatusCode(), info);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
+
+    @Override
+    public boolean preemptTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException {
+        ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
+        try {
+            clientResponse = client.preemptTask(sessionId, "" + jobId, taskName);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String info = convertToString(response);
+            switch (status) {
+                case OK:
+                    return true;
+                default:
+                    throw new RestServerException(status.getStatusCode(), info);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
+
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasks(java.lang.String, java.lang.String)
