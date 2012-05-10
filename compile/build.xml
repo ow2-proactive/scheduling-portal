@@ -123,30 +123,6 @@
 		<delete file="${war.dir}/servers.jar" failonerror="false" />
 		<delete dir="${web-inf.dir}/classes" failonerror="false" />
 		<delete dir="${web-inf.dir}/deploy" failonerror="false" />
-		<delete file="${compile.dir}/eclipse_formatter_config.properties" failonerror="false" />
 	</target>
 
-	<macrodef name="eclipse_format_m">
-		<attribute name="loglevel" default="WARN" />
-		<element name="sourcefileset" optional="false" />
-		<sequential>
-			<taskdef name="javaformatter" classname="org.hibernate.tool.ant.JavaFormatterTask">
-				<classpath refid="formatter.class.path" />
-			</taskdef>
-			<copy file="${compile.dir}/eclipse_formatter_config.xml" tofile="${compile.dir}/eclipse_formatter_config.properties" />
-			<replaceregexp file="${compile.dir}/eclipse_formatter_config.properties" match='^&lt;(.xml|/?profile).*' replace="" byline="true" />
-			<replaceregexp file="${compile.dir}/eclipse_formatter_config.properties" match='.*\"(.*)\".*\"(.*)\".*' replace="\1=\2" byline="true" />
-			<javaformatter configurationFile="eclipse_formatter_config.properties">
-				<sourcefileset />
-			</javaformatter>
-		</sequential>
-	</macrodef>
-
-	<target name="format" description="hibernate's eclipse-based formatter">
-		<eclipse_format_m>
-			<sourcefileset>
-				<fileset dir="${src.dir}" includes="**/*.java" />
-			</sourcefileset>
-		</eclipse_format_m>
-	</target>
 </project>

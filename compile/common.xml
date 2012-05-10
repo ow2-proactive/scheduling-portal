@@ -40,10 +40,4 @@
 			<exclude name="${classes.dir}/org/ow2/proactive_grid_cloud_portal/extra/" />
 		</fileset>
 	</path>
-
-	<path id="formatter.class.path">
-		<fileset dir="${compile.dir}/lib-formatter">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
 </project>
