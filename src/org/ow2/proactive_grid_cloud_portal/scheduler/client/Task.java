@@ -301,8 +301,7 @@ public class Task implements Serializable, Comparable<Task> {
             if (desc != null)
                 description = desc.stringValue();
         }
-        int maxExec = (int) jsonTask.get("maxNumberOfExecution").isObject().get("value").isObject().get(
-                "value").isNumber().doubleValue();
+        int maxExec = (int) jsonTask.get("maxNumberOfExecution").isNumber().doubleValue();
         int execLeft = (int) taskInfo.get("numberOfExecutionLeft").isNumber().doubleValue();
         int execOnFailureLeft = (int) taskInfo.get("numberOfExecutionOnFailureLeft").isNumber().doubleValue();
         int maxExecOnFailure = (int) jsonTask.get("maxNumberOfExecutionOnFailure").isNumber().doubleValue();
