@@ -64,7 +64,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  */
 public class FileSystemView extends VLayout {
 
-    public FileSystemView(RMController controller, String url) {
+    public FileSystemView(final RMController controller, String url) {
         setWidth100();
 
         final List<String> attrs = new ArrayList<String>();
@@ -100,7 +100,7 @@ public class FileSystemView extends VLayout {
                         opts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
                                 "#ef2929", "#000000");
 
-                        JSONObject object = JSONParser.parseStrict(result).isObject();
+                        JSONObject object = controller.parseJSON(result).isObject();
                         if (object != null) {
 
                             for (String disk : object.keySet()) {

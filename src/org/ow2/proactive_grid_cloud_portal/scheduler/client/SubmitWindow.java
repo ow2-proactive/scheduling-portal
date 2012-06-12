@@ -388,7 +388,7 @@ public class SubmitWindow {
                                 String res = event.getResults();
                                 boolean failure = false;
                                 try {
-                                    JSONValue val = JSONParser.parseStrict(res);
+                                    JSONValue val = controller.parseJSON(res);
                                     if (val.isObject() != null && val.isObject().containsKey("id")) {
                                         int id = (int) val.isObject().get("id").isNumber().doubleValue();
                                         SubmitWindow.this.destroy();

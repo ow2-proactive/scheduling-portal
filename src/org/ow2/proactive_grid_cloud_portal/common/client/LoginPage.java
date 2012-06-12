@@ -475,7 +475,7 @@ public class LoginPage {
                 String res = event.getResults();
                 boolean fail = false;
                 try {
-                    JSONValue val = JSONParser.parseStrict(res);
+                    JSONValue val = controller.parseJSON(res);
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
@@ -576,7 +576,7 @@ public class LoginPage {
                 String res = event.getResults();
                 boolean fail = false;
                 try {
-                    JSONValue val = JSONParser.parseStrict(res);
+                    JSONValue val = controller.parseJSON(res);
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();

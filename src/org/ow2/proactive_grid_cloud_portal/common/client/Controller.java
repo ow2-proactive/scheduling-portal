@@ -143,4 +143,29 @@ public abstract class Controller {
         return -1;
     }
 
+    /**
+     * Parse a JSON string
+     * <p>
+     * If the input is not valid JSON or parsing fails for some reason,
+     * the exception will be logged in the UI but not thrown.
+     * 
+     * @param jsonStr a valid JSON string
+     * @return a java representation of the JSON object hierarchy,
+     *     or a JSONObject representing {} if parsing fails
+     */
+    public JSONValue parseJSON(String jsonStr) {
+        try {
+            JSONValue val = JSONParser.parseStrict(jsonStr);
+            return val;
+        } catch (Throwable t) {
+            // only shows up in eclipse dev mode
+            t.printStackTrace();
+
+            this.getModel().logCriticalMessage(
+                    "JSON Parser failed " + t.getClass().getName() + ": " + t.getLocalizedMessage());
+            this.getModel().logCriticalMessage("input was: " + jsonStr);
+            return new JSONObject();
+        }
+    }
+
 }

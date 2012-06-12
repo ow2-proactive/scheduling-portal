@@ -70,7 +70,7 @@ public class MBeanDetailedView extends DetailViewer {
         load(controller, jmxServerUrl, mbean, attrs);
     }
 
-    public void load(RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
+    public void load(final RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
         DetailViewerField[] fields = new DetailViewerField[attrs.size()];
 
         for (int i = 0; i < fields.length; i++) {
@@ -95,7 +95,7 @@ public class MBeanDetailedView extends DetailViewer {
                     return;
 
                 model.logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
-                JSONArray array = JSONParser.parseStrict(result).isArray();
+                JSONArray array = controller.parseJSON(result).isArray();
                 if (array != null) {
                     DetailViewerRecord dv = new DetailViewerRecord();
                     for (int i = 0; i < array.size(); i++) {

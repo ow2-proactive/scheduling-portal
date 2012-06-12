@@ -65,7 +65,7 @@ public class JVMCpuUsageAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = JSONParser.parseStrict(result).isArray();
+        JSONArray array = controller.parseJSON(result).isArray();
         if (array != null) {
             long curTime = System.currentTimeMillis();
             long curCpu = (long) array.get(0).isObject().get("value").isNumber().doubleValue();

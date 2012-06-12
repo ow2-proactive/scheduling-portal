@@ -324,7 +324,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 @Override
                 public void onSuccess(String result) {
 
-                    JSONValue val = JSONParser.parseStrict(result);
+                    JSONValue val = RMController.this.parseJSON(result);
                     JSONObject obj = val.isObject();
 
                     HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
@@ -458,7 +458,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private HashMap<String, NodeSource> parseRMMonitoring(String json) {
 
-        JSONObject obj = JSONParser.parseStrict(json).isObject();
+        JSONObject obj = this.parseJSON(json).isObject();
         HashMap<String, NodeSource> ns = new HashMap<String, NodeSource>();
 
         JSONArray nodesources = obj.get("nodeSource").isArray();
@@ -630,7 +630,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
-        JSONArray arr = JSONParser.parseStrict(json).isArray();
+        JSONArray arr = this.parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<String, PluginDescriptor>();
 
         for (int i = 0; i < arr.size(); i++) {

@@ -72,7 +72,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONObject object = JSONParser.parseStrict(result).isObject();
+        JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(

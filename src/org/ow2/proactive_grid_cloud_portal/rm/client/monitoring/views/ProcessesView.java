@@ -108,7 +108,7 @@ public class ProcessesView extends VLayout implements Reloadable {
 
                         //[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
 
-                        JSONArray processes = JSONParser.parseStrict(result).isArray().get(0).isObject().get(
+                        JSONArray processes = controller.parseJSON(result).isArray().get(0).isObject().get(
                                 "value").isArray();
                         if (processes != null) {
                             ListGridRecord[] records = new ListGridRecord[processes.size()];

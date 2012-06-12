@@ -806,7 +806,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         String msg = getJsonErrorMessage(caught);
                         // might be an exception
                         try {
-                            JSONObject json = JSONParser.parseStrict(caught.getMessage()).isObject();
+                            JSONObject json = parseJSON(caught.getMessage()).isObject();
                             if (json.containsKey("stackTrace")) {
                                 msg = json.get("stackTrace").isString().stringValue();
                                 msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -938,7 +938,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 public void onSuccess(String result) {
                     List<Task> tasks = null;
 
-                    JSONValue val = JSONParser.parseStrict(result);
+                    JSONValue val = parseJSON(result);
                     JSONArray arr = val.isArray();
                     if (arr == null) {
                         error("Expected JSON Array: " + val.toString());
@@ -1003,7 +1003,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         public void onSuccess(String result) {
                             List<SchedulerUser> users = null;
 
-                            JSONValue val = JSONParser.parseStrict(result);
+                            JSONValue val = parseJSON(result);
                             JSONArray arr = val.isArray();
                             if (arr == null) {
                                 error("Expected JSON Array: " + val.toString());
@@ -1039,7 +1039,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         public void onSuccess(String result) {
                             HashMap<String, String> stats = new HashMap<String, String>();
 
-                            JSONObject json = JSONParser.parseStrict(result).isObject();
+                            JSONObject json = parseJSON(result).isObject();
                             if (json == null)
                                 error("Expected JSON Object: " + result);
 
@@ -1094,7 +1094,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         public void onSuccess(String result) {
                             HashMap<String, String> stats = new HashMap<String, String>();
 
-                            JSONObject json = JSONParser.parseStrict(result).isObject();
+                            JSONObject json = parseJSON(result).isObject();
                             if (json == null)
                                 error("Expected JSON Object: " + result);
 
@@ -1150,7 +1150,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         int rev = 0;
                         Map<Integer, Job> jobs = null;
 
-                        JSONValue jsonVal = JSONParser.parseStrict(result);
+                        JSONValue jsonVal = parseJSON(result);
                         JSONObject jsonInfo = jsonVal.isObject();
                         if (jsonInfo == null) {
                             error("Expected JSON Object: " + result);
@@ -1254,7 +1254,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onSuccess(String result) {
-                JSONValue val = JSONParser.parseStrict(result);
+                JSONValue val = parseJSON(result);
                 String sval = val.isString().stringValue();
                 SchedulerStatus stat = SchedulerStatus.valueOf(sval);
                 SchedulerController.this.model.setSchedulerStatus(stat);

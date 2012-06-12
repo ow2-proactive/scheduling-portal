@@ -68,7 +68,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = JSONParser.parseStrict(result).isArray();
+        JSONArray array = controller.parseJSON(result).isArray();
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
                     new Date(System.currentTimeMillis()));

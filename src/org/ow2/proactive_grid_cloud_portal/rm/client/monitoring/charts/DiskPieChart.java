@@ -67,7 +67,7 @@ public class DiskPieChart extends MBeansChart {
     @Override
     public void processResult(String result) {
 
-        JSONObject object = JSONParser.parseStrict(result).isObject();
+        JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
             loadTable.removeRows(0, loadTable.getNumberOfRows());

@@ -119,7 +119,7 @@ public class NetworkView extends VLayout implements Reloadable {
                                 .logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
                                     "ms");
 
-                        JSONObject object = JSONParser.parseStrict(result).isObject();
+                        JSONObject object = controller.parseJSON(result).isObject();
                         if (object != null) {
                             for (String network : object.keySet()) {
                                 DetailViewer details = new DetailViewer();

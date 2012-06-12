@@ -71,7 +71,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public void processResult(String result) {
 
         // Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
-        JSONObject object = JSONParser.parseStrict(result).isObject();
+        JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
