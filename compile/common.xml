@@ -19,10 +19,6 @@
 	<property name="lib.dir" value="${web-inf.dir}/lib" />
 	<property name="rm.config.file" value="rm.conf" />
 	<property name="sched.config.file" value="scheduler.conf" />
-	<exec executable="svnversion" outputproperty="svnversion" failifexecutionfails="false"/>
-	<condition property="svnversion" value="0">
-	  <not><isset property="svnversion" /></not>
-	</condition>
 
 	<property name="package.name" value="org.ow2.proactive_grid_cloud_portal" />
 	<property name="gwt.args" value="-war ${war.dir} -style OBF" />
