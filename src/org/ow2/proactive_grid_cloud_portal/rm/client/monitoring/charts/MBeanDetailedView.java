@@ -44,7 +44,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;

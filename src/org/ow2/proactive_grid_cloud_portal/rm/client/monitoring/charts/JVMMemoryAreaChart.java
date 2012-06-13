@@ -43,7 +43,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 

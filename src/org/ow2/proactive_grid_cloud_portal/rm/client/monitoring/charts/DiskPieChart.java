@@ -39,7 +39,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
