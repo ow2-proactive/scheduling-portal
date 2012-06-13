@@ -135,12 +135,6 @@ public abstract class Config {
     public abstract String getVersion();
 
     /**
-     * @return SCM revision of the application build
-     * 		for finer grained version control
-     */
-    public abstract String getRevision();
-
-    /**
      * @return URL of the service to GET for the MOTD
      */
     public abstract String getMotdUrl();

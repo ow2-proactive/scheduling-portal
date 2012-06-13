@@ -70,7 +70,7 @@ public class AboutWindow {
     private void build() {
         HLayout pane = new HLayout();
         pane.setWidth100();
-        pane.setHeight(240);
+        pane.setHeight(220);
         pane.setBackgroundColor("#ffffff");
 
         String ver = Config.get().getVersion();
@@ -84,13 +84,11 @@ public class AboutWindow {
             "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
             "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
             "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a><br><br><br>" +
-            "<table style='color:#404040'>" + "<tr><td>Revision</td><td>" + Config.get().getRevision() +
-            "</td></tr>" + "<tr><td>REST server</td><td>" + Config.get().getRestUrl() + "</td></tr>" +
-            "<tr><td>REST version</td><td>" + Config.get().getRestVersion() + "</td></tr>" + "<tr><td>" +
-            Config.get().getApplicationName() + " version</td><td>" + Config.get().getApplicationVersion() +
-            "</td></tr></table>";
+            "<table style='color:#404040'>" + "<tr><td>REST server</td><td>" + Config.get().getRestUrl() +
+            "</td></tr>" + "<tr><td>REST version</td><td>" + Config.get().getRestVersion() + "</td></tr>" +
+            "<tr><td>" + Config.get().getApplicationName() + " version</td><td>" +
+            Config.get().getApplicationVersion() + "</td></tr></table>";
 
-        ;
         HTMLPane text = new HTMLPane();
         text.setContents(str);
         text.setWidth100();
@@ -130,7 +128,7 @@ public class AboutWindow {
         this.window.setShowModalMask(true);
         this.window.addItem(root);
         this.window.setWidth(500);
-        this.window.setHeight(320);
+        this.window.setHeight(290);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
     }

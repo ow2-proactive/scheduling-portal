@@ -83,10 +83,6 @@ public class SchedulerConfig extends Config {
     public static final String SCHED_VERSION = "sched.server.version";
     private static final String d_SCHED_VERSION = "0.0";
 
-    /** SCM revision number */
-    public static final String REVISION = "sched.revision";
-    private static final String d_REVISION = "0";
-
     /** message of the day service URL */
     public static final String MOTD_URL = "sched.motd.url";
     private static final String d_MOTD_URL = "";
@@ -110,7 +106,6 @@ public class SchedulerConfig extends Config {
         properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
         properties.put(VERSION, d_VERSION);
-        properties.put(REVISION, d_REVISION);
         properties.put(SCHED_VERSION, d_SCHED_VERSION);
         properties.put(REST_VERSION, d_REST_VERSION);
         properties.put(MOTD_URL, d_MOTD_URL);
@@ -129,11 +124,6 @@ public class SchedulerConfig extends Config {
     @Override
     public String getVersion() {
         return properties.get(VERSION);
-    }
-
-    @Override
-    public String getRevision() {
-        return properties.get(REVISION);
     }
 
     @Override

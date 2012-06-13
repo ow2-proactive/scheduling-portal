@@ -74,10 +74,6 @@ public class RMConfig extends Config {
     public static final String RM_VERSION = "rm.server.version";
     private static final String d_RM_VERSION = "0.0";
 
-    /** SCM revision number */
-    public static final String REVISION = "rm.revision";
-    private static final String d_REVISION = "0";
-
     /** stat history refresh rate in millis */
     public static final String STATISTICS_REFRESH_TIME = "rm.client.stats.time";
     private static final String d_STATISTICS_REFRESH_TIME = "5000";
@@ -111,7 +107,6 @@ public class RMConfig extends Config {
         properties.put(REST_URL, d_REST_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
         properties.put(VERSION, d_VERSION);
-        properties.put(REVISION, d_REVISION);
         properties.put(RM_VERSION, d_RM_VERSION);
         properties.put(REST_VERSION, d_REST_VERSION);
         properties.put(STATISTICS_REFRESH_TIME, d_STATISTICS_REFRESH_TIME);
@@ -133,11 +128,6 @@ public class RMConfig extends Config {
     @Override
     public String getVersion() {
         return properties.get(VERSION);
-    }
-
-    @Override
-    public String getRevision() {
-        return properties.get(REVISION);
     }
 
     @Override
