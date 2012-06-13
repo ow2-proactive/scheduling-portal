@@ -510,8 +510,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 JSONString descStr = nodeObj.get("nodeInfo").isString();
                 if (descStr != null)
                     description = descStr.stringValue();
-                String defaultJMXUrl = nodeObj.get("defaultJMXUrl").isString().stringValue();
-                String proactiveJMXUrl = nodeObj.get("proactiveJMXUrl").isString().stringValue();
+
+                String defaultJMXUrl = "";
+                JSONString jmxStr = nodeObj.get("defaultJMXUrl").isString();
+                if (jmxStr != null) {
+                    defaultJMXUrl = jmxStr.stringValue();
+                }
+                String proactiveJMXUrl = "";
+                JSONString paJmx = nodeObj.get("proactiveJMXUrl").isString();
+                if (paJmx != null) {
+                    proactiveJMXUrl = paJmx.stringValue();
+                }
 
                 Node n = new Node(nodeUrl, nodeState, nodeInfo, timeStamp, timeStampFormatted, nodeProvider,
                     nodeOwner, nss, hostName, vmName, description, defaultJMXUrl, proactiveJMXUrl);
@@ -564,6 +573,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 System.out.println("Failed to parse node : ");
                 System.out.println(nodes.get(i).toString());
                 t.printStackTrace();
+
+                model.logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() + " for input: " +
+                    nodes.get(i).toString());
             }
         }
 
