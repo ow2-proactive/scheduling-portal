@@ -36,8 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
@@ -53,9 +54,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 public class NodeSource {
 
     /** nodes are grouped per host, each nodesource can hold nodes on different hosts */
-    private HashMap<String, Host> hosts;
+    private Map<String, Host> hosts;
     /** currently _deploying_ nodes are not yet on any host */
-    private HashMap<String, Node> deploying;
+    private Map<String, Node> deploying;
 
     /** Unique name of the nodesource */
     private String sourceName;
@@ -64,12 +65,61 @@ public class NodeSource {
     /** login of the user that created the NS */
     private String nodeSourceAdmin;
 
+    private static class Comp implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            StringBuffer l1 = new StringBuffer();
+            StringBuffer l2 = new StringBuffer();
+            StringBuffer n1 = new StringBuffer();
+            StringBuffer n2 = new StringBuffer();
+
+            for (int i = 0; i < o1.length(); i++) {
+                char c = o1.charAt(i);
+                if (Character.isDigit(c)) {
+                    n1.append(c);
+                } else {
+                    l1.append(c);
+                }
+            }
+            for (int i = 0; i < o2.length(); i++) {
+                char c = o2.charAt(i);
+                if (Character.isDigit(c)) {
+                    n2.append(c);
+                } else {
+                    l2.append(c);
+                }
+            }
+
+            String l1s = l1.toString();
+            String l2s = l2.toString();
+
+            int c1 = l1s.compareToIgnoreCase(l2s);
+            if (c1 == 0) {
+                Integer n1i = 0, n2i = 0;
+
+                try {
+                    n1i = new Integer(n1.toString());
+                } catch (Throwable t) {
+                }
+                try {
+                    n2i = new Integer(n2.toString());
+                } catch (Throwable t) {
+                }
+
+                return n1i.compareTo(n2i);
+            } else {
+                return c1;
+            }
+        }
+    }
+
     NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin) {
         this.sourceDescription = sourceDescription;
         this.sourceName = sourceName;
         this.nodeSourceAdmin = nodeSourceAdmin;
-        this.hosts = new HashMap<String, Host>();
-        this.deploying = new HashMap<String, Node>();
+        this.hosts = new TreeMap<String, Host>(new Comp());
+        this.deploying = new TreeMap<String, Node>(new Comp());
     }
 
     public Map<String, Host> getHosts() {
@@ -95,7 +145,7 @@ public class NodeSource {
     public static class Host {
 
         /** all nodes deployed on this host for one specific nodesource*/
-        private HashMap<String, Node> nodes;
+        private Map<String, Node> nodes;
         /** name of the host ; not unique ! */
         private String hostName;
         /** parent nodesource name */
@@ -105,11 +155,11 @@ public class NodeSource {
 
         Host(String hostName, String sourceName) {
             this.hostName = hostName;
-            this.nodes = new HashMap<String, Node>();
+            this.nodes = new TreeMap<String, Node>(new Comp());
             this.sourceName = sourceName;
         }
 
-        public HashMap<String, Node> getNodes() {
+        public Map<String, Node> getNodes() {
             return nodes;
         }
 
