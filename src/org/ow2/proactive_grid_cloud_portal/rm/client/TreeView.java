@@ -138,8 +138,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.setSelectionType(SelectionStyle.SINGLE);
 
         TreeGridField field = new TreeGridField("name");
-        field.setCanSort(false);
+        field.setCanSort(true);
+        field.setSortByDisplayField(true);
+
         treeGrid.setFields(field);
+        treeGrid.setSortField("name");
 
         this.tree = new Tree();
         tree.setModelType(TreeModelType.PARENT);
