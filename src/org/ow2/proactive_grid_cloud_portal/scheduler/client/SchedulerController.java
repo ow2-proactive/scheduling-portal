@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -63,6 +64,7 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.Label;
 
 
@@ -815,10 +817,10 @@ public class SchedulerController extends Controller implements UncaughtException
                         } catch (Throwable t) {
                             // not json
                         }
-                        SchedulerController.this.model.setTaskOutput(jobId, task.getFinishTime(), "[" +
-                            task.getName() + "] <span style='color:red;'>" + msg + "</span>");
+                        SchedulerController.this.model.setTaskOutput(jobId, task.getFinishTime(),
+                                "[" + task.getName() + "] <span style='color:red;'>" + msg + "</span>");
                         SchedulerController.this.model.logMessage("Failed to get output for task " +
-                            task.getName() + " in job " + jobId /*+ ": " + msg*/);
+                            task.getName() + " in job " + jobId /* + ": " + msg */);
 
                         taskOutputRequests.remove("" + task.getId());
                     }
@@ -833,6 +835,79 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
                 });
         this.taskOutputRequests.put("" + task.getId(), req);
+    }
+
+    /**
+     * Fetch server logs for a single task
+     * 
+     * @param jobId id of the job containing this task
+     * @param task task for which the output should be fetched
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
+     *   {@link SchedulerServiceAsync#LOG_OUT}
+     */
+    public void getTaskServerLogs(final int jobId, final String taskname, final ShowLogsCallback logs) {
+        Request req = this.scheduler.getTaskServerLogs(model.getSessionId(), jobId, taskname,
+                new AsyncCallback<String>() {
+                    public void onFailure(Throwable caught) {
+                        String msg = getJsonErrorMessage(caught);
+                        // might be an exception
+                        try {
+                            JSONObject json = parseJSON(caught.getMessage()).isObject();
+                            if (json.containsKey("stackTrace")) {
+                                msg = json.get("stackTrace").isString().stringValue();
+                                msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+                                msg = msg.replace("\n", "<br>");
+                            }
+                        } catch (Throwable t) {
+                            // not json
+                        }
+                        SchedulerController.this.model.logMessage("Failed to get server logs for task " +
+                            taskname + " in job " + jobId /* + ": " + msg */);
+                    }
+
+                    public void onSuccess(String result) {
+                        SchedulerController.this.model
+                                .logMessage("Successfully fetched server logs for task " + taskname +
+                                    " in job " + jobId);
+                        logs.show(result);
+                    }
+                });
+    }
+
+    /**
+     * Fetch server logs for a single job
+     * 
+     * @param jobId id of the job containing this task
+     * @param task task for which the output should be fetched
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
+     *   {@link SchedulerServiceAsync#LOG_OUT}
+     */
+    public void getJobServerLogs(final int jobId, final ShowLogsCallback logs) {
+        Request req = this.scheduler.getJobServerLogs(model.getSessionId(), jobId,
+                new AsyncCallback<String>() {
+                    public void onFailure(Throwable caught) {
+                        String msg = getJsonErrorMessage(caught);
+                        // might be an exception
+                        try {
+                            JSONObject json = parseJSON(caught.getMessage()).isObject();
+                            if (json.containsKey("stackTrace")) {
+                                msg = json.get("stackTrace").isString().stringValue();
+                                msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+                                msg = msg.replace("\n", "<br>");
+                            }
+                        } catch (Throwable t) {
+                            // not json
+                        }
+                        SchedulerController.this.model.logMessage("Failed to get server logs for a job " +
+                            jobId);
+                    }
+
+                    public void onSuccess(String result) {
+                        SchedulerController.this.model
+                                .logMessage("Successfully fetched server logs for job " + jobId);
+                        logs.show(result);
+                    }
+                });
     }
 
     /**
@@ -1065,11 +1140,9 @@ public class SchedulerController extends Controller implements UncaughtException
                                     .stringValue());
                             stats.put("FinishedJobsCount", json.get("FinishedJobsCount").isString()
                                     .stringValue());
-                            stats
-                                    .put("TotalTasksCount", json.get("TotalTasksCount").isString()
-                                            .stringValue());
-                            stats.put("FormattedMeanJobExecutionTime", json.get(
-                                    "FormattedMeanJobExecutionTime").isString().stringValue());
+                            stats.put("TotalTasksCount", json.get("TotalTasksCount").isString().stringValue());
+                            stats.put("FormattedMeanJobExecutionTime",
+                                    json.get("FormattedMeanJobExecutionTime").isString().stringValue());
                             stats.put("TotalJobsCount", json.get("TotalJobsCount").isString().stringValue());
                             stats.put("PendingJobsCount", json.get("PendingJobsCount").isString()
                                     .stringValue());
@@ -1131,8 +1204,8 @@ public class SchedulerController extends Controller implements UncaughtException
         int offset = model.getJobPage() * model.getJobPageSize();
         int range = model.getJobPageSize();
 
-        scheduler.revisionAndjobsinfo(model.getSessionId(), offset, range, model.isFetchMyJobsOnly(), model
-                .isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
+        scheduler.revisionAndjobsinfo(model.getSessionId(), offset, range, model.isFetchMyJobsOnly(),
+                model.isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
                 new AsyncCallback<String>() {
 
                     public void onFailure(Throwable caught) {

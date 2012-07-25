@@ -251,7 +251,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#removeJobs(java.lang.String, java.util.List)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#removeJobs(java.lang
+     * .String, java.util.List)
      */
     public int removeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException,
             ServiceException {
@@ -399,7 +402,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#setPriorityByName(java.lang.String, java.util.List, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#setPriorityByName(java
+     * .lang.String, java.util.List, java.lang.String)
      */
     public void setPriorityByName(String sessionId, List<Integer> jobIdList, String priorityName)
             throws ServiceException, RestServerException {
@@ -519,7 +525,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#logout(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#logout(java.lang.String
+     * )
      */
     public void logout(String sessionId) throws RestServerException {
 
@@ -544,7 +553,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getUser(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getUser(java.lang.String
+     * )
      */
     public User getUser(String sessionId) {
         return this.users.get(sessionId);
@@ -622,7 +634,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasks(java.lang.String, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasks(java.lang.
+     * String, java.lang.String)
      */
     public String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException {
         ClientResponse<InputStream> clientResponse = null;
@@ -647,6 +662,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getProperties()
      */
     public Map<String, String> getProperties() {
@@ -655,7 +671,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobInfo(java.lang.String, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobInfo(java.lang
+     * .String, java.lang.String)
      */
     public String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -680,7 +699,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#pauseScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#pauseScheduler(java
+     * .lang.String)
      */
     public boolean pauseScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -705,7 +727,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#resumeScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#resumeScheduler(java
+     * .lang.String)
      */
     public boolean resumeScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -731,7 +756,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#freezeScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#freezeScheduler(java
+     * .lang.String)
      */
     public boolean freezeScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -757,7 +785,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#killScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#killScheduler(java.
+     * lang.String)
      */
     public boolean killScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -783,7 +814,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#startScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#startScheduler(java
+     * .lang.String)
      */
     public boolean startScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -809,7 +843,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#stopScheduler(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#stopScheduler(java.
+     * lang.String)
      */
     public boolean stopScheduler(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -954,7 +991,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getStatistics(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getStatistics(java.
+     * lang.String)
      */
     public String getStatistics(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -977,7 +1017,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getStatisticsOnMyAccount(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getStatisticsOnMyAccount
+     * (java.lang.String)
      */
     public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException {
 
@@ -1001,7 +1044,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#schedulerStateRevision(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#schedulerStateRevision
+     * (java.lang.String)
      */
     public long schedulerStateRevision(String sessionId) throws RestServerException {
 
@@ -1055,7 +1101,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#revisionAndjobsinfo(java.lang.String, int, int, boolean, boolean, boolean, boolean)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#revisionAndjobsinfo
+     * (java.lang.String, int, int, boolean, boolean, boolean, boolean)
      */
     public String revisionAndjobsinfo(String sessionId, int index, int range, boolean myJobsOnly,
             boolean pending, boolean running, boolean finished) throws RestServerException, ServiceException {
@@ -1081,7 +1130,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobImage(java.lang.String, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobImage(java.lang
+     * .String, java.lang.String)
      */
     public String getJobImage(String sessionId, String jobId) throws RestServerException, ServiceException {
         String url = "img_" + jobId + ".png";
@@ -1127,7 +1179,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobMap(java.lang.String, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobMap(java.lang
+     * .String, java.lang.String)
      */
     public JobVisuMap getJobMap(String sessionId, String jobId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -1175,7 +1230,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getSchedulerStatus(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getSchedulerStatus(
+     * java.lang.String)
      */
     public String getSchedulerStatus(String sessionId) throws RestServerException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
@@ -1193,6 +1251,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.ow2.proactive_grid_cloud_portal.common.server.Service#getVersion()
      */
     public String getVersion() throws RestServerException, ServiceException {
@@ -1219,13 +1278,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     @Override
     public void checkPermutationStrongName() {
-        /* FIXME
-         * disable the check for XSRF attack, which finds false positives and refuses to serve
-         * requests to some clients, for no apparent reason:
-         * >> java.lang.SecurityException: Blocked request without GWT permutation header (XSRF attack?)
-         * >> at com.google.gwt.user.server.rpc.RemoteServiceServlet.checkPermutationStrongName(RemoteServiceServlet.java:267)
+        /*
+         * FIXME disable the check for XSRF attack, which finds false positives and refuses to serve
+         * requests to some clients, for no apparent reason: >> java.lang.SecurityException: Blocked
+         * request without GWT permutation header (XSRF attack?) >> at
+         * com.google.gwt.user.server.rpc
+         * .RemoteServiceServlet.checkPermutationStrongName(RemoteServiceServlet.java:267)
          * 
-         * This may be fixed in later versions of GWT, just remove this method to restore the original behaviour
+         * This may be fixed in later versions of GWT, just remove this method to restore the
+         * original behaviour
          */
         return;
     }
@@ -1258,5 +1319,62 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 reader.close();
         }
         return sb.toString();
+    }
+
+    /**
+     * Get server logs for a given task
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return job server logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String getTaskServerLogs(String sessionId, Integer jobId, String taskName)
+            throws RestServerException, ServiceException {
+        ClientResponse<String> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
+        try {
+            clientResponse = client.taskServerLogs(sessionId, "" + jobId, taskName);
+            Status status = clientResponse.getResponseStatus();
+            String response = clientResponse.getEntity();
+            switch (status) {
+                case OK:
+                    return response;
+                default:
+                    throw new RestServerException(status.getStatusCode(), response);
+            }
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
+
+    /**
+     * Get server logs for a given job
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @return task server logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException,
+            ServiceException {
+        ClientResponse<String> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl());
+        try {
+            clientResponse = client.jobServerLogs(sessionId, "" + jobId);
+            Status status = clientResponse.getResponseStatus();
+            String response = clientResponse.getEntity();
+            switch (status) {
+                case OK:
+                    return response;
+                default:
+                    throw new RestServerException(status.getStatusCode(), response);
+            }
+        } finally {
+            clientResponse.releaseConnection();
+        }
     }
 }

@@ -370,4 +370,28 @@ public interface SchedulerService extends RemoteService {
      * @return version string of the REST api
      */
     String getVersion() throws RestServerException, ServiceException;
+
+    /**
+     * Get server logs for a given task
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return task logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getTaskServerLogs(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
+     * Get server logs for a given job
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @return job logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException;
 }

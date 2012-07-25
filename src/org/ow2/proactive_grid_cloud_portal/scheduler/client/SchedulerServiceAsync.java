@@ -39,6 +39,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.User;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
@@ -304,4 +306,27 @@ public interface SchedulerServiceAsync {
      * returns the version string of the REST api
      */
     void getVersion(AsyncCallback<String> callback);
+
+    /**
+     * Get server logs for a given task
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return server task logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    Request getTaskServerLogs(String sessionId, Integer jobId, String taskName, AsyncCallback<String> callback);
+
+    /**
+     * Get server logs for a given job
+     * 
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @return server job logs
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
 }

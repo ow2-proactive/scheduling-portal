@@ -115,6 +115,8 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private TasksView tasksView = null;
     /** output for the selected job */
     private OutputView outputView = null;
+    /** server logs for the selected job */
+    private ServerLogsView serverLogsView = null;
     /** result download view */
     private ResultView resultView = null;
     /** displays connected users */
@@ -788,12 +790,17 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.outputView = new OutputView(this.controller);
         outputTab.setPane(this.outputView.build());
 
+        Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
+        this.serverLogsView = new ServerLogsView(this.controller);
+        serverLogsTab.setPane(this.serverLogsView.build());
+
         Tab resultTab = new Tab("Preview", Images.instance.search_16().getSafeUri().asString());
         this.resultView = new ResultView(this.controller);
         resultTab.setPane(this.resultView.build());
 
         rightTabSet.addTab(jobinfoTab);
         rightTabSet.addTab(outputTab);
+        rightTabSet.addTab(serverLogsTab);
         rightTabSet.addTab(resultTab);
 
         HLayout layout = new HLayout();

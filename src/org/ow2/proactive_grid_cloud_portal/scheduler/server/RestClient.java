@@ -83,7 +83,7 @@ public interface RestClient {
      */
     @GET
     @Path("jobsinfo")
-    @Produces( { "application/json", "application/xml" })
+    @Produces({ "application/json", "application/xml" })
     public ClientResponse<InputStream> jobs(@HeaderParam("sessionid")
     String sessionId);
 
@@ -417,6 +417,36 @@ public interface RestClient {
     String jobId);
 
     /**
+     * Gets server logs for a given task.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job to which the task corresponds to
+     * @param taskId the id of the task 
+     * @return a ClientResponse containing the response status and a string with the server logs
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/tasks/{taskid}/log/server")
+    @Produces("application/json")
+    public ClientResponse<String> taskServerLogs(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("taskid")
+    String taskId);
+
+    /**
+     * Gets server logs for a given job.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job to which the task corresponds to
+     * @return a ClientResponse containing the response status and a string with the server logs
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/log/server")
+    @Produces("application/json")
+    public ClientResponse<String> jobServerLogs(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId);
+
+    /**
      * Gets the result of a task.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task belongs
@@ -465,7 +495,7 @@ public interface RestClient {
      */
     @GET
     @Path("state/revision")
-    @Produces( { "application/json", "application/xml" })
+    @Produces({ "application/json", "application/xml" })
     public ClientResponse<String> schedulerStateRevision(@HeaderParam("sessionid")
     String sessionId);
 
@@ -487,7 +517,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("revisionjobsinfo")
-    @Produces( { "application/json", "application/xml" })
+    @Produces({ "application/json", "application/xml" })
     public ClientResponse<InputStream> revisionAndjobsinfo(@HeaderParam("sessionid")
     String sessionId, @QueryParam("index")
     int index, @QueryParam("range")
@@ -506,7 +536,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/map")
-    @Produces( { "application/json", "application/xml" })
+    @Produces({ "application/json", "application/xml" })
     public ClientResponse<InputStream> getJobMap(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
@@ -532,7 +562,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("users")
-    @Produces( { "application/json", "application/xml" })
+    @Produces({ "application/json", "application/xml" })
     public ClientResponse<InputStream> getSchedulerUsers(@HeaderParam("sessionid")
     String sessionId);
 
