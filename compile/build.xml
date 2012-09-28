@@ -85,6 +85,9 @@
 	<target name="war.scheduler" depends="gwt.scheduler,visu,servers"
 		description="Create a distributable .war for the Scheduler application">
 		<mkdir dir="${dist.dir}" />
+		<propertyfile file="${war.dir}/${sched.config.file}">
+		    <entry key="sched.version" value="${portal.version}" />
+		</propertyfile>
 		<copy file="${web-inf.dir}/web.scheduler.xml" tofile="${web-inf.dir}/web.xml" />
 		<zip destfile="${dist.dir}/scheduler.war"
 			basedir="${war.dir}"
@@ -97,7 +100,7 @@
 		description="Create a distributable .war for the RM application">
 		<mkdir dir="${dist.dir}" />
 		<propertyfile file="${war.dir}/${rm.config.file}">
-		  <entry key="rm.revision" value="${svnversion}" />
+		    <entry key="rm.version" value="${portal.version}" />
 		</propertyfile>
 		<copy file="${web-inf.dir}/web.rm.xml" tofile="${web-inf.dir}/web.xml" />
 		<zip destfile="${dist.dir}/rm.war"
