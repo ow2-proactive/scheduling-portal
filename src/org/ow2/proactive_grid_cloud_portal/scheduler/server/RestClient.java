@@ -64,6 +64,8 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 @Path("/scheduler/")
 public interface RestClient {
 
+    String ENCODING = "utf-8";
+
     /**
      * Disconnect the user identified by the sessionId from the scheduler
      * 
@@ -549,7 +551,7 @@ public interface RestClient {
      */
     @GET
     @Path("jobs/{jobid}/image")
-    @Produces("application/json")
+    @Produces("application/json;charset=" + ENCODING)
     public ClientResponse<InputStream> getJobImage(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);

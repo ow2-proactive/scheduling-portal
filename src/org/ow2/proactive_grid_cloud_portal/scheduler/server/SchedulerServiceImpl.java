@@ -65,6 +65,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -1154,11 +1155,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
         try {
             InputStream response = clientResponse.getEntity();
-            String ret = convertToString(response);
+            String ret = IOUtils.toString(response, RestClient.ENCODING);
             switch (status) {
                 case OK:
                     String dec = new String(org.apache.commons.codec.binary.Base64.decodeBase64(ret
-                            .getBytes()));
+                            .getBytes(RestClient.ENCODING)), RestClient.ENCODING);
                     BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(f));
                     for (int i = 0; i < dec.length(); i++) {
                         fos.write(dec.charAt(i));
