@@ -23,6 +23,16 @@
 	<property name="package.name" value="org.ow2.proactive_grid_cloud_portal" />
 	<property name="gwt.args" value="-war ${war.dir} -style OBF" />
 
+	<property name="src.tests.dir" value="${base.dir}/tests"/>
+	<property name="classes.tests.dir" value="${base.dir}/test-classes"/>
+	<property name="junit.dir" value="${base.dir}/junitReports"/>
+
+	<path id="test.classpath">
+		<pathelement location="${classes.dir}"/>
+		<pathelement location="${classes.tests.dir}"/>
+		<path refid="project.class.path"/>
+	</path>
+
 	<path id="project.class.path">
 		<pathelement location="${classes.dir}" />
 		<fileset dir="${base.dir}/lib" includes="**/*.jar" />

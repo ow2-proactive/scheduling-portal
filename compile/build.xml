@@ -111,12 +111,41 @@
 		<delete file="${web-inf.dir}/web.xml" />
 	</target>
 
-	<target name="wars" depends="war.scheduler, war.rm"
+	<macrodef name="junitMacro">
+		<attribute name="testdir"/>
+		<sequential>
+			<delete dir="${junit.dir}"/>
+			<mkdir dir="${junit.dir}"/>
+			<junit printsummary="yes" forkmode="perTest" showoutput="true" timeout="300000" haltonfailure="true">
+
+				<classpath>
+					<path refid="test.classpath"/>
+				</classpath>
+
+				<formatter type="xml"/>
+
+				<batchtest fork="yes" todir="${junit.dir}">
+					<fileset dir="@{testdir}"/>
+				</batchtest>
+			</junit>
+		</sequential>
+	</macrodef>
+
+	<target name="junit" depends="javac" description="Run rest tests">
+		<mkdir dir="${classes.tests.dir}" />
+		<javac srcdir="${src.tests.dir}" destdir="${classes.tests.dir}" deprecation="false" failonerror="true" debug="true">
+			<classpath refid="test.classpath" />
+		</javac>
+		<junitMacro testdir="${src.tests.dir}"/>
+	</target>
+
+	<target name="wars" depends="war.scheduler, war.rm, junit"
 		description="Build distributable .war for the Scheduler and RM applications" />
 
 	<target name="clean" description="Cleans this project">
 		<delete dir="${classes.dir}" failonerror="false" />
-		<delete dir="${test.classes.dir}" failonerror="false" />
+		<delete dir="${classes.tests.dir}" failonerror="false" />
+		<delete dir="${junit.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />
 		<delete dir="${war.dir}/portal" failonerror="false" />
 		<delete file="${war.dir}/visu.jar" failonerror="false" />

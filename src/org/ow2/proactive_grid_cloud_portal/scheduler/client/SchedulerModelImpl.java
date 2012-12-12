@@ -71,6 +71,9 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  */
 public class SchedulerModelImpl extends SchedulerModel implements SchedulerEventDispatcher {
 
+    private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
+    private static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
+
     private boolean logged = false;
     private String login = null;
     private String sessionId = null;
@@ -186,7 +189,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     /**
      * Modifies the local joblist
-     * triggers {@link JobsUpdatedListener#jobsUpdated(JobSet)},
+     * triggers {@link JobsUpdatedListener#jobsUpdated(java.util.Map)}},
      * or {@link JobsUpdatedListener#jobsUpdating()} if <code>jobs</code> was null
      * 
      * @param jobs a jobset, or null
@@ -209,12 +212,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    void jobsUpdated() {
-        for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobsUpdated(this.jobs);
-        }
-    }
-
     void jobSubmitted(Job j) {
         for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
             listener.jobSubmitted(j);
@@ -231,7 +228,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * Modifies the Job selection,
      * triggers a JobSelected event
      *
-     * @param jobId
      */
     void selectJob(int jobId) {
         Job j = null;
@@ -241,7 +237,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
                 j = it;
             }
         }
-        boolean selChanged = (this.selectedJob == null) ? true : !this.selectedJob.equals(j);
+        boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
         this.selectedJob = j;
 
         // notify job selection listeners
@@ -341,8 +337,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     @Override
     public JobOutput getJobOutput(int jobId) {
-        JobOutput ret = this.output.get(jobId);
-        return ret;
+        return this.output.get(jobId);
     }
 
     /**
@@ -350,9 +345,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * 
      * notify listeners
      * 
-     * @param jobId
-     * @param taskId
-     * @param output
      */
     void setTaskOutput(int jobId, long finishedTime, String output) {
         JobStatus stat = null;
@@ -365,21 +357,13 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
                 " for which there is no local representation");
         }
 
-        Map<Long, String> tasks = new HashMap<Long, String>();
-        tasks.put(finishedTime, output);
-
         List<String> lines = new ArrayList<String>();
 
-        for (String line : output.split("\n")) {
-            if (line.contains("PA_REMOTE_CONNECTION")) {
-                this.addRemoteHint(line);
-            }
-            if (line.matches("\\[.*\\].*")) {
-                line = line.replaceFirst("]", "]</span>");
-                line = "<nobr><span style='color:gray;'>" + line + "</nobr><br>";
-            }
+        for (String line : lineByLine(output)) {
+            addRemoteHintIfNecessary(line);
+            line = formatLine(line);
 
-            if (line.trim().length() > 0) {
+            if (!line.trim().isEmpty()) {
                 lines.add(line);
             }
         }
@@ -395,6 +379,16 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.updateOutput(jobId);
     }
 
+    private String[] lineByLine(String lines) {
+        return lines.split(PLATFORM_INDEPENDENT_LINE_BREAK);
+    }
+
+    private void addRemoteHintIfNecessary(String line) {
+        if (line.contains(PA_REMOTE_CONNECTION)) {
+            this.addRemoteHint(line);
+        }
+    }
+
     /**
      * Add a remote hint
      * will notify listeners if it is well formed
@@ -402,7 +396,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * @param remoteHint a string containing PA_REMOTE_CONNECTION
      */
     void addRemoteHint(String remoteHint) {
-        String[] expl = remoteHint.split("PA_REMOTE_CONNECTION");
+        String[] expl = remoteHint.split(PA_REMOTE_CONNECTION);
         if (expl.length < 2)
             return;
 
@@ -444,16 +438,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * @param out job output fragment
      */
     void appendLiveOutput(String jobId, String out) {
-        String[] expl = out.split("\n");
+        String[] expl = lineByLine(out);
         out = "";
         for (String str : expl) {
-            if (str.contains("PA_REMOTE_CONNECTION")) {
-                this.addRemoteHint(str);
-            }
-            if (str.matches("\\[.*\\].*")) {
-                str = str.replaceFirst("]", "]</span>");
-                out += "<nobr><span style='color:gray;'>" + str + "</nobr><br>";
-            }
+            addRemoteHintIfNecessary(str);
+            out += formatLine(str);
         }
 
         StringBuffer buf = this.liveOutput.get(jobId);
@@ -466,6 +455,14 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         for (JobOutputListener list : this.jobOutputListeners) {
             list.liveOutputUpdated(jobId, buf.toString());
         }
+    }
+
+    private String formatLine(String str) {
+        if (str.matches("\\[.*\\].*")) {
+            str = str.replaceFirst("]", "]</span>");
+            return "<nobr><span style='color:gray;'>" + str + "</nobr><br>";
+        }
+        return "";
     }
 
     @Override
@@ -591,7 +588,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     /**
      * Set local model, notify listeners
      * 
-     * @param stats
      */
     void setAccountStatistics(HashMap<String, String> stats) {
         this.accountStats = stats;
@@ -627,23 +623,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return this.statistics;
     }
 
-    void setStatistics(Map<String, StatHistory> values) {
-        this.statistics = values;
-        for (StatsListener list : this.statsListeners) {
-            list.statsUpdated(values);
-        }
-    }
-
     @Override
     public Range getRequestedStatHistoryRange(String source) {
         Range r = this.requestedStatRange.get(source);
         if (r == null)
             return Range.MINUTE_1;
         return r;
-    }
-
-    void setRequestedStatisticsRange(String source, Range r) {
-        this.requestedStatRange.put(source, r);
     }
 
     @Override
@@ -757,19 +742,4 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.statsListeners.add(listener);
     }
 
-    /**
-     * Nulls references to all known listeners
-     */
-    void clearListeners() {
-        this.jobsUpdatedListeners.clear();
-        this.jobSelectedListeners.clear();
-        this.tasksUpdatedListeners.clear();
-        this.schedulerStateListeners.clear();
-        this.jobOutputListeners.clear();
-        this.logListeners.clear();
-        this.usersListeners.clear();
-        this.remoteHintListeners.clear();
-        this.visuListeners.clear();
-        this.statsListeners.clear();
-    }
 }
