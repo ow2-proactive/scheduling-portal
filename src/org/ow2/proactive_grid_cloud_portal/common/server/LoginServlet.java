@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -121,10 +122,11 @@ public class LoginServlet extends HttpServlet {
             }
 
             String responseS = Service.get().login(user, pass, cred, sshKey);
-            response.getWriter().write("{ \"sessionId\" : \"" + responseS + "\" }");
+            String s = "{ \"sessionId\" : \"" + responseS + "\" }";
+            response.getWriter().write(SafeHtmlUtils.htmlEscape(s));
         } catch (Throwable t) {
             try {
-                response.getWriter().write(t.getMessage());
+                response.getWriter().write(SafeHtmlUtils.htmlEscape(t.getMessage()));
             } catch (IOException e1) {
                 e1.printStackTrace();
                 t.printStackTrace();

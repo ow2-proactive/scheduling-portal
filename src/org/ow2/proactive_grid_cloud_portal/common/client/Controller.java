@@ -105,12 +105,10 @@ public abstract class Controller {
         try {
             JSONObject exc = JSONParser.parseStrict(str).isObject();
             if (exc != null && exc.containsKey("errorMessage")) {
-                JSONValue val = exc.get("errorMessage");
-                if (val == null || val.isString() == null) {
-                    return "<no reason>";
-                } else {
-                    return val.isString().stringValue();
-                }
+                return retrieveErrorMessage(exc);
+            } else if (exc != null && exc.containsKey("exception")) {
+                JSONObject nestedExc = exc.get("exception").isObject();
+                return retrieveErrorMessage(nestedExc);
             }
         } catch (Exception e) {
             if (str != null) {
@@ -122,6 +120,15 @@ public abstract class Controller {
         return null;
     }
 
+    private static String retrieveErrorMessage(JSONObject exc) {
+        JSONValue val = exc.get("errorMessage");
+        if (val == null || val.isString() == null) {
+            return "<no reason>";
+        } else {
+            return val.isString().stringValue();
+        }
+    }
+
     /**
      * @param str String representation of a serialized JSON Exception
      * @return the value of the 'httpErrorCode' key, or -1
@@ -130,17 +137,24 @@ public abstract class Controller {
         try {
             JSONObject exc = JSONParser.parseStrict(str).isObject();
             if (exc != null && exc.containsKey("httpErrorCode")) {
-                JSONValue val = exc.get("httpErrorCode");
-                if (val == null || val.isNumber() == null) {
-                    return -1;
-                } else {
-                    return (int) val.isNumber().doubleValue();
-                }
+                return retrieveErrorCode(exc);
+            } else if (exc != null && exc.containsKey("exception")) {
+                JSONObject nestedExc = exc.get("exception").isObject();
+                return retrieveErrorCode(nestedExc);
             }
         } catch (Exception e) {
             return -1;
         }
         return -1;
+    }
+
+    private static int retrieveErrorCode(JSONObject exc) {
+        JSONValue val = exc.get("httpErrorCode");
+        if (val == null || val.isNumber() == null) {
+            return -1;
+        } else {
+            return (int) val.isNumber().doubleValue();
+        }
     }
 
     /**
@@ -155,8 +169,7 @@ public abstract class Controller {
      */
     public JSONValue parseJSON(String jsonStr) {
         try {
-            JSONValue val = JSONParser.parseStrict(jsonStr);
-            return val;
+            return JSONParser.parseStrict(jsonStr);
         } catch (Throwable t) {
             // only shows up in eclipse dev mode
             t.printStackTrace();
