@@ -57,6 +57,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.AnimationEffect;
 import com.smartgwt.client.types.VerticalAlignment;
+import com.smartgwt.client.widgets.AnimationCallback;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Img;
@@ -218,7 +219,7 @@ public class LoginPage {
             rqb.sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    String content = "";
+                    String content;
                     if (response.getStatusCode() == 200) {
                         content = response.getText();
                         if (content.trim().length() == 0) {
@@ -448,8 +449,6 @@ public class LoginPage {
         okButton.setWidth(120);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                errorLabel.animateHide(AnimationEffect.FLY);
-
                 if (!form.validate())
                     return;
 
@@ -466,7 +465,18 @@ public class LoginPage {
                 authTypeSelectForm.disable();
                 okButton.disable();
 
-                formPanel.submit();
+                // only submit once the the error message is hidden so we don't try to show it (on form response)
+                // while the effect is played resulting in the message hidden staying hidden
+                if (errorLabel.isDrawn() && errorLabel.isVisible()) {
+                    errorLabel.animateHide(AnimationEffect.FLY, new AnimationCallback() {
+                        @Override
+                        public void execute(boolean earlyFinish) {
+                            formPanel.submit();
+                        }
+                    });
+                } else {
+                    formPanel.submit();
+                }
             }
         });
 
