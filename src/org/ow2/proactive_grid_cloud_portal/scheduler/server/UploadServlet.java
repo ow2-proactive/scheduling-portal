@@ -49,9 +49,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.w3c.dom.Document;
@@ -68,6 +70,8 @@ import com.google.gwt.user.server.Base64Utils;
  *   containing a specific file hierarchy).
  * . one form field named 'sessionId' used to connect to the server
  * . one optional form field named 'edit'. if edit == "1",
+ * . one optional form field named 'droppedFileContent'. when the file has been dragged and dropped,
+ *          with a base64 string (the file) content)
  *   the servlet does not submit the job, but simply writes the following string as application/json response:
  *   { "jobEdit" : "<DESC_64>" }
  *   where <DESC_64> is a base64 encoded version of the job sent as parameter.
@@ -117,18 +121,19 @@ public class UploadServlet extends HttpServlet {
                     if (fi.getFieldName().equals("sessionId")) {
                         sessionId = fi.getString();
                     } else if (fi.getFieldName().equals("edit")) {
-                        if (fi.getString().equals("1")) {
-                            edit = true;
-                        } else {
-                            edit = false;
-                        }
+                        edit = fi.getString().equals("1");
+                    } else if (fi.getFieldName().equals("droppedFileContent")) {
+                        job = createTempFile("dragdropped_job");
+                        byte[] base64File = IOUtils.toByteArray(fi.getInputStream());
+                        byte[] decodedFile = Base64.decodeBase64(base64File);
+                        FileUtils.writeByteArrayToFile(job, decodedFile);
                     }
                 } else {
-                    String fileName = fi.getName();
-                    job = new File(System.getProperty("java.io.tmpdir"), fileName);
-                    fi.write(job);
+                    if (fi.getName() != null && !fi.getName().isEmpty()) {
+                        job = createTempFile(fi.getName());
+                        fi.write(job);
+                    }
                 }
-
                 fi.delete();
             }
 
@@ -189,6 +194,10 @@ public class UploadServlet extends HttpServlet {
                 job.delete();
         }
 
+    }
+
+    private File createTempFile(String fileName) {
+        return new File(System.getProperty("java.io.tmpdir"), fileName);
     }
 
 }
