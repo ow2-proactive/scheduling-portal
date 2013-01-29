@@ -10,7 +10,7 @@ able to properly run without it.
 Information about the REST API, the Scheduler and Resource Manager software
 can be found at the following locations:
   - Project: http://proactive.inria.fr/
-  - SCM: https://gforge.inria.fr/scm/?group_id=180
+  - SCM: http://gitorious.ow2.org/ow2-proactive
   - Mailing: http://mail.ow2.org/wws/arc/proactive
 
 This project is Open Source and distributed under the terms of the GNU AGPLv3,
