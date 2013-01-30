@@ -59,11 +59,12 @@ public class SchedulerModelImplTest {
     public void testSetTaskOutput_LinuxLineBreak() {
         addJob(42);
 
-        scheduler.setTaskOutput(42, 0, "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
+        Task task = new Task();
+        scheduler.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
 
         JobOutput jobOutput = scheduler.getJobOutput(42);
-        String firstLine = jobOutput.getLines().get(0L).get(0);
-        String secondLine = jobOutput.getLines().get(0L).get(1);
+        String firstLine = jobOutput.getLines().get(task).get(0);
+        String secondLine = jobOutput.getLines().get(task).get(1);
 
         assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
@@ -76,11 +77,12 @@ public class SchedulerModelImplTest {
     public void testSetTaskOutput_WindowsLineBreak() {
         addJob(42);
 
-        scheduler.setTaskOutput(42, 0, "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
+        Task task = new Task();
+        scheduler.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
 
         JobOutput jobOutput = scheduler.getJobOutput(42);
-        String firstLine = jobOutput.getLines().get(0L).get(0);
-        String secondLine = jobOutput.getLines().get(0L).get(1);
+        String firstLine = jobOutput.getLines().get(task).get(0);
+        String secondLine = jobOutput.getLines().get(task).get(1);
 
         assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));

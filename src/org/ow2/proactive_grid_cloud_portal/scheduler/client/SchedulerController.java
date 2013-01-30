@@ -817,7 +817,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         } catch (Throwable t) {
                             // not json
                         }
-                        SchedulerController.this.model.setTaskOutput(jobId, task.getFinishTime(),
+                        SchedulerController.this.model.setTaskOutput(jobId, task,
                                 "[" + task.getName() + "] <span style='color:red;'>" + msg + "</span>");
                         SchedulerController.this.model.logMessage("Failed to get output for task " +
                             task.getName() + " in job " + jobId /* + ": " + msg */);
@@ -827,7 +827,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     public void onSuccess(String result) {
                         String val = result;
-                        SchedulerController.this.model.setTaskOutput(jobId, task.getFinishTime(), val);
+                        SchedulerController.this.model.setTaskOutput(jobId, task, val);
                         SchedulerController.this.model.logMessage("Successfully fetched output for task " +
                             task.getName() + " in job " + jobId);
 

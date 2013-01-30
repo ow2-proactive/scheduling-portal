@@ -346,7 +346,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * notify listeners
      * 
      */
-    void setTaskOutput(int jobId, long finishedTime, String output) {
+    void setTaskOutput(int jobId, Task task, String output) {
         JobStatus stat = null;
         for (Job j : this.jobs.values()) {
             if (jobId == j.getId())
@@ -370,10 +370,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
         if (this.output.get(jobId) == null) {
             JobOutput jo = new JobOutput(jobId);
-            jo.update(finishedTime, lines);
+            jo.update(task, lines);
             this.output.put(jobId, jo);
         } else {
-            this.output.get(jobId).update(finishedTime, lines);
+            this.output.get(jobId).update(task, lines);
         }
 
         this.updateOutput(jobId);

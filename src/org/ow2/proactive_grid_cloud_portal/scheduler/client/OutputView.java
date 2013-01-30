@@ -75,8 +75,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     private static final String OUT_ERR = "Stderr";
     private static final String OUT_OUT = "Stdout";
 
-    /** contains the layout */
-    private Layout root = null;
     /** displays the job output */
     private HTMLPane text = null;
     /** click to fetch/refetch */
@@ -96,10 +94,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     private SchedulerController controller;
 
-    /**
-     * Default constructor
-     * @param controller
-     */
     public OutputView(SchedulerController controller) {
         this.controller = controller;
         this.controller.getEventDispatcher().addJobSelectedListener(this);
@@ -111,9 +105,10 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
      * @return the Widget to display, ready to be added in a container
      */
     public Layout build() {
-        this.root = new VLayout();
-        this.root.setWidth100();
-        this.root.setHeight100();
+        /* contains the layout */
+        Layout root = new VLayout();
+        root.setWidth100();
+        root.setHeight100();
 
         this.refreshButton = new IButton("Fetch output");
         this.refreshButton.setTooltip("Request fetching the Output for this job");
@@ -125,7 +120,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 OutputView.this.label.show();
 
                 isLive = false;
-                int mode = -1;
+                int mode;
                 String selMode = outSelect.getValueAsString();
                 if (selMode.equals(OUT_ALL)) {
                     mode = SchedulerServiceAsync.LOG_ALL;
@@ -232,11 +227,11 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.text.setShowEdges(true);
         this.text.hide();
 
-        this.root.addMember(buttons);
-        this.root.addMember(this.text);
-        this.root.addMember(this.label);
+        root.addMember(buttons);
+        root.addMember(this.text);
+        root.addMember(this.label);
 
-        return this.root;
+        return root;
     }
 
     /*
@@ -368,7 +363,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         if (this.taskSelect.getValueAsString().equals(TASKS_ALL)) {
             // alternate bgcolors for each entry
             boolean even = false;
-            for (Entry<Long, List<String>> tl : out.getLines().entrySet()) {
+            for (Entry<Task, List<String>> tl : out.getLines().entrySet()) {
                 String style = "";
                 if (even) {
                     style = "background-color:#FAFAFA; border-bottom: 1px solid #EDEDED; border-top: 1px solid #EDEDED;";
@@ -387,21 +382,21 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             }
         } else {
             String taskName = (String) this.taskSelect.getValue();
-            int taskid = 0;
+            Task task = null;
             for (Task t : this.controller.getModel().getTasks()) {
                 if (taskName.equals(t.getName())) {
-                    taskid = t.getId().intValue();
+                    task = t;
+                    break;
                 }
             }
 
-            List<String> lines = out.getLines().get(taskid);
+            List<String> lines = out.getLines().get(task);
             if (lines == null || lines.isEmpty()) {
                 clear();
                 return;
             }
             for (String str : lines) {
-                str = str.replaceFirst("]", "]</span>");
-                content += "<nobr><span style='color: gray;'>" + str + "</nobr><br>";
+                content += str;
             }
         }
 

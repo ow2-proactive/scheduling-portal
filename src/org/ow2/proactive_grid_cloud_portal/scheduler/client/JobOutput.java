@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -45,7 +46,7 @@ import java.util.TreeMap;
 /**
  * Wraps the output of a job, as it was received at a given time
  * <p>
- * Each task output is stored in a map sorted by taskid
+ * Each task output is stored in a map sorted by finished time
  * each entry is this map is a list of output lines
  * 
  * 
@@ -54,9 +55,16 @@ import java.util.TreeMap;
  */
 public class JobOutput {
 
+    private static final Comparator<Task> TASK_FINISHED_TIME_COMPARATOR = new Comparator<Task>() {
+        @Override
+        public int compare(Task o1, Task o2) {
+            return (int) (o1.getFinishTime() - o2.getFinishTime());
+        }
+    };
+
     /** the output content, split by task and line
      * key is timestamp for task finish time for sorting */
-    private SortedMap<Long, List<String>> lines;
+    private SortedMap<Task, List<String>> lines;
 
     /** id of the job */
     private int jobId;
@@ -68,22 +76,22 @@ public class JobOutput {
      */
     public JobOutput(int jobId) {
         this.jobId = jobId;
-        this.lines = new TreeMap<Long, List<String>>();
+        this.lines = new TreeMap<Task, List<String>>(TASK_FINISHED_TIME_COMPARATOR);
     }
 
     /**
      * Update the output for a single task
-     * 
-     * @param finishedTime
+     *
+     * @param task the task we update
      * @param output output for this task
      */
-    public void update(long finishedTime, List<String> output) {
-        List<String> tl = this.lines.get(finishedTime);
+    public void update(Task task, List<String> output) {
+        List<String> tl = this.lines.get(task);
         if (tl != null) {
             tl.clear();
         } else {
             tl = new ArrayList<String>();
-            this.lines.put(finishedTime, tl);
+            this.lines.put(task, tl);
         }
         tl.addAll(output);
     }
@@ -91,7 +99,7 @@ public class JobOutput {
     /**
      * @return the output lines, exploded in a list, per task (finished time as key for sorting)
      */
-    public SortedMap<Long, List<String>> getLines() {
+    public SortedMap<Task, List<String>> getLines() {
         return this.lines;
     }
 
