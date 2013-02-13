@@ -463,8 +463,14 @@ public class JobsView implements JobsUpdatedListener {
                     "background-repeat: no-repeat;" + //
                     "background-color:#a7cef6";
 
-                String prg = ((JobRecord) record).job.getFinishedTasks() + " / " +
-                    ((JobRecord) record).job.getTotalTasks();
+                String prg;
+                if (record instanceof JobRecord) {
+                    prg = ((JobRecord) record).job.getFinishedTasks() + " / " +
+                            ((JobRecord) record).job.getTotalTasks();
+                } else {
+                    Job job = submittingJobs.get(record.getAttributeAsInt(ID_ATTR)).job;
+                    prg = job.getFinishedTasks() + " / " + job.getTotalTasks();
+                }
                 String str = "<div style='" + style + "'>" + prg + "</div>";
 
                 return str;
