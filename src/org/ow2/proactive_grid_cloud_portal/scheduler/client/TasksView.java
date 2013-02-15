@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
@@ -53,8 +54,10 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
@@ -76,10 +79,8 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
 /**
  * Contains the ListGrid that displays tasks
- * 
- * 
- * @author mschnoor
  *
+ * @author mschnoor
  */
 public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
@@ -96,8 +97,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     private static final String DESCRIPTION_ATTR = "description";
 
     /**
-     * Entries in the Tasks Grid 
-     *
+     * Entries in the Tasks Grid
      */
     private class TaskRecord extends ListGridRecord {
 
@@ -111,18 +111,18 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
         /**
          * Updates the attributes of this record to reflect the fields of the task <code>t</code>
-         * 
+         *
          * @param t a task
          */
         public void update(Task t) {
             String execs = (t.getMaxNumberOfExec() - t.getNumberOfExecLeft()) + " / " +
-                t.getMaxNumberOfExec();
+                    t.getMaxNumberOfExec();
             if (t.getNumberOfExecLeft() > 0)
                 execs = (t.getMaxNumberOfExec() - t.getNumberOfExecLeft() + 1) + " / " +
-                    t.getMaxNumberOfExec();
+                        t.getMaxNumberOfExec();
 
             String fails = (t.getMaxNumberOfExecOnFailure() - t.getNumberOfExecOnFailureLeft()) + " / " +
-                t.getMaxNumberOfExecOnFailure();
+                    t.getMaxNumberOfExecOnFailure();
 
             setAttribute(NAME_ATTR, t.getName());
             setAttribute(STATUS_ATTR, t.getStatus().toString());
@@ -144,7 +144,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     /**
      * DataStore for the Tasks Grid
-     *
      */
     private class TaskDS extends DataSource {
 
@@ -190,13 +189,21 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         }
     }
 
-    /** the Grid widget displayed in the view */
+    /**
+     * the Grid widget displayed in the view
+     */
     private ListGrid tasksGrid = null;
-    /** shown when loading */
+    /**
+     * shown when loading
+     */
     private Label loadingLabel = null;
-    /** shown upon error */
+    /**
+     * shown upon error
+     */
     private Label errorLabel = null;
-    /** datasource : contains the actual data */
+    /**
+     * datasource : contains the actual data
+     */
     private TaskDS ds = null;
 
     private HashMap<String, ImgButton> visuButtons = null;
@@ -247,7 +254,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         for (Task t : tasks) {
             data[i] = new TaskRecord(t);
             if (this.expandRecord != null &&
-                data[i].getAttribute(ID_ATTR).equals(this.expandRecord.getAttribute(ID_ATTR))) {
+                    data[i].getAttribute(ID_ATTR).equals(this.expandRecord.getAttribute(ID_ATTR))) {
                 this.expandRecord = data[i];
             }
             i++;
@@ -299,7 +306,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 r1.setAttribute(START_TIME_ATTR, rec.getAttribute(START_TIME_ATTR));
                 r1.setAttribute(FINISHED_TIME_ATTR, rec.getAttribute(FINISHED_TIME_ATTR));
 
-                detail.setData(new DetailViewerRecord[] { r1 });
+                detail.setData(new DetailViewerRecord[]{r1});
 
                 VLayout layout = new VLayout();
                 layout.addMember(detail);
@@ -313,16 +320,16 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 if (colNum == 2) {
                     String st = record.getAttribute(STATUS_ATTR);
                     if (st.equals(TaskStatus.PENDING.toString()) ||
-                        st.equals(TaskStatus.SUBMITTED.toString()))
+                            st.equals(TaskStatus.SUBMITTED.toString()))
                         return "color:#1a8bba;" + base;
                     else if (st.equals(TaskStatus.RUNNING.toString()))
                         return "color:#176925;font-weight:bold;" + base;
                     else if (st.equals(TaskStatus.ABORTED.toString()) ||
-                        st.equals(TaskStatus.FAILED.toString()))
+                            st.equals(TaskStatus.FAILED.toString()))
                         return "color:#d37a11;font-weight:bold;" + base;
                     else if (st.equals(TaskStatus.FAULTY.toString()) ||
-                        st.equals(TaskStatus.NOT_STARTED.toString()) ||
-                        st.equals(TaskStatus.NOT_RESTARTED.toString()))
+                            st.equals(TaskStatus.NOT_STARTED.toString()) ||
+                            st.equals(TaskStatus.NOT_RESTARTED.toString()))
                         return "color:#c50000;font-weight:bold;" + base;
                     else
                         return base;
@@ -501,19 +508,104 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String id = rec.getAttributeAsString(ID_ATTR);
+        final String taskName = rec.getAttributeAsString(NAME_ATTR);
         if (id.equals(hint.taskId)) {
             ImgButton button = visuButtons.get(id);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
             button.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
-                    String url = GWT.getModuleBaseURL() + "visu?";
-                    url += "&codebase=" + GWT.getHostPageBaseURL();
-                    url += "&apptype=" + hint.type;
-                    url += "&argument=" + hint.argument;
-                    com.google.gwt.user.client.Window.open(url, "_blank", "");
+                    showRemoteVisuChoices(hint, taskName);
                 }
             });
         }
     }
+
+    private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {
+        final Window window = new Window();
+
+        window.setTitle("Show Remote Visualization");
+        window.setShowMinimizeButton(false);
+        window.setIsModal(true);
+        window.setShowModalMask(true);
+        window.setAutoSize(true);
+        window.setAutoCenter(true);
+
+        final Label label = new Label("Remote visualization can be performed using your web browser " +
+                "if it supports Websocket and Canvas or using VNC client application.");
+        label.setWidth(300);
+
+        final IButton cancelButton = new IButton("Cancel");
+        cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                window.destroy();
+            }
+        });
+
+        final IButton noVncButton = new IButton("Use web browser");
+        noVncButton.setIcon(SchedulerImages.instance.visu_16().getSafeUri().asString());
+        noVncButton.setAutoFit(true);
+
+        if (!(isWebSocketSupported() && isCanvasSupported())) {
+            noVncButton.disable();
+            noVncButton.setTooltip("Not supported");
+        }
+        noVncButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openNoVncPage(taskName);
+                window.destroy();
+            }
+        });
+
+        final IButton appletButton = new IButton("Use VNC client");
+        appletButton.setAutoFit(true);
+        appletButton.setIcon(SchedulerImages.instance.visu_16().getSafeUri().asString());
+        appletButton.setTooltip("Run a Java applet to launch VNC client application on your desktop.");
+        appletButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openRemoteVisuServlet(hint);
+                window.destroy();
+            }
+        });
+
+        final HLayout buttonBar = new HLayout();
+        buttonBar.setMembersMargin(5);
+        buttonBar.setMembers(noVncButton, appletButton, cancelButton);
+
+        VLayout layout = new VLayout();
+        layout.setMembersMargin(10);
+        layout.setMargin(5);
+        layout.setMembers(label, buttonBar);
+
+        window.addItem(layout);
+        window.show();
+    }
+
+    private void openNoVncPage(String taskName) {
+        final String jobId = String.valueOf(controller.getModel().getSelectedJob().getId());
+        final String sessionId = controller.getModel().getSessionId();
+        String httpsRedirectUrl = NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
+        com.google.gwt.user.client.Window.open(httpsRedirectUrl, "_blank", "");
+    }
+
+    private void openRemoteVisuServlet(RemoteHint hint) {
+        String url = GWT.getModuleBaseURL() + "visu?";
+        url += "&codebase=" + GWT.getHostPageBaseURL();
+        url += "&apptype=" + hint.type;
+        url += "&argument=" + hint.argument;
+        com.google.gwt.user.client.Window.open(url, "_blank", "");
+    }
+
+    private native boolean isWebSocketSupported() /*-{
+        return "WebSocket" in $wnd;
+    }-*/;
+
+    private native boolean isCanvasSupported() /*-{
+        var elem = document.createElement('canvas');
+        return !!(elem.getContext && elem.getContext('2d'));
+    }-*/;
 
 }

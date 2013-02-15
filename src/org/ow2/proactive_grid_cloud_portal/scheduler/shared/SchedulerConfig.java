@@ -59,6 +59,10 @@ public class SchedulerConfig extends Config {
     public static final String REST_URL = "sched.rest.url";
     private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
 
+    /** URL of the remote noVNC service */
+    public static final String NOVNC_URL = "sched.novnc.url";
+    private static final String d_NOVNC_URL = "http://localhost:8080/proactive_grid_cloud_portal/novnc";
+
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
     private static final String d_CLIENT_REFRESH_TIME = "3000";
@@ -102,6 +106,7 @@ public class SchedulerConfig extends Config {
 
     private void setDefaults() {
         properties.put(REST_URL, d_REST_URL);
+        properties.put(NOVNC_URL, d_NOVNC_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
         properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
@@ -119,6 +124,10 @@ public class SchedulerConfig extends Config {
     @Override
     public String getRestUrl() {
         return properties.get(REST_URL);
+    }
+
+    public String getNoVncUrl() {
+        return properties.get(NOVNC_URL);
     }
 
     @Override
