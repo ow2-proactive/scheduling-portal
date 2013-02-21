@@ -36,12 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import java.io.BufferedReader;
+import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,15 +59,16 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.User;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-
 
 /**
  * The server side implementation of the RPC service.
@@ -76,7 +77,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 public class RMServiceImpl extends Service implements RMService {
 
     /** current users */
-    private Map<String, User> users = null;
+    private Map<String, User> users;
+
+    private ClientExecutor executor;
 
     /**
      * Default constructor
@@ -89,6 +92,8 @@ public class RMServiceImpl extends Service implements RMService {
     @Override
     public void init() {
         loadProperties();
+
+        executor = HttpUtils.createDefaultExecutor();
     }
 
     /*
@@ -130,7 +135,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#logout(java.lang.String)
      */
     public void logout(String sessionId) throws ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         User user = this.users.remove(sessionId);
         if (user != null) {
             client.logout(sessionId);
@@ -187,7 +192,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getState(java.lang.String)
      */
     public String getState(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -213,7 +218,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getMonitoring(java.lang.String)
      */
     public String getMonitoring(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -280,7 +285,7 @@ public class RMServiceImpl extends Service implements RMService {
             String[] policyParameters, String[] policyFileParameters) throws RestServerException,
             ServiceException {
 
-        RestClient cli = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient cli = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -309,7 +314,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getInfrastructures(java.lang.String)
      */
     public String getInfrastructures(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -335,7 +340,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getPolicies(java.lang.String)
      */
     public String getPolicies(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -361,7 +366,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#lockNodes(java.lang.String, java.util.Set)
      */
     public String lockNodes(String sessionId, Set<String> urls) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         int failures = 0;
         int success = 0;
 
@@ -397,7 +402,7 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String unlockNodes(String sessionId, Set<String> urls) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         int failures = 0;
         int success = 0;
 
@@ -433,7 +438,7 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String removeNode(String sessionId, String url, boolean force) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -460,7 +465,7 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String removeNodesource(String sessionId, String name, boolean preempt)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -486,7 +491,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#releaseNode(java.lang.String, java.lang.String)
      */
     public String releaseNode(String sessionId, String url) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -512,7 +517,7 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.common.server.Service#getVersion()
      */
     public String getVersion() throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             clientResponse = client.getVersion();
@@ -535,7 +540,7 @@ public class RMServiceImpl extends Service implements RMService {
     @Override
     public String getMBeanInfo(String sessionId, String name, List<String> attrs) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             ObjectName obj = new ObjectName(name);
@@ -561,7 +566,7 @@ public class RMServiceImpl extends Service implements RMService {
     @Override
     public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             clientResponse = client.getNodeMBeanInfo(sessionId, nodeJmxUrl, objectName, attrs);
@@ -584,7 +589,7 @@ public class RMServiceImpl extends Service implements RMService {
     @Override
     public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames,
             List<String> attrs) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             clientResponse = client.getNodeMBeansInfo(sessionId, nodeJmxUrl, objectNames, attrs);
@@ -606,7 +611,7 @@ public class RMServiceImpl extends Service implements RMService {
 
     @Override
     public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             clientResponse = client.getStatHistory(sessionId, range);
@@ -624,27 +629,6 @@ public class RMServiceImpl extends Service implements RMService {
         } finally {
             clientResponse.releaseConnection();
         }
-    }
-
-    private static String convertToString(InputStream inputStream) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        String line;
-
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (reader != null)
-                reader.close();
-        }
-        return sb.toString();
     }
 
     @Override

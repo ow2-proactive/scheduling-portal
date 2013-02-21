@@ -35,9 +35,13 @@
 
 	<path id="project.class.path">
 		<pathelement location="${classes.dir}" />
-		<fileset dir="${base.dir}/lib" includes="**/*.jar" />
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
+        <fileset dir="${base.dir}/lib" includes="gwt-user.jar" />
 	</path>
+
+	<path id="gwt.class.path">
+        <fileset dir="${base.dir}/lib" includes="**/*.jar" />
+    </path>
 
 	<path id="compile.class.path">
 		<fileset dir="${compile.dir}/lib">
