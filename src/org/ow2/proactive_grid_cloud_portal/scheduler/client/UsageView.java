@@ -53,6 +53,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.smartgwt.client.data.RelativeDate;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.AutoFitWidthApproach;
 import com.smartgwt.client.types.FormLayoutType;
 import com.smartgwt.client.types.GroupStartOpen;
@@ -64,9 +65,9 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.ButtonItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.GroupNode;
 import com.smartgwt.client.widgets.grid.GroupTitleRenderer;
@@ -98,6 +99,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
     private DataTable durationData;
     private ColumnChart durationChart;
     private Options durationChartOptions;
+    private DynamicForm datesForm;
 
     public UsageView(SchedulerController controller) {
         this.controller = controller;
@@ -113,23 +115,13 @@ public class UsageView implements SchedulerListeners.UsageListener {
         Label summaryLabel = new Label("<h3>Summary</h3>");
         summaryLabel.setHeight(20);
         HorizontalPanel charts = createCharts();
-        Label detailsLabel = new Label("<h3>Details</h3>");
-        detailsLabel.setHeight(20);
+        HLayout detailsLabelAndExportButton = createDetailsLabelAndExportButton();
         ListGrid details = createDetailsGrid();
 
         root.addMember(dateInputs);
         root.addMember(summaryLabel);
         root.addMember(charts);
-        HLayout layout = new HLayout();
-        layout.setDefaultLayoutAlign(VerticalAlignment.CENTER);
-        layout.setHeight(30);
-        layout.addMember(detailsLabel);
-        IButton export = new IButton("Export");
-        export.setAutoFit(true);
-        export.addClickHandler(downloadUsageData());
-        layout.addMember(new LayoutSpacer());
-        layout.addMember(export);
-        root.addMember(layout);
+        root.addMember(detailsLabelAndExportButton);
         root.addMember(details);
 
         Date from = RelativeDateItem.getAbsoluteDate(RelativeDate.START_OF_MONTH);
@@ -139,27 +131,15 @@ public class UsageView implements SchedulerListeners.UsageListener {
         return root;
     }
 
-    private ClickHandler downloadUsageData() {
-        return new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                String url = GWT.getModuleBaseURL() + "usageexporter";
-                url += "?sessionId=" + controller.getModel().getSessionId();
-                String date = DATE_FORMAT.format(new Date()); // TODO get proper dates
-                url += "&startDate=" + URL.encodeQueryString(date);
-                url += "&endDate=" + URL.encodeQueryString(date);
-                Window.open(url, "_blank", "");
-            }
-        };
-    }
-
     private DynamicForm createDateInputs() {
-        DynamicForm form = new DynamicForm();
-        form.setWidth100();
-        form.setTitleOrientation(TitleOrientation.LEFT);
-        form.setItemLayout(FormLayoutType.TABLE);
-        form.setNumCols(8);
-        form.setWrapItemTitles(false);
+        datesForm = new DynamicForm();
+        datesForm.setWidth100();
+        datesForm.setTitleOrientation(TitleOrientation.LEFT);
+        datesForm.setItemLayout(FormLayoutType.TABLE);
+        datesForm.setNumCols(5);
+        // put refresh button on the left
+        datesForm.setColWidths("10", "10", "10", "10", "*");
+        datesForm.setWrapItemTitles(false);
 
         RelativeDateItem fromDate = new RelativeDateItem("From", "Usage From");
         fromDate.setOperator(OperatorId.GREATER_OR_EQUAL);
@@ -169,20 +149,23 @@ public class UsageView implements SchedulerListeners.UsageListener {
         toDate.setOperator(OperatorId.LESS_OR_EQUAL);
         toDate.setValue(RelativeDate.NOW);
 
-        form.setItems(fromDate, toDate);
+        ButtonItem button = new ButtonItem("Refresh");
+        button.setAutoFit(true);
+        button.setStartRow(false);
+        button.setAlign(Alignment.RIGHT);
+        button.addClickHandler(refreshAfterDateSelection());
 
-        fromDate.addChangedHandler(getHandler());
-        toDate.addChangedHandler(getHandler());
+        datesForm.setItems(fromDate, toDate, button);
 
-        return form;
+        return datesForm;
     }
 
-    private ChangedHandler getHandler() {
-        return new ChangedHandler() {
+    private com.smartgwt.client.widgets.form.fields.events.ClickHandler refreshAfterDateSelection() {
+        return new com.smartgwt.client.widgets.form.fields.events.ClickHandler() {
             @Override
-            public void onChanged(ChangedEvent event) {
-                Date from = RelativeDateItem.getAbsoluteDate(((RelativeDateItem) event.getForm().getItem("From")).getRelativeDate());
-                Date to = RelativeDateItem.getAbsoluteDate(((RelativeDateItem) event.getForm().getItem("To")).getRelativeDate());
+            public void onClick(com.smartgwt.client.widgets.form.fields.events.ClickEvent event) {
+                Date from = readDateFromFormItem(event.getForm().getItem("From"));
+                Date to = readDateFromFormItem(event.getForm().getItem("To"));
                 controller.getUsage(from, to);
                 clearDetailsGrid();
                 displayDetailsGridLoadingMessage();
@@ -190,8 +173,42 @@ public class UsageView implements SchedulerListeners.UsageListener {
         };
     }
 
-    private void clearDetailsGrid() {
-        detailsGrid.setData(new ListGridRecord[]{});
+    private HLayout createDetailsLabelAndExportButton() {
+        HLayout layout = new HLayout();
+        layout.setDefaultLayoutAlign(VerticalAlignment.CENTER);
+        layout.setHeight(30);
+
+        Label detailsLabel = new Label("<h3>Details</h3>");
+        detailsLabel.setHeight(20);
+        layout.addMember(detailsLabel);
+
+        layout.addMember(new LayoutSpacer());
+
+        IButton export = new IButton("Export");
+        export.setAutoFit(true);
+        export.addClickHandler(downloadUsageData());
+        layout.addMember(export);
+
+        LayoutSpacer toAlignWithRefresh = new LayoutSpacer();
+        toAlignWithRefresh.setWidth(2);
+        layout.addMember(toAlignWithRefresh);
+        return layout;
+    }
+
+    private ClickHandler downloadUsageData() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                String from = DATE_FORMAT.format(readDateFromFormItem(datesForm.getItem("From")));
+                String to = DATE_FORMAT.format(readDateFromFormItem(datesForm.getItem("To")));
+
+                String url = GWT.getModuleBaseURL() + "usageexporter";
+                url += "?sessionId=" + controller.getModel().getSessionId();
+                url += "&startDate=" + URL.encodeQueryString(from);
+                url += "&endDate=" + URL.encodeQueryString(to);
+                Window.open(url, "_blank", "");
+            }
+        };
     }
 
     private ListGrid createDetailsGrid() {
@@ -261,10 +278,6 @@ public class UsageView implements SchedulerListeners.UsageListener {
         detailsGrid.setFields(jobField, taskField, nbNodesField, startTimeField, finishedTimeField, durationField);
         displayDetailsGridLoadingMessage();
         return detailsGrid;
-    }
-
-    private void displayDetailsGridLoadingMessage() {
-        detailsGrid.setEmptyMessage("Loading usage data...");
     }
 
     private HorizontalPanel createCharts() {
@@ -385,5 +398,21 @@ public class UsageView implements SchedulerListeners.UsageListener {
         counterData.setValue(1, 0, "Tasks");
         counterData.setValue(1, 2, taskCounter);
         counterChart.draw(counterData, counterChartOptions);
+    }
+
+    private Date readDateFromFormItem(FormItem formItem) {
+        Object formItemValue = formItem.getValue();
+        if (formItemValue instanceof Date) {
+            return (Date) formItemValue;
+        }
+        return RelativeDateItem.getAbsoluteDate(new RelativeDate(formItem.getValue().toString()));
+    }
+
+    private void displayDetailsGridLoadingMessage() {
+        detailsGrid.setEmptyMessage("Loading usage data...");
+    }
+
+    private void clearDetailsGrid() {
+        detailsGrid.setData(new ListGridRecord[]{});
     }
 }
