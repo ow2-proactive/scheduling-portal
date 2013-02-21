@@ -70,7 +70,7 @@ public class AboutWindow {
     private void build() {
         HLayout pane = new HLayout();
         pane.setWidth100();
-        pane.setHeight(220);
+        pane.setHeight(210);
         pane.setBackgroundColor("#ffffff");
 
         String ver = Config.get().getVersion();
@@ -127,7 +127,7 @@ public class AboutWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(root);
-        this.window.setWidth(500);
+        this.window.setWidth(520);
         this.window.setHeight(290);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
