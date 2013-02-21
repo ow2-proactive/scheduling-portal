@@ -49,6 +49,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 
 
@@ -61,6 +64,8 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
  */
 @SuppressWarnings("serial")
 public class NSCreationServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NSCreationServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -116,7 +121,7 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (readingPolicyParams) {
                         policyParams.add(fi.getString());
                     } else {
-                        System.out.println("unexpected param " + fi.getFieldName());
+                        LOGGER.warn("unexpected param " + fi.getFieldName());
                     }
                 } else {
                     if (readingInfraParams) {
@@ -126,7 +131,7 @@ public class NSCreationServlet extends HttpServlet {
                         byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        System.out.println("unexpected param " + fi.getFieldName());
+                        LOGGER.warn("unexpected param " + fi.getFieldName());
                     }
                 }
             }
@@ -166,7 +171,7 @@ public class NSCreationServlet extends HttpServlet {
                 response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
                 response.getWriter().write("</script>");
             } catch (Throwable e1) {
-                e1.printStackTrace();
+                LOGGER.warn("Failed to write script back to client", e);
             }
         } catch (Throwable t) {
             try {
@@ -177,7 +182,7 @@ public class NSCreationServlet extends HttpServlet {
                                     "\" });");
                 response.getWriter().write("</script>");
             } catch (Throwable e1) {
-                t.printStackTrace();
+                LOGGER.warn("Failed to write script back to client", e1);
             }
         }
     }

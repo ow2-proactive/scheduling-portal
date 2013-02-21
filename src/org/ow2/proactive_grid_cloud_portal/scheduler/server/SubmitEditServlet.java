@@ -58,6 +58,9 @@ import org.apache.commons.io.IOUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -84,6 +87,8 @@ import org.xml.sax.SAXException;
  */
 @SuppressWarnings("serial")
 public class SubmitEditServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubmitEditServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -209,7 +214,7 @@ public class SubmitEditServlet extends HttpServlet {
             }
 
         } catch (IOException e1) {
-            e1.printStackTrace();
+            LOGGER.warn("Failed to write back to client", e1);
         } finally {
             if (jobDesc != null)
                 jobDesc.delete();

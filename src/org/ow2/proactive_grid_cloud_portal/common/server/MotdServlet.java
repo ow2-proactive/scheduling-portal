@@ -46,6 +46,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 
@@ -58,6 +61,8 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
  */
 @SuppressWarnings("serial")
 public class MotdServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MotdServlet.class);
 
     private static long lastModified = 0L;
     private static String fileContent = "";
@@ -82,7 +87,7 @@ public class MotdServlet extends HttpServlet {
                     try {
                         fileContent = FileUtils.readFileToString(f);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.debug("Failed to read MOTD file", e);
                         response.getWriter().write("");
                         return;
                     }
@@ -101,7 +106,7 @@ public class MotdServlet extends HttpServlet {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.debug("Failed to provide MOTD file", e);
         }
     }
 }

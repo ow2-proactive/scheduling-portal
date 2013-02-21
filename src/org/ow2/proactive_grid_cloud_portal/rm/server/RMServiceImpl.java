@@ -36,7 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,12 +63,10 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.User;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
 
 
 /**
@@ -71,6 +74,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
  */
 @SuppressWarnings("serial")
 public class RMServiceImpl extends Service implements RMService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RMServiceImpl.class);
 
     @Override
     public void init() {
@@ -89,26 +94,7 @@ public class RMServiceImpl extends Service implements RMService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-
-        /**
-         * Loads the Default properties written in the config file
-         */
-        java.util.Properties properties = new java.util.Properties();
-        String path = getServletContext().getRealPath(RMConfig.CONFIG_PATH);
-        try {
-            properties.load(new FileInputStream(new File(path)));
-        } catch (Exception e) {
-            System.out.println("Failed to load config from file: " + path);
-            e.printStackTrace();
-        }
-        HashMap<String, String> props = new HashMap<String, String>();
-        Set<Entry<Object, Object>> entries = properties.entrySet();
-        for (Entry<Object, Object> entry : entries) {
-            String name = (String) entry.getKey();
-            String value = (String) entry.getValue();
-            props.put(name, value);
-        }
-        RMConfig.get().load(props);
+        RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
     }
 
     /*
@@ -117,12 +103,7 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public void logout(String sessionId) throws ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
-        User user = this.users.remove(sessionId);
-        if (user != null) {
-            client.logout(sessionId);
-        } else {
-            throw new ServiceException("No user for session id '" + sessionId + "'");
-        }
+        client.logout(sessionId);
     }
 
     /*
@@ -134,7 +115,7 @@ public class RMServiceImpl extends Service implements RMService {
         PostMethod method = new PostMethod(RMConfig.get().getRestUrl() + "/rm/login");
 
         try {
-            Part[] parts = null;
+            Part[] parts;
             if (cred == null) {
                 parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
                         new StringPart("sshkey", ssh) };
@@ -149,9 +130,6 @@ public class RMServiceImpl extends Service implements RMService {
 
             switch (status) {
                 case 200:
-                    User user = new User(login);
-                    user.setSessionId(response);
-                    this.users.put(response, user);
                     break;
                 default:
                     throw new RestServerException(status, response);
@@ -190,7 +168,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -215,7 +195,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -250,7 +232,7 @@ public class RMServiceImpl extends Service implements RMService {
                     throw new RestServerException(status, response);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn("Failed to create credentials", e);
             throw new ServiceException(e.getMessage());
         } finally {
             method.releaseConnection();
@@ -285,7 +267,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
 
     }
@@ -312,7 +296,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -338,7 +324,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -367,7 +355,9 @@ public class RMServiceImpl extends Service implements RMService {
                         failures++;
                 }
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -403,7 +393,9 @@ public class RMServiceImpl extends Service implements RMService {
                         failures++;
                 }
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -436,7 +428,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -463,7 +457,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -489,7 +485,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -514,7 +512,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -540,7 +540,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (MalformedObjectNameException e) {
             throw new ServiceException("Malformed MBean name", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -586,7 +588,9 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -608,19 +612,10 @@ public class RMServiceImpl extends Service implements RMService {
         } catch (IOException e) {
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
-    @Override
-    public void checkPermutationStrongName() {
-        /* FIXME
-         * disable the check for XSRF attack, which finds false positives and refuses to serve
-         * requests to some clients, for no apparent reason:
-         * >> java.lang.SecurityException: Blocked request without GWT permutation header (XSRF attack?)
-         * >> at com.google.gwt.user.server.rpc.RemoteServiceServlet.checkPermutationStrongName(RemoteServiceServlet.java:267)
-         * 
-         * This may be fixed in later versions of GWT, just remove this method to restore the original behaviour
-         */
-    }
 }

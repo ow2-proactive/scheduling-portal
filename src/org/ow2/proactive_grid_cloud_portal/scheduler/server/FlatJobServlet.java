@@ -49,6 +49,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 
 
@@ -61,6 +64,8 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
  */
 @SuppressWarnings("serial")
 public class FlatJobServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlatJobServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -149,7 +154,7 @@ public class FlatJobServlet extends HttpServlet {
                 response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
                 response.getWriter().write("</script>");
             } catch (Throwable e1) {
-                e1.printStackTrace();
+                LOGGER.warn("Failed to write script back to client", e);
             }
         } catch (Exception e) {
             try {
@@ -158,7 +163,7 @@ public class FlatJobServlet extends HttpServlet {
                 tw += "</script>";
                 response.getWriter().write(tw);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                LOGGER.warn("Failed to write script back to client", e);
             }
         }
     }

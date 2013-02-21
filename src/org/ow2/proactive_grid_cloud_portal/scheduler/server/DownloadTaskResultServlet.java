@@ -47,6 +47,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * The servlet which is called when the result of a task is wanted to be downloaded
@@ -55,6 +58,8 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
  */
 @SuppressWarnings("serial")
 public class DownloadTaskResultServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadTaskResultServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -93,7 +98,7 @@ public class DownloadTaskResultServlet extends HttpServlet {
             }
 
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOGGER.warn("Failed to download result", t);
             String str = "Failed to download result: " + Controller.getJsonErrorMessage(t);
             out.write(str.getBytes());
         } finally {

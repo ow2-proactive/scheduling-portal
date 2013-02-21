@@ -76,15 +76,18 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
-
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 
     private ClientExecutor executor;
     
@@ -209,9 +212,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 return clientResponse.getEntity();
 
             default:
-                String stringResponse = "";
                 try {
-                    stringResponse = convertToString(clientResponse.getEntity());
+                    String stringResponse = convertToString(clientResponse.getEntity());
                     throw new RestServerException(status.getStatusCode(), stringResponse);
                 } catch (IOException e) {
                     throw new ServiceException("Error while converting InputStream to String: " +
@@ -253,7 +255,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             } catch (IOException e) {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -289,7 +293,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             } catch (IOException e) {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -325,7 +331,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             } catch (IOException e) {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -361,7 +369,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             } catch (IOException e) {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
-                clientResponse.releaseConnection();
+                if (clientResponse != null) {
+                    clientResponse.releaseConnection();
+                }
             }
         }
         if (failures > 0) {
@@ -385,8 +395,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         int success = 0;
 
         for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = null;
-            clientResponse = client.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId),
+            ClientResponse<InputStream> clientResponse = client.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId),
                     priorityName);
             Status st = clientResponse.getResponseStatus();
             switch (st) {
@@ -408,7 +417,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /**
      * Login to the scheduler using a Credentials file
      * 
-     * @param form login form
      * @return the sessionId which can be parsed as an Integer, or an error message
      * @throws RestServerException
      * @throws ServiceException 
@@ -418,7 +426,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         PostMethod method = new PostMethod(SchedulerConfig.get().getRestUrl() + "/scheduler/login");
 
         try {
-            Part[] parts = null;
+            Part[] parts;
             if (cred == null) {
                 parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
                         new StringPart("sshkey", ssh) };
@@ -522,7 +530,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -536,7 +546,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             Status status = clientResponse.getResponseStatus();
             InputStream response = clientResponse.getEntity();
             String info = convertToString(response);
-            System.out.println("SchedulerServiceImpl.restartTask() " + status + "//" + info);
+            LOGGER.info("SchedulerServiceImpl.restartTask() " + status + "//" + info);
             switch (status) {
                 case OK:
                     return true;
@@ -546,7 +556,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -569,7 +581,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -597,7 +611,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -662,7 +678,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -691,7 +709,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -720,7 +740,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -749,7 +771,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -778,7 +802,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -807,7 +833,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
     }
 
@@ -817,8 +845,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId current session id
      * @param jobId id of the job
      * @param taskName name of the task
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     * 			 {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * 			 {@link SchedulerServiceAsync#LOG_STDOUT}
      * @return the logs for the given task
      * @throws RestServerException
      * @throws ServiceException 
@@ -827,23 +855,22 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<String> clientResponse = null;
-        try {
-            if (logMode == SchedulerServiceAsync.LOG_ALL) {
-                clientResponse = client.tasklog(sessionId, jobId, taskName);
-            } else if (logMode == SchedulerServiceAsync.LOG_STDOUT) {
-                clientResponse = client.taskStdout(sessionId, jobId, taskName);
-            } else if (logMode == SchedulerServiceAsync.LOG_STDERR) {
-                clientResponse = client.taskStderr(sessionId, jobId, taskName);
-            }
+        if (logMode == SchedulerServiceAsync.LOG_ALL) {
+            clientResponse = client.tasklog(sessionId, jobId, taskName);
+        } else if (logMode == SchedulerServiceAsync.LOG_STDOUT) {
+            clientResponse = client.taskStdout(sessionId, jobId, taskName);
+        } else if (logMode == SchedulerServiceAsync.LOG_STDERR) {
+            clientResponse = client.taskStderr(sessionId, jobId, taskName);
+        }
 
+        if (clientResponse != null) {
             String ret = clientResponse.getEntity();
             if (clientResponse.getStatus() == 200) {
                 return ret;
-            } else {
-                throw new RestServerException(clientResponse.getResponseStatus().getStatusCode(), ret);
             }
-        } finally {
-            clientResponse.releaseConnection();
+            throw new RestServerException(clientResponse.getResponseStatus().getStatusCode(), ret);
+        } else {
+            throw new RestServerException("Invalid logMode value");
         }
     }
 
@@ -1178,26 +1205,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                     throw new RestServerException(status.getStatusCode(), ret);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn("Failed to read server response", e);
             throw new ServiceException("Failed to read server response", e);
         } finally {
-            clientResponse.releaseConnection();
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
         }
-    }
-
-    @Override
-    public void checkPermutationStrongName() {
-        /*
-         * FIXME disable the check for XSRF attack, which finds false positives and refuses to serve
-         * requests to some clients, for no apparent reason: >> java.lang.SecurityException: Blocked
-         * request without GWT permutation header (XSRF attack?) >> at
-         * com.google.gwt.user.server.rpc
-         * .RemoteServiceServlet.checkPermutationStrongName(RemoteServiceServlet.java:267)
-         * 
-         * This may be fixed in later versions of GWT, just remove this method to restore the
-         * original behaviour
-         */
-        return;
     }
 
     /**

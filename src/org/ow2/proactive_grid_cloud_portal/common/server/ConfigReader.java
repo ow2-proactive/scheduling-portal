@@ -40,14 +40,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConfigReader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigReader.class);
+
     public static HashMap<String, String> readPropertiesFromFile(String pathToFile) {
         java.util.Properties properties = new java.util.Properties();
         try {
             properties.load(new FileInputStream(new File(pathToFile)));
         } catch (Exception e) {
-            System.out.println("Failed to load config from file: " + pathToFile);
-            e.printStackTrace();
+            LOGGER.warn("Failed to load config from file: " + pathToFile, e);
         }
         HashMap<String, String> props = new HashMap<String, String>();
         Set<Map.Entry<Object, Object>> entries = properties.entrySet();

@@ -50,6 +50,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -64,6 +66,8 @@ import org.apache.commons.io.IOUtils;
  */
 @SuppressWarnings("serial")
 public class LoginServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -128,8 +132,7 @@ public class LoginServlet extends HttpServlet {
             try {
                 response.getWriter().write(SafeHtmlUtils.htmlEscape(t.getMessage()));
             } catch (IOException e1) {
-                e1.printStackTrace();
-                t.printStackTrace();
+                LOGGER.warn("Failed to return login error to client, error was:" + t.getMessage(), e1);
             }
         } finally {
             if (cred != null)
