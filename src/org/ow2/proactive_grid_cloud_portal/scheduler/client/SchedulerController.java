@@ -825,8 +825,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
 
                     public void onSuccess(String result) {
-                        String val = result;
-                        SchedulerController.this.model.setTaskOutput(jobId, task, val);
+                        SchedulerController.this.model.setTaskOutput(jobId, task, result);
                         SchedulerController.this.model.logMessage("Successfully fetched output for task " +
                             task.getName() + " in job " + jobId);
 
@@ -999,7 +998,7 @@ public class SchedulerController extends Controller implements UncaughtException
         } else {
             final String jobId = "" + model.getSelectedJob().getId();
 
-            Request req = this.scheduler.getTasks(model.getSessionId(), jobId, new AsyncCallback<String>() {
+            this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, new AsyncCallback<String>() {
 
                 public void onFailure(Throwable caught) {
                     String msg = Controller.getJsonErrorMessage(caught);
@@ -1024,7 +1023,6 @@ public class SchedulerController extends Controller implements UncaughtException
                     // do not model.logMessage() : this is repeated by a timer
                 }
             });
-            this.taskUpdateRequest = req;
         }
     }
 
@@ -1228,7 +1226,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             error("Expected JSON Object: " + result);
                         }
 
-                        String key = (String) jsonInfo.keySet().iterator().next();
+                        String key = jsonInfo.keySet().iterator().next();
                         rev = Long.parseLong(key);
 
                         JSONArray jsonArr = jsonInfo.get(key).isArray();

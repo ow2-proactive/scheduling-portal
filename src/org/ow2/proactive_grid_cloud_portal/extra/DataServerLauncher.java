@@ -222,8 +222,7 @@ public class DataServerLauncher implements ActionListener {
     private Image getIcon() throws IOException {
         String name = "32.png";
         URL url = this.getClass().getResource(name);
-        Image img = ImageIO.read(url);
-        return img;
+        return ImageIO.read(url);
     }
 
     /**
@@ -264,13 +263,13 @@ public class DataServerLauncher implements ActionListener {
             String exec = null;
             String[] cmdArr = null;
 
-            if (os.indexOf("mac") >= 0 || os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
+            if (os.contains("mac") || os.contains("nix") || os.contains("nux")) {
                 exec = this.paPath.getAbsolutePath() + "/bin/pa-dataserver-gui.sh";
                 if (!new File(exec).exists())
                     exec = this.paPath.getAbsolutePath() + "/bin/unix/pa-dataserver-gui";
 
                 cmdArr = new String[] { "/bin/sh", exec };
-            } else if (os.indexOf("win") >= 0) {
+            } else if (os.contains("win")) {
                 exec = this.paPath.getAbsolutePath() + "\\bin\\pa-dataserver-gui.bat";
                 if (!new File(exec).exists())
                     exec = this.paPath.getAbsolutePath() + "\\bin\\windows\\pa-dataserver-gui.bat";

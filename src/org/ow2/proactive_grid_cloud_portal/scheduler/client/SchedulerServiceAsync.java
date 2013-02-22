@@ -41,7 +41,6 @@ import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.User;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.http.client.Request;
@@ -63,13 +62,6 @@ public interface SchedulerServiceAsync {
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
     void logout(String sessionId, AsyncCallback<Void> callback);
-
-    /**
-     * Method used for making an asynchronous call to the server for returning the user that is logged in. 
-     * @param sessionId the user session id 
-     * @param callback the object used for notifying the caller when the asynchronous call is completed.
-     */
-    void getUser(String sessionId, AsyncCallback<User> callback);
 
     /**
      * Method used for making an asynchronous call to the server for removing a job.

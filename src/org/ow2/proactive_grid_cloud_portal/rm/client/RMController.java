@@ -772,7 +772,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             return;
         }
 
-        final String msg = new String(_msg);
+        final String msg = _msg;
         final int numNodes = _numNodes;
 
         final AsyncCallback<String> callback = new AsyncCallback<String>() {

@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.shared;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 

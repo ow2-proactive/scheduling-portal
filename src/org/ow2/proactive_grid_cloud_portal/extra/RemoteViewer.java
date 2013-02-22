@@ -253,8 +253,7 @@ public class RemoteViewer implements ActionListener {
     private Image getIcon() throws IOException {
         String name = "32.png";
         URL url = this.getClass().getResource(name);
-        Image img = ImageIO.read(url);
-        return img;
+        return ImageIO.read(url);
     }
 
     /**

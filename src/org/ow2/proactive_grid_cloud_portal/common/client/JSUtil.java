@@ -110,13 +110,11 @@ public class JSUtil {
     }
 
     private static native String getAvailHeight() /*-{
-    	var screenHeight = screen.availHeight + "";
-    	return screenHeight;
+        return screen.availHeight + "";
     }-*/;
 
     private static native String getAvailWidth() /*-{
-    	var screenWidth = screen.availWidth + "";
-    	return screenWidth;
+        return screen.availWidth + "";
     }-*/;
 
     public static String getTime(long time) {
@@ -135,15 +133,15 @@ public class JSUtil {
         sec = seconds % 60;
 
         if (day > 0) {
-            ret.append(day + "d ");
-            ret.append(hou + "h ");
+            ret.append(day).append("d ");
+            ret.append(hou).append("h ");
         } else if (hou > 0) {
-            ret.append(hou + "h");
-            ret.append(min + "mn ");
+            ret.append(hou).append("h");
+            ret.append(min).append("mn ");
         } else if (min > 0) {
-            ret.append(min + "mn ");
+            ret.append(min).append("mn ");
         } else {
-            ret.append(sec + "s ");
+            ret.append(sec).append("s ");
         }
 
         ret.append("ago");

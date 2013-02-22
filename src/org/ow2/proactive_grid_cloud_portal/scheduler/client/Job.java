@@ -257,7 +257,7 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     public int compareTo(Job job) {
-        return ((Integer) this.id).compareTo((Integer) job.getId());
+        return ((Integer) this.id).compareTo(job.getId());
     }
 
     @Override

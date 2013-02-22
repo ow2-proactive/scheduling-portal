@@ -44,7 +44,6 @@ import javax.ws.rs.QueryParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.User;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -64,14 +63,6 @@ public interface SchedulerService extends RemoteService {
      * @throws LogoutException exception thrown if problems occurred during the logout process. 
      */
     void logout(String sessionId) throws RestServerException;
-
-    /**
-     * Get the user that is logged in.
-     * 
-     * @param sessionId The user session id
-     * @return The user that is logged in.
-     */
-    User getUser(String sessionId);
 
     /**
      * Removes several jobs from the scheduler.

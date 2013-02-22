@@ -36,20 +36,27 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.jar.JarFile;
 
 import javax.ws.rs.core.Response.Status;
@@ -69,18 +76,8 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.User;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
 
 
 /**
@@ -89,23 +86,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
 
-    /**
-     * Map of connected users. The key String is the session Id
-     */
-    public Map<String, User> users;
-
     private ClientExecutor executor;
     
-    /**
-     * Creates the service and begins the job synchronization with the scheduler
-     * 
-     * @throws ServiceCreationException
-     */
-    public SchedulerServiceImpl() {
-        super();
-        this.users = new HashMap<String, User>();
-    }
-
     @Override
     public void init() {
         loadProperties();
@@ -117,25 +99,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        /**
-         * Loads the Default properties written in the config file
-         */
-        java.util.Properties properties = new java.util.Properties();
-        String path = getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH);
-        try {
-            properties.load(new FileInputStream(new File(path)));
-        } catch (Exception e) {
-            System.out.println("Failed to load config from file: " + path);
-            e.printStackTrace();
-        }
-        HashMap<String, String> props = new HashMap<String, String>();
-        Set<Entry<Object, Object>> entries = properties.entrySet();
-        for (Entry<Object, Object> entry : entries) {
-            String name = (String) entry.getKey();
-            String value = (String) entry.getValue();
-            props.put(name, value);
-        }
-        SchedulerConfig.get().load(props);
+        SchedulerConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
     }
 
     /**
@@ -150,15 +114,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         PostMethod method = new PostMethod(SchedulerConfig.get().getRestUrl() + "/scheduler/submit");
         method.addRequestHeader("sessionId", sessionId);
 
-        boolean isJar = false;
-        try {
-            JarFile jf = new JarFile(file);
-            if (jf != null) {
-                isJar = true;
-            }
-        } catch (IOException e1) {
-            // not a jar
-        }
+        boolean isJar = isJarFile(file);
 
         try {
             String name = (isJar) ? "jar" : "file";
@@ -192,6 +148,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             if (file != null) {
                 file.delete();
             }
+        }
+    }
+
+    private boolean isJarFile(File file) {
+        try {
+            new JarFile(file);
+            return true;
+        } catch (IOException e1) {
+            return false;
         }
     }
 
@@ -468,9 +433,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String response = convertToString(method.getResponseBodyAsStream());
             switch (status) {
                 case 200:
-                    User user = new User(login);
-                    user.setSessionId(response);
-                    this.users.put(response, user);
                     break;
                 default:
                     String message = response;
@@ -537,35 +499,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * )
      */
     public void logout(String sessionId) throws RestServerException {
-
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-
-        User user = this.users.get(sessionId);
-
-        this.users.remove(sessionId);
-
-        ClientResponse<Void> clientResponse = null;
-        try {
-            clientResponse = client.disconnect(sessionId);
-        } finally {
-            clientResponse.releaseConnection();
-        }
-
-        if (user == null) {
-            throw new RestServerException(500, "No user for session " + sessionId);
-        }
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getUser(java.lang.String
-     * )
-     */
-    public User getUser(String sessionId) {
-        return this.users.get(sessionId);
+        client.disconnect(sessionId);
     }
 
     @Override
@@ -923,21 +858,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     public String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
             ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = null;
-
-        try {
-            clientResponse = client.getLiveLogJob(sessionId, jobId);
-            String out = clientResponse.getEntity();
-            if (clientResponse.getStatus() == 200) {
-                return out;
-            } else {
-                throw new RestServerException(clientResponse.getStatus(), out);
-            }
-
-        } finally {
-            if (clientResponse != null)
-                clientResponse.releaseConnection();
+        ClientResponse<String> clientResponse = client.getLiveLogJob(sessionId, jobId);
+        String out = clientResponse.getEntity();
+        if (clientResponse.getStatus() == 200) {
+            return out;
+        } else {
+            throw new RestServerException(clientResponse.getStatus(), out);
         }
+
     }
 
     /**
@@ -949,24 +877,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws RestServerException
      */
     public int getLiveLogJobAvailable(final String sessionId, final String jobId) throws RestServerException {
-        int ret = -1;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = null;
+        ClientResponse<String> clientResponse = client.getLiveLogJobAvailable(sessionId, jobId);
+        String out = clientResponse.getEntity();
 
-        try {
-            clientResponse = client.getLiveLogJobAvailable(sessionId, jobId);
-            String out = clientResponse.getEntity();
-
-            if (clientResponse.getStatus() == 200) {
-                ret = Integer.parseInt(out);
-            } else {
-                throw new RestServerException(clientResponse.getStatus(), out);
-            }
-        } finally {
-            if (clientResponse != null)
-                clientResponse.releaseConnection();
+        if (clientResponse.getStatus() == 200) {
+            return Integer.parseInt(out);
+        } else {
+            throw new RestServerException(clientResponse.getStatus(), out);
         }
-        return ret;
     }
 
     /**
@@ -1005,19 +924,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     public String getStatistics(String sessionId) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
 
-        ClientResponse<String> clientResponse = null;
-        try {
-            clientResponse = client.getStatistics(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return clientResponse.getEntity();
-                default:
-                    throw new RestServerException("Failed to fetch account stats: " +
+        ClientResponse<String> clientResponse = client.getStatistics(sessionId);
+        Status status = clientResponse.getResponseStatus();
+        switch (status) {
+            case OK:
+                return clientResponse.getEntity();
+            default:
+                throw new RestServerException("Failed to fetch account stats: " +
                         clientResponse.getEntity());
-            }
-        } finally {
-            clientResponse.releaseConnection();
         }
     }
 
@@ -1032,19 +946,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
 
-        ClientResponse<String> clientResponse = null;
-        try {
-            clientResponse = client.getStatisticsOnMyAccount(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return clientResponse.getEntity();
-                default:
-                    throw new RestServerException("Failed to fetch account stats: " +
+        ClientResponse<String> clientResponse = client.getStatisticsOnMyAccount(sessionId);
+        Status status = clientResponse.getResponseStatus();
+        switch (status) {
+            case OK:
+                return clientResponse.getEntity();
+            default:
+                throw new RestServerException("Failed to fetch account stats: " +
                         clientResponse.getEntity());
-            }
-        } finally {
-            clientResponse.releaseConnection();
         }
     }
 
@@ -1060,19 +969,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<String> clientResponse = client.schedulerStateRevision(sessionId);
 
-        try {
-
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Long.parseLong(clientResponse.getEntity());
-                default:
-                    throw new RestServerException(clientResponse.getEntity());
-            }
-        } finally {
-            clientResponse.releaseConnection();
+        Status status = clientResponse.getResponseStatus();
+        switch (status) {
+            case OK:
+                return Long.parseLong(clientResponse.getEntity());
+            default:
+                throw new RestServerException(clientResponse.getEntity());
         }
-
     }
 
     /**
@@ -1309,20 +1212,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     public String getTaskServerLogs(String sessionId, Integer jobId, String taskName)
             throws RestServerException, ServiceException {
-        ClientResponse<String> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.taskServerLogs(sessionId, "" + jobId, taskName);
-            Status status = clientResponse.getResponseStatus();
-            String response = clientResponse.getEntity();
-            switch (status) {
-                case OK:
-                    return response;
-                default:
-                    throw new RestServerException(status.getStatusCode(), response);
-            }
-        } finally {
-            clientResponse.releaseConnection();
+        ClientResponse<String> clientResponse = client.taskServerLogs(sessionId, "" + jobId, taskName);
+        Status status = clientResponse.getResponseStatus();
+        String response = clientResponse.getEntity();
+        switch (status) {
+            case OK:
+                return response;
+            default:
+                throw new RestServerException(status.getStatusCode(), response);
         }
     }
 
@@ -1337,20 +1235,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     public String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException,
             ServiceException {
-        ClientResponse<String> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.jobServerLogs(sessionId, "" + jobId);
-            Status status = clientResponse.getResponseStatus();
-            String response = clientResponse.getEntity();
-            switch (status) {
-                case OK:
-                    return response;
-                default:
-                    throw new RestServerException(status.getStatusCode(), response);
-            }
-        } finally {
-            clientResponse.releaseConnection();
+        ClientResponse<String> clientResponse = client.jobServerLogs(sessionId, "" + jobId);
+        Status status = clientResponse.getResponseStatus();
+        String response = clientResponse.getEntity();
+        switch (status) {
+            case OK:
+                return response;
+            default:
+                throw new RestServerException(status.getStatusCode(), response);
         }
     }
+
 }
