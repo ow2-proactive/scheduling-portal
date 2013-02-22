@@ -64,7 +64,6 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.Label;
 
 
@@ -1220,7 +1219,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
 
                     public void onSuccess(String result) {
-                        int rev = 0;
+                        long rev = 0;
                         Map<Integer, Job> jobs = null;
 
                         JSONValue jsonVal = parseJSON(result);
@@ -1230,7 +1229,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         }
 
                         String key = (String) jsonInfo.keySet().iterator().next();
-                        rev = Integer.parseInt(key);
+                        rev = Long.parseLong(key);
 
                         JSONArray jsonArr = jsonInfo.get(key).isArray();
                         if (jsonArr == null)
