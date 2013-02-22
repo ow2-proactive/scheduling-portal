@@ -45,6 +45,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.util.SC;
 
 
@@ -55,7 +57,12 @@ public class SchedulerPortal implements EntryPoint {
     public void onModuleLoad() {
         JSUtil.addScript("portal/raphael-min.js");
 
-        loadProperties();
+        VisualizationUtils.loadVisualizationApi(new Runnable() {
+            @Override
+            public void run() {
+                loadProperties();
+            }
+        }, CoreChart.PACKAGE);
     }
 
     private void loadProperties() {

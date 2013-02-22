@@ -99,6 +99,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, JobVisuMap> visuMap = null;
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
+    private List<JobUsage> usage = null;
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
@@ -111,6 +112,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<RemoteHintListener> remoteHintListeners = null;
     private ArrayList<VisualizationListener> visuListeners = null;
     private ArrayList<StatsListener> statsListeners = null;
+    private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
 
     SchedulerModelImpl() {
         super();
@@ -130,6 +132,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.remoteHintListeners = new ArrayList<RemoteHintListener>();
         this.visuListeners = new ArrayList<VisualizationListener>();
         this.statsListeners = new ArrayList<StatsListener>();
+        this.usageListeners = new ArrayList<SchedulerListeners.UsageListener>();
         this.imagePath = new HashMap<String, String>();
         this.visuMap = new HashMap<String, JobVisuMap>();
         this.requestedStatRange = new HashMap<String, Range>();
@@ -614,6 +617,18 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
     @Override
+    public List<JobUsage> getUsage() {
+        return this.usage;
+    }
+
+    void setUsage(List<JobUsage> usage) {
+        this.usage = usage;
+        for (SchedulerListeners.UsageListener list : this.usageListeners) {
+            list.usageUpdated(usage);
+        }
+    }
+
+    @Override
     public StatHistory getStatHistory(String source) {
         return this.statistics.get(source);
     }
@@ -740,6 +755,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     @Override
     public void addStatsListener(StatsListener listener) {
         this.statsListeners.add(listener);
+    }
+
+    @Override
+    public void addUsageListener(SchedulerListeners.UsageListener listener) {
+        this.usageListeners.add(listener);
     }
 
 }

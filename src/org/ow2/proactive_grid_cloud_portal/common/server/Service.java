@@ -102,4 +102,16 @@ public abstract class Service extends RemoteServiceServlet {
      */
     public abstract String createCredentials(String login, String pass, String ssh)
             throws RestServerException, ServiceException;
+
+    @Override
+    public void checkPermutationStrongName() {
+        /* FIXME
+         * disable the check for XSRF attack, which finds false positives and refuses to serve
+         * requests to some clients, for no apparent reason:
+         * >> java.lang.SecurityException: Blocked request without GWT permutation header (XSRF attack?)
+         * >> at com.google.gwt.user.server.rpc.RemoteServiceServlet.checkPermutationStrongName(RemoteServiceServlet.java:267)
+         *
+         * This may be fixed in later versions of GWT, just remove this method to restore the original behaviour
+         */
+    }
 }

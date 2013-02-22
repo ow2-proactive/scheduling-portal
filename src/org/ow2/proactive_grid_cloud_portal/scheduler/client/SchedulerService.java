@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -385,4 +386,6 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException
      */
     String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException;
+
+    List<JobUsage> getUsage(String sessionId, Date startDate, Date endDate) throws RestServerException, ServiceException;
 }

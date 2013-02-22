@@ -41,6 +41,7 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
@@ -55,6 +56,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -74,12 +78,14 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.client.ClientExecutor;
+import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+
 
 /**
  * The server side implementation of the RPC service.
@@ -88,6 +94,8 @@ import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.conver
 public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+
+    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
     private ClientExecutor executor;
     
@@ -1261,4 +1269,35 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    @Override
+    public List<JobUsage> getUsage(String sessionId, Date startDate, Date endDate) throws RestServerException, ServiceException {
+        ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        try {
+            DateFormat df = new SimpleDateFormat(ISO_8601_FORMAT);
+            String startDateAsString = df.format(startDate);
+            String endDateAsString = df.format(endDate);
+
+            clientResponse = client.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
+
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String responseAsString = convertToString(response);
+
+            switch (status) {
+                case OK:
+                    return UsageJsonReader.readJobUsages(responseAsString);
+                default:
+                    throw new RestServerException(status.getStatusCode(), responseAsString);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (JSONException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
+        }
+    }
 }

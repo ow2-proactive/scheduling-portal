@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -582,4 +583,11 @@ public interface RestClient {
     @GET
     @Path("version")
     public ClientResponse<InputStream> getVersion();
+
+    @GET
+    @Path("usage/myaccount")
+    @Produces("application/json")
+    ClientResponse<InputStream> getUsageOnMyAccount(@HeaderParam("sessionid") String sessionId,
+                                                    @QueryParam("startdate") String startDate,
+                                                    @QueryParam("enddate") String endDate);
 }

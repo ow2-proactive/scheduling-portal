@@ -227,4 +227,11 @@ public class SchedulerListeners {
         public void visualizationUnavailable(String jobId);
 
     }
+
+    public interface UsageListener {
+
+        public void usageUpdated(List<JobUsage> usage);
+
+    }
+
 }

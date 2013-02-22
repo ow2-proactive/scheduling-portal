@@ -44,7 +44,12 @@
 		<servlet-name>UploadServlet</servlet-name>
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet</servlet-class>
 	</servlet>
-	
+
+	<servlet>
+		<servlet-name>ExportUsageServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.scheduler.server.ExportUsageServlet</servlet-class>
+	</servlet>
+
 	<servlet>
 		<servlet-name>FlatJobServlet</servlet-name>
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.scheduler.server.FlatJobServlet</servlet-class>
@@ -96,7 +101,12 @@
 		<servlet-name>UploadServlet</servlet-name>
 		<url-pattern>/portal/uploader</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet-mapping>
+		<servlet-name>ExportUsageServlet</servlet-name>
+		<url-pattern>/portal/usageexporter</url-pattern>
+	</servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>FlatJobServlet</servlet-name>
 		<url-pattern>/portal/flatsubmit</url-pattern>

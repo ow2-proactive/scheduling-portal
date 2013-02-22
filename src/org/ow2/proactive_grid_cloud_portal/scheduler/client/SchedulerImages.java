@@ -123,4 +123,7 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/logo_350.png")
     ImageResource logo_350();
 
+    @Source("images/usage_16.png")
+    ImageResource usage_16();
+
 }

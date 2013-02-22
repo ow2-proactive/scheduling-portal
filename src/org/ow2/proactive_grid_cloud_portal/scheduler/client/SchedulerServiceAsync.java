@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -321,4 +322,6 @@ public interface SchedulerServiceAsync {
      * @throws ServiceException
      */
     Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
+
+    void getUsage(String sessionId, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
 }

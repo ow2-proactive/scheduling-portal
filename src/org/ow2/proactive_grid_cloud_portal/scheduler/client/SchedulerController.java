@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1476,4 +1477,22 @@ public class SchedulerController extends Controller implements UncaughtException
     public void onUncaughtException(Throwable e) {
         e.printStackTrace();
     }
+
+    public void getUsage(Date startDate, Date endDate) {
+        scheduler.getUsage(model.getSessionId(), startDate, endDate, new AsyncCallback<List<JobUsage>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = Controller.getJsonErrorMessage(caught);
+                model.logImportantMessage("Failed to fetch usage data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(List<JobUsage> jobUsages) {
+                model.setUsage(jobUsages);
+                model.logMessage("Successfully fetched usage for " + jobUsages.size()+ " jobs");
+
+            }
+        });
+    }
+
 }

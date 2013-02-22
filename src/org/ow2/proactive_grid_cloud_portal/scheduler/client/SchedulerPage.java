@@ -804,10 +804,14 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.statsView = new StatisticsView(this.controller);
         statsTab.setPane(this.statsView.build());
 
+        final Tab usageTab = new Tab("Usage", SchedulerImages.instance.usage_16().getSafeUri().asString());
+        usageTab.setPane(new UsageView(this.controller).build());
+
         leftTabSet.addTab(tasksTab);
         leftTabSet.addTab(visuTab);
         leftTabSet.addTab(usersTab);
         leftTabSet.addTab(statsTab);
+        leftTabSet.addTab(usageTab);
 
         leftTabSet.addTabSelectedHandler(new TabSelectedHandler() {
             public void onTabSelected(TabSelectedEvent event) {

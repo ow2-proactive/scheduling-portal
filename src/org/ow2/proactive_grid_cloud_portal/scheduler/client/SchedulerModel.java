@@ -185,4 +185,6 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract HashMap<String, String> getSchedulerStatistics();
 
+    public abstract List<JobUsage> getUsage();
+
 }

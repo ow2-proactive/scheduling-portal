@@ -119,4 +119,6 @@ public interface SchedulerEventDispatcher extends EventDispatcher {
      * @param listener
      */
     public abstract void addVisualizationListener(VisualizationListener listener);
+
+    public abstract void addUsageListener(SchedulerListeners.UsageListener listener);
 }
