@@ -39,8 +39,8 @@ import java.io.Serializable;
 public class TaskUsage implements Serializable {
     private String taskId;
     private String taskName;
-    private long taskStartTime;
-    private long taskFinishedTime;
+    private long taskStartTime = -1;
+    private long taskFinishedTime = -1;
     private long taskExecutionDuration;
     private long taskNodeNumber;
 

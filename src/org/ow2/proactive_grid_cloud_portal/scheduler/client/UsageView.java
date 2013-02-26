@@ -52,12 +52,13 @@ import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RelativeDate;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.AutoFitWidthApproach;
 import com.smartgwt.client.types.FormLayoutType;
 import com.smartgwt.client.types.GroupStartOpen;
-import com.smartgwt.client.types.OperatorId;
+import com.smartgwt.client.types.SummaryFunctionType;
 import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
@@ -74,6 +75,7 @@ import com.smartgwt.client.widgets.grid.GroupTitleRenderer;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.SummaryFunction;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
@@ -83,6 +85,11 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+    // The RelativeDate#START_OF_MONTH has not the behavior expected
+    private static final RelativeDate START_OF_MONTH = new RelativeDate("+1m[-1m]");
+
+    private static final RelativeDate DEFAULT_START_DATE = START_OF_MONTH;
+    private static final RelativeDate DEFAULT_END_DATE = RelativeDate.NOW;
 
     private static final String BLUE = "#3a668d";
     private static final String GREEN = "#35a849";
@@ -124,8 +131,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         root.addMember(detailsLabelAndExportButton);
         root.addMember(details);
 
-        Date from = RelativeDateItem.getAbsoluteDate(RelativeDate.START_OF_MONTH);
-        Date to = RelativeDateItem.getAbsoluteDate(RelativeDate.NOW);
+        Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
+        Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
         controller.getUsage(from, to);
 
         return root;
@@ -137,17 +144,16 @@ public class UsageView implements SchedulerListeners.UsageListener {
         datesForm.setTitleOrientation(TitleOrientation.LEFT);
         datesForm.setItemLayout(FormLayoutType.TABLE);
         datesForm.setNumCols(5);
-        // put refresh button on the left
-        datesForm.setColWidths("10", "10", "10", "10", "*");
+        datesForm.setColWidths("*", "*", "*", "*", "*");
         datesForm.setWrapItemTitles(false);
 
         RelativeDateItem fromDate = new RelativeDateItem("From", "Usage From");
-        fromDate.setOperator(OperatorId.GREATER_OR_EQUAL);
-        fromDate.setValue(RelativeDate.START_OF_MONTH);
+        fromDate.setValue(DEFAULT_START_DATE);
+        fromDate.setShowFutureOptions(false);
 
         RelativeDateItem toDate = new RelativeDateItem("To");
-        toDate.setOperator(OperatorId.LESS_OR_EQUAL);
-        toDate.setValue(RelativeDate.NOW);
+        toDate.setValue(DEFAULT_END_DATE);
+        toDate.setShowFutureOptions(false);
 
         ButtonItem button = new ButtonItem("Refresh");
         button.setAutoFit(true);
@@ -166,9 +172,10 @@ public class UsageView implements SchedulerListeners.UsageListener {
             public void onClick(com.smartgwt.client.widgets.form.fields.events.ClickEvent event) {
                 Date from = readDateFromFormItem(event.getForm().getItem("From"));
                 Date to = readDateFromFormItem(event.getForm().getItem("To"));
-                controller.getUsage(from, to);
                 clearDetailsGrid();
+                clearCharts();
                 displayDetailsGridLoadingMessage();
+                controller.getUsage(from, to);
             }
         };
     }
@@ -229,20 +236,35 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 return groupValue + " - " + groupNode.getGroupMembers()[0].getAttribute("jobName");
             }
         });
+        jobField.setShowGridSummary(true);
+        jobField.setShowGroupSummary(false);
 
         ListGridField taskField = new ListGridField("taskId", "Task");
         taskField.setCellFormatter(new CellFormatter() {
             @Override
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
+                if (record.getIsGridSummary() || record.getIsGroupSummary()) {
+                    return value + " tasks";
+                }
                 return record.getAttribute("taskName");
             }
         });
         taskField.setWidth(150);
+        taskField.setShowGridSummary(true);
+        taskField.setShowGroupSummary(true);
+        taskField.setSummaryFunction(new SummaryFunction() {
+            @Override
+            public Object getSummaryValue(Record[] records, ListGridField field) {
+                return records.length;
+            }
+        });
 
         ListGridField nbNodesField = new ListGridField("nbNodes", "# Nodes");
         nbNodesField.setWidth(50);
         nbNodesField.setCanGroupBy(false);
         nbNodesField.setPrompt("The number of nodes used to execute this task");
+        nbNodesField.setShowGridSummary(false);
+        nbNodesField.setShowGroupSummary(false);
 
         ListGridField startTimeField = new ListGridField("startTime", "Started at");
         startTimeField.setCanGroupBy(false);
@@ -252,6 +274,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 return JSUtil.getTime(record.getAttributeAsLong("startTime"));
             }
         });
+        startTimeField.setShowGridSummary(false);
+        startTimeField.setShowGroupSummary(false);
 
         ListGridField finishedTimeField = new ListGridField("finishedTime", "Finished at");
         finishedTimeField.setCanGroupBy(false);
@@ -261,6 +285,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 return JSUtil.getTime(record.getAttributeAsLong("finishedTime"));
             }
         });
+        finishedTimeField.setShowGridSummary(false);
+        finishedTimeField.setShowGroupSummary(false);
 
         ListGridField durationField = new ListGridField("duration", "Duration");
         durationField.setCanGroupBy(false);
@@ -271,9 +297,15 @@ public class UsageView implements SchedulerListeners.UsageListener {
             }
         });
         durationField.setWidth(80);
+        durationField.setPrompt("Execution duration");
+        durationField.setShowGridSummary(true);
+        durationField.setShowGroupSummary(true);
+        durationField.setSummaryFunction(SummaryFunctionType.SUM);
 
         detailsGrid.setGroupByField("jobId");
         detailsGrid.setGroupStartOpen(GroupStartOpen.ALL);
+        detailsGrid.setShowGridSummary(true);
+        detailsGrid.setShowGroupSummary(true);
         detailsGrid.setAutoFitWidthApproach(AutoFitWidthApproach.BOTH);
         detailsGrid.setFields(jobField, taskField, nbNodesField, startTimeField, finishedTimeField, durationField);
         displayDetailsGridLoadingMessage();
@@ -327,10 +359,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         Options nodeLineOpts = Options.create();
         HorizontalAxisOptions axisOpts = HorizontalAxisOptions.create();
         nodeLineOpts.setLegend(LegendPosition.NONE);
-        axisOpts.setMaxAlternation(1);
         nodeLineOpts.setHAxisOptions(axisOpts);
         AxisOptions options = AxisOptions.create();
-        options.set("format", "");
         nodeLineOpts.setVAxisOptions(options);
         nodeLineOpts.setHeight(CHART_HEIGHT);
         nodeLineOpts.setLineWidth(0);
@@ -363,6 +393,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
         updateCounterChart(taskCounter, jobCounter);
         updateDurationChart(jobTotalDuration, taskTotalDuration);
+
+        detailsGrid.recalculateSummaries();
     }
 
     private ListGridRecord createGridRecord(JobUsage jobUsage, TaskUsage taskUsage) {
@@ -382,12 +414,30 @@ public class UsageView implements SchedulerListeners.UsageListener {
         durationData.removeRows(0, durationData.getNumberOfRows());
         durationData.addRows(2);
         durationData.setValue(0, 0, "Jobs");
-        durationData.setValue(0, 1, jobTotalDuration);
+        durationData.setValue(0, 1, scale(jobTotalDuration, taskTotalDuration));
         durationData.setFormattedValue(0, 1, Job.formatDuration(jobTotalDuration));
         durationData.setValue(1, 0, "Tasks");
-        durationData.setValue(1, 2, taskTotalDuration);
+        durationData.setValue(1, 2, scale(taskTotalDuration, jobTotalDuration));
         durationData.setFormattedValue(1, 2, Job.formatDuration(taskTotalDuration));
         durationChart.draw(durationData, durationChartOptions);
+    }
+
+    // divide the value in the chart to be seconds, or minutes, or ... for better y-axis display
+    private double scale(long valueToDisplay, long otherValueInChart) {
+        long scaleMax = Math.max(valueToDisplay, otherValueInChart);
+        if (scaleMax < 1000) {
+            durationChartOptions.setTitle("Total Duration in milliseconds");
+            return valueToDisplay;
+        } else if (scaleMax < 1000 * 60) {
+            durationChartOptions.setTitle("Total Duration in seconds");
+            return valueToDisplay / 1000.0;
+        } else if (scaleMax < 1000 * 60 * 60) {
+            durationChartOptions.setTitle("Total Duration in minutes");
+            return valueToDisplay / (1000.0 * 60);
+        } else {
+            durationChartOptions.setTitle("Total Duration in hours");
+            return valueToDisplay / (1000.0 * 60 * 60);
+        }
     }
 
     private void updateCounterChart(int taskCounter, int jobCounter) {
@@ -414,5 +464,13 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
     private void clearDetailsGrid() {
         detailsGrid.setData(new ListGridRecord[]{});
+    }
+
+    private void clearCharts() {
+        counterData.removeRows(0, counterData.getNumberOfRows());
+        counterChart.draw(counterData, counterChartOptions);
+
+        durationData.removeRows(0, durationData.getNumberOfRows());
+        durationChart.draw(durationData, durationChartOptions);
     }
 }

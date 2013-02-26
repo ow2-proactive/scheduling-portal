@@ -118,6 +118,10 @@ public class JSUtil {
     }-*/;
 
     public static String getTime(long time) {
+        if(time < 0) {
+            return "";
+        }
+
         StringBuilder ret = new StringBuilder();
         ret.append(new Date(time).toString());
         ret.append(", ");
