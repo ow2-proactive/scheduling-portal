@@ -36,14 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.dom.client.DropHandler;
 import com.smartgwt.client.data.AdvancedCriteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
@@ -73,14 +71,10 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
-import org.vectomatic.dnd.DropPanel;
 
 
 /**
  * Contains the ListGrid that displays jobs
- *
- *
- * @author mschnoor
  *
  */
 public class JobsView implements JobsUpdatedListener {
@@ -92,18 +86,12 @@ public class JobsView implements JobsUpdatedListener {
     private static final String NAME_ATTR = "name";
     private static final String PROGRESS_ATTR = "progress";
     private static final String DURATION_ATTR = "duration";
+    private static final String JOB_ATTR = "job";
 
-    /**
-     * Entries in the Job Grid
-     *
-     */
     private class JobRecord extends ListGridRecord {
-
-        private Job job;
 
         public JobRecord(Job j) {
             setAttribute(ID_ATTR, j.getId());
-            this.job = j;
             update(j);
         }
 
@@ -113,8 +101,6 @@ public class JobsView implements JobsUpdatedListener {
          * @param j a Job
          */
         public void update(Job j) {
-            this.job = j;
-
             float progress = (float) j.getFinishedTasks() / (float) j.getTotalTasks();
             long duration = -1;
             if (j.getFinishTime() > 0 && j.getStartTime() > 0) {
@@ -127,13 +113,10 @@ public class JobsView implements JobsUpdatedListener {
             setAttribute(NAME_ATTR, j.getName());
             setAttribute(DURATION_ATTR, duration);
             setAttribute(PROGRESS_ATTR, progress);
+            setAttribute(JOB_ATTR, j);
         }
     }
 
-    /**
-     * DataStore for the Job Grid
-     *
-     */
     private class JobDS extends DataSource {
 
         public JobDS(String id) {
@@ -261,8 +244,7 @@ public class JobsView implements JobsUpdatedListener {
                 if (oldJob != null) {
                     if (!newJob.isEqual(oldJob)) {
 
-                        JobRecord rec = null;
-
+                        JobRecord rec;
                         JobRecord selRec = (JobRecord) jobsGrid.getSelectedRecord();
                         if (selRec != null && selRec.getAttribute(ID_ATTR).equals("" + newJob.getId())) {
                             // avoid changing reference to the selected entry, messes selection beyond repair
@@ -463,17 +445,9 @@ public class JobsView implements JobsUpdatedListener {
                     "background-repeat: no-repeat;" + //
                     "background-color:#a7cef6";
 
-                String prg;
-                if (record instanceof JobRecord) {
-                    prg = ((JobRecord) record).job.getFinishedTasks() + " / " +
-                            ((JobRecord) record).job.getTotalTasks();
-                } else {
-                    Job job = submittingJobs.get(record.getAttributeAsInt(ID_ATTR)).job;
-                    prg = job.getFinishedTasks() + " / " + job.getTotalTasks();
-                }
-                String str = "<div style='" + style + "'>" + prg + "</div>";
-
-                return str;
+                Job job = (Job) record.getAttributeAsObject(JOB_ATTR);
+                String progressCounters = job.getFinishedTasks() + " / " + job.getTotalTasks();
+                return "<div style='" + style + "'>" + progressCounters + "</div>";
             }
         });
 
