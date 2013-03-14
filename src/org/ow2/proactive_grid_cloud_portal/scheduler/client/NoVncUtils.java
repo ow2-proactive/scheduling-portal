@@ -49,32 +49,30 @@ public class NoVncUtils {
     }
 
     private static String createNoVncUrl(String sessionId, String jobId, String taskName) {
-        String redirectedUrl = SchedulerConfig.get().getRestUrl();
-        // novnc static web page is hosted on the Rest server
-        redirectedUrl += "/../novnc.html";
-        // we want to connect to this VNC host
-        redirectedUrl += "?sessionId=" + sessionId;
-        redirectedUrl += "&jobId=" + jobId;
-        redirectedUrl += "&taskName=" + taskName;
+        String noVncPageUrl = SchedulerConfig.get().getNoVncPageUrl();
+        // we want to connect to a task (task output will be checked)
+        noVncPageUrl += "?sessionId=" + sessionId;
+        noVncPageUrl += "&jobId=" + jobId;
+        noVncPageUrl += "&taskName=" + taskName;
 
         // we connect to this websocket proxy
         String noVncUrl = SchedulerConfig.get().getNoVncUrl();
         String[] splitUrl = noVncUrl.split(":");
-        redirectedUrl += "&host=" + splitUrl[1].replace("//", "");
-        redirectedUrl += "&port=" + splitUrl[2].replaceAll("[^0-9]", "");
+        noVncPageUrl += "&host=" + splitUrl[1].replace("//", "");
+        noVncPageUrl += "&port=" + splitUrl[2].replaceAll("[^0-9]", "");
 
         // we encrypt if https is used
-        redirectedUrl += "&encrypt=" + (noVncUrl.toLowerCase().contains("https") ? "True" : "False");
-        return redirectedUrl;
+        noVncPageUrl += "&encrypt=" + (noVncUrl.toLowerCase().contains("https") ? "true" : "false");
+        return noVncPageUrl;
     }
 
-    private static String createHttpsRedirectUrl(String redirectedUrl) {
+    private static String createHttpsRedirectUrl(String noVncPageUrl) {
         // first we hit the websocket host and port to validate the HTTPS certificate
         // see https://bugzilla.mozilla.org/show_bug.cgi?id=594502
         // we will be redirect to novnc static web page afterwards
-        String noVncUrl = SchedulerConfig.get().getNoVncUrl();
-        noVncUrl += "/redirect";
-        noVncUrl += "?url=" + URL.encodeQueryString(redirectedUrl);
-        return noVncUrl;
+        String redirectedUrl = SchedulerConfig.get().getNoVncUrl();
+        redirectedUrl += "/redirect";
+        redirectedUrl += "?url=" + URL.encodeQueryString(noVncPageUrl);
+        return redirectedUrl;
     }
 }
