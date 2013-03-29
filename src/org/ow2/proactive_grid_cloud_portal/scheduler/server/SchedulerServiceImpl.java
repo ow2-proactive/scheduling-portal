@@ -69,6 +69,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -76,6 +77,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.codehaus.jettison.json.JSONException;
@@ -1101,13 +1103,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String ret = IOUtils.toString(response, RestClient.ENCODING);
             switch (status) {
                 case OK:
-                    String dec = new String(org.apache.commons.codec.binary.Base64.decodeBase64(ret
-                            .getBytes(RestClient.ENCODING)), RestClient.ENCODING);
-                    BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(f));
-                    for (int i = 0; i < dec.length(); i++) {
-                        fos.write(dec.charAt(i));
-                    }
-                    fos.close();
+                    byte[] dec = Base64.decodeBase64(ret.getBytes(RestClient.ENCODING));
+                    FileUtils.writeByteArrayToFile(f,dec);
                     return url;
 
                 default:
