@@ -832,7 +832,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         win.setIsModal(true);
         win.setShowModalMask(true);
         win.setWidth(380);
-        win.setHeight(150);
+        win.setHeight(160);
         win.setCanDragResize(false);
         win.setCanDragReposition(false);
         win.centerInPage();
