@@ -43,6 +43,8 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.util.BooleanCallback;
@@ -332,35 +334,44 @@ public class RMPage implements LogListener {
     }
 
     private Canvas buildBotPane() {
-        HLayout hl = new HLayout();
+        final HLayout hl = new HLayout();
         hl.setWidth100();
         hl.setHeight100();
 
         this.infoView = new InfoView(controller);
-        this.monitoringView = new MonitoringView(controller);
         this.statsView = new StatisticsView(controller);
-        this.rmStatsView = new RMStatsView(controller);
 
-        Canvas infoCanvas = this.infoView.build();
-        Canvas monitoringCanvas = this.monitoringView.build();
+        final Canvas infoCanvas = this.infoView.build();
         Canvas statsCanvas = this.statsView.build();
-        Canvas rmStatsCanvas = this.rmStatsView.build();
 
         Tab t1 = new Tab("Selection");
         t1.setPane(infoCanvas);
         Tab t2 = new Tab("Nodes");
         t2.setPane(statsCanvas);
-        Tab t3 = new Tab("Monitoring");
-        t3.setPane(monitoringCanvas);
 
-        TabSet leftTabs = new TabSet();
+        final TabSet leftTabs = new TabSet();
         leftTabs.setWidth("50%");
         leftTabs.setShowResizeBar(true);
-        leftTabs.setTabs(t1, t2, t3);
-        rmStatsCanvas.setWidth("50%");
+        leftTabs.setTabs(t1, t2);
 
         hl.addMember(leftTabs);
-        hl.addMember(rmStatsCanvas);
+
+        // in offline charts are not displayed
+        VisualizationUtils.loadVisualizationApi(new Runnable() {
+            @Override
+            public void run() {
+                Tab t3 = new Tab("Monitoring");
+                monitoringView = new MonitoringView(controller);
+                Canvas monitoringCanvas = monitoringView.build();
+                t3.setPane(monitoringCanvas);
+                leftTabs.addTab(t3);
+
+                rmStatsView = new RMStatsView(controller);
+                final Canvas rmStatsCanvas = rmStatsView.build();
+                rmStatsCanvas.setWidth("50%");
+                hl.addMember(rmStatsCanvas);
+            }
+        }, CoreChart.PACKAGE);
 
         return hl;
     }
