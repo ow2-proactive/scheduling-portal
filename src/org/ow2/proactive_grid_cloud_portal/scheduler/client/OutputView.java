@@ -231,6 +231,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         root.addMember(this.text);
         root.addMember(this.label);
 
+        jobUnselected();
+
         return root;
     }
 

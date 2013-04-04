@@ -372,6 +372,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.setSelectionType(SelectionStyle.SINGLE);
         this.tasksGrid.setShowRecordComponents(true);
         this.tasksGrid.setShowRecordComponentsByCell(true);
+        this.tasksGrid.setEmptyMessage("No tasks to show.");
         this.ds = new TaskDS("taskds_" + controller.getModel().getSessionId());
         this.tasksGrid.setDataSource(this.ds);
 

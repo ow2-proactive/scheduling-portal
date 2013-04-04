@@ -39,11 +39,16 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.smartgwt.client.data.AdvancedCriteria;
+import com.smartgwt.client.data.DSCallback;
+import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
@@ -75,7 +80,6 @@ import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
 /**
  * Contains the ListGrid that displays jobs
- *
  */
 public class JobsView implements JobsUpdatedListener {
 
@@ -156,160 +160,118 @@ public class JobsView implements JobsUpdatedListener {
 
     }
 
-    /** the Grid widget displayed in the view */
+    /**
+     * the Grid widget displayed in the view
+     */
     private ListGrid jobsGrid = null;
-    /** shown in undeterminate state */
+    /**
+     * shown in undeterminate state
+     */
     private Label jobsLoading = null;
-    /** data-source: contains the actual data */
+    /**
+     * data-source: contains the actual data
+     */
     private JobDS ds = null;
-    /** ui panel used to edit filters */
+    /**
+     * ui panel used to edit filters
+     */
     private FilterBuilder filterBuilder = null;
-    /** current job filtering criteria, or null */
+    /**
+     * current job filtering criteria, or null
+     */
     private AdvancedCriteria filter = null;
-    /** the JobSet currently stored in the DataStore */
-    private Map<Integer, Job> oldJobs = null;
-    /** jobs submitted locally, to display even though not in the jobs list */
-    private Map<Integer, JobRecord> submittingJobs = null;
-    /** id of the currently selected job */
-    private int selJobId = 0;
 
     private SchedulerController controller = null;
 
+    /** To disable selection listener while fetching data */
+    private boolean fetchingData;
+
     /**
-     * Default Constructor
-     *
      * @param controller Controller used to create this view
      */
     public JobsView(SchedulerController controller) {
         this.controller = controller;
         this.controller.getEventDispatcher().addJobsUpdatedListener(this);
-        this.submittingJobs = new HashMap<Integer, JobRecord>();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdating()
-     */
     public void jobsUpdating() {
         this.jobsGrid.hide();
         this.jobsLoading.show();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobSubmitted(org.ow2.proactive_grid_cloud_portal.client.Job)
-     */
     public void jobSubmitted(Job j) {
         JobRecord jr = new JobRecord(j);
-        this.submittingJobs.put(j.getId(), jr);
         this.ds.addData(jr);
-        this.jobsGrid.filterData(this.filter);
+        transparentUpdate(JobsView.this.ds.getTestData().length + 1);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.event.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
-     */
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        boolean resetData = (this.oldJobs == null || this.oldJobs.isEmpty() || jobs.isEmpty());
-        boolean keepSel = false;
+        boolean selectedJobRemoved = jobsGrid.getSelectedRecord() != null;
+        List<Integer> selectedIds = listSelectedJobs();
 
-        // no data is present, or the entire dataset has been invalidated
-        // insert all data at once
-        if (resetData) {
-            JobRecord[] data = new JobRecord[jobs.size()];
-            int i = 0;
-            for (Job j : jobs.values()) {
-                data[i] = new JobRecord(j);
-
-                if (data[i].getAttribute(ID_ATTR).equals("" + selJobId))
-                    keepSel = true;
-
-                i++;
-            }
-
-            this.jobsGrid.invalidateCache();
-            this.ds.setTestData(data);
-        }
-
-        // for each entry on the jobset, find out which is to add, update or remove
-        // alter the datasource accordingly 
-        else {
-            keepSel = true;
-
-            for (Job newJob : jobs.values()) {
-                Job oldJob = this.oldJobs.get(newJob.getId());
-
-                // data present in both sets: either the same, or the be updated
-                if (oldJob != null) {
-                    if (!newJob.isEqual(oldJob)) {
-
-                        JobRecord rec;
-                        JobRecord selRec = (JobRecord) jobsGrid.getSelectedRecord();
-                        if (selRec != null && selRec.getAttribute(ID_ATTR).equals("" + newJob.getId())) {
-                            // avoid changing reference to the selected entry, messes selection beyond repair
-                            selRec.update(newJob);
-                            rec = selRec;
-                            selRec.setAttribute("isSelected", true);
-                        } else {
-                            rec = new JobRecord(newJob);
-                            rec.setAttribute("isSelected", false);
-                        }
-
-                        if (this.submittingJobs.remove(newJob.getId()) != null) {
-                            if (selRec != null && selRec.getAttribute(ID_ATTR).equals("" + newJob.getId())) {
-                                controller.selectJob(rec.getAttribute(ID_ATTR));
-                            }
-                        }
-
-                        // data differs, update
-                        this.ds.updateData(rec);
-                    }
-                    this.oldJobs.remove(newJob.getId());
-                }
-                // data present in the new set only: was added since last time
-                else {
-                    JobRecord oldSub = this.submittingJobs.remove(newJob.getId());
-                    // remove submitting job entry
-                    if (oldSub != null) {
-                        this.ds.removeData(oldSub);
-                    }
-
-                    JobRecord njr = new JobRecord(newJob);
-                    this.ds.addData(njr);
-                }
-            }
-            // the difference between the new and old sets: the old entries no longer present in the model, to be removed
-            for (Job toRemove : this.oldJobs.values()) {
-                // submitting job : not included on server yet..
-                if (this.submittingJobs.containsKey(toRemove.getId())) {
-                    continue;
-                }
-
-                this.ds.removeData(new JobRecord(toRemove));
-
-                // removed selection
-                if (selJobId == toRemove.getId()) {
-                    keepSel = false;
-                }
+        RecordList data = new RecordList();
+        for (Job j : jobs.values()) {
+            JobRecord jobRecord = new JobRecord(j);
+            data.add(jobRecord);
+            boolean isSelectedJob = selectedIds.contains(jobRecord.getAttributeAsInt(ID_ATTR));
+            jobRecord.setAttribute("isSelected", isSelectedJob);
+            if (isSelectedJob) {
+                selectedJobRemoved = false;
             }
         }
 
-        this.oldJobs = jobs;
-
-        if (!keepSel) {
-            this.controller.selectJob(null);
-            selJobId = 0;
+        if (selectedJobRemoved) {
+            JobsView.this.controller.selectJob(null);
         }
 
-        this.jobsGrid.filterData(this.filter);
+        this.ds.setTestData(data.toArray());
+        transparentUpdate(jobs.size() + 1);
+
         this.jobsLoading.hide();
         this.jobsGrid.show();
     }
 
+    private List<Integer> listSelectedJobs() {
+        List<Integer> selectedIds = new ArrayList<Integer>();
+        for (ListGridRecord listGridRecord : jobsGrid.getSelectedRecords()) {
+            selectedIds.add(listGridRecord.getAttributeAsInt(ID_ATTR));
+        }
+        return selectedIds;
+    }
+
+    // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
+    private void transparentUpdate(int nbOfJobs) {
+        DataSource dataSource = jobsGrid.getDataSource();
+        Integer[] visibleRows = jobsGrid.getVisibleRows();
+
+        DSRequest request = new DSRequest();
+        request.setStartRow(0);
+        request.setEndRow(nbOfJobs + visibleRows[1]);
+        request.setSortBy(jobsGrid.getSort());
+
+        dataSource.fetchData(this.filter, new DSCallback() {
+            @Override
+            public void execute(DSResponse response, Object rawData, DSRequest request) {
+                ListGridRecord[] keepSelectedRecords = jobsGrid.getSelectedRecords();
+                jobsGrid.setData(new RecordList(response.getData()));
+                // manual reset of selection (otherwise it is lost)
+                if (keepSelectedRecords != null) {
+                    fetchingData = true;
+                    jobsGrid.selectRecords(keepSelectedRecords);
+                    fetchingData = false;
+                }
+            }
+
+        }, request);
+    }
+
+    private void applyFilter() {
+        transparentUpdate(ds.getTestData().length);
+    }
+
     /**
      * Construct and return the pane used to filter the job's datasource
-     * 
+     *
      * @return a widget for filtering the grid
      */
     Layout buildFilterPane() {
@@ -326,7 +288,7 @@ public class JobsView implements JobsUpdatedListener {
         ok.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
             public void onClick(ClickEvent event) {
                 filter = filterBuilder.getCriteria();
-                jobsGrid.filterData(filter);
+                applyFilter();
             }
         });
         IButton clear = new IButton("Clear");
@@ -335,7 +297,7 @@ public class JobsView implements JobsUpdatedListener {
             public void onClick(ClickEvent event) {
                 filterBuilder.clearCriteria();
                 filter = filterBuilder.getCriteria();
-                jobsGrid.filterData(filter);
+                applyFilter();
             }
         });
 
@@ -410,7 +372,7 @@ public class JobsView implements JobsUpdatedListener {
         this.jobsGrid.setCanPickFields(false);
         this.jobsGrid.setCanFreezeFields(false);
         this.jobsGrid.setSelectionProperty("isSelected");
-        // this.jobsGrid.setSelectionType(SelectionStyle.SINGLE);
+        this.jobsGrid.setEmptyMessage("No jobs to show");
         this.jobsGrid.setAutoFetchData(true);
         this.jobsGrid.setSortField(0);
         this.jobsGrid.setSortDirection(SortDirection.DESCENDING);
@@ -486,8 +448,7 @@ public class JobsView implements JobsUpdatedListener {
 
                 final ArrayList<String> ids = new ArrayList<String>(jobsGrid.getSelectedRecords().length);
                 for (ListGridRecord rec : jobsGrid.getSelectedRecords()) {
-                    JobRecord j = (JobRecord) rec;
-                    switch (JobStatus.valueOf(j.getAttribute(STATE_ATTR).toUpperCase())) {
+                    switch (JobStatus.valueOf(rec.getAttribute(STATE_ATTR).toUpperCase())) {
                         case PENDING:
                         case RUNNING:
                         case STALLED:
@@ -504,7 +465,7 @@ public class JobsView implements JobsUpdatedListener {
                             selPause = false;
                     }
 
-                    ids.add(j.getAttribute(ID_ATTR));
+                    ids.add(rec.getAttribute(ID_ATTR));
                 }
 
                 Menu menu = new Menu();
@@ -582,10 +543,9 @@ public class JobsView implements JobsUpdatedListener {
 
         jobsGrid.addSelectionChangedHandler(new SelectionChangedHandler() {
             public void onSelectionChanged(SelectionEvent event) {
-                if (event.getState()) {
-                    JobRecord record = (JobRecord) event.getRecord();
-                    selJobId = record.getAttributeAsInt(ID_ATTR);
-                    JobsView.this.controller.selectJob("" + selJobId);
+                if (event.getState() && !fetchingData) {
+                    Record record = event.getRecord();
+                    JobsView.this.controller.selectJob(Integer.toString(record.getAttributeAsInt(ID_ATTR)));
                 }
             }
         });

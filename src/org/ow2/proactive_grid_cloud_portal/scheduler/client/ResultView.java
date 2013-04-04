@@ -175,7 +175,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
         this.root.setMembersMargin(30);
         this.root.setMembers(label, visuPane, formPane);
-        root.hideMember(formPane);
+        jobUnselected();
 
         return this.root;
     }
