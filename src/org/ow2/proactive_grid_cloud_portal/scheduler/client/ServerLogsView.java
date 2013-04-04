@@ -162,6 +162,8 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
         this.root.addMember(this.text);
         this.root.addMember(this.label);
 
+        jobUnselected();
+
         return this.root;
     }
 
@@ -194,8 +196,8 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
      */
     public void jobUnselected() {
-        this.refreshButton.hide();
         this.clear();
+        this.refreshButton.hide();
         this.taskSelect.hide();
         this.taskSelect.setValueMap("<i>all tasks</i>");
         this.label.setContents("No job selected");

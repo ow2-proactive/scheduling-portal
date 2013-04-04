@@ -77,8 +77,6 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
     private static final String EXEC_DURATION_ATTR = "execDuration";
     private static final String TOTAL_DURATION_ATTR = "totalDuration";
 
-    /** widget that has been returned as the root layout */
-    private Layout root = null;
     /** label when no job is selected */
     private Label label = null;
     /** widget shown when a job is selected */
@@ -106,11 +104,12 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
      * @return the Widget to display, ready to be added in a container
      */
     public Layout build() {
-        this.root = new Layout();
-        this.root.setWidth100();
-        this.root.setHeight100();
+        /* widget that has been returned as the root layout */
+        Layout root = new Layout();
+        root.setWidth100();
+        root.setHeight100();
 
-        this.label = new Label("No job selected");
+        this.label = new Label("No job selected.");
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
@@ -118,6 +117,7 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
         this.details.setWidth100();
         this.details.setHeight100();
         this.details.setCanSelectText(true);
+        this.details.hide();
 
         DetailViewerField df1 = new DetailViewerField(ID_ATTR, "Job Id");
         DetailViewerField df2 = new DetailViewerField(STATE_ATTR, "State");
@@ -136,10 +136,10 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
 
         this.details.setFields(df1, df2, df3, df4, df9, df5, df6, df7, df8, df10, df11, df12, df13, df14);
 
-        this.root.addMember(label);
-        this.root.addMember(details);
+        root.addMember(label);
+        root.addMember(details);
 
-        return this.root;
+        return root;
     }
 
     /*
@@ -223,6 +223,7 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
     public void jobUnselected() {
         this.details.hide();
         this.label.show();
+        this.displayedJob = null;
     }
 
     /*
@@ -240,7 +241,6 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
         Job selJob = controller.getModel().getSelectedJob();
         if (this.displayedJob != null && selJob != null) {
 
-            JobStatus s = JobStatus.PENDING;
             int pending = 0;
             int running = 0;
             int finished = 0;
@@ -291,6 +291,7 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
                 }
             }
 
+            JobStatus s;
             if (running > 0 || (pending > 0 && finished > 0)) {
                 s = JobStatus.RUNNING;
             } else if (finished > 0 && pending == 0) {
