@@ -48,31 +48,12 @@ import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.util.SC;
 
-
-/**
- * RM Portal entry point
- * 
- * 
- * 
- */
 public class RMPortal implements EntryPoint {
 
     private final RMServiceAsync rmService = GWT.create(RMService.class);
 
-    /**
-     * Entry point
-     */
     public void onModuleLoad() {
-        Runnable startup = new Runnable() {
-            @Override
-            public void run() {
-                loadProperties();
-            }
-        };
-        // the Javascript code for Google Visualization MUST be hosted by Google
-        // and fetched dynamically. Right now, the page won't load if
-        // the JS cannot be fetched.
-        VisualizationUtils.loadVisualizationApi(startup, CoreChart.PACKAGE);
+        loadProperties();
     }
 
     private void loadProperties() {

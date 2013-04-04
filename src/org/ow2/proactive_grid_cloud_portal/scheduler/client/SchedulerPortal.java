@@ -56,17 +56,10 @@ public class SchedulerPortal implements EntryPoint {
 
     public void onModuleLoad() {
         JSUtil.addScript("portal/raphael-min.js");
-
-        VisualizationUtils.loadVisualizationApi(new Runnable() {
-            @Override
-            public void run() {
-                loadProperties();
-            }
-        }, CoreChart.PACKAGE);
+        loadProperties();
     }
 
     private void loadProperties() {
-
         rpcService.getProperties(new AsyncCallback<Map<String, String>>() {
 
             public void onSuccess(Map<String, String> result) {

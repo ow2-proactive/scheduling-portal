@@ -48,8 +48,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
+import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
+import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.smartgwt.client.data.Record;
@@ -107,6 +109,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
     private ColumnChart durationChart;
     private Options durationChartOptions;
     private DynamicForm datesForm;
+    /** In case data are received before charts are displayed, save them */
+    private ChartData currentChartData;
 
     public UsageView(SchedulerController controller) {
         this.controller = controller;
@@ -114,22 +118,29 @@ public class UsageView implements SchedulerListeners.UsageListener {
     }
 
     public Layout build() {
-        VLayout root = new VLayout();
+        final VLayout root = new VLayout();
         root.setWidth100();
         root.setHeight100();
 
         DynamicForm dateInputs = createDateInputs();
-        Label summaryLabel = new Label("<h3>Summary</h3>");
-        summaryLabel.setHeight(20);
-        HorizontalPanel charts = createCharts();
         HLayout detailsLabelAndExportButton = createDetailsLabelAndExportButton();
         ListGrid details = createDetailsGrid();
 
         root.addMember(dateInputs);
-        root.addMember(summaryLabel);
-        root.addMember(charts);
         root.addMember(detailsLabelAndExportButton);
         root.addMember(details);
+
+        VisualizationUtils.loadVisualizationApi(new Runnable() {
+            @Override
+            public void run() {
+                Label summaryLabel = new Label("<h3>Summary</h3>");
+                summaryLabel.setHeight(20);
+                HorizontalPanel charts = createCharts();
+                root.addMember(summaryLabel,1);
+                root.addMember(charts,2);
+                updateCharts();
+            }
+        }, CoreChart.PACKAGE);
 
         Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
         Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
@@ -391,10 +402,17 @@ public class UsageView implements SchedulerListeners.UsageListener {
         detailsGrid.setData(records.toArray(new ListGridRecord[records.size()]));
         detailsGrid.setEmptyMessage("No data for this period.");
 
-        updateCounterChart(taskCounter, jobCounter);
-        updateDurationChart(jobTotalDuration, taskTotalDuration);
+        currentChartData = new ChartData(taskCounter, jobCounter, jobTotalDuration, taskTotalDuration);
+        updateCharts();
 
         detailsGrid.recalculateSummaries();
+    }
+
+    private void updateCharts() {
+        if (currentChartData != null) {
+            updateCounterChart(currentChartData.taskCounter, currentChartData.jobCounter);
+            updateDurationChart(currentChartData.jobTotalDuration, currentChartData.taskTotalDuration);
+        }
     }
 
     private ListGridRecord createGridRecord(JobUsage jobUsage, TaskUsage taskUsage) {
@@ -411,15 +429,17 @@ public class UsageView implements SchedulerListeners.UsageListener {
     }
 
     private void updateDurationChart(long jobTotalDuration, long taskTotalDuration) {
-        durationData.removeRows(0, durationData.getNumberOfRows());
-        durationData.addRows(2);
-        durationData.setValue(0, 0, "Jobs");
-        durationData.setValue(0, 1, scale(jobTotalDuration, taskTotalDuration));
-        durationData.setFormattedValue(0, 1, Job.formatDuration(jobTotalDuration));
-        durationData.setValue(1, 0, "Tasks");
-        durationData.setValue(1, 2, scale(taskTotalDuration, jobTotalDuration));
-        durationData.setFormattedValue(1, 2, Job.formatDuration(taskTotalDuration));
-        durationChart.draw(durationData, durationChartOptions);
+        if (durationChart != null && durationData != null) { // offline mode, charts not displayed
+            durationData.removeRows(0, durationData.getNumberOfRows());
+            durationData.addRows(2);
+            durationData.setValue(0, 0, "Jobs");
+            durationData.setValue(0, 1, scale(jobTotalDuration, taskTotalDuration));
+            durationData.setFormattedValue(0, 1, Job.formatDuration(jobTotalDuration));
+            durationData.setValue(1, 0, "Tasks");
+            durationData.setValue(1, 2, scale(taskTotalDuration, jobTotalDuration));
+            durationData.setFormattedValue(1, 2, Job.formatDuration(taskTotalDuration));
+            durationChart.draw(durationData, durationChartOptions);
+        }
     }
 
     // divide the value in the chart to be seconds, or minutes, or ... for better y-axis display
@@ -441,13 +461,15 @@ public class UsageView implements SchedulerListeners.UsageListener {
     }
 
     private void updateCounterChart(int taskCounter, int jobCounter) {
-        counterData.removeRows(0, counterData.getNumberOfRows());
-        counterData.addRows(2);
-        counterData.setValue(0, 0, "Jobs");
-        counterData.setValue(0, 1, jobCounter);
-        counterData.setValue(1, 0, "Tasks");
-        counterData.setValue(1, 2, taskCounter);
-        counterChart.draw(counterData, counterChartOptions);
+        if (counterChart != null && counterData != null) { // offline mode, charts not displayed
+            counterData.removeRows(0, counterData.getNumberOfRows());
+            counterData.addRows(2);
+            counterData.setValue(0, 0, "Jobs");
+            counterData.setValue(0, 1, jobCounter);
+            counterData.setValue(1, 0, "Tasks");
+            counterData.setValue(1, 2, taskCounter);
+            counterChart.draw(counterData, counterChartOptions);
+        }
     }
 
     private Date readDateFromFormItem(FormItem formItem) {
@@ -467,10 +489,27 @@ public class UsageView implements SchedulerListeners.UsageListener {
     }
 
     private void clearCharts() {
-        counterData.removeRows(0, counterData.getNumberOfRows());
-        counterChart.draw(counterData, counterChartOptions);
+        if (counterData != null && counterChart != null
+                && durationChart != null && durationData != null) { // offline mode, charts not displayed
+            counterData.removeRows(0, counterData.getNumberOfRows());
+            counterChart.draw(counterData, counterChartOptions);
 
-        durationData.removeRows(0, durationData.getNumberOfRows());
-        durationChart.draw(durationData, durationChartOptions);
+            durationData.removeRows(0, durationData.getNumberOfRows());
+            durationChart.draw(durationData, durationChartOptions);
+        }
+    }
+
+    private class ChartData {
+        private final int taskCounter;
+        private final int jobCounter;
+        private final long jobTotalDuration;
+        private final long taskTotalDuration;
+
+        public ChartData(int taskCounter, int jobCounter, long jobTotalDuration, long taskTotalDuration) {
+            this.taskCounter = taskCounter;
+            this.jobCounter = jobCounter;
+            this.jobTotalDuration = jobTotalDuration;
+            this.taskTotalDuration = taskTotalDuration;
+        }
     }
 }
