@@ -36,13 +36,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.List;
-import java.util.Map;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+
+import java.util.Map;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
@@ -59,7 +57,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  * @author mschnoor
  *
  */
-public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, TasksUpdatedListener {
+public class JobInfoView implements JobSelectedListener, JobsUpdatedListener {
 
     private static final String ID_ATTR = "id";
     private static final String STATE_ATTR = "state";
@@ -81,23 +79,15 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
     private Label label = null;
     /** widget shown when a job is selected */
     private DetailViewer details = null;
-    /** currently displayed details */
-    private DetailViewerRecord curDetails = null;
     /** currently displayed job */
     private Job displayedJob = null;
 
-    private SchedulerController controller = null;
-
     /**
-     * Default constructor
-     *
      * @param controller the Controller that created this View
      */
     public JobInfoView(SchedulerController controller) {
         controller.getEventDispatcher().addJobSelectedListener(this);
         controller.getEventDispatcher().addJobsUpdatedListener(this);
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
-        this.controller = controller;
     }
 
     /**
@@ -142,10 +132,6 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
         return root;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.event.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.shared.job.Job)
-     */
     public void jobSelected(Job job) {
         long submitTime = job.getSubmitTime();
         long startTime = job.getStartTime();
@@ -162,7 +148,8 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
             totalDuration = Job.formatDuration(finishTime - submitTime);
         }
 
-        curDetails = new DetailViewerRecord();
+        /* currently displayed details */
+        DetailViewerRecord curDetails = new DetailViewerRecord();
         curDetails.setAttribute(ID_ATTR, job.getId());
         curDetails.setAttribute(STATE_ATTR, job.getStatus().toString());
         curDetails.setAttribute(NAME_ATTR, job.getName());
@@ -180,31 +167,19 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
         curDetails.setAttribute(EXEC_DURATION_ATTR, execDuration);
         curDetails.setAttribute(TOTAL_DURATION_ATTR, totalDuration);
 
-        this.details.setData(new DetailViewerRecord[] { curDetails });
+        this.details.setData(new DetailViewerRecord[]{curDetails});
 
         this.label.hide();
         this.details.show();
         this.displayedJob = job;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdating()
-     */
     public void jobsUpdating() {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobSubmitted(org.ow2.proactive_grid_cloud_portal.client.Job)
-     */
     public void jobSubmitted(Job j) {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
-     */
     public void jobsUpdated(Map<Integer, Job> jobs) {
         if (this.displayedJob == null)
             return;
@@ -216,104 +191,10 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener, Ta
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.event.JobSelectedListener#jobUnselected()
-     */
     public void jobUnselected() {
         this.details.hide();
         this.label.show();
         this.displayedJob = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
-     */
-    public void tasksUpdating(boolean jobChanged) {
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(java.util.List)
-     */
-    public void tasksUpdated(List<Task> tasks) {
-        Job selJob = controller.getModel().getSelectedJob();
-        if (this.displayedJob != null && selJob != null) {
-
-            int pending = 0;
-            int running = 0;
-            int finished = 0;
-
-            // this is not accurate at all...
-            // you might want to improve it.
-            for (Task t : tasks) {
-                switch (t.getStatus()) {
-                    case ABORTED:
-                        finished++;
-                        break;
-                    case FAILED:
-                        finished++;
-                        break;
-                    case FAULTY:
-                        finished++;
-                        break;
-                    case FINISHED:
-                        finished++;
-                        break;
-                    case NOT_RESTARTED:
-                        finished++;
-                        break;
-                    case NOT_STARTED:
-                        finished++;
-                        break;
-                    case PAUSED:
-                        running++;
-                        break;
-                    case PENDING:
-                        pending++;
-                        break;
-                    case RUNNING:
-                        running++;
-                        break;
-                    case SKIPPED:
-                        finished++;
-                        break;
-                    case SUBMITTED:
-                        pending++;
-                        break;
-                    case WAITING_ON_ERROR:
-                        running++;
-                        break;
-                    case WAITING_ON_FAILURE:
-                        running++;
-                        break;
-                }
-            }
-
-            JobStatus s;
-            if (running > 0 || (pending > 0 && finished > 0)) {
-                s = JobStatus.RUNNING;
-            } else if (finished > 0 && pending == 0) {
-                s = JobStatus.FINISHED;
-            } else {
-                s = JobStatus.PENDING;
-            }
-
-            curDetails.setAttribute(STATE_ATTR, s.toString());
-            curDetails.setAttribute(PENDING_TASKS_ATTR, pending);
-            curDetails.setAttribute(RUNNING_TASKS_ATTR, running);
-            curDetails.setAttribute(FINISHED_TASKS_ATTR, finished);
-            curDetails.setAttribute(TOTAL_TASKS_ATTR, pending + running + finished);
-            this.details.setData(new DetailViewerRecord[] { curDetails });
-
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
-     */
-    public void tasksUpdatedFailure(String message) {
-    }
 }
