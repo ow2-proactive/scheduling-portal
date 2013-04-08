@@ -236,7 +236,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                menu.setItems(expandItem, collapseItem, new MenuItemSeparator(), unlockItem, removeItem);
+                menu.setItems(expandItem, collapseItem, new MenuItemSeparator(), lockItem, unlockItem, removeItem);
                 treeGrid.setContextMenu(menu);
             }
         });
