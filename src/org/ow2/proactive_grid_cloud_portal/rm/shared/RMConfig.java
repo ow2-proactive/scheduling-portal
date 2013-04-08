@@ -90,6 +90,23 @@ public class RMConfig extends Config {
     public static final String MONITORING_PERIOD = "rm.monitoring.period";
     public static final String MONITORING_PERIOD_DEFAULT = "10000";
 
+    /** hostname used to form the jmx url to monitor the node sources in the RM */
+    public static final String RM_JMX_HOSTNAME = "rm.jmx.hostname";
+    public static final String RM_JMX_HOSTNAME_DEFAULT = "localhost";
+    
+    /** port used to form the jmx url to monitor the node sources in the RM */
+    public static final String RM_JMX_PORT = "rm.jmx.port";
+    public static final String RM_JMX_PORT_DEFAULT = "5822";
+    
+    /** servername used to form the jmx url to monitor the node sources in the RM */
+    public static final String RM_JMX_SERVER_NAME = "rm.jmx.servername";
+    public static final String RM_JMX_SERVER_NAME_DEFAULT = "JMXRMAgent";
+    
+    /** prefix used to form the jmx url to monitor the node sources in the RM */
+    public static final String RM_JMX_PREFIX = "rm.jmx.prefix";
+    public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
+    
+    
     private static RMConfig instance = null;
 
     /**
@@ -113,6 +130,10 @@ public class RMConfig extends Config {
         properties.put(MOTD_URL, d_MOTD_URL);
         properties.put(MONITORING_PROTOCOL, MONITORING_PROTOCOL_DEFAULT);
         properties.put(MONITORING_PERIOD, MONITORING_PERIOD_DEFAULT);
+        properties.put(RM_JMX_HOSTNAME, RM_JMX_HOSTNAME_DEFAULT);
+        properties.put(RM_JMX_PORT, RM_JMX_PORT_DEFAULT);
+        properties.put(RM_JMX_SERVER_NAME, RM_JMX_SERVER_NAME_DEFAULT);
+        properties.put(RM_JMX_PREFIX, RM_JMX_PREFIX_DEFAULT);
     }
 
     @Override
@@ -172,4 +193,33 @@ public class RMConfig extends Config {
     public int getMonitoringPeriod() {
         return Integer.parseInt(properties.get(MONITORING_PERIOD));
     }
+    
+    /**
+     * @return hostname used to form the jmx url to monitor the node sources in the RM
+     */
+    public String getRMJmxHostname() {
+        return properties.get(RM_JMX_HOSTNAME);
+    }
+    
+    /**
+     * @return port used to form the jmx url to monitor the node sources in the RM
+     */
+    public int getRMJmxPort() {
+        return Integer.parseInt(properties.get(RM_JMX_PORT));
+    }
+    
+    /**
+     * @return server name used to form the jmx url to monitor the node sources in the RM
+     */
+    public String getRMJmxServerName() {
+        return properties.get(RM_JMX_SERVER_NAME);
+    }
+    
+    /**
+     * @return prefix used to form the jmx url to monitor the node sources in the RM
+     */
+    public String getRMJmxPrefix() {
+        return properties.get(RM_JMX_PREFIX);
+    }
 }
+

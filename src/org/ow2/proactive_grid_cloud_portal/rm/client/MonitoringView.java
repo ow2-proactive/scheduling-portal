@@ -41,6 +41,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringHostView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringNodeView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
@@ -60,12 +61,17 @@ public class MonitoringView implements NodeSelectedListener {
 
     private MonitoringNodeView nodeMonitoring = null;
     private MonitoringHostView hostMonitoring = null;
+    private MonitoringSourceView sourceMonitoring = null;
+    
     private VLayout nodeCanvas = null;
     private Label nodeLabel = null;
 
     private Layout hostCanvas = null;
     private Label hostLabel = null;
 
+    private Layout sourceCanvas = null;
+    private Label sourceLabel = null;
+    
     private RMController controller;
 
     MonitoringView(RMController controller) {
@@ -95,6 +101,22 @@ public class MonitoringView implements NodeSelectedListener {
         this.nodeCanvas.addMember(nodeMonitoring);
         this.nodeCanvas.hide();
 
+        
+        this.sourceMonitoring = new MonitoringSourceView(controller);
+        this.sourceMonitoring.setOverflow(Overflow.AUTO);
+        this.sourceMonitoring.setWidth100();
+
+        this.sourceCanvas = new VLayout();
+        this.sourceCanvas.setWidth100();
+        this.sourceCanvas.setHeight100();
+        this.sourceLabel = new Label();
+        this.sourceLabel.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        this.sourceLabel.setHeight(16);
+        this.sourceCanvas.addMember(sourceLabel);
+        this.sourceCanvas.addMember(sourceMonitoring);
+        this.sourceCanvas.hide();
+        
+        
         this.hostMonitoring = new MonitoringHostView(controller);
         this.hostMonitoring.setOverflow(Overflow.AUTO);
         this.hostMonitoring.setWidth100();
@@ -109,7 +131,7 @@ public class MonitoringView implements NodeSelectedListener {
         this.hostCanvas.addMember(hostMonitoring);
         this.hostCanvas.hide();
 
-        vl.setMembers(label, nodeCanvas, hostCanvas);
+        vl.setMembers(label, nodeCanvas, hostCanvas, sourceCanvas);
         return vl;
     }
 
@@ -123,8 +145,10 @@ public class MonitoringView implements NodeSelectedListener {
         this.label.show();
         this.nodeCanvas.hide();
         this.hostCanvas.hide();
+        this.sourceCanvas.hide();
         this.nodeMonitoring.close();
         this.hostMonitoring.close();
+        this.sourceMonitoring.close();
     }
 
     /*
@@ -137,9 +161,11 @@ public class MonitoringView implements NodeSelectedListener {
 
         this.label.hide();
         this.hostCanvas.hide();
+        this.sourceCanvas.hide();
 
         this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
         this.hostMonitoring.close();
+        this.sourceMonitoring.close();
         this.nodeMonitoring.close();
         this.nodeMonitoring.init(node);
         this.nodeCanvas.show();
@@ -150,7 +176,17 @@ public class MonitoringView implements NodeSelectedListener {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
-        nodeUnselected();
+        //nodeUnselected();
+        this.label.hide();
+        this.nodeCanvas.hide();
+        this.hostCanvas.hide();
+
+        this.sourceLabel.setContents("<h3>" + ns.getSourceName() + "</h3>");
+        this.nodeMonitoring.close();
+        this.hostMonitoring.close();
+        this.sourceMonitoring.close();
+        this.sourceMonitoring.init(ns);
+        this.sourceCanvas.show();
     }
 
     /*
@@ -160,9 +196,11 @@ public class MonitoringView implements NodeSelectedListener {
     public void hostSelected(Host h) {
         this.label.hide();
         this.nodeCanvas.hide();
+        this.sourceCanvas.hide();
 
         this.hostLabel.setContents("<h3>" + h.getHostName() + "</h3>");
         this.nodeMonitoring.close();
+        this.sourceMonitoring.close();
         this.hostMonitoring.close();
         this.hostMonitoring.init(h);
         this.hostCanvas.show();
