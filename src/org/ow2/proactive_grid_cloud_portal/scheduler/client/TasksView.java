@@ -38,6 +38,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -46,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.T
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
@@ -208,6 +210,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     private HashMap<String, ImgButton> visuButtons = null;
 
+    /** To avoid opening severial popup on button's click */
+    private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
+
     private SchedulerController controller = null;
 
     public TasksView(SchedulerController controller) {
@@ -216,12 +221,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.controller.getEventDispatcher().addRemoteHintListener(this);
 
         this.visuButtons = new HashMap<String, ImgButton>();
+        visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
-     */
     public void tasksUpdating(boolean jobChanged) {
         if (jobChanged) {
             this.errorLabel.hide();
@@ -231,10 +233,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
-     */
     public void tasksUpdatedFailure(String message) {
         this.errorLabel.setContents(message);
         this.tasksGrid.hide();
@@ -242,10 +240,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.show();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org.ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
-     */
     public void tasksUpdated(List<Task> tasks) {
         this.visuButtons.clear();
 
@@ -513,11 +507,15 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         if (id.equals(hint.taskId)) {
             ImgButton button = visuButtons.get(id);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
-            button.addClickHandler(new ClickHandler() {
+            if(visuButtonsClickHandlers.containsKey(button)){
+                visuButtonsClickHandlers.get(button).removeHandler();
+            }
+            HandlerRegistration clickHandler = button.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                     showRemoteVisuChoices(hint, taskName);
                 }
             });
+            visuButtonsClickHandlers.put(button, clickHandler);
         }
     }
 
