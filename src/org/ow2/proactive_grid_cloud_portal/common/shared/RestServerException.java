@@ -36,7 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 
 /**
@@ -47,7 +47,7 @@ import java.io.Serializable;
  *
  */
 @SuppressWarnings("serial")
-public class RestServerException extends Exception implements Serializable {
+public class RestServerException extends Exception implements IsSerializable {
 
     private int status;
     private String response;

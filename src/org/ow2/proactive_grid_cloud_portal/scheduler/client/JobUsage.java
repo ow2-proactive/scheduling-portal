@@ -34,11 +34,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JobUsage implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class JobUsage implements IsSerializable {
 
     private String jobId;
     private String jobName;

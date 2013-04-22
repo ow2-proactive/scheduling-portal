@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 
 /**
  * Contains a description of the graphical representation of a job
@@ -51,7 +53,7 @@ import java.util.Set;
  *
  */
 @SuppressWarnings("serial")
-public class JobVisuMap implements Serializable {
+public class JobVisuMap implements IsSerializable {
 
     private Map<String, TaskPos> tasks = null;
 

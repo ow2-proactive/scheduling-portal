@@ -34,9 +34,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class TaskUsage implements Serializable {
+public class TaskUsage implements IsSerializable {
     private String taskId;
     private String taskName;
     private long taskStartTime = -1;

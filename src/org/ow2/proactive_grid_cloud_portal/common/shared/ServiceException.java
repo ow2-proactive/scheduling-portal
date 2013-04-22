@@ -2,6 +2,8 @@ package org.ow2.proactive_grid_cloud_portal.common.shared;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 
 /**
  * Thrown by {@link Service} upon internal logic failure detection
@@ -10,7 +12,7 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
  *
  */
 @SuppressWarnings("serial")
-public class ServiceException extends Exception {
+public class ServiceException extends Exception  implements IsSerializable {
 
     public ServiceException() {
         super();

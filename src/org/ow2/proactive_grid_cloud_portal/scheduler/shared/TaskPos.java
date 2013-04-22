@@ -36,7 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 
 /**
@@ -48,7 +48,7 @@ import java.io.Serializable;
  *
  */
 @SuppressWarnings("serial")
-class TaskPos implements Serializable {
+class TaskPos implements IsSerializable {
     int x;
     int y;
     int w;
