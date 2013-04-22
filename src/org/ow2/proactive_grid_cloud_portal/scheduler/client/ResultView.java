@@ -36,11 +36,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.types.Alignment;
@@ -64,7 +64,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Actually delegates previewing to the browser, letting
  * the user pick a task and a mimetype before clicking the link
  * 
- * 
  * @author mschnoor
  *
  */
@@ -87,11 +86,6 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
     private String jobId = null;
 
-    /**
-     * Default constructor
-     * 
-     * @param controller
-     */
     public ResultView(SchedulerController controller) {
         this.controller = controller;
         controller.getEventDispatcher().addTasksUpdatedListener(this);
@@ -180,19 +174,11 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         return this.root;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
-     */
     public void tasksUpdating(boolean jobChanged) {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org.ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
-     */
     public void tasksUpdated(List<Task> tasks) {
-        if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
+        if (tasks.size() == this.taskSelect.getClientPickListData().length) {
             return;
         }
 
@@ -201,39 +187,20 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         String defaultVal = "";
 
         for (Task t : tasks) {
-            switch (t.getStatus()) {
-                /*
-                	case SKIPPED:
-                	case PENDING:
-                	case SUBMITTED:
-                	case NOT_STARTED:
-                		break;
-                 */
-                default:
                     defaultVal = t.getName();
                     values[i] = t.getName();
                     i++;
-                    break;
-            }
         }
         this.taskSelect.setValueMap(values);
         this.taskSelect.setValue(defaultVal);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
-     */
     public void tasksUpdatedFailure(String message) {
         this.tasksUpdated(new ArrayList<Task>());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.shared.job.Job)
-     */
     public void jobSelected(Job job) {
-        taskSelect.setValues(new String[] {});
+        taskSelect.setValues();
         this.jobId = (job != null) ? "" + job.getId() : "";
         root.showMember(formPane);
         root.showMember(visuPane);
@@ -247,10 +214,6 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
-     */
     public void jobUnselected() {
 
         root.hideMember(formPane);
