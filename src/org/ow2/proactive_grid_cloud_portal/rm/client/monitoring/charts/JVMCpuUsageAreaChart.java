@@ -36,9 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.Date;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+
+import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -70,16 +70,20 @@ public class JVMCpuUsageAreaChart extends MBeanTimeAreaChart {
             long curCpu = (long) array.get(0).isObject().get("value").isNumber().doubleValue();
 
             if (prevTime > 0) {
-                addRow();
-
-                String formattedTime = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
-                        new Date(curTime));
-                double cpuPercent = (curCpu - prevCpu) / (10000 * (curTime - prevTime));
-                // as it will be formatted to percents divide by 100
-                cpuPercent /= 100;
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, formattedTime);
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, cpuPercent);
+                // for the first value, assume just before the second value so points are still displayed
+                prevTime = curTime - 1;
+                prevCpu = curCpu;
             }
+
+            addRow();
+
+            String formattedTime = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                    new Date(curTime));
+            double cpuPercent = (curCpu - prevCpu) / (10000 * (curTime - prevTime));
+            // as it will be formatted to percents divide by 100
+            cpuPercent /= 100;
+            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, formattedTime);
+            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, cpuPercent);
 
             prevCpu = curCpu;
             prevTime = curTime;

@@ -60,7 +60,7 @@ public class MemoryView extends VLayout implements Reloadable {
         ram = new MemoryLineChart(controller, url);
         swap = new SwapLineChart(controller, url);
 
-        chain = new ReloadableChain(new Reloadable[] { ram, swap });
+        chain = new ReloadableChain(ram, swap);
 
         setWidth100();
         addMember(ram);

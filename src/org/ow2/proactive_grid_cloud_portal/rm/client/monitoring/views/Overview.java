@@ -36,8 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import java.util.Arrays;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.CpuUsageAreaChart;
@@ -46,6 +44,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChar
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MemoryLineChart;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.NetworkAreaChart;
+
+import java.util.Arrays;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.Label;
@@ -78,7 +78,7 @@ public class Overview extends VLayout implements Reloadable {
 
         disk.reload();
 
-        chain = new ReloadableChain(new Reloadable[] { cpuUsage, memory, network });
+        chain = new ReloadableChain(cpuUsage, memory, network);
 
         VLayout osInfoRow = new VLayout();
         HLayout cpuMemRow = new HLayout();

@@ -41,7 +41,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.user.client.Timer;
@@ -98,7 +97,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         }
 
         String hostMonitoringUrl = node.getDefaultJMXUrl();
-        if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
+        if (!RMConfig.MONITORING_PROTOCOL_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
             hostMonitoringUrl = node.getProactiveJMXUrl();
         }
 
@@ -110,7 +109,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         fsView = new FileSystemView(controller, hostMonitoringUrl);
         networkView = new NetworkView(controller, hostMonitoringUrl);
 
-        chain = new ReloadableChain(new Reloadable[] { overview, cpuView, memoryView, networkView });
+        chain = new ReloadableChain(overview, cpuView, memoryView, networkView);
 
         // to not add to to automatic reloadable views (use a dedicated button for this)
         processesView = new ProcessesView(controller, hostMonitoringUrl);
@@ -177,8 +176,16 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
                 chain.reload();
             }
         };
-        updater.schedule(1);
         updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
+        // Get two values right now to quickly display the charts
+        chain.onFinish(new Runnable() {
+            @Override
+            public void run() {
+                chain.onFinish(null);
+                chain.reload();
+            }
+        });
+        chain.reload();
     }
 
     public void close() {

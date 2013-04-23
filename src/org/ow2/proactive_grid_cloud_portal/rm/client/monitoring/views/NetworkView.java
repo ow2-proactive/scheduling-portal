@@ -36,16 +36,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.NetworkDetailedAreaChart;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -151,7 +151,7 @@ public class NetworkView extends VLayout implements Reloadable {
                             }
 
                             synchronized (NetworkView.this) {
-                                chain = new ReloadableChain(charts.toArray(new Reloadable[] {}));
+                                chain = new ReloadableChain(charts.toArray(new Reloadable[charts.size()]));
                                 if (onFinish != null) {
                                     chain.onFinish(onFinish);
                                 }

@@ -49,21 +49,14 @@ public class ReloadableChain implements Reloadable {
 
     private Runnable onFinish;
 
-    public ReloadableChain(Reloadable[] reloadables) {
+    public ReloadableChain(Reloadable... reloadables) {
         this.reloadables = reloadables;
 
         for (int i = 0; i < reloadables.length - 1; i++) {
             final int index = i;
             reloadables[i].onFinish(new Runnable() {
                 public void run() {
-                    boolean continueReloading = false;
-                    synchronized (ReloadableChain.this) {
-                        if (reloading) {
-                            continueReloading = true;
-                        }
-                    }
-
-                    if (continueReloading) {
+                    if (reloading) {
                         ReloadableChain.this.reloadables[index + 1].reload();
                     }
                 }
@@ -71,11 +64,9 @@ public class ReloadableChain implements Reloadable {
         }
         reloadables[reloadables.length - 1].onFinish(new Runnable() {
             public void run() {
-                synchronized (ReloadableChain.this) {
-                    reloading = false;
-                    if (onFinish != null) {
-                        onFinish.run();
-                    }
+                reloading = false;
+                if (onFinish != null) {
+                    onFinish.run();
                 }
             }
         });
@@ -86,12 +77,10 @@ public class ReloadableChain implements Reloadable {
     }
 
     public void reload() {
-        synchronized (this) {
-            if (reloading) {
-                return;
-            }
-            reloading = true;
+        if (reloading) {
+            return;
         }
+        reloading = true;
         reloadables[0].reload();
     }
 

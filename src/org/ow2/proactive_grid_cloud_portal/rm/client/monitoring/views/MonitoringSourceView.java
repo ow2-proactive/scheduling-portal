@@ -105,7 +105,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
         status.setWidth100();
         status.setAlign(Alignment.CENTER);
 
-        chain = new ReloadableChain(new Reloadable[] { sourceOverview, sourceHosts });
+        chain = new ReloadableChain(sourceOverview, sourceHosts);
 
         final Tab overviewTab = new Tab("Overview");
         overviewTab.setPane(sourceOverview);
@@ -159,9 +159,16 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
                 chain.reload();
             }
         };
-        updater.schedule(1);
         updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
-
+        // Get two values right now to quickly display the charts
+        chain.onFinish(new Runnable() {
+            @Override
+            public void run() {
+                chain.onFinish(null);
+                chain.reload();
+            }
+        });
+        chain.reload();
     }
 
     public void close() {

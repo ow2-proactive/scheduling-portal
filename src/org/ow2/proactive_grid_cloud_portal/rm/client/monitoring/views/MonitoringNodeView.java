@@ -36,12 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import java.util.Arrays;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ClassesAreaChart;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMCpuUsageAreaChart;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMMemoryAreaChart;
@@ -49,6 +46,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChar
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
+import java.util.Arrays;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -89,7 +88,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
         setWidth100();
         String nodeUrl = node.getDefaultJMXUrl();
-        if (!RMConfig.MONITORING_PERIOD_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
+        if (!RMConfig.MONITORING_PROTOCOL_DEFAULT.equals(RMConfig.get().getMonitoringProtocol())) {
             nodeUrl = node.getProactiveJMXUrl();
         }
 
@@ -105,7 +104,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
         jvmDetails.setWidth100();
 
-        chain = new ReloadableChain(new Reloadable[] { heapMemory, threads, classes, cpuUsage });
+        chain = new ReloadableChain(heapMemory, threads, classes, cpuUsage);
 
         HLayout firstRow = new HLayout();
         HLayout secondRow = new HLayout();
@@ -147,8 +146,16 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
                 chain.reload();
             }
         };
-        updater.schedule(1);
         updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
+        // Get two values right now to quickly display the charts
+        chain.onFinish(new Runnable() {
+            @Override
+            public void run() {
+                chain.onFinish(null);
+                chain.reload();
+            }
+        });
+        chain.reload();
     }
 
     public void close() {
