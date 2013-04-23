@@ -37,17 +37,18 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.List;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
 
 
 /**
@@ -55,23 +56,24 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  */
 public class MBeanSourceDetailedView extends DetailViewer {
 
-        public static final String NO_MONITORING_INFO_EXCEPTION_NAME = 
-                "javax.management.InstanceNotFoundException";
-
     private AsyncCallback<String> extraCallback;
-    
-    public MBeanSourceDetailedView() {
+    private RMController controller;
+    private String jmxServerUrl;
+    private String mbean;
+    private List<String> attrs;
+
+    public MBeanSourceDetailedView(AsyncCallback<String> extraCallback, RMController controller,
+            String jmxServerUrl, String mbean, List<String> attrs) {
+        this.extraCallback = extraCallback;
+        this.controller = controller;
+        this.jmxServerUrl = jmxServerUrl;
+        this.mbean = mbean;
+        this.attrs = attrs;
+
+        reload();
     }
 
-    public MBeanSourceDetailedView(AsyncCallback<String> extraCallback) {
-        this.extraCallback = extraCallback;
-    }
-    
-    public MBeanSourceDetailedView(RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
-        load(controller, jmxServerUrl, mbean, attrs);
-    }
-    
-    public void load(final RMController controller, String jmxServerUrl, String mbean, List<String> attrs) {
+    public void reload() {
         DetailViewerField[] fields = new DetailViewerField[attrs.size()];
 
         for (int i = 0; i < fields.length; i++) {
@@ -111,9 +113,9 @@ public class MBeanSourceDetailedView extends DetailViewer {
                             } else if (value.isNumber() != null) {
                                 valueStr = value.isNumber().toString();
                             } else if (value.isArray() != null) {
-                                JSONArray values = value.isArray(); 
+                                JSONArray values = value.isArray();
                                 for (int j = 0; j < values.size(); j++)
-                                    valueStr+= values.get(j).toString() + " ";
+                                    valueStr += values.get(j).isString().stringValue() + " ";
                             } else if (value.isObject() != null) {
                                 valueStr = value.toString();
                             } else {
@@ -129,28 +131,29 @@ public class MBeanSourceDetailedView extends DetailViewer {
                 }
 
             }
-                
-            
+
             public void onFailure(Throwable caught) {
                 if (extraCallback != null) {
-                        String errmessage = caught.getMessage();
-                        if (caught instanceof RestServerException &&
-                                errmessage.contains(NO_MONITORING_INFO_EXCEPTION_NAME)
-                                ) {
-                                extraCallback.onFailure(
-                                            new Exception(
-                                                "Node Source monitoring information " +
-                                                "not available."));
+                    String errmessage = caught.getMessage();
+                    if (caught instanceof RestServerException &&
+                        errmessage.contains(MonitoringSourceView.NO_MONITORING_INFO_EXCEPTION_STRING)) {
+                        extraCallback.onFailure(new Exception("Node Source monitoring information "
+                            + "not available."));
+                    } else if (caught instanceof RestServerException &&
+                        errmessage.contains(MonitoringSourceView.ACCESS_DENIED_EXCEPTION_STRING)) {
+                        extraCallback
+                                .onFailure(new Exception(
+                                    "The current user is not authorized to get Node Source monitoring information. "));
                     } else {
                         extraCallback.onFailure(caught);
-                    } 
+                    }
                 }
 
                 if (RMController.getJsonErrorCode(caught) == 401) {
                     model.logMessage("You have been disconnected from the server.");
-                } 
+                }
             }
         });
     }
-}
 
+}

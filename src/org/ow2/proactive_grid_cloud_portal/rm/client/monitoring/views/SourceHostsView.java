@@ -42,176 +42,179 @@ import com.smartgwt.client.widgets.Label;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.json.client.JSONObject;
-import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
-
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanSourceDetailedView;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+
 
 /**
  * Hosts & VMs tab in node source monitoring.
  */
 public class SourceHostsView extends VLayout implements Reloadable {
-        
+
     private RMController controller;
     private String url;
     private String nsname;
     private AsyncCallback<String> extraCallback;
     private VLayout currpane;
-        
-        
-    public SourceHostsView(final RMController controller, final String url, String nsname, AsyncCallback<String> extraCallback) {
+
+    public SourceHostsView(final RMController controller, final String url, String nsname,
+            AsyncCallback<String> extraCallback) {
 
         this.controller = controller;
-        this.url = url; 
-        this.nsname = nsname; 
+        this.url = url;
+        this.nsname = nsname;
         this.extraCallback = extraCallback;
-        
+
         this.reload();
     }
-    
+
     @Override
     public void reload() {
-        if (currpane != null) 
+        if (currpane != null)
             removeMember(currpane);
         currpane = new VLayout();
         addMember(currpane);
-        
+
         Label label = new Label("Reloading...");
         label.setHeight(50);
         currpane.addMember(label);
         currpane.draw();
-        
+
         load();
-        
+
     }
-    
-    public void load(){
+
+    public void load() {
         final RMServiceAsync rm = controller.getRMService();
         final RMModel model = controller.getModel();
-        final String mbeanname = SourceOverview.MBEAN_NAME_PREFIX + "-" + nsname;
+        final String mbeanname = MonitoringSourceView.MBEAN_NAME_PREFIX + "-" + nsname;
         final List<String> mbeanAttrs = new ArrayList<String>();
         mbeanAttrs.add("Summary");
 
         setWidth100();
 
-        rm.getNodeMBeansInfo(model.getSessionId(), url, mbeanname, mbeanAttrs,
-            new AsyncCallback<String>() {
-                public void onSuccess(String result) {
-                        
-                    // Result should look like this: 
-                    // {"ProActiveResourceManager:name=IaasMonitoring-OPENSTACK_NS_26599":
-                    // [{"name":"Summary","value":
-                    // {
-                    // "host2":{
-                    //    "cpu.usage":"0.25",
-                    //    "vmsinfo": {"vm1":{"cpu.usage":"0.25","mem.usage":"0.35"},"vm2":{"cpu.usage":"0.25","mem.usage":"0.35"}},
-                    //    "mem.usage":"0.35"},
-                    // "host1":{
-                    //    "cpu.usage":"0.25",
-                    //    "vmsinfo": {"vm1":{"cpu.usage":"0.25","mem.usage":"0.35"},"vm2":{"cpu.usage":"0.25","mem.usage":"0.35"}},
-                    //    "mem.usage":"0.35"}
-                    // }}]
-                    // }
-                        
-                    if (!model.isLoggedIn())
-                        return;
-                    
-                    JSONObject hosts;
-                    try { 
-                        JSONObject object = controller.parseJSON(result).isObject();
-                        JSONValue mbeaninfo = null; 
-                        for (String key: object.keySet())
-                            mbeaninfo = object.get(key);
-                        JSONArray array = mbeaninfo.isArray();
-                        JSONObject nsinfo = array.get(0).isObject(); 
-                        JSONValue masbueno = nsinfo.get("value");
-                        hosts = masbueno.isObject();
-                    } catch (Exception e) {
-                        // Failure. Could not parse the JSON.
-                        return;
-                    }
-                    
-                    VLayout allpane = new VLayout();
-                    
-                    if (hosts != null) {
-                        for (String hostname : hosts.keySet()) {
-                                
-                            VLayout hostpane = new VLayout();
-                            Label label = new Label("<nobr style='font-weight:bold;'>" + hostname + "<nobr>");
-                            label.setHeight(50);
-                            hostpane.addMember(label);
-                                
-                            JSONObject hostc = hosts.get(hostname).isObject();
-                                
-                            DetailViewer hostdetails = generateDetails(hostc);
-                            
-                            hostpane.addMember(hostdetails);
-                            
-                            allpane.addMember(hostpane);
-                            
-                            JSONObject vms = hostc.get("vmsinfo").isObject();
-                            if (vms != null) {
-                                for (String vmname : vms.keySet() ) {
-                                    JSONObject vmc = vms.get(vmname).isObject();
-                                    if (vmc != null) {
-                                        DetailViewer vmdetails = generateDetails(vmc);
-                                        VLayout vmlay = new VLayout();
-                                        Label vmlabel = new Label(vmname);
-                                        vmlabel.setHeight(50);
-                                        vmlay.addMember(vmlabel);
-                                        vmlay.addMember(vmdetails);
-                                        allpane.addMember(vmlay);
-                                    }
+        rm.getNodeMBeansInfo(model.getSessionId(), url, mbeanname, mbeanAttrs, new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+
+                // Result should look like this: 
+                // {"ProActiveResourceManager:name=IaasMonitoring-OPENSTACK_NS_26599":
+                // [{"name":"Summary","value":
+                // {
+                // "host2":{
+                //    "cpu.usage":"0.25",
+                //    "vmsinfo": {"vm1":{"cpu.usage":"0.25","mem.usage":"0.35"},"vm2":{"cpu.usage":"0.25","mem.usage":"0.35"}},
+                //    "mem.usage":"0.35"},
+                // "host1":{
+                //    "cpu.usage":"0.25",
+                //    "vmsinfo": {"vm1":{"cpu.usage":"0.25","mem.usage":"0.35"},"vm2":{"cpu.usage":"0.25","mem.usage":"0.35"}},
+                //    "mem.usage":"0.35"}
+                // }}]
+                // }
+
+                if (!model.isLoggedIn())
+                    return;
+
+                VLayout allpane = new VLayout();
+
+                JSONObject hosts;
+                try {
+                    JSONObject object = controller.parseJSON(result).isObject();
+                    JSONValue mbeaninfo = null;
+                    for (String key : object.keySet())
+                        mbeaninfo = object.get(key);
+                    JSONArray array = mbeaninfo.isArray();
+                    JSONObject nsinfo = array.get(0).isObject();
+                    JSONValue masbueno = nsinfo.get("value");
+                    hosts = masbueno.isObject();
+                } catch (Exception e) {
+                    // Failure. Could not parse the JSON.
+                    Label label = new Label("Error parsing the response.");
+                    label.setHeight(50);
+                    allpane.addMember(label);
+                    return;
+                }
+
+                if (hosts != null) {
+                    for (String hostname : hosts.keySet()) {
+
+                        VLayout hostpane = new VLayout();
+                        Label label = new Label("<nobr style='font-weight:bold;'> Host " + hostname +
+                            "<nobr>");
+                        label.setHeight(50);
+                        hostpane.addMember(label);
+
+                        JSONObject hostc = hosts.get(hostname).isObject();
+
+                        DetailViewer hostdetails = generateDetails(hostc);
+
+                        hostpane.addMember(hostdetails);
+
+                        allpane.addMember(hostpane);
+
+                        JSONObject vms = hostc.get("vmsinfo").isObject();
+                        if (vms != null) {
+                            for (String vmname : vms.keySet()) {
+                                JSONObject vmc = vms.get(vmname).isObject();
+                                if (vmc != null) {
+                                    DetailViewer vmdetails = generateDetails(vmc);
+                                    VLayout vmlay = new VLayout();
+                                    Label vmlabel = new Label("Virtual machine " + vmname);
+                                    vmlabel.setHeight(50);
+                                    vmlay.addMember(vmlabel);
+                                    vmlay.addMember(vmdetails);
+                                    allpane.addMember(vmlay);
                                 }
                             }
                         }
-
-                        if (currpane != null) 
-                            removeMember(currpane);
-                        
-                        addMember(allpane);
-                        currpane = allpane;
-                    }
-                }
-
-                public void onFailure(Throwable caught) {
-                    if (extraCallback != null) {
-                        String errmessage = caught.getMessage();
-                        if (caught instanceof RestServerException &&
-                            errmessage.contains(MBeanSourceDetailedView.NO_MONITORING_INFO_EXCEPTION_NAME)
-                            ) {
-                                extraCallback.onFailure(
-                                            new Exception ("Node Source monitoring information " +
-                                                "not available."));
-                        } else {
-                            extraCallback.onFailure(caught);
-                        } 
                     }
 
-                        
-                    if (RMController.getJsonErrorCode(caught) == 401) {
-                        model.logMessage("You have been disconnected from the server.");
-                    } 
+                    if (currpane != null)
+                        removeMember(currpane);
+
+                    addMember(allpane);
+                    currpane = allpane;
                 }
             }
-        );
+
+            public void onFailure(Throwable caught) {
+
+                if (extraCallback != null) {
+                    String errmessage = caught.getMessage();
+                    if (caught instanceof RestServerException &&
+                        errmessage.contains(MonitoringSourceView.NO_MONITORING_INFO_EXCEPTION_STRING)) {
+                        extraCallback.onFailure(new Exception("Node Source monitoring information "
+                            + "not available."));
+                    } else if (caught instanceof RestServerException &&
+                        errmessage.contains(MonitoringSourceView.ACCESS_DENIED_EXCEPTION_STRING)) {
+                        extraCallback
+                                .onFailure(new Exception(
+                                    "The current user is not authorized to get Node Source monitoring information. "));
+                    } else {
+                        extraCallback.onFailure(caught);
+                    }
+                }
+
+                if (RMController.getJsonErrorCode(caught) == 401) {
+                    model.logMessage("You have been disconnected from the server.");
+                }
+            }
+        });
     }
-    
+
     // Generate a GUI object with details about hosts or vms' data in JSONObject format.
     private DetailViewer generateDetails(JSONObject hostc) {
         DetailViewer details = new DetailViewer();
         DetailViewerRecord dv = new DetailViewerRecord();
         DetailViewerField[] fields = new DetailViewerField[hostc.keySet().size()];
-        
+
         int j = 0;
         for (String hostatt : hostc.keySet()) {
             fields[j++] = new DetailViewerField(convertIdToJavascriptId(hostatt));
@@ -229,18 +232,18 @@ public class SourceHostsView extends VLayout implements Reloadable {
             } else {
                 value = "";
             }
-            
+
             dv.setAttribute(convertIdToJavascriptId(hostattkey), value);
         }
         details.setData(new DetailViewerRecord[] { dv });
         details.setWidth("45%");
         return details;
     }
-    
-    private String convertIdToJavascriptId(String id){
+
+    private String convertIdToJavascriptId(String id) {
         return id.replace(".", "_");
     }
-    
+
     @Override
     public synchronized void onFinish(Runnable onFinish) {
     }

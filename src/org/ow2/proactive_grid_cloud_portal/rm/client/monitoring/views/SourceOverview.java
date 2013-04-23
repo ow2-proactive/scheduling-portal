@@ -37,29 +37,28 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Arrays;
-
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.VLayout;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanSourceDetailedView;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.layout.VLayout;
+
 
 /**
  * Overview tab in node source monitoring.
  */
 public class SourceOverview extends VLayout implements Reloadable {
-        
-    public static final String MBEAN_NAME_PREFIX = 
-                "ProActiveResourceManager:name=IaasMonitoring";
-        
+
     private MBeanSourceDetailedView nsInfo;
 
-    public SourceOverview(RMController controller, String url, String nsname, AsyncCallback<String> extraCallback) {
+    public SourceOverview(RMController controller, String url, String nsname,
+            AsyncCallback<String> extraCallback) {
 
-        nsInfo = new MBeanSourceDetailedView(extraCallback);
-        nsInfo.load(controller, url, MBEAN_NAME_PREFIX + "-" + nsname, 
-            Arrays.asList("Hosts", "VMs"));
+        nsInfo = new MBeanSourceDetailedView(extraCallback, controller, url,
+            MonitoringSourceView.MBEAN_NAME_PREFIX + "-" + nsname, Arrays.asList("Hosts", "VMs"));
+
+        nsInfo.reload();
 
         VLayout nsInfoRow = new VLayout();
 
@@ -75,9 +74,11 @@ public class SourceOverview extends VLayout implements Reloadable {
 
     @Override
     public void reload() {
+        nsInfo.reload();
     }
 
     @Override
     public void onFinish(Runnable callback) {
     }
+
 }

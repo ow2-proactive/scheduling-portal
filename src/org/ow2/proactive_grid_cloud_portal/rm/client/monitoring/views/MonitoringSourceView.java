@@ -41,6 +41,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.Alignment;
@@ -55,16 +56,21 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
+
 /**
  * Source monitoring view.
  */
 public class MonitoringSourceView extends VLayout implements AsyncCallback<String> {
-    
+
+    public static final String MBEAN_NAME_PREFIX = "ProActiveResourceManager:name=IaasMonitoring";
+    public static final String NO_MONITORING_INFO_EXCEPTION_STRING = "javax.management.InstanceNotFoundException";
+    public static final String ACCESS_DENIED_EXCEPTION_STRING = "javax.management.MBeanPermission";
+
     private Timer updater = null;
     private ReloadableChain chain;
     private SourceOverview sourceOverview;
     private SourceHostsView sourceHosts;
-  
+
     private TabSet tabs;
     private Label status;
 
@@ -77,16 +83,14 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
     public void init(NodeSource ns) {
 
         // Set up JMX url to contact the RM
-        RMConfig config = RMConfig.get();       
-        String rmJmxPrefix = config.getRMJmxPrefix();       
+        RMConfig config = RMConfig.get();
+        String rmJmxPrefix = config.getRMJmxPrefix();
         int port = config.getRMJmxPort();
         String hostname = config.getRMJmxHostname();
         String connectorServerName = config.getRMJmxServerName();
-        
-        String rmJmxUrl = rmJmxPrefix + 
-                            hostname + ":" + port + "/" +
-                            connectorServerName;
-        
+
+        String rmJmxUrl = rmJmxPrefix + hostname + ":" + port + "/" + connectorServerName;
+
         setWidth100();
 
         // Set up tabs
@@ -100,30 +104,31 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
         status = new Label("Retreiving data");
         status.setWidth100();
         status.setAlign(Alignment.CENTER);
-        
-        chain = new ReloadableChain(new Reloadable[] {sourceOverview, sourceHosts});
 
-        
-        final Tab t1 = new Tab("Overview");
-        t1.setPane(sourceOverview);
-        final Tab t2 = new Tab("Hosts & VMs");
-        t2.setPane(sourceHosts);
+        chain = new ReloadableChain(new Reloadable[] { sourceOverview, sourceHosts });
+
+        final Tab overviewTab = new Tab("Overview");
+        overviewTab.setPane(sourceOverview);
+        final Tab detailsTab = new Tab("Hosts & VMs");
+        detailsTab.setPane(sourceHosts);
 
         tabs = new TabSet();
         tabs.setWidth100();
         tabs.setShowResizeBar(true);
 
-        // Refresh button
+        // Refresh button 
         final IButton refresh = new IButton();
         refresh.setIcon(RMImages.instance.refresh().getSafeUri().asString());
         refresh.setIconAlign("center");
         refresh.setWidth(25);
-        refresh.setTooltip("Refresh processes");
+        refresh.setTooltip("Refresh");
         refresh.hide();
 
         tabs.addTabSelectedHandler(new TabSelectedHandler() {
             public void onTabSelected(TabSelectedEvent event) {
-                if (event.getTab() == t1 || event.getTab() == t2) {
+                if (event.getTab() == overviewTab) {
+                    refresh.show();
+                } else if (event.getTab() == detailsTab) {
                     refresh.show();
                 } else {
                     refresh.hide();
@@ -136,13 +141,15 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
         refresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sourceHosts.reload();
+                Object pane = tabs.getSelectedTab().getPane();
+                Reloadable reloadable = (Reloadable) pane;
+                reloadable.reload();
             }
         });
 
-        tabs.setTabs(t1, t2);
+        // All tabs must also implement Reloadable.
+        tabs.setTabs(overviewTab, detailsTab);
         tabs.hide();
-
 
         addMember(status);
 
@@ -154,7 +161,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
         };
         updater.schedule(1);
         updater.scheduleRepeating(RMConfig.get().getMonitoringPeriod());
-        
+
     }
 
     public void close() {
