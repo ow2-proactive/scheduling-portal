@@ -77,8 +77,9 @@ public class ProcessesView extends VLayout implements Reloadable {
         ListGridField cpuTime = new ListGridField("cpuTime", "Cpu Time");
         ListGridField state = new ListGridField("state", "state");
         ListGridField description = new ListGridField("description", "description");
-        processesGrid
-                .setFields(pid, owner, startTime, memSize, memRss, memShare, cpuTime, state, description);
+        ListGridField commandline = new ListGridField("commandline", "Command line");
+        processesGrid.setFields(pid, owner, startTime, memSize, memRss, memShare, cpuTime, state,
+                description, commandline);
 
         setWidth100();
         addMember(processesGrid);
@@ -101,14 +102,12 @@ public class ProcessesView extends VLayout implements Reloadable {
                         if (!model.isLoggedIn())
                             return;
 
-                        model
-                                .logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
-                                    "ms");
+                        model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
 
-                        //[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
+                        //[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","commandline":["/sbin/init","--arg"],"memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
 
-                        JSONArray processes = controller.parseJSON(result).isArray().get(0).isObject().get(
-                                "value").isArray();
+                        JSONArray processes = controller.parseJSON(result).isArray().get(0).isObject()
+                                .get("value").isArray();
                         if (processes != null) {
                             ListGridRecord[] records = new ListGridRecord[processes.size()];
                             for (int i = 0; i < processes.size(); i++) {
@@ -117,9 +116,13 @@ public class ProcessesView extends VLayout implements Reloadable {
                                 try {
                                     for (String key : process.keySet()) {
                                         ListGridField lgf = processesGrid.getField(key);
+
+                                        if (lgf == null)
+                                            continue;
+
                                         if (lgf.getType() == ListGridFieldType.INTEGER) {
-                                            records[i].setAttribute(key, Integer.parseInt(process.get(key)
-                                                    .toString()));
+                                            records[i].setAttribute(key,
+                                                    Integer.parseInt(process.get(key).toString()));
                                         } else {
                                             records[i].setAttribute(key, process.get(key).toString());
                                         }
