@@ -284,7 +284,7 @@ public class Job implements Serializable, Comparable<Job> {
     public static Job parseJson(JSONObject jsonJob) {
         int id = Integer.parseInt(jsonJob.get("jobid").isString().stringValue());
         String user = jsonJob.get("jobOwner").isString().stringValue();
-        JSONObject jsonInfo = jsonJob.get("jobinfo").isObject();
+        JSONObject jsonInfo = jsonJob.get("jobInfo").isObject(); // TODO to update jobInfo
         String priority = jsonInfo.get("priority").isString().stringValue();
         String status = jsonInfo.get("status").isString().stringValue();
         int pending = (int) jsonInfo.get("numberOfPendingTasks").isNumber().doubleValue();
