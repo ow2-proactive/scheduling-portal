@@ -31,5 +31,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/gwt-user.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lib-gwt-file-0.3.3.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
