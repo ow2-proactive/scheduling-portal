@@ -37,6 +37,10 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
+
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
@@ -54,6 +58,7 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.SectionStack;
 import com.smartgwt.client.widgets.layout.SectionStackSection;
@@ -154,6 +159,24 @@ public class RMPage implements LogListener {
                 RMPage.this.treeView.expandAll();
             }
         });
+        
+        final CheckboxItem c1 = new CheckboxItem("mynodes", "My nodes");
+        c1.setValue(false);
+        c1.addChangedHandler(new ChangedHandler() {
+            public void onChanged(ChangedEvent event) {
+                compactView.setViewMyNodes(c1.getValueAsBoolean());
+            }
+        });
+        
+        // for some reason IE9 standards fails to detect the right width
+        if (SC.isIE()) {
+            c1.setWidth(60);
+        }
+        
+        DynamicForm checkBoxes = new DynamicForm();
+        checkBoxes.setNumCols(8);
+        checkBoxes.setItems(c1);
+        
         expandButton.setShowFocusedIcon(false);
         expandButton.setShowRollOver(false);
         expandButton.setShowDown(false);
@@ -171,7 +194,7 @@ public class RMPage implements LogListener {
         closeButton.setShowRollOver(false);
         closeButton.setShowDown(false);
 
-        topSection.setControls(expandButton, closeButton);
+        topSection.setControls(checkBoxes, expandButton, closeButton);
 
         SectionStackSection botSection = new SectionStackSection();
         botSection.setTitle("Details");

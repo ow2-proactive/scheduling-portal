@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -100,6 +101,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private Map<String, NodeSource> oldNodes = null;
     /* currently selected tile */
     private NodeTile curSelTile = null;
+    /*
+     * if view only my nodes is available (to see only nodes currently used by
+     * the user logged)
+     */
+    private boolean onlyMyNodes = false;
 
     CompactView(RMController controller) {
         this.controller = controller;
@@ -114,6 +120,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         root.setHeight100();
         root.setOverflow(Overflow.AUTO);
         return root;
+    }
+
+    public void setViewMyNodes(boolean value) {
+        this.onlyMyNodes = value;
     }
 
     @Override
@@ -141,6 +151,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private void changeSelection(String name) {
         int id = this.curTiles.indexOf(name);
+        
+        if (id < 0)
+            return;
+		
         NodeTile nt = (NodeTile) this.flow.getWidget(id);
 
         if (this.curSelTile != null) {
@@ -160,8 +174,79 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         _doNotScroll = false;
     }
 
+    private boolean usedBy(NodeSource ns, String username) {
+        for (String hostid : ns.getHosts().keySet()) {
+            Host host = ns.getHosts().get(hostid);
+            if (usedBy(host, username))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean usedBy(Host h, String username) {
+        for (String nodeid : h.getNodes().keySet()) {
+            Node node = h.getNodes().get(nodeid);
+            if (usedBy(node, username))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean usedBy(Node n, String username) {
+        return username != null ? username.equals(n.getNodeOwner()) : false;
+    }
+
+    /* create a copy of the original map containing only resources
+     * used by the current user  */
+    private Map<String, NodeSource> filterMyNodes(Map<String, NodeSource> origNodes) {
+		
+        String username = controller.getModel().getLogin();
+
+        Map<String, NodeSource> myNodesNsMap = new HashMap<String, NodeSource>();
+        for (String nsid : origNodes.keySet()) {
+            NodeSource origNs = origNodes.get(nsid);
+            NodeSource myNodesNs = null ;
+            if (!usedBy(origNs, username)) {
+                continue;
+            } else {
+                myNodesNs = new NodeSource(origNs);
+                myNodesNsMap.put(nsid, myNodesNs);
+            }
+
+            // at this point, at least one node of this ns is being used
+
+            Iterator<String> hostsIt = myNodesNs.getHosts().keySet().iterator();
+            while (hostsIt.hasNext()){
+                String hostid = hostsIt.next();
+                Host host = myNodesNs.getHosts().get(hostid);
+                if (!usedBy(host, username)) {
+                    hostsIt.remove();
+                    continue;
+                }
+
+                Iterator<String> nodesIt = host.getNodes().keySet().iterator();
+                while (nodesIt.hasNext()) {
+                    String nodeid = nodesIt.next();
+                    Node node = host.getNodes().get(nodeid);
+                    if (!usedBy(node, username)) {
+                        nodesIt.remove();
+                        continue;
+                    } else {
+                        // node used by the logged user found!
+                    }
+                }
+            }
+        }
+        return myNodesNsMap;
+    }
+
     @Override
     public void nodesUpdated(Map<String, NodeSource> nodes) {
+    	/* show only nodes used by the logged user */
+        if (onlyMyNodes) {
+            nodes = filterMyNodes(nodes);
+        }
+
         /* first call : create the components */
         if (this.flow == null) {
             this.flow = new FlowPanel();
