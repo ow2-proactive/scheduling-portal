@@ -296,6 +296,13 @@ public interface SchedulerServiceAsync {
     void getSchedulerUsers(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * Returns the list of users having jobs the scheduler as a json array 
+     * @param sessionId current session id
+     * @param callback
+     */
+    void getSchedulerUsersWithJobs(String sessionId, AsyncCallback<String> callback);
+
+    /**
      * returns the version string of the REST api
      */
     void getVersion(AsyncCallback<String> callback);
@@ -323,5 +330,5 @@ public interface SchedulerServiceAsync {
      */
     Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
 
-    void getUsage(String sessionId, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
+    void getUsage(String sessionId, String user, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
 }

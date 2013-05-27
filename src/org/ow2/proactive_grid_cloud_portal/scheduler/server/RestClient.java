@@ -570,6 +570,18 @@ public interface RestClient {
     String sessionId);
 
     /**
+     * Users having jobs in the scheduler
+     * 
+     * @param sessionId the session id associated to this new connection
+     */
+    @GET
+    @GZIP
+    @Path("userswithjobs")
+    @Produces({ "application/json", "application/xml" })
+    public ClientResponse<InputStream> getSchedulerUsersWithJobs(@HeaderParam("sessionid")
+    String sessionId);
+
+    /**
      * Returns the Scheduler status as a String, 
      * ie org.ow2.proactive.scheduler.common.SchedulerStatus.toString()
      * @param sessionId a valid session id
@@ -588,6 +600,13 @@ public interface RestClient {
     @Path("usage/myaccount")
     @Produces("application/json")
     ClientResponse<InputStream> getUsageOnMyAccount(@HeaderParam("sessionid") String sessionId,
+                                                    @QueryParam("startdate") String startDate,
+                                                    @QueryParam("enddate") String endDate);
+    @GET
+    @Path("usage/account")
+    @Produces("application/json")
+    ClientResponse<InputStream> getUsageOnAccount(@HeaderParam("sessionid") String sessionId,
+                                                    @QueryParam("user") String user,
                                                     @QueryParam("startdate") String startDate,
                                                     @QueryParam("enddate") String endDate);
 }

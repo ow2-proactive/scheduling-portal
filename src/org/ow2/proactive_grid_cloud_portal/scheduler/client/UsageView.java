@@ -71,6 +71,9 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ButtonItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.GroupNode;
 import com.smartgwt.client.widgets.grid.GroupTitleRenderer;
@@ -109,6 +112,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
     private ColumnChart durationChart;
     private Options durationChartOptions;
     private DynamicForm datesForm;
+    private SelectItem userSelect;
     /** In case data are received before charts are displayed, save them */
     private ChartData currentChartData;
 
@@ -144,7 +148,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
         Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
         Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
-        controller.getUsage(from, to);
+        controller.getUsage(null, from, to);
+        controller.getUsersWithJobs();
 
         return root;
     }
@@ -154,9 +159,42 @@ public class UsageView implements SchedulerListeners.UsageListener {
         datesForm.setWidth100();
         datesForm.setTitleOrientation(TitleOrientation.LEFT);
         datesForm.setItemLayout(FormLayoutType.TABLE);
-        datesForm.setNumCols(5);
-        datesForm.setColWidths("*", "*", "*", "*", "*");
+        datesForm.setNumCols(7);
+        datesForm.setColWidths("*", "*", "*", "*", "*", "*", "*");
         datesForm.setWrapItemTitles(false);
+
+        userSelect = new SelectItem("User");
+
+        userSelect.setValueMap(controller.getModel().getLogin());
+        userSelect.setValue(controller.getModel().getLogin());
+
+        userSelect.addChangedHandler(new ChangedHandler() {
+            public void onChanged(ChangedEvent event) {
+                String user = userSelect.getValue().toString();
+                Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
+                Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
+                controller.getUsage(user, from, to);
+            }
+        });
+
+        controller.getEventDispatcher().addUsersWithJobsListener(new SchedulerListeners.UsersListener() {
+            @Override
+            public void usersUpdated(List<SchedulerUser> users) {
+                ArrayList<String> formatted = new ArrayList<String>(users.size());
+                for (SchedulerUser user: users) {
+                    formatted.add(user.getUsername());
+                }
+                String selected = userSelect.getValue().toString();
+                if (formatted.size() > 1) {
+                    userSelect.enable();
+                } else {
+                    userSelect.disable();
+                }
+
+                userSelect.setValueMap(formatted.toArray(new String[]{}));
+                userSelect.setValue(selected);
+            }
+        });
 
         RelativeDateItem fromDate = new RelativeDateItem("From", "Usage From");
         fromDate.setValue(DEFAULT_START_DATE);
@@ -172,7 +210,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
         button.setAlign(Alignment.RIGHT);
         button.addClickHandler(refreshAfterDateSelection());
 
-        datesForm.setItems(fromDate, toDate, button);
+        datesForm.setItems(userSelect, fromDate, toDate, button);
 
         return datesForm;
     }
@@ -186,7 +224,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 clearDetailsGrid();
                 clearCharts();
                 displayDetailsGridLoadingMessage();
-                controller.getUsage(from, to);
+                controller.getUsage(userSelect.getValue().toString(), from, to);
+                controller.getUsersWithJobs();
             }
         };
     }
@@ -222,6 +261,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
                 String url = GWT.getModuleBaseURL() + "usageexporter";
                 url += "?sessionId=" + controller.getModel().getSessionId();
+                url += "&user=" + userSelect.getValue().toString();
                 url += "&startDate=" + URL.encodeQueryString(from);
                 url += "&endDate=" + URL.encodeQueryString(to);
                 Window.open(url, "_blank", "");

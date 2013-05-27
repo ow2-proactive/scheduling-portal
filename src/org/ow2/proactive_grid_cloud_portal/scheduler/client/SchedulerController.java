@@ -1478,8 +1478,8 @@ public class SchedulerController extends Controller implements UncaughtException
         e.printStackTrace();
     }
 
-    public void getUsage(Date startDate, Date endDate) {
-        scheduler.getUsage(model.getSessionId(), startDate, endDate, new AsyncCallback<List<JobUsage>>() {
+    public void getUsage(String user, Date startDate, Date endDate) {
+        scheduler.getUsage(model.getSessionId(), user, startDate, endDate, new AsyncCallback<List<JobUsage>>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = Controller.getJsonErrorMessage(caught);
@@ -1495,4 +1495,32 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
+    public void getUsersWithJobs() {
+        final long t1 = System.currentTimeMillis();
+
+        scheduler.getSchedulerUsersWithJobs(model.getSessionId(), new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                List<SchedulerUser> users = null;
+
+                JSONValue val = parseJSON(result);
+                JSONArray arr = val.isArray();
+                if (arr == null) {
+                    error("Expected JSON Array: " + val.toString());
+                }
+                users = getUsersFromJson(arr);
+                model.setSchedulerUsersWithJobs(users);
+
+                long t = (System.currentTimeMillis() - t1);
+                model.logMessage("<span style='color:gray;'>Fetched " + users.size() +
+                    " users with jobs in " + t + " ms</span>");
+            }
+
+            public void onFailure(Throwable caught) {
+                if (!model.isLoggedIn())
+                    return;
+
+                error("Failed to fetch scheduler users with jobs:<br>" + getJsonErrorMessage(caught));
+            }
+        });
+    }
 }

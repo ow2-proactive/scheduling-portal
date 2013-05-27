@@ -93,6 +93,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private boolean fetchFinished = true;
     private int currentJobPage = 0;
     private List<SchedulerUser> users = null;
+    private List<SchedulerUser> usersWithJobs = null;
     private HashMap<String, String> schedulerStats = null;
     private HashMap<String, String> accountStats = null;
     private Map<String, String> imagePath = null;
@@ -108,6 +109,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<JobOutputListener> jobOutputListeners = null;
     private ArrayList<LogListener> logListeners = null;
     private ArrayList<UsersListener> usersListeners = null;
+    private ArrayList<UsersListener> usersWithJobsListeners = null;
     private ArrayList<StatisticsListener> statisticsListeners = null;
     private ArrayList<RemoteHintListener> remoteHintListeners = null;
     private ArrayList<VisualizationListener> visuListeners = null;
@@ -128,6 +130,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.jobOutputListeners = new ArrayList<JobOutputListener>();
         this.logListeners = new ArrayList<LogListener>();
         this.usersListeners = new ArrayList<UsersListener>();
+        this.usersWithJobsListeners = new ArrayList<UsersListener>();
         this.statisticsListeners = new ArrayList<StatisticsListener>();
         this.remoteHintListeners = new ArrayList<RemoteHintListener>();
         this.visuListeners = new ArrayList<VisualizationListener>();
@@ -588,6 +591,23 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
+    @Override
+    public List<SchedulerUser> getSchedulerUsersWithJobs() {
+        return this.usersWithJobs;
+    }
+
+    /**
+     * Change the local users list, notify listeners
+     * 
+     * @param users new users
+     */
+    void setSchedulerUsersWithJobs(List<SchedulerUser> usersWithJobs) {
+        this.usersWithJobs = usersWithJobs;
+        for (UsersListener list : this.usersWithJobsListeners) {
+            list.usersUpdated(this.usersWithJobs);
+        }
+    }
+
     /**
      * Set local model, notify listeners
      * 
@@ -726,6 +746,14 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      */
     public void addUsersListener(UsersListener listener) {
         this.usersListeners.add(listener);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addUsersWithJobsListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.UsersListener)
+     */
+    public void addUsersWithJobsListener(UsersListener listener) {
+        this.usersWithJobsListeners.add(listener);
     }
 
     /*

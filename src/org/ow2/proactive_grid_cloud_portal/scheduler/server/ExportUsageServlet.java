@@ -65,10 +65,11 @@ public class ExportUsageServlet extends HttpServlet {
         try {
             String sessionId = request.getParameter("sessionId");
             SimpleDateFormat formatter = new SimpleDateFormat(ISO_8601_FORMAT);
+            String user = request.getParameter("user");
             Date startDate = getDateParameter(request, formatter, "startDate");
             Date endDate = getDateParameter(request, formatter, "endDate");
 
-            String csvContent = csvExport(sessionId, startDate, endDate);
+            String csvContent = csvExport(sessionId, user, startDate, endDate);
 
             response.setContentType("text/csv");
             response.setHeader("Content-Disposition", "attachment; filename=\"SchedulerUsage.csv\"");
@@ -90,8 +91,8 @@ public class ExportUsageServlet extends HttpServlet {
         return formatter.parse(request.getParameter(parameterName));
     }
 
-    private String csvExport(String sessionId, Date startDate, Date endDate) throws ServiceException, RestServerException {
-        List<JobUsage> jobUsages = ((SchedulerServiceImpl) Service.get()).getUsage(sessionId, startDate, endDate);
+    private String csvExport(String sessionId, String user, Date startDate, Date endDate) throws ServiceException, RestServerException {
+        List<JobUsage> jobUsages = ((SchedulerServiceImpl) Service.get()).getUsage(sessionId, user, startDate, endDate);
 
         List<String> lines = usageToCsvLines(jobUsages);
 

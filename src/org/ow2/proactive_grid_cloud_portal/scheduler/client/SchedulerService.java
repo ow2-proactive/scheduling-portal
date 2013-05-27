@@ -359,6 +359,16 @@ public interface SchedulerService extends RemoteService {
     String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * returns the list of users having jobs in the scheduler
+     * @param sessionId current session id
+     * @return list of users as json array
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    public String getSchedulerUsersWithJobs(@HeaderParam("sessionid")
+    String sessionId) throws RestServerException, ServiceException;
+
+    /**
      * @return version string of the REST api
      */
     String getVersion() throws RestServerException, ServiceException;
@@ -387,5 +397,5 @@ public interface SchedulerService extends RemoteService {
      */
     String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException;
 
-    List<JobUsage> getUsage(String sessionId, Date startDate, Date endDate) throws RestServerException, ServiceException;
+    List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException;
 }

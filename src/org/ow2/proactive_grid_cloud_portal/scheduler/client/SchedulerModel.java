@@ -176,6 +176,11 @@ public abstract class SchedulerModel implements Model {
     public abstract List<SchedulerUser> getSchedulerUsers();
 
     /**
+     * @return the list of users having jobs in the scheduler
+     */
+    public abstract List<SchedulerUser> getSchedulerUsersWithJobs();
+
+    /**
      * @return statistics for the logged user account
      */
     public abstract HashMap<String, String> getAccountStatistics();

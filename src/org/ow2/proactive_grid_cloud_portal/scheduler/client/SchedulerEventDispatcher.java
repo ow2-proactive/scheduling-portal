@@ -100,6 +100,13 @@ public interface SchedulerEventDispatcher extends EventDispatcher {
     public abstract void addUsersListener(UsersListener listener);
 
     /**
+     * register a new listener for scheduler users events
+     * 
+     * @param listener
+     */
+    public abstract void addUsersWithJobsListener(UsersListener listener);
+
+    /**
      * register a new listener for statistics events
      * 
      * @param listener

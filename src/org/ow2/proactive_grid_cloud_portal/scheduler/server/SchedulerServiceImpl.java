@@ -36,24 +36,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -79,14 +65,25 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.jboss.resteasy.client.ClientExecutor;
 import org.codehaus.jettison.json.JSONException;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
 
 
 /**
@@ -1045,6 +1042,36 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    /**
+     * Get users having jobs in the scheduler
+     * 
+     * @param sessionId session id
+     * @return user info as a json array
+     * @throws RestServerException
+     * @throws ServiceException 
+     */
+    public String getSchedulerUsersWithJobs(String sessionId) throws RestServerException, ServiceException {
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        ClientResponse<InputStream> clientResponse = client.getSchedulerUsersWithJobs(sessionId);
+
+        Status status = clientResponse.getResponseStatus();
+
+        try {
+            String ret = convertToString(clientResponse.getEntity(InputStream.class));
+
+            switch (status) {
+                case OK:
+                    return ret;
+                default:
+                    throw new RestServerException(clientResponse.getStatus(), ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -1267,7 +1294,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
-    public List<JobUsage> getUsage(String sessionId, Date startDate, Date endDate) throws RestServerException, ServiceException {
+    public List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException {
         ClientResponse<InputStream> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         try {
@@ -1275,7 +1302,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String startDateAsString = df.format(startDate);
             String endDateAsString = df.format(endDate);
 
-            clientResponse = client.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
+            if (user!=null) {
+                clientResponse = client.getUsageOnAccount(sessionId, user, startDateAsString, endDateAsString);
+            } else {
+                clientResponse = client.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
+            }
 
             Status status = clientResponse.getResponseStatus();
             InputStream response = clientResponse.getEntity();
