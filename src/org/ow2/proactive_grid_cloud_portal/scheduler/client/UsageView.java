@@ -34,17 +34,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
@@ -139,7 +139,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
             public void run() {
                 Label summaryLabel = new Label("<h3>Summary</h3>");
                 summaryLabel.setHeight(20);
-                HorizontalPanel charts = createCharts();
+                VerticalPanel charts = createCharts();
                 root.addMember(summaryLabel,1);
                 root.addMember(charts,2);
                 updateCharts();
@@ -159,21 +159,22 @@ public class UsageView implements SchedulerListeners.UsageListener {
         datesForm.setWidth100();
         datesForm.setTitleOrientation(TitleOrientation.LEFT);
         datesForm.setItemLayout(FormLayoutType.TABLE);
-        datesForm.setNumCols(7);
-        datesForm.setColWidths("*", "*", "*", "*", "*", "*", "*");
+        datesForm.setLayoutAlign(Alignment.LEFT);
+        datesForm.setNumCols(3);
+        datesForm.setColWidths("80", "200", "*");
         datesForm.setWrapItemTitles(false);
 
         userSelect = new SelectItem("User");
 
         userSelect.setValueMap(controller.getModel().getLogin());
         userSelect.setValue(controller.getModel().getLogin());
+        userSelect.setAlign(Alignment.LEFT);
 
         userSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                String user = userSelect.getValue().toString();
-                Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
-                Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
-                controller.getUsage(user, from, to);
+                Date from = readDateFromFormItem(event.getForm().getItem("From"));
+                Date to = readDateFromFormItem(event.getForm().getItem("To"));
+                refreshUsage(from, to);
             }
         });
 
@@ -198,10 +199,12 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
         RelativeDateItem fromDate = new RelativeDateItem("From", "Usage From");
         fromDate.setValue(DEFAULT_START_DATE);
+        fromDate.setAlign(Alignment.LEFT);
         fromDate.setShowFutureOptions(false);
 
         RelativeDateItem toDate = new RelativeDateItem("To");
         toDate.setValue(DEFAULT_END_DATE);
+        toDate.setAlign(Alignment.LEFT);
         toDate.setShowFutureOptions(false);
 
         ButtonItem button = new ButtonItem("Refresh");
@@ -210,9 +213,17 @@ public class UsageView implements SchedulerListeners.UsageListener {
         button.setAlign(Alignment.RIGHT);
         button.addClickHandler(refreshAfterDateSelection());
 
-        datesForm.setItems(userSelect, fromDate, toDate, button);
+        datesForm.setItems(userSelect, button, fromDate, toDate);
 
         return datesForm;
+    }
+
+    private void refreshUsage(Date from, Date to) {
+        clearDetailsGrid();
+        clearCharts();
+        displayDetailsGridLoadingMessage();
+        controller.getUsage(userSelect.getValue().toString(), from, to);
+        controller.getUsersWithJobs();
     }
 
     private com.smartgwt.client.widgets.form.fields.events.ClickHandler refreshAfterDateSelection() {
@@ -221,11 +232,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
             public void onClick(com.smartgwt.client.widgets.form.fields.events.ClickEvent event) {
                 Date from = readDateFromFormItem(event.getForm().getItem("From"));
                 Date to = readDateFromFormItem(event.getForm().getItem("To"));
-                clearDetailsGrid();
-                clearCharts();
-                displayDetailsGridLoadingMessage();
-                controller.getUsage(userSelect.getValue().toString(), from, to);
-                controller.getUsersWithJobs();
+                refreshUsage(from, to);
             }
         };
     }
@@ -363,18 +370,16 @@ public class UsageView implements SchedulerListeners.UsageListener {
         return detailsGrid;
     }
 
-    private HorizontalPanel createCharts() {
-        HorizontalPanel charts = new HorizontalPanel();
+    private VerticalPanel createCharts() {
+        VerticalPanel charts = new VerticalPanel();
         charts.setWidth("100%");
         charts.setHeight(CHART_HEIGHT + "px");
 
         ColumnChart counter = createCounterChart();
         charts.add(counter);
-        charts.setCellWidth(counter, "50%");
 
         ColumnChart timer = createDurationChart();
         charts.add(timer);
-        charts.setCellWidth(timer, "50%");
         return charts;
     }
 
