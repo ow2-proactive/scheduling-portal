@@ -37,19 +37,16 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
-
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
@@ -58,8 +55,16 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.DrawEvent;
+import com.smartgwt.client.widgets.events.DrawHandler;
+import com.smartgwt.client.widgets.events.ResizedEvent;
+import com.smartgwt.client.widgets.events.ResizedHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.SectionStack;
 import com.smartgwt.client.widgets.layout.SectionStackSection;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -84,6 +89,8 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  *
  */
 public class RMPage implements LogListener {
+
+    private static final int EXPAND_COLLAPSE_SECTION_LABEL_WIDTH = 80;
 
     private RMController controller = null;
     /** parent of all widgets held by this page */
@@ -159,7 +166,11 @@ public class RMPage implements LogListener {
                 RMPage.this.treeView.expandAll();
             }
         });
-        
+        expandButton.setShowFocusedIcon(false);
+        expandButton.setShowRollOver(false);
+        expandButton.setShowDown(false);
+        expandButton.setLayoutAlign(Alignment.CENTER);
+
         final CheckboxItem c1 = new CheckboxItem("mynodes", "My nodes");
         c1.setValue(false);
         c1.addChangedHandler(new ChangedHandler() {
@@ -176,10 +187,7 @@ public class RMPage implements LogListener {
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(8);
         checkBoxes.setItems(c1);
-        
-        expandButton.setShowFocusedIcon(false);
-        expandButton.setShowRollOver(false);
-        expandButton.setShowDown(false);
+
         ImgButton closeButton = new ImgButton();
         closeButton.setWidth(16);
         closeButton.setHeight(16);
@@ -193,15 +201,23 @@ public class RMPage implements LogListener {
         closeButton.setShowFocusedIcon(false);
         closeButton.setShowRollOver(false);
         closeButton.setShowDown(false);
+        closeButton.setLayoutAlign(Alignment.CENTER);
 
-        topSection.setControls(checkBoxes, expandButton, closeButton);
+        // left align expand collapse buttons, right align mynodes
+        final HLayout controls = new HLayout();
+        controls.addMember(expandButton);
+        controls.addMember(closeButton);
+        controls.addMember(new LayoutSpacer());
+        controls.addMember(checkBoxes);
+        controls.setLayoutAlign(VerticalAlignment.CENTER);
+        topSection.setControls(controls);
 
         SectionStackSection botSection = new SectionStackSection();
         botSection.setTitle("Details");
         botSection.setExpanded(true);
         botSection.setItems(botPane);
 
-        SectionStack stack = new SectionStack();
+        final SectionStack stack = new SectionStack();
         stack.setWidth100();
         stack.setHeight100();
         stack.setMargin(2);
@@ -209,6 +225,20 @@ public class RMPage implements LogListener {
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
         stack.setSections(topSection, botSection);
+
+        // dynamic width of controls layout
+        stack.addResizedHandler(new ResizedHandler() {
+            @Override
+            public void onResized(ResizedEvent event) {
+                controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH);
+            }
+        });
+        stack.addDrawHandler(new DrawHandler() {
+            @Override
+            public void onDraw(DrawEvent event) {
+                controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH);
+            }
+        });
 
         rl.addMember(header);
         rl.addMember(stack);
