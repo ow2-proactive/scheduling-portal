@@ -687,20 +687,22 @@ public class SchedulerController extends Controller implements UncaughtException
         this.model.setLiveOutput(jobId, true);
         this.liveOutputJobs.add(jobId);
 
-        scheduler.deleteLiveLogJob(model.getSessionId(), jobId, new AsyncCallback<Boolean>() {
-            public void onSuccess(Boolean result) {
-                model.logMessage("Reset live log for job " + jobId);
-            }
-
-            public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
-                model.logMessage("Failed to delete live log for job " + jobId + " : " + msg);
-            }
-        });
-
         if (this.liveOutputUpdater == null) {
             this.startLiveTimer();
         }
+    }
+
+    public void deleteLiveLogJob() {
+        Job j = this.model.getSelectedJob();
+        if (j == null)
+            return;
+
+        if (this.model.getTasks().isEmpty())
+            return;
+
+        final String jobId = String.valueOf(j.getId());
+        liveOutputJobs.remove(jobId);
+        model.setLiveOutput(jobId, false);
     }
 
     /**
@@ -720,6 +722,8 @@ public class SchedulerController extends Controller implements UncaughtException
                     if (j == null || j.isExecuted()) {
                         model.logMessage("stop fetching live logs for job " + jobId);
                         it.remove();
+                        model.setLiveOutput(jobId, false);
+                        model.appendLiveOutput(jobId, "");
                     }
                 }
             }

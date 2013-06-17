@@ -494,7 +494,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     void setLiveOutput(String jobId, boolean isLiveOutput) {
         if (isLiveOutput) {
             this.isLiveOutput.add(jobId);
-            this.liveOutput.put(jobId, new StringBuffer());
+            if(!liveOutput.containsKey(jobId)){
+                this.liveOutput.put(jobId, new StringBuffer());
+            }
         } else {
             this.isLiveOutput.remove(jobId);
         }

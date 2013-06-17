@@ -42,7 +42,6 @@ import java.util.Map.Entry;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.HTMLPane;
@@ -173,6 +172,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                     taskSelect.show();
                     outSelect.show();
                     refreshButton.show();
+                    OutputView.this.controller.deleteLiveLogJob();
                 }
             }
         });
