@@ -60,7 +60,7 @@ public final class HttpUtils {
         return new ApacheHttpClient4Executor(httpClient);
     }
 
-    public static String convertToString(InputStream inputStream) throws IOException {
+    public static String convertToString(InputStream inputStream, boolean keepNewLines) throws IOException {
         StringBuilder sb = new StringBuilder();
 
         BufferedReader reader = null;
@@ -70,6 +70,9 @@ public final class HttpUtils {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
+                if (keepNewLines) {
+                    sb.append("\n");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,4 +85,7 @@ public final class HttpUtils {
         return sb.toString();
     }
 
+    public static String convertToString(InputStream inputStream) throws IOException {
+        return convertToString(inputStream, false);
+    }
 }

@@ -246,4 +246,18 @@ public interface RMService extends RemoteService {
      * @return will contain the server response, a JSON object containing a key for each source
      */
     String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException;
+
+    /**
+     * Executes a script on a node
+     * 
+     * @param sessionId current session
+     * @param script to execute 
+     * @param a script engine to use for the script execution 
+     * @param nodeUrl a target for the script execution
+     * 
+     * @return script output
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String executeNodeScript(String sessionId, String script, String engine, String nodeUrl) throws RestServerException, ServiceException;
 }

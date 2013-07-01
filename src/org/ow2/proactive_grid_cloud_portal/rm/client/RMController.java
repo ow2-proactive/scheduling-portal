@@ -53,6 +53,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
@@ -993,5 +994,42 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     public void onUncaughtException(Throwable e) {
         e.printStackTrace();
         error(e.getMessage());
+    }
+
+
+    private String parseScriptResult(String json) {
+        StringBuilder scriptResultStr = new StringBuilder();
+        JSONObject scriptResult = this.parseJSON(json).isObject();
+
+        JSONObject exception = scriptResult.get("exception").isObject();
+        while (exception!=null && exception.get("cause")!= null && 
+                exception.get("cause").isObject()!=null) {
+            exception = exception.get("cause").isObject();
+        }
+
+        if (exception!=null) {
+            scriptResultStr.append(exception.get("message").isString().stringValue());
+        }
+        JSONString output = scriptResult.get("output").isString();
+        if (output!=null) {
+            scriptResultStr.append(output.stringValue());
+        }
+
+        return scriptResultStr.toString();
+    }
+
+    public void executeScript(final String script, final String engine, final String nodeUrl, final Callback<String, String> syncCallBack) {
+        rm.executeNodeScript(model.getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
+            public void onFailure(Throwable caught) {
+                model.logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
+                        getJsonErrorMessage(caught));
+                syncCallBack.onFailure(getJsonErrorMessage(caught));
+            }
+
+            public void onSuccess(String result) {
+                System.out.println(result);
+                syncCallBack.onSuccess(parseScriptResult(result));
+            }
+        });
     }
 }

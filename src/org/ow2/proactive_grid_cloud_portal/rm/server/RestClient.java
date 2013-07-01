@@ -179,4 +179,13 @@ public interface RestClient {
     String sessionId, @QueryParam("range")
     String range);
 
+    @POST
+    @GZIP
+    @Path("/rm/node/script")
+    @Produces("application/json")
+    public ClientResponse<InputStream> executeNodeScript(@HeaderParam("sessionid")
+    String sessionId, @FormParam("nodeurl")
+    String nodeUrl, @FormParam("script")
+    String script, @FormParam("scriptEngine")
+    String scriptEngine);
 }

@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
 import com.google.gwt.http.client.Request;
@@ -224,4 +225,13 @@ public interface RMServiceAsync {
      */
     Request getStatHistory(String sessionId, String range, AsyncCallback<String> callback);
 
+    /**
+     * Executes a script on a node
+     * 
+     * @param sessionId current session
+     * @param script to execute 
+     * @param a script engine to use for the script execution 
+     * @param nodeUrl a target for the script execution
+     */
+    void executeNodeScript(String sessionId, String script, String engine, String nodeUrl, AsyncCallback<String> callback);
 }

@@ -117,6 +117,7 @@ public class RMPage implements LogListener {
     private CompactView compactView = null;
     /** bot left pane : node count */
     private StatisticsView statsView = null;
+    private ScriptConsoleView scriptConsoleView = null;
     /** bot right : graphs */
     private RMStatsView rmStatsView = null;
 
@@ -393,19 +394,24 @@ public class RMPage implements LogListener {
 
         this.infoView = new InfoView(controller);
         this.statsView = new StatisticsView(controller);
+        this.scriptConsoleView = new ScriptConsoleView(controller);
 
         final Canvas infoCanvas = this.infoView.build();
         Canvas statsCanvas = this.statsView.build();
+        Canvas scriptConsoleCanvas = this.scriptConsoleView.build();
 
         Tab t1 = new Tab("Selection");
         t1.setPane(infoCanvas);
         Tab t2 = new Tab("Nodes");
         t2.setPane(statsCanvas);
 
+        Tab t3 = new Tab("Script Console");
+        t3.setPane(scriptConsoleCanvas);
+
         final TabSet leftTabs = new TabSet();
         leftTabs.setWidth("50%");
         leftTabs.setShowResizeBar(true);
-        leftTabs.setTabs(t1, t2);
+        leftTabs.setTabs(t1, t2, t3);
 
         hl.addMember(leftTabs);
 

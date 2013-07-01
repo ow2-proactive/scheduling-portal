@@ -618,4 +618,28 @@ public class RMServiceImpl extends Service implements RMService {
         }
     }
 
+    @Override
+    public String executeNodeScript(String sessionId, String script, String engine, String nodeUrl) throws RestServerException, ServiceException {
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        ClientResponse<InputStream> clientResponse = null;
+        try {
+            clientResponse = client.executeNodeScript(sessionId, nodeUrl, script, engine);
+            int code = clientResponse.getStatus();
+            String ret = convertToString(clientResponse.getEntity(), true);
+
+            switch (code) {
+                case 200:
+                    return ret;
+                default:
+                    throw new RestServerException(code, ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException("Failed to read server response", e);
+        } finally {
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
+        }
+    }
+
 }
