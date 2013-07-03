@@ -36,11 +36,18 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.Arrays;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 
+import com.google.codemirror2_gwt.client.CodeMirrorConfig;
+import com.google.codemirror2_gwt.client.CodeMirrorWrapper;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.ui.TextArea;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
@@ -51,6 +58,8 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -75,8 +84,11 @@ public class ScriptConsoleView implements NodeSelectedListener {
     private IButton execute = null;
     private String nodeUrl = null;
     private Label loadingLabel = null;
+    private CodeMirrorWrapper codeMirror = null;
 
     private static final String[] engineNames = { "Groovy", "JavaScript", "Ruby", "Python" };
+    private static final String[] engineCodeHighliters = { "text/x-groovy", "text/javascript", "text/x-ruby",
+            "text/x-python" };
     private RadioGroupItem selectedEngine;
 
     private RMController controller;
@@ -91,8 +103,9 @@ public class ScriptConsoleView implements NodeSelectedListener {
         vl.setOverflow(Overflow.AUTO);
 
         scriptArea = new TextArea();
-        scriptArea.setWidth("99%");
-        scriptArea.setHeight("200px");
+        scriptArea.setWidth("97%");
+        scriptArea.setHeight("300px");
+        scriptArea.getElement().setId("highlighted-text-area");
 
         this.execute = new IButton("Execute");
         this.execute.addClickHandler(new ClickHandler() {
@@ -103,7 +116,7 @@ public class ScriptConsoleView implements NodeSelectedListener {
                     String engine = selectedEngine.getValueAsString();
                     engine = engine.toLowerCase();
 
-                    controller.executeScript(scriptArea.getText(), engine, nodeUrl,
+                    controller.executeScript(codeMirror.getValue(), engine, nodeUrl,
                             new Callback<String, String>() {
                                 @Override
                                 public void onSuccess(String result) {
@@ -184,8 +197,45 @@ public class ScriptConsoleView implements NodeSelectedListener {
 
         this.nodeCanvas.hide();
 
+        scriptArea.addAttachHandler(new com.google.gwt.event.logical.shared.AttachEvent.Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                initCodeMirror();
+            }
+        });
+
+        selectedEngine.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (codeMirror != null) {
+                    String engine = event.getValue().toString();
+                    String highliter = engineCodeHighliters[Arrays.asList(engineNames).indexOf(engine)];
+                    codeMirror.setOption("mode", highliter);
+                }
+            }
+        });
+
+        JSUtil.addStyle("codemirror-3.14/lib/codemirror.css");
+        JSUtil.addScript("codemirror-3.14/lib/codemirror.js");
+        JSUtil.addScript("codemirror-3.14/addon/comment/comment.js");
+        JSUtil.addScript("codemirror-3.14/addon/edit/matchbrackets.js");
+
+        JSUtil.addScript("codemirror-3.14/mode/groovy/groovy.js");
+        JSUtil.addScript("codemirror-3.14/mode/javascript/javascript.js");
+        JSUtil.addScript("codemirror-3.14/mode/ruby/ruby.js");
+        JSUtil.addScript("codemirror-3.14/mode/python/python.js");
+
         vl.setMembers(label, nodeCanvas);
         return vl;
+    }
+
+    public void initCodeMirror() {
+
+        if (codeMirror == null && Document.get().getElementById("highlighted-text-area") != null) {
+            CodeMirrorConfig config = CodeMirrorConfig.makeBuilder();
+            config = config.setMode(engineCodeHighliters[0]).setShowLineNumbers(true).setMatchBrackets(true);
+            codeMirror = CodeMirrorWrapper.createEditor(scriptArea.getElement(), config);
+        }
     }
 
     public void nodeUnselected() {
@@ -207,12 +257,12 @@ public class ScriptConsoleView implements NodeSelectedListener {
     }
 
     public void nodeSourceSelected(NodeSource ns) {
-        this.label.hide();
         this.nodeCanvas.hide();
+        this.label.show();
     }
 
     public void hostSelected(Host h) {
-        this.label.hide();
         this.nodeCanvas.hide();
+        this.label.show();
     }
 }

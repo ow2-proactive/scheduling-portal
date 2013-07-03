@@ -7,7 +7,8 @@
 	<inherits name="com.google.gwt.http.HTTP"/>
 	<inherits name="com.smartgwt.tools.SmartGwtTools"/>
 	<inherits name='com.google.gwt.visualization.Visualization'/>
-	
+	<inherits name='com.google.codemirror2_gwt.CodeMirror2GWT' />
+
 	<entry-point class='org.ow2.proactive_grid_cloud_portal.rm.client.RMPortal' />
 	
 	<source path='common/client' />

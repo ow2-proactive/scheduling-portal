@@ -41,6 +41,7 @@ import java.util.Date;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.ScriptElement;
 
 
@@ -95,6 +96,15 @@ public class JSUtil {
         head.appendChild(script);
     }
 
+    public static void addStyle(String path) {
+        Element head = Document.get().getElementsByTagName("head").getItem(0);
+        LinkElement style = Document.get().createLinkElement();
+        style.setPropertyString("language", "text/css");
+        style.setRel("stylesheet");
+        style.setHref(path);
+        head.appendChild(style);
+    }
+    
     /**
      * @return available screen width in pixels
      */
