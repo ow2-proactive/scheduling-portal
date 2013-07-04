@@ -1007,9 +1007,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             exception = exception.get("cause").isObject();
         }
 
-        if (exception!=null) {
+        if (exception!=null && exception.get("message").isString()!=null) {
             scriptResultStr.append(exception.get("message").isString().stringValue());
         }
+
         JSONString output = scriptResult.get("output").isString();
         if (output!=null) {
             scriptResultStr.append(output.stringValue());
@@ -1027,7 +1028,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onSuccess(String result) {
-                System.out.println(result);
                 syncCallBack.onSuccess(parseScriptResult(result));
             }
         });
