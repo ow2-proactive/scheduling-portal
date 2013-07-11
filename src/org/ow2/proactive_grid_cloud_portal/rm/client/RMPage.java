@@ -343,7 +343,7 @@ public class RMPage implements LogListener {
             }
         });
 
-        errorButton = new ToolStripButton("<strong>Network error</strong>", Images.instance.net_error_16()
+        errorButton = new ToolStripButton("<strong>Error</strong>", Images.instance.net_error_16()
                 .getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
         errorButton.addClickHandler(new ClickHandler() {

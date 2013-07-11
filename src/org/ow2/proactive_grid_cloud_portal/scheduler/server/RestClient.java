@@ -37,7 +37,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.io.InputStream;
-import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

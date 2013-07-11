@@ -1523,7 +1523,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (!model.isLoggedIn())
                     return;
 
-                error("Failed to fetch scheduler users with jobs:<br>" + getJsonErrorMessage(caught));
+                model.logMessage("Failed to fetch scheduler users with jobs:<br>" + getJsonErrorMessage(caught));
             }
         });
     }

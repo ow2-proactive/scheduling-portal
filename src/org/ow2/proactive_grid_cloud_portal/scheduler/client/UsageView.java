@@ -169,6 +169,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
         userSelect.setValueMap(controller.getModel().getLogin());
         userSelect.setValue(controller.getModel().getLogin());
         userSelect.setAlign(Alignment.LEFT);
+        userSelect.disable();
 
         userSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
@@ -222,7 +223,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         clearDetailsGrid();
         clearCharts();
         displayDetailsGridLoadingMessage();
-        controller.getUsage(userSelect.getValue().toString(), from, to);
+        String userName = userSelect.isDisabled()?null:userSelect.getValue().toString();
+        controller.getUsage(userName, from, to);
         controller.getUsersWithJobs();
     }
 
