@@ -80,7 +80,7 @@ public class AboutWindow {
             "Version: " +
             ver +
             "<br><br>" +
-            "Copyright (C) 1997-2011 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
+            "Copyright (C) 1997-2013 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
             "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
             "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
             "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a><br><br><br>" +
