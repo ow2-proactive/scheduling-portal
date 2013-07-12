@@ -92,6 +92,9 @@
 		    <entry key="sched.version" value="${portal.version}" />
 		</propertyfile>
 		<copy file="${web-inf.dir}/web.scheduler.xml" tofile="${web-inf.dir}/web.xml" />
+		<replace dir="${war.dir}" includes="portal.html">
+			<replacefilter token="portal_version" value="${portal.version}" />
+		</replace>
 		<zip destfile="${dist.dir}/scheduler.war"
 			basedir="${war.dir}"
 			excludes="${rm.config.file}, **/rm/, **/extra/,
@@ -106,6 +109,9 @@
 		    <entry key="rm.version" value="${portal.version}" />
 		</propertyfile>
 		<copy file="${web-inf.dir}/web.rm.xml" tofile="${web-inf.dir}/web.xml" />
+		<replace dir="${war.dir}" includes="portal.html">
+			<replacefilter token="portal_version" value="${portal.version}" />
+		</replace>
 		<zip destfile="${dist.dir}/rm.war"
 			basedir="${war.dir}"
 			excludes="${sched.config.file}, servers.jar, visu.jar,
