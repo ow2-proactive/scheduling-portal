@@ -314,7 +314,7 @@ public class Task implements Serializable, Comparable<Task> {
         }
 
         return new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
-            executionDuration, description, nodes, execLeft, maxExec, maxExecOnFailure, execOnFailureLeft);
+            executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
     }
 
     /**
