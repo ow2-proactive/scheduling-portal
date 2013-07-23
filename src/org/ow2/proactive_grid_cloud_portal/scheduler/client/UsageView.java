@@ -165,12 +165,9 @@ public class UsageView implements SchedulerListeners.UsageListener {
         datesForm.setWrapItemTitles(false);
 
         userSelect = new SelectItem("User");
-
-        userSelect.setValueMap(controller.getModel().getLogin());
+        userSelect.disable();
         userSelect.setValue(controller.getModel().getLogin());
         userSelect.setAlign(Alignment.LEFT);
-        userSelect.disable();
-
         userSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
                 Date from = readDateFromFormItem(event.getForm().getItem("From"));
@@ -183,18 +180,23 @@ public class UsageView implements SchedulerListeners.UsageListener {
             @Override
             public void usersUpdated(List<SchedulerUser> users) {
                 ArrayList<String> formatted = new ArrayList<String>(users.size());
-                for (SchedulerUser user: users) {
+                for (SchedulerUser user : users) {
                     formatted.add(user.getUsername());
                 }
-                String selected = userSelect.getValue().toString();
-                if (formatted.size() > 1) {
-                    userSelect.enable();
-                } else {
+                if (formatted.size() == 1 && formatted.get(0).equals(controller.getModel().getLogin())) {
+                    // only one user available and it is the current user, disable combo
                     userSelect.disable();
+                } else {
+                    userSelect.enable();
                 }
 
-                userSelect.setValueMap(formatted.toArray(new String[]{}));
-                userSelect.setValue(selected);
+                if (userSelect.getValue().equals(controller.getModel().getLogin())
+                        && !formatted.contains(controller.getModel().getLogin())) {
+                    // remove default value (user login) as he has not yet submitted jobs
+                    userSelect.clearValue();
+                }
+
+                userSelect.setValueMap(formatted.toArray(new String[] { }));
             }
         });
 
@@ -223,7 +225,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
         clearDetailsGrid();
         clearCharts();
         displayDetailsGridLoadingMessage();
-        String userName = userSelect.isDisabled()?null:userSelect.getValue().toString();
+        String userName = userSelect.isDisabled() ? null : userSelect.getValue().toString();
         controller.getUsage(userName, from, to);
         controller.getUsersWithJobs();
     }
