@@ -81,8 +81,6 @@ public abstract class MBeansChart extends MBeanChart {
                         }
                         if (RMController.getJsonErrorCode(caught) == 401) {
                             model.logMessage("You have been disconnected from the server.");
-                        } else {
-                            //error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
                         }
                     }
                 });

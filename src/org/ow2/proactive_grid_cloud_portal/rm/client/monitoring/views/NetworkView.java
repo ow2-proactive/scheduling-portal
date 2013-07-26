@@ -162,8 +162,6 @@ public class NetworkView extends VLayout implements Reloadable {
                     public void onFailure(Throwable caught) {
                         if (RMController.getJsonErrorCode(caught) == 401) {
                             model.logMessage("You have been disconnected from the server.");
-                        } else {
-                            //error("Failed to fetch RM State: " + RMController.getJsonErrorMessage(caught));
                         }
                     }
                 });
