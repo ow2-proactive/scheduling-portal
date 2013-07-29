@@ -36,6 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import java.util.Arrays;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -46,9 +48,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChar
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-
-import java.util.Arrays;
-
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.Alignment;
@@ -186,7 +185,9 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
     public void onSuccess(String result) {
         removeMember(status);
         status.destroy();
-        addMember(tabs);
-        tabs.show();
+        if (tabs != null) {
+            addMember(tabs);
+            tabs.show();
+        }
     }
 }

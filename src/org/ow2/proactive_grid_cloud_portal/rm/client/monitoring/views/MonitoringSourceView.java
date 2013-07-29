@@ -200,7 +200,9 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
             removeMember(status);
             status = null;
         }
-        addMember(tabs);
-        tabs.show();
+        if (tabs != null) {
+            addMember(tabs);
+            tabs.show();
+        }
     }
 }

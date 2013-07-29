@@ -215,7 +215,9 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
     @Override
     public void onSuccess(String result) {
         removeMember(status);
-        addMember(tabs);
-        tabs.show();
+        if(tabs != null){
+            addMember(tabs);
+            tabs.show();
+        }
     }
 }
