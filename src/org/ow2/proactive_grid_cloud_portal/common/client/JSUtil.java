@@ -36,13 +36,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.LinkElement;
-import com.google.gwt.dom.client.ScriptElement;
 
 
 /**
@@ -83,17 +87,30 @@ public class JSUtil {
     			}-*/;
 
     /**
-     * load a new script in the document
+     * Load scripts in the document, in order, one after another.
      * 
-     * @param path relative path to the JS
+     * @param paths relative paths to the JS
      */
-    public static void addScript(String path) {
-        Element head = Document.get().getElementsByTagName("head").getItem(0);
-        ScriptElement script = Document.get().createScriptElement();
-        script.setType("text/javascript");
-        script.setLang("javascript");
-        script.setSrc(path);
-        head.appendChild(script);
+    public static void addScript(String... paths) {
+        List<String> pathAsList = new ArrayList<String>(Arrays.asList(paths));
+        injectScriptOneAfterAnother(pathAsList);
+    }
+
+    private static void injectScriptOneAfterAnother(final List<String> pathAsList) {
+        ScriptInjector.fromUrl(pathAsList.remove(0))
+                .setWindow(ScriptInjector.TOP_WINDOW)
+                .setCallback(new Callback<Void, Exception>() {
+                    @Override
+                    public void onFailure(Exception reason) {
+                    }
+                    @Override
+                    public void onSuccess(Void result) {
+                        if (!pathAsList.isEmpty()) {
+                            injectScriptOneAfterAnother(pathAsList);
+                        }
+                    }
+                })
+                .inject();
     }
 
     public static void addStyle(String path) {

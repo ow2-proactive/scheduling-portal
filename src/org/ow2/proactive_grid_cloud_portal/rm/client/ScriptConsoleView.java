@@ -216,14 +216,13 @@ public class ScriptConsoleView implements NodeSelectedListener {
         });
 
         JSUtil.addStyle("codemirror-3.14/lib/codemirror.css");
-        JSUtil.addScript("codemirror-3.14/lib/codemirror.js");
-        JSUtil.addScript("codemirror-3.14/addon/comment/comment.js");
-        JSUtil.addScript("codemirror-3.14/addon/edit/matchbrackets.js");
-
-        JSUtil.addScript("codemirror-3.14/mode/groovy/groovy.js");
-        JSUtil.addScript("codemirror-3.14/mode/javascript/javascript.js");
-        JSUtil.addScript("codemirror-3.14/mode/ruby/ruby.js");
-        JSUtil.addScript("codemirror-3.14/mode/python/python.js");
+        JSUtil.addScript("codemirror-3.14/lib/codemirror.js",
+                "codemirror-3.14/addon/comment/comment.js",
+                "codemirror-3.14/addon/edit/matchbrackets.js",
+                "codemirror-3.14/mode/groovy/groovy.js",
+                "codemirror-3.14/mode/javascript/javascript.js",
+                "codemirror-3.14/mode/ruby/ruby.js",
+                "codemirror-3.14/mode/python/python.js");
 
         vl.setMembers(label, nodeCanvas);
         return vl;
