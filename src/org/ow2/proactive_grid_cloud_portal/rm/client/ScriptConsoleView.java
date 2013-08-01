@@ -65,7 +65,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
- * 
  * Allows to execute a script on a node and see its output.
  * 
  * 4 script engines are supported and available from every RM's node:
@@ -74,17 +73,15 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ScriptConsoleView implements NodeSelectedListener {
 
-    private Label label = null;
-
-    private VLayout nodeCanvas = null;
-    private Label nodeLabel = null;
-    private Label outputLabel = null;
-    private Label outputText = null;
-    private TextArea scriptArea = null;
-    private IButton execute = null;
-    private String nodeUrl = null;
-    private Label loadingLabel = null;
-    private CodeMirrorWrapper codeMirror = null;
+    private Label label;
+    private VLayout nodeCanvas;
+    private Label nodeLabel;
+    private Label outputLabel;
+    private Label outputText;
+    private TextArea scriptArea;
+    private String nodeUrl;
+    private Label loadingLabel;
+    private CodeMirrorWrapper codeMirror;
 
     private static final String[] engineNames = { "Groovy", "JavaScript", "Ruby", "Python" };
     private static final String[] engineCodeHighliters = { "text/x-groovy", "text/javascript", "text/x-ruby",
@@ -104,11 +101,11 @@ public class ScriptConsoleView implements NodeSelectedListener {
 
         scriptArea = new TextArea();
         scriptArea.setWidth("97%");
-        scriptArea.setHeight("300px");
+        scriptArea.setHeight("150px");
         scriptArea.getElement().setId("highlighted-text-area");
 
-        this.execute = new IButton("Execute");
-        this.execute.addClickHandler(new ClickHandler() {
+        IButton execute = new IButton("Execute");
+        execute.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (nodeUrl != null) {
@@ -178,7 +175,7 @@ public class ScriptConsoleView implements NodeSelectedListener {
         selectedEngine.setValueMap(engineNames);
 
         HLayout executeAndLoading = new HLayout();
-        executeAndLoading.setHeight("40px");
+        executeAndLoading.setHeight("20px");
 
         executeAndLoading.addMember(execute);
         executeAndLoading.addMember(loadingLabel);
