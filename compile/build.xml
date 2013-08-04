@@ -105,10 +105,10 @@
 	<target name="war.rm" depends="gwt.rm"
 		description="Create a distributable .war for the RM application">
 		<mkdir dir="${dist.dir}" />
-		<propertyfile file="${war.dir}/${rm.config.file}">
+		<propertyfile file="../rm/src/main/webapp/rm.conf">
 		    <entry key="rm.version" value="${portal.version}" />
 		</propertyfile>
-		<copy file="${web-inf.dir}/web.rm.xml" tofile="${web-inf.dir}/web.xml" />
+		<copy file="../rm/src/main/webapp/WEB-INF/web.xml" tofile="${web-inf.dir}/web.xml" />
 		<replace dir="${war.dir}" includes="portal.html">
 			<replacefilter token="portal_version" value="${portal.version}" />
 		</replace>

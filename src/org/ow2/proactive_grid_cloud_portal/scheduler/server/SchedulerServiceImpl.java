@@ -1220,7 +1220,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /*
      * (non-Javadoc)
      * 
-     * @see org.ow2.proactive_grid_cloud_portal.common.server.Service#getVersion()
+     * @see Service#getVersion()
      */
     public String getVersion() throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);

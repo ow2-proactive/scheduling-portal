@@ -1,0 +1,20 @@
+apply plugin: 'war'
+
+dependencies {
+    compile 'com.google.gwt:gwt-user:2.5.1'
+    compile 'com.google.gwt:gwt-servlet:2.5.1'
+    compile 'com.smartgwt:smartgwt:3.1'
+    compile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
+
+    compile files('../lib/codemirror2-gwt-1.2.0.jar')
+
+    compile 'org.slf4j:slf4j-api:1.5.8'
+    compile 'commons-httpclient:commons-httpclient:3.1'
+    compile 'commons-io:commons-io:1.3.1'
+    compile 'commons-fileupload:commons-fileupload:1.2'
+    compile 'org.apache.httpcomponents:httpclient:4.2.3'
+
+    compile 'org.jboss.resteasy:resteasy-jaxrs:2.3.3.Final'
+
+    compile project(':common')
+}
