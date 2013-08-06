@@ -36,24 +36,21 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -66,7 +63,6 @@ import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
 import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -79,28 +75,29 @@ import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.vectomatic.file.File;
-import org.vectomatic.file.FileReader;
-import org.vectomatic.file.events.LoadEndEvent;
-import org.vectomatic.file.events.LoadEndHandler;
+
 
 /**
  * Popup Window for job submission
+ * 
+ * 
+ * @author mschnoor
+ *
  */
 public class SubmitWindow {
 
-    private static final String XML_MIME_TYPE = "text/xml";
     private Window window;
 
     private SchedulerController controller;
 
+    /**
+     * Default constructor
+     * 
+     * @param controller
+     */
     public SubmitWindow(SchedulerController controller) {
-        this(controller, null);
-    }
-
-    public SubmitWindow(SchedulerController controller, File droppedFile) {
         this.controller = controller;
-        this.build(droppedFile);
+        this.build();
     }
 
     /**
@@ -150,8 +147,9 @@ public class SubmitWindow {
      * If the {@link SubmitEditServlet} submission fails, we get back in the same state
      * as before the first click to Submit
      * 
+     * 
      */
-    private void build(File droppedFile) {
+    private void build() {
 
         /* mixing GWT's native FormPanel with SmartGWT containers,
          * because SmartGWT's form somehow sucks when not using the datasource stuff
@@ -192,28 +190,12 @@ public class SubmitWindow {
         hiddenField.setValue(this.controller.getModel().getSessionId());
         formContent.add(hiddenField);
 
-        final Hidden droppedFileContent = new Hidden();
-        droppedFileContent.setName("droppedFileContent");
-        formContent.add(droppedFileContent);
-
         final FileUpload fileUpload = new FileUpload();
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (fileUpload.getFilename() != null) {
-                    uploadButton.enable();
-                } else {
-                    uploadButton.disable();
-                }
-            }
-        });
         fileUpload.setName("job");
-        if (droppedFile == null) {
-            formContent.add(fileUpload);
-        }
         final Hidden editField = new Hidden("edit");
         editField.setValue("0");
 
+        formContent.add(fileUpload);
         formContent.add(editField);
 
         // actual form		
@@ -250,6 +232,10 @@ public class SubmitWindow {
         editForm.setFields(edit);
 
         layout.addMember(label);
+        layout.addMember(formWrapper);
+        layout.addMember(editForm);
+        layout.addMember(buttons);
+
         this.window = new Window();
         this.window.setTitle("Submit Job");
         this.window.setShowMinimizeButton(false);
@@ -258,67 +244,8 @@ public class SubmitWindow {
         this.window.addItem(layout);
         this.window.setWidth(420);
         this.window.setHeight(180);
-        this.window.setAutoCenter(true);
+        this.window.centerInPage();
         this.window.setCanDragResize(true);
-
-        if (droppedFile == null) {
-            // normal click on submit button
-            layout.addMember(formWrapper);
-            layout.addMember(editForm);
-            layout.addMember(buttons);
-        } else {
-            // a file has been drag and dropped
-            layout.addMember(waitLabel);
-
-            String fileType = droppedFile.getType();
-            final String fileName = droppedFile.getName();
-            if (XML_MIME_TYPE.equals(fileType)) {
-                final FileReader reader = new FileReader();
-                reader.addLoadEndHandler(new LoadEndHandler() {
-                    @Override
-                    public void onLoadEnd(LoadEndEvent event) {
-                        String fileAsString = reader.getStringResult();
-                        droppedFileContent.setValue(b64encode(fileAsString));
-
-                        HTMLPane shortJob = buildJobPreview(fileAsString);
-                        formWrapper.setHeight(0);
-                        window.setHeight(380);
-
-                        layout.removeMember(waitLabel);
-                        layout.addMember(shortJob);
-                        layout.addMember(formWrapper);
-                        layout.addMember(editForm);
-                        layout.addMember(buttons);
-
-                    }
-                });
-                reader.readAsText(droppedFile);
-            } else {
-                // assume that this is a job archive
-                final FileReader reader = new FileReader();
-                reader.addLoadEndHandler(new LoadEndHandler() {
-                    @Override
-                    public void onLoadEnd(LoadEndEvent event) {
-                        String fileAsString = reader.getStringResult();
-                        droppedFileContent.setValue(b64encode(fileAsString));
-
-                        final Label droppedLabel = new Label("<b>" + fileName + " (dropped job archive file)</b>");
-                        droppedLabel.setAlign(Alignment.CENTER);
-                        droppedLabel.setHeight(30);
-                        droppedLabel.setWidth100();
-
-                        layout.removeMember(waitLabel);
-                        layout.addMember(droppedLabel);
-                        layout.addMember(formWrapper);
-                        layout.addMember(editForm);
-                        layout.addMember(buttons);
-                    }
-
-                });
-                reader.readAsBinaryString(droppedFile);
-            }
-        }
-
 
         // click the upload button :
         // hide the form, show a 'please wait' label,
@@ -329,7 +256,11 @@ public class SubmitWindow {
 
                 formPanel.submit();
 
-                layout.removeMembers(layout.getMembers());
+                layout.removeMember(label);
+                layout.removeMember(formWrapper);
+                layout.removeMember(editForm);
+                layout.removeMember(buttons);
+
                 layout.addMember(waitLabel);
             }
         });
@@ -340,7 +271,6 @@ public class SubmitWindow {
 
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String fn = fileUpload.getFilename();
-                if(fn==null) { fn = "job.xml" ;}
 
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
@@ -527,15 +457,6 @@ public class SubmitWindow {
         });
     }
 
-    private HTMLPane buildJobPreview(String jobFileContent) {
-        HTMLPane shortJob = new HTMLPane();
-        shortJob.setHeight(200);
-        shortJob.setWidth100();
-        shortJob.setShowEdges(true);
-        shortJob.setContents(SafeHtmlUtils.htmlEscape(jobFileContent).replaceAll("\n", "<br/>"));
-        return shortJob;
-    }
-
     /**
      * @param jobDescriptor an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
@@ -584,8 +505,4 @@ public class SubmitWindow {
         }
         return ret;
     }
-
-    private static native String b64encode(String stringToEncode) /*-{
-        return window.btoa(stringToEncode);
-    }-*/;
 }
