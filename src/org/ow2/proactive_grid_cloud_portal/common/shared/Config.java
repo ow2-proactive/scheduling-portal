@@ -116,6 +116,11 @@ public abstract class Config {
     public abstract String getRestUrl();
 
     /**
+     * @return the REST public URL defined in properties or {@link #getRestUrl()} if empty or null
+     */
+    public abstract String getRestPublicUrl();
+
+    /**
      * @return the REST server version string
      */
     public abstract String getRestVersion();

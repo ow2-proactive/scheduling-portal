@@ -57,6 +57,7 @@ public class RMConfig extends Config {
     /** URL of the REST service */
     public static final String REST_URL = "rm.rest.url";
     private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
+    public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
     /** refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "rm.client.refresh.time";
@@ -144,6 +145,15 @@ public class RMConfig extends Config {
     @Override
     public String getRestUrl() {
         return properties.get(REST_URL);
+    }
+
+    @Override
+    public String getRestPublicUrl() {
+        String restPublicUrl = properties.get(REST_PUBLIC_URL);
+        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
+            return getRestUrl();
+        }
+        return restPublicUrl;
     }
 
     @Override
