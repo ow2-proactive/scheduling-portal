@@ -52,9 +52,9 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
@@ -1058,7 +1058,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             // might have been disconnected in between
                             return;
                         }
-                        if (getJsonErrorCode(caught) == 401) {
+                        if (getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
                             teardown("You have been disconnected from the server.");
                         }
                         error("Failed to get Scheduler Revision: " + getJsonErrorMessage(caught));
@@ -1215,10 +1215,19 @@ public class SchedulerController extends Controller implements UncaughtException
                             // might have been disconnected in between
                             return;
                         }
-                        if (getJsonErrorCode(caught) == 401) {
+                        int httpErrorCodeFromException = getJsonErrorCode(caught);
+                        if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
                             teardown("You have been disconnected from the server.");
+                        } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
+                            model.logImportantMessage(
+                                    "Failed to fetch jobs because of permission (automatic refresh will be disabled)"
+                                            + getJsonErrorMessage(caught));
+                            stopTimer();
+                            // display empty message in jobs view
+                            model.setJobs(new HashMap<Integer, Job>(), -1);
+                        } else {
+                            error("Error while fetching jobs:\n" + getJsonErrorMessage(caught));
                         }
-                        error("Error while fetching jobs:\n" + getJsonErrorMessage(caught));
                     }
 
                     public void onSuccess(String result) {
