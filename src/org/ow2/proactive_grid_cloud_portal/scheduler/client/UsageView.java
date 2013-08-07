@@ -186,7 +186,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 if (formatted.size() == 1 && formatted.get(0).equals(controller.getModel().getLogin())) {
                     // only one user available and it is the current user, disable combo
                     userSelect.disable();
-                } else {
+                    userSelect.setValue(controller.getModel().getLogin());
+                } else if (!formatted.isEmpty()) {
                     userSelect.enable();
                 }
 
@@ -196,7 +197,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
                     userSelect.clearValue();
                 }
 
-                userSelect.setValueMap(formatted.toArray(new String[] { }));
+                userSelect.setValueMap(formatted.toArray(new String[formatted.size()]));
             }
         });
 
