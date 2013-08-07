@@ -82,6 +82,7 @@ public class ProcessesView extends VLayout implements Reloadable {
                 description, commandline);
 
         setWidth100();
+        processesGrid.setCanDragSelectText(true);
         addMember(processesGrid);
         load();
     }
