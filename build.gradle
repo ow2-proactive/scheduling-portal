@@ -1,15 +1,94 @@
 subprojects {
-
     apply plugin: 'java'
+    apply plugin: 'war'
+    apply plugin: 'jetty'
 
     repositories {
         mavenLocal()
         mavenCentral()
-        maven {url 'http://www.smartclient.com/maven2'}
-        maven {url 'https://repository.sonatype.org/content/groups/forge/'}
+        maven { url 'http://www.smartclient.com/maven2' }
+        maven { url 'https://repository.sonatype.org/content/groups/forge/' }
     }
 
+    dependencies {
+        providedCompile 'com.google.gwt:gwt-user:2.5.1'
+        providedCompile 'com.google.gwt:gwt-dev:2.5.1'
+        providedCompile 'com.smartgwt:smartgwt:3.1'
+        providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
+        // Needed for GWT compile and at runtime for RequestBuilder
+        // Specify two artifacts as workaround for GRADLE-1934
+        compile('javax.validation:validation-api:1.0.0.GA')
+        compile('javax.validation:validation-api:1.0.0.GA:sources')
+        compile 'org.slf4j:slf4j-api:1.5.8'
+        compile 'commons-httpclient:commons-httpclient:3.1'
+        compile 'commons-io:commons-io:1.3.1'
+        compile 'commons-fileupload:commons-fileupload:1.2'
+        compile 'org.apache.httpcomponents:httpclient:4.2.3'
 
+        compile 'org.jboss.resteasy:resteasy-jaxrs:2.3.3.Final'
 
+        testCompile 'junit:junit:4.11'
+    }
 
+    jar { // build jar with sources for GWT
+        from sourceSets.main.allSource
+    }
+}
+
+project(':rm') {
+    dependencies {
+        compile files('../lib/codemirror2-gwt-1.2.0.jar')
+
+        runtime 'net.bull.javamelody:javamelody-core:1.33.0'
+        runtime 'org.slf4j:slf4j-simple:1.5.8'
+
+        compile project(':common')
+    }
+}
+
+project(':scheduler') {
+    dependencies {
+        compile files('../lib/raphaelgwt-r28.jar')
+        compile 'org.vectomatic:lib-gwt-file:0.3.3'
+        compile 'org.codehaus.jettison:jettison:1.2'
+        compile 'org.jboss.resteasy:resteasy-multipart-provider:2.3.3.Final'
+
+        compile project(':common')
+
+        runtime 'net.bull.javamelody:javamelody-core:1.33.0'
+        runtime 'org.slf4j:slf4j-simple:1.5.8'
+    }
+}
+
+configure([project(':scheduler'), project(':rm')]) {
+    task compileGwt(dependsOn: classes, type: JavaExec) {
+        inputs.source sourceSets.main.java.srcDirs
+        inputs.dir sourceSets.main.output.resourcesDir
+        outputs.dir webAppDir
+
+        logging.captureStandardOutput LogLevel.INFO
+
+        main = 'com.google.gwt.dev.Compiler'
+        classpath {
+            [sourceSets.main.java.srcDirs,           // Java source
+                    sourceSets.main.output.resourcesDir,    // Generated resources
+                    sourceSets.main.output.classesDir,      // Generated classes
+                    sourceSets.main.compileClasspath,       // Deps
+            ]
+        }
+        args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize()}", // Your GWT module
+                '-war', webAppDir,
+                '-logLevel', 'INFO',
+                '-localWorkers', '2',
+                '-compileReport',
+                '-extra', webAppDir,
+                '-draftCompile' // Speeds up compile with 25%
+        ]
+
+        jettyRun.dependsOn compileGwt
+        war.dependsOn compileGwt
+        war {
+            from webAppDir
+        }
+    }
 }
