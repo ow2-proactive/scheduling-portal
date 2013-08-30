@@ -1,6 +1,5 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'war'
     apply plugin: 'jetty'
 
     repositories {
@@ -27,6 +26,8 @@ subprojects {
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:2.3.3.Final'
 
+        runtime 'com.google.gwt:gwt-servlet:2.5.1'
+
         testCompile 'junit:junit:4.11'
     }
 
@@ -36,6 +37,7 @@ subprojects {
 }
 
 project(':rm') {
+    apply plugin: 'war'
     dependencies {
         compile files('../lib/codemirror2-gwt-1.2.0.jar')
 
@@ -47,6 +49,7 @@ project(':rm') {
 }
 
 project(':scheduler') {
+    apply plugin: 'war'
     dependencies {
         compile files('../lib/raphaelgwt-r28.jar')
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
@@ -57,6 +60,11 @@ project(':scheduler') {
 
         runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
+    }
+
+    war {
+        from project(':applet:visu').jar.outputs
+        from project(':applet:dataserver').jar.outputs
     }
 }
 
@@ -87,8 +95,5 @@ configure([project(':scheduler'), project(':rm')]) {
 
         jettyRun.dependsOn compileGwt
         war.dependsOn compileGwt
-        war {
-            from webAppDir
-        }
     }
 }
