@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'war'
     apply plugin: 'jetty'
 
     repositories {
@@ -34,10 +35,13 @@ subprojects {
     jar { // build jar with sources for GWT
         from sourceSets.main.allSource
     }
+
+    // war build only enabled for RM and Scheduler
+    war.enabled = false
 }
 
 project(':rm') {
-    apply plugin: 'war'
+    war.enabled = true
     dependencies {
         compile files('../lib/codemirror2-gwt-1.2.0.jar')
 
@@ -49,7 +53,7 @@ project(':rm') {
 }
 
 project(':scheduler') {
-    apply plugin: 'war'
+    war.enabled = true
     dependencies {
         compile files('../lib/raphaelgwt-r28.jar')
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
