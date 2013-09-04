@@ -1,6 +1,5 @@
 include 'common'
-include 'rm'
-include 'scheduler'
-include 'applet:visu'
-include 'applet:dataserver'
+include 'rm-portal'
+include 'scheduler-portal'
+include 'applet'
 

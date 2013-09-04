@@ -2,6 +2,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'war'
     apply plugin: 'jetty'
+    apply plugin: 'maven'
 
     group = 'org.ow2.proactive_grid_cloud_portal'
     version = '1.5.0-SNAPSHOT'
@@ -54,7 +55,25 @@ subprojects {
     war.enabled = false
 }
 
-project(':rm') {
+project(':applet') {
+    task visu(type: Jar) {
+        from sourceSets.main.output
+        exclude '**/DataServerLauncher*'
+        archiveName = "visu.jar"
+        manifest.attributes("Main-Class": "org.ow2.proactive_grid_cloud_portal.extra.RemoteViewer")
+    }
+
+    task dataserver(type: Jar) {
+        from sourceSets.main.output
+        exclude '**/RemoteViewer*'
+        archiveName = "servers.jar"
+        manifest.attributes("Main-Class": "org.ow2.proactive_grid_cloud_portal.extra.DataServerLauncher")
+    }
+
+    build.dependsOn visu, dataserver
+}
+
+project(':rm-portal') {
     war.enabled = true
     dependencies {
         compile files('../lib/codemirror2-gwt-1.2.0.jar')
@@ -64,9 +83,16 @@ project(':rm') {
 
         compile project(':common')
     }
+    war {
+        def replaceTokens = {
+            it.filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: ['portal_version': project.version])
+        }
+        filesMatching('**/portal.html', replaceTokens)
+        filesMatching('**/rm.conf', replaceTokens)
+    }
 }
 
-project(':scheduler') {
+project(':scheduler-portal') {
     war.enabled = true
     dependencies {
         compile files('../lib/raphaelgwt-r28.jar')
@@ -81,12 +107,18 @@ project(':scheduler') {
     }
 
     war {
-        from project(':applet:visu').jar.outputs
-        from project(':applet:dataserver').jar.outputs
+        from project(':applet').visu.outputs
+        from project(':applet').dataserver.outputs
+
+        def replaceTokens = {
+            it.filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: ['portal_version': project.version])
+        }
+        filesMatching('**/portal.html', replaceTokens)
+        filesMatching('**/scheduler.conf', replaceTokens)
     }
 }
 
-configure([project(':scheduler'), project(':rm')]) {
+configure([project(':scheduler-portal'), project(':rm-portal')]) {
     task compileGwt(dependsOn: classes, type: JavaExec) {
         inputs.source sourceSets.main.java.srcDirs
         inputs.dir sourceSets.main.output.resourcesDir
@@ -102,7 +134,7 @@ configure([project(':scheduler'), project(':rm')]) {
                     sourceSets.main.compileClasspath,       // Deps
             ]
         }
-        args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize()}", // Your GWT module
+        args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize() - "-portal"}",
                 '-war', webAppDir,
                 '-logLevel', 'INFO',
                 '-localWorkers', '2',
@@ -110,6 +142,7 @@ configure([project(':scheduler'), project(':rm')]) {
                 '-extra', webAppDir,
                 '-draftCompile' // Speeds up compile with 25%
         ]
+        systemProperties = ['gwt.persistentunitcachedir': buildDir]
 
         jettyRun.dependsOn compileGwt
         war.dependsOn compileGwt
