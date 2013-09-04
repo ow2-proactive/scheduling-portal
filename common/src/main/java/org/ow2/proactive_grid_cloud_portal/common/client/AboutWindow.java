@@ -84,7 +84,7 @@ public class AboutWindow {
             "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
             "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
             "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a><br><br><br>" +
-            "<table style='color:#404040'>" + "<tr><td>REST server</td><td>" + Config.get().getRestUrl() +
+            "<table style='color:#404040'>" + "<tr><td>REST server</td><td>" + Config.get().getRestPublicUrl() +
             "</td></tr>" + "<tr><td>REST version</td><td>" + Config.get().getRestVersion() + "</td></tr>" +
             "<tr><td>" + Config.get().getApplicationName() + " version</td><td>" +
             Config.get().getApplicationVersion() + "</td></tr></table>";

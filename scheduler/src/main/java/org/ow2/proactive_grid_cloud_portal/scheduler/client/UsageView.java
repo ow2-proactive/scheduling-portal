@@ -39,12 +39,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
@@ -125,6 +123,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         final VLayout root = new VLayout();
         root.setWidth100();
         root.setHeight100();
+        // for details grid to be shown even if empty
+        root.setMinMemberSize(200);
 
         DynamicForm dateInputs = createDateInputs();
         HLayout detailsLabelAndExportButton = createDetailsLabelAndExportButton();
@@ -139,9 +139,9 @@ public class UsageView implements SchedulerListeners.UsageListener {
             public void run() {
                 Label summaryLabel = new Label("<h3>Summary</h3>");
                 summaryLabel.setHeight(20);
-                VerticalPanel charts = createCharts();
-                root.addMember(summaryLabel,1);
-                root.addMember(charts,2);
+                VLayout charts = createCharts(root);
+                root.addMember(summaryLabel, 1);
+                root.addMember(charts, 2);
                 updateCharts();
             }
         }, CoreChart.PACKAGE);
@@ -186,7 +186,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 if (formatted.size() == 1 && formatted.get(0).equals(controller.getModel().getLogin())) {
                     // only one user available and it is the current user, disable combo
                     userSelect.disable();
-                } else {
+                    userSelect.setValue(controller.getModel().getLogin());
+                } else if (!formatted.isEmpty()) {
                     userSelect.enable();
                 }
 
@@ -196,7 +197,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
                     userSelect.clearValue();
                 }
 
-                userSelect.setValueMap(formatted.toArray(new String[] { }));
+                userSelect.setValueMap(formatted.toArray(new String[formatted.size()]));
             }
         });
 
@@ -374,16 +375,17 @@ public class UsageView implements SchedulerListeners.UsageListener {
         return detailsGrid;
     }
 
-    private VerticalPanel createCharts() {
-        VerticalPanel charts = new VerticalPanel();
-        charts.setWidth("100%");
-        charts.setHeight(CHART_HEIGHT + "px");
+    private VLayout createCharts(final VLayout root) {
+        VLayout charts = new VLayout();
+        charts.setWidth(root.getWidth() - 30);
+        charts.setHeight(CHART_HEIGHT);
 
         ColumnChart counter = createCounterChart();
-        charts.add(counter);
+        charts.addMember(counter);
 
         ColumnChart timer = createDurationChart();
-        charts.add(timer);
+        charts.addMember(timer);
+
         return charts;
     }
 

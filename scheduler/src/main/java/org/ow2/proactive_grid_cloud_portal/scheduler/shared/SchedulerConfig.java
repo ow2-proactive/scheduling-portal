@@ -58,6 +58,7 @@ public class SchedulerConfig extends Config {
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
     private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
+    public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
@@ -129,6 +130,15 @@ public class SchedulerConfig extends Config {
     @Override
     public String getRestUrl() {
         return properties.get(REST_URL);
+    }
+
+    @Override
+    public String getRestPublicUrl() {
+        String restPublicUrl = properties.get(REST_PUBLIC_URL);
+        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
+            return getRestUrl();
+        }
+        return restPublicUrl;
     }
 
     public String getNoVncUrl() {

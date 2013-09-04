@@ -46,19 +46,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-import org.vectomatic.dnd.DataTransferExt;
-import org.vectomatic.file.File;
-import org.vectomatic.file.FileList;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.DragEnterEvent;
-import com.google.gwt.event.dom.client.DragLeaveEvent;
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
@@ -107,8 +97,6 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  */
 public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListener, LogListener {
 
-    private static final int MENU_HEIGHT = 34;
-
     static SchedulerPage inst;
 
     // this is ugly but I need this stupid object for the visu view
@@ -117,7 +105,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     Tab visuTab;
 
     /** root layout: parent to all widgets of this view */
-    private VerticalPanel rootLayout = null;
+    private Layout rootLayout = null;
 
     /** grid displaying the jobs */
     private JobsView jobGrid = null;
@@ -158,7 +146,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private long lastCriticalMessage = 0;
 
     private SchedulerController controller = null;
-    private ToolStripButton submitButton;
 
     /**
      * Default constructor
@@ -246,6 +233,12 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      *
      */
     private void buildAndShow() {
+        VLayout contentLayout = new VLayout();
+        this.rootLayout = contentLayout;
+        contentLayout.setWidth100();
+        contentLayout.setHeight100();
+        contentLayout.setBackgroundColor("#fafafa");
+
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
 
@@ -331,7 +324,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.pageChanged();
 
         Canvas tools = buildTools();
-        FileDragAndDropPanel dragNDropPanel = buildFileDragAndDropPanel(tools);
 
         Layout botPane = buildBotPane();
 
@@ -340,57 +332,20 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         detailsSection.setExpanded(true);
         detailsSection.setItems(botPane);
 
-        final SectionStack stack = new SectionStack();
+        SectionStack stack = new SectionStack();
         stack.setWidth100();
-        stack.setHeight(Window.getClientHeight() - MENU_HEIGHT);
-        Window.addResizeHandler(new ResizeHandler() {
-            public void onResize(ResizeEvent event) {
-                int height = event.getHeight();
-                stack.setHeight(height - MENU_HEIGHT);
-            }
-
-        });
+        stack.setHeight100();
         stack.setMargin(2);
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
         stack.setSections(jobsSection, detailsSection);
 
-        rootLayout = new VerticalPanel();
-        rootLayout.add(dragNDropPanel);
-        rootLayout.add(stack);
-        RootLayoutPanel.get().add(rootLayout);
-        RootLayoutPanel.get().getElement().getStyle().setBackgroundColor("#fafafa");
-
+        contentLayout.addMember(tools);
+        contentLayout.addMember(stack);
         this.logWindow = new LogWindow(controller);
 
-    }
-
-    private FileDragAndDropPanel buildFileDragAndDropPanel(Canvas tools) {
-        FileDragAndDropPanel dragNDropPanel = new FileDragAndDropPanel(tools) {
-            @Override
-            protected void doOnDragEnter(DragEnterEvent event) {
-                submitButton.select();
-            }
-
-            @Override
-            protected void doOnDragLeave(DragLeaveEvent event) {
-                submitButton.deselect();
-            }
-
-            @Override
-            protected void doOnDrop(DropEvent event) {
-                FileList files = event.getDataTransfer().<DataTransferExt>cast().getFiles();
-                File firstFile = files.getItem(0);
-                if (firstFile != null) {
-                    SubmitWindow w = new SubmitWindow(SchedulerPage.this.controller, firstFile);
-                    w.show();
-                }
-                submitButton.deselect();
-            }
-        };
-        dragNDropPanel.setHeight(MENU_HEIGHT + "px");
-        return dragNDropPanel;
+        this.rootLayout.draw();
     }
 
     /** admin scheduler functionalities */
@@ -414,7 +369,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      */
     private ToolStrip buildTools() {
         ToolStrip tools = new ToolStrip();
-        tools.setHeight(MENU_HEIGHT);
+        tools.setHeight(34);
         tools.setWidth100();
         tools.setBackgroundImage("");
         tools.setBackgroundColor("#fafafa");
@@ -501,7 +456,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         helpMenu.setItems(logMenuItem, aboutMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
-        submitButton = new ToolStripButton("Submit job");
+        ToolStripButton submitButton = new ToolStripButton("Submit job");
         submitButton.setIcon(SchedulerImages.instance.job_submit_16().getSafeUri().asString());
         submitButton.setTooltip("Submit a new job");
         submitButton.addClickHandler(new ClickHandler() {
@@ -593,7 +548,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
             }
         });
 
-        errorButton = new ToolStripButton("<strong>Error</strong>", Images.instance.net_error_16()
+        errorButton = new ToolStripButton("<strong>Network error</strong>", Images.instance.net_error_16()
                 .getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
         errorButton.addClickHandler(new ClickHandler() {
@@ -609,8 +564,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
-
-        tools.addMember(submitButton);
+        tools.addButton(submitButton);
         tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
@@ -866,7 +820,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      * Call this when the view should be definitely removed and GC's, else just hide() it
      */
     public void destroy() {
-        RootLayoutPanel.get().remove(rootLayout);
+        this.rootLayout.destroy();
         this.logWindow.destroy();
         this.aboutWindow.destroy();
         this.settingsWindow.destroy();
