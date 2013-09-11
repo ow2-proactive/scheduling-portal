@@ -12,6 +12,7 @@ subprojects {
         mavenCentral()
         maven { url 'http://www.smartclient.com/maven2' }
         maven { url 'https://repository.sonatype.org/content/groups/forge/' }
+        maven { url 'http://repo.activeeon.com/content/repositories/thirdparty/' }
     }
 
     uploadArchives {
@@ -76,7 +77,7 @@ project(':applet') {
 project(':rm-portal') {
     war.enabled = true
     dependencies {
-        compile files('../lib/codemirror2-gwt-1.2.0.jar')
+        compile 'codemirror:codemirror2-gwt:1.2.0'
 
         runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
@@ -95,7 +96,7 @@ project(':rm-portal') {
 project(':scheduler-portal') {
     war.enabled = true
     dependencies {
-        compile files('../lib/raphaelgwt-r28.jar')
+        compile 'raphaelgwt:raphaelgwt:r28'
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
         compile 'org.codehaus.jettison:jettison:1.2'
         compile 'org.jboss.resteasy:resteasy-multipart-provider:2.3.3.Final'
