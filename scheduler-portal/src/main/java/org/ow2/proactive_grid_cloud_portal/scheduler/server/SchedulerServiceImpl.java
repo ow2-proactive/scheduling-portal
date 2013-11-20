@@ -1328,4 +1328,28 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         }
     }
+
+    @Override
+    public String getJobHtml(String sessionId, String jobId) throws RestServerException, ServiceException {
+
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        ClientResponse<InputStream> clientResponse = client.getJobHtml(sessionId, jobId);
+        Status status = clientResponse.getResponseStatus();
+
+        try {
+            InputStream response = clientResponse.getEntity();
+            String res = convertToString(response);
+            switch (status) {
+                case OK:
+                    return res;
+
+                default:
+                    throw new RestServerException(status.getStatusCode(), res);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            clientResponse.releaseConnection();
+        }
+    }
 }

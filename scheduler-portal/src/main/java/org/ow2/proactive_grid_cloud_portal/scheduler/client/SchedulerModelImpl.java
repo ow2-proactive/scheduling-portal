@@ -98,6 +98,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private HashMap<String, String> accountStats = null;
     private Map<String, String> imagePath = null;
     private Map<String, JobVisuMap> visuMap = null;
+    private Map<String, String> htmlMap = null;
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
@@ -138,6 +139,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.usageListeners = new ArrayList<SchedulerListeners.UsageListener>();
         this.imagePath = new HashMap<String, String>();
         this.visuMap = new HashMap<String, JobVisuMap>();
+        this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
     }
 
@@ -559,6 +561,20 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     void visuUnavailable(String jobId) {
         for (VisualizationListener list : visuListeners) {
             list.visualizationUnavailable(jobId);
+        }
+    }
+
+    @Override
+    public String getJobHtml(String jobId) {
+        return this.htmlMap.get(jobId);
+    }
+
+    @Override
+    public void setJobHtml(String jobId, String curHtml) {
+        this.htmlMap.put(jobId, curHtml);
+
+        for (VisualizationListener list : this.visuListeners) {
+            list.htmlUpdated(jobId, curHtml);
         }
     }
 

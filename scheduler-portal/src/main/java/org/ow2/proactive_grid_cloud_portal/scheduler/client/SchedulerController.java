@@ -326,56 +326,83 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     void visuFetch(final String jobId) {
+
         // fetch visu info
         if (jobId != null) {
-            String curPath = model.getJobImagePath(jobId);
-            if (curPath != null) {
+            String curHtml = model.getJobHtml(jobId);
+            if (curHtml != null) {
                 // exists already, resetting it will trigger listeners
-                model.setJobImagePath(jobId, curPath);
+                model.setJobHtml(jobId, curHtml);
             } else {
                 final long t = System.currentTimeMillis();
-                this.scheduler.getJobImage(model.getSessionId(), jobId, new AsyncCallback<String>() {
+                this.scheduler.getJobHtml(model.getSessionId(), jobId, new AsyncCallback<String>() {
                     public void onSuccess(String result) {
-                        model.setJobImagePath(jobId, result);
-                        model.logMessage("Fetched image for job " + jobId + " in " +
-                            (System.currentTimeMillis() - t) + " ms");
+                        model.setJobHtml(jobId, result);
+                        model.logMessage("Fetched html for job " + jobId + " in " +
+                                (System.currentTimeMillis() - t) + " ms");
                     }
 
                     public void onFailure(Throwable caught) {
-                        String msg = "Failed to fetch image for job " + jobId;
+                        String msg = "Failed to fetch html for job " + jobId;
                         String json = getJsonErrorMessage(caught);
                         if (json != null)
                             msg += " : " + json;
 
                         model.logImportantMessage(msg);
-                        model.visuUnavailable(jobId);
+
+                        // trying to load image
+                        String curPath = model.getJobImagePath(jobId);
+                        if (curPath != null) {
+                            // exists already, resetting it will trigger listeners
+                            model.setJobImagePath(jobId, curPath);
+                        } else {
+                            final long t = System.currentTimeMillis();
+                            scheduler.getJobImage(model.getSessionId(), jobId, new AsyncCallback<String>() {
+                                public void onSuccess(String result) {
+                                    model.setJobImagePath(jobId, result);
+                                    model.logMessage("Fetched image for job " + jobId + " in " +
+                                            (System.currentTimeMillis() - t) + " ms");
+                                }
+
+                                public void onFailure(Throwable caught) {
+                                    String msg = "Failed to fetch image for job " + jobId;
+                                    String json = getJsonErrorMessage(caught);
+                                    if (json != null)
+                                        msg += " : " + json;
+
+                                    model.logImportantMessage(msg);
+                                    model.visuUnavailable(jobId);
+                                }
+                            });
+                        }
+
+                        JobVisuMap map = model.getJobVisuMap(jobId);
+                        if (map != null) {
+                            model.setJobVisuMap(jobId, map);
+                        } else {
+                            final long t = System.currentTimeMillis();
+                            scheduler.getJobMap(model.getSessionId(), jobId, new AsyncCallback<JobVisuMap>() {
+                                public void onSuccess(JobVisuMap result) {
+                                    model.setJobVisuMap(jobId, result);
+                                    model.logMessage("Fetched map for job " + jobId + " in " +
+                                            (System.currentTimeMillis() - t) + " ms");
+                                }
+
+                                public void onFailure(Throwable caught) {
+                                    String msg = "Failed to fetch visu map for job " + jobId;
+                                    String json = getJsonErrorMessage(caught);
+                                    if (json != null)
+                                        msg += " : " + json;
+
+                                    model.logImportantMessage(msg);
+                                    model.visuUnavailable(jobId);
+                                }
+                            });
+                        }
                     }
                 });
             }
 
-            JobVisuMap map = model.getJobVisuMap(jobId);
-            if (map != null) {
-                model.setJobVisuMap(jobId, map);
-            } else {
-                final long t = System.currentTimeMillis();
-                this.scheduler.getJobMap(model.getSessionId(), jobId, new AsyncCallback<JobVisuMap>() {
-                    public void onSuccess(JobVisuMap result) {
-                        model.setJobVisuMap(jobId, result);
-                        model.logMessage("Fetched map for job " + jobId + " in " +
-                            (System.currentTimeMillis() - t) + " ms");
-                    }
-
-                    public void onFailure(Throwable caught) {
-                        String msg = "Failed to fetch visu map for job " + jobId;
-                        String json = getJsonErrorMessage(caught);
-                        if (json != null)
-                            msg += " : " + json;
-
-                        model.logImportantMessage(msg);
-                        model.visuUnavailable(jobId);
-                    }
-                });
-            }
 
         }
     }

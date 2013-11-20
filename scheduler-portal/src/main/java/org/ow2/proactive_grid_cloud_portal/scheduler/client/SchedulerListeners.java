@@ -204,6 +204,14 @@ public class SchedulerListeners {
     public interface VisualizationListener {
 
         /**
+         * The html used for job visualization has been updated (web studio)
+         *
+         * @param jobId id of the job
+         * @param path Relative path of the image on the server
+         */
+        public void htmlUpdated(String jobId, String path);
+
+        /**
          * The image used for job visualization has been updated
          * 
          * @param jobId id of the job
