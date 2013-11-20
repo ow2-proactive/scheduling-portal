@@ -329,6 +329,16 @@ public interface SchedulerService extends RemoteService {
     String sessionId, String jobId) throws RestServerException, ServiceException;
 
     /**
+     * Html representing the job as designed in the WF studio when applicable
+     * @param sessionId current session
+     * @param jobId id of the job
+     * @return path of the image on the server
+     * @throws ServiceException
+     */
+    public String getJobHtml(@HeaderParam("sessionid")
+                              String sessionId, String jobId) throws RestServerException, ServiceException;
+
+    /**
      * Textual representation of the graphical info returned by {@link #getJobImage(String, String)}
      * @param sessionId current session
      * @param jobId id of a job
@@ -398,4 +408,5 @@ public interface SchedulerService extends RemoteService {
     String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException;
 
     List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException;
+
 }

@@ -331,4 +331,6 @@ public interface SchedulerServiceAsync {
     Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
 
     void getUsage(String sessionId, String user, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
+
+    void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
 }

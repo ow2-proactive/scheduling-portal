@@ -557,6 +557,19 @@ public interface RestClient {
     String jobId);
 
     /**
+     * Returns an html visualization corresponding of a jobid
+     * @param sessionId a valid session id
+     * @param jobId the job id
+     * @return an html visualization corresponding of a <code>jobId</code>
+     */
+    @GET
+    @Path("jobs/{jobid}/html")
+    @Produces("text/html")
+    public ClientResponse<InputStream> getJobHtml(@HeaderParam("sessionid")
+                                                   String sessionId, @PathParam("jobid")
+                                                   String jobId);
+
+    /**
      * Users currently connected to the scheduler
      * 
      * @param sessionId the session id associated to this new connection
@@ -608,4 +621,5 @@ public interface RestClient {
                                                     @QueryParam("user") String user,
                                                     @QueryParam("startdate") String startDate,
                                                     @QueryParam("enddate") String endDate);
+
 }
