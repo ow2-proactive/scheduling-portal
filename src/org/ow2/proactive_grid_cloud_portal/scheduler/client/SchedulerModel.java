@@ -37,8 +37,8 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
@@ -60,7 +60,7 @@ public abstract class SchedulerModel implements Model {
     /**
      * @return local view of all the jobs known by the scheduler server
      */
-    public abstract Map<Integer, Job> getJobs();
+    public abstract LinkedHashMap<Integer, Job> getJobs();
 
     /**
      * @return the number of jobs to be displayed on a page
@@ -133,6 +133,8 @@ public abstract class SchedulerModel implements Model {
      * 		{@link #getJobImagePath(String)}; or null
      */
     public abstract JobVisuMap getJobVisuMap(String jobId);
+
+    public abstract void emptyJobs();
 
     public static class RemoteHint {
         String taskId;

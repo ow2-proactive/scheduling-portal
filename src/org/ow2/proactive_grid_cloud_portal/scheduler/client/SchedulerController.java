@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +53,6 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
@@ -1223,7 +1223,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     public void onSuccess(String result) {
                         long rev = 0;
-                        Map<Integer, Job> jobs = null;
+                        LinkedHashMap<Integer, Job> jobs = null;
 
                         JSONValue jsonVal = parseJSON(result);
                         JSONObject jsonInfo = jsonVal.isObject();
@@ -1268,8 +1268,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * @return the complete jobid:job map
      * @throws JSONException JSON parsing failed
      */
-    private Map<Integer, Job> getJobsFromJson(JSONArray jsonArray) throws JSONException {
-        HashMap<Integer, Job> jobs = new HashMap<Integer, Job>();
+    private LinkedHashMap<Integer, Job> getJobsFromJson(JSONArray jsonArray) throws JSONException {
+        LinkedHashMap<Integer, Job> jobs = new LinkedHashMap<Integer, Job>();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonJob = jsonArray.get(i).isObject();
