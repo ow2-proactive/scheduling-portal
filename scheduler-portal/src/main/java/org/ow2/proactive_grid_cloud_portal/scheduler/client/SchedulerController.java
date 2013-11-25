@@ -41,17 +41,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -66,6 +60,13 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Label;
+import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -933,7 +934,7 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public void resetPage() {
         model.setJobPage(0);
-        model.setJobs(null, -1);
+        model.emptyJobs();
         this.fetchJobs();
     }
 
@@ -943,7 +944,7 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public void nextPage() {
         model.setJobPage(model.getJobPage() + 1);
-        model.setJobs(null, -1);
+        model.emptyJobs();
         this.fetchJobs();
     }
 
@@ -956,7 +957,7 @@ public class SchedulerController extends Controller implements UncaughtException
         if (curPage == 0)
             return;
         model.setJobPage(curPage - 1);
-        model.setJobs(null, -1);
+        model.emptyJobs();
         this.fetchJobs();
     }
 
@@ -1224,7 +1225,7 @@ public class SchedulerController extends Controller implements UncaughtException
                                             + getJsonErrorMessage(caught));
                             stopTimer();
                             // display empty message in jobs view
-                            model.setJobs(new HashMap<Integer, Job>(), -1);
+                            model.emptyJobs();
                         } else {
                             error("Error while fetching jobs:\n" + getJsonErrorMessage(caught));
                         }
@@ -1232,7 +1233,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     public void onSuccess(String result) {
                         long rev = 0;
-                        Map<Integer, Job> jobs = null;
+                        LinkedHashMap<Integer, Job> jobs = null;
 
                         JSONValue jsonVal = parseJSON(result);
                         JSONObject jsonInfo = jsonVal.isObject();
@@ -1277,8 +1278,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * @return the complete jobid:job map
      * @throws JSONException JSON parsing failed
      */
-    private Map<Integer, Job> getJobsFromJson(JSONArray jsonArray) throws JSONException {
-        HashMap<Integer, Job> jobs = new HashMap<Integer, Job>();
+    private LinkedHashMap<Integer, Job> getJobsFromJson(JSONArray jsonArray) throws JSONException {
+        LinkedHashMap<Integer, Job> jobs = new LinkedHashMap<Integer, Job>();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonJob = jsonArray.get(i).isObject();

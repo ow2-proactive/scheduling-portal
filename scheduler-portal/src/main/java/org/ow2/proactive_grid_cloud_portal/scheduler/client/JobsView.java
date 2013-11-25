@@ -36,8 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +47,7 @@ import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
+import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
@@ -63,6 +62,7 @@ import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.SortNormalizer;
 import com.smartgwt.client.widgets.grid.events.CellContextClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellContextClickHandler;
 import com.smartgwt.client.widgets.grid.events.CellOutEvent;
@@ -76,6 +76,7 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 
 
 /**
@@ -91,6 +92,10 @@ public class JobsView implements JobsUpdatedListener {
     private static final String PROGRESS_ATTR = "progress";
     private static final String DURATION_ATTR = "duration";
     private static final String JOB_ATTR = "job";
+
+    private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
+      new SortSpecifier(STATE_ATTR, SortDirection.ASCENDING),
+      new SortSpecifier(ID_ATTR, SortDirection.DESCENDING) };
 
     private class JobRecord extends ListGridRecord {
 
@@ -374,8 +379,8 @@ public class JobsView implements JobsUpdatedListener {
         this.jobsGrid.setSelectionProperty("isSelected");
         this.jobsGrid.setEmptyMessage("No jobs to show");
         this.jobsGrid.setAutoFetchData(true);
-        this.jobsGrid.setSortField(0);
-        this.jobsGrid.setSortDirection(SortDirection.DESCENDING);
+        this.jobsGrid.setShowSortNumerals(false);
+        this.jobsGrid.setSort(DEFAULT_SORT);
 
         ListGridField idField = new ListGridField(ID_ATTR, "Id");
         idField.setType(ListGridFieldType.INTEGER);
@@ -385,6 +390,7 @@ public class JobsView implements JobsUpdatedListener {
 
         ListGridField stateField = new ListGridField(STATE_ATTR, "State");
         stateField.setWidth(100);
+        stateField.setSortNormalizer(sortStatusAndGroup());
 
         ListGridField userField = new ListGridField(USER_ATTR, "User");
         userField.setWidth(140);
@@ -551,5 +557,29 @@ public class JobsView implements JobsUpdatedListener {
         });
 
         return layout;
+    }
+
+    /**
+     * A custom sort for status:
+     *  - pending first
+     *  - running, stalled, paused then
+     *  - all other status (finished, killed,...)
+     */
+    private SortNormalizer sortStatusAndGroup() {
+        return new SortNormalizer() {
+            @Override
+            public Object normalize(ListGridRecord record, String fieldName) {
+                String status = record.getAttribute(fieldName);
+                if (status.equals(JobStatus.PENDING.toString())) {
+                    return 0;
+                } else if (status.equals(JobStatus.RUNNING.toString())
+                  || status.equals(JobStatus.STALLED.toString())
+                  || status.equals(JobStatus.PAUSED.toString())) {
+                    return 1;
+                } else {
+                    return 2;
+                }
+            }
+        };
     }
 }
