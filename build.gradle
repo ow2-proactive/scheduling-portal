@@ -12,6 +12,8 @@ subprojects {
         mavenCentral()
         maven { url 'http://www.smartclient.com/maven2' }
         maven { url 'https://repository.sonatype.org/content/groups/forge/' }
+        maven { url 'http://repo.activeeon.com/content/repositories/snapshots/' }
+        maven { url 'http://repo.activeeon.com/content/repositories/releases/' }
         maven { url 'http://repo.activeeon.com/content/repositories/thirdparty/' }
     }
 
@@ -46,6 +48,8 @@ subprojects {
         runtime 'com.google.gwt:gwt-servlet:2.5.1'
 
         testCompile 'junit:junit:4.11'
+        testCompile 'org.ow2.proactive:rm-server:3.5.0-SNAPSHOT'
+        testCompile 'org.ow2.proactive:scheduler-server:3.5.0-SNAPSHOT'
     }
 
     jar { // build jar with sources for GWT
@@ -84,7 +88,65 @@ project(':rm-portal') {
 
         compile project(':common')
     }
+
+    task copyFiles(type: Copy) {
+        file("$rootDir/dist/jnlp/libs").mkdirs()
+        from configurations.testCompile
+        into file("$rootDir/dist/jnlp/libs")
+    }
+
+    task signAll(dependsOn: [copyFiles]) << {
+        file("$rootDir/dist/jnlp/webstart").mkdirs()
+        libFiles = file("$rootDir/dist/jnlp/libs").listFiles()
+        println("Signing " + libFiles.length + " jars")
+
+        libFiles.each {
+            println("Signing " + it.getAbsolutePath())
+            ant.signjar(
+                    destDir: "$rootDir/dist/jnlp/webstart",
+                    alias: 'http://www.activeeon.com',
+                    jar: it.getAbsolutePath(),
+                    keystore: 'src/jnlp/keys/activeeon.keys',
+                    storepass: 'activeeon123',
+                    preservelastmodified: 'true')
+        }
+
+        println("Signing done")
+    }
+
+//    task generateJnlp(dependsOn: [signAll]) << {
+    task generateJnlp() << {
+        File jnlpTemplateFile = file('src/jnlp/template/node.jnlp')
+        def root = new XmlParser().parse(jnlpTemplateFile)
+        def jnlpFileName = "node.jnlp"
+
+        // Setting information values
+        def information = root.information[0]
+        def title = information.title[0]
+        def vendor = information.vendor[0]
+        title.setValue("ProActive Node Web Start")
+        vendor.setValue("Activeeon")
+        // Setting resources
+        def resource = root.resources[0]
+        def j2se = resource.j2se[0]
+        j2se.@version = "1.6+"
+        def collection = files { file("$rootDir/dist/jnlp/webstart/").listFiles().findAll {it.name.endsWith('.jar')} }
+        collection.each {
+            def resourceValues = [href: it.name]
+            resource.appendNode('jar', resourceValues)
+        }
+        // Setting the main class
+        def applicationDesc = root.'application-desc'[0]
+        applicationDesc.'@main-class' = "org.ow2.proactive.resourcemanager.utils.RMNodeStarter"
+        // Writing the jnlp file filled
+        File jnlpFile = file("$rootDir/dist/jnlp/webstart/" + jnlpFileName)
+        new XmlNodePrinter(new PrintWriter(jnlpFile)).print(root)
+    }
+
+    war.dependsOn generateJnlp
+
     war {
+        from ("$rootDir/dist/jnlp")
         def replaceTokens = {
             it.filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: ['portal_version': project.version])
         }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0+" href="node.jnlp">
+	<information>
+		<title>Proactive Node</title>
+		<vendor>ActiveEon</vendor>
+		<homepage href="http://www.activeeon.com"/>
+		<description>Proactive computing node</description>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.6*"/>
+	</resources>
+	<!--<resources os="Linux" arch="amd64">-->
+		<!--<nativelib href="sigarlinux.jar"/>-->
+	<!--</resources>-->
+	<!--<resources os="Linux" arch="x86">-->
+		<!--<nativelib href="sigarlinuxx86.jar"/>-->
+	<!--</resources>-->
+	<update check="timeout" policy="always"/>
+	<application-desc main-class="org.ow2.proactive.resourcemanager.utils.RMNodeStarter">
+		<argument>-r</argument>
+		<argument>${rm.url}</argument>
+	</application-desc>
+</jnlp>

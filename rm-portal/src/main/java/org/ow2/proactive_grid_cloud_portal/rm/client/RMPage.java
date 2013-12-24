@@ -328,6 +328,23 @@ public class RMPage implements LogListener {
             }
         });
 
+        ToolStripButton nodeButton = new ToolStripButton("Launch Node");
+
+
+
+
+        nodeButton.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        nodeButton.setTooltip("Create and add a new node");
+        nodeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                if (RMPage.this.nsWindow != null)
+                    RMPage.this.nsWindow.destroy();
+                RMPage.this.nsWindow = new NSCreationWindow(controller);
+                RMPage.this.nsWindow.show();
+            }
+        });
+
+
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
         logoutButton.setIcon(Images.instance.exit_16().getSafeUri().asString());
         logoutButton.setTooltip("Logout");
@@ -359,6 +376,7 @@ public class RMPage implements LogListener {
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
+        tools.addButton(nodeButton);
         tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
