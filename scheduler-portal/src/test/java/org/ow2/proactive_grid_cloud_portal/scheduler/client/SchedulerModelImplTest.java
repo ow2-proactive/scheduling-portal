@@ -36,10 +36,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Collections;
 
 import static org.junit.Assert.assertTrue;
 
@@ -134,6 +135,6 @@ public class SchedulerModelImplTest {
     private void addJob(int jobId) {
         Job job = new Job(jobId);
         job.setStatus(JobStatus.RUNNING);
-        scheduler.setJobs(Collections.singletonMap(jobId, job), 1);
+        scheduler.setJobs(new LinkedHashMap<Integer, Job>(Collections.singletonMap(jobId, job)), 1);
     }
 }

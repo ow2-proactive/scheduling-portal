@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private String login = null;
     private String sessionId = null;
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
-    private Map<Integer, Job> jobs = null;
+    private LinkedHashMap<Integer, Job> jobs = null;
     private long jobsRev = -1;
     private Job selectedJob = null;
     private List<Task> selectedTasks = null;
@@ -191,8 +192,13 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
     @Override
-    public Map<Integer, Job> getJobs() {
+    public LinkedHashMap<Integer, Job> getJobs() {
         return this.jobs;
+    }
+
+    @Override
+    public void emptyJobs() {
+        setJobs(null, -1);
     }
 
     /**
@@ -203,14 +209,14 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * @param jobs a jobset, or null
      * @param rev the revision of this jobset
      */
-    void setJobs(Map<Integer, Job> jobs, long rev) {
+    void setJobs(LinkedHashMap<Integer, Job> jobs, long rev) {
         this.jobs = jobs;
         this.jobsRev = rev;
         boolean empty = false;
 
         if (jobs == null) {
             empty = true;
-            this.jobs = new HashMap<Integer, Job>();
+            this.jobs = new LinkedHashMap<Integer, Job>();
         }
 
         for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
