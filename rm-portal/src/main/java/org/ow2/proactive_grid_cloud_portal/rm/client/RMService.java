@@ -260,4 +260,10 @@ public interface RMService extends RemoteService {
      * @throws ServiceException
      */
     String executeNodeScript(String sessionId, String script, String engine, String nodeUrl) throws RestServerException, ServiceException;
+
+    /**
+     * Generates jnlp to launch a node
+     *
+     */
+    String generateJnlp(String sessionId) throws RestServerException, ServiceException;
 }

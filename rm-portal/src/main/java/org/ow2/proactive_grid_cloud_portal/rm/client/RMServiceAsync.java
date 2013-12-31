@@ -233,4 +233,9 @@ public interface RMServiceAsync {
      * @param nodeUrl a target for the script execution
      */
     void executeNodeScript(String sessionId, String script, String engine, String nodeUrl, AsyncCallback<String> callback);
+
+    /**
+     * Generates jnlp to launch a node
+     */
+    void generateJnlp(String sessionId, AsyncCallback<String> async);
 }

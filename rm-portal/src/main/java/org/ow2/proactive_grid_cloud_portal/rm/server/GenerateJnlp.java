@@ -34,42 +34,35 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import java.util.Map;
+import org.apache.commons.io.FileUtils;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.util.SC;
 
-public class RMPortal implements EntryPoint {
+public class GenerateJnlp extends HttpServlet {
 
-    private final RMServiceAsync rmService = GWT.create(RMService.class);
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
 
-    public void onModuleLoad() {
-        JSUtil.addScript("portal/deployJava.js");
-        loadProperties();
+        String sessionId = request.getParameter("sessionid");
+        String jnlpContent = null;
+        try {
+            jnlpContent = ((RMServiceImpl) RMServiceImpl.get()).generateJnlp(sessionId);
+            response.setContentType("application/x-java-jnlp-file");
+            PrintWriter out = response.getWriter();
+            out.println(jnlpContent);
+            out.close();
+        } catch (RestServerException e) {
+            e.printStackTrace();
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        }
     }
-
-    private void loadProperties() {
-        rmService.getProperties(new AsyncCallback<Map<String, String>>() {
-
-            public void onSuccess(Map<String, String> result) {
-                RMConfig.get().load(result);
-                Settings.load();
-                RMController c = new RMController(rmService);
-                GWT.setUncaughtExceptionHandler(c);
-            }
-
-            public void onFailure(Throwable caught) {
-                SC.warn("Unable to get the client properties:<br>" + caught.getMessage());
-            }
-        });
-    }
-
 }

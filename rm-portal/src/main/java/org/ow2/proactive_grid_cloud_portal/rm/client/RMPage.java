@@ -36,6 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.smartgwt.client.types.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -44,10 +47,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.types.VerticalAlignment;
-import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -77,6 +76,9 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+
+import javax.xml.ws.Response;
+import java.io.File;
 
 
 /**
@@ -329,18 +331,13 @@ public class RMPage implements LogListener {
         });
 
         ToolStripButton nodeButton = new ToolStripButton("Launch Node");
-
-
-
-
-        nodeButton.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        nodeButton.setIcon(RMImages.instance.node_free_16().getSafeUri().asString());
         nodeButton.setTooltip("Create and add a new node");
         nodeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (RMPage.this.nsWindow != null)
-                    RMPage.this.nsWindow.destroy();
-                RMPage.this.nsWindow = new NSCreationWindow(controller);
-                RMPage.this.nsWindow.show();
+                String url = GWT.getModuleBaseURL() + "node.jnlp?sessionid=" + controller.getModel().getSessionId();
+                System.out.println("Generating jnlp " + url);
+                Window.open(url, "", "");
             }
         });
 

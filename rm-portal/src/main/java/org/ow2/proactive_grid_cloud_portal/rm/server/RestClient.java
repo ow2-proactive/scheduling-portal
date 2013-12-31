@@ -188,4 +188,10 @@ public interface RestClient {
     String nodeUrl, @FormParam("script")
     String script, @FormParam("scriptEngine")
     String scriptEngine);
+
+    @GET
+    @GZIP
+    @Path("/rm/node/launcher")
+    @Produces("application/json")
+    ClientResponse<InputStream> generateJnlp(@HeaderParam("sessionid") String sessionId);
 }
