@@ -36,6 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import com.google.gwt.user.client.*;
+import com.google.gwt.user.client.Window;
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -77,6 +79,8 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+
+import java.awt.*;
 
 
 /**
@@ -273,6 +277,14 @@ public class RMPage implements LogListener {
             }
         });
 
+        MenuItem nodeMenuItem = new MenuItem("Download Proactive Node", Images.instance.pa_16().getSafeUri()
+                .asString());
+        nodeMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            public void onClick(MenuItemClickEvent event) {
+                Window.open(RMConfig.get().getRestUrl() + "/../node.jar", "", "");
+            }
+        });
+
         MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_16().getSafeUri().asString());
         logoutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -288,7 +300,7 @@ public class RMPage implements LogListener {
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
-        portalMenu.setItems(credMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
