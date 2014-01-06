@@ -110,6 +110,8 @@ public class RMPage implements LogListener {
     private CredentialsWindow credentialsWindow = null;
     /** create node sources */
     private NSCreationWindow nsWindow = null;
+    /** node launcher window */
+    private AddNodeWindow addNodeWindow = null;
 
     /** top pane : textual list of nodes */
     private TreeView treeView = null;
@@ -144,6 +146,7 @@ public class RMPage implements LogListener {
         rl.setBackgroundColor("#fafafa");
 
         this.aboutWindow = new AboutWindow();
+        this.addNodeWindow = new AddNodeWindow();
         this.settingsWindow = new SettingsWindow(controller);
         this.credentialsWindow = new CredentialsWindow();
 
@@ -277,11 +280,12 @@ public class RMPage implements LogListener {
             }
         });
 
-        MenuItem nodeMenuItem = new MenuItem("Download Proactive Node", Images.instance.pa_16().getSafeUri()
+        MenuItem nodeMenuItem = new MenuItem("Launch a Node", Images.instance.pa_16().getSafeUri()
                 .asString());
         nodeMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
-                Window.open(RMConfig.get().getRestUrl() + "/../node.jar", "", "");
+                RMPage.this.addNodeWindow.show();
+                //Window.open(RMConfig.get().getRestUrl() + "/../node.jar", "", "");
             }
         });
 
@@ -453,6 +457,7 @@ public class RMPage implements LogListener {
         this.credentialsWindow.destroy();
         this.settingsWindow.destroy();
         this.aboutWindow.destroy();
+        this.addNodeWindow.destroy();
         if (this.nsWindow != null)
             this.nsWindow.destroy();
     }

@@ -59,6 +59,9 @@ public class RMConfig extends Config {
     private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
     public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
+    public static final String RM_URL = "rm.url";
+    private static final String d_RM_URL = "rmi://localhost:1099";
+
     /** refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "rm.client.refresh.time";
     private static final String d_CLIENT_REFRESH_TIME = "3000";
@@ -123,6 +126,7 @@ public class RMConfig extends Config {
 
     private void setDefaults() {
         properties.put(REST_URL, d_REST_URL);
+        properties.put(RM_URL, d_RM_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
         properties.put(VERSION, d_VERSION);
         properties.put(RM_VERSION, d_RM_VERSION);
@@ -230,6 +234,10 @@ public class RMConfig extends Config {
      */
     public String getRMJmxPrefix() {
         return properties.get(RM_JMX_PREFIX);
+    }
+
+    public String getRMUrl() {
+        return properties.get(RM_URL);
     }
 }
 
