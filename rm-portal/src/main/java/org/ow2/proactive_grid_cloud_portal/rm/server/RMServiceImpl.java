@@ -252,7 +252,7 @@ public class RMServiceImpl extends Service implements RMService {
             String[] policyParameters, String[] policyFileParameters) throws RestServerException,
             ServiceException {
 
-        RestClient cli = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient cli = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
 
         ClientResponse<InputStream> clientResponse = null;
         try {
@@ -602,7 +602,7 @@ public class RMServiceImpl extends Service implements RMService {
 
     @Override
     public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl());
+        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = null;
         try {
             clientResponse = client.getStatHistory(sessionId, range);
