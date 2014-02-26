@@ -10,7 +10,6 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url 'http://www.smartclient.com/maven2' }
         maven { url 'http://repository.sonatype.org/content/groups/forge/' }
         maven { url 'http://repo.activeeon.com/content/repositories/thirdparty/' }
     }
@@ -29,7 +28,7 @@ subprojects {
     dependencies {
         providedCompile 'com.google.gwt:gwt-user:2.5.1'
         providedCompile 'com.google.gwt:gwt-dev:2.5.1'
-        providedCompile 'com.smartgwt:smartgwt:3.1'
+        providedCompile 'com.smartgwt:smartgwt:4.0d-2014-02-26' // SNAPSHOT build to fix PORTAL-356
         providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
         // Needed for GWT compile and at runtime for RequestBuilder
         // Specify two artifacts as workaround for GRADLE-1934
