@@ -1,6 +1,5 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'war'
     apply plugin: 'jetty'
     apply plugin: 'maven'
 
@@ -51,8 +50,6 @@ subprojects {
         from sourceSets.main.allSource
     }
 
-    // war build only enabled for RM and Scheduler
-    war.enabled = false
 }
 
 project(':applet') {
@@ -74,7 +71,6 @@ project(':applet') {
 }
 
 project(':rm-portal') {
-    war.enabled = true
     dependencies {
         compile 'codemirror:codemirror2-gwt:1.2.0'
 
@@ -93,7 +89,6 @@ project(':rm-portal') {
 }
 
 project(':scheduler-portal') {
-    war.enabled = true
     dependencies {
         compile 'raphaelgwt:raphaelgwt:r28'
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
@@ -119,6 +114,7 @@ project(':scheduler-portal') {
 }
 
 configure([project(':scheduler-portal'), project(':rm-portal')]) {
+    apply plugin: 'war'
     task compileGwt(dependsOn: classes, type: JavaExec) {
         inputs.source sourceSets.main.java.srcDirs
         inputs.dir sourceSets.main.output.resourcesDir
