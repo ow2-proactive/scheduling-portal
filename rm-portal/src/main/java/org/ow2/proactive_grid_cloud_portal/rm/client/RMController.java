@@ -43,6 +43,7 @@ import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
@@ -52,7 +53,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
@@ -95,9 +95,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class RMController extends Controller implements UncaughtExceptionHandler {
 
-    static final String SESSION_SETTING = "pa.rm.session";
-    static final String LOGIN_SETTING = "pa.rm.login";
-    static final String LOCAL_SESSION_COOKIE = "pa.rm.local_session";
+    static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
+
+    private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
 
     @Override
     public String getLoginSettingKey() {
@@ -132,6 +132,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /** system.currenttimemillis of last StatHistory call */
     private long lastStatHistReq = 0;
 
+    private Timer autoLoginTimer;
+
     /**
      * Default constructor
      * 
@@ -151,37 +153,67 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         final String session = Settings.get().getSetting(SESSION_SETTING);
 
         if (session != null) {
-            final Label wait = new Label("Rebinding session...");
-            wait.setIcon("loading.gif");
-            wait.setMargin(20);
-            wait.draw();
-
-            this.rm.getState(session, new AsyncCallback<String>() {
-                public void onSuccess(String result) {
-                    if (result.startsWith("you are not connected")) {
-                        wait.destroy();
-                        Settings.get().clearSetting(SESSION_SETTING);
-                        RMController.this.loginPage = new LoginPage(RMController.this, null);
-                    } else {
-                        wait.destroy();
-                        login(session, Settings.get().getSetting(LOGIN_SETTING));
-                        model.logMessage("Rebound session " + session);
-                    }
-                }
-
-                public void onFailure(Throwable caught) {
-                    wait.destroy();
-                    Settings.get().clearSetting(SESSION_SETTING);
-                    RMController.this.loginPage = new LoginPage(RMController.this, null);
-                }
-            });
+            LoadingMessage loadingMessage = new LoadingMessage();
+            loadingMessage.draw();
+            tryLogin(session, loadingMessage);
         } else {
             this.loginPage = new LoginPage(this, null);
+            tryToLoginIfLoggedInScheduler();
+        }
+    }
+
+    private void tryLogin(final String session, final VLayout loadingMessage) {
+        this.rm.getState(session, new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                if (result.startsWith("you are not connected")) {
+                    if (loadingMessage != null) {
+                        loadingMessage.destroy();
+                    }
+                    Settings.get().clearSetting(SESSION_SETTING);
+                    RMController.this.loginPage = new LoginPage(RMController.this, null);
+                    tryToLoginIfLoggedInScheduler();
+                } else {
+                    if (loadingMessage != null) {
+                        loadingMessage.destroy();
+                    }
+                    login(session, Settings.get().getSetting(LOGIN_SETTING));
+                    model.logMessage("Rebound session " + session);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                if (loadingMessage != null) {
+                    loadingMessage.destroy();
+                }
+                Settings.get().clearSetting(SESSION_SETTING);
+                RMController.this.loginPage = new LoginPage(RMController.this, null);
+                tryToLoginIfLoggedInScheduler();
+            }
+        });
+    }
+
+    private void tryToLoginIfLoggedInScheduler() {
+        autoLoginTimer = new Timer() {
+            @Override
+            public void run() {
+                String session = Settings.get().getSetting(SESSION_SETTING);
+                if (session != null) {
+                    tryLogin(session, null);
+                }
+            }
+        };
+        autoLoginTimer.scheduleRepeating(AUTO_LOGIN_TIMER_PERIOD_IN_MS);
+    }
+
+    private void stopTryingLoginIfLoggerInScheduler() {
+        if (autoLoginTimer != null) {
+            autoLoginTimer.cancel();
         }
     }
 
     @Override
     public void login(final String sessionId, final String login) {
+        stopTryingLoginIfLoggerInScheduler();
         rm.getVersion(new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 JSONObject obj = JSONParser.parseStrict(result).isObject();
@@ -754,7 +786,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * if a nodesource is selected, multiple hosts will be removed
      */
     public void removeNodes() {
-        String _msg = null;
+        String _msg;
         int _numNodes = 1;
         if (model.getSelectedNode() != null) {
             _msg = "Node " + model.getSelectedNode().getNodeUrl();
@@ -966,6 +998,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         this.model = new RMModelImpl();
         this.loginPage = new LoginPage(this, message);
+        tryToLoginIfLoggedInScheduler();
     }
 
     /**

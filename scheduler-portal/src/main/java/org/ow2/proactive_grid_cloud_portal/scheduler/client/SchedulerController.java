@@ -46,6 +46,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -59,14 +67,7 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Label;
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
@@ -85,9 +86,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
  */
 public class SchedulerController extends Controller implements UncaughtExceptionHandler {
 
-    static final String SESSION_SETTING = "pa.sched.session";
-    static final String LOGIN_SETTING = "pa.sched.login";
     static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
+
+    private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
 
     @Override
     public String getLoginSettingKey() {
@@ -140,6 +141,8 @@ public class SchedulerController extends Controller implements UncaughtException
     private static final int active_tick = 3;
     private static final int lazy_tick = 20;
 
+    private Timer autoLoginTimer;
+
     /**
      * Default constructor
      *
@@ -161,26 +164,52 @@ public class SchedulerController extends Controller implements UncaughtException
         final String session = Settings.get().getSetting(SESSION_SETTING);
 
         if (session != null) {
-            final Label wait = new Label("Rebinding session...");
-            wait.setIcon("loading.gif");
-            wait.setMargin(20);
-            wait.draw();
-
-            this.scheduler.getSchedulerStatus(session, new AsyncCallback<String>() {
-                public void onSuccess(String result) {
-                    wait.destroy();
-                    login(session, Settings.get().getSetting(LOGIN_SETTING));
-                    model.logMessage("Rebound session " + session);
-                }
-
-                public void onFailure(Throwable caught) {
-                    wait.destroy();
-                    Settings.get().clearSetting(SESSION_SETTING);
-                    SchedulerController.this.loginView = new LoginPage(SchedulerController.this, null);
-                }
-            });
+            LoadingMessage loadingMessage = new LoadingMessage();
+            loadingMessage.draw();
+            tryLogin(session, loadingMessage);
         } else {
             this.loginView = new LoginPage(this, null);
+            tryToLoginIfLoggedInRm();
+        }
+    }
+
+    private void tryLogin(final String session, final VLayout loadingMessage) {
+        this.scheduler.getSchedulerStatus(session, new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                if (loadingMessage != null) {
+                    loadingMessage.destroy();
+                }
+                login(session, Settings.get().getSetting(LOGIN_SETTING));
+                model.logMessage("Rebound session " + session);
+            }
+
+            public void onFailure(Throwable caught) {
+                if (loadingMessage != null) {
+                    loadingMessage.destroy();
+                }
+                Settings.get().clearSetting(SESSION_SETTING);
+                SchedulerController.this.loginView = new LoginPage(SchedulerController.this, null);
+                tryToLoginIfLoggedInRm();
+            }
+        });
+    }
+
+    private void tryToLoginIfLoggedInRm() {
+        autoLoginTimer = new Timer() {
+            @Override
+            public void run() {
+                String session = Settings.get().getSetting(SESSION_SETTING);
+                if (session != null) {
+                    tryLogin(session, null);
+                }
+            }
+        };
+        autoLoginTimer.scheduleRepeating(AUTO_LOGIN_TIMER_PERIOD_IN_MS);
+    }
+
+    private void stopTryingLoginIfLoggerInRm() {
+        if (autoLoginTimer != null) {
+            autoLoginTimer.cancel();
         }
     }
 
@@ -203,6 +232,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
     @Override
     public void login(final String sessionId, final String login) {
+        stopTryingLoginIfLoggerInRm();
         scheduler.getVersion(new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 JSONObject obj = JSONParser.parseStrict(result).isObject();
@@ -1497,6 +1527,7 @@ public class SchedulerController extends Controller implements UncaughtException
         SchedulerController.this.schedulerView = null;
 
         this.loginView = new LoginPage(this, message);
+        tryToLoginIfLoggedInRm();
     }
 
     /**

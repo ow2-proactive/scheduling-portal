@@ -43,6 +43,9 @@ import com.google.gwt.json.client.JSONValue;
 
 public abstract class Controller {
 
+    protected static final String SESSION_SETTING = "pa.session";
+    protected static final String LOGIN_SETTING = "pa.login";
+
     /**
      * @return locally stored data
      */

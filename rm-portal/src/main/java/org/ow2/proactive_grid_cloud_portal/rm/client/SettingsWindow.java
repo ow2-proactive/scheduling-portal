@@ -110,7 +110,7 @@ public class SettingsWindow {
 
                 String refreshTime = form.getValueAsString("refreshTime");
 
-                controller.setUserSettings(refreshTime, false);
+                controller.setUserSettings(refreshTime);
                 window.hide();
             }
         });
@@ -122,7 +122,7 @@ public class SettingsWindow {
                 int refresh = RMConfig.get().getClientRefreshTime();
 
                 form.setValue("refreshTime", refresh);
-                controller.setUserSettings("" + refresh, true);
+                controller.setUserSettings("" + refresh);
             }
         });
 
