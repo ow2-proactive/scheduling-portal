@@ -105,11 +105,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     @Override
-    public String getLogo32Url() {
-        return RMImages.instance.logo_32().getSafeUri().asString();
-    }
-
-    @Override
     public String getLogo350Url() {
         return RMImages.instance.logo_350().getSafeUri().asString();
     }
@@ -888,11 +883,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Override user settings, rewrite cookies, refresh corresponding ui elements
-     * 
-     * @param refreshTime refresh time for update thread in ms
-     * @param forceRefresh refresh ui even if properties did not change
+     *  @param refreshTime refresh time for update thread in ms
+     *
      */
-    public void setUserSettings(String refreshTime, boolean forceRefresh) {
+    public void setUserSettings(String refreshTime) {
 
         boolean refreshChanged = !refreshTime.equals("" + RMConfig.get().getClass());
         RMConfig.get().set(RMConfig.CLIENT_REFRESH_TIME, refreshTime);

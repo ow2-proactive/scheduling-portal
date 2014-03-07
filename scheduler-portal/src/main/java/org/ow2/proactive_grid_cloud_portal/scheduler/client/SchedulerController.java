@@ -95,11 +95,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     @Override
-    public String getLogo32Url() {
-        return SchedulerImages.instance.logo_32().getSafeUri().asString();
-    }
-
-    @Override
     public String getLogo350Url() {
         return SchedulerImages.instance.logo_350().getSafeUri().asString();
     }
@@ -791,8 +786,8 @@ public class SchedulerController extends Controller implements UncaughtException
     /**
      * Fetch the output for the currently selected job
      * store the result (or error msg) in the model
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     * 	 {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobOutput(int logMode) {
         if (this.model.getSelectedJob() == null)
@@ -824,8 +819,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * 
      * @param jobId id of the job containing this task
      * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     * 	 {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getTaskOutput(final int jobId, final Task task, final int logMode) {
         this.model.setLiveOutput("" + jobId, false);
@@ -873,8 +868,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * 
      * @param jobId id of the job containing this task
      * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     *   {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getTaskServerLogs(final int jobId, final String taskname, final ShowLogsCallback logs) {
         Request req = this.scheduler.getTaskServerLogs(model.getSessionId(), jobId, taskname,
@@ -910,8 +905,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * 
      * @param jobId id of the job containing this task
      * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     *   {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobServerLogs(final int jobId, final ShowLogsCallback logs) {
         Request req = this.scheduler.getJobServerLogs(model.getSessionId(), jobId,
@@ -1042,7 +1037,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 }
 
                 public void onSuccess(String result) {
-                    List<Task> tasks = null;
+                    List<Task> tasks;
 
                     JSONValue val = parseJSON(result);
                     JSONArray arr = val.isArray();
@@ -1106,7 +1101,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     scheduler.getSchedulerUsers(model.getSessionId(), new AsyncCallback<String>() {
                         public void onSuccess(String result) {
-                            List<SchedulerUser> users = null;
+                            List<SchedulerUser> users;
 
                             JSONValue val = parseJSON(result);
                             JSONArray arr = val.isArray();
@@ -1259,8 +1254,8 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
 
                     public void onSuccess(String result) {
-                        long rev = 0;
-                        LinkedHashMap<Integer, Job> jobs = null;
+                        long rev;
+                        LinkedHashMap<Integer, Job> jobs;
 
                         JSONValue jsonVal = parseJSON(result);
                         JSONObject jsonInfo = jsonVal.isObject();
@@ -1317,7 +1312,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     /**
-     * @param list of tasks as a JSON array
+     * @param arr list of tasks as a JSON array
      * @return the POJO equivalent 
      */
     private List<Task> getTasksFromJson(JSONArray arr) {
@@ -1406,7 +1401,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Invalidates the current job list if toggling state,
      * refetch immediately a new job list
      * 
-     * @param b true to fetch pending jobs
+     * @param f true to fetch pending jobs
      */
     public void fetchPending(boolean f) {
         if (f == model.isFetchPendingJobs())
@@ -1426,7 +1421,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Invalidates the current job list if toggling state,
      * refetch immediately a new job list
      * 
-     * @param b true to fetch running jobs
+     * @param f true to fetch running jobs
      */
     public void fetchRunning(boolean f) {
         if (f == model.isFetchRunningJobs())
@@ -1446,7 +1441,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Invalidates the current job list if toggling state,
      * refetch immediately a new job list
      * 
-     * @param b true to fetch finished jobs
+     * @param f true to fetch finished jobs
      */
     public void fetchFinished(boolean f) {
         if (f == model.isFetchFinishedJobs())
@@ -1541,7 +1536,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
         scheduler.getSchedulerUsersWithJobs(model.getSessionId(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                List<SchedulerUser> users = null;
+                List<SchedulerUser> users;
 
                 JSONValue val = parseJSON(result);
                 JSONArray arr = val.isArray();

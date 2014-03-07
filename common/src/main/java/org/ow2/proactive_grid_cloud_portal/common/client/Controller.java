@@ -54,11 +54,10 @@ public abstract class Controller {
     public abstract EventDispatcher getEventDispatcher();
 
     /**
-     * login has been succesfully performed,
+     * login has been successfully performed,
      * this method sets the pages & model accordingly.
      * This does NOT perform a server login call
      * 
-     * @param sessionId
      * @param login can be null
      */
     public abstract void login(String sessionId, String login);
@@ -68,11 +67,6 @@ public abstract class Controller {
      *  the login page
      */
     public abstract String getLoginSettingKey();
-
-    /**
-     * @return URL of the small application logo
-     */
-    public abstract String getLogo32Url();
 
     /**
      * @return URL of the large application logo
