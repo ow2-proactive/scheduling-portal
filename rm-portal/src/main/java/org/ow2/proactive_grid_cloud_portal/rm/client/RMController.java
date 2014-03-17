@@ -288,6 +288,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         model.setLoggedIn(false);
         teardown(null);
+        tryToLoginIfLoggedInScheduler();
     }
 
     /**
@@ -998,7 +999,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         this.model = new RMModelImpl();
         this.loginPage = new LoginPage(this, message);
-        tryToLoginIfLoggedInScheduler();
     }
 
     /**

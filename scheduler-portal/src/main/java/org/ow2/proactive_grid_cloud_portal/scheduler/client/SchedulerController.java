@@ -314,6 +314,7 @@ public class SchedulerController extends Controller implements UncaughtException
         // do not wait for the callback, stop the thread immediately
         // or it may try to update stuff while disconnected
         teardown(null);
+        tryToLoginIfLoggedInRm();
     }
 
     /**
@@ -1527,7 +1528,6 @@ public class SchedulerController extends Controller implements UncaughtException
         SchedulerController.this.schedulerView = null;
 
         this.loginView = new LoginPage(this, message);
-        tryToLoginIfLoggedInRm();
     }
 
     /**
