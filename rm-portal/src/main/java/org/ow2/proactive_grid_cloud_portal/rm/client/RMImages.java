@@ -93,12 +93,6 @@ public interface RMImages extends ClientBundle {
     @Source("images/open_16.png")
     ImageResource open_16();
 
-    @Source("images/logo_32.png")
-    ImageResource logo_32();
-
-    @Source("images/logo_350.png")
-    ImageResource logo_350();
-
     @Source("images/refresh.png")
     ImageResource refresh();
 }

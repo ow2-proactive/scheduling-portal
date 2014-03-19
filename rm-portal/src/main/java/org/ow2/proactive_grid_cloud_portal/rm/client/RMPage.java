@@ -378,7 +378,7 @@ public class RMPage implements LogListener {
         tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
-        tools.addMember(new Img(RMImages.instance.logo_32().getSafeUri().asString(), 154, 32));
+        tools.addMember(new Img(RMImagesUnbundled.LOGO_32, 154, 32));
 
         return tools;
     }
