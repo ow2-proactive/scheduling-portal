@@ -93,7 +93,7 @@ public class AboutWindow {
         text.setContents(str);
         text.setWidth100();
 
-        Img img = new Img(Images.instance.about_115().getSafeUri().asString(), 115, 130);
+        Img img = new Img(ImagesUnbundled.ABOUT_115, 115, 130);
 
         pane.addMember(img);
         pane.addMember(text);

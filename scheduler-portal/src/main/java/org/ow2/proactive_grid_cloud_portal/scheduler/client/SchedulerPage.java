@@ -41,6 +41,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
@@ -736,7 +737,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.tasksView = new TasksView(this.controller);
         tasksTab.setPane(this.tasksView.build());
 
-        visuTab = new Tab("Visualization", Images.instance.pa_16().getSafeUri().asString());
+        visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
         this.visuView = new VisualizationView(this.controller);
         visuTab.setPane(this.visuView.build());
 

@@ -41,6 +41,7 @@ import com.google.gwt.user.client.Window;
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
@@ -280,8 +281,7 @@ public class RMPage implements LogListener {
             }
         });
 
-        MenuItem nodeMenuItem = new MenuItem("Launch a Node", Images.instance.pa_16().getSafeUri()
-                .asString());
+        MenuItem nodeMenuItem = new MenuItem("Launch a Node", ImagesUnbundled.PA_16);
         nodeMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 RMPage.this.addNodeWindow.show();

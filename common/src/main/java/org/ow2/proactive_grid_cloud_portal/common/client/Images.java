@@ -54,9 +54,6 @@ public interface Images extends ClientBundle {
     @Source("images/about_16.png")
     ImageResource about_16();
 
-    @Source("images/about_115.png")
-    ImageResource about_115();
-
     @Source("images/clear_16.png")
     ImageResource clear_16();
 
@@ -74,9 +71,6 @@ public interface Images extends ClientBundle {
 
     @Source("images/log_16.png")
     ImageResource log_16();
-
-    @Source("images/pa_16.png")
-    ImageResource pa_16();
 
     @Source("images/search_16.png")
     ImageResource search_16();

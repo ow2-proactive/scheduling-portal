@@ -46,6 +46,7 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -81,7 +82,7 @@ public class AddNodeWindow {
         text.setCanSelectText(true);
         text.setWidth100();
 
-        Img img = new Img(Images.instance.about_115().getSafeUri().asString(), 115, 130);
+        Img img = new Img(ImagesUnbundled.ABOUT_115, 115, 130);
 
         pane.addMember(img);
         pane.addMember(text);
