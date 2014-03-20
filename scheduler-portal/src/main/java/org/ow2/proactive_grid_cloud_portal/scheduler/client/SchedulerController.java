@@ -97,7 +97,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
     @Override
     public String getLogo350Url() {
-        return SchedulerImages.instance.logo_350().getSafeUri().asString();
+        return SchedulerImagesUnbundled.LOGO_350;
     }
 
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */

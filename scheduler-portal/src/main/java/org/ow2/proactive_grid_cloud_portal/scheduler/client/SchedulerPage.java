@@ -569,7 +569,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
-        tools.addMember(new Img(SchedulerImages.instance.logo_32().getSafeUri().asString(), 154, 32));
+        tools.addMember(new Img(SchedulerImagesUnbundled.LOGO_32, 154, 32));
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.KILLED);

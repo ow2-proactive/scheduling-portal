@@ -117,12 +117,6 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/visu_16.png")
     ImageResource visu_16();
 
-    @Source("images/logo_32.png")
-    ImageResource logo_32();
-
-    @Source("images/logo_350.png")
-    ImageResource logo_350();
-
     @Source("images/usage_16.png")
     ImageResource usage_16();
 
