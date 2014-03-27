@@ -36,8 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +43,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -55,6 +54,19 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -69,21 +81,10 @@ import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
 
 
 /**
@@ -109,7 +110,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        SchedulerConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
+        SchedulerConfig.get().load(
+          ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
+        HashMap<String, String> systemPropertiesAsString = new HashMap<String, String>();
+        for (Map.Entry entry : System.getProperties().entrySet()) {
+            systemPropertiesAsString.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+        SchedulerConfig.get().load(systemPropertiesAsString);
     }
 
     /**
