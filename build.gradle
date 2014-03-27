@@ -118,7 +118,7 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
     task compileGwt(dependsOn: classes, type: JavaExec) {
         inputs.source sourceSets.main.java.srcDirs
         inputs.dir sourceSets.main.output.resourcesDir
-        outputs.dir webAppDir
+        outputs.dir "$buildDir/portal"
 
         logging.captureStandardOutput LogLevel.INFO
 
@@ -131,16 +131,19 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
             ]
         }
         args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize() - "-portal"}",
-                '-war', webAppDir,
+                '-war', "$buildDir/portal",
                 '-logLevel', 'INFO',
                 '-localWorkers', '2',
                 '-compileReport',
-                '-extra', webAppDir,
+                '-extra', "$buildDir/portal",
                 '-draftCompile' // Speeds up compile with 25%
         ]
         systemProperties = ['gwt.persistentunitcachedir': buildDir]
 
         jettyRun.dependsOn compileGwt
         war.dependsOn compileGwt
+    }
+    war {
+        from "$buildDir/portal"
     }
 }
