@@ -36,12 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.HTMLPane;
@@ -57,6 +53,13 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import java.util.List;
+import java.util.Map.Entry;
 
 
 /**
@@ -70,9 +73,10 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     private static final String TASKS_ALL = "All Tasks";
 
-    private static final String OUT_ALL = "All logs";
-    private static final String OUT_ERR = "Stderr";
-    private static final String OUT_OUT = "Stdout";
+    private static final String LOG_OUT_ERR = "Out & Err (1024 lines)";
+    private static final String LOG_ERR = "Std Err";
+    private static final String LOG_OUT = "Std Out";
+    private static final String LOG_FULL = "Full logs (download)";
 
     /** displays the job output */
     private HTMLPane text = null;
@@ -113,6 +117,17 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.refreshButton.setTooltip("Request fetching the Output for this job");
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+
+                String selMode = outSelect.getValueAsString();
+                if(selMode.equals(LOG_FULL)) {
+                    if (taskSelect.getValue().equals(TASKS_ALL)) {
+                        downloadFullJobLogs(controller.getModel().getSessionId(), String.valueOf(jobId));
+                    } else {
+                        downloadFullTaskLogs(controller.getModel().getSessionId(), String.valueOf(jobId), (String) taskSelect.getValue());
+                    }
+                    return;
+                }
+
                 OutputView.this.text.hide();
                 OutputView.this.label.setContents("Please wait...");
                 OutputView.this.label.setIcon("loading.gif");
@@ -120,19 +135,18 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
                 isLive = false;
                 int mode;
-                String selMode = outSelect.getValueAsString();
-                if (selMode.equals(OUT_ALL)) {
+                if (selMode.equals(LOG_OUT_ERR)) {
                     mode = SchedulerServiceAsync.LOG_ALL;
-                } else if (selMode.equals(OUT_ERR)) {
+                } else if (selMode.equals(LOG_ERR)) {
                     mode = SchedulerServiceAsync.LOG_STDERR;
                 } else {
                     mode = SchedulerServiceAsync.LOG_STDOUT;
                 }
 
+                int jobId = controller.getModel().getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     OutputView.this.controller.getJobOutput(mode);
                 } else {
-                    int jobId = controller.getModel().getSelectedJob().getId();
 
                     String taskName = (String) taskSelect.getValue();
                     Task task = null;
@@ -142,9 +156,9 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                             break;
                         }
                     }
-                    if (task != null)
+                    if (task != null) {
                         OutputView.this.controller.getTaskOutput(jobId, task, mode);
-                    else {
+                    } else {
                         clear();
                     }
                 }
@@ -198,8 +212,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
         this.outSelect = new SelectItem();
         this.outSelect.setShowTitle(false);
-        this.outSelect.setValueMap(OUT_ALL, OUT_OUT, OUT_ERR);
-        this.outSelect.setValue(OUT_ALL);
+        this.outSelect.setValueMap(LOG_OUT_ERR, LOG_OUT, LOG_ERR, LOG_FULL);
+        this.outSelect.setValue(LOG_OUT_ERR);
 
         DynamicForm form = new DynamicForm();
         form.setColWidths("10", "*", "*", "*");
@@ -234,6 +248,16 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         jobUnselected();
 
         return root;
+    }
+
+    private void downloadFullJobLogs(String sessionId, String jobId) {
+        String url = SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/" + jobId + "/log/full?sessionid="+sessionId;
+        Window.open(url, "_blank", "");
+    }
+
+    private void downloadFullTaskLogs(String sessionId, String jobId, String taskName) {
+        String url = SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/" + jobId + "/tasks/" + taskName + "/result/log/full?sessionid="+sessionId;
+        Window.open(url, "_blank", "");
     }
 
     /*

@@ -56,6 +56,7 @@ public interface SchedulerServiceAsync {
     public static final int LOG_ALL = 1;
     public static final int LOG_STDOUT = 2;
     public static final int LOG_STDERR = 3;
+    public static final int LOG_FULL = 4;
 
     /**
      * Method used for making an asynchronous call to the server for logout.

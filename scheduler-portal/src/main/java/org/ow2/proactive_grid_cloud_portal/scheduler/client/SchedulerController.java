@@ -36,24 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -68,6 +50,24 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -878,7 +878,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         SchedulerController.this.model.setTaskOutput(jobId, task,
                                 "[" + task.getName() + "] <span style='color:red;'>" + msg + "</span>");
                         SchedulerController.this.model.logMessage("Failed to get output for task " +
-                            task.getName() + " in job " + jobId /* + ": " + msg */);
+                                task.getName() + " in job " + jobId /* + ": " + msg */);
 
                         taskOutputRequests.remove("" + task.getId());
                     }
@@ -886,7 +886,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     public void onSuccess(String result) {
                         SchedulerController.this.model.setTaskOutput(jobId, task, result);
                         SchedulerController.this.model.logMessage("Successfully fetched output for task " +
-                            task.getName() + " in job " + jobId);
+                                task.getName() + " in job " + jobId);
 
                         taskOutputRequests.remove("" + task.getId());
                     }
