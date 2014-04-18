@@ -37,7 +37,26 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedHashMap;
 
+import com.google.gwt.dev.jjs.ast.js.JsonArray;
+import com.google.gwt.dev.json.JsonString;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -70,6 +89,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     protected DataTable loadTable;
     protected Options loadOpts;
     protected AbsolutePanel chartContainer;
+    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
     protected Runnable onFinish;
 
@@ -95,7 +115,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         setHeight100();
 
         if (title.length() > 0) {
-            Label label = new Label("<nobr style='font-weight:bold;'>" + title + "<nobr>");
+            Label label = new Label("<nobr style='font-weight:bold;padding-left:10px;'>" + title + "<nobr>");
             label.setHeight(30);
             addMember(label);
         }
@@ -108,6 +128,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadChart.setWidth("100%");
         loadChart.setHeight("200px");
         chartContainer.add(loadChart);
+        if (!(loadChart instanceof PieChart)) {
+            addMember(getTimeSlotSelector());
+        }
         addMember(chartContainer);
     }
 
@@ -117,29 +140,115 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
-        rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs),
-                new AsyncCallback<String>() {
-                    public void onSuccess(String result) {
-                        if (onFinish != null) {
-                            onFinish.run();
-                        }
-                        if (!model.isLoggedIn())
-                            return;
+        final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
-                        model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
-                            (System.currentTimeMillis() - t) + "ms");
-                        processResult(result);
-                    }
+        AsyncCallback callback = new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                if (onFinish != null) {
+                    onFinish.run();
+                }
+                if (!model.isLoggedIn())
+                    return;
 
-                    public void onFailure(Throwable caught) {
-                        if (onFinish != null) {
-                            onFinish.run();
-                        }
-                        if (RMController.getJsonErrorCode(caught) == 401) {
-                            model.logMessage("You have been disconnected from the server.");
-                        }
-                    }
-                });
+                model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
+                        (System.currentTimeMillis() - t) + "ms");
+
+                if (realTime) {
+                    processResult(result);
+                } else {
+                    processHistoryResult(result);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                if (onFinish != null) {
+                    onFinish.run();
+                }
+                if (RMController.getJsonErrorCode(caught) == 401) {
+                    model.logMessage("You have been disconnected from the server.");
+                }
+            }
+        };
+
+        if (realTime) {
+            rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
+        } else {
+            try {
+                rm.getNodeMBeanHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+            } catch (Exception e) {
+                model.logCriticalMessage(e.getMessage());
+            }
+        }
+    }
+
+    protected int getJsonInternalSize(JSONObject json) {
+        for (String key: json.keySet()) {
+            JSONArray values = json.get(key).isArray();
+            if (values!=null) {
+                return values.size();
+            }
+        }
+
+        return 0;
+    }
+
+    protected double[] getJsonSlice(JSONObject json, int i) {
+
+        double[] res = new double[json.keySet().size()];
+
+        int counter = 0;
+        for (String key: json.keySet()) {
+            JSONArray values = json.get(key).isArray();
+            double numValue = 0;
+
+            if (values != null) {
+                JSONNumber num = values.get(i).isNumber();
+                if (num != null) {
+                    numValue = num.doubleValue();
+                }
+            }
+
+            res[counter++] = numValue;
+        }
+        return res;
+    }
+
+    public void processHistoryResult(String result) {
+
+        // removing internal escaping
+        result = result.replace("\\\"", "\"");
+        result = result.replace("\"{", "{");
+        result = result.replace("}\"", "}");
+
+        JSONValue resultVal = controller.parseJSON(result);
+        JSONObject json = resultVal.isObject();
+
+        if (json == null) {
+            return;
+        }
+
+        loadTable.removeRows(0, loadTable.getNumberOfRows());
+        long now = new Date().getTime() / 1000;
+        long dur = timeRange.getDuration();
+        long size = getJsonInternalSize(json);
+        long step = dur / size;
+
+        for (int i=0; i < size; i++) {
+
+            double[] slice = getJsonSlice(json, i);
+            long t = now - dur + step * i;
+            DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
+            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+
+            loadTable.addRow();
+            loadTable.setValue(i, 0, timeStamp);
+
+            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+                loadTable.setValue(i, sliceIndex+1, formatValue(slice[sliceIndex]));
+            }
+        }
+
+        loadChart.draw(loadTable, loadOpts);
     }
 
     protected void addRow() {
@@ -153,7 +262,38 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     public abstract void processResult(String result);
 
+    public double formatValue(double value) {
+        return value;
+    }
+
     public void onFinish(Runnable onFinish) {
         this.onFinish = onFinish;
+    }
+
+    public DynamicForm getTimeSlotSelector() {
+        DynamicForm form = new DynamicForm();
+
+        final SelectItem selectedRange = new SelectItem("statRange", "");
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<String, String>();
+        for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
+            nodeLineValues.put("" + r.getChar(), r.getString());
+        }
+        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
+        selectedRange.setValueMap(nodeLineValues);
+
+        selectedRange.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
+                loadTable.removeRows(0, loadTable.getNumberOfRows());
+                reload();
+            }
+        });
+
+        form.setItems(selectedRange);
+        form.setHeight(24);
+        form.setWidth(40);
+
+        return form;
     }
 }

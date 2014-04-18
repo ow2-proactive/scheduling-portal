@@ -66,6 +66,11 @@ public class SwapLineChart extends MBeanTimeAreaChart {
     }
 
     @Override
+    public double formatValue(double value) {
+        return (long) (value / (1024 * 1024));
+    }
+
+    @Override
     public void processResult(String result) {
         JSONArray array = controller.parseJSON(result).isArray();
         if (array != null) {
@@ -78,7 +83,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
             // getting primitive values of all attributes
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) (value / (1024 * 1024)));
+                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, formatValue(value));
             }
 
             loadChart.draw(loadTable, loadOpts);

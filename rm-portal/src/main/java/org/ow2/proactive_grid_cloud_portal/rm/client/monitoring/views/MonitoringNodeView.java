@@ -36,18 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import java.util.Arrays;
-
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ClassesAreaChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMCpuUsageAreaChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMMemoryAreaChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.Alignment;
@@ -57,6 +45,18 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ClassesAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.CpuUsageAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.JVMMemoryAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
+import java.util.Arrays;
 
 
 /**
@@ -94,7 +94,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
         final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
         final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
-        final MBeanChart cpuUsage = new JVMCpuUsageAreaChart(controller, nodeUrl);
+        final MBeanChart cpuUsage = new CpuUsageAreaChart(controller, nodeUrl);
 
         String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime",
                 "Uptime", "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };

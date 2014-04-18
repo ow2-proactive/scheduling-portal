@@ -59,6 +59,11 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
     }
 
     @Override
+    public double formatValue(double value) {
+        return (long) (value / (1024 * 1024));
+    }
+
+    @Override
     public void processResult(String result) {
         JSONArray array = controller.parseJSON(result).isArray();
         if (array != null) {
@@ -69,7 +74,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
             addRow();
             loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, value / (1024 * 1024));
+            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
             loadChart.draw(loadTable, loadOpts);
         }
     }

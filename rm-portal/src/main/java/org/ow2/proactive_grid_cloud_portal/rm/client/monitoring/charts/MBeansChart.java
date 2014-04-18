@@ -38,6 +38,12 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Arrays;
 
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -60,29 +66,91 @@ public abstract class MBeansChart extends MBeanChart {
         final RMServiceAsync rm = controller.getRMService();
         final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
+        final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
-        rm.getNodeMBeansInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs),
-                new AsyncCallback<String>() {
-                    public void onSuccess(String result) {
-                        if (onFinish != null) {
-                            onFinish.run();
-                        }
-                        if (!model.isLoggedIn())
-                            return;
+        AsyncCallback<String> callback = new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                if (onFinish != null) {
+                    onFinish.run();
+                }
+                if (!model.isLoggedIn())
+                    return;
 
-                        model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
-                            (System.currentTimeMillis() - t) + "ms");
-                        processResult(result);
-                    }
+                model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
+                        (System.currentTimeMillis() - t) + "ms");
 
-                    public void onFailure(Throwable caught) {
-                        if (onFinish != null) {
-                            onFinish.run();
-                        }
-                        if (RMController.getJsonErrorCode(caught) == 401) {
-                            model.logMessage("You have been disconnected from the server.");
-                        }
-                    }
-                });
+                if (realTime) {
+                    processResult(result);
+                } else {
+                    processHistoryResult(result);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                if (onFinish != null) {
+                    onFinish.run();
+                }
+                if (RMController.getJsonErrorCode(caught) == 401) {
+                    model.logMessage("You have been disconnected from the server.");
+                }
+            }
+        };
+
+        if (realTime) {
+            rm.getNodeMBeansInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
+        } else {
+            try {
+                rm.getNodeMBeansHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+            } catch (Exception e) {
+                model.logCriticalMessage(e.getMessage());
+            }
+        }
     }
+
+    protected int getJsonInternalSize(JSONObject json) {
+
+        // assuming the response structure is the following
+        // {mbean1:{theonlyattr:[values]}, mbean2:{theonlyattr:[values]}, ...}
+
+        for (String mbean: json.keySet()) {
+            JSONObject attrObject = json.get(mbean).isObject();
+            if (attrObject != null) {
+                return super.getJsonInternalSize(attrObject);
+            }
+        }
+
+        return 0;
+    }
+
+    protected double[] getJsonSlice(JSONObject json, int i) {
+
+        // assuming the response structure is the following
+        // {mbean1:{theonlyattr:[values]}, mbean2:{theonlyattr:[values]}, ...}
+
+        double[] res = new double[json.keySet().size()];
+
+        int counter = 0;
+        for (String mbean: json.keySet()) {
+            JSONObject attrObject = json.get(mbean).isObject();
+
+            double numValue = 0;
+            if (attrObject != null) {
+                for (String attr: attrObject.keySet()) {
+                    JSONArray values = attrObject.get(attr).isArray();
+
+                    if (values != null) {
+                        JSONNumber num = values.get(i).isNumber();
+                        if (num != null) {
+                            numValue = num.doubleValue();
+                        }
+                    }
+                    break;
+                }
+            }
+
+            res[counter++] = numValue;
+        }
+        return res;
+    }
+
 }

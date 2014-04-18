@@ -38,6 +38,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -80,7 +82,9 @@ public class MBeanTimeAreaChart extends MBeanChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
+        JSONValue json = controller.parseJSON(result);
+        JSONArray array = json.isArray();
+
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
                     new Date(System.currentTimeMillis()));

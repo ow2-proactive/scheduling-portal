@@ -205,10 +205,15 @@ public interface RMService extends RemoteService {
      * @param name of mbean
      * @param nodeJmxUrl mbean server url
      * @param attrs set of mbean attributes
-     * 
+     *
      * @return mbean attributes values
      */
     String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
+            throws RestServerException, ServiceException;
+
+    String getNodeMBeanHistory(String sessionId, String jmxServerUrl, String mbeanName, List<String> strings, String timeRange) throws RestServerException, ServiceException;
+
+    String getNodeMBeansHistory(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs, String timeRange)
             throws RestServerException, ServiceException;
 
     /**
@@ -260,4 +265,5 @@ public interface RMService extends RemoteService {
      * @throws ServiceException
      */
     String executeNodeScript(String sessionId, String script, String engine, String nodeUrl) throws RestServerException, ServiceException;
+
 }

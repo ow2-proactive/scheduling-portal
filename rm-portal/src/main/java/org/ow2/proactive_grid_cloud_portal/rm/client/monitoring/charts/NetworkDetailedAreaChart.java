@@ -38,6 +38,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -63,7 +65,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         time = new long[2];
 
         AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#.# Mb/s");
+        vAxis.set("format", "#.# Kb/s");
         loadOpts.setVAxisOptions(vAxis);
         loadOpts.setLegend(LegendPosition.RIGHT);
         loadTable.setColumnLabel(1, "RX");
@@ -86,7 +88,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                 long t = System.currentTimeMillis();
                 if (history[i] > 0) {
                     double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-                    double mbPerSec = bytePerMilliSec * 1000 / (1024 * 1024);
+                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
                     loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) mbPerSec);
                 } else {
                     loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, 0);
@@ -99,4 +101,64 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             loadChart.draw(loadTable, loadOpts);
         }
     }
+
+    public void processHistoryResult(String result) {
+
+        // removing internal escaping
+        result = result.replace("\\\"", "\"");
+        result = result.replace("\"{", "{");
+        result = result.replace("}\"", "}");
+
+        JSONValue resultVal = controller.parseJSON(result);
+        JSONObject json = resultVal.isObject();
+
+        if (json == null) {
+            return;
+        }
+
+        loadTable.removeRows(0, loadTable.getNumberOfRows());
+        long now = new Date().getTime() / 1000;
+        long dur = timeRange.getDuration();
+        int size = getJsonInternalSize(json);
+        long step = dur / size;
+
+        for (int i=1; i < size; i++) {
+
+            double[] slice = getJsonSlice(json, i);
+
+            if (i == 1) {
+                time = new long[slice.length];
+                history = new long[slice.length];
+            }
+
+            long t = now - dur + step * (i-1);
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                    new Date(t * 1000));
+
+            loadTable.addRow();
+            loadTable.setValue(i-1, 0, timeStamp);
+
+            for (int j=0; j < slice.length; j++) {
+                long value = (long)slice[j];
+
+                if (i > 1) {
+                    double bytePerSec = (value - history[j]) / (t - time[j]);
+                    double kbPerSec = bytePerSec / 1024;
+
+                    if (kbPerSec < 0) {
+                        // rx counter is reset
+                        kbPerSec = 0;
+                    }
+
+                    loadTable.setValue(i-1, j+1, (long) kbPerSec);
+                }
+
+                history[j] = value;
+                time[j] = t;
+            }
+        }
+
+        loadChart.draw(loadTable, loadOpts);
+    }
+
 }

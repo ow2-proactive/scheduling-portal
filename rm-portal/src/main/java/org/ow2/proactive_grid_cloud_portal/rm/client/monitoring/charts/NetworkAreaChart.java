@@ -36,8 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
+import com.google.gwt.json.client.JSONValue;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -62,7 +66,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
         AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#.# Mb/s");
+        vAxis.set("format", "#.# Kb/s");
         loadOpts.setVAxisOptions(vAxis);
     }
 
@@ -98,7 +102,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 long t = System.currentTimeMillis();
                 if (txBytes[colIndex - 1] > 0) {
                     double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
-                    double mbPerSec = bytePerMilliSec * 1000 / (1024 * 1024);
+                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
                     loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
                 }
 
@@ -111,6 +115,66 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             loadChart.draw(loadTable, loadOpts);
         }
     }
+
+    public void processHistoryResult(String result) {
+
+        // removing internal escaping
+        result = result.replace("\\\"", "\"");
+        result = result.replace("\"{", "{");
+        result = result.replace("}\"", "}");
+
+        JSONValue resultVal = controller.parseJSON(result);
+        JSONObject json = resultVal.isObject();
+
+        if (json == null) {
+            return;
+        }
+
+        loadTable.removeRows(0, loadTable.getNumberOfRows());
+        long now = new Date().getTime() / 1000;
+        long dur = timeRange.getDuration();
+        int size = getJsonInternalSize(json);
+        long step = dur / size;
+
+        for (int i=1; i < size; i++) {
+
+            double[] slice = getJsonSlice(json, i);
+
+            if (i == 1) {
+                time = new long[slice.length];
+                txBytes = new long[slice.length];
+            }
+
+            long t = now - dur + step * (i-1);
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(
+                    new Date(t * 1000));
+
+            loadTable.addRow();
+            loadTable.setValue(i-1, 0, timeStamp);
+
+            for (int j=0; j < slice.length; j++) {
+                long value = (long)slice[j];
+
+                if (i > 1) {
+                    double bytePerSec = (value - txBytes[j]) / (t - time[j]);
+                    double kbPerSec = bytePerSec / 1024;
+
+                    if (kbPerSec < 0) {
+                        // rx counter is reset
+                        kbPerSec = 0;
+                    }
+
+                    loadTable.setValue(i-1, j+1, (long) kbPerSec);
+                }
+
+                txBytes[j] = value;
+                time[j] = t;
+            }
+        }
+
+        loadChart.draw(loadTable, loadOpts);
+    }
+
 
     private String beautifyName(String mbeanName) {
         // sigar:Name=lo,Type=NetInterface

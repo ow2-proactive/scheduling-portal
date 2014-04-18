@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
 import com.google.gwt.http.client.Request;
@@ -181,7 +183,7 @@ public interface RMServiceAsync {
      * @param name of mbean
      * @param nodeJmxUrl mbean server url
      * @param attrs set of mbean attributes
-     * 
+     *
      * @return mbean attributes values
      */
     void getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs,
@@ -199,6 +201,12 @@ public interface RMServiceAsync {
      */
     void getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames, List<String> attrs,
             AsyncCallback<String> callback);
+
+    void getNodeMBeanHistory(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs, String timeRange, AsyncCallback callback)
+            throws RestServerException, ServiceException;
+
+    void getNodeMBeansHistory(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs, String timeRange, AsyncCallback callback)
+            throws RestServerException, ServiceException;
 
     /**
      * Statistic history for the following values:<pre>
