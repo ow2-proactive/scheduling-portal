@@ -55,6 +55,7 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.ImgButton;
@@ -471,6 +472,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
         this.tasksGrid.setFields(idField, statusField, nameField, execDuration, nodeCount, executions,
                 failures, visu);
+        this.tasksGrid.sort(ID_ATTR, SortDirection.ASCENDING);
 
         this.loadingLabel = new Label("fetching tasks...");
         this.loadingLabel.setIcon("loading.gif");
