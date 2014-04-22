@@ -49,6 +49,7 @@ import javax.management.ObjectName;
 import javax.ws.rs.core.Response.Status;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
@@ -99,6 +100,7 @@ public class RMServiceImpl extends Service implements RMService {
      */
     private void loadProperties() {
         RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
+        ConfigUtils.loadSystemProperties(RMConfig.get());
     }
 
     /*

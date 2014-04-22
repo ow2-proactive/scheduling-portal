@@ -55,6 +55,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
@@ -112,11 +113,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     private void loadProperties() {
         SchedulerConfig.get().load(
           ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
-        HashMap<String, String> systemPropertiesAsString = new HashMap<String, String>();
-        for (Map.Entry entry : System.getProperties().entrySet()) {
-            systemPropertiesAsString.put(entry.getKey().toString(), entry.getValue().toString());
-        }
-        SchedulerConfig.get().load(systemPropertiesAsString);
+        ConfigUtils.loadSystemProperties(SchedulerConfig.get());
     }
 
     /**
