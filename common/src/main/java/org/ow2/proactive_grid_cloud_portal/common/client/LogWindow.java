@@ -103,7 +103,7 @@ public class LogWindow implements LogListener {
         this.fullContent = "";
         fullLineCount = 0;
         briefLineCount = 0;
-        this.text.setContents("");
+        this.text.setContents(" "); // whitespace otherwise they won't be replaced in text panel
     }
 
     public void destroy() {

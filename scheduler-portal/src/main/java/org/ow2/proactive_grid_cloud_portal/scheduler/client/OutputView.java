@@ -36,7 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import com.google.gwt.core.client.GWT;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Canvas;
@@ -53,13 +59,6 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
-import java.util.List;
-import java.util.Map.Entry;
 
 
 /**
@@ -355,7 +354,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     }
 
     private void clear() {
-        this.text.setContents("");
+        this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
         this.text.hide();
         this.refreshButton.show();
         this.liveCheck.show();
@@ -385,7 +384,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         if (this.isLive)
             return;
 
-        String content = "";
+        String content = " "; // whitespace otherwise it logs are empty, they won't be replaced in text panel
         if (this.taskSelect.getValueAsString().equals(TASKS_ALL)) {
             // alternate bgcolors for each entry
             boolean even = false;
