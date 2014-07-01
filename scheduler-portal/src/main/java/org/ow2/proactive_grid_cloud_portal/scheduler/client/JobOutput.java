@@ -58,6 +58,9 @@ public class JobOutput {
     private static final Comparator<Task> TASK_FINISHED_TIME_COMPARATOR = new Comparator<Task>() {
         @Override
         public int compare(Task o1, Task o2) {
+            if (o1.equals(o2)) {
+                return 0;
+            }
             return (int) (o1.getFinishTime() - o2.getFinishTime());
         }
     };

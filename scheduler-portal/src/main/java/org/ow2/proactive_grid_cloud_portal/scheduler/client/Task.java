@@ -258,10 +258,6 @@ public class Task implements Serializable, Comparable<Task> {
         return "id";
     }
 
-    public int compareTo(Task task) {
-        return ((Long) this.id).compareTo(task.getId());
-    }
-
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "hostName=" +
             hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
@@ -270,10 +266,16 @@ public class Task implements Serializable, Comparable<Task> {
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof Task))
-            return false;
+        return o instanceof Task && this.id == ((Task) o).getId();
+    }
 
-        return this.id == ((Task) o).getId();
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
+
+    public int compareTo(Task task) {
+        return ((Long) this.id).compareTo(task.getId());
     }
 
     /**

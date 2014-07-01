@@ -69,6 +69,25 @@ public class JobOutputTest {
         assertEquals("output_second", allTaskOutput.get(1).get(0));
     }
 
+    // PORTAL-348
+    @Test
+    public void tasks_are_unique_in_job_ouput() throws Exception {
+        JobOutput jobOutput = new JobOutput(1);
+        Task firstTask = createTask(1, 42);
+
+        jobOutput.update(firstTask, Collections.singletonList("output"));
+
+        firstTask.setFinishTime(123);
+        jobOutput.update(firstTask, Collections.singletonList("finished"));
+
+        assertEquals(1, jobOutput.getLines().size());
+
+        Task firstTaskDifferentObject = createTask(1, 456);
+        jobOutput.update(firstTaskDifferentObject, Collections.singletonList("finished_new_object"));
+
+        assertEquals(1, jobOutput.getLines().size());
+    }
+
     private Task createTask(int id, int finishedTime) {
         Task firstTask = new Task();
         firstTask.setId(id);
