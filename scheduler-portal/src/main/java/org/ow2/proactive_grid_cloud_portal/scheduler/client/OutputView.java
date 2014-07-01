@@ -259,10 +259,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         Window.open(url, "_blank", "");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.shared.job.Job)
-     */
     public void jobSelected(Job job) {
         this.refreshButton.setDisabled(false);
         if (job.getId() == this.jobId)
@@ -302,10 +298,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
-     */
     public void jobUnselected() {
         this.jobId = 0;
         this.refreshButton.hide();
@@ -318,10 +310,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.label.setContents("No job selected");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobOutputListener#jobOutputUpdated(org.ow2.proactive_grid_cloud_portal.client.JobOutput)
-     */
     public void jobOutputUpdated(JobOutput output) {
         if (this.isLive)
             return;
@@ -335,10 +323,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobOutputListener#liveOutputUpdated(java.lang.String, java.lang.String)
-     */
     public void liveOutputUpdated(String jobId, String out) {
         if (!controller.getModel().isLiveOutput(jobId))
             return;
@@ -433,17 +417,9 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.text.show();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
-     */
     public void tasksUpdating(boolean jobChanged) {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org.ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
-     */
     public void tasksUpdated(List<Task> tasks) {
         if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
             return;
@@ -477,10 +453,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
-     */
     public void tasksUpdatedFailure(String message) {
     }
 }
