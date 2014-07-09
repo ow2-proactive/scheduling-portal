@@ -191,7 +191,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
                     userSelect.enable();
                 }
 
-                if (userSelect.getValue().equals(controller.getModel().getLogin())
+                if (userSelect.getValue() != null && userSelect.getValue().equals(controller.getModel().getLogin())
                         && !formatted.contains(controller.getModel().getLogin())) {
                     // remove default value (user login) as he has not yet submitted jobs
                     userSelect.clearValue();
