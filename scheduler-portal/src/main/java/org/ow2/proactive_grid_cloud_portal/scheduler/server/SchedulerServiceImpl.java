@@ -43,7 +43,6 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -56,8 +55,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
@@ -69,23 +68,23 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
 
 /**
@@ -99,12 +98,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
     private ClientExecutor executor;
-    
+    private DefaultHttpClient httpClient;
+
     @Override
     public void init() {
         loadProperties();
-        
-        executor = HttpUtils.createDefaultExecutor();
+        httpClient = HttpUtils.createDefaultExecutor();
+        executor = new ApacheHttpClient4Executor(httpClient);
     }
 
     /**
@@ -125,8 +125,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws ServiceException
      */
     public String submitXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
-        PostMethod method = new PostMethod(SchedulerConfig.get().getRestUrl() + "/scheduler/submit");
-        method.addRequestHeader("sessionId", sessionId);
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/submit");
+        method.addHeader("sessionId", sessionId);
 
         boolean isJar = isJarFile(file);
 
@@ -135,26 +135,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String mime = (isJar) ? "application/java-archive" : "application/xml";
             String charset = "ISO-8859-1";
 
-            Part[] parts = { new FilePart(name, file, mime, charset) };
-            method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
+            MultipartEntity entity = new MultipartEntity();
+            entity.addPart("file", new FileBody(file, name, mime, charset));
+            method.setEntity(entity);
 
-            HttpClient httpClient = new HttpClient();
-
-            int status = httpClient.executeMethod(method);
-            InputStream is = method.getResponseBodyAsStream();
+            HttpResponse execute = httpClient.execute(method);
+            InputStream is = execute.getEntity().getContent();
             String ret = convertToString(is);
 
-            if (status == 200) {
+            if (execute.getStatusLine().getStatusCode() == 200) {
                 if (ret == null) {
                     throw new RestServerException(500, "Failed to get submission Id");
                 } else {
                     return ret;
                 }
             } else {
-                throw new RestServerException(status, ret);
+                throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
             }
-        } catch (HttpException e) {
-            throw new ServiceException("HTTP Error: " + e.getMessage());
         } catch (IOException e) {
             throw new ServiceException("Failed to read response: " + e.getMessage());
         } finally {
@@ -434,34 +431,36 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     public String login(String login, String pass, File cred, String ssh) throws RestServerException,
             ServiceException {
-        PostMethod method = new PostMethod(SchedulerConfig.get().getRestUrl() + "/scheduler/login");
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/login");
 
         try {
-            Part[] parts;
+            MultipartEntity entity = new MultipartEntity();
+
             if (cred == null) {
-                parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
-                        new StringPart("sshkey", ssh) };
+                entity.addPart("username", new StringBody(login));
+                entity.addPart("password", new StringBody(pass));
+                entity.addPart("sshkey", new StringBody(ssh));
+
             } else {
-                parts = new Part[] { new FilePart("credential", cred) };
+                entity.addPart("credential", new FileBody(cred, "application/octet-stream"));
             }
 
-            method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
+            method.setEntity(entity);
 
-            HttpClient httpClient = new HttpClient();
-            int status = httpClient.executeMethod(method);
-            String response = convertToString(method.getResponseBodyAsStream());
-            switch (status) {
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
+            switch (response.getStatusLine().getStatusCode()) {
                 case 200:
                     break;
                 default:
-                    String message = response;
+                    String message = responseAsString;
                     if (message == null || message.trim().length() == 0) {
-                        message = "{ \"httpErrorCode\": " + status + "," + "\"errorMessage\": \"" +
-                            method.getStatusText() + "\" }";
+                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
+                            response.getStatusLine().getReasonPhrase() + "\" }";
                     }
-                    throw new RestServerException(status, message);
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
             }
-            return response;
+            return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
@@ -484,24 +483,24 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     public String createCredentials(String login, String pass, String ssh) throws RestServerException,
             ServiceException {
-        PostMethod method = new PostMethod(SchedulerConfig.get().getRestUrl() + "/scheduler/createcredential");
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/createcredential");
 
         try {
-            Part[] parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
-                    new StringPart("sshkey", ssh) };
+            MultipartEntity entity = new MultipartEntity();
+            entity.addPart("username", new StringBody(login));
+            entity.addPart("password", new StringBody(pass));
+            entity.addPart("sshkey", new StringBody(ssh));
 
-            method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
+            method.setEntity(entity);
 
-            HttpClient httpClient = new HttpClient();
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
 
-            int status = httpClient.executeMethod(method);
-            String response = convertToString(method.getResponseBodyAsStream());
-
-            switch (status) {
+            switch (response.getStatusLine().getStatusCode()) {
                 case 200:
-                    return response;
+                    return responseAsString;
                 default:
-                    throw new RestServerException(status, response);
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
             }
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());

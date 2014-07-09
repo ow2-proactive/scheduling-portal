@@ -50,25 +50,26 @@ import javax.ws.rs.core.Response.Status;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ProxyFactory;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ow2.proactive_grid_cloud_portal.common.shared.HttpUtils.convertToString;
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
 
 /**
@@ -80,11 +81,13 @@ public class RMServiceImpl extends Service implements RMService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RMServiceImpl.class);
 
     private ClientExecutor executor;
-    
+    private DefaultHttpClient httpClient;
+
     @Override
     public void init() {
         loadProperties();
-        executor = HttpUtils.createDefaultExecutor();
+        httpClient = HttpUtils.createDefaultExecutor();
+        executor = new ApacheHttpClient4Executor(httpClient);
     }
 
     /*
@@ -117,31 +120,37 @@ public class RMServiceImpl extends Service implements RMService {
      * @see Service#login(java.lang.String, java.lang.String, java.io.File, java.lang.String)
      */
     public String login(String login, String pass, File cred, String ssh) throws RestServerException,
-            ServiceException {
-        PostMethod method = new PostMethod(RMConfig.get().getRestUrl() + "/rm/login");
+      ServiceException {
+        HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
 
         try {
-            Part[] parts;
+            MultipartEntity entity = new MultipartEntity();
+
             if (cred == null) {
-                parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
-                        new StringPart("sshkey", ssh) };
+                entity.addPart("username", new StringBody(login));
+                entity.addPart("password", new StringBody(pass));
+                entity.addPart("sshkey", new StringBody(ssh));
+
             } else {
-                parts = new Part[] { new FilePart("credential", cred) };
+                entity.addPart("credential", new FileBody(cred, "application/octet-stream"));
             }
 
-            method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
-            HttpClient httpClient = new HttpClient();
-            int status = httpClient.executeMethod(method);
-            String response = convertToString(method.getResponseBodyAsStream());
+            method.setEntity(entity);
 
-            switch (status) {
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
+            switch (response.getStatusLine().getStatusCode()) {
                 case 200:
                     break;
                 default:
-                    throw new RestServerException(status, response);
+                    String message = responseAsString;
+                    if (message == null || message.trim().length() == 0) {
+                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
+                          response.getStatusLine().getReasonPhrase() + "\" }";
+                    }
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
             }
-            return response;
-
+            return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
@@ -218,24 +227,24 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String createCredentials(String login, String pass, String ssh) throws RestServerException,
             ServiceException {
-        PostMethod method = new PostMethod(RMConfig.get().getRestUrl() + "/scheduler/createcredential");
+        HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/scheduler/createcredential");
 
         try {
-            Part[] parts = new Part[] { new StringPart("username", login), new StringPart("password", pass),
-                    new StringPart("sshkey", ssh) };
+            MultipartEntity entity = new MultipartEntity();
+            entity.addPart("username", new StringBody(login));
+            entity.addPart("password", new StringBody(pass));
+            entity.addPart("sshkey", new StringBody(ssh));
 
-            method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
+            method.setEntity(entity);
 
-            HttpClient httpClient = new HttpClient();
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
 
-            int status = httpClient.executeMethod(method);
-            String response = convertToString(method.getResponseBodyAsStream());
-
-            switch (status) {
+            switch (response.getStatusLine().getStatusCode()) {
                 case 200:
-                    return response;
+                    return responseAsString;
                 default:
-                    throw new RestServerException(status, response);
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to create credentials", e);
