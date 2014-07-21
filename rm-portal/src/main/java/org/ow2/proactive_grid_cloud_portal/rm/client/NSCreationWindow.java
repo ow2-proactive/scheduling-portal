@@ -192,7 +192,7 @@ public class NSCreationWindow {
                         }
                         infra.setValue(f.getValue());
                         infra.setWidth(250);
-                        infra.setHint(f.getDescription());
+                        infra.setHint("<nobr>" + f.getDescription() + "</nobr>");
                         forms.add(infra);
                         tmpAll.add(infra);
                     }
@@ -235,7 +235,7 @@ public class NSCreationWindow {
                         }
                         pol.setValue(f.getValue());
                         pol.setWidth(250);
-                        pol.setHint(f.getDescription());
+                        pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
                         forms.add(pol);
                         tmpAll.add(pol);
                     }
