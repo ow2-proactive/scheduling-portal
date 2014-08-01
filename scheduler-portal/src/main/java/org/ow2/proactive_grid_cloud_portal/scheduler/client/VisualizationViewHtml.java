@@ -36,40 +36,32 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.HashMap;
+import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**
  * Displays an html of the currently selected job if available
  *
  */
-public class VisualizationViewHtml extends VisualizationView {
+public class VisualizationViewHtml implements VisualizationView {
 
-    private SchedulerController controller = null;
-    private Layout root = null;
     private Layout wrapper = new Layout();
     private HTML htmlPanel;
     private HashMap<String, Element> task2Dom = null;
-    private List<Task> tasks2Update = null;
+    private List<Task> currentTasks = null;
 
-    private static String TASK_STATUS_PREFFIX = "task-status-";
-
-    VisualizationViewHtml(SchedulerController controller) {
-        this.controller = controller;
-        controller.getEventDispatcher().addVisualizationListener(this);
-        controller.getEventDispatcher().addJobSelectedListener(this);
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
-    }
+    private static final String TASK_STATUS_PREFIX = "task-status-";
+    private Label noJobSelectedMessage;
 
     public void imageUpdated(String jobId, String path) {
         hideHtml();
@@ -83,9 +75,14 @@ public class VisualizationViewHtml extends VisualizationView {
     }
 
     public void jobSelected(Job job) {
+        noJobSelectedMessage.setVisible(false);
     }
 
     public void jobUnselected() {
+        htmlPanel.setHTML("");
+        wrapper.setWidth100();
+        wrapper.setHeight100();
+        noJobSelectedMessage.setVisible(true);
     }
 
     public void visualizationUnavailable(String jobId) {
@@ -96,26 +93,23 @@ public class VisualizationViewHtml extends VisualizationView {
     }
 
     public void tasksUpdated(List<Task> tasks) {
-        for (Task t : tasks) {
-            String name = t.getName();
-            if (task2Dom != null) {
-                Element taskElem = task2Dom.get(name);
-                if (taskElem != null) {
-                    String classes = taskElem.getClassName();
-                    int statusIndex = classes.indexOf(TASK_STATUS_PREFFIX);
-                    if (statusIndex != -1) {
-                        classes = classes.substring(0, statusIndex);
-                    }
+        if (tasks != null) { // received HTML before tasks
+            for (Task t : tasks) {
+                if (task2Dom != null) {
+                    Element taskElem = task2Dom.get(t.getName());
+                    if (taskElem != null) {
+                        String classes = taskElem.getClassName();
+                        int statusIndex = classes.indexOf(TASK_STATUS_PREFIX);
+                        if (statusIndex != -1) {
+                            classes = classes.substring(0, statusIndex);
+                        }
 
-                    classes += " " + TASK_STATUS_PREFFIX + String.valueOf(t.getStatus()).toLowerCase();
-                    taskElem.setClassName(classes);
+                        classes += " " + TASK_STATUS_PREFIX + String.valueOf(t.getStatus()).toLowerCase();
+                        taskElem.setClassName(classes);
+                    }
                 }
-            } else {
-                if (tasks2Update == null) {
-                    tasks2Update = new LinkedList<Task>();
-                }
-                tasks2Update.add(t);
             }
+            currentTasks = tasks;
         }
     }
 
@@ -133,7 +127,7 @@ public class VisualizationViewHtml extends VisualizationView {
 
         task2Dom = new HashMap<String, Element>();
         NodeList<Element> elements = htmlPanel.getElement().getElementsByTagName("div");
-        if (elements!=null) {
+        if (elements != null) {
             for (int i = 0; i < elements.getLength(); i++) {
                 Element elem = elements.getItem(i);
                 if (elem.getClassName().contains("task")) {
@@ -147,11 +141,7 @@ public class VisualizationViewHtml extends VisualizationView {
             }
         }
 
-        if (tasks2Update != null) {
-            tasksUpdated(tasks2Update);
-            tasks2Update = null;
-        }
-
+        tasksUpdated(currentTasks);
     }
 
     private void showHtml() {
@@ -167,16 +157,21 @@ public class VisualizationViewHtml extends VisualizationView {
     }
 
     public void setRoot(Layout layout) {
-        this.root = layout;
 
         wrapper = new Layout();
         wrapper.setWidth100();
         wrapper.setHeight100();
 
+        this.noJobSelectedMessage = new Label("No job selected.");
+        this.noJobSelectedMessage.setAlign(Alignment.CENTER);
+        this.noJobSelectedMessage.setWidth100();
+        wrapper.addMember(noJobSelectedMessage);
+
         htmlPanel = new HTML();
         htmlPanel.getElement().setId("html-view");
         wrapper.addMember(htmlPanel);
-        root.addMember(wrapper);
+
+        layout.addMember(wrapper);
     }
 
     private String extractCss(String html, String cssName) {

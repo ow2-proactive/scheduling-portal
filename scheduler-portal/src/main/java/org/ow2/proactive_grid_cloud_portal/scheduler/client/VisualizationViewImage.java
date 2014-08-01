@@ -36,8 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.hydro4ge.raphaelgwt.client.Raphael;
@@ -51,17 +55,16 @@ import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.WidgetCanvas;
-import com.smartgwt.client.widgets.events.*;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.MouseStillDownEvent;
+import com.smartgwt.client.widgets.events.MouseStillDownHandler;
+import com.smartgwt.client.widgets.events.ResizedEvent;
+import com.smartgwt.client.widgets.events.ResizedHandler;
+import com.smartgwt.client.widgets.events.ScrolledEvent;
+import com.smartgwt.client.widgets.events.ScrolledHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
 
 
 /**
@@ -71,7 +74,7 @@ import java.util.Map.Entry;
  * @author mschnoor
  *
  */
-public class VisualizationViewImage extends VisualizationView {
+public class VisualizationViewImage implements VisualizationView {
 
     private SchedulerController controller = null;
 
@@ -257,9 +260,6 @@ public class VisualizationViewImage extends VisualizationView {
     VisualizationViewImage(SchedulerController controller) {
         this.controller = controller;
         this.boxes = new HashMap<String, Box>();
-        controller.getEventDispatcher().addVisualizationListener(this);
-        controller.getEventDispatcher().addJobSelectedListener(this);
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
     }
 
     /*
@@ -538,7 +538,7 @@ public class VisualizationViewImage extends VisualizationView {
             this.overlay = null;
             this.root.removeChild(this.navIcon);
         }
-        this.message.setContents("No job selected");
+        this.message.setContents("No job selected.");
         this.message.setIcon(null);
         this.message.setVisible(true);
     }

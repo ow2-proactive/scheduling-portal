@@ -125,7 +125,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     /** displays scheduler & accounting stats */
     private StatisticsView statsView = null;
     /** job visualization */
-    private VisualizationView visuView = null;
+    private VisualizationViewSwitcher visuView = null;
     /** logs for async scheduler callbacks */
     private LogWindow logWindow = null;
     /** about this app */
@@ -738,7 +738,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         tasksTab.setPane(this.tasksView.build());
 
         visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
-        this.visuView = new VisualizationView(this.controller);
+        this.visuView = new VisualizationViewSwitcher(this.controller);
         visuTab.setPane(this.visuView.build());
 
         final Tab usersTab = new Tab("Users", Images.instance.user_16().getSafeUri().asString());

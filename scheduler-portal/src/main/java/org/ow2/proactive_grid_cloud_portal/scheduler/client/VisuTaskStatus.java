@@ -40,7 +40,7 @@ import java.io.Serializable;
 
 
 /**
- * This should be an private inner class in {@link VisualizationView} but GWT
+ * This should be an private inner class in {@link VisualizationViewSwitcher} but GWT
  * fails to serialize inner classes in RPCs
  * 
  * 

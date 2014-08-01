@@ -1,11 +1,10 @@
 /*
- * ################################################################
- *
+ *  *
  * ProActive Parallel Suite(TM): The Java(TM) library for
  *    Parallel, Distributed, Multi-Core Computing for
  *    Enterprise Grids & Clouds
  *
- * Copyright (C) 1997-2011 INRIA/University of
+ * Copyright (C) 1997-2014 INRIA/University of
  *                 Nice-Sophia Antipolis/ActiveEon
  * Contact: proactive@ow2.org or contact@activeeon.com
  *
@@ -31,149 +30,13 @@
  *                        http://proactive.inria.fr/team_members.htm
  *  Contributor(s):
  *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
+ *  * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-
-import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.hydro4ge.raphaelgwt.client.Raphael;
-import com.hydro4ge.raphaelgwt.client.Raphael.Rect;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.types.Cursor;
-import com.smartgwt.client.types.ImageStyle;
-import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.Img;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.WidgetCanvas;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.MouseStillDownEvent;
-import com.smartgwt.client.widgets.events.MouseStillDownHandler;
-import com.smartgwt.client.widgets.events.ResizedEvent;
-import com.smartgwt.client.widgets.events.ResizedHandler;
-import com.smartgwt.client.widgets.events.ScrolledEvent;
-import com.smartgwt.client.widgets.events.ScrolledHandler;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.menu.Menu;
 
 
-/**
- * Displays an image of the currently selected job if available 
- * 
- * 
- * @author mschnoor
- *
- */
-public class VisualizationView implements JobSelectedListener, VisualizationListener, LoadHandler,
-        TasksUpdatedListener {
-
-    private VisualizationViewHtml htmlView;
-    private VisualizationViewImage imageView;
-
-    private VisualizationView activeVisualization;
-
-    VisualizationView() {}
-
-    VisualizationView(SchedulerController controller) {
-        this.htmlView = new VisualizationViewHtml(controller);
-        this.imageView = new VisualizationViewImage(controller);
-
-        this.activeVisualization = this.htmlView;
-    }
-
-    @Override
-    public void jobSelected(Job job) {
-        this.activeVisualization.jobSelected(job);
-    }
-
-    @Override
-    public void jobUnselected() {
-        this.activeVisualization.jobUnselected();
-    }
-
-    @Override
-    public void onLoad(LoadEvent event) {
-        this.activeVisualization.onLoad(event);
-    }
-
-    @Override
-    public void tasksUpdating(boolean jobChanged) {
-        this.activeVisualization.tasksUpdating(jobChanged);
-    }
-
-    @Override
-    public void tasksUpdated(List<Task> tasks) {
-        this.activeVisualization.tasksUpdated(tasks);
-    }
-
-    @Override
-    public void tasksUpdatedFailure(String message) {
-        this.activeVisualization.tasksUpdatedFailure(message);
-    }
-
-    @Override
-    public void htmlUpdated(String jobId, String path) {
-        this.activeVisualization = this.htmlView;
-
-        this.imageView.htmlUpdated(jobId, path);
-        this.htmlView.htmlUpdated(jobId, path);
-    }
-
-    @Override
-    public void imageUpdated(String jobId, String path) {
-        this.activeVisualization = this.imageView;
-
-        this.imageView.imageUpdated(jobId, path);
-        this.htmlView.imageUpdated(jobId, path);
-    }
-
-    @Override
-    public void mapUpdated(String jobId, JobVisuMap map) {
-        this.activeVisualization = this.imageView;
-
-        this.imageView.mapUpdated(jobId, map);
-        this.htmlView.mapUpdated(jobId, map);
-    }
-
-    @Override
-    public void visualizationUnavailable(String jobId) {
-        this.imageView.visualizationUnavailable(jobId);
-        this.htmlView.visualizationUnavailable(jobId);
-    }
-
-    public Canvas build() {
-        Layout layout = new Layout();
-        layout.setWidth100();
-        layout.setHeight100();
-
-        HorizontalPanel hp = new HorizontalPanel();
-        HTML html = new HTML("<p>This is html with a <a href='www.google.com'>link</a></p>");
-        hp.add(html);
-
-        this.htmlView.setRoot(layout);
-        this.imageView.setRoot(layout);
-
-        return layout;
-    }
-
-    public void setRoot(Layout layout) {
-        throw new UnsupportedOperationException();
-    }
+interface VisualizationView extends SchedulerListeners.JobSelectedListener, SchedulerListeners.VisualizationListener, LoadHandler,
+  SchedulerListeners.TasksUpdatedListener {
 }
