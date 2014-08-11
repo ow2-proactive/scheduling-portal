@@ -137,7 +137,7 @@ public class LoginPage {
      */
     private void buildAndShow() {
 
-        Img logo = new Img(controller.getLogo350Url(), 350, 88);
+        Img logo = new Img(controller.getLogo350Url(), 349, 75);
 
         // contains the forms for authentication
         final VLayout auth = new VLayout();

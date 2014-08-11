@@ -36,8 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import com.google.gwt.user.client.*;
-import com.google.gwt.user.client.Window;
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -80,8 +78,6 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
-
-import java.awt.*;
 
 
 /**
@@ -378,7 +374,7 @@ public class RMPage implements LogListener {
         tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
-        tools.addMember(new Img(RMImagesUnbundled.LOGO_32, 154, 32));
+        tools.addMember(new Img(RMImagesUnbundled.LOGO_32, 156, 32));
 
         return tools;
     }
