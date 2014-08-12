@@ -56,7 +56,7 @@ public class RMConfig extends Config {
 
     /** URL of the REST service */
     public static final String REST_URL = "rm.rest.url";
-    private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
+    private static final String d_REST_URL = "http://localhost:8080/rest";
     public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
     public static final String RM_URL = "rm.url";

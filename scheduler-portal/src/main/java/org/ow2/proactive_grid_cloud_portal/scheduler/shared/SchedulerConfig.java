@@ -57,16 +57,16 @@ public class SchedulerConfig extends Config {
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
-    private static final String d_REST_URL = "http://localhost:8080/proactive_grid_cloud_portal/rest";
+    private static final String d_REST_URL = "http://localhost:8080/rest";
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
-    private static final String d_NOVNC_URL = "http://localhost:8080/proactive_grid_cloud_portal/novnc";
+    private static final String d_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
-    private static final String d_NOVNC_PAGE_URL = "http://localhost:8080/proactive_grid_cloud_portal/novnc.html";
+    private static final String d_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
