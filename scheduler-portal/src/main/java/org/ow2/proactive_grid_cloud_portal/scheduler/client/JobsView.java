@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import com.smartgwt.client.data.AdvancedCriteria;
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
@@ -76,7 +77,6 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 
 
 /**
@@ -377,7 +377,7 @@ public class JobsView implements JobsUpdatedListener {
         this.jobsGrid.setCanPickFields(false);
         this.jobsGrid.setCanFreezeFields(false);
         this.jobsGrid.setSelectionProperty("isSelected");
-        this.jobsGrid.setEmptyMessage("No jobs to show");
+        this.jobsGrid.setEmptyMessage("No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.");
         this.jobsGrid.setAutoFetchData(true);
         this.jobsGrid.setShowSortNumerals(false);
         this.jobsGrid.setSort(DEFAULT_SORT);
