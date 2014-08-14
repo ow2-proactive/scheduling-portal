@@ -19,7 +19,7 @@ public class RMServiceImplTest {
 
     @Test
     public void rm_config_is_loaded() throws Exception {
-        assertEquals("http://localhost:8080/proactive_grid_cloud_portal/rest",
+        assertEquals("http://localhost:8080/rest",
           RMConfig.get().getRestUrl());
         System.setProperty(RMConfig.VERSION, "a_version");
 
