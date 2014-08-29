@@ -84,7 +84,7 @@ project(':rm-portal') {
         runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
 
-        compile project(':common')
+        compile project(':common-portal')
     }
     war {
         def replaceTokens = {
@@ -102,7 +102,7 @@ project(':scheduler-portal') {
         compile 'org.codehaus.jettison:jettison:1.2'
         compile 'org.jboss.resteasy:resteasy-multipart-provider:2.3.3.Final'
 
-        compile project(':common')
+        compile project(':common-portal')
 
         runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
