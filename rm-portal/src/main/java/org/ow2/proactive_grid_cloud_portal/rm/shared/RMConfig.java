@@ -60,7 +60,7 @@ public class RMConfig extends Config {
     public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
     public static final String RM_URL = "rm.url";
-    private static final String d_RM_URL = "rmi://localhost:1099";
+    private static final String d_RM_URL = "pnp://localhost:64738";
 
     /** refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "rm.client.refresh.time";
