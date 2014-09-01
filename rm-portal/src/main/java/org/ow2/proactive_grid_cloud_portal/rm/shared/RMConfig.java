@@ -152,9 +152,9 @@ public class RMConfig extends Config {
     }
 
     @Override
-    public String getRestPublicUrl() {
+    protected String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
+        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(d_REST_URL)) {
             return getRestUrl();
         }
         return restPublicUrl;

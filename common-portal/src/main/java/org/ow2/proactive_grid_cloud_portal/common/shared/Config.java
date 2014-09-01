@@ -116,9 +116,25 @@ public abstract class Config {
     public abstract String getRestUrl();
 
     /**
-     * @return the REST public URL defined in properties or {@link #getRestUrl()} if empty or null
+     * @return the REST public URL if it has been overridden from properties
+     * If the {@link #getRestUrl()} is different than its default value, it will be used as the REST public URL
      */
-    public abstract String getRestPublicUrl();
+    protected abstract String getRestPublicUrlIfDefinedOrOverridden();
+
+    /**
+     * @return the {@link #getRestPublicUrlIfDefinedOrOverridden()} or guessed from current location if not set
+     */
+    public String getRestPublicUrlOrGuessRestUrl() {
+        String restPublicUrl = getRestPublicUrlIfDefinedOrOverridden();
+        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
+            String restUrlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
+            restUrlFromCurrentLocation = restUrlFromCurrentLocation.replace(
+                    com.google.gwt.user.client.Window.Location.getPath(), "");
+            restUrlFromCurrentLocation += "/rest";
+            return restUrlFromCurrentLocation;
+        }
+        return restPublicUrl;
+    }
 
     /**
      * @return the REST server version string
@@ -169,10 +185,9 @@ public abstract class Config {
     }
 
     private String fillTemplate(String template) {
-        return template
-                .replace("@application_name@", getApplicationName())
+        return template.replace("@application_name@", getApplicationName())
                 .replace("@version@", getVersion())
-                .replace("@rest_public_url@", getRestPublicUrl())
+                .replace("@rest_public_url@", getRestPublicUrlOrGuessRestUrl())
                 .replace("@rest_version@", getRestVersion())
                 .replace("@application_version@", getApplicationVersion());
     }

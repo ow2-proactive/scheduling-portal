@@ -71,11 +71,11 @@ public class AddNodeWindow {
         pane.setHeight(150);
         pane.setBackgroundColor("#ffffff");
 
-        String ver = Config.get().getVersion();
-        String str =
-            "<h3>Connect a node to the ProActive Resource Manager using the following way</h3><ul>" +
-            "<li><a target='_blank' href='"+Config.get().getRestPublicUrl()+"/node.jar'>Download</a> jar containing ProActive node</li>" +
-            "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -r "+ RMConfig.get().getRMUrl()+"' style='width:270px;border-style:none' disabled></li>";
+        String str = "<h3>Connect a node to the ProActive Resource Manager using the following way</h3><ul>" +
+            "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
+            "/node.jar'>Download</a> jar containing ProActive node</li>" +
+            "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -r " +
+            RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
 
         HTMLPane text = new HTMLPane();
         text.setContents(str);
