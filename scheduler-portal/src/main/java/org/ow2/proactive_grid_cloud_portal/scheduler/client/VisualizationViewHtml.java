@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.HashMap;
 import java.util.List;
 
+import com.smartgwt.client.widgets.layout.VLayout;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
@@ -158,7 +159,7 @@ public class VisualizationViewHtml implements VisualizationView {
 
     public void setRoot(Layout layout) {
 
-        wrapper = new Layout();
+        wrapper = new VLayout();
         wrapper.setWidth100();
         wrapper.setHeight100();
 
