@@ -55,6 +55,7 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.types.TopOperatorAppearance;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
@@ -206,7 +207,18 @@ public class JobsView implements JobsUpdatedListener {
 
     public void jobSubmitted(Job j) {
         JobRecord jr = new JobRecord(j);
-        this.ds.addData(jr);
+        DSRequest customErrorHandling = new DSRequest();
+        customErrorHandling.setWillHandleError(true);
+        this.ds.addData(jr, new DSCallback() {
+            @Override
+            public void execute(DSResponse dsResponse, Object o, DSRequest dsRequest) {
+                if (dsResponse.getStatus() < 0) {
+                    // it could fail because results from the server with the new job are already displayed
+                    // failed silently since the new job is already displayed or will be anyway with next call
+                    SC.logWarn(dsResponse.getDataAsString());
+                }
+            }
+        }, customErrorHandling);
         transparentUpdate(JobsView.this.ds.getTestData().length + 1);
     }
 
