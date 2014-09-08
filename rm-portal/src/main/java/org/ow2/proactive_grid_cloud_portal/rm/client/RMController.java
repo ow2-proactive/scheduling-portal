@@ -205,7 +205,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         autoLoginTimer.scheduleRepeating(AUTO_LOGIN_TIMER_PERIOD_IN_MS);
     }
 
-    private void stopTryingLoginIfLoggerInScheduler() {
+    private void stopTryingLoginIfLoggedInScheduler() {
         if (autoLoginTimer != null) {
             autoLoginTimer.cancel();
         }
@@ -213,7 +213,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     @Override
     public void login(final String sessionId, final String login) {
-        stopTryingLoginIfLoggerInScheduler();
+        stopTryingLoginIfLoggedInScheduler();
         rm.getVersion(new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 JSONObject obj = JSONParser.parseStrict(result).isObject();
