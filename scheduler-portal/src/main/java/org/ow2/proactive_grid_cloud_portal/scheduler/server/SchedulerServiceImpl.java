@@ -68,12 +68,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
@@ -86,8 +86,6 @@ import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.thirdparty.guava.common.base.Strings;
 
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 

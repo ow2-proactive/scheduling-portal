@@ -102,6 +102,9 @@ project(':scheduler-portal') {
         compile 'org.codehaus.jettison:jettison:1.2'
         compile 'org.jboss.resteasy:resteasy-multipart-provider:2.3.3.Final'
 
+        compile 'com.google.guava:guava:17.0'
+        compile 'com.google.guava:guava-gwt:17.0'
+
         compile project(':common-portal')
 
         runtime 'net.bull.javamelody:javamelody-core:1.33.0'
