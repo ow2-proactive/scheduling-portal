@@ -40,6 +40,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -443,14 +444,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/login");
 
         try {
-            MultipartEntity entity = new MultipartEntity();
-
+            MultipartEntity entity;
             if (cred == null) {
-                entity.addPart("username", new StringBody(login));
-                entity.addPart("password", new StringBody(pass));
-                entity.addPart("sshkey", new StringBody(ssh));
-
+                entity = createLoginPasswordSSHKeyMultipart(login, pass, ssh);
             } else {
+                entity = new MultipartEntity();
                 entity.addPart("credential", new FileBody(cred, "application/octet-stream"));
             }
 
@@ -480,6 +478,18 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    private MultipartEntity createLoginPasswordSSHKeyMultipart(String login, String pass,
+      String ssh) throws UnsupportedEncodingException {
+        MultipartEntity entity = new MultipartEntity();
+        entity.addPart("username", new StringBody(login));
+        entity.addPart("password", new StringBody(pass));
+        if (!Strings.isNullOrEmpty(ssh)) {
+            entity.addPart("sshKey",
+              new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
+        }
+        return entity;
+    }
+
     /**
      * Create a Credentials file with the provided authentication parameters
      *
@@ -496,14 +506,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/createcredential");
 
         try {
-            MultipartEntity entity = new MultipartEntity();
-            entity.addPart("username", new StringBody(login));
-            entity.addPart("password", new StringBody(pass));
-            if (!Strings.isNullOrEmpty(ssh)) {
-                entity.addPart("sshKey", new ByteArrayBody(ssh.getBytes(),
-                        MediaType.APPLICATION_OCTET_STREAM, null));
-            }
-
+            MultipartEntity entity = createLoginPasswordSSHKeyMultipart(login, pass, ssh);
             method.setEntity(entity);
 
             HttpResponse response = httpClient.execute(method);

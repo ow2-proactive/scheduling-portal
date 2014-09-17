@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ import java.util.Set;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
@@ -56,9 +58,11 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import com.google.common.base.Strings;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -124,17 +128,13 @@ public class RMServiceImpl extends Service implements RMService {
         HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
 
         try {
-            MultipartEntity entity = new MultipartEntity();
-
+            MultipartEntity entity;
             if (cred == null) {
-                entity.addPart("username", new StringBody(login));
-                entity.addPart("password", new StringBody(pass));
-                entity.addPart("sshkey", new StringBody(ssh));
-
+                entity = createLoginPasswordSSHKeyMultipart(login, pass, ssh);
             } else {
+                entity = new MultipartEntity();
                 entity.addPart("credential", new FileBody(cred, "application/octet-stream"));
             }
-
             method.setEntity(entity);
 
             HttpResponse response = httpClient.execute(method);
@@ -230,10 +230,7 @@ public class RMServiceImpl extends Service implements RMService {
         HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/scheduler/createcredential");
 
         try {
-            MultipartEntity entity = new MultipartEntity();
-            entity.addPart("username", new StringBody(login));
-            entity.addPart("password", new StringBody(pass));
-            entity.addPart("sshkey", new StringBody(ssh));
+            MultipartEntity entity = createLoginPasswordSSHKeyMultipart(login, pass, ssh);
 
             method.setEntity(entity);
 
@@ -252,6 +249,18 @@ public class RMServiceImpl extends Service implements RMService {
         } finally {
             method.releaseConnection();
         }
+    }
+
+    private MultipartEntity createLoginPasswordSSHKeyMultipart(String login, String pass,
+      String ssh) throws UnsupportedEncodingException {
+        MultipartEntity entity = new MultipartEntity();
+        entity.addPart("username", new StringBody(login));
+        entity.addPart("password", new StringBody(pass));
+        if (!Strings.isNullOrEmpty(ssh)) {
+            entity.addPart("sshKey",
+              new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
+        }
+        return entity;
     }
 
     /*
