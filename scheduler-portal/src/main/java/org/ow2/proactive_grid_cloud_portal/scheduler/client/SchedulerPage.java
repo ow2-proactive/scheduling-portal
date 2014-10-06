@@ -410,6 +410,15 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
             }
         });
 
+        MenuItem thirdPartyCredentialsMenuItem = new MenuItem("Manage third-party credentials", Images.instance.key_16().getSafeUri()
+          .asString());
+        thirdPartyCredentialsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            public void onClick(MenuItemClickEvent event) {
+                ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(SchedulerPage.this.controller);
+                credentialsWindow.show();
+            }
+        });
+
         MenuItem serversMenuItem = new MenuItem("Data servers", Images.instance.server_16().getSafeUri()
                 .asString());
         serversMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
@@ -435,7 +444,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
         portalMenu.setItems(submitMenuItem, flatSubmitMenuItem, new MenuItemSeparator(), credMenuItem,
-                serversMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+          thirdPartyCredentialsMenuItem, serversMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());

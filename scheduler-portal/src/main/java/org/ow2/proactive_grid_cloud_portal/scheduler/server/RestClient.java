@@ -622,4 +622,19 @@ public interface RestClient {
                                                     @QueryParam("startdate") String startDate,
                                                     @QueryParam("enddate") String endDate);
 
+    @POST
+    @Path("/credentials/{key}")
+    ClientResponse<Void> putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") String key,
+                                 @FormParam(
+                                         "value") String value);
+
+    @DELETE
+    @Path("/credentials/{key}")
+    ClientResponse<Void> removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") String key);
+
+    @GET
+    @Path("/credentials/")
+    @Produces("application/json")
+    ClientResponse<InputStream> thirdPartyCredentialsKeySet(@HeaderParam("sessionid") String sessionId);
+
 }

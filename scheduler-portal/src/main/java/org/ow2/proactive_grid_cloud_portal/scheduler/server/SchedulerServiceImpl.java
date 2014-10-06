@@ -44,8 +44,10 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarFile;
 
 import javax.ws.rs.core.MediaType;
@@ -80,6 +82,7 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientResponse;
@@ -192,7 +195,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<String> clientResponse = client.submitFlat(sessionId, commandFileContent, jobName,
-                selectionScriptContent, selectionScriptExtension);
+          selectionScriptContent, selectionScriptExtension);
 
         Status status = clientResponse.getResponseStatus();
         String stringResponse = clientResponse.getEntity();
@@ -1122,7 +1125,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             boolean pending, boolean running, boolean finished) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = client.revisionAndjobsinfo(sessionId, index, range,
-                myJobsOnly, pending, running, finished);
+          myJobsOnly, pending, running, finished);
 
         Status status = clientResponse.getResponseStatus();
         try {
@@ -1341,7 +1344,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException {
         ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(),
+          executor);
         try {
             DateFormat df = new SimpleDateFormat(ISO_8601_FORMAT);
             String startDateAsString = df.format(startDate);
@@ -1396,5 +1400,58 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } finally {
             clientResponse.releaseConnection();
         }
+    }
+
+    @Override
+    public void putThirdPartyCredential(String sessionId, String key, String value) throws RestServerException {
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        ClientResponse clientResponse = client.putThirdPartyCredential(sessionId, key, value);
+        Status status = clientResponse.getResponseStatus();
+        if (status.getFamily() != Status.Family.SUCCESSFUL) {
+            throw new RestServerException(status.getStatusCode(), "Server-side error");
+        }
+    }
+
+    @Override
+    public Set<String> thirdPartyCredentialKeySet(String sessionId) throws ServiceException, RestServerException {
+        ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        try {
+            clientResponse = client.thirdPartyCredentialsKeySet(sessionId);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String responseAsString = convertToString(response);
+            switch (status) {
+                case OK:
+                    HashSet<String> result = new HashSet<String>();
+                    JSONArray jsonArray = new JSONArray(responseAsString);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        result.add(jsonArray.getString(i));
+                    }
+                    return result;
+                default:
+                    throw new RestServerException(status.getStatusCode(), responseAsString);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (JSONException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
+        }
+
+    }
+
+    @Override
+    public void removeThirdPartyCredential(String sessionId, String key) throws RestServerException {
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        ClientResponse<Void> clientResponse = client.removeThirdPartyCredential(sessionId, key);
+        Status status = clientResponse.getResponseStatus();
+        if (status.getFamily() != Status.Family.SUCCESSFUL) {
+            throw new RestServerException(status.getStatusCode(), "Server-side error");
+        }
+
     }
 }

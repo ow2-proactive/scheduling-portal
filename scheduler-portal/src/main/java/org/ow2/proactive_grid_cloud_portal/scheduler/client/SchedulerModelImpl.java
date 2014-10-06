@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
@@ -58,7 +59,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.U
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 
@@ -117,6 +117,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<VisualizationListener> visuListeners = null;
     private ArrayList<StatsListener> statsListeners = null;
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
+    private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
 
     SchedulerModelImpl() {
         super();
@@ -623,7 +624,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     /**
      * Change the local users list, notify listeners
      * 
-     * @param users new users
+     * @param usersWithJobs new users
      */
     void setSchedulerUsersWithJobs(List<SchedulerUser> usersWithJobs) {
         this.usersWithJobs = usersWithJobs;
@@ -670,6 +671,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         for (SchedulerListeners.UsageListener list : this.usageListeners) {
             list.usageUpdated(usage);
         }
+    }
+
+    public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
+        thirdPartyCredentialsListener.keysUpdated(thirdPartyCredentialsKeys);
     }
 
     @Override
@@ -814,4 +819,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.usageListeners.add(listener);
     }
 
+    @Override
+    public void setThirdPartyCredentialsListener(
+      SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
+        this.thirdPartyCredentialsListener = thirdPartyCredentialsListener;
+    }
 }

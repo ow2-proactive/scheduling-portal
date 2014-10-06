@@ -36,6 +36,24 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
+import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -50,24 +68,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -1587,6 +1587,54 @@ public class SchedulerController extends Controller implements UncaughtException
                     return;
 
                 model.logMessage("Failed to fetch scheduler users with jobs:<br>" + getJsonErrorMessage(caught));
+            }
+        });
+    }
+
+    public void putThirdPartyCredential(final String key, String value) {
+        scheduler.putThirdPartyCredential(model.getSessionId(), key, value, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Error while saving third-party credential: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                model.logMessage("Successfully saved third-party credential for " + key + ".");
+                refreshThirdPartyCredentialsKeys();
+            }
+        });
+    }
+
+    public void refreshThirdPartyCredentialsKeys() {
+        scheduler.thirdPartyCredentialKeySet(model.getSessionId(), new AsyncCallback<Set<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Error while getting third-party credentials: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Set<String> result) {
+                model.setThirdPartyCredentialsKeys(result);
+            }
+        });
+    }
+
+    public void removeThirdPartyCredential(final String key) {
+        scheduler.removeThirdPartyCredential(model.getSessionId(), key, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = getJsonErrorMessage(caught);
+                model.logImportantMessage("Error while deleting third-party credential: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                model.logMessage("Successfully deleted third-party credential for " + key + ".");
+                refreshThirdPartyCredentialsKeys();
             }
         });
     }

@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.QueryParam;
@@ -409,4 +410,9 @@ public interface SchedulerService extends RemoteService {
 
     List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException;
 
+    void putThirdPartyCredential(String sessionId, String key, String value) throws RestServerException;
+
+    Set<String> thirdPartyCredentialKeySet(String sessionId) throws ServiceException, RestServerException;
+
+    void removeThirdPartyCredential(String sessionId, String key) throws RestServerException;
 }

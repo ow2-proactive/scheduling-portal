@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
@@ -242,4 +243,7 @@ public class SchedulerListeners {
 
     }
 
+    public interface ThirdPartyCredentialsListener {
+        void keysUpdated(Set<String> thirdPartyCredentialsKeys);
+    }
 }

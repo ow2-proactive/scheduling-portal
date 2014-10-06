@@ -51,81 +51,33 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.V
 /**
  * Registers event listeners, notifies them when something happens
  *
- *
  * @author mschnoor
  *
  */
 public interface SchedulerEventDispatcher extends EventDispatcher {
 
-    /**
-     * register a new listener for JobsUpdated events
-     *
-     * @param listener
-     */
-    public abstract void addJobsUpdatedListener(JobsUpdatedListener listener);
+    void addJobsUpdatedListener(JobsUpdatedListener listener);
 
-    /**
-     * register a new listener for JobSelected events
-     *
-     * @param listener
-     */
-    public abstract void addJobSelectedListener(JobSelectedListener listener);
+    void addJobSelectedListener(JobSelectedListener listener);
 
-    /**
-     * register a new listener for TasksUpdated events
-     * 
-     * @param listener
-     */
-    public abstract void addTasksUpdatedListener(TasksUpdatedListener listener);
+    void addTasksUpdatedListener(TasksUpdatedListener listener);
 
-    /**
-     * register a new listener for SchedulerState events
-     * 
-     * @param listener
-     */
-    public abstract void addSchedulerStatusListener(SchedulerStatusListener listener);
+    void addSchedulerStatusListener(SchedulerStatusListener listener);
 
-    /**
-     * Register a new listener for job output events
-     * 
-     * @param listener
-     */
-    public abstract void addJobOutputListener(JobOutputListener listener);
+    void addJobOutputListener(JobOutputListener listener);
 
-    /**
-     * register a new listener for scheduler users events
-     * 
-     * @param listener
-     */
-    public abstract void addUsersListener(UsersListener listener);
+    void addUsersListener(UsersListener listener);
 
-    /**
-     * register a new listener for scheduler users events
-     * 
-     * @param listener
-     */
-    public abstract void addUsersWithJobsListener(UsersListener listener);
+    void addUsersWithJobsListener(UsersListener listener);
 
-    /**
-     * register a new listener for statistics events
-     * 
-     * @param listener
-     */
-    public abstract void addStatisticsListener(StatisticsListener listener);
+    void addStatisticsListener(StatisticsListener listener);
 
-    /**
-     * register a new remote hint listener
-     * 
-     * @param listener
-     */
-    public abstract void addRemoteHintListener(RemoteHintListener listener);
+    void addRemoteHintListener(RemoteHintListener listener);
 
-    /**
-     * register a new visualization listener
-     * 
-     * @param listener
-     */
-    public abstract void addVisualizationListener(VisualizationListener listener);
+    void addVisualizationListener(VisualizationListener listener);
 
-    public abstract void addUsageListener(SchedulerListeners.UsageListener listener);
+    void addUsageListener(SchedulerListeners.UsageListener listener);
+
+    void setThirdPartyCredentialsListener(
+            SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener);
 }

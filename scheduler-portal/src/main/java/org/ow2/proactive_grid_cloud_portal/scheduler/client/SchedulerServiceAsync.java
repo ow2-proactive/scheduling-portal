@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
@@ -334,4 +335,11 @@ public interface SchedulerServiceAsync {
     void getUsage(String sessionId, String user, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
 
     void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
+
+    void putThirdPartyCredential(String sessionId, String key, String value, AsyncCallback<Void> async);
+
+    void thirdPartyCredentialKeySet(String sessionId, AsyncCallback<Set<String>> asyncCallback);
+
+    void removeThirdPartyCredential(String sessionId, String key, AsyncCallback<Void> asyncCallback);
+
 }
