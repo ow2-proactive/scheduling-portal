@@ -37,13 +37,11 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.List;
-import java.util.Map.Entry;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.util.StringUtil;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.IButton;
@@ -51,7 +49,6 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
@@ -186,7 +183,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
     public void showLogs(String logs) {
         this.clear();
         this.label.hide();
-        this.text.setContents("<pre>" + logs + "</pre>");
+        this.text.setContents("<pre>" + StringUtil.asHTML(logs) + "</pre>");
         this.text.show();
     }
 
