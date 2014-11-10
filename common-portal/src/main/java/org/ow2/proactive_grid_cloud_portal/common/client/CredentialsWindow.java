@@ -183,11 +183,6 @@ public class CredentialsWindow {
         });
 
         final IButton closeButton = new IButton("Close");
-        closeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                window.hide();
-            }
-        });
 
         final Label label = new Label("A Credential is a file containing all information used"
             + " for authentication, in an encrypted form. It allows easier authentication and"
@@ -196,7 +191,6 @@ public class CredentialsWindow {
 
         final HLayout buttonBar = new HLayout();
 
-        final IButton cancelButton = new IButton("Cancel");
 
         final IButton okButton = new IButton();
         okButton.setShowDisabled(false);
@@ -212,21 +206,12 @@ public class CredentialsWindow {
                 hiddenUser.setValue(login);
                 hiddenPass.setValue(pw);
 
-                label.setContents("Your request has been submitted to the server.<br>Please wait.");
-
-                form.hide();
-                formWrapper.hide();
-                okButton.hide();
-                cancelButton.hide();
-                clearButton.hide();
-                buttonBar.addMember(closeButton);
-
                 formPanel.submit();
             }
         });
 
-        cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        cancelButton.addClickHandler(new ClickHandler() {
+        closeButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 CredentialsWindow.this.window.hide();
@@ -241,12 +226,6 @@ public class CredentialsWindow {
                 String str = event.getResults();
                 label.setContents("<span style='color:red;'>" + str + "</span>");
 
-                form.show();
-                formWrapper.show();
-                okButton.show();
-                cancelButton.show();
-                clearButton.show();
-                buttonBar.removeMember(closeButton);
             }
         });
 
@@ -260,7 +239,7 @@ public class CredentialsWindow {
         buttonBar.setWidth100();
         buttonBar.setAlign(Alignment.RIGHT);
         buttonBar.setMembersMargin(5);
-        buttonBar.setMembers(clearButton, okButton, cancelButton);
+        buttonBar.setMembers(clearButton, okButton, closeButton);
         formLayout.addMember(buttonBar);
 
         VLayout layout = new VLayout();
