@@ -104,9 +104,9 @@ public class UploadServlet extends HttpServlet {
             String sessionId = null;
             boolean edit = false;
 
-            /* 
-             * * edit=0, simply submit the job descriptor
-             * * edit=1, open the descriptor and return it as a string 
+            /*
+             * * edit=0, simply submit the job descriptor * edit=1, open the descriptor and return
+             * it as a string
              */
 
             while (i.hasNext()) {
@@ -123,23 +123,16 @@ public class UploadServlet extends HttpServlet {
                         }
                     }
                 } else {
-                    String fileName = fi.getName();
-                    job = new File(System.getProperty("java.io.tmpdir"), fileName);
+                    job = File.createTempFile("job_upload", ".xml");
                     fi.write(job);
                 }
 
                 fi.delete();
             }
 
-            boolean isJar = false;
-            try {
-                JarFile jf = new JarFile(job);
-                isJar = (jf != null);
-            } catch (IOException e) {
-                // not a jar;
-            }
+            boolean isJar = isJarFile(job);
 
-            if (!isJar && job != null) {
+            if (!isJar) {
                 // this _loosely_ checks that the file we got is an XML file 
                 try {
                     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -150,11 +143,9 @@ public class UploadServlet extends HttpServlet {
                         // don't go on with edition if there are no variables
                         if (doc.getElementsByTagName("variables").getLength() < 1 ||
                             doc.getElementsByTagName("variable").getLength() < 1) {
-                            response
-                                    .getWriter()
-                                    .write(
-                                            "This job descriptor contains no variable definition.<br>"
-                                                + "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
+                            response.getWriter()
+                                    .write("This job descriptor contains no variable definition.<br>"
+                                        + "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
                             return;
                         }
                     }
@@ -181,13 +172,24 @@ public class UploadServlet extends HttpServlet {
             try {
                 String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
                 response.getWriter().write(msg);
-            } catch (IOException e1) {
+            } catch (IOException ignored) {
             }
         } finally {
             if (job != null)
                 job.delete();
         }
 
+    }
+
+    private boolean isJarFile(File job) {
+        boolean isJar = false;
+        try {
+            new JarFile(job);
+            isJar = true;
+        } catch (IOException e) {
+            // not a jar;
+        }
+        return isJar;
     }
 
 }

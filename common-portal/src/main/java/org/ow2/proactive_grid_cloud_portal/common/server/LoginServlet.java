@@ -114,7 +114,7 @@ public class LoginServlet extends HttpServlet {
                     byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
 
                     if (field.equals("credential")) {
-                        cred = new File(System.getProperty("java.io.tmpdir"), fi.getName());
+                        cred = File.createTempFile("credential", null);
                         cred.deleteOnExit();
                         fi.write(cred);
                     } else if (field.equals("sshkey")) {
