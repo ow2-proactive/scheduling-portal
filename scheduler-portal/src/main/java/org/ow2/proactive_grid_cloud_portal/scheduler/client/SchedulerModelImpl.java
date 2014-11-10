@@ -59,9 +59,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.U
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.smartgwt.client.util.StringUtil;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 
 /**
@@ -475,7 +476,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     private String formatLine(String str) {
         if (str.matches("\\[.*\\].*")) {
-            str = StringUtil.asHTML(str).replaceFirst("]", "]</span>");
+            str = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
             return "<nobr><span style='color:gray;'>" + str +"</nobr><br>";
         }
         return "";
