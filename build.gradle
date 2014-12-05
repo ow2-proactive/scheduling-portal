@@ -84,7 +84,6 @@ project(':rm-portal') {
     dependencies {
         compile 'codemirror:codemirror2-gwt:1.2.0'
 
-        runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
 
         compile project(':common-portal')
@@ -107,7 +106,6 @@ project(':scheduler-portal') {
 
         compile project(':common-portal')
 
-        runtime 'net.bull.javamelody:javamelody-core:1.33.0'
         runtime 'org.slf4j:slf4j-simple:1.5.8'
     }
 
