@@ -1,3 +1,4 @@
+*.iml
 build/
 .gradle
 rm-portal/src/main/webapp/WEB-INF/deploy/

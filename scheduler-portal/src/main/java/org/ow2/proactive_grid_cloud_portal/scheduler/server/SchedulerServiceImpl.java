@@ -71,7 +71,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -486,7 +485,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         MultipartEntity entity = new MultipartEntity();
         entity.addPart("username", new StringBody(login));
         entity.addPart("password", new StringBody(pass));
-        if (!Strings.isNullOrEmpty(ssh)) {
+        if (ssh != null && !ssh.isEmpty()) {
             entity.addPart("sshKey",
               new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
         }

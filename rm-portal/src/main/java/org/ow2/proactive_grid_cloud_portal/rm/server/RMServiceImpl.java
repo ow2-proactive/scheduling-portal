@@ -58,7 +58,6 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import com.google.common.base.Strings;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -256,7 +255,7 @@ public class RMServiceImpl extends Service implements RMService {
         MultipartEntity entity = new MultipartEntity();
         entity.addPart("username", new StringBody(login));
         entity.addPart("password", new StringBody(pass));
-        if (!Strings.isNullOrEmpty(ssh)) {
+        if (ssh != null && !ssh.isEmpty()) {
             entity.addPart("sshKey",
               new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
         }
