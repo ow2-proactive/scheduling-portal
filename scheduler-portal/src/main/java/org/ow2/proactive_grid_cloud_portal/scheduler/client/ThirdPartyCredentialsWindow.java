@@ -50,12 +50,17 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
 import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -74,7 +79,9 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
 
         credentialsGrid = new ListGrid();
         ListGridField keyField = new ListGridField("key", "Key");
+        keyField.setWidth(142);
         ListGridField valueField = new ListGridField("value", "Credential");
+        valueField.setWidth(360);
         credentialsGrid.setFields(keyField, valueField);
         SortSpecifier[] sortedByKeys = { new SortSpecifier("key", SortDirection.ASCENDING) };
         credentialsGrid.setInitialSort(sortedByKeys);
@@ -99,44 +106,80 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
         HLayout addCredential = new HLayout();
         addCredential.setAutoHeight();
 
-        final DynamicForm form = new DynamicForm();
-        form.setAutoHeight();
-        form.setWidth(390);
+        final DynamicForm addEntryForm = new DynamicForm();
+        addEntryForm.setAutoHeight();
+        addEntryForm.setWidth(350);
 
         TextItem key = new TextItem("key", "Key");
         key.setRequired(true);
-        key.setWidth(195);
-        TextItem value = new PasswordItem("value", "Credential");
-        value.setRequired(true);
-        value.setWidth(195);
+        key.setWidth(142);
+        key.setHeight(26);
+        final TextItem shortValue = new PasswordItem("shortValue", "Credential");
+        shortValue.setRequired(true);
+        shortValue.setWidth(208);
+        shortValue.setHeight(26);
+        final TextAreaItem longValue = new TextAreaItem("longValue", "Credential");
+        longValue.setRequired(true);
+        longValue.setWidth(208);
+        longValue.setHeight(26);
+        longValue.hide();
 
-        form.setTitleOrientation(TitleOrientation.TOP);
-        form.setFields(key, value);
+        addEntryForm.setTitleOrientation(TitleOrientation.TOP);
+        addEntryForm.setFields(key, shortValue, longValue);
 
-        IButton addButton = new IButton("Add");
-        addButton.setLayoutAlign(VerticalAlignment.BOTTOM);
-        addButton.setWidth(50);
-        addButton.setHeight(26);
-        addButton.setMargin(2);
-        addButton.addClickHandler(new ClickHandler() {
+        final CheckboxItem longValueCheck =
+                new CheckboxItem("longValueCheck", "Multiline credential");
+        longValueCheck.setHeight(26);
+        longValueCheck.setWidth(70);
+        final DynamicForm longValueCheckForm = new DynamicForm();
+        longValueCheckForm.setLayoutAlign(VerticalAlignment.BOTTOM);
+        longValueCheckForm.setFields(longValueCheck);
+
+        longValueCheck.addChangedHandler(new ChangedHandler() {
             @Override
-            public void onClick(ClickEvent clickEvent) {
-                if (!form.validate())
-                    return;
-
-                String key = form.getValueAsString("key");
-                String value = form.getValueAsString("value");
-                controller.putThirdPartyCredential(key, value);
-                form.clearValues();
+            public void onChanged(ChangedEvent changedEvent) {
+                if (longValueCheck.getValueAsBoolean()) {
+                    shortValue.hide();
+                    longValue.show();
+                } else {
+                    shortValue.show();
+                    longValue.hide();
+                }
             }
         });
 
-        addCredential.setMembers(form, addButton);
+        LayoutSpacer space = new LayoutSpacer();
+        space.setWidth(20);
+
+        IButton addButton = new IButton("Add");
+        addButton.setLayoutAlign(VerticalAlignment.BOTTOM);
+        addButton.setHeight(26);
+        addButton.setWidth(46);
+        addButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (!addEntryForm.validate())
+                    return;
+
+                String key = addEntryForm.getValueAsString("key");
+                String value;
+                if (longValueCheck.getValueAsBoolean()) {
+                    value = addEntryForm.getValueAsString("longValue");
+                } else {
+                    value = addEntryForm.getValueAsString("shortValue");
+                }
+                controller.putThirdPartyCredential(key, value);
+                addEntryForm.clearValues();
+            }
+        });
+
+        addCredential.setMembers(
+                addEntryForm, longValueCheckForm, space, addButton);
 
         VLayout layout = new VLayout();
         layout.setMembersMargin(10);
         layout.setMargin(5);
-        layout.setWidth(450);
+        layout.setWidth(550);
         layout.setMembers(label, credentialsGrid, addCredential);
 
         this.window = new Window();
