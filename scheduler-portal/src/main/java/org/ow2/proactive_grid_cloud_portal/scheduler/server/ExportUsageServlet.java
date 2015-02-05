@@ -36,12 +36,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskUsage;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
@@ -50,14 +55,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public class ExportUsageServlet extends HttpServlet {
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSz";
-    private static final String CSV_SEPARATOR = ",";
     private static final String LINE_SEPARATOR = "\n";
 
     @Override
@@ -83,7 +83,6 @@ public class ExportUsageServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to retrieve usage data: " + e.getMessage());
         } catch (RestServerException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to retrieve usage data: " + e.getMessage());
-
         }
     }
 
@@ -91,34 +90,32 @@ public class ExportUsageServlet extends HttpServlet {
         return formatter.parse(request.getParameter(parameterName));
     }
 
-    private String csvExport(String sessionId, String user, Date startDate, Date endDate) throws ServiceException, RestServerException {
+    private String csvExport(String sessionId, String user, Date startDate, Date endDate) throws ServiceException, RestServerException, IOException {
+        Object [] header = {"Owner","Project","Job Id","Job Name","Job Duration","Task Id","Task Name","Task Node Number","Task Start Time","Task Finished Time","Task Duration"};
         List<JobUsage> jobUsages = ((SchedulerServiceImpl) Service.get()).getUsage(sessionId, user, startDate, endDate);
-
-        List<String> lines = usageToCsvLines(jobUsages);
-
         StringBuilder sb = new StringBuilder();
-        for (String line : lines) {
-            sb.append(line);
-            sb.append(LINE_SEPARATOR);
-        }
-        return sb.toString();
-
-    }
-
-    private List<String> usageToCsvLines(List<JobUsage> jobUsages) {
-        List<String> lines = new ArrayList<String>();
-        lines.add(JobUsage.toCsvHeader(CSV_SEPARATOR) + CSV_SEPARATOR + TaskUsage.toCsvHeader(CSV_SEPARATOR));
+        CSVPrinter csvFilePrinter = null;
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(LINE_SEPARATOR);
+        csvFilePrinter = new CSVPrinter(sb, csvFileFormat);
+        csvFilePrinter.printRecord(header);
         for (JobUsage jobUsage : jobUsages) {
             for (TaskUsage taskUsage : jobUsage.getTaskUsages()) {
-                String line = toCsvLine(jobUsage, taskUsage);
-                lines.add(line);
+                csvFilePrinter.printRecord(
+                    jobUsage.getOwner(),
+                    jobUsage.getProject(),
+                    jobUsage.getJobId(),
+                    jobUsage.getJobName(),
+                    jobUsage.getJobDuration(),
+                    taskUsage.getTaskId(),
+                    taskUsage.getTaskName(),
+                    taskUsage.getTaskNodeNumber(),
+                    taskUsage.getTaskStartTime(),
+                    taskUsage.getTaskFinishedTime(),
+                    taskUsage.getTaskExecutionDuration()
+                );
             }
         }
-        return lines;
+        csvFilePrinter.close();
+        return sb.toString();
     }
-
-    private String toCsvLine(JobUsage jobUsage, TaskUsage taskUsage) {
-        return jobUsage.toCsv(CSV_SEPARATOR) + CSV_SEPARATOR + taskUsage.toCsv(CSV_SEPARATOR);
-    }
-
 }

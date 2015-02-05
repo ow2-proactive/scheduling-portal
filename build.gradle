@@ -102,6 +102,7 @@ project(':scheduler-portal') {
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
         compile 'org.codehaus.jettison:jettison:1.2'
         compile 'org.jboss.resteasy:resteasy-multipart-provider:2.3.3.Final'
+        compile 'org.apache.commons:commons-csv:1.1'
 
         compile project(':common-portal')
 

@@ -41,13 +41,17 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class JobUsage implements IsSerializable {
 
+    private String owner;
+    private String project;
     private String jobId;
     private String jobName;
     private long jobDuration;
 
     private List<TaskUsage> taskUsages = new ArrayList<TaskUsage>();
 
-    public JobUsage(String jobId, String jobName, long jobDuration) {
+    public JobUsage(String owner, String project, String jobId, String jobName, long jobDuration) {
+        this.owner = owner;
+        this.project = project;
         this.jobId = jobId;
         this.jobName = jobName;
         this.jobDuration = jobDuration;
@@ -58,6 +62,14 @@ public class JobUsage implements IsSerializable {
 
     public void add(TaskUsage taskUsage) {
         taskUsages.add(taskUsage);
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public String getProject() {
+        return project;
     }
 
     public String getJobId() {
@@ -74,21 +86,5 @@ public class JobUsage implements IsSerializable {
 
     public List<TaskUsage> getTaskUsages() {
         return taskUsages;
-    }
-
-    public String toCsv(String separator) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(jobId).append(separator);
-        sb.append(jobName).append(separator);
-        sb.append(jobDuration);
-        return sb.toString();
-    }
-
-    public static String toCsvHeader(String separator) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Job Id").append(separator);
-        sb.append("Job Name").append(separator);
-        sb.append("Job Duration");
-        return sb.toString();
     }
 }

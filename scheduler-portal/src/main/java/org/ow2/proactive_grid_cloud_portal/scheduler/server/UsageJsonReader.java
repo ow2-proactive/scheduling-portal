@@ -58,11 +58,13 @@ public class UsageJsonReader {
     }
 
     private static JobUsage read(JSONObject json) throws JSONException {
+        String owner = json.getString("owner");
+        String project = json.getString("project");
         String jobId = json.getString("jobId");
         String jobName = json.getString("jobName");
         long jobDuration = json.getLong("jobDuration");
 
-        JobUsage jobUsage = new JobUsage(jobId, jobName, jobDuration);
+        JobUsage jobUsage = new JobUsage(owner, project, jobId, jobName, jobDuration);
 
         JSONArray tasks = json.getJSONArray("taskUsages");
         for (int i = 0; i < tasks.length(); i++) {

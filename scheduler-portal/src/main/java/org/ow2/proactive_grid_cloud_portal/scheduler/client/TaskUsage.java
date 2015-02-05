@@ -81,26 +81,4 @@ public class TaskUsage implements IsSerializable {
     public long getTaskNodeNumber() {
         return taskNodeNumber;
     }
-
-    public String toCsv(String separator) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(taskId).append(separator);
-        sb.append(taskName).append(separator);
-        sb.append(taskNodeNumber).append(separator);
-        sb.append(taskStartTime).append(separator);
-        sb.append(taskFinishedTime).append(separator);
-        sb.append(taskExecutionDuration);
-        return sb.toString();
-    }
-
-    public static String toCsvHeader(String separator) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Task Id").append(separator);
-        sb.append("Task Name").append(separator);
-        sb.append("Task Node Number").append(separator);
-        sb.append("Task Start Time").append(separator);
-        sb.append("Task Finished Time").append(separator);
-        sb.append("Task Duration");
-        return sb.toString();
-    }
 }
