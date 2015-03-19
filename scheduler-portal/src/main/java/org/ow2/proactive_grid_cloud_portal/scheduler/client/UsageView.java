@@ -146,11 +146,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
             }
         }, CoreChart.PACKAGE);
 
-        Date from = RelativeDateItem.getAbsoluteDate(DEFAULT_START_DATE);
-        Date to = RelativeDateItem.getAbsoluteDate(DEFAULT_END_DATE);
-        controller.getUsage(null, from, to);
         controller.getUsersWithJobs();
-
         return root;
     }
 
@@ -284,6 +280,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
     private ListGrid createDetailsGrid() {
         detailsGrid = new ListGrid();
         detailsGrid.setWidth100();
+        detailsGrid.setEmptyMessage("Use the refresh button above to load usage data.");
 
         ListGridField jobField = new ListGridField("jobId", "Job");
         jobField.setHidden(true);
