@@ -6,7 +6,7 @@ subprojects {
     group = 'org.ow2.proactive_grid_cloud_portal'
     version = schedulingPortalVersion
 
-    sourceCompatibility = 1.6
+    sourceCompatibility = 1.7
 
     repositories {
         if (project.hasProperty('local')) mavenLocal()
