@@ -40,7 +40,7 @@ subprojects {
         // Specify two artifacts as workaround for GRADLE-1934
         compile('javax.validation:validation-api:1.0.0.GA')
         compile('javax.validation:validation-api:1.0.0.GA:sources')
-        compile 'org.slf4j:slf4j-api:1.5.8'
+        compile 'org.slf4j:slf4j-api:1.7.12'
         compile 'commons-io:commons-io:1.3.1'
         compile 'commons-fileupload:commons-fileupload:1.2'
         compile 'org.apache.httpcomponents:httpclient:4.2.3'
@@ -82,7 +82,7 @@ project(':rm-portal') {
     dependencies {
         compile 'codemirror:codemirror2-gwt:1.2.0'
 
-        runtime 'org.slf4j:slf4j-simple:1.5.8'
+        runtime 'org.slf4j:slf4j-simple:1.7.12'
 
         compile project(':common-portal')
     }
@@ -106,7 +106,7 @@ project(':scheduler-portal') {
 
         compile project(':common-portal')
 
-        runtime 'org.slf4j:slf4j-simple:1.5.8'
+        runtime 'org.slf4j:slf4j-simple:1.7.12'
     }
 
     war {
