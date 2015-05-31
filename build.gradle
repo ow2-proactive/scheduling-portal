@@ -46,7 +46,7 @@ subprojects {
         compile 'org.apache.httpcomponents:httpclient:4.2.6'
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.13.Final'
-        compile 'org.apache.httpcomponents:httpmime:4.2.1'
+        compile 'org.apache.httpcomponents:httpmime:4.2.6'
 
         runtime 'com.google.gwt:gwt-servlet:2.5.1'
 
