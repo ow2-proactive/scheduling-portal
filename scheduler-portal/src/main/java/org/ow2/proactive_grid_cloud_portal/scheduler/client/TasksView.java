@@ -107,7 +107,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         private Task task = null;
 
         public TaskRecord(Task t) {
-            setAttribute(ID_ATTR, t.getId().intValue());
+            setAttribute(ID_ATTR, t.getId().longValue());
             this.task = t;
             update(t);
         }
