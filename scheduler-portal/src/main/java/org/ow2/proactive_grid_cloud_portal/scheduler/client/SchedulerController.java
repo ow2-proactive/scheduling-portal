@@ -52,7 +52,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
@@ -80,7 +79,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * <li>the Controller updates new Data to the Model,
  * <li>the view displays what it reads from the Model.
  * </code>
- *
  *
  * @author mschnoor
  */
@@ -874,8 +872,8 @@ public class SchedulerController extends Controller implements UncaughtException
      * Fetch server logs for a single task
      * 
      * @param jobId id of the job containing this task
-     * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * @param taskname task for which the output should be fetched
+     * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getTaskServerLogs(final int jobId, final String taskname, final ShowLogsCallback logs) {
@@ -911,8 +909,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Fetch server logs for a single job
      * 
      * @param jobId id of the job containing this task
-     * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobServerLogs(final int jobId, final ShowLogsCallback logs) {

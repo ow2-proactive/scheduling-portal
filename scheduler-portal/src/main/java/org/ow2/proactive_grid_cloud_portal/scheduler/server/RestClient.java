@@ -64,8 +64,6 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 @Path("/scheduler/")
 public interface RestClient {
 
-    String ENCODING = "utf-8";
-
     /**
      * Disconnect the user identified by the sessionId from the scheduler
      * 
@@ -74,7 +72,7 @@ public interface RestClient {
      */
     @PUT
     @Path("disconnect")
-    public ClientResponse<Void> disconnect(@HeaderParam("sessionid")
+    ClientResponse<Void> disconnect(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -86,7 +84,7 @@ public interface RestClient {
     @GET
     @Path("jobsinfo")
     @Produces({ "application/json", "application/xml" })
-    public ClientResponse<InputStream> jobs(@HeaderParam("sessionid")
+    ClientResponse<InputStream> jobs(@HeaderParam("sessionid")
     String sessionId);
 
     /**
@@ -98,7 +96,7 @@ public interface RestClient {
     @POST
     @Path("submit")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public ClientResponse<String> jobs(@HeaderParam("sessionid")
+    ClientResponse<String> jobs(@HeaderParam("sessionid")
     String sessionId, MultipartInput multipart);
 
     /**
@@ -113,7 +111,7 @@ public interface RestClient {
     @POST
     @Path("submitflat")
     @Produces("application/json")
-    public ClientResponse<String> submitFlat(@HeaderParam("sessionid")
+    ClientResponse<String> submitFlat(@HeaderParam("sessionid")
     String sessionId, @FormParam("commandFileContent")
     String commandFileContent, @FormParam("jobName")
     String jobName, @FormParam("selectionScriptContent")
@@ -128,7 +126,7 @@ public interface RestClient {
      */
     @DELETE
     @Path("jobs/{jobid}")
-    public ClientResponse<InputStream> removeJob(@HeaderParam("sessionid")
+    ClientResponse<InputStream> removeJob(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -140,7 +138,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/pause")
-    public ClientResponse<InputStream> pauseJob(@HeaderParam("sessionid")
+    ClientResponse<InputStream> pauseJob(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId);
 
@@ -152,7 +150,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/resume")
-    public ClientResponse<InputStream> resumeJob(@HeaderParam("sessionid")
+    ClientResponse<InputStream> resumeJob(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId);
 
@@ -164,7 +162,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/kill")
-    public ClientResponse<InputStream> killJob(@HeaderParam("sessionid")
+    ClientResponse<InputStream> killJob(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -177,7 +175,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/kill")
-    public ClientResponse<InputStream> killTask(@HeaderParam("sessionid")
+    ClientResponse<InputStream> killTask(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskname")
     String taskName);
@@ -191,7 +189,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/preempt")
-    public ClientResponse<InputStream> preemptTask(@HeaderParam("sessionid")
+    ClientResponse<InputStream> preemptTask(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskname")
     String taskName);
@@ -205,7 +203,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/restart")
-    public ClientResponse<InputStream> restartTask(@HeaderParam("sessionid")
+    ClientResponse<InputStream> restartTask(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskname")
     String taskName);
@@ -220,7 +218,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/taskstates")
     @Produces("application/json")
-    public ClientResponse<InputStream> getJobTaskStates(@HeaderParam("sessionid")
+    ClientResponse<InputStream> getJobTaskStates(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -233,7 +231,7 @@ public interface RestClient {
     @GET
     @Path("jobs/{jobid}")
     @Produces("application/json")
-    public ClientResponse<InputStream> job(@HeaderParam("sessionid")
+    ClientResponse<InputStream> job(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -246,7 +244,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")
-    public ClientResponse<InputStream> schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
+    ClientResponse<InputStream> schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId, @PathParam("name")
     String priorityName);
@@ -259,7 +257,7 @@ public interface RestClient {
      */
     @PUT
     @Path("pause")
-    public ClientResponse<InputStream> pauseScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> pauseScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -270,7 +268,7 @@ public interface RestClient {
      */
     @PUT
     @Path("resume")
-    public ClientResponse<InputStream> resumeScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> resumeScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -281,7 +279,7 @@ public interface RestClient {
      */
     @PUT
     @Path("freeze")
-    public ClientResponse<InputStream> freezeScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> freezeScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -292,7 +290,7 @@ public interface RestClient {
      */
     @PUT
     @Path("kill")
-    public ClientResponse<InputStream> killScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> killScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -303,7 +301,7 @@ public interface RestClient {
      */
     @PUT
     @Path("start")
-    public ClientResponse<InputStream> startScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> startScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -314,7 +312,7 @@ public interface RestClient {
      */
     @PUT
     @Path("stop")
-    public ClientResponse<InputStream> stopScheduler(@HeaderParam("sessionid")
+    ClientResponse<InputStream> stopScheduler(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -326,7 +324,7 @@ public interface RestClient {
     @GET
     @Path("jobs/{jobid}/tasks")
     @Produces("application/json")
-    public ClientResponse<InputStream> getJobTasksIds(@HeaderParam("sessionid")
+    ClientResponse<InputStream> getJobTasksIds(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -341,7 +339,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/all")
     @Produces("application/json")
-    public ClientResponse<String> tasklog(@HeaderParam("sessionid")
+    ClientResponse<String> tasklog(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskid")
     String taskId);
@@ -357,7 +355,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/out")
     @Produces("application/json")
-    public ClientResponse<String> taskStdout(@HeaderParam("sessionid")
+    ClientResponse<String> taskStdout(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskid")
     String taskId);
@@ -373,7 +371,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/err")
     @Produces("application/json")
-    public ClientResponse<String> taskStderr(@HeaderParam("sessionid")
+    ClientResponse<String> taskStderr(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskid")
     String taskId);
@@ -382,39 +380,38 @@ public interface RestClient {
      * Stream the output of job identified by the id <code>jobid</code>
      * only stream currently available logs, call this method several times
      * to get the complete output.
-     * @param sessionid a valid session id
-     * @param jobid the id of the job to retrieve
-     * @throws LogForwardingException
+     * @param sessionId a valid session id
+     * @param jobId the id of the job to retrieve
      */
     @GET
     @GZIP
     @Path("jobs/{jobid}/livelog")
     @Produces("application/json")
-    public ClientResponse<String> getLiveLogJob(@HeaderParam("sessionid")
+    ClientResponse<String> getLiveLogJob(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
     /**
      * number of available bytes in the stream or -1 if the stream does not exist.
-     * @param sessionid a valid session id
-     * @param jobid the id of the job to retrieve
+     * @param sessionId a valid session id
+     * @param jobId the id of the job to retrieve
      */
     @GET
     @Path("jobs/{jobid}/livelog/available")
     @Produces("application/json")
-    public ClientResponse<String> getLiveLogJobAvailable(@HeaderParam("sessionid")
+    ClientResponse<String> getLiveLogJobAvailable(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
     /**
      * remove the live log object.
-     * @param sessionid a valid session id
-     * @param jobid the id of the job to retrieve
+     * @param sessionId a valid session id
+     * @param jobId the id of the job to retrieve
      */
     @DELETE
     @Path("jobs/{jobid}/livelog")
     @Produces("application/json")
-    public ClientResponse<InputStream> deleteLiveLogJob(@HeaderParam("sessionid")
+    ClientResponse<InputStream> deleteLiveLogJob(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -429,7 +426,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/log/server")
     @Produces("application/json")
-    public ClientResponse<String> taskServerLogs(@HeaderParam("sessionid")
+    ClientResponse<String> taskServerLogs(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskid")
     String taskId);
@@ -444,7 +441,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/log/server")
     @Produces("application/json")
-    public ClientResponse<String> jobServerLogs(@HeaderParam("sessionid")
+    ClientResponse<String> jobServerLogs(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
 
@@ -459,7 +456,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/value")
     @Produces("*/*")
-    public ClientResponse<InputStream> taskresult(@HeaderParam("sessionid")
+    ClientResponse<InputStream> taskresult(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskid")
     String taskId);
@@ -468,26 +465,22 @@ public interface RestClient {
      * returns statistics about the scheduler
      * @param sessionId the session id associated to this new connection
      * @return a string containing the statistics
-     * @throws NotConnectedException
-     * @throws PermissionException
      */
     @GET
     @Path("stats")
     @Produces("application/json")
-    public ClientResponse<String> getStatistics(@HeaderParam("sessionid")
+    ClientResponse<String> getStatistics(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
      * returns a string containing some data regarding the user's account
      * @param sessionId the session id associated to this new connection
      * @return a string containing some data regarding the user's account
-     * @throws NotConnectedException
-     * @throws PermissionException
      */
     @GET
     @Path("stats/myaccount")
     @Produces("application/json")
-    public ClientResponse<String> getStatisticsOnMyAccount(@HeaderParam("sessionid")
+    ClientResponse<String> getStatisticsOnMyAccount(@HeaderParam("sessionid")
     final String sessionId);
 
     /**
@@ -498,7 +491,7 @@ public interface RestClient {
     @GET
     @Path("state/revision")
     @Produces({ "application/json", "application/xml" })
-    public ClientResponse<String> schedulerStateRevision(@HeaderParam("sessionid")
+    ClientResponse<String> schedulerStateRevision(@HeaderParam("sessionid")
     String sessionId);
 
     /**
@@ -509,7 +502,7 @@ public interface RestClient {
      *   - its owner
      *   - the JobInfo class
      * @param sessionId a valid session id
-     * @param fetch only my jobs when true, all jobs when false
+     * @param myJobs only my jobs when true, all jobs when false
      * @param pending fetch pending jobs
      * @param running fetch running jobs
      * @param finished fetch finished jobs
@@ -520,7 +513,7 @@ public interface RestClient {
     @GZIP
     @Path("revisionjobsinfo")
     @Produces({ "application/json", "application/xml" })
-    public ClientResponse<InputStream> revisionAndjobsinfo(@HeaderParam("sessionid")
+    ClientResponse<InputStream> revisionAndjobsinfo(@HeaderParam("sessionid")
     String sessionId, @QueryParam("index")
     int index, @QueryParam("range")
     int range, @QueryParam("myjobs")
@@ -538,9 +531,9 @@ public interface RestClient {
     @GET
     @Path("jobs/{jobid}/html")
     @Produces("text/html")
-    public ClientResponse<InputStream> getJobHtml(@HeaderParam("sessionid")
-                                                   String sessionId, @PathParam("jobid")
-                                                   String jobId);
+    ClientResponse<InputStream> getJobHtml(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId);
 
     /**
      * Users currently connected to the scheduler
@@ -551,7 +544,7 @@ public interface RestClient {
     @GZIP
     @Path("users")
     @Produces({ "application/json", "application/xml" })
-    public ClientResponse<InputStream> getSchedulerUsers(@HeaderParam("sessionid")
+    ClientResponse<InputStream> getSchedulerUsers(@HeaderParam("sessionid")
     String sessionId);
 
     /**
@@ -563,7 +556,7 @@ public interface RestClient {
     @GZIP
     @Path("userswithjobs")
     @Produces({ "application/json", "application/xml" })
-    public ClientResponse<InputStream> getSchedulerUsersWithJobs(@HeaderParam("sessionid")
+    ClientResponse<InputStream> getSchedulerUsersWithJobs(@HeaderParam("sessionid")
     String sessionId);
 
     /**
@@ -574,12 +567,12 @@ public interface RestClient {
      */
     @GET
     @Path("status")
-    public ClientResponse<String> schedulerStatus(@HeaderParam("sessionid")
+    ClientResponse<String> schedulerStatus(@HeaderParam("sessionid")
     String sessionId);
 
     @GET
     @Path("version")
-    public ClientResponse<InputStream> getVersion();
+    ClientResponse<InputStream> getVersion();
 
     @GET
     @Path("usage/myaccount")

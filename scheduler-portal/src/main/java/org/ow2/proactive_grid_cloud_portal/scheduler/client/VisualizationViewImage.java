@@ -70,9 +70,7 @@ import com.smartgwt.client.widgets.menu.Menu;
 /**
  * Displays an image of the currently selected job if available 
  * 
- * 
  * @author mschnoor
- *
  */
 public class VisualizationViewImage implements VisualizationView {
 

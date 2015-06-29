@@ -44,7 +44,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.json.client.JSONException;
@@ -80,9 +79,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 /**
  * Popup Window for job submission
  * 
- * 
  * @author mschnoor
- *
  */
 public class SubmitWindow {
 
