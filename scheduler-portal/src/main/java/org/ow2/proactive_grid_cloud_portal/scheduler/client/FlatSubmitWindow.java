@@ -143,7 +143,7 @@ public class FlatSubmitWindow {
         //nameItem.setRequired(true);
         UploadItem commandsItem = new UploadItem("commandFile", "Command file");
         //commandsItem.setRequired(true);
-        UploadItem selectionItem = new UploadItem("selectionScript", "Section script");
+        UploadItem selectionItem = new UploadItem("selectionScript", "Selection script");
 
         form.setItems(sessionItem, nameItem, commandsItem, selectionItem, callback);
 
