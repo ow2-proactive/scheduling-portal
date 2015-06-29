@@ -276,14 +276,6 @@ public interface SchedulerServiceAsync {
     void getJobImage(String sessionId, String jobId, AsyncCallback<String> callback);
 
     /**
-     * Textual representation of the graphical info returned by {@link #getJobImage(String, String, AsyncCallback)}
-     * @param sessionId current session
-     * @param jobId id of the job
-     * @param callback handle the returned XML map of task coordinates
-     */
-    void getJobMap(String sessionId, String jobId, AsyncCallback<JobVisuMap> callback);
-
-    /**
      * Returns the Scheduler status as a JSON String 
      * @param sessionId a valid session id
      * @param the callback for returning the current scheduler status

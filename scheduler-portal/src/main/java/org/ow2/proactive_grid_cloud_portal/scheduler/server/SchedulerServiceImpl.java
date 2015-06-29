@@ -36,7 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,11 +50,8 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
@@ -66,14 +62,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.MapRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.ObjectFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.jaxb.TaskRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -118,7 +107,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private void loadProperties() {
         SchedulerConfig.get().load(
-          ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
+                ConfigReader.readPropertiesFromFile(
+                        getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
     }
 
@@ -194,7 +184,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<String> clientResponse = client.submitFlat(sessionId, commandFileContent, jobName,
-          selectionScriptContent, selectionScriptExtension);
+                selectionScriptContent, selectionScriptExtension);
 
         Status status = clientResponse.getResponseStatus();
         String stringResponse = clientResponse.getEntity();
@@ -892,7 +882,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTaskOutput(String sessionId, String jobId, String taskName, int logMode)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(),
+                executor);
         ClientResponse<String> clientResponse = null;
         if (logMode == SchedulerServiceAsync.LOG_ALL) {
             clientResponse = client.tasklog(sessionId, jobId, taskName);
@@ -1124,7 +1115,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             boolean pending, boolean running, boolean finished) throws RestServerException, ServiceException {
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         ClientResponse<InputStream> clientResponse = client.revisionAndjobsinfo(sessionId, index, range,
-          myJobsOnly, pending, running, finished);
+                myJobsOnly, pending, running, finished);
 
         Status status = clientResponse.getResponseStatus();
         try {
@@ -1163,80 +1154,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             return url;
         }
 
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.getJobImage(sessionId, jobId);
-        Status status = clientResponse.getResponseStatus();
-
-        try {
-            InputStream response = clientResponse.getEntity();
-            String ret = IOUtils.toString(response, RestClient.ENCODING);
-            switch (status) {
-                case OK:
-                    byte[] dec = Base64.decodeBase64(ret.getBytes(RestClient.ENCODING));
-                    FileUtils.writeByteArrayToFile(f,dec);
-                    return url;
-
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
-            }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
-
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getJobMap(java.lang
-     * .String, java.lang.String)
-     */
-    @Override
-    public JobVisuMap getJobMap(String sessionId, String jobId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.getJobMap(sessionId, jobId);
-        Status status = clientResponse.getResponseStatus();
-
-        try {
-            InputStream response = clientResponse.getEntity();
-            String res = convertToString(response);
-            switch (status) {
-                case OK:
-                    try {
-                        // it's kinda bad to do this server-side,
-                        // but JAXB doesn't really work great client side
-                        InputStream in = new ByteArrayInputStream(res.getBytes());
-                        JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
-                        Unmarshaller um = jc.createUnmarshaller();
-                        JAXBElement<?> elt = (JAXBElement<?>) um.unmarshal(in);
-                        MapRecord rec = (MapRecord) elt.getValue();
-
-                        JobVisuMap ret = new JobVisuMap();
-                        for (TaskRecord tr : rec.getMap().getTask()) {
-                            int x = tr.getPosition().getX();
-                            int y = tr.getPosition().getY();
-                            int w = tr.getSize().getX();
-                            int h = tr.getSize().getY();
-                            String name = tr.getName();
-                            ret.addTask(x, y, w, h, name);
-                        }
-
-                        return ret;
-
-                    } catch (JAXBException e) {
-                        throw new ServiceException(e.getMessage());
-                    }
-                default:
-                    throw new RestServerException(status.getStatusCode(), res);
-            }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        throw new RestServerException(
+                Status.NOT_FOUND.getStatusCode(), "File not found: " + f.getPath());
     }
 
     /*

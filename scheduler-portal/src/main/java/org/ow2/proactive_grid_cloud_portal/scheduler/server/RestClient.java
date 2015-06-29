@@ -384,7 +384,7 @@ public interface RestClient {
      * to get the complete output.
      * @param sessionid a valid session id
      * @param jobid the id of the job to retrieve
-     * @throws LogForwardingException 
+     * @throws LogForwardingException
      */
     @GET
     @GZIP
@@ -528,33 +528,6 @@ public interface RestClient {
     boolean pending, @QueryParam("running")
     boolean running, @QueryParam("finished")
     boolean finished);
-
-    /**
-     * Returns a map corresponding of a jobid
-     * @param sessionId a valid session id
-     * @param jobId the job id
-     * @return a map corresponding of a <code>jobId</code>
-     */
-    @GET
-    @GZIP
-    @Path("jobs/{jobid}/map")
-    @Produces({ "application/json", "application/xml" })
-    public ClientResponse<InputStream> getJobMap(@HeaderParam("sessionid")
-    String sessionId, @PathParam("jobid")
-    String jobId);
-
-    /**
-     * Returns an image corresponding of a jobid
-     * @param sessionId a valid session id
-     * @param jobId the job id
-     * @return a map corresponding of a <code>jobId</code>
-     */
-    @GET
-    @Path("jobs/{jobid}/image")
-    @Produces("application/json;charset=" + ENCODING)
-    public ClientResponse<InputStream> getJobImage(@HeaderParam("sessionid")
-    String sessionId, @PathParam("jobid")
-    String jobId);
 
     /**
      * Returns an html visualization corresponding of a jobid

@@ -340,17 +340,6 @@ public interface SchedulerService extends RemoteService {
                               String sessionId, String jobId) throws RestServerException, ServiceException;
 
     /**
-     * Textual representation of the graphical info returned by {@link #getJobImage(String, String)}
-     * @param sessionId current session
-     * @param jobId id of a job
-     * @return an XML map of task coordinates
-     * @throws RestServerException
-     * @throws ServiceException 
-     */
-    public JobVisuMap getJobMap(@HeaderParam("sessionid")
-    String sessionId, String jobId) throws RestServerException, ServiceException;
-
-    /**
      * Returns the Scheduler status as a JSON String 
      * @param sessionId a valid session id
      * @return the current scheduler status

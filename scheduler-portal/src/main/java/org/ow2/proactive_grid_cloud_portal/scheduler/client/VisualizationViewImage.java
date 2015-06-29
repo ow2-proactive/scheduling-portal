@@ -551,7 +551,7 @@ public class VisualizationViewImage implements VisualizationView {
         this.message
                 .setContents("Visualization is not available<br><br>"
                     + "To use visualization you need to create your job using the <strong>Workflow Studio</strong>, and either<br>"
-                    + "Submit it to directly from the editor, or Export it as a job archive and submit it from any client");
+                    + "Submit it to directly from the editor");
         this.message.setIcon(null);
     }
 

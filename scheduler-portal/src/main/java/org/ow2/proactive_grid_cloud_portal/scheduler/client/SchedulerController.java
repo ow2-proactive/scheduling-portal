@@ -402,30 +402,6 @@ public class SchedulerController extends Controller implements UncaughtException
                                 }
                             });
                         }
-
-                        JobVisuMap map = model.getJobVisuMap(jobId);
-                        if (map != null) {
-                            model.setJobVisuMap(jobId, map);
-                        } else {
-                            final long t = System.currentTimeMillis();
-                            scheduler.getJobMap(model.getSessionId(), jobId, new AsyncCallback<JobVisuMap>() {
-                                public void onSuccess(JobVisuMap result) {
-                                    model.setJobVisuMap(jobId, result);
-                                    model.logMessage("Fetched map for job " + jobId + " in " +
-                                            (System.currentTimeMillis() - t) + " ms");
-                                }
-
-                                public void onFailure(Throwable caught) {
-                                    String msg = "Failed to fetch visu map for job " + jobId;
-                                    String json = getJsonErrorMessage(caught);
-                                    if (json != null)
-                                        msg += " : " + json;
-
-                                    model.logImportantMessage(msg);
-                                    model.visuUnavailable(jobId);
-                                }
-                            });
-                        }
                     }
                 });
             }
