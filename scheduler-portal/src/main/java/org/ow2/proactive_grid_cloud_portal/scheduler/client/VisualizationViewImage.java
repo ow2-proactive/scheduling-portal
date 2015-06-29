@@ -548,8 +548,8 @@ public class VisualizationViewImage implements VisualizationView {
     public void visualizationUnavailable(String jobId) {
         this.message
                 .setContents("Visualization is not available<br><br>"
-                    + "To use visualization you need to create your job using the <strong>Workflow Studio</strong>, and either<br>"
-                    + "Submit it to directly from the editor");
+                    + "To use visualization you need to create your job using the <strong>Workflow Studio</strong>, and <br>"
+                    + "submit it directly from the editor");
         this.message.setIcon(null);
     }
 
