@@ -59,19 +59,16 @@ import org.w3c.dom.Document;
 
 
 /**
- * Default job submission servlet
+ * Default job submission servlet.
  * <p>
- * 
- * form must be multipart and contain:
- * . one file, name ignored, must be a valid XML job descriptor or a Job ARchive (a ZIP file
- *   containing a specific file hierarchy).
+ * Form must be multipart and contain:
+ * . one file, name ignored, must be a valid XML job descriptor
  * . one form field named 'sessionId' used to connect to the server
  * . one optional form field named 'edit'. if edit == "1",
  *   the servlet does not submit the job, but simply writes the following string as application/json response:
  *   { "jobEdit" : "<DESC_64>" }
  *   where <DESC_64> is a base64 encoded version of the job sent as parameter.
  *   This will allow client to edit the descriptor, as javascript runtimes are not allow to open local files.
- *   Edition of a job descriptor contained in an archive is not supported.
  */
 @SuppressWarnings("serial")
 public class UploadServlet extends HttpServlet {

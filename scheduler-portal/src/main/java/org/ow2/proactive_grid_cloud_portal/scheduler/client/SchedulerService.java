@@ -46,8 +46,6 @@ import javax.ws.rs.QueryParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -62,7 +60,7 @@ public interface SchedulerService extends RemoteService {
      * Logout from the scheduler.
      * 
      * @param sessionId the user session id used to logout from the scheduler.
-     * @throws LogoutException exception thrown if problems occurred during the logout process. 
+     * @throws RestServerException exception thrown if problems occurred during the logout process.
      */
     void logout(String sessionId) throws RestServerException;
 
@@ -243,8 +241,8 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
      * @param taskName the name of the task, not the id
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_ERR},
-     * 	 {@link SchedulerServiceAsync#LOG_OUT}
+     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
+     * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      * @return the output of the task
      * @throws RestServerException
      * @throws ServiceException 
@@ -279,12 +277,12 @@ public interface SchedulerService extends RemoteService {
      * @param jobId id of the job for which live logs should be cleaned
      * @throws RestServerException
      */
-    public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
+    boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
             ServiceException;
 
-    public String getStatistics(String sessionId) throws RestServerException, ServiceException;
+    String getStatistics(String sessionId) throws RestServerException, ServiceException;
 
-    public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException;
+    String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException;
 
     /**
     * Returns the revision number of the scheduler state
@@ -292,7 +290,7 @@ public interface SchedulerService extends RemoteService {
     * @return the revision of the scheduler state
     * @throws RestServerException
     */
-    public long schedulerStateRevision(String sessionId) throws RestServerException;
+    long schedulerStateRevision(String sessionId) throws RestServerException;
 
     /**
      * Returns a map containing one entry with the revision id as key and the
@@ -312,7 +310,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException 
      * @throws ServiceException 
      */
-    public String revisionAndjobsinfo(@HeaderParam("sessionid")
+    String revisionAndjobsinfo(@HeaderParam("sessionid")
     String sessionId, @QueryParam("index")
     int index, @QueryParam("range")
     int range, @QueryParam("myjobs")
@@ -326,7 +324,7 @@ public interface SchedulerService extends RemoteService {
      * @return path of the image on the server
      * @throws ServiceException 
      */
-    public String getJobImage(@HeaderParam("sessionid")
+    String getJobImage(@HeaderParam("sessionid")
     String sessionId, String jobId) throws RestServerException, ServiceException;
 
     /**
@@ -336,18 +334,7 @@ public interface SchedulerService extends RemoteService {
      * @return path of the image on the server
      * @throws ServiceException
      */
-    public String getJobHtml(@HeaderParam("sessionid")
-                              String sessionId, String jobId) throws RestServerException, ServiceException;
-
-    /**
-     * Textual representation of the graphical info returned by {@link #getJobImage(String, String)}
-     * @param sessionId current session
-     * @param jobId id of a job
-     * @return an XML map of task coordinates
-     * @throws RestServerException
-     * @throws ServiceException 
-     */
-    public JobVisuMap getJobMap(@HeaderParam("sessionid")
+    String getJobHtml(@HeaderParam("sessionid")
     String sessionId, String jobId) throws RestServerException, ServiceException;
 
     /**
@@ -356,7 +343,7 @@ public interface SchedulerService extends RemoteService {
      * @return the current scheduler status
      * @throws RestServerException
      */
-    public String getSchedulerStatus(@HeaderParam("sessionid")
+    String getSchedulerStatus(@HeaderParam("sessionid")
     String sessionId) throws RestServerException;
 
     /**
@@ -366,7 +353,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException 
      */
-    public String getSchedulerUsers(@HeaderParam("sessionid")
+    String getSchedulerUsers(@HeaderParam("sessionid")
     String sessionId) throws RestServerException, ServiceException;
 
     /**
@@ -376,7 +363,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException 
      */
-    public String getSchedulerUsersWithJobs(@HeaderParam("sessionid")
+    String getSchedulerUsersWithJobs(@HeaderParam("sessionid")
     String sessionId) throws RestServerException, ServiceException;
 
     /**

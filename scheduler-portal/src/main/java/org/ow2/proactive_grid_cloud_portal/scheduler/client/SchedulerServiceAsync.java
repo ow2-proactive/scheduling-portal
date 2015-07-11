@@ -43,8 +43,6 @@ import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -105,7 +103,7 @@ public interface SchedulerServiceAsync {
      * Kill a task within a given job
      * @param sessionId current session
      * @param jobId id of a job
-     * @param taskname name of the task to kill
+     * @param taskName name of the task to kill
      * @param cb
      */
     void killTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
@@ -114,7 +112,7 @@ public interface SchedulerServiceAsync {
      * Preempt a task within a given job
      * @param sessionId current session
      * @param jobId id of a job
-     * @param taskname name of the task to preempt
+     * @param taskName name of the task to preempt
      * @param cb
      */
     void preemptTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
@@ -123,7 +121,7 @@ public interface SchedulerServiceAsync {
      * Restart a task within a given job
      * @param sessionId current session
      * @param jobId id of a job
-     * @param taskname name of the task to restart
+     * @param taskName name of the task to restart
      * @param cb
      */
     void restartTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
@@ -276,17 +274,9 @@ public interface SchedulerServiceAsync {
     void getJobImage(String sessionId, String jobId, AsyncCallback<String> callback);
 
     /**
-     * Textual representation of the graphical info returned by {@link #getJobImage(String, String, AsyncCallback)}
-     * @param sessionId current session
-     * @param jobId id of the job
-     * @param callback handle the returned XML map of task coordinates
-     */
-    void getJobMap(String sessionId, String jobId, AsyncCallback<JobVisuMap> callback);
-
-    /**
      * Returns the Scheduler status as a JSON String 
      * @param sessionId a valid session id
-     * @param the callback for returning the current scheduler status
+     * @param callback the callback for returning the current scheduler status
      */
     void getSchedulerStatus(String sessionId, AsyncCallback<String> callback);
 
