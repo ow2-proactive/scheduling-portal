@@ -66,10 +66,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
  * Allows to execute a script on a node and see its output.
- * 
- * 4 script engines are supported and available from every RM's node:
- * "Groovy", "JavaScript", "Ruby", "Python"
- * 
  */
 public class ScriptConsoleView implements NodeSelectedListener {
 
@@ -83,9 +79,8 @@ public class ScriptConsoleView implements NodeSelectedListener {
     private Label loadingLabel;
     private CodeMirrorWrapper codeMirror;
 
-    private static final String[] engineNames = { "Groovy", "JavaScript", "Ruby", "Python" };
-    private static final String[] engineCodeHighliters = { "text/x-groovy", "text/javascript", "text/x-ruby",
-            "text/x-python" };
+    private static final String[] engineNames = { "Bash", "Cmd", "Groovy", "JavaScript", "Python", "Ruby" };
+    private static final String[] engineCodeHighliters = { "text/x-sh", "text/x-sh", "text/x-groovy", "text/javascript", "text/x-python", "text/x-ruby"};
     private RadioGroupItem selectedEngine;
 
     private RMController controller;
@@ -156,12 +151,13 @@ public class ScriptConsoleView implements NodeSelectedListener {
         this.nodeLabel.setHeight(16);
 
         String helpMessage = "Type in an arbitrary script and execute it on the node.";
-        helpMessage += "Useful for trouble-shooting and diagnostics.";
-        helpMessage += "Use the 'println' command to see the output ";
-        helpMessage += "(if you use System.out, it will go to the server's stdout, which is harder to see.) Groovy example:<br/><br/>";
+        helpMessage += " Useful for trouble-shooting and diagnostics.";
+        helpMessage += "<br/><br/>Groovy example:<br/><br/>";
         helpMessage += "<div style='padding-left:20px'>println System.getenv(\"PATH\")</div>";
         helpMessage += "<div style='padding-left:20px'>println \"uname -a\".execute().text</div>";
         helpMessage += "<div style='padding-left:20px;padding-bottom:10px'>println \"jstack pid\".execute().text</div>";
+        helpMessage += "Use the 'println' command to see the output ";
+        helpMessage += "(if you use System.out, it will go to the server's stdout, which is harder to see).";
 
         Label help = new Label(helpMessage);
         help.setHeight(16);
@@ -219,7 +215,8 @@ public class ScriptConsoleView implements NodeSelectedListener {
                 "codemirror-3.14/mode/groovy/groovy.js",
                 "codemirror-3.14/mode/javascript/javascript.js",
                 "codemirror-3.14/mode/ruby/ruby.js",
-                "codemirror-3.14/mode/python/python.js");
+                "codemirror-3.14/mode/python/python.js",
+                "codemirror-3.14/mode/shell/shell.js");
 
         vl.setMembers(label, nodeCanvas);
         return vl;
