@@ -59,6 +59,7 @@ public class Task implements Serializable, Comparable<Task> {
     private long finishedTime;
     private long executionDuration;
     private String description;
+    private String tag;
     private int maxNumberOfExec;
     private int numberOfExecLeft;
     private int maxNumberOfExecOnFailure;
@@ -253,8 +254,27 @@ public class Task implements Serializable, Comparable<Task> {
     public String getDescription() {
         return description;
     }
+    
+    
+    
+    /**
+     * Getter of the task tag.
+     * @return the tag of the task.
+     */
+    public String getTag() {
+		return tag;
+	}
 
-    public String getIdName() {
+    
+    /**
+     * Setter of the task tag.
+     * @param tag the tag of the task.
+     */
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	public String getIdName() {
         return "id";
     }
 
@@ -303,6 +323,12 @@ public class Task implements Serializable, Comparable<Task> {
             if (desc != null)
                 description = desc.stringValue();
         }
+        String tag = "";
+        if (jsonTask.containsKey("tag")) {
+            JSONString tagValue = jsonTask.get("tag").isString();
+            if (tagValue != null)
+                tag = tagValue.stringValue();
+        }
         int maxExec = (int) jsonTask.get("maxNumberOfExecution").isNumber().doubleValue();
         int execLeft = (int) taskInfo.get("numberOfExecutionLeft").isNumber().doubleValue();
         int execOnFailureLeft = (int) taskInfo.get("numberOfExecutionOnFailureLeft").isNumber().doubleValue();
@@ -315,8 +341,10 @@ public class Task implements Serializable, Comparable<Task> {
             }
         }
 
-        return new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
+        Task result = new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
             executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
+        result.setTag(tag);
+        return result;
     }
 
     /**

@@ -98,6 +98,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     private static final String EXECUTIONS_ATTR = "executions";
     private static final String NODE_FAILURE_ATTR = "nodeFailure";
     private static final String DESCRIPTION_ATTR = "description";
+    private static final String TAG_ATTR = "tag";
 
     /**
      * Entries in the Tasks Grid
@@ -183,6 +184,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
             DataSourceTextField descrF = new DataSourceTextField(DESCRIPTION_ATTR, "Description");
             descrF.setRequired(true);
+            
+            DataSourceTextField tagF = new DataSourceTextField(TAG_ATTR, "Tag");
+            tagF.setRequired(true);
 
             DataSourceTextField hostF = new DataSourceTextField(HOST_ATTR, "Hostname");
             hostF.setRequired(true);
@@ -292,14 +296,16 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 DetailViewerField df2 = new DetailViewerField(START_TIME_ATTR, "Started time");
                 DetailViewerField df3 = new DetailViewerField(FINISHED_TIME_ATTR, "Finished time");
                 DetailViewerField df1 = new DetailViewerField(DESCRIPTION_ATTR, "Description");
+                DetailViewerField df4 = new DetailViewerField(TAG_ATTR, "Tag");
 
-                detail.setFields(dfh, df2, df3, df1);
+                detail.setFields(dfh, df2, df3, df1, df4);
 
                 DetailViewerRecord r1 = new DetailViewerRecord();
                 r1.setAttribute(HOST_ATTR, (t.getHostName().equals("null") ? "" : t.getHostName()));
                 r1.setAttribute(DESCRIPTION_ATTR, t.getDescription());
                 r1.setAttribute(START_TIME_ATTR, rec.getAttribute(START_TIME_ATTR));
                 r1.setAttribute(FINISHED_TIME_ATTR, rec.getAttribute(FINISHED_TIME_ATTR));
+                r1.setAttribute(TAG_ATTR, t.getTag());
 
                 detail.setData(new DetailViewerRecord[]{r1});
 
