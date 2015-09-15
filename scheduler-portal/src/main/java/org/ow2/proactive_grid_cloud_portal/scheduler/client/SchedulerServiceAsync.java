@@ -43,6 +43,7 @@ import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -134,6 +135,16 @@ public interface SchedulerServiceAsync {
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
     Request getTasks(String sessionId, String jobId, AsyncCallback<String> callback);
+    
+    
+    /**
+     * Method used for making an asynchronous call to the server for returning a list of 
+     * tasks that correspond to a job and filtered by a given tag.
+     * @param sessionId the session if of the user that asks for the tasks
+     * @param jobId the id of the job for which its task list is asked 
+     * @param tag the tag used to filter the tasks.
+     */
+    Request getTasksByTag(String sessionId, String jobId, String tag, AsyncCallback<String> callback);
 
     /**
      * Gets the properties needed by the client. When loading properties we can only

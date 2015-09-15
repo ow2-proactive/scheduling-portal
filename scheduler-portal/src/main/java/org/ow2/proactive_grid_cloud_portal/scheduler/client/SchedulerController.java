@@ -345,6 +345,10 @@ public class SchedulerController extends Controller implements UncaughtException
             visuFetch(jobId);
         }
     }
+    
+    
+    
+    
 
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
@@ -1058,6 +1062,59 @@ public class SchedulerController extends Controller implements UncaughtException
         }
     }
 
+    public void setTaskTagFilter(String tag){
+    	boolean changed = this.model.setCurrentTagFilter(tag);
+    	if(changed){
+    		this.taskOutputRequests.clear();
+    		if (this.taskUpdateRequest != null) {
+    			this.taskUpdateRequest.cancel();
+    			this.taskUpdateRequest = null;
+    		}
+    		
+    		if(tag != ""){
+    			//tasks have to be filtered by a tag
+    			filterTasksByTag(tag);
+    		}
+    		else{
+    			//no filter to apply
+    			updateTasks();
+    		}
+    	}
+    }
+    
+    
+    
+    
+    public void filterTasksByTag(final String tag){
+    	final String jobId = "" + model.getSelectedJob().getId();
+    	this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tag, new AsyncCallback<String>() {
+
+    		public void onFailure(Throwable caught) {
+    			String msg = Controller.getJsonErrorMessage(caught);
+
+    			SchedulerController.this.model.taskUpdateError(msg);
+    			SchedulerController.this.model.logImportantMessage("Failed to update tasks for job " +
+    					jobId + " and tag " + tag + ": " + msg);
+    		}
+
+    		public void onSuccess(String result) {
+    			List<Task> tasks;
+
+    			JSONValue val = parseJSON(result);
+    			JSONArray arr = val.isArray();
+    			if (arr == null) {
+    				error("Expected JSON Array: " + val.toString());
+    			}
+    			tasks = getTasksFromJson(arr);
+
+    			SchedulerController.this.model.setTasksDirty(false);
+    			SchedulerController.this.model.setTasks(tasks);
+    			// do not model.logMessage() : this is repeated by a timer
+    		}
+    	});
+    }
+    
+    
     /**
      * Starts the Timer that will periodically fetch the current scheduler state
      * from the server end and update the local view

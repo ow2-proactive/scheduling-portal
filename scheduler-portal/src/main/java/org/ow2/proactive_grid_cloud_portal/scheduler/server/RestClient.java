@@ -221,6 +221,24 @@ public interface RestClient {
     ClientResponse<InputStream> getJobTaskStates(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId);
+    
+    
+    /**
+     * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the job id for which the tasks are asked.
+     * @param tag the tag used to filter the tasks.
+     * @return a ClientResponse containing the response status and the JSON array including the task list, in case of success.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}")
+    @Produces("application/json")
+    ClientResponse<InputStream> getJobTaskStatesByTag(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("tasktag")
+    String tag);
+    
 
     /**
      * Gets the state of a certain job.

@@ -87,6 +87,13 @@ public abstract class SchedulerModel implements Model {
      * @return the currently selected job
      */
     public abstract Job getSelectedJob();
+    
+    
+    /**
+     * @return the current tag used to filter the list of tasks.
+     */
+    public abstract String getCurrentTagFilter();
+    
 
     /**
      * @return the list of tasks corresponding the currently selected job

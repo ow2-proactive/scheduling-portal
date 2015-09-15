@@ -47,7 +47,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.T
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.TextBox;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
@@ -75,6 +80,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -129,6 +135,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                     t.getMaxNumberOfExecOnFailure();
 
             setAttribute(NAME_ATTR, t.getName());
+            setAttribute(TAG_ATTR, t.getTag());
             setAttribute(STATUS_ATTR, t.getStatus().toString());
             setAttribute(EXEC_DURATION_ATTR, t.getExecutionTime());
             setAttribute(EXECUTIONS_ATTR, execs);
@@ -296,16 +303,14 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 DetailViewerField df2 = new DetailViewerField(START_TIME_ATTR, "Started time");
                 DetailViewerField df3 = new DetailViewerField(FINISHED_TIME_ATTR, "Finished time");
                 DetailViewerField df1 = new DetailViewerField(DESCRIPTION_ATTR, "Description");
-                DetailViewerField df4 = new DetailViewerField(TAG_ATTR, "Tag");
 
-                detail.setFields(dfh, df2, df3, df1, df4);
+                detail.setFields(dfh, df2, df3, df1);
 
                 DetailViewerRecord r1 = new DetailViewerRecord();
                 r1.setAttribute(HOST_ATTR, (t.getHostName().equals("null") ? "" : t.getHostName()));
                 r1.setAttribute(DESCRIPTION_ATTR, t.getDescription());
                 r1.setAttribute(START_TIME_ATTR, rec.getAttribute(START_TIME_ATTR));
                 r1.setAttribute(FINISHED_TIME_ATTR, rec.getAttribute(FINISHED_TIME_ATTR));
-                r1.setAttribute(TAG_ATTR, t.getTag());
 
                 detail.setData(new DetailViewerRecord[]{r1});
 
@@ -451,6 +456,8 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         idField.setWidth(60);
 
         ListGridField nameField = new ListGridField(NAME_ATTR, "Name");
+        
+        ListGridField tagField = new ListGridField(TAG_ATTR, "Tag");
 
         ListGridField statusField = new ListGridField(STATUS_ATTR, "Status");
         statusField.setWidth(80);
@@ -476,7 +483,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         ListGridField visu = new ListGridField("visu", " ");
         visu.setWidth(20);
 
-        this.tasksGrid.setFields(idField, statusField, nameField, execDuration, nodeCount, executions,
+        this.tasksGrid.setFields(idField, statusField, nameField, tagField, execDuration, nodeCount, executions,
                 failures, visu);
         this.tasksGrid.sort(ID_ATTR, SortDirection.ASCENDING);
 
@@ -490,13 +497,50 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.setWidth100();
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
+        
+        final TextBox searchTextBox = new TextBox();
+        searchTextBox.addStyleName("searchBox");
+        searchTextBox.getElement().setAttribute("placeholder", "tag...");
+        searchTextBox.addKeyDownHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+					String tag = searchTextBox.getText();
+					TasksView.this.controller.setTaskTagFilter(tag);
+				}
+			}
+		});
+        
+        Button btnFilter = new Button("Filter");
+        btnFilter.setWidth("40");
+        btnFilter.addStyleName("btnBoxCombo");
+        btnFilter.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+			
+			@Override
+			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+				String tag = searchTextBox.getText();
+				TasksView.this.controller.setTaskTagFilter(tag);
+			}
+		});
+        
+        ToolStrip navTools = new ToolStrip();
+        navTools.setHeight(34);
+        navTools.setWidth100();
+        navTools.setBackgroundImage("");
+        navTools.setBackgroundColor("#fafafa");
+        navTools.setBorder("0px");
+        
+        navTools.addMember(searchTextBox);
+        navTools.addMember(btnFilter);
+        
+        VLayout tasksViewLayout = new VLayout();
+        tasksViewLayout.addMember(navTools);
+        tasksViewLayout.addMember(this.tasksGrid);
+        tasksViewLayout.addMember(this.loadingLabel);
+        tasksViewLayout.addMember(this.errorLabel);
 
-        HLayout layout = new HLayout();
-        layout.addMember(this.tasksGrid);
-        layout.addMember(this.loadingLabel);
-        layout.addMember(this.errorLabel);
-
-        return layout;
+        
+        return tasksViewLayout;
     }
 
     /*

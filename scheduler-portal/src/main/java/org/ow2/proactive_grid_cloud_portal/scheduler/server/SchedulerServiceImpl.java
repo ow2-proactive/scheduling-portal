@@ -636,6 +636,40 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         }
     }
+    
+    
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasksByTag(java.lang.
+     * String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String getTasksByTag(String sessionId, String jobId, String tag)
+    		throws RestServerException, ServiceException {
+    	ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        try {
+            clientResponse = client.getJobTaskStatesByTag(sessionId, jobId, tag);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String info = convertToString(response);
+            switch (status) {
+                case OK:
+                    return info;
+                default:
+                    throw new RestServerException(status.getStatusCode(), info);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
+        }
+    }
+    
 
     /*
      * (non-Javadoc)

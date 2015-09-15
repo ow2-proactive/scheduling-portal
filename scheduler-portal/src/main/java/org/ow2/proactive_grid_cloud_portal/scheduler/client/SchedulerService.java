@@ -149,6 +149,18 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException 
      */
     String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException;
+    
+    /**
+     * Gets the list of tasks that correspond to a job and filtered by a given tag.
+     * @param sessionId the session if of the user that asks for the tasks
+     * @param jobId the id of the job for which its task list is asked 
+     * @param tag the tag used to filter the tasks.
+     * @return the list of tasks as raw json
+     * @throws RestServerException 
+     * @throws ServiceException 
+     */
+    String getTasksByTag(String sessionId, String jobId, String tag) throws RestServerException, ServiceException;
+    
 
     /**
      * Gets the properties needed by the client. When loading properties we can only

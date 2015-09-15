@@ -105,6 +105,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
+    private String tasksTagFilter = "";
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
@@ -273,6 +274,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
                 list.tasksUpdating(selChanged);
         }
     }
+    
+    
 
     @Override
     public Job getSelectedJob() {
@@ -674,6 +677,28 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             list.usageUpdated(usage);
         }
     }
+    
+    /**
+     * Set the current tag used to filter the list of tasks.
+     * @param tag the tag used to filter the list of tasks.
+     * @return true if the tag value has changed, false otherwise.
+     */
+    public boolean setCurrentTagFilter(String tag){
+    	boolean result = (!this.tasksTagFilter.equals(tag));
+    	this.tasksTagFilter = tag;
+    	if(result){
+    		for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
+                list.tasksUpdating(true);
+            }
+    	}
+    	return result;
+    }
+    
+    @Override
+    public String getCurrentTagFilter() {
+    	return this.tasksTagFilter;
+    }
+    
 
     public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
         thirdPartyCredentialsListener.keysUpdated(thirdPartyCredentialsKeys);
@@ -696,6 +721,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             return Range.MINUTE_1;
         return r;
     }
+    
+    
 
     @Override
     public void logMessage(String message) {
