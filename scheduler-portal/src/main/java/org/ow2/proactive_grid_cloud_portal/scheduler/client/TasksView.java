@@ -88,6 +88,7 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
+import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -236,6 +237,19 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
     
     private CheckBox autoRefreshOption;
 
+    /**
+     * Task page number
+     */
+    private Label pageLabel = null;
+    /**
+     * Task previous page button
+     */
+    private ToolStripButton pagePreviousButton = null;
+    /**
+     * Task next page button
+     */
+    private ToolStripButton pageNextButton = null;
+    
     private SchedulerController controller = null;
 
     public TasksView(SchedulerController controller) {
@@ -561,6 +575,37 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
         navTools.addMember(this.autoRefreshOption);
+        
+        
+        /* Task pagination buttons and indicator label */
+        this.pageNextButton = new ToolStripButton("Next >");
+        this.pageNextButton.disable();
+        this.pageNextButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                //controller.nextPage();
+                //pageChanged();
+            	// TODO: Paraita: impl task pagination pageNextButton logic
+            }
+        });
+        this.pagePreviousButton = new ToolStripButton("< Previous");
+        this.pagePreviousButton.disable();
+        this.pagePreviousButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                //controller.previousPage();
+                //pageChanged();
+            	// TODO: Paraita: impl task pagination pagePreviousButton logic
+            }
+        });
+     // TODO: Paraita: impl task pagination label logic
+        this.pageLabel = new Label("");
+        this.pageLabel.setAlign(Alignment.CENTER);
+        this.pageLabel.setWidth(60);
+        this.pageLabel.setMargin(0);
+        this.pageLabel.setPadding(0);
+        
+        navTools.addMember(this.pagePreviousButton);
+        navTools.addMember(this.pageLabel);
+        navTools.addMember(this.pageNextButton);
         
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
