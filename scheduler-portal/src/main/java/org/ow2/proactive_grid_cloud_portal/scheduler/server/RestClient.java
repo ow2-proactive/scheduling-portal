@@ -239,6 +239,23 @@ public interface RestClient {
     String jobId, @PathParam("tasktag")
     String tag);
     
+    
+    /**
+     * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
+     * @param sessionId a valid session id
+     * @param jobId jobid one wants to list the tasks' tags
+     * @param prefix the prefix used to filter tags
+     * @return a list of tasks' name
+     */
+    @GET
+    @Path("jobs/{jobid}/tasks/tags/startsWith/{prefix}")
+    @Produces("application/json")
+    ClientResponse<InputStream> getJobTaskTagsPrefix(@HeaderParam("sessionid")
+                                String sessionId, @PathParam("jobid")
+                                String jobId, @PathParam("prefix")
+                                      String prefix);
+
+    
 
     /**
      * Gets the state of a certain job.

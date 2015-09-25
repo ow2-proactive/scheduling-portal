@@ -36,11 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 
@@ -204,5 +206,16 @@ public abstract class SchedulerModel implements Model {
     public abstract HashMap<String, String> getSchedulerStatistics();
 
     public abstract List<JobUsage> getUsage();
-
+    
+    
+    public abstract Collection<TagSuggestion> getAvailableTags(String query);
+    
+    public abstract void setTagSuggestions(Collection<String> tags);
+    
+    public abstract void setTaskAutoRefreshOption(boolean value);
+    
+    public abstract boolean getTaskAutoRefreshOption();
+    
+    
+   
 }

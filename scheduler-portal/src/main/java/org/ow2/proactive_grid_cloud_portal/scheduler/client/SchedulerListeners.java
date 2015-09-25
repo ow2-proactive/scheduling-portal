@@ -246,4 +246,9 @@ public class SchedulerListeners {
     public interface ThirdPartyCredentialsListener {
         void keysUpdated(Set<String> thirdPartyCredentialsKeys);
     }
+    
+    
+    public interface TagSuggestionListener {
+    	void tagSuggestionListUpdated();
+    }
 }

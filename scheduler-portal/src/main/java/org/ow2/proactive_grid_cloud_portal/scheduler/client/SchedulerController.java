@@ -52,7 +52,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
@@ -65,6 +67,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -140,6 +143,9 @@ public class SchedulerController extends Controller implements UncaughtException
     private static final int lazy_tick = 20;
 
     private Timer autoLoginTimer;
+    
+    
+    private PrefixWordSuggestOracle tagSuggestionOracle;
 
     /**
      * Default constructor
@@ -151,6 +157,8 @@ public class SchedulerController extends Controller implements UncaughtException
         this.model = new SchedulerModelImpl();
         this.taskOutputRequests = new HashMap<String, Request>();
         this.liveOutputJobs = new HashSet<String>();
+        
+        this.tagSuggestionOracle = new PrefixWordSuggestOracle(this.model, this.scheduler);
 
         init();
     }
@@ -339,7 +347,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
         SchedulerController.this.model.selectJob(id);
         this.model.setTasksDirty(true);
-        this.updateTasks();
+        this.updateTasks("");
 
         if (visuFetchEnabled) {
             visuFetch(jobId);
@@ -348,6 +356,9 @@ public class SchedulerController extends Controller implements UncaughtException
     
     
     
+    SuggestOracle getTagSuggestionOracle(){
+    	return this.tagSuggestionOracle;
+    }
     
 
     void setVisuFetchEnabled(boolean b) {
@@ -1028,13 +1039,13 @@ public class SchedulerController extends Controller implements UncaughtException
     /**
      * Updates the current task list depending the current job selection in the model 
      */
-    private void updateTasks() {
+    private void updateTasks(String tagFilter) {
         if (model.getSelectedJob() == null) {
             SchedulerController.this.model.setTasks(new ArrayList<Task>());
         } else {
             final String jobId = "" + model.getSelectedJob().getId();
 
-            this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, new AsyncCallback<String>() {
+            AsyncCallback<String> callback = new AsyncCallback<String>() {
 
                 public void onFailure(Throwable caught) {
                     String msg = Controller.getJsonErrorMessage(caught);
@@ -1058,7 +1069,14 @@ public class SchedulerController extends Controller implements UncaughtException
                     SchedulerController.this.model.setTasks(tasks);
                     // do not model.logMessage() : this is repeated by a timer
                 }
-            });
+            };
+            
+            if(tagFilter.equals("")){
+            	this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, callback);
+            }
+            else{
+            	this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tagFilter, callback);
+            }
         }
     }
 
@@ -1072,47 +1090,11 @@ public class SchedulerController extends Controller implements UncaughtException
     		}
     		
     		if(tag != ""){
-    			//tasks have to be filtered by a tag
-    			filterTasksByTag(tag);
-    		}
-    		else{
-    			//no filter to apply
-    			updateTasks();
+    			updateTasks(tag);
     		}
     	}
     }
     
-    
-    
-    
-    public void filterTasksByTag(final String tag){
-    	final String jobId = "" + model.getSelectedJob().getId();
-    	this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tag, new AsyncCallback<String>() {
-
-    		public void onFailure(Throwable caught) {
-    			String msg = Controller.getJsonErrorMessage(caught);
-
-    			SchedulerController.this.model.taskUpdateError(msg);
-    			SchedulerController.this.model.logImportantMessage("Failed to update tasks for job " +
-    					jobId + " and tag " + tag + ": " + msg);
-    		}
-
-    		public void onSuccess(String result) {
-    			List<Task> tasks;
-
-    			JSONValue val = parseJSON(result);
-    			JSONArray arr = val.isArray();
-    			if (arr == null) {
-    				error("Expected JSON Array: " + val.toString());
-    			}
-    			tasks = getTasksFromJson(arr);
-
-    			SchedulerController.this.model.setTasksDirty(false);
-    			SchedulerController.this.model.setTasks(tasks);
-    			// do not model.logMessage() : this is repeated by a timer
-    		}
-    	});
-    }
     
     
     /**
@@ -1333,13 +1315,15 @@ public class SchedulerController extends Controller implements UncaughtException
 
                         jobs = getJobsFromJson(jsonArr);
 
-                        // if the selected job has changed, fetch task details
-                        Job oldSel = model.getSelectedJob();
-                        if (oldSel != null) {
-                            Job newSel = jobs.get(oldSel.getId());
-                            if (newSel != null && !newSel.isEqual(oldSel)) {
-                                updateTasks();
-                            }
+                        // if the selected job has changed and autorefresh is enabled, fetch task details
+                        if(SchedulerController.this.model.getTaskAutoRefreshOption()){
+                        	Job oldSel = model.getSelectedJob();
+                        	if (oldSel != null) {
+                        		Job newSel = jobs.get(oldSel.getId());
+                        		if (newSel != null && !newSel.isEqual(oldSel)) {
+                        			updateTasks(model.getCurrentTagFilter());
+                        		}
+                        	}
                         }
 
                         SchedulerController.this.model.setJobs(jobs, rev);
@@ -1668,4 +1652,10 @@ public class SchedulerController extends Controller implements UncaughtException
             }
         });
     }
+    
+    
+    public void setTaskAutoRefreshOption(boolean value){
+    	this.model.setTaskAutoRefreshOption(value);
+    }
+    
 }

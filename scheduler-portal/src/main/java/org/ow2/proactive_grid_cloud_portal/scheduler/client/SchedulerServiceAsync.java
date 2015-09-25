@@ -143,9 +143,20 @@ public interface SchedulerServiceAsync {
      * @param sessionId the session if of the user that asks for the tasks
      * @param jobId the id of the job for which its task list is asked 
      * @param tag the tag used to filter the tasks.
+     * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
     Request getTasksByTag(String sessionId, String jobId, String tag, AsyncCallback<String> callback);
 
+    /**
+     * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
+     * @param sessionId a valid session id
+     * @param jobId jobid one wants to list the tasks' tags
+     * @param prefix the prefix used to filter tags
+     * @param callback the object used for notifying the caller when the asynchronous call is completed.
+     */
+    Request getJobTaskTagsPrefix(String sessionId, String jobId, String prefix, AsyncCallback<String> callback);
+    
+    
     /**
      * Gets the properties needed by the client. When loading properties we can only
      * change properties value on the server side. For changing properties on the client

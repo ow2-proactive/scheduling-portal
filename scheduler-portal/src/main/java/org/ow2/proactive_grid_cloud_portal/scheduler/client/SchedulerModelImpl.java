@@ -37,14 +37,18 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
+import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
@@ -54,9 +58,11 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -105,7 +111,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
+    private boolean taskAutoRefreshOption = false;
+    
+    //tags
     private String tasksTagFilter = "";
+    private PatriciaTrie<String> availableTags = null;
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
@@ -121,6 +131,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<StatsListener> statsListeners = null;
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
+    private ArrayList<TagSuggestionListener> tagSuggestionListeners = null;
 
     SchedulerModelImpl() {
         super();
@@ -142,12 +153,48 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.visuListeners = new ArrayList<VisualizationListener>();
         this.statsListeners = new ArrayList<StatsListener>();
         this.usageListeners = new ArrayList<SchedulerListeners.UsageListener>();
+        this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.imagePath = new HashMap<String, String>();
         this.visuMap = new HashMap<String, JobVisuMap>();
         this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
+        
+        this.availableTags = new PatriciaTrie<String>();
     }
+    
+    
+    @Override
+    public Collection<TagSuggestion> getAvailableTags(String query) {
+    	SortedMap<String, String> mapSuggestions = this.availableTags.prefixMap(query);
+    	ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(20);
+    	Iterator<Map.Entry<String, String>> it = mapSuggestions.entrySet().iterator();
+    	for(int i = 0; i < 20 && it.hasNext(); i++){
+    		Map.Entry<String, String> current = it.next();
+    		TagSuggestion suggestion = new TagSuggestion(current.getValue(), current.getKey());
+    		suggestions.add(suggestion);
+    	}
+    	
+    	return suggestions;
+    }
+    
 
+    @Override
+    public void setTagSuggestions(Collection<String> tags) {
+    	for(String currentTag: tags){
+    		int index = currentTag.indexOf("<index>");
+    		if(index >= 0){
+    			this.availableTags.put(currentTag, currentTag.substring(0, index));
+    		}
+    		else{
+    			this.availableTags.put(currentTag, currentTag);
+    		}
+    	}
+    	
+    	for(TagSuggestionListener currentListener: this.tagSuggestionListeners){
+    		currentListener.tagSuggestionListUpdated();
+    	}
+    }
+    
     @Override
     public boolean isLoggedIn() {
         return this.logged;
@@ -258,6 +305,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
         this.selectedJob = j;
 
+        this.availableTags.clear();
+        
         // notify job selection listeners
         for (JobSelectedListener listener : this.jobSelectedListeners) {
             if (j == null)
@@ -328,6 +377,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             list.tasksUpdated(tasks);
         }
     }
+    
 
     /**
      * Notify task updated listeners that updating failed
@@ -830,6 +880,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.remoteHintListeners.add(listener);
     }
 
+    
+    @Override
+    public void addTagSuggestionListener(TagSuggestionListener listener) {
+    	this.tagSuggestionListeners.add(listener);
+    }
+    
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addVisualizationListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener)
@@ -852,5 +908,17 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     public void setThirdPartyCredentialsListener(
       SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
         this.thirdPartyCredentialsListener = thirdPartyCredentialsListener;
+    }
+    
+    
+    @Override
+    public boolean getTaskAutoRefreshOption() {
+    	return this.taskAutoRefreshOption;
+    }
+    
+    
+    @Override
+    public void setTaskAutoRefreshOption(boolean value) {
+    	this.taskAutoRefreshOption = value;
     }
 }

@@ -46,6 +46,7 @@ import javax.ws.rs.QueryParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -160,6 +161,15 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException 
      */
     String getTasksByTag(String sessionId, String jobId, String tag) throws RestServerException, ServiceException;
+    
+    /**
+     * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
+     * @param sessionId a valid session id
+     * @param jobId jobid one wants to list the tasks' tags
+     * @param prefix the prefix used to filter tags
+     * @return a list tags
+     */
+    String getJobTaskTagsPrefix(String sessionId, String jobId, String prefix) throws RestServerException, ServiceException;
     
 
     /**

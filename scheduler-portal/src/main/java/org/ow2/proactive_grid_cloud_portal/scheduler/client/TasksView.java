@@ -42,9 +42,12 @@ import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -52,6 +55,10 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle.MultiWordSuggestion;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceDateField;
@@ -91,7 +98,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  *
  * @author mschnoor
  */
-public class TasksView implements TasksUpdatedListener, RemoteHintListener {
+public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagSuggestionListener, JobSelectedListener {
 
     private static final String ID_ATTR = "id";
     private static final String STATUS_ATTR = "status";
@@ -224,6 +231,10 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
+    
+    private SuggestBox tagSearchTextBox;
+    
+    private CheckBox autoRefreshOption;
 
     private SchedulerController controller = null;
 
@@ -231,6 +242,8 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.controller = controller;
         this.controller.getEventDispatcher().addTasksUpdatedListener(this);
         this.controller.getEventDispatcher().addRemoteHintListener(this);
+        this.controller.getEventDispatcher().addTagSuggestionListener(this);
+        this.controller.getEventDispatcher().addJobSelectedListener(this);
 
         this.visuButtons = new HashMap<String, ImgButton>();
         visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
@@ -242,6 +255,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             this.tasksGrid.hide();
             this.loadingLabel.show();
             this.expandRecord = null;
+            this.tagSearchTextBox.setEnabled(false);
         }
     }
 
@@ -250,6 +264,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.hide();
         this.loadingLabel.hide();
         this.errorLabel.show();
+        this.tagSearchTextBox.setEnabled(false);
     }
 
     public void tasksUpdated(List<Task> tasks) {
@@ -277,6 +292,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         if (this.expandRecord != null) {
             this.tasksGrid.expandRecord(this.expandRecord);
         }
+        this.tagSearchTextBox.setEnabled(true);
     }
 
     private ListGridRecord expandRecord;
@@ -498,14 +514,17 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
         
-        final TextBox searchTextBox = new TextBox();
-        searchTextBox.addStyleName("searchBox");
-        searchTextBox.getElement().setAttribute("placeholder", "tag...");
-        searchTextBox.addKeyDownHandler(new KeyDownHandler() {
+        
+        this.tagSearchTextBox = new SuggestBox(this.controller.getTagSuggestionOracle());
+        
+        this.tagSearchTextBox.addStyleName("searchBox");
+        this.tagSearchTextBox.getElement().setAttribute("placeholder", "tag...");
+        this.tagSearchTextBox.setEnabled(false);
+        this.tagSearchTextBox.addKeyDownHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
-					String tag = searchTextBox.getText();
+					String tag = tagSearchTextBox.getText();
 					TasksView.this.controller.setTaskTagFilter(tag);
 				}
 			}
@@ -518,8 +537,17 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 			
 			@Override
 			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-				String tag = searchTextBox.getText();
+				String tag = tagSearchTextBox.getText();
 				TasksView.this.controller.setTaskTagFilter(tag);
+			}
+		});
+        
+        
+        this.autoRefreshOption = new CheckBox("Auto-refresh");
+        this.autoRefreshOption.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+			@Override
+			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+				controller.setTaskAutoRefreshOption(autoRefreshOption.getValue());
 			}
 		});
         
@@ -530,8 +558,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         navTools.setBackgroundColor("#fafafa");
         navTools.setBorder("0px");
         
-        navTools.addMember(searchTextBox);
+        navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
+        navTools.addMember(this.autoRefreshOption);
         
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
@@ -542,6 +571,26 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         
         return tasksViewLayout;
     }
+    
+    
+    public void tagSuggestionListUpdated(){
+    	this.tagSearchTextBox.showSuggestionList();
+    }
+    
+    
+    @Override
+    public void jobSelected(Job job) {
+    	this.tagSearchTextBox.setEnabled(true);
+    	this.tagSearchTextBox.setText("");
+    }
+    
+    
+    @Override
+    public void jobUnselected() {
+    	this.tagSearchTextBox.setText("");
+    	this.tagSearchTextBox.setEnabled(false);
+    }
+    
 
     /*
      * (non-Javadoc)

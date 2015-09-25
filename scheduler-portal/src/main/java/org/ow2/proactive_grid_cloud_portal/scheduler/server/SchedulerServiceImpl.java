@@ -670,6 +670,31 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
     
+    
+    @Override
+    public String getJobTaskTagsPrefix(String sessionId, String jobId, String prefix) throws RestServerException, ServiceException {
+    	ClientResponse<InputStream> clientResponse = null;
+        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        try {
+            clientResponse = client.getJobTaskTagsPrefix(sessionId, jobId, prefix);
+            Status status = clientResponse.getResponseStatus();
+            InputStream response = clientResponse.getEntity();
+            String info = convertToString(response);
+            switch (status) {
+                case OK:
+                    return info;
+                default:
+                    throw new RestServerException(status.getStatusCode(), info);
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            if (clientResponse != null) {
+                clientResponse.releaseConnection();
+            }
+        }
+    }
+    
 
     /*
      * (non-Javadoc)
