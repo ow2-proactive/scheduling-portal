@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -103,11 +105,11 @@ public class MotdServlet extends HttpServlet {
 
                     ResponseHandler<String> responseHandler = new BasicResponseHandler();
                     String responseBody = httpclient.execute(httpget, responseHandler);
-                    response.setStatus(200);
+                    response.setStatus(Response.Status.OK.getStatusCode());
                     response.getWriter().write(responseBody);
                 }
                 catch (Exception e) {
-                    response.setStatus(500);
+                    response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     response.getWriter().write("Server error");
                 } finally {
                     httpclient.getConnectionManager().shutdown();

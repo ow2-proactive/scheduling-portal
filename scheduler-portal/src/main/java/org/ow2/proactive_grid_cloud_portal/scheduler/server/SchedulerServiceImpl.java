@@ -54,6 +54,7 @@ import java.util.jar.JarFile;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
@@ -148,7 +149,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             InputStream is = execute.getEntity().getContent();
             String ret = convertToString(is);
 
-            if (execute.getStatusLine().getStatusCode() == 200) {
+            if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
                 return ret;
             } else {
                 throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
