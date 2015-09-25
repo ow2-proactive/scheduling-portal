@@ -36,22 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
+import org.jboss.resteasy.annotations.GZIP;
+
+import javax.management.ObjectName;
+import javax.ws.rs.*;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
-
-import javax.management.ObjectName;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-
-import org.jboss.resteasy.annotations.GZIP;
-import org.jboss.resteasy.client.ClientResponse;
 
 
 @Path("/")
@@ -60,112 +51,112 @@ public interface RestClient {
     @POST
     @Path("/rm/disconnect")
     @Produces("application/json")
-    public void logout(@HeaderParam("sessionid")
-    String sessionId);
+    void logout(@HeaderParam("sessionid")
+                String sessionId);
 
     @GET
     @Path("/rm/state")
     @Produces("application/json")
-    public ClientResponse<InputStream> state(@HeaderParam("sessionid")
-    String sessionId);
+    InputStream state(@HeaderParam("sessionid")
+                                      String sessionId);
 
     @GET
     @GZIP
     @Path("/rm/monitoring")
     @Produces("application/json")
-    public ClientResponse<InputStream> monitoring(@HeaderParam("sessionid")
-    String sessionId);
+    InputStream monitoring(@HeaderParam("sessionid")
+                                           String sessionId);
 
     @GET
     @GZIP
     @Path("/rm/infrastructures")
     @Produces("application/json")
-    public ClientResponse<InputStream> infrastructures(@HeaderParam("sessionid")
-    String sessionId);
+    InputStream infrastructures(@HeaderParam("sessionid")
+                                                String sessionId);
 
     @GET
     @Path("/rm/policies")
     @GZIP
     @Produces("application/json")
-    public ClientResponse<InputStream> policies(@HeaderParam("sessionid")
-    String sessionId);
+    InputStream policies(@HeaderParam("sessionid")
+                                         String sessionId);
 
     @POST
     @Path("/rm/nodesource/create")
     @Produces("application/json")
-    public ClientResponse<InputStream> createnodeSource(@HeaderParam("sessionId")
-    String sessionId, @FormParam("nodeSourceName")
-    String nodeSourceName, @FormParam("infrastructureType")
-    String infrastructureType, @FormParam("infrastructureParameters")
-    String[] infrastructureParameters, @FormParam("infrastructureFileParameters")
-    String[] infrastructureFileParameters, @FormParam("policyType")
-    String policyType, @FormParam("policyParameters")
-    String[] policyParameters, @FormParam("policyFileParameters")
-    String[] policyFileParameters);
+    InputStream createnodeSource(@HeaderParam("sessionId")
+                                                 String sessionId, @FormParam("nodeSourceName")
+                                                 String nodeSourceName, @FormParam("infrastructureType")
+                                                 String infrastructureType, @FormParam("infrastructureParameters")
+                                                 String[] infrastructureParameters, @FormParam("infrastructureFileParameters")
+                                                 String[] infrastructureFileParameters, @FormParam("policyType")
+                                                 String policyType, @FormParam("policyParameters")
+                                                 String[] policyParameters, @FormParam("policyFileParameters")
+                                                 String[] policyFileParameters);
 
     @POST
     @Path("/rm/node/lock")
     @Produces("application/json")
-    public ClientResponse<InputStream> lockNodes(@HeaderParam("sessionid")
-    String sessionId, @FormParam("nodeurls")
-    Set<String> nodeUrls);
+    InputStream lockNodes(@HeaderParam("sessionid")
+                                          String sessionId, @FormParam("nodeurls")
+                                          Set<String> nodeUrls);
 
     @POST
     @Path("/rm/node/unlock")
     @Produces("application/json")
-    public ClientResponse<InputStream> unlockNodes(@HeaderParam("sessionid")
-    String sessionId, @FormParam("nodeurls")
-    Set<String> nodeUrls);
+    InputStream unlockNodes(@HeaderParam("sessionid")
+                                            String sessionId, @FormParam("nodeurls")
+                                            Set<String> nodeUrls);
 
     @POST
     @Path("/rm/nodesource/remove")
     @Produces("application/json")
-    public ClientResponse<InputStream> removeNodesource(@HeaderParam("sessionId")
-    String sessionId, @FormParam("name")
-    String nsName, @FormParam("preempt")
-    boolean preempt);
+    InputStream removeNodesource(@HeaderParam("sessionId")
+                                                 String sessionId, @FormParam("name")
+                                                 String nsName, @FormParam("preempt")
+                                                 boolean preempt);
 
     @POST
     @Path("/rm/node/remove")
     @Produces("application/json")
-    public ClientResponse<InputStream> removeNode(@HeaderParam("sessionId")
-    String sessionId, @FormParam("url")
-    String url, @FormParam("preempt")
-    boolean preempt);
+    InputStream removeNode(@HeaderParam("sessionId")
+                                           String sessionId, @FormParam("url")
+                                           String url, @FormParam("preempt")
+                                           boolean preempt);
 
     @POST
     @Path("/rm/node/release")
     @Produces("application/json")
-    public ClientResponse<InputStream> releaseNode(@HeaderParam("sessionId")
-    String sessionId, @FormParam("url")
-    String url);
+    InputStream releaseNode(@HeaderParam("sessionId")
+                                            String sessionId, @FormParam("url")
+                                            String url);
 
     @GET
     @Path("/rm/version")
-    public ClientResponse<InputStream> getVersion();
+    InputStream getVersion();
 
     @GET
     @GZIP
     @Path("/rm/info/{name}")
     @Produces("application/json")
-    public ClientResponse<InputStream> getMBeanInfo(@HeaderParam("sessionid")
-    String sessionId, @PathParam("name")
-    ObjectName name, @QueryParam("attr")
-    List<String> attrs);
+    InputStream getMBeanInfo(@HeaderParam("sessionid")
+                                             String sessionId, @PathParam("name")
+                                             ObjectName name, @QueryParam("attr")
+                                             List<String> attrs);
 
     @GET
     @Produces("application/json")
     @Path("/rm/node/mbean")
-    public ClientResponse<InputStream> getNodeMBeanInfo(@HeaderParam("sessionid")
-    String sessionId, @QueryParam("nodejmxurl")
-    String nodeJmxUrl, @QueryParam("objectname")
-    String objectName, @QueryParam("attrs")
-    List<String> attrs);
+    InputStream getNodeMBeanInfo(@HeaderParam("sessionid")
+                                                 String sessionId, @QueryParam("nodejmxurl")
+                                                 String nodeJmxUrl, @QueryParam("objectname")
+                                                 String objectName, @QueryParam("attrs")
+                                                 List<String> attrs);
 
     @GET
     @Produces("application/json")
     @Path("/rm/node/mbean/history")
-    public ClientResponse<InputStream> getNodeMBeanHistory(
+    InputStream getNodeMBeanHistory(
             @HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl,
             @QueryParam("objectname") String objectName,
@@ -175,16 +166,16 @@ public interface RestClient {
     @GET
     @Produces("application/json")
     @Path("/rm/node/mbeans")
-    public ClientResponse<InputStream> getNodeMBeansInfo(@HeaderParam("sessionid")
-    String sessionId, @QueryParam("nodejmxurl")
-    String nodeJmxUrl, @QueryParam("objectname")
-    String objectNames, @QueryParam("attrs")
-    List<String> attrs);
+    InputStream getNodeMBeansInfo(@HeaderParam("sessionid")
+                                                  String sessionId, @QueryParam("nodejmxurl")
+                                                  String nodeJmxUrl, @QueryParam("objectname")
+                                                  String objectNames, @QueryParam("attrs")
+                                                  List<String> attrs);
 
     @GET
     @Produces("application/json")
     @Path("/rm/node/mbeans/history")
-    public ClientResponse<InputStream> getNodeMBeansHistory(
+    InputStream getNodeMBeansHistory(
             @HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl,
             @QueryParam("objectname") String objectNames,
@@ -195,18 +186,18 @@ public interface RestClient {
     @GZIP
     @Path("/rm/stathistory")
     @Produces("application/json")
-    public ClientResponse<InputStream> getStatHistory(@HeaderParam("sessionid")
-    String sessionId, @QueryParam("range")
-    String range);
+    InputStream getStatHistory(@HeaderParam("sessionid")
+                                               String sessionId, @QueryParam("range")
+                                               String range);
 
     @POST
     @GZIP
     @Path("/rm/node/script")
     @Produces("application/json")
-    public ClientResponse<InputStream> executeNodeScript(@HeaderParam("sessionid")
-    String sessionId, @FormParam("nodeurl")
-    String nodeUrl, @FormParam("script")
-    String script, @FormParam("scriptEngine")
-    String scriptEngine);
+    InputStream executeNodeScript(@HeaderParam("sessionid")
+                                                  String sessionId, @FormParam("nodeurl")
+                                                  String nodeUrl, @FormParam("script")
+                                                  String script, @FormParam("scriptEngine")
+                                                  String scriptEngine);
 
 }

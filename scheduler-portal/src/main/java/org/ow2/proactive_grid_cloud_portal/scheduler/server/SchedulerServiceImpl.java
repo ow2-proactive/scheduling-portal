@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,8 +48,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -63,6 +67,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -72,12 +77,9 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.client.ProxyFactory;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
@@ -88,18 +90,26 @@ import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.conver
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerServiceImpl.class);
-
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
-    private ClientExecutor executor;
     private DefaultHttpClient httpClient;
+
+    /**
+     * Number of threads created for the threadPool shared by RestEasy client proxies.
+     */
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
+
+    /**
+     * Thread pool shared by RestEasy client proxies.
+     */
+    private ExecutorService threadPool;
 
     @Override
     public void init() {
         loadProperties();
+
         httpClient = HttpUtils.createDefaultExecutor();
-        executor = new ApacheHttpClient4Executor(httpClient);
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
     /**
@@ -107,15 +117,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private void loadProperties() {
         SchedulerConfig.get().load(
-                ConfigReader.readPropertiesFromFile(
-                        getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
+                ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
     }
 
     /**
      * Submits a XML file to the REST part by using an HTTP client.
+     *
      * @param sessionId the id of the client which submits the job
-     * @param file the XML file that is submitted
+     * @param file      the XML file that is submitted
      * @return an error message upon failure, "id=<jobId>" upon success
      * @throws RestServerException
      * @throws ServiceException
@@ -127,8 +137,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         boolean isJar = isJarFile(file);
 
         try {
-            String name = (isJar) ? "jar" : "file";
-            String mime = (isJar) ? "application/java-archive" : "application/xml";
+            String name = isJar ? "jar" : "file";
+            String mime = isJar ? "application/java-archive" : "application/xml";
             String charset = "ISO-8859-1";
 
             MultipartEntity entity = new MultipartEntity();
@@ -139,12 +149,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             InputStream is = execute.getEntity().getContent();
             String ret = convertToString(is);
 
-            if (execute.getStatusLine().getStatusCode() == 200) {
-                if (ret == null) {
-                    throw new RestServerException(500, "Failed to get submission Id");
-                } else {
-                    return ret;
-                }
+            if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
+                return ret;
             } else {
                 throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
             }
@@ -170,59 +176,49 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /**
      * Submit flat command file
      *
-     * @param sessionId current session
-     * @param commandFileContent content of the command file: endline separated native commands
-     * @param jobName name of the job to create
-     * @param selectionScriptContent selection script content, or null
-     * @param selectionScriptExtension selection script extension for script engine detection ("js", "py", "rb")
+     * @param sessionId                current session
+     * @param commandFileContent       content of the command file: endline
+     *                                 separated native commands
+     * @param jobName                  name of the job to create
+     * @param selectionScriptContent   selection script content, or null
+     * @param selectionScriptExtension selection script extension for script
+     *                                 engine detection ("js", "py", "rb")
      * @return JobId of created Job as JSON
      * @throws RestServerException
      * @throws ServiceException
      */
     public String submitFlatJob(String sessionId, String commandFileContent, String jobName,
-            String selectionScriptContent, String selectionScriptExtension) throws RestServerException,
+                                String selectionScriptContent, String selectionScriptExtension) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.submitFlat(sessionId, commandFileContent, jobName,
-                selectionScriptContent, selectionScriptExtension);
 
-        Status status = clientResponse.getResponseStatus();
-        String stringResponse = clientResponse.getEntity();
-        switch (status) {
-            case OK:
-                return stringResponse;
-            default:
-                throw new RestServerException(status.getStatusCode(), stringResponse);
+        try {
+            return getRestClientProxy().submitFlat(
+                    sessionId, commandFileContent, jobName,
+                    selectionScriptContent, selectionScriptExtension);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
         }
+
+        return null;
     }
 
     /**
      * Getter of the result of a task.
+     *
      * @param sessionId the session id of the user which is looged in
-     * @param jobId the id of the job the task belongs to
-     * @param taskId the id of the task
+     * @param jobId     the id of the job the task belongs to
+     * @param taskId    the id of the task
      * @return the result
      * @throws RestServerException
      * @throws ServiceException
      */
     public InputStream getTaskResult(String sessionId, String jobId, String taskId)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.taskresult(sessionId, jobId, taskId);
-
-        Status status = clientResponse.getResponseStatus();
-        switch (status) {
-            case OK:
-                return clientResponse.getEntity();
-
-            default:
-                try {
-                    String stringResponse = convertToString(clientResponse.getEntity());
-                    throw new RestServerException(status.getStatusCode(), stringResponse);
-                } catch (IOException e) {
-                    throw new ServiceException("Error while converting InputStream to String: " +
-                        e.getMessage());
-                }
+        try {
+            return getRestClientProxy().taskresult(sessionId, jobId, taskId);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return null;
         }
     }
 
@@ -234,159 +230,45 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .String, java.util.List)
      */
     @Override
-    public int removeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException,
-            ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = null;
-            try {
-                clientResponse = client.removeJob(sessionId, Integer.toString(jobId));
-                Status status = clientResponse.getResponseStatus();
-                String ret = convertToString(clientResponse.getEntity());
-
-                switch (status) {
-                    case OK:
-                        if (Boolean.parseBoolean(ret)) {
-                            success++;
-                        }
-                        break;
-                    default:
-                        failures++;
-                        break;
-                }
-            } catch (IOException e) {
-                throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+    public int removeJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
+        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.removeJob(sessionId, Integer.toString(jobId));
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Requested " + jobIdList.size() + " job removal; " + success +
-                " succeeded, " + failures + " failed.");
-        }
-        return success;
+        }, jobIdList, "job removal");
     }
 
     @Override
-    public int pauseJobs(String sessionId, List<Integer> jobIdList) throws RestServerException,
-            ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = null;
-            try {
-                clientResponse = client.pauseJob(sessionId, Integer.toString(jobId));
-                Status status = clientResponse.getResponseStatus();
-                String ret = convertToString(clientResponse.getEntity());
-
-                switch (status) {
-                    case OK:
-                        if (Boolean.parseBoolean(ret)) {
-                            success++;
-                        }
-                        break;
-                    default:
-                        failures++;
-                        break;
-                }
-            } catch (IOException e) {
-                throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+    public int pauseJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
+        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.pauseJob(sessionId, Integer.toString(jobId));
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Requested " + jobIdList.size() + " job paused; " + success +
-                " succeeded, " + failures + " failed.");
-        }
-        return success;
+        }, jobIdList, "job paused");
     }
 
     @Override
-    public int resumeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException,
+    public int resumeJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = null;
-            try {
-                clientResponse = client.resumeJob(sessionId, Integer.toString(jobId));
-                Status status = clientResponse.getResponseStatus();
-                String ret = convertToString(clientResponse.getEntity());
-
-                switch (status) {
-                    case OK:
-                        if (Boolean.parseBoolean(ret)) {
-                            success++;
-                        }
-                        break;
-                    default:
-                        failures++;
-                        break;
-                }
-            } catch (IOException e) {
-                throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.resumeJob(sessionId, Integer.toString(jobId));
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Requested " + jobIdList.size() + " job resumed; " + success +
-                " succeeded, " + failures + " failed.");
-        }
-        return success;
+        }, jobIdList, "job resumed");
     }
 
     @Override
-    public int killJobs(String sessionId, List<Integer> jobIdList) throws RestServerException,
+    public int killJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = null;
-            try {
-                clientResponse = client.killJob(sessionId, Integer.toString(jobId));
-                Status status = clientResponse.getResponseStatus();
-                String ret = convertToString(clientResponse.getEntity());
-
-                switch (status) {
-                    case OK:
-                        if (Boolean.parseBoolean(ret)) {
-                            success++;
-                        }
-                        break;
-                    default:
-                        failures++;
-                        break;
-                }
-            } catch (IOException e) {
-                throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.killJob(sessionId, Integer.toString(jobId));
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Requested " + jobIdList.size() + " job killed; " + success +
-                " succeeded, " + failures + " failed.");
-        }
-        return success;
+        }, jobIdList, "job killed");
     }
 
     /*
@@ -397,36 +279,21 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String, java.util.List, java.lang.String)
      */
     @Override
-    public void setPriorityByName(String sessionId, List<Integer> jobIdList, String priorityName)
+    public void setPriorityByName(final String sessionId, List<Integer> jobIdList, final String priorityName)
             throws ServiceException, RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (Integer jobId : jobIdList) {
-            ClientResponse<InputStream> clientResponse = client.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId),
-                    priorityName);
-            Status st = clientResponse.getResponseStatus();
-            switch (st) {
-                case NO_CONTENT:
-                    success++;
-                    break;
-                default:
-                    failures++;
-                    break;
+        executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId), priorityName);
             }
-            clientResponse.releaseConnection();
-        }
-        if (failures > 0) {
-            throw new RestServerException("Requested " + jobIdList.size() + " job set to priority " +
-                priorityName + "; " + success + " succeeded, " + failures + " failed.");
-        }
+        }, jobIdList, "job set to priority " + priorityName);
     }
 
     /**
      * Login to the scheduler using a Credentials file
      *
-     * @return the sessionId which can be parsed as an Integer, or an error message
+     * @return the sessionId which can be parsed as an Integer, or an error
+     * message
      * @throws RestServerException
      * @throws ServiceException
      */
@@ -453,9 +320,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                     break;
                 default:
                     String message = responseAsString;
-                    if (message == null || message.trim().length() == 0) {
+                    if (message.trim().length() == 0) {
                         message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
-                            response.getStatusLine().getReasonPhrase() + "\" }";
+                                response.getStatusLine().getReasonPhrase() + "\" }";
                     }
                     throw new RestServerException(response.getStatusLine().getStatusCode(), message);
             }
@@ -471,14 +338,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private MultipartEntity createLoginPasswordSSHKeyMultipart(String login, String pass,
-      String ssh) throws UnsupportedEncodingException {
+                                                               String ssh) throws UnsupportedEncodingException {
         MultipartEntity entity = new MultipartEntity();
         entity.addPart("username", new StringBody(login));
         entity.addPart("password", new StringBody(pass));
+
         if (ssh != null && !ssh.isEmpty()) {
             entity.addPart("sshKey",
-              new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
+                    new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
         }
+
         return entity;
     }
 
@@ -486,8 +355,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Create a Credentials file with the provided authentication parameters
      *
      * @param login username
-     * @param pass password
-     * @param ssh private ssh key
+     * @param pass  password
+     * @param ssh   private ssh key
      * @return the the Credentials file as a base64 String
      * @throws RestServerException
      * @throws ServiceException
@@ -526,84 +395,40 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public void logout(String sessionId) throws RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        client.disconnect(sessionId);
+        getRestClientProxy().disconnect(sessionId);
     }
 
     @Override
-    public boolean killTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+    public boolean killTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
             ServiceException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.killTask(sessionId, "" + jobId, taskName);
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String info = convertToString(response);
-            switch (status) {
-                case OK:
-                    return true;
-                default:
-                    throw new RestServerException(status.getStatusCode(), info);
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.killTask(sessionId, jobId.toString(), taskName);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public boolean restartTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+    public boolean restartTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
             ServiceException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.restartTask(sessionId, "" + jobId, taskName);
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String info = convertToString(response);
-            LOGGER.info("SchedulerServiceImpl.restartTask() " + status + "//" + info);
-            switch (status) {
-                case OK:
-                    return true;
-                default:
-                    throw new RestServerException(status.getStatusCode(), info);
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.restartTask(sessionId, jobId.toString(), taskName);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public boolean preemptTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+    public boolean preemptTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
             ServiceException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.preemptTask(sessionId, "" + jobId, taskName);
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String info = convertToString(response);
-            switch (status) {
-                case OK:
-                    return true;
-                default:
-                    throw new RestServerException(status.getStatusCode(), info);
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.preemptTask(sessionId, jobId.toString(), taskName);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -614,27 +439,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * String, java.lang.String)
      */
     @Override
-    public String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.getJobTaskStates(sessionId, jobId);
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String info = convertToString(response);
-            switch (status) {
-                case OK:
-                    return info;
-                default:
-                    throw new RestServerException(status.getStatusCode(), info);
+    public String getTasks(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getJobTaskStates(sessionId, jobId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -655,25 +466,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .String, java.lang.String)
      */
     @Override
-    public String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.job(sessionId, jobId);
-        try {
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String respStr = convertToString(response);
-
-            switch (status) {
-                case OK:
-                    return respStr;
-                default:
-                    throw new RestServerException(status.getStatusCode(), status.getReasonPhrase(), respStr);
+    public String getJobInfo(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.job(sessionId, jobId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        });
     }
 
     /*
@@ -684,27 +483,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean pauseScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.pauseScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean pauseScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.pauseScheduler(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -715,28 +500,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean resumeScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.resumeScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean resumeScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.resumeScheduler(sessionId);
             }
-
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -747,28 +517,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean freezeScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.freezeScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean freezeScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.freezeScheduler(sessionId);
             }
-
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -779,28 +534,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public boolean killScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.killScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean killScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.killScheduler(sessionId);
             }
-
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -811,28 +551,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean startScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.startScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean startScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.startScheduler(sessionId);
             }
-
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -843,38 +568,24 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public boolean stopScheduler(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-
-        try {
-            clientResponse = client.stopScheduler(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            switch (status) {
-                case OK:
-                    return Boolean.parseBoolean(convertToString(clientResponse.getEntity()));
-                default:
-                    String stringResponse = convertToString(clientResponse.getEntity(InputStream.class));
-                    throw new RestServerException(clientResponse.getStatus(), stringResponse);
+    public boolean stopScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.stopScheduler(sessionId);
             }
-
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /**
      * Fetch logs for a given task in a given job
      *
      * @param sessionId current session id
-     * @param jobId id of the job
-     * @param taskName name of the task
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
-     * 			 {@link SchedulerServiceAsync#LOG_STDOUT}
+     * @param jobId     id of the job
+     * @param taskName  name of the task
+     * @param logMode   one of {@link SchedulerServiceAsync#LOG_ALL}, {@link
+     *                  SchedulerServiceAsync#LOG_STDERR}, {@link
+     *                  SchedulerServiceAsync#LOG_STDOUT}
      * @return the logs for the given task
      * @throws RestServerException
      * @throws ServiceException
@@ -882,32 +593,29 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTaskOutput(String sessionId, String jobId, String taskName, int logMode)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(),
-                executor);
-        ClientResponse<String> clientResponse = null;
-        if (logMode == SchedulerServiceAsync.LOG_ALL) {
-            clientResponse = client.tasklog(sessionId, jobId, taskName);
-        } else if (logMode == SchedulerServiceAsync.LOG_STDOUT) {
-            clientResponse = client.taskStdout(sessionId, jobId, taskName);
-        } else if (logMode == SchedulerServiceAsync.LOG_STDERR) {
-            clientResponse = client.taskStderr(sessionId, jobId, taskName);
-        }
 
-        if (clientResponse != null) {
-            String ret = clientResponse.getEntity();
-            if (clientResponse.getStatus() == 200) {
-                return ret;
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            if (logMode == SchedulerServiceAsync.LOG_ALL) {
+                return restClientProxy.tasklog(sessionId, jobId, taskName);
+            } else if (logMode == SchedulerServiceAsync.LOG_STDOUT) {
+                return restClientProxy.taskStdout(sessionId, jobId, taskName);
+            } else if (logMode == SchedulerServiceAsync.LOG_STDERR) {
+                return restClientProxy.taskStderr(sessionId, jobId, taskName);
+            } else {
+                throw new RestServerException("Invalid logMode value: " + logMode);
             }
-            throw new RestServerException(clientResponse.getResponseStatus().getStatusCode(), ret);
-        } else {
-            throw new RestServerException("Invalid logMode value");
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
     /**
      * Gets the output of a job even for tasks that have not terminated yet
+     *
      * @param sessionId current session id
-     * @param jobId id of the job for which logs should be fetched
+     * @param jobId     id of the job for which logs should be fetched
      * @return console output for the whole job
      * @throws RestServerException
      * @throws ServiceException
@@ -915,63 +623,60 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.getLiveLogJob(sessionId, jobId);
-        String out = clientResponse.getEntity();
-        if (clientResponse.getStatus() == 200) {
-            return out;
-        } else {
-            throw new RestServerException(clientResponse.getStatus(), out);
-        }
+        RestClient restClientProxy = getRestClientProxy();
 
+        try {
+            return restClientProxy.getLiveLogJob(sessionId, jobId);
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        }
     }
 
     /**
-     * Gets the number of bytes available in the job output stream for the given job id,
-     * might be used to determine if fetch is necessary
+     * Gets the number of bytes available in the job output stream for the given
+     * job id, might be used to determine if fetch is necessary
+     *
      * @param sessionId current session id
-     * @param jobId id of the job for which logs should be fetched
-     * @return number of bytes available in the log for the given job, -1 if no avail
+     * @param jobId     id of the job for which logs should be fetched
+     * @return number of bytes available in the log for the given job, -1 if no
+     * avail
      * @throws RestServerException
      */
     @Override
     public int getLiveLogJobAvailable(final String sessionId, final String jobId) throws RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.getLiveLogJobAvailable(sessionId, jobId);
-        String out = clientResponse.getEntity();
+        RestClient restClientProxy = getRestClientProxy();
 
-        if (clientResponse.getStatus() == 200) {
-            return Integer.parseInt(out);
-        } else {
-            throw new RestServerException(clientResponse.getStatus(), out);
+        String number = null;
+
+        try {
+            number = restClientProxy.getLiveLogJobAvailable(sessionId, jobId);
+
+            return Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            throw new RestServerException("Invalid number: " + number);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return -1;
         }
     }
 
     /**
      * Clean the remote live log object
+     *
      * @param sessionId current session id
-     * @param jobId id of the job for which live logs should be cleaned
+     * @param jobId     id of the job for which live logs should be cleaned
      * @return true if something was actually deleted
      * @throws RestServerException
      * @throws ServiceException
      */
     @Override
-    public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
-            ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> resp = client.deleteLiveLogJob(sessionId, jobId);
-        try {
-            String ret = convertToString(resp.getEntity());
-            if (resp.getStatus() == 200) {
-                return Boolean.parseBoolean(ret);
-            } else {
-                throw new RestServerException(resp.getStatus(), ret);
+    public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.deleteLiveLogJob(sessionId, jobId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            resp.releaseConnection();
-        }
+        });
     }
 
     /*
@@ -983,16 +688,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String getStatistics(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        RestClient restClientProxy = getRestClientProxy();
 
-        ClientResponse<String> clientResponse = client.getStatistics(sessionId);
-        Status status = clientResponse.getResponseStatus();
-        switch (status) {
-            case OK:
-                return clientResponse.getEntity();
-            default:
-                throw new RestServerException("Failed to fetch account stats: " +
-                        clientResponse.getEntity());
+        try {
+            return restClientProxy.getStatistics(sessionId);
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
@@ -1006,16 +707,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException {
 
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
+        RestClient restClientProxy = getRestClientProxy();
 
-        ClientResponse<String> clientResponse = client.getStatisticsOnMyAccount(sessionId);
-        Status status = clientResponse.getResponseStatus();
-        switch (status) {
-            case OK:
-                return clientResponse.getEntity();
-            default:
-                throw new RestServerException("Failed to fetch account stats: " +
-                        clientResponse.getEntity());
+        try {
+            return restClientProxy.getStatisticsOnMyAccount(sessionId);
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
@@ -1028,16 +725,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public long schedulerStateRevision(String sessionId) throws RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
 
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.schedulerStateRevision(sessionId);
+        String revision = null;
 
-        Status status = clientResponse.getResponseStatus();
-        switch (status) {
-            case OK:
-                return Long.parseLong(clientResponse.getEntity());
-            default:
-                throw new RestServerException(clientResponse.getEntity());
+        try {
+            revision = restClientProxy.schedulerStateRevision(sessionId);
+
+            return Long.parseLong(revision);
+        } catch (NumberFormatException e) {
+            throw new RestServerException("Revision is not a number: " + revision);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return -1L;
         }
     }
 
@@ -1050,26 +750,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws ServiceException
      */
     @Override
-    public String getSchedulerUsers(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.getSchedulerUsers(sessionId);
-
-        Status status = clientResponse.getResponseStatus();
-
-        try {
-            String ret = convertToString(clientResponse.getEntity(InputStream.class));
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(clientResponse.getStatus(), ret);
+    public String getSchedulerUsers(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getSchedulerUsers(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        });
     }
 
     /**
@@ -1081,26 +768,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws ServiceException
      */
     @Override
-    public String getSchedulerUsersWithJobs(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.getSchedulerUsersWithJobs(sessionId);
-
-        Status status = clientResponse.getResponseStatus();
-
-        try {
-            String ret = convertToString(clientResponse.getEntity(InputStream.class));
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(clientResponse.getStatus(), ret);
+    public String getSchedulerUsersWithJobs(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getSchedulerUsersWithJobs(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        });
     }
 
     /*
@@ -1111,26 +785,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * (java.lang.String, int, int, boolean, boolean, boolean, boolean)
      */
     @Override
-    public String revisionAndjobsinfo(String sessionId, int index, int range, boolean myJobsOnly,
-            boolean pending, boolean running, boolean finished) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.revisionAndjobsinfo(sessionId, index, range,
-                myJobsOnly, pending, running, finished);
-
-        Status status = clientResponse.getResponseStatus();
-        try {
-            String ret = convertToString(clientResponse.getEntity(InputStream.class));
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String revisionAndjobsinfo(final String sessionId, final int index, final int range, final boolean myJobsOnly,
+                                      final boolean pending, final boolean running, final boolean finished) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.revisionAndjobsinfo(sessionId, index, range, myJobsOnly, pending, running, finished);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        });
     }
 
     /*
@@ -1145,17 +807,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         String url = "img_" + jobId + ".png";
         String path = getServletContext().getRealPath("/images");
 
-        File f = new File(path + File.separator + url);
-        f.deleteOnExit();
+        File file = new File(path + File.separator + url);
+        file.deleteOnExit();
 
-        if (f.exists()) {
+        if (file.exists()) {
             // this might very well return the wrong file if you restart
             // the server but omit to clean tmpdir; not my problem
             return url;
         }
 
         throw new RestServerException(
-                Status.NOT_FOUND.getStatusCode(), "File not found: " + f.getPath());
+                Status.NOT_FOUND.getStatusCode(), "File not found: " + file.getPath());
     }
 
     /*
@@ -1167,16 +829,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String getSchedulerStatus(String sessionId) throws RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.schedulerStatus(sessionId);
-        Status status = clientResponse.getResponseStatus();
-        String ret = clientResponse.getEntity();
-
-        switch (status) {
-            case OK:
-                return ret;
-            default:
-                throw new RestServerException(ret);
+        try {
+            return getRestClientProxy().schedulerStatus(sessionId);
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
@@ -1187,35 +843,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String getVersion() throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getVersion();
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getVersion();
             }
-        } catch (IOException e) {
-            LOGGER.warn("Failed to read server response", e);
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /**
      * Get server logs for a given task
      *
      * @param sessionId current session
-     * @param jobId id of a job
-     * @param taskName name of a task to restart within that job
+     * @param jobId     id of a job
+     * @param taskName  name of a task to restart within that job
      * @return job server logs
      * @throws RestServerException
      * @throws ServiceException
@@ -1223,15 +864,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTaskServerLogs(String sessionId, Integer jobId, String taskName)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.taskServerLogs(sessionId, "" + jobId, taskName);
-        Status status = clientResponse.getResponseStatus();
-        String response = clientResponse.getEntity();
-        switch (status) {
-            case OK:
-                return response;
-            default:
-                throw new RestServerException(status.getStatusCode(), response);
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            return restClientProxy.taskServerLogs(sessionId, "" + jobId, taskName);
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
@@ -1239,7 +877,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Get server logs for a given job
      *
      * @param sessionId current session
-     * @param jobId id of a job
+     * @param jobId     id of a job
      * @return task server logs
      * @throws RestServerException
      * @throws ServiceException
@@ -1247,129 +885,197 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<String> clientResponse = client.jobServerLogs(sessionId, "" + jobId);
-        Status status = clientResponse.getResponseStatus();
-        String response = clientResponse.getEntity();
-        switch (status) {
-            case OK:
-                return response;
-            default:
-                throw new RestServerException(status.getStatusCode(), response);
+
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            return restClientProxy.jobServerLogs(sessionId, jobId.toString());
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
         }
     }
 
     @Override
     public List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(),
-          executor);
+        RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
         try {
             DateFormat df = new SimpleDateFormat(ISO_8601_FORMAT);
             String startDateAsString = df.format(startDate);
             String endDateAsString = df.format(endDate);
 
-            if (user!=null) {
-                clientResponse = client.getUsageOnAccount(sessionId, user, startDateAsString, endDateAsString);
+            if (user != null) {
+                inputStream = restClientProxy.getUsageOnAccount(sessionId, user, startDateAsString, endDateAsString);
             } else {
-                clientResponse = client.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
+                inputStream = restClientProxy.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
             }
 
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String responseAsString = convertToString(response);
+            String responseAsString = convertToString(inputStream);
 
-            switch (status) {
-                case OK:
-                    return UsageJsonReader.readJobUsages(responseAsString);
-                default:
-                    throw new RestServerException(status.getStatusCode(), responseAsString);
-            }
-        } catch (IOException e) {
+            return UsageJsonReader.readJobUsages(responseAsString);
+        } catch (IOException | JSONException e) {
             throw new ServiceException(e.getMessage());
-        } catch (JSONException e) {
-            throw new ServiceException(e.getMessage());
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return null;
         } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
+            IOUtils.closeQuietly(inputStream);
         }
     }
 
     @Override
-    public String getJobHtml(String sessionId, String jobId) throws RestServerException, ServiceException {
-
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = client.getJobHtml(sessionId, jobId);
-        Status status = clientResponse.getResponseStatus();
-
-        try {
-            InputStream response = clientResponse.getEntity();
-            String res = convertToString(response);
-            switch (status) {
-                case OK:
-                    return res;
-
-                default:
-                    throw new RestServerException(status.getStatusCode(), res);
+    public String getJobHtml(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getJobHtml(sessionId, jobId);
             }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            clientResponse.releaseConnection();
-        }
+        });
     }
 
     @Override
     public void putThirdPartyCredential(String sessionId, String key, String value) throws RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse clientResponse = client.putThirdPartyCredential(sessionId, key, value);
-        Status status = clientResponse.getResponseStatus();
-        if (status.getFamily() != Status.Family.SUCCESSFUL) {
-            throw new RestServerException(status.getStatusCode(), "Server-side error");
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            restClientProxy.putThirdPartyCredential(sessionId, key, value);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
         }
     }
 
     @Override
     public Set<String> thirdPartyCredentialKeySet(String sessionId) throws ServiceException, RestServerException {
-        ClientResponse<InputStream> clientResponse = null;
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        try {
-            clientResponse = client.thirdPartyCredentialsKeySet(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            InputStream response = clientResponse.getEntity();
-            String responseAsString = convertToString(response);
-            switch (status) {
-                case OK:
-                    HashSet<String> result = new HashSet<String>();
-                    JSONArray jsonArray = new JSONArray(responseAsString);
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        result.add(jsonArray.getString(i));
-                    }
-                    return result;
-                default:
-                    throw new RestServerException(status.getStatusCode(), responseAsString);
-            }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        } catch (JSONException e) {
-            throw new ServiceException(e.getMessage());
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        RestClient restClientProxy = getRestClientProxy();
 
+        InputStream inputStream = null;
+        try {
+            inputStream = restClientProxy.thirdPartyCredentialsKeySet(sessionId);
+
+            String responseAsString = convertToString(inputStream);
+
+            JSONArray jsonArray = new JSONArray(responseAsString);
+            HashSet<String> result = new HashSet<>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                result.add(jsonArray.getString(i));
+            }
+            return result;
+        } catch (IOException | JSONException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return null;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
     }
 
     @Override
     public void removeThirdPartyCredential(String sessionId, String key) throws RestServerException {
-        RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
-        ClientResponse<Void> clientResponse = client.removeThirdPartyCredential(sessionId, key);
-        Status status = clientResponse.getResponseStatus();
-        if (status.getFamily() != Status.Family.SUCCESSFUL) {
-            throw new RestServerException(status.getStatusCode(), "Server-side error");
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            restClientProxy.removeThirdPartyCredential(sessionId, key);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+        }
+    }
+
+    private boolean executeFunction(Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+            return true;
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return false;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private int executeFunction(BiFunction<RestClient, Integer, InputStream> action, List<Integer> jobIdList,
+                                String actionName) throws ServiceException, RestServerException {
+
+        RestClient restClientProxy = getRestClientProxy();
+
+        int failures = 0;
+        int success = 0;
+
+        for (Integer jobId : jobIdList) {
+            InputStream inputStream = null;
+
+            try {
+                inputStream = action.apply(restClientProxy, jobId);
+
+                if (Boolean.parseBoolean(convertToString(inputStream))) {
+                    success++;
+                } else {
+                    failures++;
+                }
+            } catch (WebApplicationException e) {
+                failures++;
+            } catch (IOException e) {
+                throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
         }
 
+        if (failures > 0) {
+            throw new RestServerException("Requested " + jobIdList.size()
+                    + " " + actionName + ": " + success + " succeeded, " + failures + " failed.");
+        }
+
+        return success;
     }
+
+    private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToString(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private RestClient getRestClientProxy() {
+        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool).build();
+        ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
+
+        return target.proxy(RestClient.class);
+    }
+
+    private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
+        throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
+    }
+
+    private interface BiFunction<T, U, R> {
+
+        R apply(T t, U u);
+
+    }
+
+    private interface Function<T, R> {
+
+        R apply(T t);
+
+    }
+
 }

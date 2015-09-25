@@ -36,20 +36,23 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.server;
 
-import java.io.File;
-import java.io.IOException;
+import org.apache.commons.io.FileUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -95,14 +98,22 @@ public class MotdServlet extends HttpServlet {
                 response.getWriter().write(fileContent);
 
             } else {
-                HttpClient httpClient = new HttpClient();
-                GetMethod get = new GetMethod(url);
+                HttpClient httpclient = new DefaultHttpClient();
 
-                int status = httpClient.executeMethod(get);
-                String ret = get.getResponseBodyAsString();
+                try {
+                    HttpGet httpget = new HttpGet(url);
 
-                response.setStatus(status);
-                response.getWriter().write(ret);
+                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                    String responseBody = httpclient.execute(httpget, responseHandler);
+                    response.setStatus(Response.Status.OK.getStatusCode());
+                    response.getWriter().write(responseBody);
+                }
+                catch (Exception e) {
+                    response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                    response.getWriter().write("Server error");
+                } finally {
+                    httpclient.getConnectionManager().shutdown();
+                }
             }
 
         } catch (IOException e) {
