@@ -85,16 +85,24 @@ public class RMServiceImpl extends Service implements RMService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RMServiceImpl.class);
 
-    private DefaultHttpClient httpClient;
+    /**
+     * Number of threads created for the threadPool shared by RestEasy client proxies.
+     */
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
 
+    /**
+     * Thread pool shared by RestEasy client proxies.
+     */
     private ExecutorService threadPool;
+
+    private DefaultHttpClient httpClient;
 
     @Override
     public void init() {
         loadProperties();
 
         httpClient = HttpUtils.createDefaultExecutor();
-        threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 8);
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
     /*

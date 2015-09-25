@@ -93,6 +93,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private DefaultHttpClient httpClient;
 
+    /**
+     * Number of threads created for the threadPool shared by RestEasy client proxies.
+     */
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
+
+    /**
+     * Thread pool shared by RestEasy client proxies.
+     */
     private ExecutorService threadPool;
 
     @Override
@@ -100,7 +108,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         loadProperties();
 
         httpClient = HttpUtils.createDefaultExecutor();
-        threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 8);
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
     /**
