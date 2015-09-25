@@ -159,12 +159,11 @@ public class RMServiceImpl extends Service implements RMService {
                 case 200:
                     break;
                 default:
-                    String message = responseAsString;
-                    if (message.trim().length() == 0) {
-                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
+                    if (responseAsString.trim().length() == 0) {
+                        responseAsString = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
                                 response.getStatusLine().getReasonPhrase() + "\" }";
                     }
-                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
             }
             return responseAsString;
         } catch (IOException e) {
