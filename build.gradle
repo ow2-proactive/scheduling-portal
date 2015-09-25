@@ -10,7 +10,8 @@ subprojects {
 
     repositories {
         if (project.hasProperty('local')) mavenLocal()
-        mavenCentral()
+
+        jcenter()
         maven { url 'http://repository.sonatype.org/content/groups/forge/' }
         maven { url 'http://repository.activeeon.com/content/repositories/thirdparty/' }
     }
