@@ -134,7 +134,7 @@ public interface SchedulerServiceAsync {
      * @param jobId the id of the job for which its task list is asked 
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
-    Request getTasks(String sessionId, String jobId, AsyncCallback<String> callback);
+    Request getTasks(String sessionId, String jobId, int offset, int limit, AsyncCallback<String> callback);
     
     
     /**
@@ -145,7 +145,7 @@ public interface SchedulerServiceAsync {
      * @param tag the tag used to filter the tasks.
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
-    Request getTasksByTag(String sessionId, String jobId, String tag, AsyncCallback<String> callback);
+    Request getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit, AsyncCallback<String> callback);
 
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern

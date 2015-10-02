@@ -79,6 +79,12 @@ public class SchedulerConfig extends Config {
     /** job page size */
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
     private static final String d_JOBS_PAGE_SIZE = "50";
+    
+    
+    /** task page size */
+    public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
+    private static final String d_TASKS_PAGE_SIZE = "20";
+    
 
     /** release version string */
     public static final String VERSION = "sched.version";
@@ -116,6 +122,7 @@ public class SchedulerConfig extends Config {
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
         properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
+        properties.put(TASKS_PAGE_SIZE, d_TASKS_PAGE_SIZE);
         properties.put(VERSION, d_VERSION);
         properties.put(SCHED_VERSION, d_SCHED_VERSION);
         properties.put(REST_VERSION, d_REST_VERSION);
@@ -179,9 +186,17 @@ public class SchedulerConfig extends Config {
     /**
      * @return number of jobs per page
      */
-    public int getJobsPageSize() {
-        return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
+    public int getPageSize(PaginatedItemType itemType) {
+    	if(itemType == PaginatedItemType.JOB){
+    		return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
+    	}
+    	if(itemType == PaginatedItemType.TASK){
+    		return Integer.parseInt(properties.get(TASKS_PAGE_SIZE));
+    	}
+    	return 0;
     }
+    
+    
 
     /**
      * @return refresh rate for live logs in millis

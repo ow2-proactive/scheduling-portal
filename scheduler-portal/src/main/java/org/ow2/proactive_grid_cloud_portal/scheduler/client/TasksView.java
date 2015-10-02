@@ -46,8 +46,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PrefixWordSuggestOracle;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.SchedulerModel.RemoteHint;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -582,21 +583,19 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         this.pageNextButton.disable();
         this.pageNextButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                //controller.nextPage();
-                //pageChanged();
-            	// TODO: Paraita: impl task pagination pageNextButton logic
+                controller.nextTaskPage();
+                pageChanged();
             }
         });
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                //controller.previousPage();
-                //pageChanged();
-            	// TODO: Paraita: impl task pagination pagePreviousButton logic
+                controller.previousTaskPage();
+                pageChanged();
             }
         });
-     // TODO: Paraita: impl task pagination label logic
+     
         this.pageLabel = new Label("");
         this.pageLabel.setAlign(Alignment.CENTER);
         this.pageLabel.setWidth(60);
@@ -663,6 +662,17 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
             });
             visuButtonsClickHandlers.put(button, clickHandler);
         }
+    }
+    
+    
+    private void pageChanged() {
+        int page = controller.getModel().getJobPage();
+        int size = controller.getModel().getJobPageSize();
+        this.pageNextButton.disable();
+        this.pagePreviousButton.disable();
+
+        String str = "" + (page * size + 1) + " - " + ((page + 1) * size);
+        this.pageLabel.setContents(str);
     }
 
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {

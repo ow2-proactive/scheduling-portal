@@ -145,22 +145,26 @@ public interface SchedulerService extends RemoteService {
      * Gets the list of tasks that correspond to a job.
      * @param sessionId the session if of the user that asks for the tasks
      * @param jobId the id of the job for which its task list is asked 
+     * @param offset the first task to show
+     * @param limit the last task to show
      * @return the list of tasks as raw json
      * @throws RestServerException 
      * @throws ServiceException 
      */
-    String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException;
+    String getTasks(String sessionId, String jobId, int offset, int limit) throws RestServerException, ServiceException;
     
     /**
      * Gets the list of tasks that correspond to a job and filtered by a given tag.
      * @param sessionId the session if of the user that asks for the tasks
      * @param jobId the id of the job for which its task list is asked 
      * @param tag the tag used to filter the tasks.
+     * @param offset the first task to show
+     * @param limit the last task to show
      * @return the list of tasks as raw json
      * @throws RestServerException 
      * @throws ServiceException 
      */
-    String getTasksByTag(String sessionId, String jobId, String tag) throws RestServerException, ServiceException;
+    String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit) throws RestServerException, ServiceException;
     
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern

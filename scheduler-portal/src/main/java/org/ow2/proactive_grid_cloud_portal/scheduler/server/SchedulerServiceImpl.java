@@ -614,7 +614,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * String, java.lang.String)
      */
     @Override
-    public String getTasks(String sessionId, String jobId) throws RestServerException, ServiceException {
+    public String getTasks(String sessionId, String jobId, int offset, int limit) throws RestServerException, ServiceException {
         ClientResponse<InputStream> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         try {
@@ -646,7 +646,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * String, java.lang.String, java.lang.String)
      */
     @Override
-    public String getTasksByTag(String sessionId, String jobId, String tag)
+    public String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit)
     		throws RestServerException, ServiceException {
     	ClientResponse<InputStream> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
