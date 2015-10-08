@@ -251,4 +251,9 @@ public class SchedulerListeners {
     public interface TagSuggestionListener {
     	void tagSuggestionListUpdated();
     }
+    
+    
+    public interface PaginationListener {
+    	void pageChanged();
+    }
 }

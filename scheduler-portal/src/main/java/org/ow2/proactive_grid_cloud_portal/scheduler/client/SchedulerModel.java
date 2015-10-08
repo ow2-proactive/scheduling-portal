@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
@@ -64,15 +65,7 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract LinkedHashMap<Integer, Job> getJobs();
 
-    /**
-     * @return the number of jobs to be displayed on a page
-     */
-    public abstract int getJobPageSize();
-
-    /**
-     * @return the job page currently displayed
-     */
-    public abstract int getJobPage();
+    
 
     /**
      * @param jobId the Id of a Job
@@ -217,5 +210,7 @@ public abstract class SchedulerModel implements Model {
     public abstract boolean getTaskAutoRefreshOption();
     
     
-   
+    public abstract PaginationModel getJobsPaginationModel();
+    
+    public abstract PaginationModel getTasksPaginationModel();
 }

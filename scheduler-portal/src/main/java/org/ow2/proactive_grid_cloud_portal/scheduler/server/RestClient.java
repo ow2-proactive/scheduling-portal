@@ -40,6 +40,7 @@ import java.io.InputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -223,6 +224,25 @@ public interface RestClient {
     String jobId);
     
     
+    
+    /**
+     * Returns a list of taskState with pagination
+     * @param sessionId a valid session id
+     * @param jobId the job id
+     * @return a list of task' states of the job <code>jobId</code>
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/paginated")
+    @Produces("application/json")
+    ClientResponse<InputStream> getJobTaskStatesPaginated(
+            @HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit);
+    
+    
+    
     /**
      * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
      * @param sessionId the session id of the user which is logged in
@@ -238,6 +258,29 @@ public interface RestClient {
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("tasktag")
     String tag);
+    
+    
+    
+    /**
+     * Returns a list of taskState of the tasks filtered by a given tag and paginated.
+     * @param sessionId a valid session id.
+     * @param jobId the job id.
+     * @param taskTag the tag used to filter the tasks.
+     * @param offset the number of the first task to fetch
+     * @param limit the number of the last task to fetch (non inclusive)
+     * @return a list of task' states of the job <code>jobId</code> filtered by a given tag, for a given pagination.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}/paginated")
+    @Produces("application/json")
+    ClientResponse<InputStream> getJobTaskStatesByTagPaginated(
+            @HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId,
+            @PathParam("tasktag") String taskTag,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit);
+    
     
     
     /**

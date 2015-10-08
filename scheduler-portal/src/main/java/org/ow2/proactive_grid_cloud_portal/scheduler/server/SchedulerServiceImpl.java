@@ -618,7 +618,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         ClientResponse<InputStream> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         try {
-            clientResponse = client.getJobTaskStates(sessionId, jobId);
+            clientResponse = client.getJobTaskStatesPaginated(sessionId, jobId, offset, limit);
             Status status = clientResponse.getResponseStatus();
             InputStream response = clientResponse.getEntity();
             String info = convertToString(response);
@@ -651,7 +651,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     	ClientResponse<InputStream> clientResponse = null;
         RestClient client = ProxyFactory.create(RestClient.class, SchedulerConfig.get().getRestUrl(), executor);
         try {
-            clientResponse = client.getJobTaskStatesByTag(sessionId, jobId, tag);
+            clientResponse = client.getJobTaskStatesByTagPaginated(sessionId, jobId, tag, offset, limit);
             Status status = clientResponse.getResponseStatus();
             InputStream response = clientResponse.getEntity();
             String info = convertToString(response);

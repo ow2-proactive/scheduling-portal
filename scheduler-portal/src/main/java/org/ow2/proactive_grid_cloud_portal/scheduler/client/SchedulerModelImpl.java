@@ -62,8 +62,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.T
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -100,7 +102,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private boolean fetchPending = true;
     private boolean fetchRunning = true;
     private boolean fetchFinished = true;
-    private int currentJobPage = 0;
     private List<SchedulerUser> users = null;
     private List<SchedulerUser> usersWithJobs = null;
     private HashMap<String, String> schedulerStats = null;
@@ -132,6 +133,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
     private ArrayList<TagSuggestionListener> tagSuggestionListeners = null;
+    
+    private PaginationModel jobsPaginationModel;
+    
+    private PaginationModel tasksPaginationModel;
 
     SchedulerModelImpl() {
         super();
@@ -160,6 +165,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.requestedStatRange = new HashMap<String, Range>();
         
         this.availableTags = new PatriciaTrie<String>();
+        
+        this.jobsPaginationModel = new PaginationModel(PaginatedItemType.JOB);
+        this.tasksPaginationModel = new PaginationModel(PaginatedItemType.TASK);
     }
     
     
@@ -289,7 +297,20 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    /**
+    
+    
+    
+    public PaginationModel getJobsPaginationModel() {
+		return jobsPaginationModel;
+	}
+
+
+	public PaginationModel getTasksPaginationModel() {
+		return tasksPaginationModel;
+	}
+
+
+	/**
      * Modifies the Job selection,
      * triggers a JobSelected event
      *
@@ -346,24 +367,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return this.jobsRev;
     }
 
-    @Override
-    public int getJobPageSize() {
-        return SchedulerConfig.get().getJobsPageSize();
-    }
+    
 
-    @Override
-    public int getJobPage() {
-        return this.currentJobPage;
-    }
+    
 
-    /**
-     * change current page
-     * 
-     * @param page new page number
-     */
-    void setJobPage(int page) {
-        this.currentJobPage = page;
-    }
+    
 
     /**
      * Modifies the tasks set

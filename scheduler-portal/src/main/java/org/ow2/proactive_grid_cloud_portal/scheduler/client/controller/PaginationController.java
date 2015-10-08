@@ -1,7 +1,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginatedModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -10,13 +10,13 @@ public abstract class PaginationController {
 	protected PaginationModel model;
 	
 	
-	protected PaginatedController paginatedController;
+	protected SchedulerController schedulerController;
 	
 	protected String pageSizePropertyName;
 	
 	
-	public PaginationController(PaginatedController paginatedController, String pageSizePropertyName){
-		this.paginatedController = paginatedController;
+	public PaginationController(SchedulerController schedulerController, String pageSizePropertyName){
+		this.schedulerController = schedulerController;
 		this.pageSizePropertyName = pageSizePropertyName;
 	}
 	
@@ -27,7 +27,7 @@ public abstract class PaginationController {
      */
     public void resetPage() {
         model.setPage(0);
-        this.paginatedController.fetch();
+        this.fetch();
     }
 
     /**
@@ -36,7 +36,7 @@ public abstract class PaginationController {
      */
     public void nextPage() {
         model.setPage(model.getPage() + 1);
-        this.paginatedController.fetch();
+        this.fetch();
     }
     
     
@@ -49,7 +49,7 @@ public abstract class PaginationController {
         if (curPage == 0)
             return;
         model.setPage(curPage - 1);
-        this.paginatedController.fetch();
+        this.fetch();
     }
     
     
@@ -69,11 +69,28 @@ public abstract class PaginationController {
     
     
     public int getOffset(){
-    	return this.model.getPage() * this.model.getPageSize();
+    	return (this.model.getPage() * this.model.getPageSize());
     }
     
     
     public int getRange(){
-    	return this.model.getPageSize();
+    	return this.model.getPageSize() * (this.model.getPage() + 1);
     }
+    
+    
+    public String getPaginationLabel(){
+    	int page = this.model.getPage();
+    	int size = this.model.getPageSize();
+    	return (page * size + 1) + " - " + ((page + 1) * size);
+    }
+    
+    
+    public boolean hasPrevious(){
+    	return (this.model.getPage() > 0);
+    }
+    
+    public boolean hasNext(int listSize){
+    	return (listSize == this.model.getPageSize());
+    }
+    
 }

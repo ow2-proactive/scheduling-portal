@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.smartgwt.client.data.DataSource;
@@ -99,15 +100,18 @@ public class SettingsWindow {
         liveLogValidator.setMax(10000);
         liveLogTime.setValidators(new IsIntegerValidator(), liveLogValidator);
 
-        DataSourceIntegerField pageSize = new DataSourceIntegerField("pageSize", "Jobs page size");
-        pageSize.setRequired(true);
+        DataSourceIntegerField jobPageSize = new DataSourceIntegerField("jobPageSize", "Jobs page size");
+        jobPageSize.setRequired(true);
+        DataSourceIntegerField taskPageSize = new DataSourceIntegerField("taskPageSize", "Tasks page size");
+        taskPageSize.setRequired(true);
         IntegerRangeValidator pageValidator = new IntegerRangeValidator();
         pageValidator.setMin(5);
         pageValidator.setMax(5000);
-        pageSize.setValidators(new IsIntegerValidator(), pageValidator);
+        jobPageSize.setValidators(new IsIntegerValidator(), pageValidator);
+        taskPageSize.setValidators(new IsIntegerValidator(), pageValidator);
 
         final DataSource ds = new DataSource();
-        ds.setFields(refreshTime, liveLogTime, pageSize);
+        ds.setFields(refreshTime, liveLogTime, jobPageSize, taskPageSize);
 
         final DynamicForm form = new DynamicForm();
         form.setDataSource(ds);
@@ -115,7 +119,8 @@ public class SettingsWindow {
         form.setWidth(350);
         form.setMargin(10);
         form.setValue("refreshTime", SchedulerConfig.get().getClientRefreshTime());
-        form.setValue("pageSize", SchedulerConfig.get().getJobsPageSize());
+        form.setValue("jobPageSize", SchedulerConfig.get().getPageSize(PaginatedItemType.JOB));
+        form.setValue("taskPageSize", SchedulerConfig.get().getPageSize(PaginatedItemType.TASK));
         form.setValue("logTime", SchedulerConfig.get().getLivelogsRefreshTime());
 
         final IButton applyButton = new IButton("Ok");
@@ -126,10 +131,11 @@ public class SettingsWindow {
                     return;
 
                 String refreshTime = form.getValueAsString("refreshTime");
-                String pageSize = form.getValueAsString("pageSize");
+                String jobPageSize = form.getValueAsString("jobPageSize");
+                String taskPageSize = form.getValueAsString("taskPageSize");
                 String livelog = form.getValueAsString("logTime");
 
-                controller.setUserSettings(refreshTime, pageSize, livelog, false);
+                controller.setUserSettings(refreshTime, jobPageSize, taskPageSize, livelog, false);
                 window.hide();
             }
         });
@@ -139,14 +145,16 @@ public class SettingsWindow {
             public void onClick(ClickEvent event) {
                 SchedulerConfig.get().reload();
                 int refresh = SchedulerConfig.get().getClientRefreshTime();
-                int page = SchedulerConfig.get().getJobsPageSize();
+                int jobPage = SchedulerConfig.get().getPageSize(PaginatedItemType.JOB);
+                int taskPage = SchedulerConfig.get().getPageSize(PaginatedItemType.TASK);
                 int log = SchedulerConfig.get().getLivelogsRefreshTime();
 
                 form.setValue("refreshTime", refresh);
-                form.setValue("pageSize", page);
+                form.setValue("jobPageSize", jobPage);
+                form.setValue("taskPageSize", taskPage);
                 form.setValue("logTime", log);
 
-                controller.setUserSettings("" + refresh, "" + page, "" + log, true);
+                controller.setUserSettings("" + refresh, "" + jobPage, "" + taskPage, "" + log, true);
             }
         });
 
@@ -180,7 +188,7 @@ public class SettingsWindow {
         this.window.setShowModalMask(true);
         this.window.addItem(layout);
         this.window.setWidth(380);
-        this.window.setHeight(190);
+        this.window.setHeight(210);
         this.window.setCanDragResize(true);
         this.window.centerInPage();
 

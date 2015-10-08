@@ -43,12 +43,12 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PrefixWordSuggestOracle;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -57,16 +57,14 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle.MultiWordSuggestion;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
+import com.smartgwt.client.types.Positioning;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.widgets.Canvas;
@@ -76,6 +74,10 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
@@ -100,7 +102,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  *
  * @author mschnoor
  */
-public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagSuggestionListener, JobSelectedListener {
+public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagSuggestionListener, JobSelectedListener, PaginationListener {
 
     private static final String ID_ATTR = "id";
     private static final String STATUS_ATTR = "status";
@@ -236,7 +238,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
     
     private SuggestBox tagSearchTextBox;
     
-    private CheckBox autoRefreshOption;
+    private CheckboxItem autoRefreshOption;
 
     /**
      * Task page number
@@ -252,9 +254,14 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
     private ToolStripButton pageNextButton = null;
     
     private SchedulerController controller = null;
+    
+    private TasksPaginationController paginationController;
 
     public TasksView(SchedulerController controller) {
         this.controller = controller;
+        this.paginationController = new TasksPaginationController(this.controller);
+        this.controller.getModel().getTasksPaginationModel().addPaginationListener(this);
+        this.controller.setTaskPaginationController(this.paginationController);
         this.controller.getEventDispatcher().addTasksUpdatedListener(this);
         this.controller.getEventDispatcher().addRemoteHintListener(this);
         this.controller.getEventDispatcher().addTagSuggestionListener(this);
@@ -308,6 +315,16 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
             this.tasksGrid.expandRecord(this.expandRecord);
         }
         this.tagSearchTextBox.setEnabled(true);
+        
+        
+        this.pageNextButton.disable();
+        this.pagePreviousButton.disable();
+
+        if (this.paginationController.hasPrevious())
+            this.pagePreviousButton.enable();
+
+        if (tasks != null && this.paginationController.hasNext(tasks.size()))
+            this.pageNextButton.enable();
     }
 
     private ListGridRecord expandRecord;
@@ -558,15 +575,26 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 		});
         
         
-        this.autoRefreshOption = new CheckBox("Auto-refresh");
-        this.autoRefreshOption.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        this.autoRefreshOption = new CheckboxItem("autoRefreshOption", "Auto-refresh");
+        this.autoRefreshOption.setCellStyle("navBarOption");
+        this.autoRefreshOption.setTextBoxStyle("navBarOptionTextBox");
+        this.autoRefreshOption.setTitleStyle("navbarOptionTitle");
+        this.autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
+        this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
 			@Override
-			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-				controller.setTaskAutoRefreshOption(autoRefreshOption.getValue());
+			public void onChanged(ChangedEvent event) {
+				controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
+				
 			}
 		});
         
+        DynamicForm checkBoxes = new DynamicForm();
+        checkBoxes.setNumCols(1);
+        checkBoxes.setItems(autoRefreshOption);
+        checkBoxes.addStyleName("checkBoxForm");
+        
         ToolStrip navTools = new ToolStrip();
+        navTools.addStyleName("itemViewNav");
         navTools.setHeight(34);
         navTools.setWidth100();
         navTools.setBackgroundImage("");
@@ -575,32 +603,40 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
-        navTools.addMember(this.autoRefreshOption);
+        navTools.addMember(checkBoxes);
         
         
         /* Task pagination buttons and indicator label */
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
+        this.pageNextButton.addStyleName("navPaginationButton");
+        this.pageNextButton.setPosition(Positioning.RELATIVE);
+        this.pageNextButton.setLeft(0);
         this.pageNextButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.nextTaskPage();
-                pageChanged();
+                paginationController.nextPage();
             }
         });
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
+        this.pagePreviousButton.addStyleName("navPaginationButton");
+        this.pagePreviousButton.setPosition(Positioning.RELATIVE);
+        this.pagePreviousButton.setLeft(0);
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.previousTaskPage();
-                pageChanged();
+                paginationController.previousPage();
             }
         });
      
         this.pageLabel = new Label("");
+        this.pageLabel.addStyleName("navPaginationLabel");
+        this.pageLabel.setPosition(Positioning.RELATIVE);
+        this.pageLabel.setLeft(0);
         this.pageLabel.setAlign(Alignment.CENTER);
         this.pageLabel.setWidth(60);
         this.pageLabel.setMargin(0);
         this.pageLabel.setPadding(0);
+        
         
         navTools.addMember(this.pagePreviousButton);
         navTools.addMember(this.pageLabel);
@@ -665,14 +701,10 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
     }
     
     
-    private void pageChanged() {
-        int page = controller.getModel().getJobPage();
-        int size = controller.getModel().getJobPageSize();
+    public void pageChanged() {
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
-
-        String str = "" + (page * size + 1) + " - " + ((page + 1) * size);
-        this.pageLabel.setContents(str);
+        this.pageLabel.setContents(this.paginationController.getPaginationLabel());
     }
 
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {

@@ -1,6 +1,9 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
+import java.util.ArrayList;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -10,9 +13,12 @@ public class PaginationModel {
 	
 	private PaginatedItemType itemType;
 	
+	protected ArrayList<PaginationListener> paginationListeners;
 	
-	public PaginationModel(PaginatedItemType itemType, PaginatedModel paginatedModel){
+	
+	public PaginationModel(PaginatedItemType itemType){
 		this.itemType = itemType;
+		this.paginationListeners = new ArrayList<PaginationListener>();
 	}
 	
 	
@@ -29,6 +35,9 @@ public class PaginationModel {
      */
     public void setPage(int page) {
         this.currentPage = page;
+        for(PaginationListener listener: this.paginationListeners){
+        	listener.pageChanged();
+        }
     }
     
     
@@ -50,5 +59,8 @@ public class PaginationModel {
 	}
     
     
+	public void addPaginationListener(PaginationListener listener){
+		this.paginationListeners.add(listener);
+	}
     
 }

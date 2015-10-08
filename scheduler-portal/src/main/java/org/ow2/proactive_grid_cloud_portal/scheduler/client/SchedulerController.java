@@ -52,7 +52,10 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -146,6 +149,13 @@ public class SchedulerController extends Controller implements UncaughtException
     
     
     private PrefixWordSuggestOracle tagSuggestionOracle;
+    
+    
+    protected TasksPaginationController taskPaginationController;
+    
+    
+    protected JobsPaginationController jobsPaginationController;
+    
 
     /**
      * Default constructor
@@ -263,11 +273,12 @@ public class SchedulerController extends Controller implements UncaughtException
         model.setLogin(login);
         model.setSessionId(sessionId);
 
-        SchedulerController.this.fetchJobs();
         if (loginView != null)
             SchedulerController.this.loginView.destroy();
         SchedulerController.this.loginView = null;
         SchedulerController.this.schedulerView = new SchedulerPage(SchedulerController.this);
+        
+        this.fetchJobs();
         model.jobsUpdating();
         SchedulerController.this.startTimer();
 
@@ -345,9 +356,9 @@ public class SchedulerController extends Controller implements UncaughtException
             }
         }
 
-        SchedulerController.this.model.selectJob(id);
+        this.model.selectJob(id);
         this.model.setTasksDirty(true);
-        this.updateTasks("");
+        this.taskPaginationController.resetPage();
 
         if (visuFetchEnabled) {
             visuFetch(jobId);
@@ -954,8 +965,32 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
                 });
     }
+    
+    
+    
 
-    /**
+    public TasksPaginationController getTaskPaginationController() {
+		return taskPaginationController;
+	}
+
+	public JobsPaginationController getJobsPaginationController() {
+		return jobsPaginationController;
+	}
+	
+	
+	
+
+	public void setTaskPaginationController(
+			TasksPaginationController taskPaginationController) {
+		this.taskPaginationController = taskPaginationController;
+	}
+
+	public void setJobsPaginationController(
+			JobsPaginationController jobsPaginationController) {
+		this.jobsPaginationController = jobsPaginationController;
+	}
+
+	/**
      * Add a fake submitted job to the list
      * the name is not important, it will be updated
      * 
@@ -973,52 +1008,32 @@ public class SchedulerController extends Controller implements UncaughtException
      * Back to page 0
      * invalidate the current page, set the jobs views in indeterminate mode
      */
-    public void resetPage() {
-        model.setJobPage(0);
-        model.emptyJobs();
-        this.fetchJobs();
-    }
+    
 
-    /**
-     * Fetch the next job list page
-     * invalidate the current page, set the jobs views in indeterminate mode
-     */
-    public void nextPage() {
-        model.setJobPage(model.getJobPage() + 1);
-        model.emptyJobs();
-        this.fetchJobs();
-    }
-
-    /**
-     * Fetch the previous job list page
-     * invalidate the current page, set the jobs views in indeterminate mode
-     */
-    public void previousPage() {
-        int curPage = model.getJobPage();
-        if (curPage == 0)
-            return;
-        model.setJobPage(curPage - 1);
-        model.emptyJobs();
-        this.fetchJobs();
-    }
 
     /**
      * Override user settings, rewrite cookies, refresh corresponding ui elements
      * 
      * @param refreshTime refresh time for update thread in ms
-     * @param pageSize number of results per job list page
+     * @param jobPageSize number of results per job list page
      * @param liveLogTime refresh time for livelog update thread in ms
      * @param forceRefresh refresh ui even if properties did not change
      */
-    public void setUserSettings(String refreshTime, String pageSize, String liveLogTime, boolean forceRefresh) {
+    public void setUserSettings(String refreshTime, String jobPageSize, String taskPageSize, String liveLogTime, boolean forceRefresh) {
         boolean refreshChanged = !refreshTime.equals("" + SchedulerConfig.get().getClientRefreshTime());
         SchedulerConfig.get().set(SchedulerConfig.CLIENT_REFRESH_TIME, refreshTime);
         Settings.get().setSetting(SchedulerConfig.CLIENT_REFRESH_TIME, refreshTime);
 
-        boolean pageChanged = !pageSize.equals("" + SchedulerConfig.get().getJobsPageSize());
-        SchedulerConfig.get().set(SchedulerConfig.JOBS_PAGE_SIZE, pageSize);
-        Settings.get().setSetting(SchedulerConfig.JOBS_PAGE_SIZE, pageSize);
+        boolean jobPageChanged = !jobPageSize.equals("" + SchedulerConfig.get().getPageSize(PaginatedItemType.JOB));
+        SchedulerConfig.get().set(SchedulerConfig.JOBS_PAGE_SIZE, jobPageSize);
+        Settings.get().setSetting(SchedulerConfig.JOBS_PAGE_SIZE, jobPageSize);
 
+        
+        boolean taskPageChanged = !taskPageSize.equals("" + SchedulerConfig.get().getPageSize(PaginatedItemType.TASK));
+        SchedulerConfig.get().set(SchedulerConfig.TASKS_PAGE_SIZE, taskPageSize);
+        Settings.get().setSetting(SchedulerConfig.TASKS_PAGE_SIZE, taskPageSize);
+        
+        
         boolean logChanged = !liveLogTime.equals("" + SchedulerConfig.get().getLivelogsRefreshTime());
         SchedulerConfig.get().set(SchedulerConfig.LIVELOGS_REFRESH_TIME, liveLogTime);
         Settings.get().setSetting(SchedulerConfig.LIVELOGS_REFRESH_TIME, liveLogTime);
@@ -1027,8 +1042,11 @@ public class SchedulerController extends Controller implements UncaughtException
             this.stopTimer();
             this.startTimer();
         }
-        if (pageChanged || forceRefresh) {
-            resetPage();
+        if (jobPageChanged || forceRefresh) {
+            this.jobsPaginationController.resetPage();
+        }
+        if(taskPageChanged || forceRefresh) {
+        	this.taskPaginationController.resetPage();
         }
         if (logChanged || forceRefresh) {
             this.stopLiveTimer();
@@ -1039,7 +1057,8 @@ public class SchedulerController extends Controller implements UncaughtException
     /**
      * Updates the current task list depending the current job selection in the model 
      */
-    private void updateTasks(String tagFilter) {
+    public void updateTasks() {
+    	
         if (model.getSelectedJob() == null) {
             SchedulerController.this.model.setTasks(new ArrayList<Task>());
         } else {
@@ -1071,11 +1090,15 @@ public class SchedulerController extends Controller implements UncaughtException
                 }
             };
             
+            String tagFilter = this.model.getCurrentTagFilter();
+            
+            int offset = this.taskPaginationController.getOffset();
+            int limit = this.taskPaginationController.getRange();
             if(tagFilter.equals("")){
-            	this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, callback);
+            	this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, offset, limit, callback);
             }
             else{
-            	this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tagFilter, callback);
+            	this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tagFilter, offset, limit, callback);
             }
         }
     }
@@ -1090,7 +1113,7 @@ public class SchedulerController extends Controller implements UncaughtException
     		}
     		
     		if(tag != ""){
-    			updateTasks(tag);
+    			taskPaginationController.resetPage();
     		}
     	}
     }
@@ -1266,11 +1289,11 @@ public class SchedulerController extends Controller implements UncaughtException
      * update the model and views
      * fail hard
      */
-    private void fetchJobs() {
+    public void fetchJobs() {
         final long t1 = System.currentTimeMillis();
 
-        int offset = model.getJobPage() * model.getJobPageSize();
-        int range = model.getJobPageSize();
+        int offset = jobsPaginationController.getOffset();
+        int range = jobsPaginationController.getRange();
 
         scheduler.revisionAndjobsinfo(model.getSessionId(), offset, range, model.isFetchMyJobsOnly(),
                 model.isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
@@ -1321,7 +1344,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         	if (oldSel != null) {
                         		Job newSel = jobs.get(oldSel.getId());
                         		if (newSel != null && !newSel.isEqual(oldSel)) {
-                        			updateTasks(model.getCurrentTagFilter());
+                        			taskPaginationController.resetPage();
                         		}
                         	}
                         }
@@ -1439,7 +1462,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Fetching all jobs");
 
-        this.resetPage();
+        this.jobsPaginationController.resetPage();
     }
 
     /**
@@ -1459,7 +1482,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch pending jobs");
 
-        this.resetPage();
+        this.jobsPaginationController.resetPage();
     }
 
     /**
@@ -1479,7 +1502,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch running jobs");
 
-        this.resetPage();
+        this.jobsPaginationController.resetPage();
     }
 
     /**
@@ -1499,7 +1522,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch finished jobs");
 
-        this.resetPage();
+        this.jobsPaginationController.resetPage();
     }
 
     /**
