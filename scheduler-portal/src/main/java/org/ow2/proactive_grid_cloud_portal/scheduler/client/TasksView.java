@@ -610,8 +610,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navPaginationButton");
-        this.pageNextButton.setPosition(Positioning.RELATIVE);
-        this.pageNextButton.setLeft(0);
         this.pageNextButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 paginationController.nextPage();
@@ -620,8 +618,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addStyleName("navPaginationButton");
-        this.pagePreviousButton.setPosition(Positioning.RELATIVE);
-        this.pagePreviousButton.setLeft(0);
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 paginationController.previousPage();
@@ -630,17 +626,15 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
      
         this.pageLabel = new Label("");
         this.pageLabel.addStyleName("navPaginationLabel");
-        this.pageLabel.setPosition(Positioning.RELATIVE);
-        this.pageLabel.setLeft(0);
         this.pageLabel.setAlign(Alignment.CENTER);
         this.pageLabel.setWidth(60);
         this.pageLabel.setMargin(0);
         this.pageLabel.setPadding(0);
         
         
-        navTools.addMember(this.pagePreviousButton);
-        navTools.addMember(this.pageLabel);
         navTools.addMember(this.pageNextButton);
+        navTools.addMember(this.pageLabel);
+        navTools.addMember(this.pagePreviousButton);
         
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
