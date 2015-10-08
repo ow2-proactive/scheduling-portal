@@ -59,7 +59,7 @@ public interface SchedulerService extends RemoteService {
 
     /**
      * Logout from the scheduler.
-     * 
+     *
      * @param sessionId the user session id used to logout from the scheduler.
      * @throws RestServerException exception thrown if problems occurred during the logout process.
      */
@@ -70,18 +70,18 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user that removes the job
      * @param jobIdList the list of the job ids that are to be removed
      * @return number of removed jobs
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     int removeJobs(String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException;
 
     /**
      * Pauses a job.
      * @param sessionId the session id of the user that pauses the job
-     * @param list the list of the job ids that are to be paused 
+     * @param list the list of the job ids that are to be paused
      * @return number of paused jobs
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     int pauseJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
@@ -90,8 +90,8 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user that resumes the job
      * @param list the list of the job ids that are to be resumed
      * @return number of resumed jobs
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     int resumeJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
@@ -100,8 +100,8 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user that resumes the job
      * @param list the list of the job ids that are to be resumed
      * @return number of killed jobs
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     int killJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
@@ -148,8 +148,6 @@ public interface SchedulerService extends RemoteService {
      * @param offset the first task to show
      * @param limit the last task to show
      * @return the list of tasks as raw json
-     * @throws RestServerException 
-     * @throws ServiceException 
      */
     String getTasks(String sessionId, String jobId, int offset, int limit) throws RestServerException, ServiceException;
     
@@ -190,9 +188,9 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user which is logged in.
      * @param jobId the job id for which the details are asked.
      * @return the job detailed information as json
-     * @throws RestServerException 
-     * @throws ServiceException 
-     * 
+     * @throws RestServerException
+     * @throws ServiceException
+     *
      */
     String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException;
 
@@ -201,9 +199,8 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the session id of the user which is logged in
      * @param list the list of the job ids which are going to have their priority changed
      * @param priorityName the name of the new priority
-     * @return number of priority set
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     void setPriorityByName(String sessionId, List<Integer> list, String priorityName)
             throws RestServerException, ServiceException;
@@ -212,8 +209,8 @@ public interface SchedulerService extends RemoteService {
      * Pauses the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the pause was successfully, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean pauseScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -221,8 +218,8 @@ public interface SchedulerService extends RemoteService {
      * Resumes the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the resume was successfully, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean resumeScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -230,8 +227,8 @@ public interface SchedulerService extends RemoteService {
      * Removes the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the freezing was successfully, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean freezeScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -239,8 +236,8 @@ public interface SchedulerService extends RemoteService {
      * Kills the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the scheduler was successfully killed, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean killScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -248,8 +245,8 @@ public interface SchedulerService extends RemoteService {
      * Starts the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the scheduler was successfully started, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean startScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -257,8 +254,8 @@ public interface SchedulerService extends RemoteService {
      * Stops the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the scheduler was successfully stopped, false otherwise.
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     boolean stopScheduler(final String sessionId) throws RestServerException, ServiceException;
 
@@ -271,7 +268,7 @@ public interface SchedulerService extends RemoteService {
      * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      * @return the output of the task
      * @throws RestServerException
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     String getTaskOutput(final String sessionId, final String jobId, final String taskName, final int logMode)
             throws RestServerException, ServiceException;
@@ -282,7 +279,7 @@ public interface SchedulerService extends RemoteService {
      * @param jobId id of the job for which logs should be fetched
      * @return console output for the whole job
      * @throws RestServerException
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
             ServiceException;
@@ -333,10 +330,11 @@ public interface SchedulerService extends RemoteService {
      * @param running fetch running jobs
      * @param finished fetch finished jobs
      * @return the raw json jobinfo from the rest api
-     * @throws RestServerException 
-     * @throws ServiceException 
+     * @throws RestServerException
+     * @throws ServiceException
      */
     String revisionAndjobsinfo(@HeaderParam("sessionid")
+
     String sessionId, @QueryParam("index")
     int index, @QueryParam("range")
     int range, @QueryParam("myjobs")
@@ -348,10 +346,11 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId current session
      * @param jobId id of the job
      * @return path of the image on the server
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     String getJobImage(@HeaderParam("sessionid")
     String sessionId, String jobId) throws RestServerException, ServiceException;
+
 
     /**
      * Html representing the job as designed in the WF studio when applicable
@@ -361,10 +360,10 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException
      */
     String getJobHtml(@HeaderParam("sessionid")
-    String sessionId, String jobId) throws RestServerException, ServiceException;
+                      String sessionId, String jobId) throws RestServerException, ServiceException;
 
     /**
-     * Returns the Scheduler status as a JSON String 
+     * Returns the Scheduler status as a JSON String
      * @param sessionId a valid session id
      * @return the current scheduler status
      * @throws RestServerException
@@ -377,7 +376,7 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId current session id
      * @return list of users as json array
      * @throws RestServerException
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     String getSchedulerUsers(@HeaderParam("sessionid")
     String sessionId) throws RestServerException, ServiceException;
@@ -387,7 +386,7 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId current session id
      * @return list of users as json array
      * @throws RestServerException
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     String getSchedulerUsersWithJobs(@HeaderParam("sessionid")
     String sessionId) throws RestServerException, ServiceException;
@@ -399,7 +398,7 @@ public interface SchedulerService extends RemoteService {
 
     /**
      * Get server logs for a given task
-     * 
+     *
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of a task to restart within that job
@@ -412,7 +411,7 @@ public interface SchedulerService extends RemoteService {
 
     /**
      * Get server logs for a given job
-     * 
+     *
      * @param sessionId current session
      * @param jobId id of a job
      * @return job logs

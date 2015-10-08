@@ -36,20 +36,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
@@ -58,19 +55,24 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.client.ProxyFactory;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
@@ -83,14 +85,24 @@ public class RMServiceImpl extends Service implements RMService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RMServiceImpl.class);
 
-    private ClientExecutor executor;
+    /**
+     * Number of threads created for the threadPool shared by RestEasy client proxies.
+     */
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
+
+    /**
+     * Thread pool shared by RestEasy client proxies.
+     */
+    private ExecutorService threadPool;
+
     private DefaultHttpClient httpClient;
 
     @Override
     public void init() {
         loadProperties();
+
         httpClient = HttpUtils.createDefaultExecutor();
-        executor = new ApacheHttpClient4Executor(httpClient);
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
     /*
@@ -114,8 +126,13 @@ public class RMServiceImpl extends Service implements RMService {
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#logout(java.lang.String)
      */
     public void logout(String sessionId) throws ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        client.logout(sessionId);
+        RestClient restClientProxy = getRestClientProxy();
+
+        try {
+            restClientProxy.logout(sessionId);
+        } catch (WebApplicationException e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 
     /*
@@ -123,8 +140,8 @@ public class RMServiceImpl extends Service implements RMService {
      * @see Service#login(java.lang.String, java.lang.String, java.io.File, java.lang.String)
      */
     public String login(String login, String pass, File cred, String ssh) throws RestServerException,
-      ServiceException {
-        HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
+            ServiceException {
+        HttpPost httpPost = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
 
         try {
             MultipartEntity entity;
@@ -134,26 +151,25 @@ public class RMServiceImpl extends Service implements RMService {
                 entity = new MultipartEntity();
                 entity.addPart("credential", new FileBody(cred, "application/octet-stream"));
             }
-            method.setEntity(entity);
+            httpPost.setEntity(entity);
 
-            HttpResponse response = httpClient.execute(method);
+            HttpResponse response = httpClient.execute(httpPost);
             String responseAsString = convertToString(response.getEntity().getContent());
             switch (response.getStatusLine().getStatusCode()) {
                 case 200:
                     break;
                 default:
-                    String message = responseAsString;
-                    if (message == null || message.trim().length() == 0) {
-                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
-                          response.getStatusLine().getReasonPhrase() + "\" }";
+                    if (responseAsString.trim().length() == 0) {
+                        responseAsString = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," + "\"errorMessage\": \"" +
+                                response.getStatusLine().getReasonPhrase() + "\" }";
                     }
-                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
+                    throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
             }
             return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         } finally {
-            method.releaseConnection();
+            httpPost.releaseConnection();
             if (cred != null) {
                 cred.delete();
             }
@@ -164,76 +180,47 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getState(java.lang.String)
      */
-    public String getState(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.state(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String getState(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.state(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getMonitoring(java.lang.String)
      */
-    public String getMonitoring(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.monitoring(sessionId);
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String getMonitoring(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.monitoring(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /**
      * Create a Credentials file with the provided authentication parameters
-     * 
+     *
      * @param login username
-     * @param pass password
-     * @param ssh private ssh key
+     * @param pass  password
+     * @param ssh   private ssh key
      * @return the the Credentials file as a base64 String
      * @throws ServiceException
      */
     public String createCredentials(String login, String pass, String ssh) throws RestServerException,
             ServiceException {
-        HttpPost method = new HttpPost(RMConfig.get().getRestUrl() + "/scheduler/createcredential");
+        HttpPost httpPost = new HttpPost(RMConfig.get().getRestUrl() + "/scheduler/createcredential");
 
         try {
             MultipartEntity entity = createLoginPasswordSSHKeyMultipart(login, pass, ssh);
 
-            method.setEntity(entity);
+            httpPost.setEntity(entity);
 
-            HttpResponse response = httpClient.execute(method);
+            HttpResponse response = httpClient.execute(httpPost);
             String responseAsString = convertToString(response.getEntity().getContent());
 
             switch (response.getStatusLine().getStatusCode()) {
@@ -246,18 +233,18 @@ public class RMServiceImpl extends Service implements RMService {
             LOGGER.warn("Failed to create credentials", e);
             throw new ServiceException(e.getMessage());
         } finally {
-            method.releaseConnection();
+            httpPost.releaseConnection();
         }
     }
 
     private MultipartEntity createLoginPasswordSSHKeyMultipart(String login, String pass,
-      String ssh) throws UnsupportedEncodingException {
+                                                               String ssh) throws UnsupportedEncodingException {
         MultipartEntity entity = new MultipartEntity();
         entity.addPart("username", new StringBody(login));
         entity.addPart("password", new StringBody(pass));
         if (ssh != null && !ssh.isEmpty()) {
             entity.addPart("sshKey",
-              new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
+                    new ByteArrayBody(ssh.getBytes(), MediaType.APPLICATION_OCTET_STREAM, null));
         }
         return entity;
     }
@@ -266,252 +253,112 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#createNodeSource(java.lang.String, java.lang.String, java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, java.lang.String[], java.lang.String[])
      */
-    public String createNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
-            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
-            String[] policyParameters, String[] policyFileParameters) throws RestServerException,
+    public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
+                                   final String[] infrastructureParameters, final String[] infrastructureFileParameters, final String policyType,
+                                   final String[] policyParameters, final String[] policyFileParameters) throws RestServerException,
             ServiceException {
-
-        RestClient cli = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = cli.createnodeSource(sessionId, nodeSourceName, infrastructureType,
-                    infrastructureParameters, infrastructureFileParameters, policyType, policyParameters,
-                    policyFileParameters);
-            String ret = convertToString(clientResponse.getEntity());
-            Status status = clientResponse.getResponseStatus();
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.createnodeSource(sessionId, nodeSourceName, infrastructureType,
+                        infrastructureParameters, infrastructureFileParameters, policyType, policyParameters,
+                        policyFileParameters);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
-
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getInfrastructures(java.lang.String)
      */
-    public String getInfrastructures(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.infrastructures(sessionId);
-            String ret = convertToString(clientResponse.getEntity());
-            Status status = clientResponse.getResponseStatus();
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String getInfrastructures(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.infrastructures(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getPolicies(java.lang.String)
      */
-    public String getPolicies(String sessionId) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.policies(sessionId);
-            String ret = convertToString(clientResponse.getEntity());
-            Status status = clientResponse.getResponseStatus();
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String getPolicies(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.policies(sessionId);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#lockNodes(java.lang.String, java.util.Set)
      */
-    public String lockNodes(String sessionId, Set<String> urls) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (String url : urls) {
-            ClientResponse<InputStream> clientResponse = null;
-            Set<String> singleton = new HashSet<String>();
-            singleton.add(url);
-            try {
-                clientResponse = client.lockNodes(sessionId, singleton);
-                Status status = clientResponse.getResponseStatus();
-
-                switch (status) {
-                    case OK:
-                        success++;
-                        break;
-                    default:
-                        failures++;
-                }
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+    public String lockNodes(final String sessionId, Set<String> urls) throws RestServerException, ServiceException {
+        return executeFunction(new BiFunction<RestClient, Set<String>, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient, Set<String> strings) {
+                return restClient.lockNodes(sessionId, strings);
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Failed to lock all requested nodes; " + success + " succeeded, " +
-                failures + " failed.");
-        }
-        return "";
+        }, urls, "lock");
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#unlockNodes(java.lang.String, java.util.Set)
      */
-    public String unlockNodes(String sessionId, Set<String> urls) throws RestServerException,
+    public String unlockNodes(final String sessionId, Set<String> urls) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        int failures = 0;
-        int success = 0;
-
-        for (String url : urls) {
-            ClientResponse<InputStream> clientResponse = null;
-            Set<String> singleton = new HashSet<String>();
-            singleton.add(url);
-            try {
-                clientResponse = client.unlockNodes(sessionId, singleton);
-                Status status = clientResponse.getResponseStatus();
-
-                switch (status) {
-                    case OK:
-                        success++;
-                        break;
-                    default:
-                        failures++;
-                }
-            } finally {
-                if (clientResponse != null) {
-                    clientResponse.releaseConnection();
-                }
+        return executeFunction(new BiFunction<RestClient, Set<String>, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient, Set<String> strings) {
+                return restClient.unlockNodes(sessionId, strings);
             }
-        }
-        if (failures > 0) {
-            throw new RestServerException("Failed to unlock all requested nodes; " + success +
-                " succeeded, " + failures + " failed.");
-        }
-        return "";
+        }, urls, "unlock");
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#removeNode(java.lang.String, java.lang.String)
      */
-    public String removeNode(String sessionId, String url, boolean force) throws RestServerException,
+    public String removeNode(final String sessionId, final String url, final boolean force) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.removeNode(sessionId, url, force);
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.removeNode(sessionId, url, force);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#removeNodesource(java.lang.String, java.lang.String)
      */
-    public String removeNodesource(String sessionId, String name, boolean preempt)
+    public String removeNodesource(final String sessionId, final String name, final boolean preempt)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.removeNodesource(sessionId, name, preempt);
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.removeNodesource(sessionId, name, preempt);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#releaseNode(java.lang.String, java.lang.String)
      */
-    public String releaseNode(String sessionId, String url) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.releaseNode(sessionId, url);
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+    public String releaseNode(final String sessionId, final String url) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.releaseNode(sessionId, url);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     /*
@@ -519,201 +366,163 @@ public class RMServiceImpl extends Service implements RMService {
      * @see Service#getVersion()
      */
     public String getVersion() throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getVersion();
-            Status status = clientResponse.getResponseStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (status) {
-                case OK:
-                    return ret;
-                default:
-                    throw new RestServerException(status.getStatusCode(), ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getVersion();
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String getMBeanInfo(String sessionId, String name, List<String> attrs) throws RestServerException,
+    public String getMBeanInfo(final String sessionId, String name, final List<String> attrs) throws RestServerException,
             ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
         try {
-            ObjectName obj = new ObjectName(name);
-            clientResponse = client.getMBeanInfo(sessionId, obj, attrs);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
+            final ObjectName obj = new ObjectName(name);
 
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
-            }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
+            return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+                @Override
+                public InputStream apply(RestClient restClient) {
+                    return restClient.getMBeanInfo(sessionId, obj, attrs);
+                }
+            });
         } catch (MalformedObjectNameException e) {
             throw new ServiceException("Malformed MBean name", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
         }
     }
 
     @Override
-    public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
+    public String getNodeMBeanInfo(final String sessionId, final String nodeJmxUrl, final String objectName, final List<String> attrs)
             throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getNodeMBeanInfo(sessionId, nodeJmxUrl, objectName, attrs);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getNodeMBeanInfo(sessionId, nodeJmxUrl, objectName, attrs);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String getNodeMBeanHistory(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs, String timeRange) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getNodeMBeanHistory(sessionId, nodeJmxUrl, objectName, attrs, timeRange);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+    public String getNodeMBeanHistory(final String sessionId, final String nodeJmxUrl, final String objectName, final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getNodeMBeanHistory(sessionId, nodeJmxUrl, objectName, attrs, timeRange);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames,
-            List<String> attrs) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getNodeMBeansInfo(sessionId, nodeJmxUrl, objectNames, attrs);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+    public String getNodeMBeansInfo(final String sessionId, final String nodeJmxUrl, final String objectNames,
+                                    final List<String> attrs) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getNodeMBeansInfo(sessionId, nodeJmxUrl, objectNames, attrs);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String getNodeMBeansHistory(String sessionId, String nodeJmxUrl, String objectNames,
-                                      List<String> attrs, String timeRange) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getNodeMBeansHistory(sessionId, nodeJmxUrl, objectNames, attrs, timeRange);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+    public String getNodeMBeansHistory(final String sessionId, final String nodeJmxUrl, final String objectNames,
+                                       final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getNodeMBeansHistory(sessionId, nodeJmxUrl, objectNames, attrs, timeRange);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.getStatHistory(sessionId, range);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity());
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+    public String getStatHistory(final String sessionId, final String range) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getStatHistory(sessionId, range);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
-            }
-        }
+        });
     }
 
     @Override
-    public String executeNodeScript(String sessionId, String script, String engine, String nodeUrl) throws RestServerException, ServiceException {
-        RestClient client = ProxyFactory.create(RestClient.class, RMConfig.get().getRestUrl(), executor);
-        ClientResponse<InputStream> clientResponse = null;
-        try {
-            clientResponse = client.executeNodeScript(sessionId, nodeUrl, script, engine);
-            int code = clientResponse.getStatus();
-            String ret = convertToString(clientResponse.getEntity(), true);
-
-            switch (code) {
-                case 200:
-                    return ret;
-                default:
-                    throw new RestServerException(code, ret);
+    public String executeNodeScript(final String sessionId, final String script, final String engine, final String nodeUrl) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.executeNodeScript(sessionId, nodeUrl, script, engine);
             }
-        } catch (IOException e) {
-            throw new ServiceException("Failed to read server response", e);
-        } finally {
-            if (clientResponse != null) {
-                clientResponse.releaseConnection();
+        });
+    }
+
+    private RestClient getRestClientProxy() {
+        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool).build();
+        ResteasyWebTarget target = client.target(RMConfig.get().getRestUrl());
+
+        return target.proxy(RestClient.class);
+    }
+
+    private String executeFunction(BiFunction<RestClient, Set<String>, InputStream> action, Set<String> urls,
+                                   String actionName) throws ServiceException, RestServerException {
+
+        RestClient restClientProxy = getRestClientProxy();
+
+        int failures = 0;
+        int success = 0;
+
+        for (String url : urls) {
+            InputStream inputStream = null;
+
+            try {
+                inputStream = action.apply(restClientProxy, Collections.singleton(url));
+                success++;
+            } catch (WebApplicationException e) {
+                failures++;
+            } finally {
+                IOUtils.closeQuietly(inputStream);
             }
         }
+
+        if (failures > 0) {
+            throw new RestServerException("Failed to " + actionName + " all requested nodes: " + success + " succeeded, " + failures + " failed.");
+        }
+
+        return "";
+    }
+
+    private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToString(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
+        throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
+    }
+
+    private interface BiFunction<T, U, R> {
+
+        R apply(T t, U u);
+
+    }
+
+    private interface Function<T, R> {
+
+        R apply(T t);
+
     }
 
 }
