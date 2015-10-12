@@ -7,21 +7,21 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 public abstract class PaginationController {
 
-	protected PaginationModel model;
-	
-	
-	protected SchedulerController schedulerController;
-	
-	protected String pageSizePropertyName;
-	
-	
-	public PaginationController(SchedulerController schedulerController, String pageSizePropertyName){
-		this.schedulerController = schedulerController;
-		this.pageSizePropertyName = pageSizePropertyName;
-	}
-	
-	
-	/**
+    protected PaginationModel model;
+
+
+    protected SchedulerController schedulerController;
+
+    protected String pageSizePropertyName;
+
+
+    public PaginationController(SchedulerController schedulerController, String pageSizePropertyName){
+        this.schedulerController = schedulerController;
+        this.pageSizePropertyName = pageSizePropertyName;
+    }
+
+
+    /**
      * Back to page 0
      * invalidate the current page, set the jobs views in indeterminate mode
      */
@@ -38,8 +38,8 @@ public abstract class PaginationController {
         model.setPage(model.getPage() + 1);
         this.fetch();
     }
-    
-    
+
+
     /**
      * Fetch the previous job list page
      * invalidate the current page, set the jobs views in indeterminate mode
@@ -51,12 +51,12 @@ public abstract class PaginationController {
         model.setPage(curPage - 1);
         this.fetch();
     }
-    
-    
+
+
     public abstract void fetch();
-   
-    
-    
+
+
+
     public void setUserSettings(String pageSize, boolean forceRefresh) {
         boolean pageChanged = !pageSize.equals("" + SchedulerConfig.get().getPageSize(this.model.getItemType()));
         SchedulerConfig.get().set(this.pageSizePropertyName, pageSize);
@@ -66,31 +66,32 @@ public abstract class PaginationController {
             resetPage();
         }        
     }
-    
-    
+
+
     public int getOffset(){
-    	return (this.model.getPage() * this.model.getPageSize());
+        return (this.model.getPage() * this.model.getPageSize());
     }
-    
-    
+
+
     public int getRange(){
-    	return this.model.getPageSize() * (this.model.getPage() + 1);
+        return this.model.getPageSize() * (this.model.getPage() + 1);
     }
-    
-    
+
+
     public String getPaginationLabel(){
-    	int page = this.model.getPage();
-    	int size = this.model.getPageSize();
-    	return (page * size + 1) + " - " + ((page + 1) * size);
+        int page = this.model.getPage();
+        int size = this.model.getPageSize();
+        int index = page * size;
+        return (index + 1) + " - " + (index + size);
     }
-    
-    
+
+
     public boolean hasPrevious(){
-    	return (this.model.getPage() > 0);
+        return (this.model.getPage() > 0);
     }
-    
+
     public boolean hasNext(int listSize){
-    	return (listSize == this.model.getPageSize());
+        return (listSize == this.model.getPageSize());
     }
-    
+
 }

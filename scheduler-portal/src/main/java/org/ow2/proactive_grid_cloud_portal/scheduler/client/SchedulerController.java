@@ -1112,7 +1112,7 @@ public class SchedulerController extends Controller implements UncaughtException
     			this.taskUpdateRequest = null;
     		}
     		
-    		if(tag != ""){
+    		if(!tag.equals("")){
     			taskPaginationController.resetPage();
     		}
     	}

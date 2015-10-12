@@ -57,50 +57,50 @@ public class SchedulerConfig extends Config {
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
-    private static final String d_REST_URL = "http://localhost:8080/rest";
+    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
-    private static final String d_NOVNC_URL = "http://localhost:8080/rest/novnc";
+    private static final String DEFAULT_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
-    private static final String d_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
+    private static final String DEFAULT_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
-    private static final String d_CLIENT_REFRESH_TIME = "3000";
+    private static final String DEFAULT_CLIENT_REFRESH_TIME = "3000";
 
     /** client livelog refresh rate in millis */
     public static final String LIVELOGS_REFRESH_TIME = "sched.client.livelog.refresh.time";
-    private static final String d_LIVELOGS_REFRESH_TIME = "1000";
+    private static final String DEFAULT_LIVELOGS_REFRESH_TIME = "1000";
 
     /** job page size */
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
-    private static final String d_JOBS_PAGE_SIZE = "50";
+    private static final String DEFAULT_JOBS_PAGE_SIZE = "50";
     
     
     /** task page size */
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
-    private static final String d_TASKS_PAGE_SIZE = "20";
+    private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
     
 
     /** release version string */
     public static final String VERSION = "sched.version";
-    private static final String d_VERSION = "0.0";
+    private static final String DEFAULT_VERSION = "0.0";
 
     /** REST version string */
     public static final String REST_VERSION = "sched.rest.version";
-    private static final String d_REST_VERSION = "0.0";
+    private static final String DEFAULT_REST_VERSION = "0.0";
 
     /** Sched version string */
     public static final String SCHED_VERSION = "sched.server.version";
-    private static final String d_SCHED_VERSION = "0.0";
+    private static final String DEFAULT_SCHED_VERSION = "0.0";
 
     /** message of the day service URL */
     public static final String MOTD_URL = "sched.motd.url";
-    private static final String d_MOTD_URL = "";
+    private static final String DEFAULT_MOTD_URL = "";
 
     private static SchedulerConfig instance = null;
 
@@ -116,17 +116,17 @@ public class SchedulerConfig extends Config {
     }
 
     private void setDefaults() {
-        properties.put(REST_URL, d_REST_URL);
-        properties.put(NOVNC_URL, d_NOVNC_URL);
-        properties.put(NOVNC_PAGE_URL, d_NOVNC_PAGE_URL);
-        properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
-        properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
-        properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
-        properties.put(TASKS_PAGE_SIZE, d_TASKS_PAGE_SIZE);
-        properties.put(VERSION, d_VERSION);
-        properties.put(SCHED_VERSION, d_SCHED_VERSION);
-        properties.put(REST_VERSION, d_REST_VERSION);
-        properties.put(MOTD_URL, d_MOTD_URL);
+        properties.put(REST_URL, DEFAULT_REST_URL);
+        properties.put(NOVNC_URL, DEFAULT_NOVNC_URL);
+        properties.put(NOVNC_PAGE_URL, DEFAULT_NOVNC_PAGE_URL);
+        properties.put(CLIENT_REFRESH_TIME, DEFAULT_CLIENT_REFRESH_TIME);
+        properties.put(LIVELOGS_REFRESH_TIME, DEFAULT_LIVELOGS_REFRESH_TIME);
+        properties.put(JOBS_PAGE_SIZE, DEFAULT_JOBS_PAGE_SIZE);
+        properties.put(TASKS_PAGE_SIZE, DEFAULT_TASKS_PAGE_SIZE);
+        properties.put(VERSION, DEFAULT_VERSION);
+        properties.put(SCHED_VERSION, DEFAULT_SCHED_VERSION);
+        properties.put(REST_VERSION, DEFAULT_REST_VERSION);
+        properties.put(MOTD_URL, DEFAULT_MOTD_URL);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class SchedulerConfig extends Config {
     @Override
     protected String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(d_REST_URL)) {
+        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
             return getRestUrl();
         }
         return restPublicUrl;

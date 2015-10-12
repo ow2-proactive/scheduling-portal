@@ -41,6 +41,7 @@ import java.util.Date;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -254,35 +255,35 @@ public class Task implements Serializable, Comparable<Task> {
     public String getDescription() {
         return description;
     }
-    
-    
-    
+
+
+
     /**
      * Getter of the task tag.
      * @return the tag of the task.
      */
     public String getTag() {
-		return tag;
-	}
+        return tag;
+    }
 
-    
+
     /**
      * Setter of the task tag.
      * @param tag the tag of the task.
      */
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
-	public String getIdName() {
+    public String getIdName() {
         return "id";
     }
 
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "hostName=" +
-            hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
-            new Date(finishedTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
-            description + "]";
+                hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
+                new Date(finishedTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
+                description + "]";
     }
 
     public boolean equals(Object o) {
@@ -324,10 +325,9 @@ public class Task implements Serializable, Comparable<Task> {
                 description = desc.stringValue();
         }
         String tag = "";
-        if (jsonTask.containsKey("tag")) {
-            JSONString tagValue = jsonTask.get("tag").isString();
-            if (tagValue != null)
-                tag = tagValue.stringValue();
+        JSONValue tagValue = jsonTask.get("tag");
+        if (tagValue != null) {
+            tag = ((JSONString) tagValue).stringValue();
         }
         int maxExec = (int) jsonTask.get("maxNumberOfExecution").isNumber().doubleValue();
         int execLeft = (int) taskInfo.get("numberOfExecutionLeft").isNumber().doubleValue();
@@ -342,7 +342,7 @@ public class Task implements Serializable, Comparable<Task> {
         }
 
         Task result = new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
-            executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
+                executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
         result.setTag(tag);
         return result;
     }
@@ -354,15 +354,15 @@ public class Task implements Serializable, Comparable<Task> {
      */
     public boolean isEquals(Task task) {
         return this.id == task.getId() && this.name.equals(task.getName()) &&
-            this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
-            this.startTime == task.getStartTime() && this.finishedTime == task.getFinishTime() &&
-            this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
+                this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
+                this.startTime == task.getStartTime() && this.finishedTime == task.getFinishTime() &&
+                this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
     }
 
     public boolean isEqual(Task t) {
         return this.id == t.getId() && this.name.equals(t.getName()) &&
-            this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
-            this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
-            this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
+                this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
+                this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
+                this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
     }
 }

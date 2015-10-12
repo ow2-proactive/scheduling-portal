@@ -113,7 +113,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
     private boolean taskAutoRefreshOption = false;
-    
+
     //tags
     private String tasksTagFilter = "";
     private PatriciaTrie<String> availableTags = null;
@@ -133,9 +133,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
     private ArrayList<TagSuggestionListener> tagSuggestionListeners = null;
-    
+
     private PaginationModel jobsPaginationModel;
-    
+
     private PaginationModel tasksPaginationModel;
 
     SchedulerModelImpl() {
@@ -163,46 +163,46 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.visuMap = new HashMap<String, JobVisuMap>();
         this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
-        
+
         this.availableTags = new PatriciaTrie<String>();
-        
+
         this.jobsPaginationModel = new PaginationModel(PaginatedItemType.JOB);
         this.tasksPaginationModel = new PaginationModel(PaginatedItemType.TASK);
     }
-    
-    
+
+
     @Override
     public Collection<TagSuggestion> getAvailableTags(String query) {
-    	SortedMap<String, String> mapSuggestions = this.availableTags.prefixMap(query);
-    	ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(20);
-    	Iterator<Map.Entry<String, String>> it = mapSuggestions.entrySet().iterator();
-    	for(int i = 0; i < 20 && it.hasNext(); i++){
-    		Map.Entry<String, String> current = it.next();
-    		TagSuggestion suggestion = new TagSuggestion(current.getValue(), current.getKey());
-    		suggestions.add(suggestion);
-    	}
-    	
-    	return suggestions;
+        SortedMap<String, String> mapSuggestions = this.availableTags.prefixMap(query);
+        ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(20);
+        Iterator<Map.Entry<String, String>> it = mapSuggestions.entrySet().iterator();
+        for(int i = 0; i < 20 && it.hasNext(); i++){
+            Map.Entry<String, String> current = it.next();
+            TagSuggestion suggestion = new TagSuggestion(current.getValue(), current.getKey());
+            suggestions.add(suggestion);
+        }
+
+        return suggestions;
     }
-    
+
 
     @Override
     public void setTagSuggestions(Collection<String> tags) {
-    	for(String currentTag: tags){
-    		int index = currentTag.indexOf("<index>");
-    		if(index >= 0){
-    			this.availableTags.put(currentTag, currentTag.substring(0, index));
-    		}
-    		else{
-    			this.availableTags.put(currentTag, currentTag);
-    		}
-    	}
-    	
-    	for(TagSuggestionListener currentListener: this.tagSuggestionListeners){
-    		currentListener.tagSuggestionListUpdated();
-    	}
+        for(String currentTag: tags){
+            int index = currentTag.indexOf("<index>");
+            if(index >= 0){
+                this.availableTags.put(currentTag, currentTag.substring(0, index));
+            }
+            else{
+                this.availableTags.put(currentTag, currentTag);
+            }
+        }
+
+        for(TagSuggestionListener currentListener: this.tagSuggestionListeners){
+            currentListener.tagSuggestionListUpdated();
+        }
     }
-    
+
     @Override
     public boolean isLoggedIn() {
         return this.logged;
@@ -297,20 +297,20 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    
-    
-    
+
+
+
     public PaginationModel getJobsPaginationModel() {
-		return jobsPaginationModel;
-	}
+        return jobsPaginationModel;
+    }
 
 
-	public PaginationModel getTasksPaginationModel() {
-		return tasksPaginationModel;
-	}
+    public PaginationModel getTasksPaginationModel() {
+        return tasksPaginationModel;
+    }
 
 
-	/**
+    /**
      * Modifies the Job selection,
      * triggers a JobSelected event
      *
@@ -327,7 +327,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.selectedJob = j;
 
         this.availableTags.clear();
-        
+
         // notify job selection listeners
         for (JobSelectedListener listener : this.jobSelectedListeners) {
             if (j == null)
@@ -344,8 +344,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
                 list.tasksUpdating(selChanged);
         }
     }
-    
-    
+
+
 
     @Override
     public Job getSelectedJob() {
@@ -367,11 +367,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return this.jobsRev;
     }
 
-    
 
-    
 
-    
+
+
+
 
     /**
      * Modifies the tasks set
@@ -385,7 +385,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             list.tasksUpdated(tasks);
         }
     }
-    
+
 
     /**
      * Notify task updated listeners that updating failed
@@ -432,7 +432,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
         if (stat == null) {
             throw new IllegalStateException("Trying to set output for a task in job " + jobId +
-                " for which there is no local representation");
+                    " for which there is no local representation");
         }
 
         List<String> lines = new ArrayList<String>();
@@ -735,28 +735,28 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             list.usageUpdated(usage);
         }
     }
-    
+
     /**
      * Set the current tag used to filter the list of tasks.
      * @param tag the tag used to filter the list of tasks.
      * @return true if the tag value has changed, false otherwise.
      */
     public boolean setCurrentTagFilter(String tag){
-    	boolean result = (!this.tasksTagFilter.equals(tag));
-    	this.tasksTagFilter = tag;
-    	if(result){
-    		for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
+        boolean result = !this.tasksTagFilter.equals(tag);
+        this.tasksTagFilter = tag;
+        if(result){
+            for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
                 list.tasksUpdating(true);
             }
-    	}
-    	return result;
+        }
+        return result;
     }
-    
+
     @Override
     public String getCurrentTagFilter() {
-    	return this.tasksTagFilter;
+        return this.tasksTagFilter;
     }
-    
+
 
     public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
         thirdPartyCredentialsListener.keysUpdated(thirdPartyCredentialsKeys);
@@ -779,8 +779,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             return Range.MINUTE_1;
         return r;
     }
-    
-    
+
+
 
     @Override
     public void logMessage(String message) {
@@ -888,12 +888,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.remoteHintListeners.add(listener);
     }
 
-    
+
     @Override
     public void addTagSuggestionListener(TagSuggestionListener listener) {
-    	this.tagSuggestionListeners.add(listener);
+        this.tagSuggestionListeners.add(listener);
     }
-    
+
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addVisualizationListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener)
@@ -914,19 +914,19 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     @Override
     public void setThirdPartyCredentialsListener(
-      SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
+            SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
         this.thirdPartyCredentialsListener = thirdPartyCredentialsListener;
     }
-    
-    
+
+
     @Override
     public boolean getTaskAutoRefreshOption() {
-    	return this.taskAutoRefreshOption;
+        return this.taskAutoRefreshOption;
     }
-    
-    
+
+
     @Override
     public void setTaskAutoRefreshOption(boolean value) {
-    	this.taskAutoRefreshOption = value;
+        this.taskAutoRefreshOption = value;
     }
 }

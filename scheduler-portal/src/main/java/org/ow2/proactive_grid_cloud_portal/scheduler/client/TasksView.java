@@ -556,8 +556,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
-					String tag = tagSearchTextBox.getText();
-					TasksView.this.controller.setTaskTagFilter(tag);
+					changeTagFilterHandler();
 				}
 			}
 		});
@@ -569,8 +568,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 			
 			@Override
 			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-				String tag = tagSearchTextBox.getText();
-				TasksView.this.controller.setTaskTagFilter(tag);
+				changeTagFilterHandler();
 			}
 		});
         
@@ -644,6 +642,12 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 
         
         return tasksViewLayout;
+    }
+    
+    
+    protected void changeTagFilterHandler(){
+        String tag = tagSearchTextBox.getText();
+        this.controller.setTaskTagFilter(tag);
     }
     
     
