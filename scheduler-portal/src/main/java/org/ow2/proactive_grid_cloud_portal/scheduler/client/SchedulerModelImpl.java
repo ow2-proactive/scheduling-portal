@@ -174,9 +174,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     @Override
     public Collection<TagSuggestion> getAvailableTags(String query) {
         SortedMap<String, String> mapSuggestions = this.availableTags.prefixMap(query);
-        ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(20);
+        int size = SchedulerConfig.get().getTagSuggestionSize();
+        ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(size);
         Iterator<Map.Entry<String, String>> it = mapSuggestions.entrySet().iterator();
-        for(int i = 0; i < 20 && it.hasNext(); i++){
+        for(int i = 0; i < size && it.hasNext(); i++){
             Map.Entry<String, String> current = it.next();
             TagSuggestion suggestion = new TagSuggestion(current.getValue(), current.getKey());
             suggestions.add(suggestion);

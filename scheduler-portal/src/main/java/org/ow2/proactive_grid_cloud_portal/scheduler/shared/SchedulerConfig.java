@@ -85,6 +85,14 @@ public class SchedulerConfig extends Config {
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
     private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
     
+    /** the number max of tag suggestions that should be displayed for autocompletion. */
+    public static final String TAG_SUGGESTIONS_SIZE = "sched.tags.suggestions.size";
+    private static final String DEFAULT_TAG_SUGGESTIONS_SIZE = "20";
+    
+    /** the delay applied before refreshing the tag suggestions for a running job. */
+    public static final String  TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
+    private static final String DEFAULT_TAG_SUGGESTIONS_DELAY = "30000";
+    
 
     /** release version string */
     public static final String VERSION = "sched.version";
@@ -127,6 +135,8 @@ public class SchedulerConfig extends Config {
         properties.put(SCHED_VERSION, DEFAULT_SCHED_VERSION);
         properties.put(REST_VERSION, DEFAULT_REST_VERSION);
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
+        properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
+        properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
     }
 
     @Override
@@ -194,6 +204,22 @@ public class SchedulerConfig extends Config {
     		return Integer.parseInt(properties.get(TASKS_PAGE_SIZE));
     	}
     	return 0;
+    }
+    
+    
+    /**
+     * @return the number of tag suggestions that should be displayed for autocompletion.
+     */
+    public int getTagSuggestionSize(){
+        return Integer.parseInt(this.properties.get(TAG_SUGGESTIONS_SIZE));
+    }
+    
+    
+    /**
+     * @return the delay applied before refreshing the tag suggestions for a running job.
+     */
+    public long getTagSuggestionDelay(){
+        return Long.parseLong(this.properties.get(TAG_SUGGESTIONS_DELAY));
     }
     
     

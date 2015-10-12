@@ -9,9 +9,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -31,9 +31,6 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     protected long lastRequestTime = -1;
 
     protected String lastRequest = "";
-
-
-    protected static final long DELAY = 1000 * 60 * 5; // 5 mins
 
 
 
@@ -85,7 +82,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
                 status == JobStatus.KILLED || 
                 status == JobStatus.CANCELED);
         long requestAge = new Date().getTime() - this.lastRequestTime;
-        return (!finishedJob && requestAge > this.DELAY);
+        return (!finishedJob && requestAge > SchedulerConfig.get().getTagSuggestionDelay());
     }
 
 
