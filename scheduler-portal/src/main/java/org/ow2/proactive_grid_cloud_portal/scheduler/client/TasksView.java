@@ -46,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.R
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksNavigationView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksPaginationView;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -228,6 +229,11 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
      * View that contains the tasks navigation controls.
      */
     private TasksNavigationView navigationView = null;
+    
+    /**
+     * The view for the pagination of the tasks.
+     */
+    private TasksPaginationView paginationView = null;
 
 
 
@@ -505,13 +511,16 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
         this.navigationView = new TasksNavigationView(this.controller);
         Layout navTools = this.navigationView.build();
+        
+        this.paginationView = new TasksPaginationView(this.controller);
+        Layout paginationBar = this.paginationView.build();
 
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
         tasksViewLayout.addMember(this.tasksGrid);
         tasksViewLayout.addMember(this.loadingLabel);
         tasksViewLayout.addMember(this.errorLabel);
-
+        tasksViewLayout.addMember(paginationBar);
 
         return tasksViewLayout;
     }

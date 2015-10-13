@@ -85,10 +85,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      */
     private TasksNavigationController navigationController;
     
-    /**
-     * The view for the pagination of the tasks.
-     */
-    private TasksPaginationView paginationView;
+    
 
 
     /**
@@ -164,9 +161,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
         navTools.addMember(checkBoxes);
-
-        this.paginationView = new TasksPaginationView(this.schedulerController);
-        navTools.addMember(this.paginationView.build());
 
         return navTools;
     }

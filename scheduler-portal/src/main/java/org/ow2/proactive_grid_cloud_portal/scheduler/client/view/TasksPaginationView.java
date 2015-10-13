@@ -49,6 +49,7 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 public class TasksPaginationView implements TasksUpdatedListener, PaginationListener{
@@ -82,7 +83,7 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         /* Task pagination buttons and indicator label */
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
-        this.pageNextButton.addStyleName("navPaginationButton");
+        this.pageNextButton.addStyleName("navNextPaginationButton");
         this.pageNextButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 paginationController.nextPage();
@@ -90,7 +91,7 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         });
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
-        this.pagePreviousButton.addStyleName("navPaginationButton");
+        this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 paginationController.previousPage();
@@ -104,12 +105,19 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         this.pageLabel.setMargin(0);
         this.pageLabel.setPadding(0);
 
-        HLayout layout = new HLayout();
-        layout.addMember(this.pageNextButton);
-        layout.addMember(this.pageLabel);
-        layout.addMember(this.pagePreviousButton);
+        ToolStrip paginationLayout = new ToolStrip();
+        paginationLayout.addStyleName("itemPaginationBar");
+        paginationLayout.setHeight(34);
+        paginationLayout.setWidth100();
+        paginationLayout.setBackgroundImage("");
+        paginationLayout.setBackgroundColor("#fafafa");
+        paginationLayout.setBorder("0px");
+        
+        paginationLayout.addMember(this.pagePreviousButton);
+        paginationLayout.addMember(this.pageLabel);
+        paginationLayout.addMember(this.pageNextButton);
 
-        return layout;
+        return paginationLayout;
     }
 
     @Override
