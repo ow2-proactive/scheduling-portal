@@ -40,7 +40,6 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
@@ -52,24 +51,19 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
-import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 /**
  * View for the tasks navigation bar.
  * @author The activeeon team
  *
  */
-public class TasksNavigationView implements TasksUpdatedListener, PaginationListener, TagSuggestionListener, JobSelectedListener{
+public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionListener, JobSelectedListener{
 
     /**
      * Test field to specify the tag filter.
@@ -81,23 +75,20 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
      */
     private CheckboxItem autoRefreshOption;
 
-    /**
-     * Task page number
-     */
-    private Label pageLabel = null;
-    /**
-     * Task previous page button
-     */
-    private ToolStripButton pagePreviousButton = null;
-    /**
-     * Task next page button
-     */
-    private ToolStripButton pageNextButton = null;
+    
 
+    private SchedulerController schedulerController;
+    
+    
     /**
      * Controller for the navigation logic.
      */
-    private TasksNavigationController controller;
+    private TasksNavigationController navigationController;
+    
+    /**
+     * The view for the pagination of the tasks.
+     */
+    private TasksPaginationView paginationView;
 
 
     /**
@@ -105,14 +96,13 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
      * @param controller the main controller.
      */
     public TasksNavigationView(SchedulerController controller){
-        this.controller = new TasksNavigationController(controller);
-        controller.setTaskNavigationController(this.controller);
+        this.navigationController = new TasksNavigationController(controller);
+        this.schedulerController = controller;
+        this.schedulerController.setTaskNavigationController(this.navigationController);
 
-
-        this.controller.getPaginationController().getModel().addPaginationListener(this);
-        this.controller.getModel().addTagSuggestionListener(this);
-        controller.getEventDispatcher().addJobSelectedListener(this);
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
+        this.navigationController.getModel().addTagSuggestionListener(this);
+        this.schedulerController.getEventDispatcher().addJobSelectedListener(this);
+        this.schedulerController.getEventDispatcher().addTasksUpdatedListener(this);
     }
 
 
@@ -121,7 +111,7 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
      * @return a layout containing the view content.
      */
     public Layout build() {
-        this.tagSearchTextBox = new SuggestBox(this.controller.getTagSuggestionOracle());
+        this.tagSearchTextBox = new SuggestBox(this.navigationController.getTagSuggestionOracle());
 
         this.tagSearchTextBox.addStyleName("searchBox");
         this.tagSearchTextBox.getElement().setAttribute("placeholder", "tag...");
@@ -154,7 +144,7 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
         this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
-                controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
+                navigationController.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
             }
         });
 
@@ -175,36 +165,8 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
         navTools.addMember(btnFilter);
         navTools.addMember(checkBoxes);
 
-
-        /* Task pagination buttons and indicator label */
-        this.pageNextButton = new ToolStripButton("Next >");
-        this.pageNextButton.disable();
-        this.pageNextButton.addStyleName("navPaginationButton");
-        this.pageNextButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                controller.getPaginationController().nextPage();
-            }
-        });
-        this.pagePreviousButton = new ToolStripButton("< Previous");
-        this.pagePreviousButton.disable();
-        this.pagePreviousButton.addStyleName("navPaginationButton");
-        this.pagePreviousButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                controller.getPaginationController().previousPage();
-            }
-        });
-
-        this.pageLabel = new Label("");
-        this.pageLabel.addStyleName("navPaginationLabel");
-        this.pageLabel.setAlign(Alignment.CENTER);
-        this.pageLabel.setWidth(60);
-        this.pageLabel.setMargin(0);
-        this.pageLabel.setPadding(0);
-
-
-        navTools.addMember(this.pageNextButton);
-        navTools.addMember(this.pageLabel);
-        navTools.addMember(this.pagePreviousButton);
+        this.paginationView = new TasksPaginationView(this.schedulerController);
+        navTools.addMember(this.paginationView.build());
 
         return navTools;
     }
@@ -219,16 +181,6 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
     @Override
     public void tasksUpdated(List<Task> tasks) {
         this.tagSearchTextBox.setEnabled(true);
-
-
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-
-        if (this.controller.getPaginationController().hasPrevious())
-            this.pagePreviousButton.enable();
-
-        if (tasks != null && this.controller.getPaginationController().hasNext(tasks.size()))
-            this.pageNextButton.enable();
     }
 
     @Override
@@ -237,12 +189,7 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
     }
 
 
-    public void pageChanged() {
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-        this.pageLabel.setContents(this.controller.getPaginationController().getPaginationLabel());
-    }
-
+    
 
     public void tagSuggestionListUpdated(){
         this.tagSearchTextBox.showSuggestionList();
@@ -252,7 +199,7 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
 
     protected void changeTagFilterHandler(){
         String tag = tagSearchTextBox.getText();
-        this.controller.setTaskTagFilter(tag);
+        this.navigationController.setTaskTagFilter(tag);
     }
 
 
@@ -274,7 +221,7 @@ public class TasksNavigationView implements TasksUpdatedListener, PaginationList
 
 
     public TasksPaginationController getTaskPaginationController() {
-        return controller.getPaginationController();
+        return navigationController.getPaginationController();
     }
 
 }
