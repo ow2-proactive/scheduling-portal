@@ -36,14 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 
@@ -65,7 +64,7 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract LinkedHashMap<Integer, Job> getJobs();
 
-    
+
 
     /**
      * @param jobId the Id of a Job
@@ -82,13 +81,7 @@ public abstract class SchedulerModel implements Model {
      * @return the currently selected job
      */
     public abstract Job getSelectedJob();
-    
-    
-    /**
-     * @return the current tag used to filter the list of tasks.
-     */
-    public abstract String getCurrentTagFilter();
-    
+
 
     /**
      * @return the list of tasks corresponding the currently selected job
@@ -199,18 +192,10 @@ public abstract class SchedulerModel implements Model {
     public abstract HashMap<String, String> getSchedulerStatistics();
 
     public abstract List<JobUsage> getUsage();
-    
-    
-    public abstract Collection<TagSuggestion> getAvailableTags(String query);
-    
-    public abstract void setTagSuggestions(Collection<String> tags);
-    
-    public abstract void setTaskAutoRefreshOption(boolean value);
-    
-    public abstract boolean getTaskAutoRefreshOption();
-    
-    
+
+
     public abstract PaginationModel getJobsPaginationModel();
-    
-    public abstract PaginationModel getTasksPaginationModel();
+
+    public abstract TasksNavigationModel getTasksNavigationModel();
+
 }

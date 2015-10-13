@@ -37,18 +37,14 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
-import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
@@ -58,15 +54,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions.PrefixWordSuggestOracle.TagSuggestion;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -112,11 +105,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
-    private boolean taskAutoRefreshOption = false;
 
-    //tags
-    private String tasksTagFilter = "";
-    private PatriciaTrie<String> availableTags = null;
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
@@ -132,11 +121,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<StatsListener> statsListeners = null;
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
-    private ArrayList<TagSuggestionListener> tagSuggestionListeners = null;
+
 
     private PaginationModel jobsPaginationModel;
 
-    private PaginationModel tasksPaginationModel;
+    private TasksNavigationModel tasksNavigationModel;
+
 
     SchedulerModelImpl() {
         super();
@@ -158,51 +148,14 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.visuListeners = new ArrayList<VisualizationListener>();
         this.statsListeners = new ArrayList<StatsListener>();
         this.usageListeners = new ArrayList<SchedulerListeners.UsageListener>();
-        this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.imagePath = new HashMap<String, String>();
         this.visuMap = new HashMap<String, JobVisuMap>();
         this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
-
-        this.availableTags = new PatriciaTrie<String>();
-
-        this.jobsPaginationModel = new PaginationModel(PaginatedItemType.JOB);
-        this.tasksPaginationModel = new PaginationModel(PaginatedItemType.TASK);
     }
 
 
-    @Override
-    public Collection<TagSuggestion> getAvailableTags(String query) {
-        SortedMap<String, String> mapSuggestions = this.availableTags.prefixMap(query);
-        int size = SchedulerConfig.get().getTagSuggestionSize();
-        ArrayList<TagSuggestion> suggestions = new ArrayList<TagSuggestion>(size);
-        Iterator<Map.Entry<String, String>> it = mapSuggestions.entrySet().iterator();
-        for(int i = 0; i < size && it.hasNext(); i++){
-            Map.Entry<String, String> current = it.next();
-            TagSuggestion suggestion = new TagSuggestion(current.getValue(), current.getKey());
-            suggestions.add(suggestion);
-        }
 
-        return suggestions;
-    }
-
-
-    @Override
-    public void setTagSuggestions(Collection<String> tags) {
-        for(String currentTag: tags){
-            int index = currentTag.indexOf("<index>");
-            if(index >= 0){
-                this.availableTags.put(currentTag, currentTag.substring(0, index));
-            }
-            else{
-                this.availableTags.put(currentTag, currentTag);
-            }
-        }
-
-        for(TagSuggestionListener currentListener: this.tagSuggestionListeners){
-            currentListener.tagSuggestionListUpdated();
-        }
-    }
 
     @Override
     public boolean isLoggedIn() {
@@ -306,9 +259,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-    public PaginationModel getTasksPaginationModel() {
-        return tasksPaginationModel;
-    }
+
 
 
     /**
@@ -326,8 +277,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
         boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
         this.selectedJob = j;
-
-        this.availableTags.clear();
 
         // notify job selection listeners
         for (JobSelectedListener listener : this.jobSelectedListeners) {
@@ -737,26 +686,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    /**
-     * Set the current tag used to filter the list of tasks.
-     * @param tag the tag used to filter the list of tasks.
-     * @return true if the tag value has changed, false otherwise.
-     */
-    public boolean setCurrentTagFilter(String tag){
-        boolean result = !this.tasksTagFilter.equals(tag);
-        this.tasksTagFilter = tag;
-        if(result){
-            for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-                list.tasksUpdating(true);
-            }
-        }
-        return result;
-    }
 
-    @Override
-    public String getCurrentTagFilter() {
-        return this.tasksTagFilter;
-    }
 
 
     public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
@@ -890,10 +820,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-    @Override
-    public void addTagSuggestionListener(TagSuggestionListener listener) {
-        this.tagSuggestionListeners.add(listener);
-    }
+
 
     /*
      * (non-Javadoc)
@@ -920,14 +847,26 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-    @Override
-    public boolean getTaskAutoRefreshOption() {
-        return this.taskAutoRefreshOption;
+
+
+    public TasksNavigationModel getTasksNavigationModel() {
+        return tasksNavigationModel;
     }
 
 
-    @Override
-    public void setTaskAutoRefreshOption(boolean value) {
-        this.taskAutoRefreshOption = value;
+
+
+    public void setJobsPaginationModel(PaginationModel jobsPaginationModel) {
+        this.jobsPaginationModel = jobsPaginationModel;
     }
+
+
+
+
+    public void setTasksNavigationModel(TasksNavigationModel tasksNavigationModel) {
+        this.tasksNavigationModel = tasksNavigationModel;
+    }
+
+
+
 }

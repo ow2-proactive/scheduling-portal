@@ -42,29 +42,19 @@ import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksNavigationView;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
-import com.smartgwt.client.types.Positioning;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.widgets.Canvas;
@@ -74,10 +64,6 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
@@ -90,8 +76,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
-import com.smartgwt.client.widgets.toolbar.ToolStrip;
-import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -102,7 +86,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  *
  * @author mschnoor
  */
-public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagSuggestionListener, JobSelectedListener, PaginationListener {
+public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     private static final String ID_ATTR = "id";
     private static final String STATUS_ATTR = "status";
@@ -202,7 +186,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 
             DataSourceTextField descrF = new DataSourceTextField(DESCRIPTION_ATTR, "Description");
             descrF.setRequired(true);
-            
+
             DataSourceTextField tagF = new DataSourceTextField(TAG_ATTR, "Tag");
             tagF.setRequired(true);
 
@@ -235,41 +219,27 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
 
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
-    
-    private SuggestBox tagSearchTextBox;
-    
-    private CheckboxItem autoRefreshOption;
+
+
+
+    private SchedulerController controller = null;
 
     /**
-     * Task page number
+     * View that contains the tasks navigation controls.
      */
-    private Label pageLabel = null;
-    /**
-     * Task previous page button
-     */
-    private ToolStripButton pagePreviousButton = null;
-    /**
-     * Task next page button
-     */
-    private ToolStripButton pageNextButton = null;
-    
-    private SchedulerController controller = null;
-    
-    private TasksPaginationController paginationController;
+    private TasksNavigationView navigationView = null;
+
+
 
     public TasksView(SchedulerController controller) {
         this.controller = controller;
-        this.paginationController = new TasksPaginationController(this.controller);
-        this.controller.getModel().getTasksPaginationModel().addPaginationListener(this);
-        this.controller.setTaskPaginationController(this.paginationController);
+
         this.controller.getEventDispatcher().addTasksUpdatedListener(this);
         this.controller.getEventDispatcher().addRemoteHintListener(this);
-        this.controller.getEventDispatcher().addTagSuggestionListener(this);
-        this.controller.getEventDispatcher().addJobSelectedListener(this);
-
         this.visuButtons = new HashMap<String, ImgButton>();
         visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
     }
+
 
     public void tasksUpdating(boolean jobChanged) {
         if (jobChanged) {
@@ -277,7 +247,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
             this.tasksGrid.hide();
             this.loadingLabel.show();
             this.expandRecord = null;
-            this.tagSearchTextBox.setEnabled(false);
         }
     }
 
@@ -286,7 +255,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         this.tasksGrid.hide();
         this.loadingLabel.hide();
         this.errorLabel.show();
-        this.tagSearchTextBox.setEnabled(false);
     }
 
     public void tasksUpdated(List<Task> tasks) {
@@ -314,17 +282,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         if (this.expandRecord != null) {
             this.tasksGrid.expandRecord(this.expandRecord);
         }
-        this.tagSearchTextBox.setEnabled(true);
-        
-        
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-
-        if (this.paginationController.hasPrevious())
-            this.pagePreviousButton.enable();
-
-        if (tasks != null && this.paginationController.hasNext(tasks.size()))
-            this.pageNextButton.enable();
     }
 
     private ListGridRecord expandRecord;
@@ -465,27 +422,27 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
                 boolean enabled;
                 TaskRecord jr = (TaskRecord) tasksGrid.getSelectedRecord();
                 switch (TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase())) {
-                    case SUBMITTED:
-                    case WAITING_ON_ERROR:
-                    case WAITING_ON_FAILURE:
-                        enabled = false;
-                        break;
-                    case PENDING:
-                    case PAUSED:
-                    case RUNNING:
-                        enabled = true;
-                        break;
-                    case SKIPPED:
-                    case FINISHED:
-                    case FAULTY:
-                    case FAILED:
-                    case ABORTED:
-                    case NOT_STARTED:
-                    case NOT_RESTARTED:
-                        enabled = false;
-                        break;
-                    default:
-                        enabled = false;
+                case SUBMITTED:
+                case WAITING_ON_ERROR:
+                case WAITING_ON_FAILURE:
+                    enabled = false;
+                    break;
+                case PENDING:
+                case PAUSED:
+                case RUNNING:
+                    enabled = true;
+                    break;
+                case SKIPPED:
+                case FINISHED:
+                case FAULTY:
+                case FAILED:
+                case ABORTED:
+                case NOT_STARTED:
+                case NOT_RESTARTED:
+                    enabled = false;
+                    break;
+                default:
+                    enabled = false;
                 }
 
                 restart.setEnabled(enabled);
@@ -504,7 +461,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         idField.setWidth(60);
 
         ListGridField nameField = new ListGridField(NAME_ATTR, "Name");
-        
+
         ListGridField tagField = new ListGridField(TAG_ATTR, "Tag");
 
         ListGridField statusField = new ListGridField(STATUS_ATTR, "Status");
@@ -545,130 +502,23 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
         this.errorLabel.setWidth100();
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
-        
-        
-        this.tagSearchTextBox = new SuggestBox(this.controller.getTagSuggestionOracle());
-        
-        this.tagSearchTextBox.addStyleName("searchBox");
-        this.tagSearchTextBox.getElement().setAttribute("placeholder", "tag...");
-        this.tagSearchTextBox.setEnabled(false);
-        this.tagSearchTextBox.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
-					changeTagFilterHandler();
-				}
-			}
-		});
-        
-        Button btnFilter = new Button("Filter");
-        btnFilter.setWidth("40");
-        btnFilter.addStyleName("btnBoxCombo");
-        btnFilter.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-			
-			@Override
-			public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-				changeTagFilterHandler();
-			}
-		});
-        
-        
-        this.autoRefreshOption = new CheckboxItem("autoRefreshOption", "Auto-refresh");
-        this.autoRefreshOption.setCellStyle("navBarOption");
-        this.autoRefreshOption.setTextBoxStyle("navBarOptionTextBox");
-        this.autoRefreshOption.setTitleStyle("navbarOptionTitle");
-        this.autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
-        this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
-			@Override
-			public void onChanged(ChangedEvent event) {
-				controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
-				
-			}
-		});
-        
-        DynamicForm checkBoxes = new DynamicForm();
-        checkBoxes.setNumCols(1);
-        checkBoxes.setItems(autoRefreshOption);
-        checkBoxes.addStyleName("checkBoxForm");
-        
-        ToolStrip navTools = new ToolStrip();
-        navTools.addStyleName("itemViewNav");
-        navTools.setHeight(34);
-        navTools.setWidth100();
-        navTools.setBackgroundImage("");
-        navTools.setBackgroundColor("#fafafa");
-        navTools.setBorder("0px");
-        
-        navTools.addMember(tagSearchTextBox);
-        navTools.addMember(btnFilter);
-        navTools.addMember(checkBoxes);
-        
-        
-        /* Task pagination buttons and indicator label */
-        this.pageNextButton = new ToolStripButton("Next >");
-        this.pageNextButton.disable();
-        this.pageNextButton.addStyleName("navPaginationButton");
-        this.pageNextButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.nextPage();
-            }
-        });
-        this.pagePreviousButton = new ToolStripButton("< Previous");
-        this.pagePreviousButton.disable();
-        this.pagePreviousButton.addStyleName("navPaginationButton");
-        this.pagePreviousButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.previousPage();
-            }
-        });
-     
-        this.pageLabel = new Label("");
-        this.pageLabel.addStyleName("navPaginationLabel");
-        this.pageLabel.setAlign(Alignment.CENTER);
-        this.pageLabel.setWidth(60);
-        this.pageLabel.setMargin(0);
-        this.pageLabel.setPadding(0);
-        
-        
-        navTools.addMember(this.pageNextButton);
-        navTools.addMember(this.pageLabel);
-        navTools.addMember(this.pagePreviousButton);
-        
+
+        this.navigationView = new TasksNavigationView(this.controller);
+        Layout navTools = this.navigationView.build();
+
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
         tasksViewLayout.addMember(this.tasksGrid);
         tasksViewLayout.addMember(this.loadingLabel);
         tasksViewLayout.addMember(this.errorLabel);
 
-        
+
         return tasksViewLayout;
     }
-    
-    
-    protected void changeTagFilterHandler(){
-        String tag = tagSearchTextBox.getText();
-        this.controller.setTaskTagFilter(tag);
-    }
-    
-    
-    public void tagSuggestionListUpdated(){
-    	this.tagSearchTextBox.showSuggestionList();
-    }
-    
-    
-    @Override
-    public void jobSelected(Job job) {
-    	this.tagSearchTextBox.setEnabled(true);
-    	this.tagSearchTextBox.setText("");
-    }
-    
-    
-    @Override
-    public void jobUnselected() {
-    	this.tagSearchTextBox.setText("");
-    	this.tagSearchTextBox.setEnabled(false);
-    }
-    
+
+
+
+
 
     /*
      * (non-Javadoc)
@@ -697,13 +547,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener, TagS
             visuButtonsClickHandlers.put(button, clickHandler);
         }
     }
-    
-    
-    public void pageChanged() {
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-        this.pageLabel.setContents(this.paginationController.getPaginationLabel());
-    }
+
+
+
 
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {
         final Window window = new Window();

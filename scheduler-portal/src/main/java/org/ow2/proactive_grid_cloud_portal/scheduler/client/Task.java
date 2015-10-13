@@ -326,7 +326,7 @@ public class Task implements Serializable, Comparable<Task> {
         }
         String tag = "";
         JSONValue tagValue = jsonTask.get("tag");
-        if (tagValue != null) {
+        if (tagValue != null && tagValue instanceof JSONString) {
             tag = ((JSONString) tagValue).stringValue();
         }
         int maxExec = (int) jsonTask.get("maxNumberOfExecution").isNumber().doubleValue();

@@ -1,3 +1,38 @@
+/*
+ *  *
+ * ProActive Parallel Suite(TM): The Java(TM) library for
+ *    Parallel, Distributed, Multi-Core Computing for
+ *    Enterprise Grids & Clouds
+ *
+ * Copyright (C) 1997-2014 INRIA/University of
+ *                 Nice-Sophia Antipolis/ActiveEon
+ * Contact: proactive@ow2.org or contact@activeeon.com
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation; version 3 of
+ * the License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ *
+ * If needed, contact us to obtain a release under GPL Version 2 or 3
+ * or a different license than the AGPL.
+ *
+ *  Initial developer(s):               The ProActive Team
+ *                        http://proactive.inria.fr/team_members.htm
+ *  Contributor(s):
+ *
+ *  * $$PROACTIVE_INITIAL_DEV$$
+ */
+
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
@@ -5,16 +40,33 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
+/**
+ * The controller for the item pagination logic.
+ * @author the activeeon team
+ *
+ */
 public abstract class PaginationController {
 
+    /**
+     * The model for the pagination.
+     */
     protected PaginationModel model;
 
-
+    /**
+     * The main controller.
+     */
     protected SchedulerController schedulerController;
 
+    /**
+     * The name of the property page size for the user settings.
+     */
     protected String pageSizePropertyName;
 
-
+    /**
+     * Builds a controller for the pagination logic.
+     * @param schedulerController the main controller.
+     * @param pageSizePropertyName the name of the property in user settings for the items page size. 
+     */
     public PaginationController(SchedulerController schedulerController, String pageSizePropertyName){
         this.schedulerController = schedulerController;
         this.pageSizePropertyName = pageSizePropertyName;
@@ -23,7 +75,6 @@ public abstract class PaginationController {
 
     /**
      * Back to page 0
-     * invalidate the current page, set the jobs views in indeterminate mode
      */
     public void resetPage() {
         model.setPage(0);
@@ -31,8 +82,7 @@ public abstract class PaginationController {
     }
 
     /**
-     * Fetch the next job list page
-     * invalidate the current page, set the jobs views in indeterminate mode
+     * Fetch the next item list page
      */
     public void nextPage() {
         model.setPage(model.getPage() + 1);
@@ -41,8 +91,7 @@ public abstract class PaginationController {
 
 
     /**
-     * Fetch the previous job list page
-     * invalidate the current page, set the jobs views in indeterminate mode
+     * Fetch the previous item list page
      */
     public void previousPage() {
         int curPage = model.getPage();
@@ -53,10 +102,17 @@ public abstract class PaginationController {
     }
 
 
+    /**
+     * Fetch the items for the current page.
+     */
     public abstract void fetch();
 
 
-
+    /**
+     * Sets user settings for the pagination.
+     * @param pageSize the item page size.
+     * @param forceRefresh true if the item list view should be refreshed after page resizing, false otherwise.
+     */
     public void setUserSettings(String pageSize, boolean forceRefresh) {
         boolean pageChanged = !pageSize.equals("" + SchedulerConfig.get().getPageSize(this.model.getItemType()));
         SchedulerConfig.get().set(this.pageSizePropertyName, pageSize);
@@ -68,16 +124,10 @@ public abstract class PaginationController {
     }
 
 
-    public int getOffset(){
-        return (this.model.getPage() * this.model.getPageSize());
-    }
-
-
-    public int getRange(){
-        return this.model.getPageSize() * (this.model.getPage() + 1);
-    }
-
-
+    /**
+     * Gets the text that displays the pagination status.
+     * @return the text that displays the pagination status.
+     */
     public String getPaginationLabel(){
         int page = this.model.getPage();
         int size = this.model.getPageSize();
@@ -85,13 +135,29 @@ public abstract class PaginationController {
         return (index + 1) + " - " + (index + size);
     }
 
-
+    /**
+     * Returns true if there is item before the current list of items, false otherwise.
+     * @return true if there is item before the current list of items, false otherwise.
+     */
     public boolean hasPrevious(){
         return (this.model.getPage() > 0);
     }
 
+    /**
+     * Returns true if there is item after the current list of items, false otherwise.
+     * @return true if there is item after the current list of items, false otherwise.
+     */
     public boolean hasNext(int listSize){
         return (listSize == this.model.getPageSize());
+    }
+
+
+    /**
+     * Gets the pagination model.
+     * @return the pagination model.
+     */
+    public PaginationModel getModel() {
+        return model;
     }
 
 }
