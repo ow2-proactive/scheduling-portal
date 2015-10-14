@@ -117,6 +117,25 @@ public abstract class PaginationController {
         this.model.setPage(this.model.getMaxPage());
         this.fetch();
     }
+    
+    
+    /**
+     * Fetch the page with the given number.
+     * @param pageNumber the number of the page to be displayed.
+     */
+    public void goToPage(int pageNumber){
+        if(pageNumber < 0){
+            pageNumber = 0;
+        }
+        
+        int maxPage = this.model.getMaxPage();
+        if(pageNumber > maxPage){
+            pageNumber = maxPage;
+        }
+        
+        this.model.setPage(pageNumber);
+        this.fetch();
+    }
 
     
     /**
@@ -154,12 +173,18 @@ public abstract class PaginationController {
      * Gets the text that displays the pagination status.
      * @return the text that displays the pagination status.
      */
-    public String getPaginationLabel(){
+    public String getPaginationRangeLabel(){
         int page = this.model.getPage();
         int size = this.model.getPageSize();
         int index = page * size;
         return (index + 1) + " - " + (index + size);
     }
+    
+    
+    public String getNumberPageText(){
+        return "" + (this.model.getPage() + 1);
+    }
+    
 
     /**
      * Returns true if there is item before the current list of items, false otherwise.
@@ -185,5 +210,15 @@ public abstract class PaginationController {
     public PaginationModel getModel() {
         return model;
     }
+    
+    
+    public String getMaxPageNumberLabel(){
+        return "" + this.model.getMaxPage() + 1;
+    }
 
+    
+    public void resetPagination(){
+        this.model.setPage(-1);
+        this.model.setTotalItems(0);
+    }
 }

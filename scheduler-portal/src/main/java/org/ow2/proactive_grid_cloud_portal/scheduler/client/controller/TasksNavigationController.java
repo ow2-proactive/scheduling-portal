@@ -140,14 +140,14 @@ public class TasksNavigationController {
     }
 
 
-    /**
-     * Reset the item navigation.
-     */
-    public void resetNavigation(){
-        if(this.model.getTaskAutoRefreshOption()){
-            paginationController.resetPage();
-        }
-    }
+//    /**
+//     * Reset the item navigation.
+//     */
+//    public void resetNavigation(){
+//        if(this.model.getTaskAutoRefreshOption()){
+//            paginationController.resetPage();
+//        }
+//    }
 
 
     /**

@@ -175,7 +175,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public void pageChanged() {
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
-        this.pageLabel.setContents(this.paginationController.getPaginationLabel());
+        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
     }
 
     /*
@@ -183,7 +183,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
      */
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        this.pageLabel.setContents(this.paginationController.getPaginationLabel());
+        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
 
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();

@@ -262,6 +262,11 @@ public class SchedulerListeners {
     }
     
     
+    public interface TagFilteringListener{
+        void tagFilterChanged();
+    }
+    
+    
     /**
      * Listener for pagination events.
      * @author the activeeon team.

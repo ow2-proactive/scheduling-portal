@@ -58,9 +58,6 @@
 	font-size: 11px;
 }
 
-.itemPaginationBar div[role=label] {
-	margin: auto;
-}
 
 .navPreviousPaginationButton, .navNextPaginationButton {
 	position: relative !important;

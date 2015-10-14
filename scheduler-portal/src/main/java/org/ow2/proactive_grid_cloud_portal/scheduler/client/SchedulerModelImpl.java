@@ -866,7 +866,4 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     public void setTasksNavigationModel(TasksNavigationModel tasksNavigationModel) {
         this.tasksNavigationModel = tasksNavigationModel;
     }
-
-
-
 }

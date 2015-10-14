@@ -173,7 +173,12 @@ public class PaginationModel {
      */
     public void setTotalItems(long totalItems){
         this.totalItems = totalItems;
-        this.maxPage = (int) this.totalItems / this.getPageSize();
+        int pageSize = this.getPageSize();
+        this.maxPage = ((int) this.totalItems / pageSize) - 1;
+        if(this.totalItems % pageSize != 0){
+            this.maxPage++;
+        }
+        
         for(PaginationListener listener: this.paginationListeners){
             listener.totalItemChanged();
         }

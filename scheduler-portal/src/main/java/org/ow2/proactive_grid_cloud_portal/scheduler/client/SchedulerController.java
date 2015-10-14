@@ -369,7 +369,12 @@ public class SchedulerController extends Controller implements UncaughtException
     
     public void updateTaskPagination(){
         Job selectedJob = this.model.getSelectedJob();
-        this.tasksPaginationController.computeMaxPage(selectedJob.getTotalTasks());
+        if(selectedJob != null){
+            this.tasksPaginationController.computeMaxPage(selectedJob.getTotalTasks());
+        }
+        else{
+            this.tasksPaginationController.resetPagination();
+        }
     }
 
 
@@ -1334,7 +1339,6 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (oldSel != null) {
                     Job newSel = jobs.get(oldSel.getId());
                     if (newSel != null && !newSel.isEqual(oldSel)) {
-                        taskNavigationController.resetNavigation();
                         tasksPaginationController.computeMaxPage(newSel.getTotalTasks());
                     }
                 }
