@@ -288,6 +288,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         if (this.expandRecord != null) {
             this.tasksGrid.expandRecord(this.expandRecord);
         }
+        this.controller.updateTaskPagination();
     }
 
     private ListGridRecord expandRecord;

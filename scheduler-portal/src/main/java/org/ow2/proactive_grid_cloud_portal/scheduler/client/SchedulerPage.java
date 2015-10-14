@@ -191,7 +191,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         if (this.paginationController.hasPrevious())
             this.pagePreviousButton.enable();
 
-        if (jobs != null && this.paginationController.hasNext(jobs.size()))
+        if (this.paginationController.hasNext())
             this.pageNextButton.enable();
     }
 
@@ -861,5 +861,10 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public void logCriticalMessage(String message) {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
+    }
+    
+    
+    @Override
+    public void totalItemChanged() {
     }
 }

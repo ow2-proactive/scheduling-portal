@@ -54,6 +54,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -148,6 +149,8 @@ public class SchedulerController extends Controller implements UncaughtException
 
 
     protected TasksNavigationController taskNavigationController;
+    
+    protected TasksPaginationController tasksPaginationController;
 
 
     protected JobsPaginationController jobsPaginationController;
@@ -345,8 +348,9 @@ public class SchedulerController extends Controller implements UncaughtException
         if (jobId != null)
             id = Integer.parseInt(jobId);
 
+        Job selectedJob = model.getSelectedJob();
         // cancel async requests relative to the old selection
-        if (model.getSelectedJob() == null || id != model.getSelectedJob().getId()) {
+        if (selectedJob == null || id != selectedJob.getId()) {
             for (Request req : this.taskOutputRequests.values()) {
                 req.cancel();
             }
@@ -360,6 +364,12 @@ public class SchedulerController extends Controller implements UncaughtException
         if (visuFetchEnabled) {
             visuFetch(jobId);
         }
+    }
+    
+    
+    public void updateTaskPagination(){
+        Job selectedJob = this.model.getSelectedJob();
+        this.tasksPaginationController.computeMaxPage(selectedJob.getTotalTasks());
     }
 
 
@@ -985,6 +995,20 @@ public class SchedulerController extends Controller implements UncaughtException
             TasksNavigationController taskNavigationController) {
         this.taskNavigationController = taskNavigationController;
     }
+    
+    
+    
+    
+    
+
+    public TasksPaginationController getTasksPaginationController() {
+        return tasksPaginationController;
+    }
+
+    public void setTasksPaginationController(
+            TasksPaginationController tasksPaginationController) {
+        this.tasksPaginationController = tasksPaginationController;
+    }
 
     /**
      * Add a fake submitted job to the list
@@ -1310,12 +1334,14 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (oldSel != null) {
                     Job newSel = jobs.get(oldSel.getId());
                     if (newSel != null && !newSel.isEqual(oldSel)) {
-                        taskNavigationController.resetNavigation();;
+                        taskNavigationController.resetNavigation();
+                        tasksPaginationController.computeMaxPage(newSel.getTotalTasks());
                     }
                 }
 
-
+                jobsPaginationController.computeMaxPage(jobs.size());
                 SchedulerController.this.model.setJobs(jobs, rev);
+                
                 // do not model.logMessage() : this is repeated by a timer
 
                 int jn = jobs.size();

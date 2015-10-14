@@ -59,5 +59,10 @@ public class JobsPaginationController extends PaginationController{
     public void fetch() {
         this.schedulerController.fetchJobs();
     }
-
+    
+    
+    @Override
+    public boolean hasNext() {
+        return this.model.getTotalItems() == this.model.getPageSize();
+    }
 }

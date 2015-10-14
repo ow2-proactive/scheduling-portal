@@ -100,7 +100,33 @@ public abstract class PaginationController {
         model.setPage(curPage - 1);
         this.fetch();
     }
+    
+    
+    /**
+     * Fetch the first item list page.
+     */
+    public void firstPage(){
+        model.setPage(0);
+        this.fetch();
+    }
+    
+    /**
+     * Fetch the last item list page.
+     */
+    public void lastPage(){
+        this.model.setPage(this.model.getMaxPage());
+        this.fetch();
+    }
 
+    
+    /**
+     * Computes the number of the last page of items.
+     * @param nbItem total number of items without pagination.
+     */
+    public void computeMaxPage(long nbItem){
+        this.model.setTotalItems(nbItem);
+    }
+    
 
     /**
      * Fetch the items for the current page.
@@ -147,8 +173,8 @@ public abstract class PaginationController {
      * Returns true if there is item after the current list of items, false otherwise.
      * @return true if there is item after the current list of items, false otherwise.
      */
-    public boolean hasNext(int listSize){
-        return (listSize == this.model.getPageSize());
+    public boolean hasNext(){
+        return (this.model.getRange() < this.model.getTotalItems());
     }
 
 

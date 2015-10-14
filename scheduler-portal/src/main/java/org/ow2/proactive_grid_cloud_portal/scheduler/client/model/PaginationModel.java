@@ -57,6 +57,18 @@ public class PaginationModel {
      * The type of item to be paginated.
      */
     private PaginatedItemType itemType;
+    
+    /**
+     * The number of the last page.
+     */
+    private int maxPage = 0;
+    
+    /**
+     * The total number of items to be displayed without pagination.
+     */
+    private long totalItems = 0;
+    
+    
 
     /**
      * Listeners for pagination events.
@@ -101,11 +113,19 @@ public class PaginationModel {
     }
 
 
+    /**
+     * Gets the type of items to be paginated (TASK or JOB)
+     * @return the type of items to be paginated (TASK or JOB)
+     */
     public PaginatedItemType getItemType() {
         return itemType;
     }
 
 
+    /**
+     * Add a listener for pagination events.
+     * @param listener the listener.
+     */
     public void addPaginationListener(PaginationListener listener){
         this.paginationListeners.add(listener);
     }
@@ -128,4 +148,34 @@ public class PaginationModel {
         return this.getPageSize() * (this.currentPage + 1);
     }
 
+
+    /**
+     * Gets the number of the last page.
+     * @return the number of the last page.
+     */
+    public int getMaxPage() {
+        return maxPage;
+    }
+
+
+    /**
+     * Get the total number of items without pagination.
+     * @return the total number of items without pagination.
+     */
+    public long getTotalItems() {
+        return totalItems;
+    }
+
+
+    /**
+     * Sets the total number of items without pagination.
+     * @param totalItems the total number of items without pagination.
+     */
+    public void setTotalItems(long totalItems){
+        this.totalItems = totalItems;
+        this.maxPage = (int) this.totalItems / this.getPageSize();
+        for(PaginationListener listener: this.paginationListeners){
+            listener.totalItemChanged();
+        }
+    }
 }

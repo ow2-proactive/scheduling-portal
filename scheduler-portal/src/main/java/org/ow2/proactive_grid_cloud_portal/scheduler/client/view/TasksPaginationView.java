@@ -47,7 +47,6 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
@@ -60,6 +59,7 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
      * Task page number
      */
     private Label pageLabel = null;
+    
     /**
      * Task previous page button
      */
@@ -68,9 +68,21 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
      * Task next page button
      */
     private ToolStripButton pageNextButton = null;
+    
+    
+    /**
+     * Task first page button
+     */
+    private ToolStripButton pageFirstButton = null;
+    /**
+     * Task last page button
+     */
+    private ToolStripButton pageLastButton = null;
 
+    
     public TasksPaginationView(SchedulerController controller){
         this.paginationController = new TasksPaginationController(controller);
+        controller.setTasksPaginationController(paginationController);
         this.paginationController.getModel().addPaginationListener(this);
         controller.getEventDispatcher().addTasksUpdatedListener(this);
     }
@@ -80,7 +92,25 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
      * @return a layout containing the view content.
      */
     public Layout build() {
-        /* Task pagination buttons and indicator label */
+        this.pageFirstButton = new ToolStripButton("<< First");
+        this.pageFirstButton.disable();
+        this.pageFirstButton.addStyleName("navPreviousPaginationButton");
+        this.pageFirstButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                paginationController.firstPage();
+            }
+        });
+        
+        this.pagePreviousButton = new ToolStripButton("< Previous");
+        this.pagePreviousButton.disable();
+        this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
+        this.pagePreviousButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                paginationController.previousPage();
+            }
+        });
+        
+        
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navNextPaginationButton");
@@ -89,12 +119,14 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
                 paginationController.nextPage();
             }
         });
-        this.pagePreviousButton = new ToolStripButton("< Previous");
-        this.pagePreviousButton.disable();
-        this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
-        this.pagePreviousButton.addClickHandler(new ClickHandler() {
+        
+        
+        this.pageLastButton = new ToolStripButton("Last >>");
+        this.pageLastButton.disable();
+        this.pageLastButton.addStyleName("navNextPaginationButton");
+        this.pageLastButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                paginationController.previousPage();
+                paginationController.lastPage();
             }
         });
 
@@ -113,29 +145,24 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         paginationLayout.setBackgroundColor("#fafafa");
         paginationLayout.setBorder("0px");
         
+        paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
         paginationLayout.addMember(this.pageLabel);
+        paginationLayout.addMember(this.pageLastButton);
         paginationLayout.addMember(this.pageNextButton);
-
+        
         return paginationLayout;
     }
 
     @Override
     public void tasksUpdating(boolean jobChanged) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void tasksUpdated(List<Task> tasks) {
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-
-        if (this.paginationController.hasPrevious())
-            this.pagePreviousButton.enable();
-
-        if (tasks != null && this.paginationController.hasNext(tasks.size()))
-            this.pageNextButton.enable();
+        this.disableAllButtons();
+        this.enablePaginationButtons();
     }
 
     @Override
@@ -145,11 +172,43 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
     }
 
 
+    @Override
     public void pageChanged() {
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
         this.pageLabel.setContents(this.paginationController.getPaginationLabel());
     }
+    
+    
+    @Override
+    public void totalItemChanged() {
+        this.disableAllButtons();
+        this.enablePaginationButtons();
+    }
+    
+    /**
+     * Disable all the buttons for the pagination.
+     */
+    protected void disableAllButtons(){
+        this.pageFirstButton.disable();
+        this.pagePreviousButton.disable();
+        this.pageNextButton.disable();
+        this.pageLastButton.disable();
+    }
 
 
+    /**
+     * Enables the pagination button according to the navigation status.
+     */
+    protected void enablePaginationButtons(){
+        if (this.paginationController.hasPrevious()){
+            this.pageFirstButton.enable();
+            this.pagePreviousButton.enable();
+        }
+
+        if (this.paginationController.hasNext()){
+            this.pageNextButton.enable();
+            this.pageLastButton.enable();
+        }
+    }
 }

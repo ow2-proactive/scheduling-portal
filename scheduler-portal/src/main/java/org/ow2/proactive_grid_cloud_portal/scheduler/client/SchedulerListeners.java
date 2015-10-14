@@ -248,12 +248,35 @@ public class SchedulerListeners {
     }
     
     
+    /**
+     * Listener for tag suggestions events.
+     * @author the activeeon team
+     *
+     */
     public interface TagSuggestionListener {
-    	void tagSuggestionListUpdated();
+    	
+        /**
+         * When the list of tag suggestion has been updated.
+         */
+        void tagSuggestionListUpdated();
     }
     
     
+    /**
+     * Listener for pagination events.
+     * @author the activeeon team.
+     *
+     */
     public interface PaginationListener {
+        
+        /**
+         * when the displayed page changed.
+         */
     	void pageChanged();
+    	
+    	/**
+    	 * when the total number of paginated items changed.
+    	 */
+    	void totalItemChanged();
     }
 }
