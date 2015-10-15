@@ -162,6 +162,12 @@ public class TasksNavigationModel {
         return this.tasksTagFilter;
     }
 
+    
+    public void resetTagFilter(){
+        this.tasksTagFilter = "";
+    }
+    
+    
 
     /**
      * Add a listener to the tags suggestions modifications.

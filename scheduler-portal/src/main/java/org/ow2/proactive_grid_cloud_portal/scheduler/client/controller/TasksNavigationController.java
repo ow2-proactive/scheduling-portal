@@ -136,6 +136,7 @@ public class TasksNavigationController {
      * Reset the item navigation.
      */
     public void resetNavigation(){
+        this.model.resetTagFilter();
         this.model.clearTagSuggestions();
         paginationController.firstPage();
     }
