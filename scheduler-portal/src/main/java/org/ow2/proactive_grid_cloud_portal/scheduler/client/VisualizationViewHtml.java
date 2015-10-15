@@ -93,7 +93,7 @@ public class VisualizationViewHtml implements VisualizationView {
     public void tasksUpdating(boolean jobChanged) {
     }
 
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         if (tasks != null) { // received HTML before tasks
             for (Task t : tasks) {
                 if (task2Dom != null) {
@@ -142,7 +142,7 @@ public class VisualizationViewHtml implements VisualizationView {
             }
         }
 
-        tasksUpdated(currentTasks);
+        tasksUpdated(currentTasks, currentTasks.size());
     }
 
     private void showHtml() {
@@ -188,5 +188,10 @@ public class VisualizationViewHtml implements VisualizationView {
         }
 
         return "";
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {   
     }
 }

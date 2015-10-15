@@ -263,7 +263,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.show();
     }
 
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
 
         TaskRecord[] data = new TaskRecord[tasks.size()];
@@ -288,7 +288,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         if (this.expandRecord != null) {
             this.tasksGrid.expandRecord(this.expandRecord);
         }
-        this.controller.updateTaskPagination();
+        //this.controller.updateTaskPagination();
     }
 
     private ListGridRecord expandRecord;
@@ -502,6 +502,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.loadingLabel = new Label("fetching tasks...");
         this.loadingLabel.setIcon("loading.gif");
         this.loadingLabel.setWidth100();
+        this.loadingLabel.setHeight100();
         this.loadingLabel.setAlign(Alignment.CENTER);
         this.loadingLabel.hide();
 

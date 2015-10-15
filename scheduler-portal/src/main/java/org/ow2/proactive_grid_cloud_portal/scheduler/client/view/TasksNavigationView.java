@@ -173,7 +173,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     }
 
     @Override
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.tagSearchTextBox.setEnabled(true);
     }
 
@@ -204,6 +204,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public void jobSelected(Job job) {
         this.tagSearchTextBox.setEnabled(true);
         this.tagSearchTextBox.setText("");
+        this.navigationController.resetNavigation();
     }
 
 
@@ -211,11 +212,19 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public void jobUnselected() {
         this.tagSearchTextBox.setText("");
         this.tagSearchTextBox.setEnabled(false);
+        this.navigationController.stopNavigation();
+       
     }
 
 
     public TasksPaginationController getTaskPaginationController() {
         return navigationController.getPaginationController();
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {
+        this.navigationController.refresh();
     }
 
 }

@@ -3,18 +3,29 @@
 	background-repeat: no-repeat;
 	background-position: right;
 	background-size: 15px 15px;
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
-	border-style: solid;
-	border-color: rgb(171, 171, 171);
-	border-width: 1px;
 	vertical-align: top;
-	height: 18px;
-	margin-top: 6px;
 	padding-left: 5px;
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
 	border-right-style: none;
+	margin-top: 6px;
+}
+
+.txtPageNumber, .searchBox {
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+	height: 18px;
+	border-style: solid;
+	border-color: rgb(171, 171, 171);
+	border-width: 1px;
+}
+
+.txtPageNumber{
+	margin-top: 3px;
+}
+
+.labelPaginationLayout{
+	top: 5px !important;
 }
 
 .btnBoxCombo {
@@ -62,6 +73,7 @@
 .navPreviousPaginationButton, .navNextPaginationButton {
 	position: relative !important;
 	left: 0 !important;
+	top: 6px !important;
 }
 
 .navPreviousPaginationButton {

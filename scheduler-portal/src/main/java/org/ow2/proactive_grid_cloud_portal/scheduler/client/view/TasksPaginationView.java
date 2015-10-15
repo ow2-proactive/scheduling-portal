@@ -39,7 +39,6 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagFilteringListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
@@ -57,7 +56,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
-public class TasksPaginationView implements TasksUpdatedListener, PaginationListener, TagFilteringListener{
+public class TasksPaginationView implements TasksUpdatedListener, PaginationListener{
 
     private TasksPaginationController paginationController;
 
@@ -157,15 +156,18 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         pageLabel.setWidth100();
         pageLabel.setAlign(Alignment.RIGHT);
         pageLabel.setMinWidth(30);
+        pageLabel.setMargin(4);
         
         this.pageMaxLabel = new Label("of 0");
         this.pageMaxLabel.setAlign(Alignment.LEFT);
         this.pageMaxLabel.setWidth100();
         this.pageMaxLabel.setMinWidth(40);
+        this.pageMaxLabel.setMargin(4);
         
         this.txtPageNumber = new TextBox();
         this.txtPageNumber.setValue("0");
         this.txtPageNumber.setWidth("25px");
+        this.txtPageNumber.addStyleName("txtPageNumber");
         this.txtPageNumber.addKeyDownHandler(new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
@@ -202,19 +204,18 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
 
     @Override
     public void tasksUpdating(boolean jobChanged) {
-        // TODO Auto-generated method stub
     }
 
     @Override
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.disableAllControls();
-        this.enablePaginationControls();
+        this.paginationController.computeMaxPage(totalTasks);
+        this.offsetRangeLabel.setContents("tasks " + this.paginationController.getPaginationRangeLabel());
+        this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
 
     @Override
     public void tasksUpdatedFailure(String message) {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -228,11 +229,7 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
     
     @Override
     public void totalItemChanged() {
-        this.disableAllControls();
-        
-        String pages = "of " + (this.paginationController.getModel().getMaxPage() + 1);
-        this.pageMaxLabel.setContents(pages);
-        
+        this.pageMaxLabel.setContents("of " + this.paginationController.getMaxPageNumberLabel());
         this.enablePaginationControls();
     }
     
@@ -274,12 +271,5 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
         catch(Exception ex){
             
         }
-    }
-    
-    
-    @Override
-    public void tagFilterChanged() {
-        // TODO Auto-generated method stub
-        
     }
 }

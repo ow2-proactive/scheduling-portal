@@ -234,7 +234,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org
      * .ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
      */
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
             return;
         }
@@ -259,5 +259,10 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      * (java.lang.String)
      */
     public void tasksUpdatedFailure(String message) {
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {   
     }
 }

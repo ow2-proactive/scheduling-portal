@@ -79,6 +79,12 @@ public class SchedulerListeners {
          * Called when the Job selection in the main Scheduler View Grid is canceled
          */
         public void jobUnselected();
+        
+        
+        /**
+         * Called when the selected job has been updated bacause of jobs revision.
+         */
+        public void selectedJobUpdated();
 
     }
 
@@ -128,7 +134,7 @@ public class SchedulerListeners {
          * 
          * @param tasks the latest TaskSet received by the model
          */
-        public void tasksUpdated(List<Task> tasks);
+        public void tasksUpdated(List<Task> tasks, long totalTasks);
 
         /**
          * Task update was requested but failed
@@ -261,10 +267,6 @@ public class SchedulerListeners {
         void tagSuggestionListUpdated();
     }
     
-    
-    public interface TagFilteringListener{
-        void tagFilterChanged();
-    }
     
     
     /**

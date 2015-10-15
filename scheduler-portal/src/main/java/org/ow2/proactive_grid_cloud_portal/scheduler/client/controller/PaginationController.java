@@ -74,14 +74,6 @@ public abstract class PaginationController {
 
 
     /**
-     * Back to page 0
-     */
-    public void resetPage() {
-        model.setPage(0);
-        this.fetch();
-    }
-
-    /**
      * Fetch the next item list page
      */
     public void nextPage() {
@@ -164,7 +156,7 @@ public abstract class PaginationController {
         Settings.get().setSetting(this.pageSizePropertyName, pageSize);
 
         if (pageChanged || forceRefresh) {
-            resetPage();
+            firstPage();
         }        
     }
 
@@ -176,8 +168,22 @@ public abstract class PaginationController {
     public String getPaginationRangeLabel(){
         int page = this.model.getPage();
         int size = this.model.getPageSize();
-        int index = page * size;
-        return (index + 1) + " - " + (index + size);
+        
+        long index = page * size;
+        long total = this.model.getTotalItems();
+        long range = index + size;
+        
+        index++;
+        if(index < 0){
+            index = 0;
+        }
+        
+        if(range < total){
+            return index + " - " + range;
+        }
+        else{
+            return index + " - " + total;
+        }
     }
     
     
@@ -213,7 +219,7 @@ public abstract class PaginationController {
     
     
     public String getMaxPageNumberLabel(){
-        return "" + this.model.getMaxPage() + 1;
+        return "" + (this.model.getMaxPage() + 1);
     }
 
     

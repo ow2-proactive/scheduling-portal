@@ -237,6 +237,23 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             if (empty)
                 listener.jobsUpdating();
         }
+        
+        if(this.selectedJob != null){
+            Job oldSel = this.selectedJob;
+            this.selectedJob = jobs.get(oldSel.getId());
+            if(this.selectedJob == null){
+                for(JobSelectedListener listener: this.jobSelectedListeners){
+                    listener.jobUnselected();
+                }
+            }
+            else{
+                if (this.selectedJob != null && !this.selectedJob.isEqual(oldSel)) {
+                    for(JobSelectedListener listener: this.jobSelectedListeners){
+                        listener.selectedJobUpdated();
+                    }
+                }
+            }
+        }
     }
 
     void jobSubmitted(Job j) {
@@ -289,7 +306,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         // tasks list will change, notify tasks listeners
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             if (j == null)
-                list.tasksUpdated(new ArrayList<Task>());
+                list.tasksUpdated(new ArrayList<Task>(), 0);
             else
                 list.tasksUpdating(selChanged);
         }
@@ -332,7 +349,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     void setTasks(List<Task> tasks) {
         this.selectedTasks = tasks;
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            list.tasksUpdated(tasks);
+            if(this.selectedJob == null){
+                list.tasksUpdated(tasks, 0);
+            }
+            else{
+                list.tasksUpdated(tasks, selectedJob.getTotalTasks());
+            }
         }
     }
 

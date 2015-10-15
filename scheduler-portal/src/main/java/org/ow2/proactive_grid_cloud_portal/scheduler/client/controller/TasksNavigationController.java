@@ -118,7 +118,7 @@ public class TasksNavigationController {
         boolean changed = this.model.setCurrentTagFilter(tag);
         if(changed){
             this.schedulerController.resetPendingTasksRequests();
-            paginationController.resetPage();
+            paginationController.firstPage();
         }
     }
 
@@ -131,23 +131,20 @@ public class TasksNavigationController {
         this.paginationController = taskPaginationController;
     }
 
+
     /**
-     * Initialize navigation when selecting a job.
+     * Reset the item navigation.
      */
-    public void selectJob(){
+    public void resetNavigation(){
         this.model.clearTagSuggestions();
-        this.paginationController.resetPage();
+        paginationController.firstPage();
     }
-
-
-//    /**
-//     * Reset the item navigation.
-//     */
-//    public void resetNavigation(){
-//        if(this.model.getTaskAutoRefreshOption()){
-//            paginationController.resetPage();
-//        }
-//    }
+    
+    
+    public void stopNavigation(){
+        this.model.clearTagSuggestions();
+        this.paginationController.resetPagination();
+    }
 
 
     /**
@@ -156,5 +153,12 @@ public class TasksNavigationController {
      */
     public TasksNavigationModel getModel() {
         return model;
+    }
+    
+    
+    public void refresh(){
+        if(this.model.getTaskAutoRefreshOption()){
+            this.paginationController.fetch();
+        }
     }
 }

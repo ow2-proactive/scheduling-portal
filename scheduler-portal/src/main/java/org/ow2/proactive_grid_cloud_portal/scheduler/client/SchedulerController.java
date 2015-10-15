@@ -359,26 +359,12 @@ public class SchedulerController extends Controller implements UncaughtException
 
         this.model.selectJob(id);
         this.model.setTasksDirty(true);
-        this.taskNavigationController.selectJob();
 
         if (visuFetchEnabled) {
             visuFetch(jobId);
         }
     }
-    
-    
-    public void updateTaskPagination(){
-        Job selectedJob = this.model.getSelectedJob();
-        if(selectedJob != null){
-            this.tasksPaginationController.computeMaxPage(selectedJob.getTotalTasks());
-        }
-        else{
-            this.tasksPaginationController.resetPagination();
-        }
-    }
-
-
-
+   
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
     }
@@ -1333,19 +1319,10 @@ public class SchedulerController extends Controller implements UncaughtException
                     error("Expected JSONArray: " + jsonInfo.toString());
 
                 jobs = getJobsFromJson(jsonArr);
-
-                // if the selected job has changed and autorefresh is enabled, fetch task details
-                Job oldSel = model.getSelectedJob();
-                if (oldSel != null) {
-                    Job newSel = jobs.get(oldSel.getId());
-                    if (newSel != null && !newSel.isEqual(oldSel)) {
-                        tasksPaginationController.computeMaxPage(newSel.getTotalTasks());
-                    }
-                }
-
                 jobsPaginationController.computeMaxPage(jobs.size());
                 SchedulerController.this.model.setJobs(jobs, rev);
                 
+
                 // do not model.logMessage() : this is repeated by a timer
 
                 int jn = jobs.size();
@@ -1458,7 +1435,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Fetching all jobs");
 
-        this.jobsPaginationController.resetPage();
+        this.jobsPaginationController.firstPage();
     }
 
     /**
@@ -1478,7 +1455,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch pending jobs");
 
-        this.jobsPaginationController.resetPage();
+        this.jobsPaginationController.firstPage();
     }
 
     /**
@@ -1498,7 +1475,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch running jobs");
 
-        this.jobsPaginationController.resetPage();
+        this.jobsPaginationController.firstPage();
     }
 
     /**
@@ -1518,7 +1495,7 @@ public class SchedulerController extends Controller implements UncaughtException
         else
             model.logMessage("Dot not fetch finished jobs");
 
-        this.jobsPaginationController.resetPage();
+        this.jobsPaginationController.firstPage();
     }
 
     /**

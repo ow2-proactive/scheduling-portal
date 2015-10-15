@@ -225,5 +225,10 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         this.lastRequest = "";
         this.lastRequestTime = -1;
     }
+    
+    
+    @Override
+    public void selectedJobUpdated() {   
+    }
 
 }
