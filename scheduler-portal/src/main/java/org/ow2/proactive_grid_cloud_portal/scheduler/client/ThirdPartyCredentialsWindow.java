@@ -95,7 +95,7 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
         credentialsGrid.addEditCompleteHandler(new EditCompleteHandler() {
             @Override
             public void onEditComplete(EditCompleteEvent editCompleteEvent) {
-                Record record = editCompleteEvent.getOldRecord();
+                Record record = editCompleteEvent.getOldValues();
                 String key = record.getAttribute("key");
                 controller.removeThirdPartyCredential(key);
             }

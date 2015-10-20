@@ -55,6 +55,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowL
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -1053,7 +1055,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public void updateTasks() {
 
         if (model.getSelectedJob() == null) {
-            SchedulerController.this.model.setTasks(new ArrayList<Task>());
+            SchedulerController.this.model.setTasks(new ArrayList<Task>(), 0);
         } else {
             final String jobId = "" + model.getSelectedJob().getId();
 
@@ -1068,18 +1070,14 @@ public class SchedulerController extends Controller implements UncaughtException
                 }
 
                 public void onSuccess(String result) {
-                    List<Task> tasks;
-
-                    JSONValue val = parseJSON(result);
-                    JSONArray arr = val.isArray();
-                    if (arr == null) {
-                        error("Expected JSON Array: " + val.toString());
+                    try {
+                        JSONPaginatedTasks tasks = SchedulerJSONUtils.parseJSONPaginatedTasks(result);
+                        SchedulerController.this.model.setTasksDirty(false);
+                        SchedulerController.this.model.setTasks(tasks.getTasks(), tasks.getTotalTasks());
+                        // do not model.logMessage() : this is repeated by a timer
+                    } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                        error(e.getMessage());
                     }
-                    tasks = getTasksFromJson(arr);
-
-                    SchedulerController.this.model.setTasksDirty(false);
-                    SchedulerController.this.model.setTasks(tasks);
-                    // do not model.logMessage() : this is repeated by a timer
                 }
             };
 
@@ -1352,20 +1350,7 @@ public class SchedulerController extends Controller implements UncaughtException
         return jobs;
     }
 
-    /**
-     * @param arr list of tasks as a JSON array
-     * @return the POJO equivalent 
-     */
-    private List<Task> getTasksFromJson(JSONArray arr) {
-        List<Task> tasks = new ArrayList<Task>();
-
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject jsonTask = arr.get(i).isObject();
-            tasks.add(Task.parseJson(jsonTask));
-        }
-
-        return tasks;
-    }
+    
 
     /**
      * Parse the raw JSON array describing the users list, return a Java representation

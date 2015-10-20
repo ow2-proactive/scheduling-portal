@@ -2,7 +2,7 @@
 <module rename-to='portal'>
 
 	<inherits name='com.google.gwt.user.User' />
-	<inherits name="com.smartgwt.SmartGwt" />
+	<inherits name="com.smartgwt.SmartGwtNoScriptNoTheme" />
 	<inherits name="com.google.gwt.json.JSON" />
 	<inherits name="com.google.gwt.http.HTTP"/>
 	<inherits name='com.hydro4ge.raphaelgwt.RaphaelGWT' />
