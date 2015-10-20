@@ -156,7 +156,9 @@ public class TasksNavigationController {
         return model;
     }
     
-    
+    /**
+     * Refresh the paginated tasks list.
+     */
     public void refresh(){
         if(this.model.getTaskAutoRefreshOption()){
             this.paginationController.fetch();

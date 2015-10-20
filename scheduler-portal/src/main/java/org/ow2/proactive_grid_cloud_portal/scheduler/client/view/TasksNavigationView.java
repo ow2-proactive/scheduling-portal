@@ -76,7 +76,9 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     private CheckboxItem autoRefreshOption;
 
     
-
+    /**
+     * The main controller of the application.
+     */
     private SchedulerController schedulerController;
     
     
@@ -184,13 +186,15 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
 
     
-
+    @Override
     public void tagSuggestionListUpdated(){
         this.tagSearchTextBox.showSuggestionList();
     }
 
 
-
+    /**
+     * Handler when the tag in the textbox changed.
+     */
     protected void changeTagFilterHandler(){
         String tag = tagSearchTextBox.getText();
         this.navigationController.setTaskTagFilter(tag);
@@ -217,11 +221,16 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     }
 
 
+    /**
+     * Gets the tasks pagination controller.
+     * @return the tasks pagination controller.
+     */
     public TasksPaginationController getTaskPaginationController() {
         return navigationController.getPaginationController();
     }
     
     
+
     @Override
     public void selectedJobUpdated() {
         this.navigationController.refresh();

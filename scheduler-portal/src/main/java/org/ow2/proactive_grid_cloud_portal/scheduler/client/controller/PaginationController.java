@@ -217,12 +217,17 @@ public abstract class PaginationController {
         return model;
     }
     
-    
+    /**
+     * Get the numero of the last page. 
+     * @return the numero of the last page.
+     */
     public String getMaxPageNumberLabel(){
         return "" + (this.model.getMaxPage() + 1);
     }
 
-    
+    /**
+     * Reset the pagination, no items are displayed in the paginated list.
+     */
     public void resetPagination(){
         this.model.setPage(-1);
         this.model.setTotalItems(0);
