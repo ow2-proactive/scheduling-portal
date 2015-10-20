@@ -33,7 +33,7 @@
  *  * $$PROACTIVE_INITIAL_DEV$$
  */
 
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.suggestions;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
