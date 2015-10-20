@@ -346,14 +346,15 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * 
      * @param tasks the new TaskSet
      */
-    void setTasks(List<Task> tasks) {
+    void setTasks(List<Task> tasks, long totalTasks) {
         this.selectedTasks = tasks;
+        this.tasksNavigationModel.getPaginationModel().setTotalItems(totalTasks);
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             if(this.selectedJob == null){
                 list.tasksUpdated(tasks, 0);
             }
             else{
-                list.tasksUpdated(tasks, selectedJob.getTotalTasks());
+                list.tasksUpdated(tasks, totalTasks);
             }
         }
     }
