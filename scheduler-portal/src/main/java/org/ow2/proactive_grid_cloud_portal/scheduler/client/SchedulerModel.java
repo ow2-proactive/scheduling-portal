@@ -136,9 +136,9 @@ public abstract class SchedulerModel implements Model {
     public abstract void setJobHtml(String jobId, String curHtml);
 
     public static class RemoteHint {
-        String taskId;
-        String type;
-        String argument;
+        public String taskId;
+        public String type;
+        public String argument;
     }
 
     /**

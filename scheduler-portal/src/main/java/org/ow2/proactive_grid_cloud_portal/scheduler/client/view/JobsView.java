@@ -34,13 +34,20 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+
 import com.smartgwt.client.data.AdvancedCriteria;
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
@@ -291,7 +298,7 @@ public class JobsView implements JobsUpdatedListener {
      *
      * @return a widget for filtering the grid
      */
-    Layout buildFilterPane() {
+    public Layout buildFilterPane() {
         VLayout layout = new VLayout();
         layout.setWidth100();
         layout.setHeight100();
