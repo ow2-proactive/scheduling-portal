@@ -36,15 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
-import com.smartgwt.client.widgets.tab.Tab;
-import com.smartgwt.client.widgets.tab.TabSet;
+import java.util.Arrays;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -56,7 +50,15 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDeta
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.ThreadsAreaChart;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
-import java.util.Arrays;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.tab.Tab;
+import com.smartgwt.client.widgets.tab.TabSet;
 
 
 /**
@@ -178,7 +180,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents(RMController.getJsonErrorMessage(caught));
+        status.setContents(JSONUtils.getJsonErrorMessage(caught));
     }
 
     @Override

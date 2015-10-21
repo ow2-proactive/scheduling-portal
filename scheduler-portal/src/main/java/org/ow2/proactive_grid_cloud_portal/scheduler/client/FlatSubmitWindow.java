@@ -36,9 +36,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 
 import com.google.gwt.core.client.GWT;
@@ -180,7 +180,7 @@ public class FlatSubmitWindow {
                                     "Successfully submitted flat job " + name + ": " + id);
                             controller.addSubmittingJob(id, name);
                         } else {
-                            String msg = Controller.getJsonErrorMessage(js.toString());
+                            String msg = JSONUtils.getJsonErrorMessage(js.toString());
                             label
                                     .setContents("<span style='color:red; font-weight:bold'>Job submission failed:</span><br>" +
                                         "<span style=''>" + msg + "</span>");

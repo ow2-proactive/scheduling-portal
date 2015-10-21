@@ -39,8 +39,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
@@ -188,7 +188,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         this.scheduler.getJobTaskTagsPrefix(this.schedulerModel.getSessionId(), jobId, query, new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
-                String msg = Controller.getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
 
                 LogModel.getInstance().logImportantMessage("Failed to update tags for job " +
                         jobId + " and prefix tag " + query + ": " + msg);

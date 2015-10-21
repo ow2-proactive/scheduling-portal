@@ -47,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -228,7 +229,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
             }
         });
@@ -383,10 +384,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    if (getJsonErrorCode(caught) == 401) {
+                    if (JSONUtils.getJsonErrorCode(caught) == 401) {
                         teardown("You have been disconnected from the server.");
                     } else {
-                        error("Failed to fetch Statistics History: " + getJsonErrorMessage(caught));
+                        error("Failed to fetch Statistics History: " + JSONUtils.getJsonErrorMessage(caught));
                     }
                 }
             });
@@ -472,10 +473,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onFailure(Throwable caught) {
-                if (getJsonErrorCode(caught) == 401) {
+                if (JSONUtils.getJsonErrorCode(caught) == 401) {
                     teardown("You have been disconnected from the server.");
                 } else {
-                    error("Failed to fetch RM State: " + getJsonErrorMessage(caught));
+                    error("Failed to fetch RM State: " + JSONUtils.getJsonErrorMessage(caught));
                 }
             }
         });
@@ -647,7 +648,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rm.getInfrastructures(model.getSessionId(), new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 SC.warn("Failed to fetch supported infrastructures:<br>" + msg);
                 failure.run();
             }
@@ -658,7 +659,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 rm.getPolicies(model.getSessionId(), new AsyncCallback<String>() {
 
                     public void onFailure(Throwable caught) {
-                        String msg = getJsonErrorMessage(caught);
+                        String msg = JSONUtils.getJsonErrorMessage(caught);
                         SC.warn("Failed to fetch supported policies:<br>" + msg);
                         failure.run();
                     }
@@ -753,7 +754,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
-                    getJsonErrorMessage(caught));
+                        JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -772,7 +773,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
-                    getJsonErrorMessage(caught));
+                        JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -809,7 +810,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         final AsyncCallback<String> callback = new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                String err = getJsonErrorMessage(caught);
+                String err = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to remove " + msg + ": " + err);
             }
 
@@ -1052,8 +1053,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rm.executeNodeScript(model.getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
-                        getJsonErrorMessage(caught));
-                syncCallBack.onFailure(getJsonErrorMessage(caught));
+                        JSONUtils.getJsonErrorMessage(caught));
+                syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
             }
 
             public void onSuccess(String result) {

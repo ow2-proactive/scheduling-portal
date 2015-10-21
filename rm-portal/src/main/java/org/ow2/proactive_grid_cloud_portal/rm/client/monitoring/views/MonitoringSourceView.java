@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
@@ -191,7 +192,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents(RMController.getJsonErrorMessage(caught));
+        status.setContents(JSONUtils.getJsonErrorMessage(caught));
     }
 
     @Override

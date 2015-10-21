@@ -37,6 +37,7 @@
 
 package org.ow2.proactive_grid_cloud_portal.common.client.json;
 
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 
@@ -66,6 +67,85 @@ public class JSONUtils {
             String message = "JSON Parser failed " + t.getClass().getName() + ": " + t.getLocalizedMessage() 
                     + "\ninput was: " + jsonStr;
             throw new JSONException(message, t);
+        }
+    }
+    
+    
+    /**
+     * @param throwable a serialized JSON Exception
+     * @return the value of the 'errorMessage' key
+     */
+    public static String getJsonErrorMessage(Throwable throwable) {
+        String msg = throwable.getMessage();
+        return getJsonErrorMessage(msg);
+    }
+
+    /**
+     * @param throwable a serialized JSON Exception
+     * @return the value of the 'httpErrorCode' key, or -1
+     */
+    public static int getJsonErrorCode(Throwable throwable) {
+        String msg = throwable.getMessage();
+        return getJsonErrorCode(msg);
+    }
+
+    /**
+     * @param str String representation of a serialized JSON Exception
+     * @return the value of the 'errorMessage' key
+     */
+    public static String getJsonErrorMessage(String str) {
+        try {
+            JSONObject exc = JSONParser.parseStrict(str).isObject();
+            if (exc != null && exc.containsKey("errorMessage")) {
+                return retrieveErrorMessage(exc);
+            } else if (exc != null && exc.containsKey("exception")) {
+                JSONObject nestedExc = exc.get("exception").isObject();
+                return retrieveErrorMessage(nestedExc);
+            }
+        } catch (Exception e) {
+            if (str != null) {
+                return str;
+            } else {
+                return "<no reason>";
+            }
+        }
+        return null;
+    }
+
+    private static String retrieveErrorMessage(JSONObject exc) {
+        JSONValue val = exc.get("errorMessage");
+        if (val == null || val.isString() == null) {
+            return "<no reason>";
+        } else {
+            return val.isString().stringValue();
+        }
+    }
+
+    /**
+     * @param str String representation of a serialized JSON Exception
+     * @return the value of the 'httpErrorCode' key, or -1
+     */
+    public static int getJsonErrorCode(String str) {
+        try {
+            JSONObject exc = JSONParser.parseStrict(str).isObject();
+            if (exc != null && exc.containsKey("httpErrorCode")) {
+                return retrieveErrorCode(exc);
+            } else if (exc != null && exc.containsKey("exception")) {
+                JSONObject nestedExc = exc.get("exception").isObject();
+                return retrieveErrorCode(nestedExc);
+            }
+        } catch (Exception e) {
+            return -1;
+        }
+        return -1;
+    }
+
+    private static int retrieveErrorCode(JSONObject exc) {
+        JSONValue val = exc.get("httpErrorCode");
+        if (val == null || val.isNumber() == null) {
+            return -1;
+        } else {
+            return (int) val.isNumber().doubleValue();
         }
     }
 }

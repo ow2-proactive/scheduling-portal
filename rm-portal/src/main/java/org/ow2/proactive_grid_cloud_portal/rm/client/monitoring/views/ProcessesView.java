@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
@@ -138,7 +139,7 @@ public class ProcessesView extends VLayout implements Reloadable {
                     }
 
                     public void onFailure(Throwable caught) {
-                        if (RMController.getJsonErrorCode(caught) == 401) {
+                        if (JSONUtils.getJsonErrorCode(caught) == 401) {
                             LogModel.getInstance().logMessage("You have been disconnected from the server.");
                         }
                     }

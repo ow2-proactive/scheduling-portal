@@ -44,9 +44,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +98,7 @@ public class DownloadTaskResultServlet extends HttpServlet {
 
         } catch (Throwable t) {
             LOGGER.warn("Failed to download result", t);
-            String str = "Failed to download result: " + Controller.getJsonErrorMessage(t);
+            String str = "Failed to download result: " + JSONUtils.getJsonErrorMessage(t);
             out.write(str.getBytes());
         } finally {
             if (is != null)

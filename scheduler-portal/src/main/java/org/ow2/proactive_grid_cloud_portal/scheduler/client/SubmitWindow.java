@@ -42,6 +42,7 @@ import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
@@ -402,7 +403,7 @@ public class SubmitWindow {
                                 }
 
                                 if (failure) {
-                                    String msg = Controller.getJsonErrorMessage(res);
+                                    String msg = JSONUtils.getJsonErrorMessage(res);
                                     layout.removeMember(waitLabel);
 
                                     label
@@ -438,7 +439,7 @@ public class SubmitWindow {
                  * submission failure 
                  */
                 if (isError) {
-                    String msg = Controller.getJsonErrorMessage(res);
+                    String msg = JSONUtils.getJsonErrorMessage(res);
                     layout.removeMember(waitLabel);
 
                     label

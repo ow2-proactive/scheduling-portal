@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 import com.google.gwt.core.client.GWT;
@@ -498,8 +499,8 @@ public class LoginPage {
                 }
 
                 if (fail) {
-                    String err = Controller.getJsonErrorMessage(res);
-                    int sta = Controller.getJsonErrorCode(res);
+                    String err = JSONUtils.getJsonErrorMessage(res);
+                    int sta = JSONUtils.getJsonErrorCode(res);
                     if (sta != -1)
                         err += " (" + sta + ")";
                     errorLabel.setContents("<span style='color:red;'>Could not login: " + err + "</span>");
@@ -599,7 +600,7 @@ public class LoginPage {
                 }
 
                 if (fail) {
-                    String err = Controller.getJsonErrorMessage(res);
+                    String err = JSONUtils.getJsonErrorMessage(res);
                     errorLabel.setContents("<span style='color:red;'>Could not login: " + err + "</span>");
                     errorLabel.animateShow(AnimationEffect.FLY);
 

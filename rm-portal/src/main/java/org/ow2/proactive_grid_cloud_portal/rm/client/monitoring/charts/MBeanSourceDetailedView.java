@@ -38,20 +38,21 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
+
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
-
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
 
 
 /**
@@ -152,7 +153,7 @@ public class MBeanSourceDetailedView extends DetailViewer {
                     }
                 }
 
-                if (RMController.getJsonErrorCode(caught) == 401) {
+                if (JSONUtils.getJsonErrorCode(caught) == 401) {
                     LogModel.getInstance().logMessage("You have been disconnected from the server.");
                 }
             }

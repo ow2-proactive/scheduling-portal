@@ -50,6 +50,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
@@ -268,7 +269,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
             }
         });
@@ -391,7 +392,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     public void onFailure(Throwable caught) {
                         String msg = "Failed to fetch html for job " + jobId;
-                        String json = getJsonErrorMessage(caught);
+                        String json = JSONUtils.getJsonErrorMessage(caught);
                         if (json != null)
                             msg += " : " + json;
 
@@ -413,7 +414,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                                 public void onFailure(Throwable caught) {
                                     String msg = "Failed to fetch image for job " + jobId;
-                                    String json = getJsonErrorMessage(caught);
+                                    String json = JSONUtils.getJsonErrorMessage(caught);
                                     if (json != null)
                                         msg += " : " + json;
 
@@ -447,7 +448,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String message = getJsonErrorMessage(caught);
+                String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to pause jobs : " + message);
             }
         });
@@ -470,7 +471,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String message = getJsonErrorMessage(caught);
+                String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to resume jobs : " + message);
             }
         });
@@ -493,7 +494,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String message = getJsonErrorMessage(caught);
+                String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to remove jobs : " + message);
             }
         });
@@ -516,7 +517,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String message = getJsonErrorMessage(caught);
+                String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
             }
         });
@@ -534,7 +535,7 @@ public class SchedulerController extends Controller implements UncaughtException
             public void onFailure(Throwable caught) {
                 caught.printStackTrace();
 
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to kill task: " + msg);
             }
 
@@ -556,7 +557,7 @@ public class SchedulerController extends Controller implements UncaughtException
             public void onFailure(Throwable caught) {
 
                 caught.printStackTrace();
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to restart task: " + msg);
             }
 
@@ -576,7 +577,7 @@ public class SchedulerController extends Controller implements UncaughtException
         this.scheduler.preemptTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to preempt task: " + msg);
             }
 
@@ -607,7 +608,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String message = getJsonErrorMessage(caught);
+                String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to set priority to " + priority.name() + " : " +
                         message);
             }
@@ -620,7 +621,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public void startScheduler() {
         this.scheduler.startScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not start Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to start Scheduler: " + msg);
             }
@@ -641,7 +642,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not stop Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to stop Scheduler: " + msg);
             }
@@ -658,7 +659,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not pause Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to pause Scheduler: " + msg);
             }
@@ -675,7 +676,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not freeze Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to freeze Scheduler: " + msg);
             }
@@ -692,7 +693,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not resume Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to resume Scheduler: " + msg);
             }
@@ -709,7 +710,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not kill Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to kill Scheduler: " + msg);
             }
@@ -793,7 +794,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to fetch live log for job " + jobId + ": " + msg);
             }
         });
@@ -859,7 +860,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Request req = this.scheduler.getTaskOutput(model.getSessionId(), "" + jobId, task.getName(), logMode,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 // might be an exception
                 try {
                     JSONObject json = parseJSON(caught.getMessage()).isObject();
@@ -902,7 +903,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Request req = this.scheduler.getTaskServerLogs(model.getSessionId(), jobId, taskname,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 // might be an exception
                 try {
                     JSONObject json = parseJSON(caught.getMessage()).isObject();
@@ -937,7 +938,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Request req = this.scheduler.getJobServerLogs(model.getSessionId(), jobId,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 // might be an exception
                 try {
                     JSONObject json = parseJSON(caught.getMessage()).isObject();
@@ -1044,7 +1045,7 @@ public class SchedulerController extends Controller implements UncaughtException
             AsyncCallback<String> callback = new AsyncCallback<String>() {
 
                 public void onFailure(Throwable caught) {
-                    String msg = Controller.getJsonErrorMessage(caught);
+                    String msg = JSONUtils.getJsonErrorMessage(caught);
 
                     SchedulerController.this.model.taskUpdateError(msg);
                     LogModel.getInstance().logImportantMessage("Failed to update tasks for job " +
@@ -1109,10 +1110,10 @@ public class SchedulerController extends Controller implements UncaughtException
                             // might have been disconnected in between
                             return;
                         }
-                        if (getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
+                        if (JSONUtils.getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
                             teardown("You have been disconnected from the server.");
                         }
-                        error("Failed to get Scheduler Revision: " + getJsonErrorMessage(caught));
+                        error("Failed to get Scheduler Revision: " + JSONUtils.getJsonErrorMessage(caught));
                     }
 
                     public void onSuccess(Long result) {
@@ -1148,7 +1149,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             if (!model.isLoggedIn())
                                 return;
 
-                            error("Failed to fetch scheduler users:<br>" + getJsonErrorMessage(caught));
+                            error("Failed to fetch scheduler users:<br>" + JSONUtils.getJsonErrorMessage(caught));
                         }
                     });
                 }
@@ -1158,7 +1159,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     scheduler.getStatistics(model.getSessionId(), new AsyncCallback<String>() {
                         public void onFailure(Throwable caught) {
-                            String msg = getJsonErrorMessage(caught);
+                            String msg = JSONUtils.getJsonErrorMessage(caught);
                             if (!model.isLoggedIn())
                                 return;
                             error("Failed to fetch scheduler stats:<br>" + msg);
@@ -1214,7 +1215,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         public void onFailure(Throwable caught) {
                             if (!model.isLoggedIn())
                                 return;
-                            error("Failed to fetch account stats:<br>" + getJsonErrorMessage(caught));
+                            error("Failed to fetch account stats:<br>" + JSONUtils.getJsonErrorMessage(caught));
                         }
 
                         public void onSuccess(String result) {
@@ -1266,18 +1267,18 @@ public class SchedulerController extends Controller implements UncaughtException
                     // might have been disconnected in between
                     return;
                 }
-                int httpErrorCodeFromException = getJsonErrorCode(caught);
+                int httpErrorCodeFromException = JSONUtils.getJsonErrorCode(caught);
                 if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
                     teardown("You have been disconnected from the server.");
                 } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
                     LogModel.getInstance().logImportantMessage(
                             "Failed to fetch jobs because of permission (automatic refresh will be disabled)"
-                                    + getJsonErrorMessage(caught));
+                                    + JSONUtils.getJsonErrorMessage(caught));
                     stopTimer();
                     // display empty message in jobs view
                     model.emptyJobs();
                 } else {
-                    error("Error while fetching jobs:\n" + getJsonErrorMessage(caught));
+                    error("Error while fetching jobs:\n" + JSONUtils.getJsonErrorMessage(caught));
                 }
             }
 
@@ -1363,7 +1364,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     // might have been disconnected in between
                     return;
                 }
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 error("Error while fetching status:\n" + caught.getClass().getName() + " " + msg);
                 LogModel.getInstance().logImportantMessage("Error while fetching status: " + msg);
             }
@@ -1526,7 +1527,7 @@ public class SchedulerController extends Controller implements UncaughtException
         scheduler.getUsage(model.getSessionId(), user, startDate, endDate, new AsyncCallback<List<JobUsage>>() {
             @Override
             public void onFailure(Throwable caught) {
-                String msg = Controller.getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to fetch usage data " + ": " + msg);
             }
 
@@ -1563,7 +1564,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (!model.isLoggedIn())
                     return;
 
-                LogModel.getInstance().logMessage("Failed to fetch scheduler users with jobs:<br>" + getJsonErrorMessage(caught));
+                LogModel.getInstance().logMessage("Failed to fetch scheduler users with jobs:<br>" + JSONUtils.getJsonErrorMessage(caught));
             }
         });
     }
@@ -1573,7 +1574,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
             @Override
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Error while saving third-party credential: " + msg);
             }
 
@@ -1589,7 +1590,7 @@ public class SchedulerController extends Controller implements UncaughtException
         scheduler.thirdPartyCredentialKeySet(model.getSessionId(), new AsyncCallback<Set<String>>() {
             @Override
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Error while getting third-party credentials: " + msg);
             }
 
@@ -1604,7 +1605,7 @@ public class SchedulerController extends Controller implements UncaughtException
         scheduler.removeThirdPartyCredential(model.getSessionId(), key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                String msg = getJsonErrorMessage(caught);
+                String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Error while deleting third-party credential: " + msg);
             }
 
