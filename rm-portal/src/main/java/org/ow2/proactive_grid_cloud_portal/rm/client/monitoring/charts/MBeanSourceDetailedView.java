@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.List;
+
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.json.client.JSONObject;
@@ -44,9 +45,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
 
@@ -97,7 +100,7 @@ public class MBeanSourceDetailedView extends DetailViewer {
                 if (!model.isLoggedIn())
                     return;
 
-                model.logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
+                LogModel.getInstance().logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
                 JSONArray array = controller.parseJSON(result).isArray();
                 if (array != null) {
                     DetailViewerRecord dv = new DetailViewerRecord();
@@ -150,7 +153,7 @@ public class MBeanSourceDetailedView extends DetailViewer {
                 }
 
                 if (RMController.getJsonErrorCode(caught) == 401) {
-                    model.logMessage("You have been disconnected from the server.");
+                    LogModel.getInstance().logMessage("You have been disconnected from the server.");
                 }
             }
         });

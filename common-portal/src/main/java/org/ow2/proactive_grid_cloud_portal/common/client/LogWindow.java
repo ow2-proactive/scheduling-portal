@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.HTMLPane;
@@ -82,7 +83,7 @@ public class LogWindow implements LogListener {
 
     public LogWindow(Controller controller) {
         this.controller = controller;
-        this.controller.getEventDispatcher().addLogListener(this);
+        LogModel.getInstance().addLogListener(this);
         this.build();
     }
 

@@ -42,8 +42,10 @@ import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.json.client.JSONException;
@@ -283,7 +285,7 @@ public class SubmitWindow {
                     if (obj.get("id") != null && obj.get("id").isNumber() != null) {
                         int id = (int) obj.get("id").isNumber().doubleValue();
                         SubmitWindow.this.destroy();
-                        controller.getModel()
+                        LogModel.getInstance()
                                 .logMessage("Successfully submitted job " + fileName + ": " + id);
                         controller.addSubmittingJob(id, fileName);
                     }
@@ -389,7 +391,7 @@ public class SubmitWindow {
                                     if (val.isObject() != null && val.isObject().containsKey("id")) {
                                         int id = (int) val.isObject().get("id").isNumber().doubleValue();
                                         SubmitWindow.this.destroy();
-                                        controller.getModel().logMessage(
+                                        LogModel.getInstance().logMessage(
                                                 "Successfully submitted job " + fileName + ": " + id);
                                         controller.addSubmittingJob(id, fileName);
                                     } else {
@@ -412,7 +414,7 @@ public class SubmitWindow {
                                     layout.addMember(editForm);
                                     layout.addMember(buttons);
                                     layout.reflow();
-                                    controller.getModel().logImportantMessage("Failed to submit job: " + msg);
+                                    LogModel.getInstance().logImportantMessage("Failed to submit job: " + msg);
                                 }
                             }
                         });
@@ -448,7 +450,7 @@ public class SubmitWindow {
                     layout.addMember(editForm);
                     layout.addMember(buttons);
                     layout.reflow();
-                    controller.getModel().logImportantMessage("Failed to submit job: " + msg);
+                    LogModel.getInstance().logImportantMessage("Failed to submit job: " + msg);
                 }
             }
         });

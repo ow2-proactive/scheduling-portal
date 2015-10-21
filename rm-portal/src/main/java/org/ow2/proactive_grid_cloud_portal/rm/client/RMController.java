@@ -47,12 +47,14 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
@@ -177,7 +179,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         loadingMessage.destroy();
                     }
                     login(session, Settings.get().getSetting(LOGIN_SETTING));
-                    model.logMessage("Rebound session " + session);
+                    LogModel.getInstance().logMessage("Rebound session " + session);
                 }
             }
 
@@ -227,7 +229,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             public void onFailure(Throwable caught) {
                 String msg = getJsonErrorMessage(caught);
-                model.logImportantMessage("Failed to get REST server version: " + msg);
+                LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
             }
         });
     }
@@ -263,7 +265,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
-        model.logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
+        LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
             model.getSessionId() + ")");
     }
 
@@ -375,7 +377,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         stats.put(source, st);
                     }
                     model.setStatHistory(stats);
-                    model.logMessage("Updated Statistics History in " + (System.currentTimeMillis() - now) +
+                    LogModel.getInstance().logMessage("Updated Statistics History in " + (System.currentTimeMillis() - now) +
                         "ms");
                 }
 
@@ -465,7 +467,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                 HashMap<String, NodeSource> nodes = parseRMMonitoring(result);
                 model.setNodes(nodes);
-                model.logMessage("Fetched " + nodes.size() + " node sources in " +
+                LogModel.getInstance().logMessage("Fetched " + nodes.size() + " node sources in " +
                     (System.currentTimeMillis() - t) + "ms");
             }
 
@@ -603,7 +605,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 System.out.println(nodes.get(i).toString());
                 t.printStackTrace();
 
-                model.logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() + " for input: " +
+                LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() + " for input: " +
                     nodes.get(i).toString());
             }
         }
@@ -750,14 +752,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rm.lockNodes(model.getSessionId(), nodeUrls, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                model.logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
+                LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
                     getJsonErrorMessage(caught));
 
             }
 
             @Override
             public void onSuccess(String result) {
-                model.logMessage("Successfully locked " + nodeUrls.size() + " nodes");
+                LogModel.getInstance().logMessage("Successfully locked " + nodeUrls.size() + " nodes");
             }
         });
     }
@@ -769,14 +771,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rm.unlockNodes(model.getSessionId(), nodeUrls, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                model.logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
+                LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
                     getJsonErrorMessage(caught));
 
             }
 
             @Override
             public void onSuccess(String result) {
-                model.logMessage("Successfully unlocked " + nodeUrls.size() + " nodes");
+                LogModel.getInstance().logMessage("Successfully unlocked " + nodeUrls.size() + " nodes");
             }
         });
     }
@@ -808,15 +810,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 String err = getJsonErrorMessage(caught);
-                model.logImportantMessage("Failed to remove " + msg + ": " + err);
+                LogModel.getInstance().logImportantMessage("Failed to remove " + msg + ": " + err);
             }
 
             @Override
             public void onSuccess(String result) {
                 if (Boolean.parseBoolean(result)) {
-                    model.logMessage("Successfully removed " + msg);
+                    LogModel.getInstance().logMessage("Successfully removed " + msg);
                 } else {
-                    model.logMessage(msg + " was not removed");
+                    LogModel.getInstance().logMessage(msg + " was not removed");
                 }
             }
         };
@@ -967,7 +969,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * @param reason error message to display
      */
     private void error(String reason) {
-        model.logCriticalMessage(reason);
+        LogModel.getInstance().logCriticalMessage(reason);
     }
 
     /**
@@ -1049,7 +1051,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     public void executeScript(final String script, final String engine, final String nodeUrl, final Callback<String, String> syncCallBack) {
         rm.executeNodeScript(model.getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
-                model.logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
+                LogModel.getInstance().logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
                         getJsonErrorMessage(caught));
                 syncCallBack.onFailure(getJsonErrorMessage(caught));
             }

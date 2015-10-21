@@ -42,7 +42,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Alignment;
@@ -130,7 +132,7 @@ public class RMPage implements LogListener {
 
     RMPage(RMController controller) {
         this.controller = controller;
-        this.controller.getEventDispatcher().addLogListener(this);
+        LogModel.getInstance().addLogListener(this);
 
         buildAndShow();
     }

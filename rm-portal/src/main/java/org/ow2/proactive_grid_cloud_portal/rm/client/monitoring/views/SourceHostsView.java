@@ -38,6 +38,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.List;
 import java.util.ArrayList;
+
 import com.smartgwt.client.widgets.Label;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
@@ -47,10 +48,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 
 
@@ -203,7 +206,7 @@ public class SourceHostsView extends VLayout implements Reloadable {
                 }
 
                 if (RMController.getJsonErrorCode(caught) == 401) {
-                    model.logMessage("You have been disconnected from the server.");
+                    LogModel.getInstance().logMessage("You have been disconnected from the server.");
                 }
             }
         });

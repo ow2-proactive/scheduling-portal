@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -175,7 +176,7 @@ public class FlatSubmitWindow {
                             int id = (int) js.get("id").isNumber().doubleValue();
                             String name = form.getValueAsString("jobName");
                             FlatSubmitWindow.this.destroy();
-                            controller.getModel().logMessage(
+                            LogModel.getInstance().logMessage(
                                     "Successfully submitted flat job " + name + ": " + id);
                             controller.addSubmittingJob(id, name);
                         } else {
@@ -183,7 +184,7 @@ public class FlatSubmitWindow {
                             label
                                     .setContents("<span style='color:red; font-weight:bold'>Job submission failed:</span><br>" +
                                         "<span style=''>" + msg + "</span>");
-                            controller.getModel().logImportantMessage("Failed to submit flat job: " + msg);
+                            LogModel.getInstance().logImportantMessage("Failed to submit flat job: " + msg);
 
                             layout.hideMember(waitLabel);
                             layout.showMember(label);

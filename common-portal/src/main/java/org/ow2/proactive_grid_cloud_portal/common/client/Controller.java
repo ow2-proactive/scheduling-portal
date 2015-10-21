@@ -36,6 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -171,9 +173,9 @@ public abstract class Controller {
             // only shows up in eclipse dev mode
             t.printStackTrace();
 
-            this.getModel().logCriticalMessage(
+            LogModel.getInstance().logCriticalMessage(
                     "JSON Parser failed " + t.getClass().getName() + ": " + t.getLocalizedMessage());
-            this.getModel().logCriticalMessage("input was: " + jsonStr);
+            LogModel.getInstance().logCriticalMessage("input was: " + jsonStr);
             return new JSONObject();
         }
     }

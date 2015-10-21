@@ -54,7 +54,9 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -150,7 +152,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 if (!model.isLoggedIn())
                     return;
 
-                model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
+                LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
                         (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
@@ -165,7 +167,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                     onFinish.run();
                 }
                 if (RMController.getJsonErrorCode(caught) == 401) {
-                    model.logMessage("You have been disconnected from the server.");
+                    LogModel.getInstance().logMessage("You have been disconnected from the server.");
                 }
             }
         };
@@ -176,7 +178,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             try {
                 rm.getNodeMBeanHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
             } catch (Exception e) {
-                model.logCriticalMessage(e.getMessage());
+                LogModel.getInstance().logCriticalMessage(e.getMessage());
             }
         }
     }

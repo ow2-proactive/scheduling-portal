@@ -43,7 +43,9 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -76,7 +78,7 @@ public abstract class MBeansChart extends MBeanChart {
                 if (!model.isLoggedIn())
                     return;
 
-                model.logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
+                LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
                         (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
@@ -91,7 +93,7 @@ public abstract class MBeansChart extends MBeanChart {
                     onFinish.run();
                 }
                 if (RMController.getJsonErrorCode(caught) == 401) {
-                    model.logMessage("You have been disconnected from the server.");
+                    LogModel.getInstance().logMessage("You have been disconnected from the server.");
                 }
             }
         };
@@ -102,7 +104,7 @@ public abstract class MBeansChart extends MBeanChart {
             try {
                 rm.getNodeMBeansHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
             } catch (Exception e) {
-                model.logCriticalMessage(e.getMessage());
+                LogModel.getInstance().logCriticalMessage(e.getMessage());
             }
         }
     }

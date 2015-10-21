@@ -158,19 +158,19 @@ public interface Model {
      */
     public abstract Range getRequestedStatHistoryRange(String source);
 
-    /**
-     * @param message issue a log message
-     */
-    public abstract void logMessage(String message);
-
-    /**
-     * @param error issue an important message
-     */
-    public abstract void logImportantMessage(String message);
-
-    /**
-     * @param error issue a critical message
-     */
-    public abstract void logCriticalMessage(String message);
+//    /**
+//     * @param message issue a log message
+//     */
+//    public abstract void logMessage(String message);
+//
+//    /**
+//     * @param error issue an important message
+//     */
+//    public abstract void logImportantMessage(String message);
+//
+//    /**
+//     * @param error issue a critical message
+//     */
+//    public abstract void logCriticalMessage(String message);
 
 }

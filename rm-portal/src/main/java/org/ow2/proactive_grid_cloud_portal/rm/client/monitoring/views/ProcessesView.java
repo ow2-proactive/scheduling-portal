@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -103,7 +104,7 @@ public class ProcessesView extends VLayout implements Reloadable {
                         if (!model.isLoggedIn())
                             return;
 
-                        model.logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
+                        LogModel.getInstance().logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
 
                         //[{"name":"Processes","value":[{"startTime":"Dec8","memSize":"4.0M","commandline":["/sbin/init","--arg"],"memRss":"848K","description":"/sbin/init","memShare":"620K","owner":"root","state":"S","pid":1,"cpuTime":"0:3"}]}]
 
@@ -138,7 +139,7 @@ public class ProcessesView extends VLayout implements Reloadable {
 
                     public void onFailure(Throwable caught) {
                         if (RMController.getJsonErrorCode(caught) == 401) {
-                            model.logMessage("You have been disconnected from the server.");
+                            LogModel.getInstance().logMessage("You have been disconnected from the server.");
                         }
                     }
                 });

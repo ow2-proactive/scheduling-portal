@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -114,7 +115,7 @@ public class NetworkView extends VLayout implements Reloadable {
                         if (!model.isLoggedIn())
                             return;
 
-                        model
+                        LogModel.getInstance()
                                 .logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) +
                                     "ms");
 
@@ -161,7 +162,7 @@ public class NetworkView extends VLayout implements Reloadable {
 
                     public void onFailure(Throwable caught) {
                         if (RMController.getJsonErrorCode(caught) == 401) {
-                            model.logMessage("You have been disconnected from the server.");
+                            LogModel.getInstance().logMessage("You have been disconnected from the server.");
                         }
                     }
                 });

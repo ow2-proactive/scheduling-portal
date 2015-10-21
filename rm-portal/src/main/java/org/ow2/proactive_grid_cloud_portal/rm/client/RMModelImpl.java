@@ -326,36 +326,12 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.requestedStatHistoryRange.put(source, r);
     }
 
-    @Override
-    public void logMessage(String message) {
-        for (LogListener list : this.logListeners) {
-            list.logMessage(getLogStamp() + message);
-        }
-    }
-
-    @Override
-    public void logImportantMessage(String message) {
-        for (LogListener list : this.logListeners) {
-            list.logImportantMessage(getLogStamp() + "<span style='color:#8f7601;'>" + message + "</span>");
-        }
-    }
-
-    @Override
-    public void logCriticalMessage(String message) {
-        for (LogListener list : this.logListeners) {
-            list.logCriticalMessage(getLogStamp() + "<span style='color:red'>" + message + "</span>");
-        }
-    }
 
     private String getLogStamp() {
         String date = DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG).format(new Date());
         return "<span style='color:gray'>" + date + "</span> ";
     }
 
-    @Override
-    public void addLogListener(LogListener listener) {
-        this.logListeners.add(listener);
-    }
 
     @Override
     public void addNodesListener(NodesListener listener) {

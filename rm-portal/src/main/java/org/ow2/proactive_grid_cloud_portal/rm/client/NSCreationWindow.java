@@ -44,6 +44,7 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 
 import com.google.gwt.core.client.GWT;
@@ -360,7 +361,7 @@ public class NSCreationWindow {
                         JSONObject js = new JSONObject(obj);
                         if (js.containsKey("result") && js.get("result").isBoolean().booleanValue()) {
                             window.hide();
-                            controller.getModel().logMessage(
+                            LogModel.getInstance().logMessage(
                                     "Successfully created nodesource: " + nameItem.getValueAsString());
                         } else {
                             String msg;
@@ -371,7 +372,7 @@ public class NSCreationWindow {
                             }
                             label.setContents("<span style='color:red'>Failed to create Node Source :<br>" +
                                 msg + "</span>");
-                            controller.getModel()
+                            LogModel.getInstance()
                                     .logImportantMessage(
                                             "Failed to create nodesource " + nameItem.getValueAsString() +
                                                 ": " + msg);

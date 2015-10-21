@@ -112,7 +112,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
     private ArrayList<SchedulerStatusListener> schedulerStateListeners = null;
     private ArrayList<JobOutputListener> jobOutputListeners = null;
-    private ArrayList<LogListener> logListeners = null;
+    
     private ArrayList<UsersListener> usersListeners = null;
     private ArrayList<UsersListener> usersWithJobsListeners = null;
     private ArrayList<StatisticsListener> statisticsListeners = null;
@@ -140,7 +140,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
         this.schedulerStateListeners = new ArrayList<SchedulerStatusListener>();
         this.jobOutputListeners = new ArrayList<JobOutputListener>();
-        this.logListeners = new ArrayList<LogListener>();
+       
         this.usersListeners = new ArrayList<UsersListener>();
         this.usersWithJobsListeners = new ArrayList<UsersListener>();
         this.statisticsListeners = new ArrayList<StatisticsListener>();
@@ -735,28 +735,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-
-    @Override
-    public void logMessage(String message) {
-        for (LogListener list : this.logListeners) {
-            list.logMessage(getLogStamp() + message);
-        }
-    }
-
-    @Override
-    public void logImportantMessage(String error) {
-        for (LogListener list : this.logListeners) {
-            list.logImportantMessage(getLogStamp() + "<span style='color:#8f7601;'>" + error + "</span>");
-        }
-    }
-
-    @Override
-    public void logCriticalMessage(String error) {
-        for (LogListener list : this.logListeners) {
-            list.logCriticalMessage(getLogStamp() + "<span style='color:red;'>" + error + "</span>");
-        }
-    }
-
     private String getLogStamp() {
         String date = DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG).format(new Date());
         return "<span style='color:gray'>" + date + "</span> ";
@@ -802,13 +780,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.jobOutputListeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addLogListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.LogListener)
-     */
-    public void addLogListener(LogListener listener) {
-        this.logListeners.add(listener);
-    }
+    
 
     /*
      * (non-Javadoc)

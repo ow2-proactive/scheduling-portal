@@ -43,6 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
@@ -165,7 +166,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         buildAndShow();
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
         this.controller.getEventDispatcher().addJobsUpdatedListener(this);
-        this.controller.getEventDispatcher().addLogListener(this);
+        LogModel.getInstance().addLogListener(this);
         inst = this;
     }
 
