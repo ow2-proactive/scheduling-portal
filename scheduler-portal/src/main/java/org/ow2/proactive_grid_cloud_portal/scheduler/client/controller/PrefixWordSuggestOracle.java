@@ -35,43 +35,64 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
+
+/**
+ * Controller for the tag suggestions.
+ * @author the activeeon team
+ *
+ */
 public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelectedListener {
 
-
+    /**
+     * Scheduler service to send request to the scheduler server.
+     */
     protected SchedulerServiceAsync scheduler;
 
+    /**
+     * The main scheduler model.
+     */
     protected SchedulerModelImpl schedulerModel;
 
+    /**
+     * The tasks navigation model
+     */
     protected TasksNavigationModel model;
 
+    /**
+     * Timestamp of the last request to the server to get the list of tag suggestions.
+     */
     protected long lastRequestTime = -1;
 
+    /**
+     * The prefix used for the last request to the server to get the list of tag suggestions.
+     */
     protected String lastRequest = "";
 
 
-
+    /**
+     * Builds a tag suggestions controller from the main scheduler model and scheduler service.
+     * @param model the main scheduler model.
+     * @param scheduler scheduler service to send request to the scheduler server.
+     */
     public PrefixWordSuggestOracle(SchedulerModelImpl model, SchedulerServiceAsync scheduler) {
         this.schedulerModel = model;
         this.model = model.getTasksNavigationModel();
@@ -80,31 +101,59 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     }
 
 
+    /**
+     * A tag suggestion
+     * @author the activeeon team
+     *
+     */
     public static class TagSuggestion implements Suggestion, IsSerializable {
+        
+        /**
+         * The string displayed as a suggestion.
+         */
         private String displayString;
+        
+        /**
+         * The string that replace the current text if the suggestion is selected. 
+         */
         private String replacementString;
 
 
-        public TagSuggestion() {
-        }
 
-
+        /**
+         * Builds a tag suggestion from a displayed string and a replacement string.
+         * @param replacementString the string displayed as a suggestion.
+         * @param displayString the string that replace the current text if the suggestion is selected. 
+         */
         public TagSuggestion(String replacementString, String displayString) {
             this.replacementString = replacementString;
             this.displayString = displayString;
         }
 
+        /**
+         * Gets the string displayed as a suggestion.
+         * @return the string displayed as a suggestion.
+         */
         public String getDisplayString() {
             return displayString;
         }
 
+        /**
+         * Gets the string that replace the current text if the suggestion is selected. 
+         * @return the string that replace the current text if the suggestion is selected. 
+         */
         public String getReplacementString() {
             return replacementString;
         }
     }
 
 
-
+    /**
+     * Computes if the set of tag suggestions in local need to be refreshed by a new request to the server,
+     * according to the current prefix query.
+     * @param query the prefix query
+     * @return true if the set of tag suggestions need to refreshed, false otherwise.
+     */
     protected boolean needToRefresh(String query){
         if(query.length() < 2){
             return false;
@@ -125,6 +174,10 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     }
 
 
+    /**
+     * Refresh the set of tag suggestions in local by a request to server, with the given prefix query.
+     * @param query the prefix query.
+     */
     protected void refresh(final String query){
         this.lastRequestTime = new Date().getTime();
         this.lastRequest = query;
@@ -141,21 +194,23 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
             }
 
             public void onSuccess(String result) {
-                List<String> tags;
-
-                JSONValue val = parseJSON(result);
-                JSONArray arr = val.isArray();
-                if (arr == null) {
-                    schedulerModel.logCriticalMessage("Expected JSON Array: " + val.toString());
+                try {
+                    List<String> tags = SchedulerJSONUtils.getTagsFromJson(result);
+                    model.setTagSuggestions(tags);
+                } catch (JSONException e) {
+                    schedulerModel.logCriticalMessage(e.getMessage());
                 }
-                tags = getTagsFromJson(arr);
-                model.setTagSuggestions(tags);
             }
         });
 
     }
 
 
+    /**
+     * Provides in the given callback, a set of tag suggestions.
+     * @param request the tag request as a prefix query.
+     * @param callback the callback that gets the resulting set of tag suggestions.
+     */
     @Override
     public void requestSuggestions(Request request, Callback callback) {
         Response response = new Response();
@@ -173,57 +228,23 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     }
 
 
-    /**
-     * Parse a JSON string
-     * <p>
-     * If the input is not valid JSON or parsing fails for some reason,
-     * the exception will be logged in the UI but not thrown.
-     * 
-     * @param jsonStr a valid JSON string
-     * @return a java representation of the JSON object hierarchy,
-     *     or a JSONObject representing {} if parsing fails
-     */
-    public JSONValue parseJSON(String jsonStr) {
-        try {
-            return JSONParser.parseStrict(jsonStr);
-        } catch (Throwable t) {
-            // only shows up in eclipse dev mode
-            t.printStackTrace();
-
-            this.schedulerModel.logCriticalMessage(
-                    "JSON Parser failed " + t.getClass().getName() + ": " + t.getLocalizedMessage());
-            this.schedulerModel.logCriticalMessage("input was: " + jsonStr);
-            return new JSONObject();
-        }
-    }
-
-
-    /**
-     * @param arr list of tags as a JSON array
-     * @return the list of tags
-     */
-    private List<String> getTagsFromJson(JSONArray arr) {
-        List<String> tags = new ArrayList<String>(arr.size());
-
-        for (int i = 0; i < arr.size(); i++) {
-            tags.add(arr.get(i).isString().stringValue());
-        }
-
-        return tags;
-    }
-
-
+   
     @Override
     public void jobSelected(Job job) {
-        this.lastRequest = "";
-        this.lastRequestTime = -1;
+        this.resetTagSuggestions();
     }
 
 
     @Override
     public void jobUnselected() {
+        this.resetTagSuggestions();
+    }
+    
+    
+    public void resetTagSuggestions(){
         this.lastRequest = "";
         this.lastRequestTime = -1;
+        this.model.clearTagSuggestions();
     }
     
     

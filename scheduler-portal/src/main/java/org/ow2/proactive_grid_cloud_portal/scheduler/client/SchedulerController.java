@@ -1017,37 +1017,20 @@ public class SchedulerController extends Controller implements UncaughtException
         this.model.jobSubmitted(j);
     }
 
-
-
-
-    /**
-     * Override user settings, rewrite cookies, refresh corresponding ui elements
-     * 
-     * @param refreshTime refresh time for update thread in ms
-     * @param jobPageSize number of results per job list page
-     * @param liveLogTime refresh time for livelog update thread in ms
-     * @param forceRefresh refresh ui even if properties did not change
-     */
-    public void setUserSettings(String refreshTime, String jobPageSize, String taskPageSize, String liveLogTime, boolean forceRefresh) {
-        boolean refreshChanged = !refreshTime.equals("" + SchedulerConfig.get().getClientRefreshTime());
-        SchedulerConfig.get().set(SchedulerConfig.CLIENT_REFRESH_TIME, refreshTime);
-        Settings.get().setSetting(SchedulerConfig.CLIENT_REFRESH_TIME, refreshTime);
-
-        boolean logChanged = !liveLogTime.equals("" + SchedulerConfig.get().getLivelogsRefreshTime());
-        SchedulerConfig.get().set(SchedulerConfig.LIVELOGS_REFRESH_TIME, liveLogTime);
-        Settings.get().setSetting(SchedulerConfig.LIVELOGS_REFRESH_TIME, liveLogTime);
-
-        if (refreshChanged || forceRefresh) {
-            this.stopTimer();
-            this.startTimer();
-        }
-        if (logChanged || forceRefresh) {
-            this.stopLiveTimer();
-            this.startLiveTimer();
-        }
-        this.jobsPaginationController.setUserSettings(jobPageSize, forceRefresh);
-        this.taskNavigationController.getPaginationController().setUserSettings(taskPageSize, forceRefresh);
+    
+    
+    public void restartTimer(){
+        this.stopTimer();
+        this.startTimer();
     }
+    
+    
+    public void restartLiveTimer(){
+        this.stopLiveTimer();
+        this.startLiveTimer();
+    }
+    
+    
 
     /**
      * Updates the current task list depending the current job selection in the model 

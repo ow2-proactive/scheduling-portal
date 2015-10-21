@@ -137,12 +137,12 @@ public class TasksNavigationController {
     public void resetNavigation(){
         this.model.resetTagFilter();
         this.model.clearTagSuggestions();
-        paginationController.firstPage();
+        this.paginationController.firstPage();
     }
     
     
     public void stopNavigation(){
-        this.model.clearTagSuggestions();
+        this.tagSuggestionOracle.resetTagSuggestions();
         this.paginationController.resetPagination();
     }
 

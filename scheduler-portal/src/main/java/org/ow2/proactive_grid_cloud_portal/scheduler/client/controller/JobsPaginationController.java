@@ -39,7 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 /**
  * Controller for the jobs pagination logic.
@@ -49,7 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 public class JobsPaginationController extends PaginationController{
 
     public JobsPaginationController(SchedulerController schedulerController) {
-        super(schedulerController, SchedulerConfig.JOBS_PAGE_SIZE);
+        super(schedulerController);
         this.model = new PaginationModel(PaginatedItemType.JOB);
         ((SchedulerModelImpl) this.schedulerController.getModel()).setJobsPaginationModel(this.model);
     }

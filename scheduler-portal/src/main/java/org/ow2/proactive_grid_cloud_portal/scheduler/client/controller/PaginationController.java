@@ -57,19 +57,14 @@ public abstract class PaginationController {
      */
     protected SchedulerController schedulerController;
 
-    /**
-     * The name of the property page size for the user settings.
-     */
-    protected String pageSizePropertyName;
+   
 
     /**
      * Builds a controller for the pagination logic.
      * @param schedulerController the main controller.
-     * @param pageSizePropertyName the name of the property in user settings for the items page size. 
      */
-    public PaginationController(SchedulerController schedulerController, String pageSizePropertyName){
+    public PaginationController(SchedulerController schedulerController){
         this.schedulerController = schedulerController;
-        this.pageSizePropertyName = pageSizePropertyName;
     }
 
 
@@ -144,21 +139,6 @@ public abstract class PaginationController {
      */
     public abstract void fetch();
 
-
-    /**
-     * Sets user settings for the pagination.
-     * @param pageSize the item page size.
-     * @param forceRefresh true if the item list view should be refreshed after page resizing, false otherwise.
-     */
-    public void setUserSettings(String pageSize, boolean forceRefresh) {
-        boolean pageChanged = !pageSize.equals("" + SchedulerConfig.get().getPageSize(this.model.getItemType()));
-        SchedulerConfig.get().set(this.pageSizePropertyName, pageSize);
-        Settings.get().setSetting(this.pageSizePropertyName, pageSize);
-
-        if (pageChanged || forceRefresh) {
-            firstPage();
-        }        
-    }
 
 
     /**

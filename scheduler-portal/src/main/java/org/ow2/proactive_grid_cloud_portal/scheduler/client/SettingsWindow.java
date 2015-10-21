@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.SettingsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -66,11 +67,11 @@ import com.smartgwt.client.widgets.layout.VLayout;
 public class SettingsWindow {
 
     private Window window;
-
-    private SchedulerController controller;
+    
+    private SettingsController settingsController;
 
     public SettingsWindow(SchedulerController controller) {
-        this.controller = controller;
+        this.settingsController = new SettingsController(controller);
         this.build();
     }
 
@@ -109,33 +110,37 @@ public class SettingsWindow {
         pageValidator.setMax(5000);
         jobPageSize.setValidators(new IsIntegerValidator(), pageValidator);
         taskPageSize.setValidators(new IsIntegerValidator(), pageValidator);
+        
+        DataSourceIntegerField tagSuggestionSize = new DataSourceIntegerField("tagSuggestionsSize", "Max tag suggestions");
+        tagSuggestionSize.setRequired(true);
+        IntegerRangeValidator tagSizeValidator = new IntegerRangeValidator();
+        tagSizeValidator.setMin(5);
+        tagSizeValidator.setMax(100);
+        tagSuggestionSize.setValidators(new IsIntegerValidator(), tagSizeValidator);
+        
+        DataSourceIntegerField tagSuggestionDelay = new DataSourceIntegerField("tagSuggestionsDelay", "Tag suggestions refresh time (ms)");
+        tagSuggestionDelay.setRequired(true);
+        IntegerRangeValidator tagDelayValidator = new IntegerRangeValidator();
+        tagDelayValidator.setMin(100);
+        tagDelayValidator.setMax(60000);
+        tagSuggestionDelay.setValidators(new IsIntegerValidator(), tagDelayValidator);
 
         final DataSource ds = new DataSource();
-        ds.setFields(refreshTime, liveLogTime, jobPageSize, taskPageSize);
+        ds.setFields(refreshTime, liveLogTime, jobPageSize, taskPageSize, tagSuggestionSize, tagSuggestionDelay);
 
         final DynamicForm form = new DynamicForm();
         form.setDataSource(ds);
-        form.setColWidths("120", "230");
-        form.setWidth(350);
+        form.setColWidths("300", "230");
+        form.setWidth(420);
         form.setMargin(10);
-        form.setValue("refreshTime", SchedulerConfig.get().getClientRefreshTime());
-        form.setValue("jobPageSize", SchedulerConfig.get().getPageSize(PaginatedItemType.JOB));
-        form.setValue("taskPageSize", SchedulerConfig.get().getPageSize(PaginatedItemType.TASK));
-        form.setValue("logTime", SchedulerConfig.get().getLivelogsRefreshTime());
+        settingsController.initForm(form);
+        
 
         final IButton applyButton = new IButton("Ok");
         applyButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
         applyButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (!form.validate())
-                    return;
-
-                String refreshTime = form.getValueAsString("refreshTime");
-                String jobPageSize = form.getValueAsString("jobPageSize");
-                String taskPageSize = form.getValueAsString("taskPageSize");
-                String livelog = form.getValueAsString("logTime");
-
-                controller.setUserSettings(refreshTime, jobPageSize, taskPageSize, livelog, false);
+                settingsController.applySettings(form, false);
                 window.hide();
             }
         });
@@ -143,18 +148,7 @@ public class SettingsWindow {
         final IButton resetButton = new IButton("Reset");
         resetButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                SchedulerConfig.get().reload();
-                int refresh = SchedulerConfig.get().getClientRefreshTime();
-                int jobPage = SchedulerConfig.get().getPageSize(PaginatedItemType.JOB);
-                int taskPage = SchedulerConfig.get().getPageSize(PaginatedItemType.TASK);
-                int log = SchedulerConfig.get().getLivelogsRefreshTime();
-
-                form.setValue("refreshTime", refresh);
-                form.setValue("jobPageSize", jobPage);
-                form.setValue("taskPageSize", taskPage);
-                form.setValue("logTime", log);
-
-                controller.setUserSettings("" + refresh, "" + jobPage, "" + taskPage, "" + log, true);
+                settingsController.resetSettings(form);
             }
         });
 
@@ -187,8 +181,8 @@ public class SettingsWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(layout);
-        this.window.setWidth(380);
-        this.window.setHeight(210);
+        this.window.setWidth(440);
+        this.window.setHeight(265);
         this.window.setCanDragResize(true);
         this.window.centerInPage();
 
