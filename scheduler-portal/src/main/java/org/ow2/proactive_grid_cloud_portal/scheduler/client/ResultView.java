@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 
@@ -114,7 +115,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         radio.setValue("Text");
 
         final HiddenItem sess = new HiddenItem("sessionId");
-        sess.setValue(controller.getModel().getSessionId());
+        sess.setValue(LoginModel.getInstance().getSessionId());
 
         final HiddenItem job = new HiddenItem("jobId");
         final HiddenItem media = new HiddenItem("media");

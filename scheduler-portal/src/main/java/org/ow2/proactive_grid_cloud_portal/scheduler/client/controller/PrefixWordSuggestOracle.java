@@ -42,6 +42,7 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
@@ -185,7 +186,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
 
         final String jobId = this.schedulerModel.getSelectedJob().getId().toString();
 
-        this.scheduler.getJobTaskTagsPrefix(this.schedulerModel.getSessionId(), jobId, query, new AsyncCallback<String>() {
+        this.scheduler.getJobTaskTagsPrefix(LoginModel.getInstance().getSessionId(), jobId, query, new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);

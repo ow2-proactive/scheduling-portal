@@ -41,6 +41,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
@@ -105,7 +106,9 @@ public class SourceHostsView extends VLayout implements Reloadable {
 
         setWidth100();
 
-        rm.getNodeMBeansInfo(model.getSessionId(), url, mbeanname, mbeanAttrs, new AsyncCallback<String>() {
+        final LoginModel loginModel = LoginModel.getInstance();
+        
+        rm.getNodeMBeansInfo(loginModel.getSessionId(), url, mbeanname, mbeanAttrs, new AsyncCallback<String>() {
             public void onSuccess(String result) {
 
                 // Result should look like this: 
@@ -123,7 +126,7 @@ public class SourceHostsView extends VLayout implements Reloadable {
                 // }}]
                 // }
 
-                if (!model.isLoggedIn())
+                if (!loginModel.isLoggedIn())
                     return;
 
                 VLayout allpane = new VLayout();

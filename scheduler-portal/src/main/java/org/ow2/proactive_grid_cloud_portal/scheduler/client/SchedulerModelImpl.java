@@ -78,9 +78,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
     private static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
 
-    private boolean logged = false;
-    private String login = null;
-    private String sessionId = null;
+    
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
     private LinkedHashMap<Integer, Job> jobs = null;
     private long jobsRev = -1;
@@ -154,36 +152,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.requestedStatRange = new HashMap<String, Range>();
     }
 
-
-
-
-    @Override
-    public boolean isLoggedIn() {
-        return this.logged;
-    }
-
-    void setLoggedIn(boolean loggedIn) {
-        this.logged = loggedIn;
-        this.sessionId = null;
-    }
-
-    @Override
-    public String getLogin() {
-        return this.login;
-    }
-
-    void setLogin(String login) {
-        this.login = login;
-    }
-
-    @Override
-    public String getSessionId() {
-        return this.sessionId;
-    }
-
-    void setSessionId(String id) {
-        this.sessionId = id;
-    }
 
     @Override
     public SchedulerStatus getSchedulerStatus() {

@@ -42,6 +42,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -109,11 +110,13 @@ public class NetworkView extends VLayout implements Reloadable {
         final long t = System.currentTimeMillis();
         final List<Reloadable> charts = new LinkedList<Reloadable>();
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         // loading runtime info
-        rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=NetInterface,Name=*", interfacesAttrs,
+        rm.getNodeMBeansInfo(loginModel.getSessionId(), url, "sigar:Type=NetInterface,Name=*", interfacesAttrs,
                 new AsyncCallback<String>() {
                     public void onSuccess(String result) {
-                        if (!model.isLoggedIn())
+                        if (!loginModel.isLoggedIn())
                             return;
 
                         LogModel.getInstance()

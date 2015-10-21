@@ -40,6 +40,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
@@ -90,15 +91,17 @@ public class MBeanSourceDetailedView extends DetailViewer {
         final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         // loading runtime info
-        rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbean, attrs, new AsyncCallback<String>() {
+        rm.getNodeMBeanInfo(loginModel.getSessionId(), jmxServerUrl, mbean, attrs, new AsyncCallback<String>() {
             public void onSuccess(String result) {
 
                 if (extraCallback != null) {
                     extraCallback.onSuccess(result);
                 }
 
-                if (!model.isLoggedIn())
+                if (!loginModel.isLoggedIn())
                     return;
 
                 LogModel.getInstance().logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");

@@ -45,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 
 import com.google.gwt.core.client.GWT;
@@ -348,7 +349,7 @@ public class NSCreationWindow {
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 infraForm.setValue("nsName", nameItem.getValueAsString());
-                infraForm.setValue("sessionId", controller.getModel().getSessionId());
+                infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 infraForm.setCanSubmit(true);
 
                 /* this smartGWT form looks nice but cannot do callbacks ;

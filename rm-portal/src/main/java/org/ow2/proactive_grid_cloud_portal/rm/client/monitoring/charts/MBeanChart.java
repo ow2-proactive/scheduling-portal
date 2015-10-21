@@ -43,6 +43,7 @@ import java.util.LinkedHashMap;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -138,12 +139,14 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         AsyncCallback callback = new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (onFinish != null) {
                     onFinish.run();
                 }
-                if (!model.isLoggedIn())
+                if (!loginModel.isLoggedIn())
                     return;
 
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
@@ -167,10 +170,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         };
 
         if (realTime) {
-            rm.getNodeMBeanInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
+            rm.getNodeMBeanInfo(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
         } else {
             try {
-                rm.getNodeMBeanHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+                rm.getNodeMBeanHistory(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
             } catch (Exception e) {
                 LogModel.getInstance().logCriticalMessage(e.getMessage());
             }

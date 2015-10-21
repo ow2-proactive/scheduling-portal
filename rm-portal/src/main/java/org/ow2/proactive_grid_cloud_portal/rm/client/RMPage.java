@@ -43,6 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.visualization.client.VisualizationUtils;
@@ -324,7 +325,7 @@ public class RMPage implements LogListener {
         helpMenu.setItems(logMenuItem, aboutMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
-        String login = this.controller.getModel().getLogin();
+        String login = LoginModel.getInstance().getLogin();
         if (login != null)
             login = " <b>" + login + "</b>";
         else

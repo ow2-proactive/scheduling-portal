@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -200,7 +201,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
      * used by the current user  */
     private Map<String, NodeSource> filterMyNodes(Map<String, NodeSource> origNodes) {
 		
-        String username = controller.getModel().getLogin();
+        String username = LoginModel.getInstance().getLogin();
 
         Map<String, NodeSource> myNodesNsMap = new HashMap<String, NodeSource>();
         for (String nsid : origNodes.keySet()) {

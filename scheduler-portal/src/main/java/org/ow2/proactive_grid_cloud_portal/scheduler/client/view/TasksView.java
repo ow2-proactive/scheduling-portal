@@ -42,6 +42,7 @@ import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.NoVncUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
@@ -397,7 +398,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.setShowRecordComponents(true);
         this.tasksGrid.setShowRecordComponentsByCell(true);
         this.tasksGrid.setEmptyMessage("No tasks to show.");
-        this.ds = new TaskDS("taskds_" + controller.getModel().getSessionId());
+        this.ds = new TaskDS("taskds_" + LoginModel.getInstance().getSessionId());
         this.tasksGrid.setDataSource(this.ds);
 
         this.tasksGrid.addCellContextClickHandler(new CellContextClickHandler() {
@@ -634,7 +635,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     private void openNoVncPage(String taskName) {
         final String jobId = String.valueOf(controller.getModel().getSelectedJob().getId());
-        final String sessionId = controller.getModel().getSessionId();
+        final String sessionId = LoginModel.getInstance().getSessionId();
         String httpsRedirectUrl = NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
         com.google.gwt.user.client.Window.open(httpsRedirectUrl, "_blank", "");
     }

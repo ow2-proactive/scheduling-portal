@@ -40,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -164,7 +165,7 @@ public class FlatSubmitWindow {
         uploadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                form.setValue("sessionId", controller.getModel().getSessionId());
+                form.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 form.setCanSubmit(true);
 
                 form.setValue("flatCallback", JSUtil.register(new JSUtil.JSCallback() {

@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
 
@@ -187,7 +188,7 @@ public class SubmitWindow {
         VerticalPanel formContent = new VerticalPanel();
         Hidden hiddenField = new Hidden();
         hiddenField.setName("sessionId");
-        hiddenField.setValue(this.controller.getModel().getSessionId());
+        hiddenField.setValue(LoginModel.getInstance().getSessionId());
         formContent.add(hiddenField);
 
         final FileUpload fileUpload = new FileUpload();
@@ -324,7 +325,7 @@ public class SubmitWindow {
                         fpanel.setMethod(FormPanel.METHOD_POST);
                         fpanel.setAction(GWT.getModuleBaseURL() + "submitedit");
                         hiddenPane.add(new Hidden("job", job));
-                        hiddenPane.add(new Hidden("sessionId", controller.getModel().getSessionId()));
+                        hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
                         fpanel.setWidget(hiddenPane);
                         final Layout fpanelWrapper = new Layout();
                         fpanelWrapper.addMember(fpanel);

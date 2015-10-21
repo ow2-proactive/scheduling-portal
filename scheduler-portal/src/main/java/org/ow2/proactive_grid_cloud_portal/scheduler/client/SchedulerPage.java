@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
@@ -314,7 +315,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         checkBoxes.setNumCols(8);
         checkBoxes.setItems(c1, c2, c3, c4);
 
-        String user = controller.getModel().getLogin();
+        String user = LoginModel.getInstance().getLogin();
         // login unknown: credentials login; fetching only my jobs will be impossible server side
         if (user == null || user.trim().length() == 0) {
             c1.setDisabled(true);
@@ -538,7 +539,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
                 schedPauseButton, schedKillButton);
         adminMenuButton.setMenu(adminMenu);
 
-        String login = this.controller.getModel().getLogin();
+        String login = LoginModel.getInstance().getLogin();
         if (login != null)
             login = " <b>" + login + "</b>";
         else

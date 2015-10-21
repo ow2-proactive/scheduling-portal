@@ -52,6 +52,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
@@ -277,9 +278,10 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     private void __login(String sessionId, String login) {
-        model.setLoggedIn(true);
-        model.setLogin(login);
-        model.setSessionId(sessionId);
+        LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setLoggedIn(true);
+        loginModel.setLogin(login);
+        loginModel.setSessionId(sessionId);
 
         if (loginView != null)
             SchedulerController.this.loginView.destroy();
@@ -309,7 +311,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
-                model.getSessionId() + ")");
+                loginModel.getSessionId() + ")");
     }
 
     /**
@@ -321,12 +323,12 @@ public class SchedulerController extends Controller implements UncaughtException
      * @throws IllegalStateException not connected
      */
     public void logout() {
-        if (!this.model.isLoggedIn())
+        if (!LoginModel.getInstance().isLoggedIn())
             throw new IllegalStateException("Not connected");
 
         Settings.get().clearSetting(SESSION_SETTING);
 
-        scheduler.logout(model.getSessionId(), new AsyncCallback<Void>() {
+        scheduler.logout(LoginModel.getInstance().getSessionId(), new AsyncCallback<Void>() {
 
             public void onFailure(Throwable caught) {
             }
@@ -383,7 +385,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 model.setJobHtml(jobId, curHtml);
             } else {
                 final long t = System.currentTimeMillis();
-                this.scheduler.getJobHtml(model.getSessionId(), jobId, new AsyncCallback<String>() {
+                this.scheduler.getJobHtml(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
                     public void onSuccess(String result) {
                         model.setJobHtml(jobId, result);
                         LogModel.getInstance().logMessage("Fetched html for job " + jobId + " in " +
@@ -405,7 +407,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             model.setJobImagePath(jobId, curPath);
                         } else {
                             final long t = System.currentTimeMillis();
-                            scheduler.getJobImage(model.getSessionId(), jobId, new AsyncCallback<String>() {
+                            scheduler.getJobImage(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
                                 public void onSuccess(String result) {
                                     model.setJobImagePath(jobId, result);
                                     LogModel.getInstance().logMessage("Fetched image for job " + jobId + " in " +
@@ -442,7 +444,7 @@ public class SchedulerController extends Controller implements UncaughtException
             l.add(Integer.parseInt(id));
         }
 
-        this.scheduler.pauseJobs(this.model.getSessionId(), l, new AsyncCallback<Integer>() {
+        this.scheduler.pauseJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + " jobs");
             }
@@ -465,7 +467,7 @@ public class SchedulerController extends Controller implements UncaughtException
             l.add(Integer.parseInt(id));
         }
 
-        this.scheduler.resumeJobs(this.model.getSessionId(), l, new AsyncCallback<Integer>() {
+        this.scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance().logMessage("Successfully resumed " + result + "/" + l.size() + " jobs");
             }
@@ -488,7 +490,7 @@ public class SchedulerController extends Controller implements UncaughtException
             l.add(Integer.parseInt(id));
         }
 
-        this.scheduler.removeJobs(this.model.getSessionId(), l, new AsyncCallback<Integer>() {
+        this.scheduler.removeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
             }
@@ -511,7 +513,7 @@ public class SchedulerController extends Controller implements UncaughtException
             l.add(Integer.parseInt(id));
         }
 
-        this.scheduler.killJobs(this.model.getSessionId(), l, new AsyncCallback<Integer>() {
+        this.scheduler.killJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + " jobs");
             }
@@ -530,7 +532,7 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public void killTask(final Integer jobId, final String taskName) {
 
-        this.scheduler.killTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+        this.scheduler.killTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 caught.printStackTrace();
@@ -552,7 +554,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * @param taskName task name
      */
     public void restartTask(final Integer jobId, final String taskName) {
-        this.scheduler.restartTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+        this.scheduler.restartTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -574,7 +576,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * @param taskName task name
      */
     public void preemptTask(final Integer jobId, final String taskName) {
-        this.scheduler.preemptTask(model.getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
+        this.scheduler.preemptTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -600,7 +602,7 @@ public class SchedulerController extends Controller implements UncaughtException
             l.add(Integer.parseInt(id));
         }
 
-        this.scheduler.setPriorityByName(this.model.getSessionId(), l, priority.name(),
+        this.scheduler.setPriorityByName(LoginModel.getInstance().getSessionId(), l, priority.name(),
                 new AsyncCallback<Void>() {
             public void onSuccess(Void result) {
                 LogModel.getInstance().logMessage("Successfully set priority to " + priority.name() + " for " +
@@ -619,7 +621,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to start the scheduler, might fail depending the server state/rights
      */
     public void startScheduler() {
-        this.scheduler.startScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.startScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not start Scheduler:\n" + msg);
@@ -636,7 +638,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to stop the scheduler, might fail depending server state/rights
      */
     public void stopScheduler() {
-        this.scheduler.stopScheduler(this.model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.stopScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Scheduler stopped");
             }
@@ -653,7 +655,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to pause the scheduler, might fail depending server state/rights
      */
     public void pauseScheduler() {
-        this.scheduler.pauseScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.pauseScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Scheduler paused");
             }
@@ -670,7 +672,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to freeze the scheduler, might fail depending server state/rights
      */
     public void freezeScheduler() {
-        this.scheduler.freezeScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.freezeScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Scheduler freezed");
             }
@@ -687,7 +689,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to resume the scheduler, might fail depending server state/rights
      */
     public void resumeScheduler() {
-        this.scheduler.resumeScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.resumeScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Scheduler resumed");
             }
@@ -704,7 +706,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Attempt to kill the scheduler, might fail depending server state/rights
      */
     public void killScheduler() {
-        this.scheduler.killScheduler(model.getSessionId(), new AsyncCallback<Boolean>() {
+        this.scheduler.killScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Scheduler killed");
             }
@@ -783,7 +785,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     private void doFetchLiveLog(final String jobId) {
-        SchedulerController.this.scheduler.getLiveLogJob(model.getSessionId(), jobId,
+        SchedulerController.this.scheduler.getLiveLogJob(LoginModel.getInstance().getSessionId(), jobId,
                 new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (result.length() > 0) {
@@ -857,7 +859,7 @@ public class SchedulerController extends Controller implements UncaughtException
             stopLiveTimer();
         }
 
-        Request req = this.scheduler.getTaskOutput(model.getSessionId(), "" + jobId, task.getName(), logMode,
+        Request req = this.scheduler.getTaskOutput(LoginModel.getInstance().getSessionId(), "" + jobId, task.getName(), logMode,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -900,7 +902,7 @@ public class SchedulerController extends Controller implements UncaughtException
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getTaskServerLogs(final int jobId, final String taskname, final ShowLogsCallback logs) {
-        Request req = this.scheduler.getTaskServerLogs(model.getSessionId(), jobId, taskname,
+        Request req = this.scheduler.getTaskServerLogs(LoginModel.getInstance().getSessionId(), jobId, taskname,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -935,7 +937,7 @@ public class SchedulerController extends Controller implements UncaughtException
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobServerLogs(final int jobId, final ShowLogsCallback logs) {
-        Request req = this.scheduler.getJobServerLogs(model.getSessionId(), jobId,
+        Request req = this.scheduler.getJobServerLogs(LoginModel.getInstance().getSessionId(), jobId,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -1011,7 +1013,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * @param name name of the job
      */
     public void addSubmittingJob(int jobId, String name) {
-        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, model.getLogin(), 0, 0, 0, 0, -1,
+        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, LoginModel.getInstance().getLogin(), 0, 0, 0, 0, -1,
                 -1, -1);
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
@@ -1071,10 +1073,10 @@ public class SchedulerController extends Controller implements UncaughtException
             int offset = paginationModel.getOffset();
             int limit = paginationModel.getRange();
             if(tagFilter.equals("")){
-                this.taskUpdateRequest = this.scheduler.getTasks(model.getSessionId(), jobId, offset, limit, callback);
+                this.taskUpdateRequest = this.scheduler.getTasks(LoginModel.getInstance().getSessionId(), jobId, offset, limit, callback);
             }
             else{
-                this.taskUpdateRequest = this.scheduler.getTasksByTag(model.getSessionId(), jobId, tagFilter, offset, limit, callback);
+                this.taskUpdateRequest = this.scheduler.getTasksByTag(LoginModel.getInstance().getSessionId(), jobId, tagFilter, offset, limit, callback);
             }
         }
     }
@@ -1103,10 +1105,10 @@ public class SchedulerController extends Controller implements UncaughtException
 
                 SchedulerController.this.updateSchedulerStatus();
 
-                scheduler.schedulerStateRevision(model.getSessionId(), new AsyncCallback<Long>() {
+                scheduler.schedulerStateRevision(LoginModel.getInstance().getSessionId(), new AsyncCallback<Long>() {
 
                     public void onFailure(Throwable caught) {
-                        if (!model.isLoggedIn()) {
+                        if (!LoginModel.getInstance().isLoggedIn()) {
                             // might have been disconnected in between
                             return;
                         }
@@ -1128,7 +1130,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (timerUpdate % userFetchTick == 0) {
                     final long t1 = System.currentTimeMillis();
 
-                    scheduler.getSchedulerUsers(model.getSessionId(), new AsyncCallback<String>() {
+                    scheduler.getSchedulerUsers(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
                         public void onSuccess(String result) {
                             List<SchedulerUser> users;
 
@@ -1146,7 +1148,7 @@ public class SchedulerController extends Controller implements UncaughtException
                         }
 
                         public void onFailure(Throwable caught) {
-                            if (!model.isLoggedIn())
+                            if (!LoginModel.getInstance().isLoggedIn())
                                 return;
 
                             error("Failed to fetch scheduler users:<br>" + JSONUtils.getJsonErrorMessage(caught));
@@ -1157,10 +1159,10 @@ public class SchedulerController extends Controller implements UncaughtException
                 if (timerUpdate % statsFetchTick == 0) {
                     final long t1 = System.currentTimeMillis();
 
-                    scheduler.getStatistics(model.getSessionId(), new AsyncCallback<String>() {
+                    scheduler.getStatistics(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
                         public void onFailure(Throwable caught) {
                             String msg = JSONUtils.getJsonErrorMessage(caught);
-                            if (!model.isLoggedIn())
+                            if (!LoginModel.getInstance().isLoggedIn())
                                 return;
                             error("Failed to fetch scheduler stats:<br>" + msg);
                         }
@@ -1211,9 +1213,9 @@ public class SchedulerController extends Controller implements UncaughtException
 
                     final long t2 = System.currentTimeMillis();
 
-                    scheduler.getStatisticsOnMyAccount(model.getSessionId(), new AsyncCallback<String>() {
+                    scheduler.getStatisticsOnMyAccount(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
                         public void onFailure(Throwable caught) {
-                            if (!model.isLoggedIn())
+                            if (!LoginModel.getInstance().isLoggedIn())
                                 return;
                             error("Failed to fetch account stats:<br>" + JSONUtils.getJsonErrorMessage(caught));
                         }
@@ -1258,12 +1260,12 @@ public class SchedulerController extends Controller implements UncaughtException
         int offset = jobsPaginationController.getModel().getOffset();
         int range = jobsPaginationController.getModel().getRange();
 
-        scheduler.revisionAndjobsinfo(model.getSessionId(), offset, range, model.isFetchMyJobsOnly(),
+        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, model.isFetchMyJobsOnly(),
                 model.isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
                 new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
-                if (!model.isLoggedIn()) {
+                if (!LoginModel.getInstance().isLoggedIn()) {
                     // might have been disconnected in between
                     return;
                 }
@@ -1357,10 +1359,10 @@ public class SchedulerController extends Controller implements UncaughtException
      * fail hard on error
      */
     private void updateSchedulerStatus() {
-        scheduler.getSchedulerStatus(model.getSessionId(), new AsyncCallback<String>() {
+        scheduler.getSchedulerStatus(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
-                if (!model.isLoggedIn()) {
+                if (!LoginModel.getInstance().isLoggedIn()) {
                     // might have been disconnected in between
                     return;
                 }
@@ -1524,7 +1526,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void getUsage(String user, Date startDate, Date endDate) {
-        scheduler.getUsage(model.getSessionId(), user, startDate, endDate, new AsyncCallback<List<JobUsage>>() {
+        scheduler.getUsage(LoginModel.getInstance().getSessionId(), user, startDate, endDate, new AsyncCallback<List<JobUsage>>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -1543,7 +1545,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public void getUsersWithJobs() {
         final long t1 = System.currentTimeMillis();
 
-        scheduler.getSchedulerUsersWithJobs(model.getSessionId(), new AsyncCallback<String>() {
+        scheduler.getSchedulerUsersWithJobs(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 List<SchedulerUser> users;
 
@@ -1561,7 +1563,7 @@ public class SchedulerController extends Controller implements UncaughtException
             }
 
             public void onFailure(Throwable caught) {
-                if (!model.isLoggedIn())
+                if (!LoginModel.getInstance().isLoggedIn())
                     return;
 
                 LogModel.getInstance().logMessage("Failed to fetch scheduler users with jobs:<br>" + JSONUtils.getJsonErrorMessage(caught));
@@ -1570,7 +1572,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void putThirdPartyCredential(final String key, String value) {
-        scheduler.putThirdPartyCredential(model.getSessionId(), key, value, new AsyncCallback<Void>() {
+        scheduler.putThirdPartyCredential(LoginModel.getInstance().getSessionId(), key, value, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -1587,7 +1589,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void refreshThirdPartyCredentialsKeys() {
-        scheduler.thirdPartyCredentialKeySet(model.getSessionId(), new AsyncCallback<Set<String>>() {
+        scheduler.thirdPartyCredentialKeySet(LoginModel.getInstance().getSessionId(), new AsyncCallback<Set<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -1602,7 +1604,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void removeThirdPartyCredential(final String key) {
-        scheduler.removeThirdPartyCredential(model.getSessionId(), key, new AsyncCallback<Void>() {
+        scheduler.removeThirdPartyCredential(LoginModel.getInstance().getSessionId(), key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);

@@ -39,10 +39,12 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Canvas;
@@ -120,9 +122,9 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 String selMode = outSelect.getValueAsString();
                 if(selMode.equals(LOG_FULL)) {
                     if (taskSelect.getValue().equals(TASKS_ALL)) {
-                        downloadFullJobLogs(controller.getModel().getSessionId(), String.valueOf(jobId));
+                        downloadFullJobLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId));
                     } else {
-                        downloadFullTaskLogs(controller.getModel().getSessionId(), String.valueOf(jobId), (String) taskSelect.getValue());
+                        downloadFullTaskLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId), (String) taskSelect.getValue());
                     }
                     return;
                 }

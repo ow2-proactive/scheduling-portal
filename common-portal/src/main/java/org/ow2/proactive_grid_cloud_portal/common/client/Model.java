@@ -54,20 +54,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  */
 public interface Model {
 
-    /**
-     * @return true if a user is currently logged in
-     */
-    public abstract boolean isLoggedIn();
-
-    /**
-     * @return the username of the currently logged in user, if available, or null
-     */
-    public abstract String getLogin();
-
-    /**
-     * @return session id of the currently logged in user
-     */
-    public abstract String getSessionId();
+    
 
     /**
      * Contains one single statistic history source,

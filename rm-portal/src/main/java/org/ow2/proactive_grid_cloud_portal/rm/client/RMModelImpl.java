@@ -112,37 +112,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.statistics = new HashMap<String, StatHistory>();
     }
 
-    @Override
-    public boolean isLoggedIn() {
-        return this.logged;
-    }
-
-    void setLoggedIn(boolean l) {
-        this.logged = l;
-        this.sessionId = null;
-        this.login = null;
-    }
-
-    @Override
-    public String getLogin() {
-        return this.login;
-    }
-
-    void setLogin(String l) {
-        this.login = l;
-    }
-
-    @Override
-    public String getSessionId() {
-        if (logged)
-            return this.sessionId;
-        else
-            return null;
-    }
-
-    void setSessionId(String id) {
-        this.sessionId = id;
-    }
+    
 
     @Override
     public Map<String, NodeSource> getNodes() {

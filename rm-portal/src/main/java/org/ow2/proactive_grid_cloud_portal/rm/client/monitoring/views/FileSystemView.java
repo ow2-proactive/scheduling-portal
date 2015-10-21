@@ -41,6 +41,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -83,11 +84,13 @@ public class FileSystemView extends VLayout {
         final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         // loading runtime info
-        rm.getNodeMBeansInfo(model.getSessionId(), url, "sigar:Type=FileSystem,Name=*", attrs,
+        rm.getNodeMBeansInfo(loginModel.getSessionId(), url, "sigar:Type=FileSystem,Name=*", attrs,
                 new AsyncCallback<String>() {
                     public void onSuccess(String result) {
-                        if (!model.isLoggedIn())
+                        if (!loginModel.isLoggedIn())
                             return;
 
                         LogModel.getInstance()

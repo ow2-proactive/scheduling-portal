@@ -49,6 +49,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -236,9 +237,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     private void __login(String sessionId, String login) {
-        model.setLoggedIn(true);
-        model.setLogin(login);
-        model.setSessionId(sessionId);
+        LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setLoggedIn(true);
+        loginModel.setLogin(login);
+        loginModel.setSessionId(sessionId);
 
         if (this.loginPage != null) {
             this.loginPage.destroy();
@@ -267,7 +269,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
-            model.getSessionId() + ")");
+            loginModel.getSessionId() + ")");
     }
 
     /** 
@@ -275,11 +277,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * updates the page accordingly
      */
     void logout() {
-        if (!model.isLoggedIn())
+        LoginModel loginModel = LoginModel.getInstance();
+        if (!loginModel.isLoggedIn())
             return;
 
         Settings.get().clearSetting(SESSION_SETTING);
-        rm.logout(model.getSessionId(), new AsyncCallback<Void>() {
+        rm.logout(loginModel.getSessionId(), new AsyncCallback<Void>() {
 
             public void onFailure(Throwable caught) {
             }
@@ -289,7 +292,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         });
 
-        model.setLoggedIn(false);
+        loginModel.setLoggedIn(false);
         teardown(null);
         tryToLoginIfLoggedInScheduler();
     }
@@ -352,7 +355,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (dt > updateFreq * 1000 || changedRange) {
             this.lastStatHistReq = now;
 
-            this.statHistReq = rm.getStatHistory(model.getSessionId(), range, new AsyncCallback<String>() {
+            this.statHistReq = rm.getStatHistory(LoginModel.getInstance().getSessionId(), range, new AsyncCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
 
@@ -460,10 +463,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchRMMonitoring() {
         final long t = System.currentTimeMillis();
-
-        rm.getMonitoring(model.getSessionId(), new AsyncCallback<String>() {
+        
+        rm.getMonitoring(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                if (!model.isLoggedIn())
+                if (!LoginModel.getInstance().isLoggedIn())
                     return;
 
                 HashMap<String, NodeSource> nodes = parseRMMonitoring(result);
@@ -645,7 +648,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * @param failure call this if it fails
      */
     public void fetchSupportedInfrastructuresAndPolicies(final Runnable success, final Runnable failure) {
-        rm.getInfrastructures(model.getSessionId(), new AsyncCallback<String>() {
+        rm.getInfrastructures(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -656,7 +659,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             public void onSuccess(String result) {
                 model.setSupportedInfrastructures(parsePluginDescriptors(result));
 
-                rm.getPolicies(model.getSessionId(), new AsyncCallback<String>() {
+                rm.getPolicies(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
 
                     public void onFailure(Throwable caught) {
                         String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -750,7 +753,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         // there's no real incentive to storing locked node states
         // here, let's just try to do what the user says, and report
         // the error if it's nonsense
-        rm.lockNodes(model.getSessionId(), nodeUrls, new AsyncCallback<String>() {
+        rm.lockNodes(LoginModel.getInstance().getSessionId(), nodeUrls, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
@@ -769,7 +772,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         // there's no real incentive to storing locked node states
         // here, let's just try to do what the user says, and report
         // the error if it's nonsense
-        rm.unlockNodes(model.getSessionId(), nodeUrls, new AsyncCallback<String>() {
+        rm.unlockNodes(LoginModel.getInstance().getSessionId(), nodeUrls, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
@@ -828,7 +831,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
                     rm
-                            .removeNode(model.getSessionId(), model.getSelectedNode().getNodeUrl(), force,
+                            .removeNode(LoginModel.getInstance().getSessionId(), model.getSelectedNode().getNodeUrl(), force,
                                     callback);
                 }
             });
@@ -839,14 +842,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     new NodeRemovalCallback() {
                         public void run(boolean force) {
                             for (Node n : h.getNodes().values()) {
-                                rm.removeNode(model.getSessionId(), n.getNodeUrl(), force, callback);
+                                rm.removeNode(LoginModel.getInstance().getSessionId(), n.getNodeUrl(), force, callback);
                             }
                         }
                     });
         } else if (model.getSelectedNodeSource() != null) {
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
-                    rm.removeNodesource(model.getSessionId(), model.getSelectedNodeSource().getSourceName(),
+                    rm.removeNodesource(LoginModel.getInstance().getSessionId(), model.getSelectedNodeSource().getSourceName(),
                             force, callback);
                 }
             });
@@ -1050,7 +1053,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void executeScript(final String script, final String engine, final String nodeUrl, final Callback<String, String> syncCallBack) {
-        rm.executeNodeScript(model.getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
+        rm.executeNodeScript(LoginModel.getInstance().getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
                         JSONUtils.getJsonErrorMessage(caught));

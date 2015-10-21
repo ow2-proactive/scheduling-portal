@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -162,7 +164,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
         userSelect = new SelectItem("User");
         userSelect.disable();
-        userSelect.setValue(controller.getModel().getLogin());
+        userSelect.setValue(LoginModel.getInstance().getLogin());
         userSelect.setAlign(Alignment.LEFT);
         userSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
@@ -179,16 +181,16 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 for (SchedulerUser user : users) {
                     formatted.add(user.getUsername());
                 }
-                if (formatted.size() == 1 && formatted.get(0).equals(controller.getModel().getLogin())) {
+                if (formatted.size() == 1 && formatted.get(0).equals(LoginModel.getInstance().getLogin())) {
                     // only one user available and it is the current user, disable combo
                     userSelect.disable();
-                    userSelect.setValue(controller.getModel().getLogin());
+                    userSelect.setValue(LoginModel.getInstance().getLogin());
                 } else if (!formatted.isEmpty()) {
                     userSelect.enable();
                 }
 
-                if (userSelect.getValue() != null && userSelect.getValue().equals(controller.getModel().getLogin())
-                        && !formatted.contains(controller.getModel().getLogin())) {
+                if (userSelect.getValue() != null && userSelect.getValue().equals(LoginModel.getInstance().getLogin())
+                        && !formatted.contains(LoginModel.getInstance().getLogin())) {
                     // remove default value (user login) as he has not yet submitted jobs
                     userSelect.clearValue();
                 }
@@ -268,7 +270,7 @@ public class UsageView implements SchedulerListeners.UsageListener {
                 String to = DATE_FORMAT.format(readDateFromFormItem(datesForm.getItem("To")));
 
                 String url = GWT.getModuleBaseURL() + "usageexporter";
-                url += "?sessionId=" + controller.getModel().getSessionId();
+                url += "?sessionId=" + LoginModel.getInstance().getSessionId();
                 url += "&user=" + userSelect.getValue().toString();
                 url += "&startDate=" + URL.encodeQueryString(from);
                 url += "&endDate=" + URL.encodeQueryString(to);

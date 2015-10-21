@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
@@ -389,7 +390,7 @@ public class JobsView implements JobsUpdatedListener {
                 return base;
             }
         };
-        this.ds = new JobDS("jobds_" + controller.getModel().getSessionId());
+        this.ds = new JobDS("jobds_" + LoginModel.getInstance().getSessionId());
         this.jobsGrid.setDataSource(this.ds);
         this.jobsGrid.setCanGroupBy(false);
         this.jobsGrid.setCanReorderFields(false);

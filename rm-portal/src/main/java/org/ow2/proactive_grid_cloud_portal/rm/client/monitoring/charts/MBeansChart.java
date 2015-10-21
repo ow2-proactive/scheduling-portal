@@ -41,6 +41,7 @@ import java.util.Arrays;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -68,12 +69,14 @@ public abstract class MBeansChart extends MBeanChart {
         final long t = System.currentTimeMillis();
         final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         AsyncCallback<String> callback = new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (onFinish != null) {
                     onFinish.run();
                 }
-                if (!model.isLoggedIn())
+                if (!loginModel.isLoggedIn())
                     return;
 
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
@@ -97,10 +100,10 @@ public abstract class MBeansChart extends MBeanChart {
         };
 
         if (realTime) {
-            rm.getNodeMBeansInfo(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
+            rm.getNodeMBeansInfo(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
         } else {
             try {
-                rm.getNodeMBeansHistory(model.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+                rm.getNodeMBeansHistory(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
             } catch (Exception e) {
                 LogModel.getInstance().logCriticalMessage(e.getMessage());
             }

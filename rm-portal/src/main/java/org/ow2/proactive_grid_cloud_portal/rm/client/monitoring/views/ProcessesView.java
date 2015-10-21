@@ -41,6 +41,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
@@ -98,11 +99,13 @@ public class ProcessesView extends VLayout implements Reloadable {
         final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
+        final LoginModel loginModel = LoginModel.getInstance();
+        
         // loading runtime info
-        rm.getNodeMBeanInfo(model.getSessionId(), url, "sigar:Type=Processes", attrs,
+        rm.getNodeMBeanInfo(loginModel.getSessionId(), url, "sigar:Type=Processes", attrs,
                 new AsyncCallback<String>() {
                     public void onSuccess(String result) {
-                        if (!model.isLoggedIn())
+                        if (!loginModel.isLoggedIn())
                             return;
 
                         LogModel.getInstance().logMessage("Fetched Runtime info in " + (System.currentTimeMillis() - t) + "ms");
