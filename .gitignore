@@ -6,3 +6,5 @@ rm-portal/src/main/webapp/portal/
 scheduler-portal/src/main/webapp/WEB-INF/deploy/
 scheduler-portal/src/main/webapp/portal/
 
+/lib/
+/.settings/

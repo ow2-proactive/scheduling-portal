@@ -295,7 +295,8 @@ public class VisualizationViewImage implements VisualizationView {
             this.map = null;
 
             if (this.img != null) {
-                this.tasksUpdated(controller.getModel().getTasks());
+                List<Task> tasks = controller.getModel().getTasks(); 
+                this.tasksUpdated(tasks, tasks.size());
             }
         }
 
@@ -474,7 +475,8 @@ public class VisualizationViewImage implements VisualizationView {
             }
         });
 
-        this.tasksUpdated(controller.getModel().getTasks());
+        List<Task> tasks = controller.getModel().getTasks(); 
+        this.tasksUpdated(tasks, tasks.size());
     }
 
     private void updateNavButtonPos(boolean init) {
@@ -564,7 +566,7 @@ public class VisualizationViewImage implements VisualizationView {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(java.util.List)
      */
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
 
         if (this.boxes.isEmpty() || controller.getModel().isTasksDirty()) {
             return;
@@ -662,5 +664,9 @@ public class VisualizationViewImage implements VisualizationView {
         this.message.setWidth100();
 
         this.root.addMember(message);
+    }
+    
+    @Override
+    public void selectedJobUpdated() {
     }
 }

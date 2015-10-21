@@ -79,6 +79,12 @@ public class SchedulerListeners {
          * Called when the Job selection in the main Scheduler View Grid is canceled
          */
         public void jobUnselected();
+        
+        
+        /**
+         * Called when the selected job has been updated bacause of jobs revision.
+         */
+        public void selectedJobUpdated();
 
     }
 
@@ -128,7 +134,7 @@ public class SchedulerListeners {
          * 
          * @param tasks the latest TaskSet received by the model
          */
-        public void tasksUpdated(List<Task> tasks);
+        public void tasksUpdated(List<Task> tasks, long totalTasks);
 
         /**
          * Task update was requested but failed
@@ -245,5 +251,39 @@ public class SchedulerListeners {
 
     public interface ThirdPartyCredentialsListener {
         void keysUpdated(Set<String> thirdPartyCredentialsKeys);
+    }
+    
+    
+    /**
+     * Listener for tag suggestions events.
+     * @author the activeeon team
+     *
+     */
+    public interface TagSuggestionListener {
+    	
+        /**
+         * When the list of tag suggestion has been updated.
+         */
+        void tagSuggestionListUpdated();
+    }
+    
+    
+    
+    /**
+     * Listener for pagination events.
+     * @author the activeeon team.
+     *
+     */
+    public interface PaginationListener {
+        
+        /**
+         * when the displayed page changed.
+         */
+    	void pageChanged();
+    	
+    	/**
+    	 * when the total number of paginated items changed.
+    	 */
+    	void totalItemChanged();
     }
 }

@@ -45,7 +45,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -96,7 +98,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  *
  * @author mschnoor
  */
-public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListener, LogListener {
+public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListener, LogListener, PaginationListener {
 
     static SchedulerPage inst;
 
@@ -147,6 +149,8 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private long lastCriticalMessage = 0;
 
     private SchedulerController controller = null;
+    
+    protected JobsPaginationController paginationController;
 
     /**
      * Default constructor
@@ -155,6 +159,9 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      */
     public SchedulerPage(SchedulerController controller) {
         this.controller = controller;
+        this.paginationController = new JobsPaginationController(this.controller);
+        this.controller.setJobsPaginationController(paginationController);
+        this.controller.getModel().getJobsPaginationModel().addPaginationListener(this);
         buildAndShow();
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
         this.controller.getEventDispatcher().addJobsUpdatedListener(this);
@@ -165,14 +172,10 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     /**
      * Clicked next/previous page, set inderterminate state until {@link #jobsUpdated(JobSet)}
      */
-    private void pageChanged() {
-        int page = controller.getModel().getJobPage();
-        int size = controller.getModel().getJobPageSize();
+    public void pageChanged() {
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
-
-        String str = "" + (page * size + 1) + " - " + ((page + 1) * size);
-        this.pageLabel.setContents(str);
+        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
     }
 
     /*
@@ -180,18 +183,15 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
      */
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        int page = controller.getModel().getJobPage();
-        int size = controller.getModel().getJobPageSize();
-        String str = "" + (page * size + 1) + " - " + ((page + 1) * size);
-        this.pageLabel.setContents(str);
+        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
 
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
 
-        if (page > 0)
+        if (this.paginationController.hasPrevious())
             this.pagePreviousButton.enable();
 
-        if (jobs != null && jobs.size() == controller.getModel().getJobPageSize())
+        if (this.paginationController.hasNext())
             this.pageNextButton.enable();
     }
 
@@ -254,16 +254,14 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.pageNextButton.disable();
         this.pageNextButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.nextPage();
-                pageChanged();
+                paginationController.nextPage();
             }
         });
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.previousPage();
-                pageChanged();
+                paginationController.previousPage();
             }
         });
         this.pageLabel = new Label("");
@@ -863,5 +861,10 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public void logCriticalMessage(String message) {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
+    }
+    
+    
+    @Override
+    public void totalItemChanged() {
     }
 }

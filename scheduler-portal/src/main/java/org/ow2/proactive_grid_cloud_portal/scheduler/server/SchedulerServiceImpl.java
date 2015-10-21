@@ -434,19 +434,50 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /*
      * (non-Javadoc)
      *
-     * @see
+     * @seeimit
      * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasks(java.lang.
      * String, java.lang.String)
      */
     @Override
-    public String getTasks(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+    public String getTasks(final String sessionId, final String jobId, final int offset, final int limit) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                return restClient.getJobTaskStates(sessionId, jobId);
+                return restClient.getJobTaskStatesPaginated(sessionId, jobId, offset, limit);
             }
         });
     }
+    
+    
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasksByTag(java.lang.
+     * String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset, final int limit)
+    		throws RestServerException, ServiceException {
+    	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getJobTaskStatesByTagPaginated(sessionId, jobId, tag, offset, limit);
+            }
+        });
+    }
+    
+    
+    @Override
+    public String getJobTaskTagsPrefix(final String sessionId, final String jobId, final String prefix) throws RestServerException, ServiceException {
+    	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.getJobTaskTagsPrefix(sessionId, jobId, prefix);
+            }
+        });
+    }
+    
 
     /*
      * (non-Javadoc)

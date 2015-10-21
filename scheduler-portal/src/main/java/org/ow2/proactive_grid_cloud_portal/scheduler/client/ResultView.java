@@ -177,7 +177,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
     public void tasksUpdating(boolean jobChanged) {
     }
 
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         if (tasks.size() == this.taskSelect.getClientPickListData().length) {
             return;
         }
@@ -196,7 +196,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
     }
 
     public void tasksUpdatedFailure(String message) {
-        this.tasksUpdated(new ArrayList<Task>());
+        this.tasksUpdated(new ArrayList<Task>(), 0);
     }
 
     public void jobSelected(Job job) {
@@ -219,6 +219,11 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         root.hideMember(formPane);
         root.hideMember(visuPane);
         root.showMember(label);
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {    
     }
 
 }

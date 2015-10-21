@@ -41,6 +41,7 @@ import java.util.Date;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -59,6 +60,7 @@ public class Task implements Serializable, Comparable<Task> {
     private long finishedTime;
     private long executionDuration;
     private String description;
+    private String tag;
     private int maxNumberOfExec;
     private int numberOfExecLeft;
     private int maxNumberOfExecOnFailure;
@@ -254,15 +256,34 @@ public class Task implements Serializable, Comparable<Task> {
         return description;
     }
 
+
+
+    /**
+     * Getter of the task tag.
+     * @return the tag of the task.
+     */
+    public String getTag() {
+        return tag;
+    }
+
+
+    /**
+     * Setter of the task tag.
+     * @param tag the tag of the task.
+     */
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public String getIdName() {
         return "id";
     }
 
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "hostName=" +
-            hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
-            new Date(finishedTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
-            description + "]";
+                hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
+                new Date(finishedTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
+                description + "]";
     }
 
     public boolean equals(Object o) {
@@ -303,6 +324,11 @@ public class Task implements Serializable, Comparable<Task> {
             if (desc != null)
                 description = desc.stringValue();
         }
+        String tag = "";
+        JSONValue tagValue = jsonTask.get("tag");
+        if (tagValue != null && tagValue instanceof JSONString) {
+            tag = ((JSONString) tagValue).stringValue();
+        }
         int maxExec = (int) jsonTask.get("maxNumberOfExecution").isNumber().doubleValue();
         int execLeft = (int) taskInfo.get("numberOfExecutionLeft").isNumber().doubleValue();
         int execOnFailureLeft = (int) taskInfo.get("numberOfExecutionOnFailureLeft").isNumber().doubleValue();
@@ -315,8 +341,10 @@ public class Task implements Serializable, Comparable<Task> {
             }
         }
 
-        return new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
-            executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
+        Task result = new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
+                executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
+        result.setTag(tag);
+        return result;
     }
 
     /**
@@ -326,15 +354,15 @@ public class Task implements Serializable, Comparable<Task> {
      */
     public boolean isEquals(Task task) {
         return this.id == task.getId() && this.name.equals(task.getName()) &&
-            this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
-            this.startTime == task.getStartTime() && this.finishedTime == task.getFinishTime() &&
-            this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
+                this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
+                this.startTime == task.getStartTime() && this.finishedTime == task.getFinishTime() &&
+                this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
     }
 
     public boolean isEqual(Task t) {
         return this.id == t.getId() && this.name.equals(t.getName()) &&
-            this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
-            this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
-            this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
+                this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
+                this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
+                this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
     }
 }

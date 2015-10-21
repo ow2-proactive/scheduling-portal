@@ -40,6 +40,7 @@ import java.io.InputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -219,6 +220,83 @@ public interface RestClient {
     InputStream getJobTaskStates(@HeaderParam("sessionid")
                                                  String sessionId, @PathParam("jobid")
                                                  String jobId);
+    
+    
+    
+    /**
+     * Returns a list of taskState with pagination
+     * @param sessionId a valid session id
+     * @param jobId the job id
+     * @return a list of task' states of the job <code>jobId</code>
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesPaginated(
+            @HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit);
+    
+    
+    
+    /**
+     * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the job id for which the tasks are asked.
+     * @param tag the tag used to filter the tasks.
+     * @return a ClientResponse containing the response status and the JSON array including the task list, in case of success.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}")
+    @Produces("application/json")
+    InputStream getJobTaskStatesByTag(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("tasktag")
+    String tag);
+    
+    
+    
+    /**
+     * Returns a list of taskState of the tasks filtered by a given tag and paginated.
+     * @param sessionId a valid session id.
+     * @param jobId the job id.
+     * @param taskTag the tag used to filter the tasks.
+     * @param offset the number of the first task to fetch
+     * @param limit the number of the last task to fetch (non inclusive)
+     * @return a list of task' states of the job <code>jobId</code> filtered by a given tag, for a given pagination.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesByTagPaginated(
+            @HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId,
+            @PathParam("tasktag") String taskTag,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit);
+    
+    
+    
+    /**
+     * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
+     * @param sessionId a valid session id
+     * @param jobId jobid one wants to list the tasks' tags
+     * @param prefix the prefix used to filter tags
+     * @return a list of tasks' name
+     */
+    @GET
+    @Path("jobs/{jobid}/tasks/tags/startsWith/{prefix}")
+    @Produces("application/json")
+    InputStream getJobTaskTagsPrefix(@HeaderParam("sessionid")
+                                String sessionId, @PathParam("jobid")
+                                String jobId, @PathParam("prefix")
+                                      String prefix);
+
+    
 
     /**
      * Gets the state of a certain job.

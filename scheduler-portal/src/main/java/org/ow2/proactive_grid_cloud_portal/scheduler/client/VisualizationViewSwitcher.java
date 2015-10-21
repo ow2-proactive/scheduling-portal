@@ -96,8 +96,8 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
     }
 
     @Override
-    public void tasksUpdated(List<Task> tasks) {
-        this.activeVisualization.tasksUpdated(tasks);
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
+        this.activeVisualization.tasksUpdated(tasks, totalTasks);
     }
 
     @Override
@@ -151,6 +151,11 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
         layout.hideMember(layout.getMembers()[1]);
 
         return layout;
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {
     }
 
 }

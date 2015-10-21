@@ -420,7 +420,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     public void tasksUpdating(boolean jobChanged) {
     }
 
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
             return;
         }
@@ -454,5 +454,10 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     }
 
     public void tasksUpdatedFailure(String message) {
+    }
+    
+    
+    @Override
+    public void selectedJobUpdated() {
     }
 }
