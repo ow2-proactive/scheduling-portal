@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
@@ -58,6 +57,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.T
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
@@ -76,18 +76,17 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class SchedulerModelImpl extends SchedulerModel implements SchedulerEventDispatcher {
 
     private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
-    private static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
+    
 
     
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
     private LinkedHashMap<Integer, Job> jobs = null;
     private long jobsRev = -1;
     private Job selectedJob = null;
-    private List<Task> selectedTasks = null;
-    private boolean tasksDirty = false;
+    
     private HashMap<Integer, JobOutput> output = null;
     private HashSet<String> isLiveOutput = null;
-    private List<RemoteHint> remoteHints = null;
+    
     private HashMap<String, StringBuffer> liveOutput = null;
     private boolean fetchMyJobsOnly = false;
     private boolean fetchPending = true;
@@ -107,14 +106,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
-    private ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
     private ArrayList<SchedulerStatusListener> schedulerStateListeners = null;
     private ArrayList<JobOutputListener> jobOutputListeners = null;
-    
     private ArrayList<UsersListener> usersListeners = null;
     private ArrayList<UsersListener> usersWithJobsListeners = null;
     private ArrayList<StatisticsListener> statisticsListeners = null;
-    private ArrayList<RemoteHintListener> remoteHintListeners = null;
     private ArrayList<VisualizationListener> visuListeners = null;
     private ArrayList<StatsListener> statsListeners = null;
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
@@ -123,26 +119,21 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     private PaginationModel jobsPaginationModel;
 
-    private TasksNavigationModel tasksNavigationModel;
-
+    private TasksModel tasksModel;
 
     SchedulerModelImpl() {
         super();
 
         this.output = new HashMap<Integer, JobOutput>();
         this.isLiveOutput = new HashSet<String>();
-        this.remoteHints = new ArrayList<RemoteHint>();
         this.liveOutput = new HashMap<String, StringBuffer>();
         this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
         this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
-        this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
         this.schedulerStateListeners = new ArrayList<SchedulerStatusListener>();
         this.jobOutputListeners = new ArrayList<JobOutputListener>();
-       
         this.usersListeners = new ArrayList<UsersListener>();
         this.usersWithJobsListeners = new ArrayList<UsersListener>();
         this.statisticsListeners = new ArrayList<StatisticsListener>();
-        this.remoteHintListeners = new ArrayList<RemoteHintListener>();
         this.visuListeners = new ArrayList<VisualizationListener>();
         this.statsListeners = new ArrayList<StatsListener>();
         this.usageListeners = new ArrayList<SchedulerListeners.UsageListener>();
@@ -272,12 +263,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
 
         // tasks list will change, notify tasks listeners
-        for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            if (j == null)
-                list.tasksUpdated(new ArrayList<Task>(), 0);
-            else
-                list.tasksUpdating(selChanged);
-        }
+        this.tasksModel.notifyTasksChanging(j, selChanged);
     }
 
 
@@ -308,51 +294,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
 
 
-    /**
-     * Modifies the tasks set
-     * triggers TasksUpdated event
-     * 
-     * @param tasks the new TaskSet
-     */
-    void setTasks(List<Task> tasks, long totalTasks) {
-        this.selectedTasks = tasks;
-        this.tasksNavigationModel.getPaginationModel().setTotalItems(totalTasks);
-        for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            if(this.selectedJob == null){
-                list.tasksUpdated(tasks, 0);
-            }
-            else{
-                list.tasksUpdated(tasks, totalTasks);
-            }
-        }
-    }
+    
 
 
-    /**
-     * Notify task updated listeners that updating failed
-     * 
-     * @param message the error message
-     */
-    void taskUpdateError(String message) {
-        this.selectedTasks = new ArrayList<Task>();
-        for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            list.tasksUpdatedFailure(message);
-        }
-    }
-
-    @Override
-    public List<Task> getTasks() {
-        return this.selectedTasks;
-    }
-
-    @Override
-    public boolean isTasksDirty() {
-        return this.tasksDirty;
-    }
-
-    void setTasksDirty(boolean b) {
-        this.tasksDirty = b;
-    }
+    
 
     @Override
     public JobOutput getJobOutput(int jobId) {
@@ -403,37 +348,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
     private void addRemoteHintIfNecessary(String line) {
-        if (line.contains(PA_REMOTE_CONNECTION)) {
-            this.addRemoteHint(line);
+        if (line.contains(TasksModel.PA_REMOTE_CONNECTION)) {
+            tasksModel.addRemoteHint(line);
         }
     }
 
-    /**
-     * Add a remote hint
-     * will notify listeners if it is well formed
-     * 
-     * @param remoteHint a string containing PA_REMOTE_CONNECTION
-     */
-    void addRemoteHint(String remoteHint) {
-        String[] expl = remoteHint.split(PA_REMOTE_CONNECTION);
-        if (expl.length < 2)
-            return;
-
-        expl = expl[1].split(";");
-        if (expl.length < 4)
-            return;
-
-        RemoteHint rh = new RemoteHint();
-        rh.taskId = expl[1];
-        rh.type = expl[2];
-        rh.argument = expl[3];
-
-        this.remoteHints.add(rh);
-
-        for (RemoteHintListener rhl : this.remoteHintListeners) {
-            rhl.remoteHintRead(rh);
-        }
-    }
+    
 
     /**
      * Notify listeners that the output of a given job has changed
@@ -515,10 +435,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    @Override
-    public List<RemoteHint> getRemoteHints() {
-        return this.remoteHints;
-    }
+    
 
     @Override
     public boolean isFetchMyJobsOnly() {
@@ -724,13 +641,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.jobSelectedListeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addTasksUpdatedListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener)
-     */
-    public void addTasksUpdatedListener(TasksUpdatedListener listener) {
-        this.tasksUpdatedListeners.add(listener);
-    }
+    
 
     /*
      * (non-Javadoc)
@@ -774,16 +685,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.statisticsListeners.add(listener);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addRemoteHintListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.RemoteHintListener)
-     */
-    public void addRemoteHintListener(RemoteHintListener listener) {
-        this.remoteHintListeners.add(listener);
-    }
-
-
-
 
     /*
      * (non-Javadoc)
@@ -810,23 +711,20 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-
-
-    public TasksNavigationModel getTasksNavigationModel() {
-        return tasksNavigationModel;
-    }
-
-
-
-
     public void setJobsPaginationModel(PaginationModel jobsPaginationModel) {
         this.jobsPaginationModel = jobsPaginationModel;
     }
 
 
-
-
-    public void setTasksNavigationModel(TasksNavigationModel tasksNavigationModel) {
-        this.tasksNavigationModel = tasksNavigationModel;
+    public TasksModel getTasksModel() {
+        return tasksModel;
     }
+
+
+    public void setTasksModel(TasksModel tasksModel) {
+        this.tasksModel = tasksModel;
+    }
+    
+    
+    
 }

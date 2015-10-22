@@ -63,6 +63,7 @@ public class SchedulerPortal implements EntryPoint {
             public void onSuccess(Map<String, String> result) {
                 SchedulerConfig.get().load(result);
                 Settings.load();
+                Scheduler.setSchedulerService(rpcService);
                 SchedulerController c = new SchedulerController(rpcService);
                 GWT.setUncaughtExceptionHandler(c);
             }

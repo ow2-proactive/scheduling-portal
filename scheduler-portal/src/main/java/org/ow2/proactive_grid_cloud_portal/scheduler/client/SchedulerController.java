@@ -56,12 +56,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -77,6 +72,7 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -128,8 +124,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
     /** contains all pending getTaskOutput requests, taskId as key */
     private Map<String, Request> taskOutputRequests = null;
-    /** pending taskUpdate request, or null */
-    private Request taskUpdateRequest = null;
+    
 
     /** ids of jobs we should auto fetch */
     private Set<String> liveOutputJobs = null;
@@ -153,9 +148,7 @@ public class SchedulerController extends Controller implements UncaughtException
     private Timer autoLoginTimer;
 
 
-    protected TasksNavigationController taskNavigationController;
-    
-    protected TasksPaginationController tasksPaginationController;
+    protected TasksController tasksController;
 
 
     protected JobsPaginationController jobsPaginationController;
@@ -290,7 +283,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
         this.fetchJobs();
         model.jobsUpdating();
-        SchedulerController.this.startTimer();
+        this.startTimer();
 
         String lstr = "";
         if (login != null) {
@@ -343,6 +336,15 @@ public class SchedulerController extends Controller implements UncaughtException
         teardown(null);
         tryToLoginIfLoggedInRm();
     }
+    
+    
+    
+    public Layout buildTaskView(){
+        this.tasksController = new TasksController(this);
+        return this.tasksController.buildView();
+    }
+    
+    
 
     /**
      * Job selection has changed, notify the views
@@ -364,7 +366,7 @@ public class SchedulerController extends Controller implements UncaughtException
         }
 
         this.model.selectJob(id);
-        this.model.setTasksDirty(true);
+        this.tasksController.updatingTasks();
 
         if (visuFetchEnabled) {
             visuFetch(jobId);
@@ -525,70 +527,7 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-    /**
-     * Kill a task within a job 
-     * @param jobId job id
-     * @param taskName task name
-     */
-    public void killTask(final Integer jobId, final String taskName) {
-
-        this.scheduler.killTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                caught.printStackTrace();
-
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to kill task: " + msg);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully killed task " + taskName + " in job " + jobId);
-            }
-        });
-    }
-
-    /**
-     * Restart a task within a job 
-     * @param jobId job id
-     * @param taskName task name
-     */
-    public void restartTask(final Integer jobId, final String taskName) {
-        this.scheduler.restartTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-                caught.printStackTrace();
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to restart task: " + msg);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully restarted task " + taskName + " in job " + jobId);
-            }
-        });
-    }
-
-    /**
-     * Preempt a task within a job 
-     * @param jobId job id
-     * @param taskName task name
-     */
-    public void preemptTask(final Integer jobId, final String taskName) {
-        this.scheduler.preemptTask(LoginModel.getInstance().getSessionId(), jobId, taskName, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to preempt task: " + msg);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully preempted task " + taskName + " in job " + jobId);
-            }
-        });
-    }
+    
 
     /**
      * Apply the specified priority to the given job
@@ -727,7 +666,7 @@ public class SchedulerController extends Controller implements UncaughtException
         if (j == null)
             return;
 
-        if (this.model.getTasks().isEmpty())
+        if (this.model.getTasksModel().getTasks().isEmpty())
             return;
 
         final String jobId = "" + j.getId();
@@ -750,7 +689,7 @@ public class SchedulerController extends Controller implements UncaughtException
         if (j == null)
             return;
 
-        if (this.model.getTasks().isEmpty())
+        if (this.model.getTasksModel().getTasks().isEmpty())
             return;
 
         final String jobId = String.valueOf(j.getId());
@@ -824,12 +763,12 @@ public class SchedulerController extends Controller implements UncaughtException
             return;
 
         Job j = this.model.getSelectedJob();
-        if (this.model.getTasks().isEmpty()) {
+        if (this.model.getTasksModel().getTasks().isEmpty()) {
             // notify the listeners, they will figure out there is no output
             this.model.updateOutput(j.getId());
         }
 
-        for (Task t : this.model.getTasks()) {
+        for (Task t : this.model.getTasksModel().getTasks()) {
             switch (t.getStatus()) {
             case SKIPPED:
             case PENDING:
@@ -979,32 +918,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
 
-
-
-
-    public TasksNavigationController getTaskNavigationController() {
-        return taskNavigationController;
-    }
-
-    public void setTaskNavigationController(
-            TasksNavigationController taskNavigationController) {
-        this.taskNavigationController = taskNavigationController;
-    }
-    
-    
-    
-    
-    
-
-    public TasksPaginationController getTasksPaginationController() {
-        return tasksPaginationController;
-    }
-
-    public void setTasksPaginationController(
-            TasksPaginationController tasksPaginationController) {
-        this.tasksPaginationController = tasksPaginationController;
-    }
-
     /**
      * Add a fake submitted job to the list
      * the name is not important, it will be updated
@@ -1032,58 +945,6 @@ public class SchedulerController extends Controller implements UncaughtException
         this.startLiveTimer();
     }
     
-    
-
-    /**
-     * Updates the current task list depending the current job selection in the model 
-     */
-    public void updateTasks() {
-
-        if (model.getSelectedJob() == null) {
-            SchedulerController.this.model.setTasks(new ArrayList<Task>(), 0);
-        } else {
-            final String jobId = "" + model.getSelectedJob().getId();
-
-            AsyncCallback<String> callback = new AsyncCallback<String>() {
-
-                public void onFailure(Throwable caught) {
-                    String msg = JSONUtils.getJsonErrorMessage(caught);
-
-                    SchedulerController.this.model.taskUpdateError(msg);
-                    LogModel.getInstance().logImportantMessage("Failed to update tasks for job " +
-                            jobId + ": " + msg);
-                }
-
-                public void onSuccess(String result) {
-                    try {
-                        JSONPaginatedTasks tasks = SchedulerJSONUtils.parseJSONPaginatedTasks(result);
-                        SchedulerController.this.model.setTasksDirty(false);
-                        SchedulerController.this.model.setTasks(tasks.getTasks(), tasks.getTotalTasks());
-                        // do not model.logMessage() : this is repeated by a timer
-                    } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
-                        error(e.getMessage());
-                    }
-                }
-            };
-
-            TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
-            String tagFilter = navigationModel.getCurrentTagFilter();
-
-            PaginationModel paginationModel = navigationModel.getPaginationModel();
-            int offset = paginationModel.getOffset();
-            int limit = paginationModel.getRange();
-            if(tagFilter.equals("")){
-                this.taskUpdateRequest = this.scheduler.getTasks(LoginModel.getInstance().getSessionId(), jobId, offset, limit, callback);
-            }
-            else{
-                this.taskUpdateRequest = this.scheduler.getTasksByTag(LoginModel.getInstance().getSessionId(), jobId, tagFilter, offset, limit, callback);
-            }
-        }
-    }
-
-
-
-
 
     /**
      * Starts the Timer that will periodically fetch the current scheduler state
@@ -1623,10 +1484,17 @@ public class SchedulerController extends Controller implements UncaughtException
 
     public void resetPendingTasksRequests(){
         this.taskOutputRequests.clear();
-        if (this.taskUpdateRequest != null) {
-            this.taskUpdateRequest.cancel();
-            this.taskUpdateRequest = null;
-        }
+        this.tasksController.resetPendingTasksRequests();
     }
+
+    public TasksController getTasksController() {
+        return tasksController;
+    }
+
+    public void setTasksController(TasksController tasksController) {
+        this.tasksController = tasksController;
+    }
+    
+    
 
 }

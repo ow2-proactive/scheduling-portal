@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -295,7 +296,7 @@ public class VisualizationViewImage implements VisualizationView {
             this.map = null;
 
             if (this.img != null) {
-                List<Task> tasks = controller.getModel().getTasks(); 
+                List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks(); 
                 this.tasksUpdated(tasks, tasks.size());
             }
         }
@@ -475,7 +476,7 @@ public class VisualizationViewImage implements VisualizationView {
             }
         });
 
-        List<Task> tasks = controller.getModel().getTasks(); 
+        List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks(); 
         this.tasksUpdated(tasks, tasks.size());
     }
 
@@ -568,7 +569,7 @@ public class VisualizationViewImage implements VisualizationView {
      */
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
 
-        if (this.boxes.isEmpty() || controller.getModel().isTasksDirty()) {
+        if (this.boxes.isEmpty() || ((SchedulerModelImpl) controller.getModel()).getTasksModel().isTasksDirty()) {
             return;
         }
 

@@ -89,7 +89,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
     public ResultView(SchedulerController controller) {
         this.controller = controller;
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
+        ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
         controller.getEventDispatcher().addJobSelectedListener(this);
     }
 

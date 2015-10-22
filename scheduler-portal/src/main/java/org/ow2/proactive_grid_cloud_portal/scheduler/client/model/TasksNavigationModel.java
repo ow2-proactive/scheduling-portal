@@ -86,13 +86,24 @@ public class TasksNavigationModel {
     private ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
 
 
+    protected TasksModel parentModel;
+    
+    
 
-    public TasksNavigationModel() {
+    public TasksNavigationModel(TasksModel parentModel) {
+        this.parentModel = parentModel;
+        this.parentModel.setTasksNavigationModel(this);
+        
         this.availableTags = new PatriciaTrie<String>();
         this.paginationModel = new PaginationModel(PaginatedItemType.TASK);
 
         this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
+    }
+    
+    
+    public TasksModel getParentModel() {
+        return parentModel;
     }
 
 

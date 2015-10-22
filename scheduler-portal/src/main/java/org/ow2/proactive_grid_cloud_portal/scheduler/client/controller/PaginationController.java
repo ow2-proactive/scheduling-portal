@@ -35,10 +35,9 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import com.smartgwt.client.widgets.layout.Layout;
 
 /**
  * The controller for the item pagination logic.
@@ -52,19 +51,13 @@ public abstract class PaginationController {
      */
     protected PaginationModel model;
 
-    /**
-     * The main controller.
-     */
-    protected SchedulerController schedulerController;
-
    
 
     /**
      * Builds a controller for the pagination logic.
      * @param schedulerController the main controller.
      */
-    public PaginationController(SchedulerController schedulerController){
-        this.schedulerController = schedulerController;
+    public PaginationController(){
     }
 
 
@@ -138,6 +131,9 @@ public abstract class PaginationController {
      * Fetch the items for the current page.
      */
     public abstract void fetch();
+    
+    
+    public abstract Layout buildView();
 
 
 

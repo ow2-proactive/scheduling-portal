@@ -102,7 +102,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.controller = controller;
         this.controller.getEventDispatcher().addJobSelectedListener(this);
         this.controller.getEventDispatcher().addJobOutputListener(this);
-        this.controller.getEventDispatcher().addTasksUpdatedListener(this);
+        ((SchedulerModelImpl) this.controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
     }
 
     /**
@@ -151,7 +151,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
                     String taskName = (String) taskSelect.getValue();
                     Task task = null;
-                    for (Task t : controller.getModel().getTasks()) {
+                    for (Task t : ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks()) {
                         if (taskName.equals(t.getName())) {
                             task = t;
                             break;
@@ -394,7 +394,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         } else {
             String taskName = (String) this.taskSelect.getValue();
             Task task = null;
-            for (Task t : this.controller.getModel().getTasks()) {
+            for (Task t : ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks()) {
                 if (taskName.equals(t.getName())) {
                     task = t;
                     break;

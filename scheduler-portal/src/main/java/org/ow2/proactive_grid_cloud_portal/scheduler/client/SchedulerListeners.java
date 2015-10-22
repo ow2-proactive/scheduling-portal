@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 

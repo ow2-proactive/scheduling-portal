@@ -37,10 +37,10 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -95,11 +95,10 @@ public class TasksPaginationView implements TasksUpdatedListener, PaginationList
     private TextBox txtPageNumber = null;
 
     
-    public TasksPaginationView(SchedulerController controller){
-        this.paginationController = new TasksPaginationController(controller);
-        controller.setTasksPaginationController(paginationController);
+    public TasksPaginationView(TasksController controller){
+        this.paginationController = controller.getTaskNavigationController().getPaginationController();
         this.paginationController.getModel().addPaginationListener(this);
-        controller.getEventDispatcher().addTasksUpdatedListener(this);
+        controller.getModel().addTasksUpdatedListener(this);
     }
 
     /**

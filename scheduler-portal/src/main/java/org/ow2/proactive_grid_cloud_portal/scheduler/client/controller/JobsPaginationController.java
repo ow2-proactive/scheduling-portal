@@ -40,6 +40,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 
+import com.smartgwt.client.widgets.layout.Layout;
+
 /**
  * Controller for the jobs pagination logic.
  * @author the activeeon team.
@@ -47,21 +49,29 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
  */
 public class JobsPaginationController extends PaginationController{
 
+    protected SchedulerController itemsController;
+    
     public JobsPaginationController(SchedulerController schedulerController) {
-        super(schedulerController);
+        this.itemsController = schedulerController;
         this.model = new PaginationModel(PaginatedItemType.JOB);
-        ((SchedulerModelImpl) this.schedulerController.getModel()).setJobsPaginationModel(this.model);
+        ((SchedulerModelImpl) schedulerController.getModel()).setJobsPaginationModel(this.model);
     }
 
 
     @Override
     public void fetch() {
-        this.schedulerController.fetchJobs();
+        this.itemsController.fetchJobs();
     }
     
     
     @Override
     public boolean hasNext() {
         return this.model.getTotalItems() == this.model.getPageSize();
+    }
+    
+    @Override
+    public Layout buildView() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -40,10 +40,8 @@ import org.ow2.proactive_grid_cloud_portal.common.client.EventDispatcher;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 
@@ -60,8 +58,6 @@ public interface SchedulerEventDispatcher extends EventDispatcher {
 
     void addJobSelectedListener(JobSelectedListener listener);
 
-    void addTasksUpdatedListener(TasksUpdatedListener listener);
-
     void addSchedulerStatusListener(SchedulerStatusListener listener);
 
     void addJobOutputListener(JobOutputListener listener);
@@ -71,8 +67,6 @@ public interface SchedulerEventDispatcher extends EventDispatcher {
     void addUsersWithJobsListener(UsersListener listener);
 
     void addStatisticsListener(StatisticsListener listener);
-
-    void addRemoteHintListener(RemoteHintListener listener);
 
     void addVisualizationListener(VisualizationListener listener);
 

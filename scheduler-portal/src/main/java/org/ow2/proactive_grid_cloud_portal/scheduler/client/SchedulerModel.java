@@ -42,7 +42,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 
@@ -82,16 +82,6 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract Job getSelectedJob();
 
-
-    /**
-     * @return the list of tasks corresponding the currently selected job
-     */
-    public abstract List<Task> getTasks();
-
-    /**
-     * @return true if the current tasks list does not match the selected job
-     */
-    public abstract boolean isTasksDirty();
 
     /**
      * If it has been previously stored, the model may have cached the partial or
@@ -135,21 +125,7 @@ public abstract class SchedulerModel implements Model {
 
     public abstract void setJobHtml(String jobId, String curHtml);
 
-    public static class RemoteHint {
-        public String taskId;
-        public String type;
-        public String argument;
-    }
-
-    /**
-     * Return all the remote hints that have been read so far by the model
-     * this corresponds to all log lines containing 'PA_REMOTE_CONNECTION' that
-     * were fetched in logs
-     * If logs for the task were not fetched, remote hints won't be stored here
-     * 
-     * @return all remote hints read so far
-     */
-    public abstract List<RemoteHint> getRemoteHints();
+   
 
     /**
      * @return true if the model should only store the jobs of the current user
@@ -195,7 +171,5 @@ public abstract class SchedulerModel implements Model {
 
 
     public abstract PaginationModel getJobsPaginationModel();
-
-    public abstract TasksNavigationModel getTasksNavigationModel();
 
 }

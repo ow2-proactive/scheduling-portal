@@ -38,7 +38,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
@@ -79,13 +78,13 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     /**
      * The main controller of the application.
      */
-    private SchedulerController schedulerController;
+    //private SchedulerController schedulerController;
     
     
     /**
      * Controller for the navigation logic.
      */
-    private TasksNavigationController navigationController;
+    private TasksNavigationController controller;
     
     
 
@@ -94,14 +93,11 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      * Build the view for the tasks navigation.
      * @param controller the main controller.
      */
-    public TasksNavigationView(SchedulerController controller){
-        this.navigationController = new TasksNavigationController(controller);
-        this.schedulerController = controller;
-        this.schedulerController.setTaskNavigationController(this.navigationController);
-
-        this.navigationController.getModel().addTagSuggestionListener(this);
-        this.schedulerController.getEventDispatcher().addJobSelectedListener(this);
-        this.schedulerController.getEventDispatcher().addTasksUpdatedListener(this);
+    public TasksNavigationView(TasksNavigationController controller){
+        this.controller = controller;
+        this.controller.getModel().addTagSuggestionListener(this);
+        this.controller.getModel().getParentModel().getParentModel().addJobSelectedListener(this);
+        this.controller.getModel().getParentModel().addTasksUpdatedListener(this);
     }
 
 
@@ -110,7 +106,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      * @return a layout containing the view content.
      */
     public Layout build() {
-        this.tagSearchTextBox = new SuggestBox(this.navigationController.getTagSuggestionOracle());
+        this.tagSearchTextBox = new SuggestBox(this.controller.getTagSuggestionOracle());
 
         this.tagSearchTextBox.addStyleName("searchBox");
         this.tagSearchTextBox.getElement().setAttribute("placeholder", "tag...");
@@ -143,7 +139,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
-                navigationController.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
+                controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
             }
         });
 
@@ -197,7 +193,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      */
     protected void changeTagFilterHandler(){
         String tag = tagSearchTextBox.getText();
-        this.navigationController.setTaskTagFilter(tag);
+        this.controller.setTaskTagFilter(tag);
     }
 
 
@@ -208,7 +204,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public void jobSelected(Job job) {
         this.tagSearchTextBox.setEnabled(true);
         this.tagSearchTextBox.setText("");
-        this.navigationController.resetNavigation();
+        this.controller.resetNavigation();
     }
 
 
@@ -216,7 +212,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public void jobUnselected() {
         this.tagSearchTextBox.setText("");
         this.tagSearchTextBox.setEnabled(false);
-        this.navigationController.stopNavigation();
+        this.controller.stopNavigation();
        
     }
 
@@ -226,14 +222,14 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      * @return the tasks pagination controller.
      */
     public TasksPaginationController getTaskPaginationController() {
-        return navigationController.getPaginationController();
+        return controller.getPaginationController();
     }
     
     
 
     @Override
     public void selectedJobUpdated() {
-        this.navigationController.refresh();
+        this.controller.refresh();
     }
 
 }

@@ -45,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
@@ -93,13 +94,12 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     /**
      * Builds a tag suggestions controller from the main scheduler model and scheduler service.
      * @param model the main scheduler model.
-     * @param scheduler scheduler service to send request to the scheduler server.
      */
-    public PrefixWordSuggestOracle(SchedulerModelImpl model, SchedulerServiceAsync scheduler) {
-        this.schedulerModel = model;
-        this.model = model.getTasksNavigationModel();
-        this.scheduler = scheduler;
-        model.addJobSelectedListener(this);
+    public PrefixWordSuggestOracle(TasksNavigationModel model) {
+        this.schedulerModel = model.getParentModel().getParentModel();
+        this.model = model;
+        this.scheduler = Scheduler.getSchedulerService();
+        this.schedulerModel.addJobSelectedListener(this);
     }
 
 

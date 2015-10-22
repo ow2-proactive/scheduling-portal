@@ -43,15 +43,14 @@ import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
+import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -118,8 +117,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private JobsView jobGrid = null;
     /** view displaying info about the selected job */
     private JobInfoView jobInfo = null;
-    /** list of tasks for the selected job in jobGrid */
-    private TasksView tasksView = null;
+    
     /** output for the selected job */
     private OutputView outputView = null;
     /** server logs for the selected job */
@@ -745,8 +743,8 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
 
         final Tab tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri()
                 .asString());
-        this.tasksView = new TasksView(this.controller);
-        tasksTab.setPane(this.tasksView.build());
+        
+        tasksTab.setPane(this.controller.buildTaskView());
 
         visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
         this.visuView = new VisualizationViewSwitcher(this.controller);

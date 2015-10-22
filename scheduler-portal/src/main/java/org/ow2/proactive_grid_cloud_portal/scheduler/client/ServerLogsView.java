@@ -40,6 +40,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.StringUtil;
 import com.smartgwt.client.widgets.Canvas;
@@ -88,7 +89,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
     public ServerLogsView(SchedulerController controller) {
         this.controller = controller;
         this.controller.getEventDispatcher().addJobSelectedListener(this);
-        this.controller.getEventDispatcher().addTasksUpdatedListener(this);
+        ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
     }
 
     /**

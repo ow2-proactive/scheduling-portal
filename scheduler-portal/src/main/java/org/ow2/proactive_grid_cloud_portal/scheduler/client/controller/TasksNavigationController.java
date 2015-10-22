@@ -35,10 +35,10 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksNavigationView;
+
+import com.smartgwt.client.widgets.layout.Layout;
 
 /**
  * Controller for the task navigation logic.
@@ -50,7 +50,7 @@ public class TasksNavigationController {
     /**
      * The main controller of the project.
      */
-    private SchedulerController schedulerController;
+    private TasksController parentController;
 
     /**
      * The controller for the tasks pagination logic.
@@ -66,19 +66,25 @@ public class TasksNavigationController {
      * The model for the tasks navigation.
      */
     private TasksNavigationModel model;
+    
+    
+    private TasksNavigationView view;
 
     /**
      * Builds a controller for the tasks navigation logic.
      * @param controller the main controller.
      */
-    public TasksNavigationController(SchedulerController controller){
-        this.schedulerController = controller;
-        this.model = new TasksNavigationModel();
-        ((SchedulerModelImpl) controller.getModel()).setTasksNavigationModel(this.model);
-        this.paginationController = new TasksPaginationController(controller);
-        SchedulerServiceAsync scheduler = controller.getScheduler();
-        this.tagSuggestionOracle = new PrefixWordSuggestOracle((SchedulerModelImpl) controller.getModel(), scheduler);
-
+    public TasksNavigationController(TasksController parentController){
+        this.parentController = parentController;
+        this.model = parentController.getModel().getTasksNavigationModel();
+        this.paginationController = new TasksPaginationController(parentController);
+        this.tagSuggestionOracle = new PrefixWordSuggestOracle(model);
+    }
+    
+    
+    public Layout buildView(){
+        this.view = new TasksNavigationView(this);
+        return this.view.build();
     }
 
 
@@ -116,7 +122,7 @@ public class TasksNavigationController {
     public void setTaskTagFilter(String tag){
         boolean changed = this.model.setCurrentTagFilter(tag);
         if(changed){
-            this.schedulerController.resetPendingTasksRequests();
+            this.parentController.resetPendingTasksRequests();
             paginationController.firstPage();
         }
     }

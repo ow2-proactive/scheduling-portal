@@ -44,16 +44,13 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.NoVncUtils;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -227,28 +224,16 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
-
-
-
-    private SchedulerController controller = null;
-
-    /**
-     * View that contains the tasks navigation controls.
-     */
-    private TasksNavigationView navigationView = null;
     
-    /**
-     * The view for the pagination of the tasks.
-     */
-    private TasksPaginationView paginationView = null;
+    
+    protected TasksController controller;
 
 
-
-    public TasksView(SchedulerController controller) {
+    public TasksView(TasksController controller) {
         this.controller = controller;
 
-        this.controller.getEventDispatcher().addTasksUpdatedListener(this);
-        this.controller.getEventDispatcher().addRemoteHintListener(this);
+        this.controller.getModel().addTasksUpdatedListener(this);
+        this.controller.getModel().addRemoteHintListener(this);
         this.visuButtons = new HashMap<String, ImgButton>();
         visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
     }
@@ -284,10 +269,10 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             i++;
         }
 
-        // this.tasksGrid.setData(data);
+        this.tasksGrid.setData(data);
         this.tasksGrid.invalidateCache();
-        this.ds.setTestData(data);
-        this.tasksGrid.fetchData();
+        //this.ds.setTestData(data);
+        //this.tasksGrid.fetchData();
 
         this.errorLabel.hide();
         this.loadingLabel.hide();
@@ -404,67 +389,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.addCellContextClickHandler(new CellContextClickHandler() {
             @Override
             public void onCellContextClick(CellContextClickEvent event) {
-                final int jobId = controller.getModel().getSelectedJob().getId();
-                final String taskName = tasksGrid.getSelectedRecord().getAttributeAsString(NAME_ATTR);
-
-                Menu menu = new Menu();
-                menu.setShowShadow(true);
-                menu.setShadowDepth(10);
-
-                MenuItem restart = new MenuItem("Restart");
-                restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        TasksView.this.controller.restartTask(jobId, taskName);
-                    }
-                });
-                MenuItem preempt = new MenuItem("Preempt");
-                preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        TasksView.this.controller.preemptTask(jobId, taskName);
-                    }
-                });
-                MenuItem kill = new MenuItem("Kill");
-                kill.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        TasksView.this.controller.killTask(jobId, taskName);
-                    }
-                });
-
-                boolean enabled;
-                TaskRecord jr = (TaskRecord) tasksGrid.getSelectedRecord();
-                switch (TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase())) {
-                case SUBMITTED:
-                case WAITING_ON_ERROR:
-                case WAITING_ON_FAILURE:
-                    enabled = false;
-                    break;
-                case PENDING:
-                case PAUSED:
-                case RUNNING:
-                    enabled = true;
-                    break;
-                case SKIPPED:
-                case FINISHED:
-                case FAULTY:
-                case FAILED:
-                case ABORTED:
-                case NOT_STARTED:
-                case NOT_RESTARTED:
-                    enabled = false;
-                    break;
-                default:
-                    enabled = false;
-                }
-
-                restart.setEnabled(enabled);
-                kill.setEnabled(enabled);
-                preempt.setEnabled(enabled);
-
-                menu.setItems(restart, preempt, kill);
-                tasksGrid.setContextMenu(menu);
+                taskClickHandler();
             }
         });
 
@@ -517,12 +442,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.setWidth100();
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
-
-        this.navigationView = new TasksNavigationView(this.controller);
-        Layout navTools = this.navigationView.build();
         
-        this.paginationView = new TasksPaginationView(this.controller);
-        Layout paginationBar = this.paginationView.build();
+        Layout navTools = this.controller.getTaskNavigationController().buildView();
+        Layout paginationBar = this.controller.getTaskNavigationController().getPaginationController().buildView();
 
         VLayout tasksViewLayout = new VLayout();
         tasksViewLayout.addMember(navTools);
@@ -536,6 +458,69 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
 
 
+    protected void taskClickHandler(){
+        final String taskName = tasksGrid.getSelectedRecord().getAttributeAsString(NAME_ATTR);
+
+        Menu menu = new Menu();
+        menu.setShowShadow(true);
+        menu.setShadowDepth(10);
+
+        MenuItem restart = new MenuItem("Restart");
+        restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.restartTask(taskName);
+            }
+        });
+        MenuItem preempt = new MenuItem("Preempt");
+        preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.preemptTask(taskName);
+            }
+        });
+        MenuItem kill = new MenuItem("Kill");
+        kill.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.killTask(taskName);
+            }
+        });
+
+        boolean enabled;
+        ListGridRecord jr = this.tasksGrid.getSelectedRecord();
+        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase()); 
+        switch (status) {
+        case SUBMITTED:
+        case WAITING_ON_ERROR:
+        case WAITING_ON_FAILURE:
+            enabled = false;
+            break;
+        case PENDING:
+        case PAUSED:
+        case RUNNING:
+            enabled = true;
+            break;
+        case SKIPPED:
+        case FINISHED:
+        case FAULTY:
+        case FAILED:
+        case ABORTED:
+        case NOT_STARTED:
+        case NOT_RESTARTED:
+            enabled = false;
+            break;
+        default:
+            enabled = false;
+        }
+
+        restart.setEnabled(enabled);
+        kill.setEnabled(enabled);
+        preempt.setEnabled(enabled);
+
+        menu.setItems(restart, preempt, kill);
+        tasksGrid.setContextMenu(menu);
+    }
 
 
     /*
@@ -549,10 +534,11 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     }
 
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
-        String id = rec.getAttributeAsString(ID_ATTR);
+        String taskId = rec.getAttributeAsString(ID_ATTR);
+        String jobId = this.controller.getModel().getParentModel().getSelectedJob().getId().toString();
         final String taskName = rec.getAttributeAsString(NAME_ATTR);
-        if (id.equals(hint.taskId)) {
-            ImgButton button = visuButtons.get(id);
+        if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
+            ImgButton button = visuButtons.get(taskId);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
             if(visuButtonsClickHandlers.containsKey(button)){
                 visuButtonsClickHandlers.get(button).removeHandler();
@@ -565,7 +551,6 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             visuButtonsClickHandlers.put(button, clickHandler);
         }
     }
-
 
 
 
@@ -634,9 +619,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     }
 
     private void openNoVncPage(String taskName) {
-        final String jobId = String.valueOf(controller.getModel().getSelectedJob().getId());
-        final String sessionId = LoginModel.getInstance().getSessionId();
-        String httpsRedirectUrl = NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
+        String httpsRedirectUrl = this.controller.computeNoVncPageUrl(taskName);
         com.google.gwt.user.client.Window.open(httpsRedirectUrl, "_blank", "");
     }
 

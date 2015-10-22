@@ -92,7 +92,7 @@ public class SettingsController {
         
         if(setSetting(SchedulerConfig.TASKS_PAGE_SIZE, 
                 newSettings.getValueAsString("taskPageSize")) || forceRefresh){
-            this.mainController.getTaskNavigationController().getPaginationController().firstPage();
+            this.mainController.getTasksController().getTaskNavigationController().getPaginationController().firstPage();
         }
         
         
@@ -101,7 +101,7 @@ public class SettingsController {
         boolean tagSuggestionsDelayChanged = setSetting(SchedulerConfig.TAG_SUGGESTIONS_DELAY, 
                 newSettings.getValueAsString("tagSuggestionsDelay"));
         if(tagSuggestionSizeChanged || tagSuggestionsDelayChanged || forceRefresh){
-            this.mainController.getTaskNavigationController().getTagSuggestionOracle().resetTagSuggestions();
+            this.mainController.getTasksController().getTaskNavigationController().getTagSuggestionOracle().resetTagSuggestions();
         }
     }
     
