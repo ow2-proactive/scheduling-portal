@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.event.dom.client.LoadEvent;
@@ -266,7 +267,8 @@ public class VisualizationViewImage implements VisualizationView {
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#imageUpdated(java.lang.String, java.lang.String)
      */
     public void imageUpdated(String jobId, String path) {
-        if (!controller.getModel().getSelectedJob().getId().toString().equals(jobId))
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 
         this.imgPath = path;
@@ -284,7 +286,8 @@ public class VisualizationViewImage implements VisualizationView {
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#mapUpdated(java.lang.String, org.ow2.proactive_grid_cloud_portal.shared.JobVisuMap)
      */
     public void mapUpdated(String jobId, JobVisuMap map) {
-        if (!this.controller.getModel().getSelectedJob().getId().toString().equals(jobId))
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 
         this.map = map;

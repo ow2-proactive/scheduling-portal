@@ -44,10 +44,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 
 import com.smartgwt.client.data.AdvancedCriteria;
 import com.smartgwt.client.data.DSCallback;
@@ -195,7 +194,7 @@ public class JobsView implements JobsUpdatedListener {
      */
     private AdvancedCriteria filter = null;
 
-    private SchedulerController controller = null;
+    private JobsController controller = null;
 
     /** To disable selection listener while fetching data */
     private boolean fetchingData;
@@ -203,9 +202,9 @@ public class JobsView implements JobsUpdatedListener {
     /**
      * @param controller Controller used to create this view
      */
-    public JobsView(SchedulerController controller) {
+    public JobsView(JobsController controller) {
         this.controller = controller;
-        this.controller.getEventDispatcher().addJobsUpdatedListener(this);
+        this.controller.getModel().addJobsUpdatedListener(this);
     }
 
     public void jobsUpdating() {

@@ -135,6 +135,6 @@ public class SchedulerModelImplTest {
     private void addJob(int jobId) {
         Job job = new Job(jobId);
         job.setStatus(JobStatus.RUNNING);
-        scheduler.setJobs(new LinkedHashMap<Integer, Job>(Collections.singletonMap(jobId, job)), 1);
+        scheduler.getJobsModel().setJobs(new LinkedHashMap<Integer, Job>(Collections.singletonMap(jobId, job)), 1);
     }
 }

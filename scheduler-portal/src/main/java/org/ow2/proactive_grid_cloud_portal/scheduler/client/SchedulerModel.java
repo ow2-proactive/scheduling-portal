@@ -59,29 +59,6 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract SchedulerStatus getSchedulerStatus();
 
-    /**
-     * @return local view of all the jobs known by the scheduler server
-     */
-    public abstract LinkedHashMap<Integer, Job> getJobs();
-
-
-
-    /**
-     * @param jobId the Id of a Job
-     * @return the corresponding job if known by the Model, or null
-     */
-    public abstract Job getJob(int jobId);
-
-    /**
-     * @return the revision id associated with the currently held JobBag
-     */
-    public abstract long getJobsRevision();
-
-    /**
-     * @return the currently selected job
-     */
-    public abstract Job getSelectedJob();
-
 
     /**
      * If it has been previously stored, the model may have cached the partial or
@@ -119,33 +96,11 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract JobVisuMap getJobVisuMap(String jobId);
 
-    public abstract void emptyJobs();
 
     public abstract String getJobHtml(String jobId);
 
     public abstract void setJobHtml(String jobId, String curHtml);
 
-   
-
-    /**
-     * @return true if the model should only store the jobs of the current user
-     */
-    public abstract boolean isFetchMyJobsOnly();
-
-    /**
-     * @return true if the model should store pending jobs
-     */
-    public abstract boolean isFetchPendingJobs();
-
-    /**
-     * @return true if the model should store running jobs
-     */
-    public abstract boolean isFetchRunningJobs();
-
-    /**
-     * @return true if the model should store finished jobs
-     */
-    public abstract boolean isFetchFinishedJobs();
 
     /**
      * @return the list of users connected to the scheduler
@@ -168,8 +123,5 @@ public abstract class SchedulerModel implements Model {
     public abstract HashMap<String, String> getSchedulerStatistics();
 
     public abstract List<JobUsage> getUsage();
-
-
-    public abstract PaginationModel getJobsPaginationModel();
 
 }

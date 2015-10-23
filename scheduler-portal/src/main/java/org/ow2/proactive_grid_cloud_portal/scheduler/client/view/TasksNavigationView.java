@@ -96,7 +96,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public TasksNavigationView(TasksNavigationController controller){
         this.controller = controller;
         this.controller.getModel().addTagSuggestionListener(this);
-        this.controller.getModel().getParentModel().getParentModel().addJobSelectedListener(this);
+        this.controller.getModel().getParentModel().getParentModel().getJobsModel().addJobSelectedListener(this);
         this.controller.getModel().getParentModel().addTasksUpdatedListener(this);
     }
 

@@ -99,7 +99,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         this.schedulerModel = model.getParentModel().getParentModel();
         this.model = model;
         this.scheduler = Scheduler.getSchedulerService();
-        this.schedulerModel.addJobSelectedListener(this);
+        this.schedulerModel.getJobsModel().addJobSelectedListener(this);
     }
 
 
@@ -166,7 +166,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
             return true;
         }
 
-        JobStatus status = this.schedulerModel.getSelectedJob().getStatus();
+        JobStatus status = this.schedulerModel.getJobsModel().getSelectedJob().getStatus();
         boolean finishedJob = (status == JobStatus.FINISHED || 
                 status == JobStatus.FAILED || 
                 status == JobStatus.KILLED || 
@@ -184,7 +184,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         this.lastRequestTime = new Date().getTime();
         this.lastRequest = query;
 
-        final String jobId = this.schedulerModel.getSelectedJob().getId().toString();
+        final String jobId = this.schedulerModel.getJobsModel().getSelectedJob().getId().toString();
 
         this.scheduler.getJobTaskTagsPrefix(LoginModel.getInstance().getSessionId(), jobId, query, new AsyncCallback<String>() {
 
@@ -217,7 +217,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     public void requestSuggestions(Request request, Callback callback) {
         Response response = new Response();
 
-        if(this.schedulerModel.getSelectedJob() != null){
+        if(this.schedulerModel.getJobsModel().getSelectedJob() != null){
             String query = request.getQuery();
             if(this.needToRefresh(query)){
                 this.refresh(query);

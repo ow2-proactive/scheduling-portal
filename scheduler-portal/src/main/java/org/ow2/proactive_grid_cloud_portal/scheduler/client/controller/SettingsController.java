@@ -87,7 +87,7 @@ public class SettingsController {
         
         if(setSetting(SchedulerConfig.JOBS_PAGE_SIZE, 
                 newSettings.getValueAsString("jobPageSize")) || forceRefresh){
-            this.mainController.getJobsPaginationController().firstPage();
+            this.mainController.getJobsController().getPaginationController().firstPage();
         }
         
         if(setSetting(SchedulerConfig.TASKS_PAGE_SIZE, 

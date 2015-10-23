@@ -41,7 +41,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,13 +54,12 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
@@ -114,8 +112,7 @@ public class SchedulerController extends Controller implements UncaughtException
     /** writable view of the model */
     private SchedulerModelImpl model = null;
 
-    /** periodically updates the local job view */
-    private Timer jobsUpdater = null;
+    
 
     /** login page when not logged in, or null */
     private LoginPage loginView = null;
@@ -125,6 +122,11 @@ public class SchedulerController extends Controller implements UncaughtException
     /** contains all pending getTaskOutput requests, taskId as key */
     private Map<String, Request> taskOutputRequests = null;
     
+    /** periodically updates the local job view */
+    private Timer schedulerTimerUpdate = null;
+    
+ // incremented each time #fetchJobs is called
+    private int timerUpdate = 0;
 
     /** ids of jobs we should auto fetch */
     private Set<String> liveOutputJobs = null;
@@ -139,8 +141,7 @@ public class SchedulerController extends Controller implements UncaughtException
     /** do not fetch visualization info when false */
     private boolean visuFetchEnabled = false;
 
-    // incremented each time #fetchJobs is called
-    private int timerUpdate = 0;
+    
 
     private static final int active_tick = 3;
     private static final int lazy_tick = 20;
@@ -151,7 +152,7 @@ public class SchedulerController extends Controller implements UncaughtException
     protected TasksController tasksController;
 
 
-    protected JobsPaginationController jobsPaginationController;
+    protected JobsController jobsController;
 
 
     /**
@@ -281,8 +282,8 @@ public class SchedulerController extends Controller implements UncaughtException
         this.loginView = null;
         this.schedulerView = new SchedulerPage(this);
 
-        this.fetchJobs();
-        model.jobsUpdating();
+        this.jobsController.fetchJobs(true);
+        
         this.startTimer();
 
         String lstr = "";
@@ -345,42 +346,20 @@ public class SchedulerController extends Controller implements UncaughtException
     }
     
     
-
-    /**
-     * Job selection has changed, notify the views
-     *
-     * @param jobId of the new job selection. you can use null to cancel the current selection
-     */
-    public void selectJob(final String jobId) {
-        int id = 0;
-        if (jobId != null)
-            id = Integer.parseInt(jobId);
-
-        Job selectedJob = model.getSelectedJob();
-        // cancel async requests relative to the old selection
-        if (selectedJob == null || id != selectedJob.getId()) {
-            for (Request req : this.taskOutputRequests.values()) {
-                req.cancel();
-            }
-            this.resetPendingTasksRequests();
-        }
-
-        this.model.selectJob(id);
-        this.tasksController.updatingTasks();
-
-        if (visuFetchEnabled) {
-            visuFetch(jobId);
-        }
+    public Layout buildJobsView(){
+        this.jobsController = new JobsController(this);
+        return this.jobsController.buildView();
     }
    
+    
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
     }
 
-    void visuFetch(final String jobId) {
+    public void visuFetch(final String jobId) {
 
         // fetch visu info
-        if (jobId != null) {
+        if (jobId != null && this.visuFetchEnabled) {
             String curHtml = model.getJobHtml(jobId);
             if (curHtml != null) {
                 // exists already, resetting it will trigger listeners
@@ -435,127 +414,7 @@ public class SchedulerController extends Controller implements UncaughtException
         }
     }
 
-    /**
-     * Pauses the given job, depending its current state
-     * 
-     * @param jobId id of the job to pause/resume
-     */
-    public void pauseJobs(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
-        for (String id : jobId) {
-            l.add(Integer.parseInt(id));
-        }
-
-        this.scheduler.pauseJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + " jobs");
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to pause jobs : " + message);
-            }
-        });
-    }
-
-    /**
-     * Pauses or resumes the given job, depending its current state
-     * 
-     * @param jobId id of the job to pause/resume
-     */
-    public void resumeJobs(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
-        for (String id : jobId) {
-            l.add(Integer.parseInt(id));
-        }
-
-        this.scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully resumed " + result + "/" + l.size() + " jobs");
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to resume jobs : " + message);
-            }
-        });
-    }
-
-    /**
-     * Removes a job
-     * 
-     * @param jobId id of the job
-     */
-    public void removeJob(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
-        for (String id : jobId) {
-            l.add(Integer.parseInt(id));
-        }
-
-        this.scheduler.removeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to remove jobs : " + message);
-            }
-        });
-    }
-
-    /**
-     * Kills a job
-     * 
-     * @param jobId id of the job
-     */
-    public void killJob(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
-        for (String id : jobId) {
-            l.add(Integer.parseInt(id));
-        }
-
-        this.scheduler.killJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + " jobs");
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
-            }
-        });
-    }
-
     
-
-    /**
-     * Apply the specified priority to the given job
-     * 
-     * @param jobId id of the job
-     * @param priority new priority
-     */
-    public void setJobPriority(List<String> jobId, final JobPriority priority) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
-        for (String id : jobId) {
-            l.add(Integer.parseInt(id));
-        }
-
-        this.scheduler.setPriorityByName(LoginModel.getInstance().getSessionId(), l, priority.name(),
-                new AsyncCallback<Void>() {
-            public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully set priority to " + priority.name() + " for " +
-                        l.size() + " jobs");
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to set priority to " + priority.name() + " : " +
-                        message);
-            }
-        });
-    }
-
     /**
      * Attempt to start the scheduler, might fail depending the server state/rights
      */
@@ -662,7 +521,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Auto fetch the output for the currently selected job
      */
     public void getLiveOutput() {
-        Job j = this.model.getSelectedJob();
+        Job j = this.jobsController.getModel().getSelectedJob();
         if (j == null)
             return;
 
@@ -685,7 +544,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void deleteLiveLogJob() {
-        Job j = this.model.getSelectedJob();
+        Job j = this.jobsController.getModel().getSelectedJob();
         if (j == null)
             return;
 
@@ -710,7 +569,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     doFetchLiveLog(jobId);
 
                     int id = Integer.parseInt(jobId);
-                    Job j = model.getJobs().get(id);
+                    Job j = jobsController.getModel().getJobs().get(id);
                     if (j == null || j.isExecuted()) {
                         LogModel.getInstance().logMessage("stop fetching live logs for job " + jobId);
                         it.remove();
@@ -759,10 +618,10 @@ public class SchedulerController extends Controller implements UncaughtException
      * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobOutput(int logMode) {
-        if (this.model.getSelectedJob() == null)
+        if (this.jobsController.getModel().getSelectedJob() == null)
             return;
 
-        Job j = this.model.getSelectedJob();
+        Job j = this.jobsController.getModel().getSelectedJob();
         if (this.model.getTasksModel().getTasks().isEmpty()) {
             // notify the listeners, they will figure out there is no output
             this.model.updateOutput(j.getId());
@@ -903,37 +762,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
 
-
-
-
-
-    public JobsPaginationController getJobsPaginationController() {
-        return jobsPaginationController;
-    }
-
-
-    public void setJobsPaginationController(
-            JobsPaginationController jobsPaginationController) {
-        this.jobsPaginationController = jobsPaginationController;
-    }
-
-
-    /**
-     * Add a fake submitted job to the list
-     * the name is not important, it will be updated
-     * 
-     * @param jobId id of the job
-     * @param name name of the job
-     */
-    public void addSubmittingJob(int jobId, String name) {
-        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, LoginModel.getInstance().getLogin(), 0, 0, 0, 0, -1,
-                -1, -1);
-        this.model.getJobs().put(jobId, j);
-        this.model.jobSubmitted(j);
-    }
-
-    
-    
     public void restartTimer(){
         this.stopTimer();
         this.startTimer();
@@ -951,10 +779,10 @@ public class SchedulerController extends Controller implements UncaughtException
      * from the server end and update the local view
      */
     private void startTimer() {
-        if (this.jobsUpdater != null)
+        if (this.schedulerTimerUpdate != null)
             throw new IllegalStateException("There's already a Timer");
 
-        this.jobsUpdater = new Timer() {
+        this.schedulerTimerUpdate = new Timer() {
 
             @Override
             public void run() {
@@ -966,27 +794,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                 SchedulerController.this.updateSchedulerStatus();
 
-                scheduler.schedulerStateRevision(LoginModel.getInstance().getSessionId(), new AsyncCallback<Long>() {
-
-                    public void onFailure(Throwable caught) {
-                        if (!LoginModel.getInstance().isLoggedIn()) {
-                            // might have been disconnected in between
-                            return;
-                        }
-                        if (JSONUtils.getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
-                            teardown("You have been disconnected from the server.");
-                        }
-                        error("Failed to get Scheduler Revision: " + JSONUtils.getJsonErrorMessage(caught));
-                    }
-
-                    public void onSuccess(Long result) {
-                        if (result > SchedulerController.this.model.getJobsRevision()) {
-                            fetchJobs();
-                        }
-                        // do not model.logMessage() : this is repeated by a timer
-                    }
-
-                });
+                jobsController.jobsStateRevision();
 
                 if (timerUpdate % userFetchTick == 0) {
                     final long t1 = System.currentTimeMillis();
@@ -1106,95 +914,10 @@ public class SchedulerController extends Controller implements UncaughtException
                 timerUpdate++;
             }
         };
-        this.jobsUpdater.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
+        this.schedulerTimerUpdate.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
     }
 
-    /**
-     * Fetch the complete JobBag from the server,
-     * update the local scheduler revision number,
-     * update the model and views
-     * fail hard
-     */
-    public void fetchJobs() {
-        final long t1 = System.currentTimeMillis();
-
-        int offset = jobsPaginationController.getModel().getOffset();
-        int range = jobsPaginationController.getModel().getRange();
-
-        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, model.isFetchMyJobsOnly(),
-                model.isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
-                new AsyncCallback<String>() {
-
-            public void onFailure(Throwable caught) {
-                if (!LoginModel.getInstance().isLoggedIn()) {
-                    // might have been disconnected in between
-                    return;
-                }
-                int httpErrorCodeFromException = JSONUtils.getJsonErrorCode(caught);
-                if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
-                    teardown("You have been disconnected from the server.");
-                } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
-                    LogModel.getInstance().logImportantMessage(
-                            "Failed to fetch jobs because of permission (automatic refresh will be disabled)"
-                                    + JSONUtils.getJsonErrorMessage(caught));
-                    stopTimer();
-                    // display empty message in jobs view
-                    model.emptyJobs();
-                } else {
-                    error("Error while fetching jobs:\n" + JSONUtils.getJsonErrorMessage(caught));
-                }
-            }
-
-            public void onSuccess(String result) {
-                long rev;
-                LinkedHashMap<Integer, Job> jobs;
-
-                JSONValue jsonVal = parseJSON(result);
-                JSONObject jsonInfo = jsonVal.isObject();
-                if (jsonInfo == null) {
-                    error("Expected JSON Object: " + result);
-                }
-
-                String key = jsonInfo.keySet().iterator().next();
-                rev = Long.parseLong(key);
-
-                JSONArray jsonArr = jsonInfo.get(key).isArray();
-                if (jsonArr == null)
-                    error("Expected JSONArray: " + jsonInfo.toString());
-
-                jobs = getJobsFromJson(jsonArr);
-                jobsPaginationController.computeMaxPage(jobs.size());
-                SchedulerController.this.model.setJobs(jobs, rev);
-                
-
-                // do not model.logMessage() : this is repeated by a timer
-
-                int jn = jobs.size();
-                if (jn > 0) {
-                    long t = (System.currentTimeMillis() - t1);
-                    LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + jn + " jobs in " + t +
-                            " ms</span>");
-                }
-            }
-        });
-    }
-
-    /**
-     * Parse the raw JSON array describing the job list, return a Java representation
-     * @param jsonArray JSONArray containing all jobs
-     * @return the complete jobid:job map
-     * @throws JSONException JSON parsing failed
-     */
-    private LinkedHashMap<Integer, Job> getJobsFromJson(JSONArray jsonArray) throws JSONException {
-        LinkedHashMap<Integer, Job> jobs = new LinkedHashMap<Integer, Job>();
-
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonJob = jsonArray.get(i).isObject();
-            Job j = Job.parseJson(jsonJob);
-            jobs.put(j.getId(), j);
-        }
-        return jobs;
-    }
+    
 
     
 
@@ -1249,86 +972,7 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param b true to fetch only jobs submitted by the current user, or false to fetch all jobs
-     */
-    public void fetchMyJobsOnly(boolean b) {
-        if (b == model.isFetchMyJobsOnly())
-            return;
-
-        model.fetchMyJobsOnly(b);
-
-        if (b)
-            LogModel.getInstance().logMessage("Fetching only my jobs");
-        else
-            LogModel.getInstance().logMessage("Fetching all jobs");
-
-        this.jobsPaginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch pending jobs
-     */
-    public void fetchPending(boolean f) {
-        if (f == model.isFetchPendingJobs())
-            return;
-
-        model.fetchPending(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching pending jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch pending jobs");
-
-        this.jobsPaginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch running jobs
-     */
-    public void fetchRunning(boolean f) {
-        if (f == model.isFetchRunningJobs())
-            return;
-
-        model.fetchRunning(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching running jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch running jobs");
-
-        this.jobsPaginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch finished jobs
-     */
-    public void fetchFinished(boolean f) {
-        if (f == model.isFetchFinishedJobs())
-            return;
-
-        model.fetchFinished(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching finished jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch finished jobs");
-
-        this.jobsPaginationController.firstPage();
-    }
-
+    
     /**
      * @param b true fetch users info less often
      */
@@ -1360,7 +1004,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Leave the scheduler view
      * Does not disconnect from the server
      */
-    private void teardown(String message) {
+    public void teardown(String message) {
         this.stopTimer();
         this.stopLiveTimer();
         this.model = new SchedulerModelImpl();
@@ -1374,12 +1018,12 @@ public class SchedulerController extends Controller implements UncaughtException
     /**
      * Stops the Timer that updates the local view of the remote scheduler
      */
-    private void stopTimer() {
-        if (this.jobsUpdater == null)
+    public void stopTimer() {
+        if (this.schedulerTimerUpdate == null)
             return;
 
-        this.jobsUpdater.cancel();
-        this.jobsUpdater = null;
+        this.schedulerTimerUpdate.cancel();
+        this.schedulerTimerUpdate = null;
     }
 
     public void onUncaughtException(Throwable e) {
@@ -1496,5 +1140,16 @@ public class SchedulerController extends Controller implements UncaughtException
     }
     
     
+    public void cancelOutputRequests(){
+        for (Request req : this.taskOutputRequests.values()) {
+            req.cancel();
+        }
+    }
 
+    public JobsController getJobsController() {
+        return jobsController;
+    }
+    
+    
+    
 }

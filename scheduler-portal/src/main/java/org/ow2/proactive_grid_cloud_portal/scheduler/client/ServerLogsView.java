@@ -40,6 +40,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.StringUtil;
@@ -88,7 +89,8 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      */
     public ServerLogsView(SchedulerController controller) {
         this.controller = controller;
-        this.controller.getEventDispatcher().addJobSelectedListener(this);
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        jobsModel.addJobSelectedListener(this);
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
     }
 
@@ -109,7 +111,8 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
                 ServerLogsView.this.label.setIcon("loading.gif");
                 ServerLogsView.this.label.show();
 
-                int jobId = controller.getModel().getSelectedJob().getId();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                int jobId = jobsModel.getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     ServerLogsView.this.controller.getJobServerLogs(jobId, new ShowLogsCallback());
                 } else {

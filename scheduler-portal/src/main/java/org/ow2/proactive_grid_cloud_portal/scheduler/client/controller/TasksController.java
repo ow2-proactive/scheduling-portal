@@ -125,7 +125,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -150,7 +150,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void restartTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.restartTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -175,7 +175,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -204,7 +204,7 @@ public class TasksController {
     
     
     public String computeNoVncPageUrl(String taskName){
-        String jobId = String.valueOf(model.getParentModel().getSelectedJob().getId());
+        String jobId = String.valueOf(model.getParentModel().getJobsModel().getSelectedJob().getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }

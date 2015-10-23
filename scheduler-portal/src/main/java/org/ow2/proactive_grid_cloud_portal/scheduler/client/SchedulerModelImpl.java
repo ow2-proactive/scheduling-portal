@@ -56,6 +56,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
@@ -78,20 +79,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
     
 
-    
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
-    private LinkedHashMap<Integer, Job> jobs = null;
-    private long jobsRev = -1;
-    private Job selectedJob = null;
-    
     private HashMap<Integer, JobOutput> output = null;
     private HashSet<String> isLiveOutput = null;
-    
     private HashMap<String, StringBuffer> liveOutput = null;
-    private boolean fetchMyJobsOnly = false;
-    private boolean fetchPending = true;
-    private boolean fetchRunning = true;
-    private boolean fetchFinished = true;
     private List<SchedulerUser> users = null;
     private List<SchedulerUser> usersWithJobs = null;
     private HashMap<String, String> schedulerStats = null;
@@ -103,9 +94,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
 
-
-    private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
-    private ArrayList<JobSelectedListener> jobSelectedListeners = null;
     private ArrayList<SchedulerStatusListener> schedulerStateListeners = null;
     private ArrayList<JobOutputListener> jobOutputListeners = null;
     private ArrayList<UsersListener> usersListeners = null;
@@ -117,7 +105,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
 
 
-    private PaginationModel jobsPaginationModel;
+    private JobsModel jobsModel;
 
     private TasksModel tasksModel;
 
@@ -127,8 +115,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.output = new HashMap<Integer, JobOutput>();
         this.isLiveOutput = new HashSet<String>();
         this.liveOutput = new HashMap<String, StringBuffer>();
-        this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
-        this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
         this.schedulerStateListeners = new ArrayList<SchedulerStatusListener>();
         this.jobOutputListeners = new ArrayList<JobOutputListener>();
         this.usersListeners = new ArrayList<UsersListener>();
@@ -163,141 +149,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    @Override
-    public LinkedHashMap<Integer, Job> getJobs() {
-        return this.jobs;
-    }
-
-    @Override
-    public void emptyJobs() {
-        setJobs(null, -1);
-    }
-
-    /**
-     * Modifies the local joblist
-     * triggers {@link JobsUpdatedListener#jobsUpdated(java.util.Map)}},
-     * or {@link JobsUpdatedListener#jobsUpdating()} if <code>jobs</code> was null
-     * 
-     * @param jobs a jobset, or null
-     * @param rev the revision of this jobset
-     */
-    void setJobs(LinkedHashMap<Integer, Job> jobs, long rev) {
-        this.jobs = jobs;
-        this.jobsRev = rev;
-        boolean empty = false;
-
-        if (jobs == null) {
-            empty = true;
-            this.jobs = new LinkedHashMap<Integer, Job>();
-        }
-
-        for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobsUpdated(this.jobs);
-            if (empty)
-                listener.jobsUpdating();
-        }
-        
-        if(this.selectedJob != null){
-            Job oldSel = this.selectedJob;
-            this.selectedJob = jobs.get(oldSel.getId());
-            if(this.selectedJob == null){
-                for(JobSelectedListener listener: this.jobSelectedListeners){
-                    listener.jobUnselected();
-                }
-            }
-            else{
-                if (this.selectedJob != null && !this.selectedJob.isEqual(oldSel)) {
-                    for(JobSelectedListener listener: this.jobSelectedListeners){
-                        listener.selectedJobUpdated();
-                    }
-                }
-            }
-        }
-    }
-
-    void jobSubmitted(Job j) {
-        for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobSubmitted(j);
-        }
-    }
-
-    void jobsUpdating() {
-        for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobsUpdating();
-        }
-    }
-
-
-
-
-    public PaginationModel getJobsPaginationModel() {
-        return jobsPaginationModel;
-    }
-
-
-
-
-
-    /**
-     * Modifies the Job selection,
-     * triggers a JobSelected event
-     *
-     */
-    void selectJob(int jobId) {
-        Job j = null;
-        // find the job
-        for (Job it : this.jobs.values()) {
-            if (it.getId() == jobId) {
-                j = it;
-            }
-        }
-        boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
-        this.selectedJob = j;
-
-        // notify job selection listeners
-        for (JobSelectedListener listener : this.jobSelectedListeners) {
-            if (j == null)
-                listener.jobUnselected();
-            else
-                listener.jobSelected(j);
-        }
-
-        // tasks list will change, notify tasks listeners
-        this.tasksModel.notifyTasksChanging(j, selChanged);
-    }
-
-
-
-    @Override
-    public Job getSelectedJob() {
-        return this.selectedJob;
-    }
-
-    @Override
-    public Job getJob(int jobId) {
-        for (Job j : this.jobs.values()) {
-            if (j.getId() == jobId) {
-                return j;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public long getJobsRevision() {
-        return this.jobsRev;
-    }
-
-
-
-
-
-
-
-    
-
-
-    
+   
 
     @Override
     public JobOutput getJobOutput(int jobId) {
@@ -312,7 +164,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      */
     void setTaskOutput(int jobId, Task task, String output) {
         JobStatus stat = null;
-        for (Job j : this.jobs.values()) {
+        for (Job j : this.jobsModel.getJobs().values()) {
             if (jobId == j.getId())
                 stat = j.getStatus();
         }
@@ -435,43 +287,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-    
-
-    @Override
-    public boolean isFetchMyJobsOnly() {
-        return fetchMyJobsOnly;
-    }
-
-    void fetchMyJobsOnly(boolean b) {
-        this.fetchMyJobsOnly = b;
-    }
-
-    @Override
-    public boolean isFetchPendingJobs() {
-        return this.fetchPending;
-    }
-
-    void fetchPending(boolean f) {
-        this.fetchPending = f;
-    }
-
-    @Override
-    public boolean isFetchRunningJobs() {
-        return this.fetchRunning;
-    }
-
-    void fetchRunning(boolean f) {
-        this.fetchRunning = f;
-    }
-
-    @Override
-    public boolean isFetchFinishedJobs() {
-        return this.fetchFinished;
-    }
-
-    void fetchFinished(boolean f) {
-        this.fetchFinished = f;
-    }
 
     @Override
     public String getJobImagePath(String jobId) {
@@ -625,22 +440,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return "<span style='color:gray'>" + date + "</span> ";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addJobsUpdatedListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener)
-     */
-    public void addJobsUpdatedListener(JobsUpdatedListener listener) {
-        this.jobsUpdatedListeners.add(listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addJobSelectedListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener)
-     */
-    public void addJobSelectedListener(JobSelectedListener listener) {
-        this.jobSelectedListeners.add(listener);
-    }
-
     
 
     /*
@@ -711,11 +510,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-    public void setJobsPaginationModel(PaginationModel jobsPaginationModel) {
-        this.jobsPaginationModel = jobsPaginationModel;
-    }
-
-
     public TasksModel getTasksModel() {
         return tasksModel;
     }
@@ -724,7 +518,15 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     public void setTasksModel(TasksModel tasksModel) {
         this.tasksModel = tasksModel;
     }
-    
-    
+
+
+    public JobsModel getJobsModel() {
+        return jobsModel;
+    }
+
+
+    public void setJobsModel(JobsModel jobsModel) {
+        this.jobsModel = jobsModel;
+    }
     
 }

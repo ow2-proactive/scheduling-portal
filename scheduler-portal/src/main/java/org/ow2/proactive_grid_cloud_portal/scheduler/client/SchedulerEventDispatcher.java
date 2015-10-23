@@ -54,10 +54,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.V
  */
 public interface SchedulerEventDispatcher extends EventDispatcher {
 
-    void addJobsUpdatedListener(JobsUpdatedListener listener);
-
-    void addJobSelectedListener(JobSelectedListener listener);
-
     void addSchedulerStatusListener(SchedulerStatusListener listener);
 
     void addJobOutputListener(JobOutputListener listener);

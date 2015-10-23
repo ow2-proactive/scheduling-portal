@@ -41,6 +41,7 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.event.dom.client.LoadEvent;
@@ -67,7 +68,8 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
 
     public VisualizationViewSwitcher(SchedulerController controller) {
         controller.getEventDispatcher().addVisualizationListener(this);
-        controller.getEventDispatcher().addJobSelectedListener(this);
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        jobsModel.addJobSelectedListener(this);
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
 
         this.htmlView = new VisualizationViewHtml();

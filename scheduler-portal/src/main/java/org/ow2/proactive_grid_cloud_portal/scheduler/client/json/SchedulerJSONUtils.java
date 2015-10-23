@@ -36,10 +36,14 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 
 import com.google.gwt.json.client.JSONArray;
@@ -131,4 +135,32 @@ public class SchedulerJSONUtils extends JSONUtils {
     }
     
     
+    
+    public static JSONPaginatedJobs getJobsFromJson(String result) throws JSONException{
+        JSONPaginatedJobs resultJobs = new JSONPaginatedJobs();
+        Map<Integer, Job> jobs = resultJobs.getJobs();
+
+        JSONValue jsonVal = parseJSON(result);
+        JSONObject jsonInfo = jsonVal.isObject();
+        if (jsonInfo == null) {
+            throw new JSONException("Expected JSON Object: " + result);
+        }
+
+        String key = jsonInfo.keySet().iterator().next();
+        resultJobs.setRevision(Long.parseLong(key));
+
+        JSONArray jsonArr = jsonInfo.get(key).isArray();
+        if (jsonArr == null)
+            throw new JSONException("Expected JSONArray: " + jsonInfo.toString());
+        
+        for (int i = 0; i < jsonArr.size(); i++) {
+            JSONObject jsonJob = jsonArr.get(i).isObject();
+            Job j = Job.parseJson(jsonJob);
+            jobs.put(j.getId(), j);
+        }
+        
+        resultJobs.setTotal(jobs.size());
+        
+        return resultJobs;
+    }
 }

@@ -35,8 +35,6 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 
@@ -49,18 +47,18 @@ import com.smartgwt.client.widgets.layout.Layout;
  */
 public class JobsPaginationController extends PaginationController{
 
-    protected SchedulerController itemsController;
+    protected JobsController itemsController;
     
-    public JobsPaginationController(SchedulerController schedulerController) {
-        this.itemsController = schedulerController;
+    public JobsPaginationController(JobsController jobsController) {
+        this.itemsController = jobsController;
         this.model = new PaginationModel(PaginatedItemType.JOB);
-        ((SchedulerModelImpl) schedulerController.getModel()).setJobsPaginationModel(this.model);
+        jobsController.getModel().setPaginationModel(this.model);
     }
 
 
     @Override
     public void fetch() {
-        this.itemsController.fetchJobs();
+        this.itemsController.fetchJobs(false);
     }
     
     

@@ -43,6 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.user.client.Window;
@@ -100,7 +101,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     public OutputView(SchedulerController controller) {
         this.controller = controller;
-        this.controller.getEventDispatcher().addJobSelectedListener(this);
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        jobsModel.addJobSelectedListener(this);
         this.controller.getEventDispatcher().addJobOutputListener(this);
         ((SchedulerModelImpl) this.controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
     }
@@ -144,7 +146,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                     mode = SchedulerServiceAsync.LOG_STDOUT;
                 }
 
-                int jobId = controller.getModel().getSelectedJob().getId();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                int jobId = jobsModel.getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     OutputView.this.controller.getJobOutput(mode);
                 } else {
@@ -199,7 +202,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 if (isLive)
                     return;
 
-                Job sel = controller.getModel().getSelectedJob();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                Job sel = jobsModel.getSelectedJob();
                 if (sel != null) {
                     JobOutput out = controller.getModel().getJobOutput(sel.getId());
                     if (out != null && !out.getLines().isEmpty()) {

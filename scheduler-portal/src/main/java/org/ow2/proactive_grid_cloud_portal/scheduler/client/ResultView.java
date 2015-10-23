@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +91,8 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
     public ResultView(SchedulerController controller) {
         this.controller = controller;
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
-        controller.getEventDispatcher().addJobSelectedListener(this);
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        jobsModel.addJobSelectedListener(this);
     }
 
     /**
@@ -207,7 +209,8 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         root.showMember(visuPane);
         root.hideMember(label);
 
-        Job j = controller.getModel().getSelectedJob();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        Job j = jobsModel.getSelectedJob();
         if (j != null && controller.getModel().isLiveOutput("" + j.getId())) {
             visuButton.setDisabled(true);
         } else {

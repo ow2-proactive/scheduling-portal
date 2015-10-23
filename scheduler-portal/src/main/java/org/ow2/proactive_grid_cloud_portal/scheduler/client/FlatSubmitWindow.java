@@ -179,7 +179,7 @@ public class FlatSubmitWindow {
                             FlatSubmitWindow.this.destroy();
                             LogModel.getInstance().logMessage(
                                     "Successfully submitted flat job " + name + ": " + id);
-                            controller.addSubmittingJob(id, name);
+                            controller.getJobsController().addSubmittingJob(id, name);
                         } else {
                             String msg = JSONUtils.getJsonErrorMessage(js.toString());
                             label

@@ -50,6 +50,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -152,7 +154,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
 
     private SchedulerController controller = null;
     
-    protected JobsPaginationController paginationController;
 
     /**
      * Default constructor
@@ -161,12 +162,10 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      */
     public SchedulerPage(SchedulerController controller) {
         this.controller = controller;
-        this.paginationController = new JobsPaginationController(this.controller);
-        this.controller.setJobsPaginationController(paginationController);
-        this.controller.getModel().getJobsPaginationModel().addPaginationListener(this);
         buildAndShow();
+        ((SchedulerModelImpl) this.controller.getModel()).getJobsModel().getPaginationModel().addPaginationListener(this);
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
-        this.controller.getEventDispatcher().addJobsUpdatedListener(this);
+        ((SchedulerModelImpl) this.controller.getModel()).getJobsModel().addJobsUpdatedListener(this);
         LogModel.getInstance().addLogListener(this);
         inst = this;
     }
@@ -177,7 +176,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public void pageChanged() {
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
-        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
+        this.pageLabel.setContents(this.controller.getJobsController().getPaginationController().getPaginationRangeLabel());
     }
 
     /*
@@ -185,15 +184,16 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
      */
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        this.pageLabel.setContents(this.paginationController.getPaginationRangeLabel());
+        PaginationController paginationController = this.controller.getJobsController().getPaginationController();
+        this.pageLabel.setContents(paginationController.getPaginationRangeLabel());
 
         this.pageNextButton.disable();
         this.pagePreviousButton.disable();
 
-        if (this.paginationController.hasPrevious())
+        if (paginationController.hasPrevious())
             this.pagePreviousButton.enable();
 
-        if (this.paginationController.hasNext())
+        if (paginationController.hasNext())
             this.pageNextButton.enable();
     }
 
@@ -252,6 +252,8 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         jobsSection.setExpanded(true);
         jobsSection.setItems(topPane);
 
+        final PaginationController paginationController = this.controller.getJobsController().getPaginationController();
+        
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addClickHandler(new ClickHandler() {
@@ -276,28 +278,28 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         c1.setValue(false);
         c1.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.fetchMyJobsOnly(c1.getValueAsBoolean());
+                controller.getJobsController().fetchMyJobsOnly(c1.getValueAsBoolean());
             }
         });
         final CheckboxItem c2 = new CheckboxItem("pending", "Pending");
         c2.setValue(true);
         c2.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.fetchPending(c2.getValueAsBoolean());
+                controller.getJobsController().fetchPending(c2.getValueAsBoolean());
             }
         });
         final CheckboxItem c3 = new CheckboxItem("running", "Running");
         c3.setValue(true);
         c3.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.fetchRunning(c3.getValueAsBoolean());
+                controller.getJobsController().fetchRunning(c3.getValueAsBoolean());
             }
         });
         final CheckboxItem c4 = new CheckboxItem("finished", "Finished");
         c4.setValue(true);
         c4.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.fetchFinished(c4.getValueAsBoolean());
+                controller.getJobsController().fetchFinished(c4.getValueAsBoolean());
             }
         });
 
@@ -649,8 +651,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private Layout buildTopPane() {
         final HLayout topPane = new HLayout();
 
-        this.jobGrid = new JobsView(this.controller);
-        Layout jobs = jobGrid.build();
+        Layout jobs = this.controller.buildJobsView();
 
         Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
             + "Filters apply only to the current page.<br>"
@@ -661,7 +662,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.filterPane = new VLayout();
         this.filterPane.setBackgroundColor("#fafafa");
         this.filterPane.addMember(label);
-        Layout gridFilter = this.jobGrid.buildFilterPane();
+        Layout gridFilter = this.controller.getJobsController().buildFilterPane();
         this.filterPane.setPadding(5);
         this.filterPane.setMembersMargin(10);
         this.filterPane.setOverflow(Overflow.AUTO);
@@ -782,8 +783,9 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
 
                 if (leftTabSet.getSelectedTab().equals(visuTab)) {
                     controller.setVisuFetchEnabled(true);
-                    if (controller.getModel().getSelectedJob() != null) {
-                        controller.visuFetch(controller.getModel().getSelectedJob().getId().toString());
+                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel(); 
+                    if (jobsModel.getSelectedJob() != null) {
+                        controller.visuFetch(jobsModel.getSelectedJob().getId().toString());
                     }
                 } else {
                     controller.setVisuFetchEnabled(false);

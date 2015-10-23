@@ -36,11 +36,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Map;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-
-import java.util.Map;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
@@ -86,8 +87,9 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener {
      * @param controller the Controller that created this View
      */
     public JobInfoView(SchedulerController controller) {
-        controller.getEventDispatcher().addJobSelectedListener(this);
-        controller.getEventDispatcher().addJobsUpdatedListener(this);
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        jobsModel.addJobSelectedListener(this);
+        jobsModel.addJobsUpdatedListener(this);
     }
 
     /**
