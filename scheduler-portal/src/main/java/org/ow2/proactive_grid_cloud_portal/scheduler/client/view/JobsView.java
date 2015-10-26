@@ -392,8 +392,8 @@ public class JobsView implements JobsUpdatedListener {
         this.ds = new JobDS("jobds_" + LoginModel.getInstance().getSessionId());
         this.jobsGrid.setDataSource(this.ds);
         this.jobsGrid.setCanGroupBy(false);
-        this.jobsGrid.setCanReorderFields(false);
-        this.jobsGrid.setCanPickFields(false);
+        this.jobsGrid.setCanReorderFields(true);
+        this.jobsGrid.setCanPickFields(true);
         this.jobsGrid.setCanFreezeFields(false);
         this.jobsGrid.setSelectionProperty("isSelected");
         this.jobsGrid.setEmptyMessage("No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.");

@@ -376,8 +376,8 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.tasksGrid.setHeight100();
         this.tasksGrid.setCanExpandRecords(true);
         this.tasksGrid.setCanGroupBy(false);
-        this.tasksGrid.setCanReorderFields(false);
-        this.tasksGrid.setCanPickFields(false);
+        this.tasksGrid.setCanReorderFields(true);
+        this.tasksGrid.setCanPickFields(true);
         this.tasksGrid.setCanFreezeFields(false);
         this.tasksGrid.setSelectionType(SelectionStyle.SINGLE);
         this.tasksGrid.setShowRecordComponents(true);
