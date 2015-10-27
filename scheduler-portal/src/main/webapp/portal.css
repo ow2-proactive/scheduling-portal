@@ -1,0 +1,89 @@
+.searchBox {
+	background-image: url('images/magnifying_glass.png');
+	background-repeat: no-repeat;
+	background-position: right;
+	background-size: 15px 15px;
+	vertical-align: top;
+	padding-left: 5px;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-right-style: none;
+	margin-top: 6px;
+}
+
+.txtPageNumber, .searchBox {
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+	height: 18px;
+	border-style: solid;
+	border-color: rgb(171, 171, 171);
+	border-width: 1px;
+}
+
+.txtPageNumber{
+	margin-top: 3px;
+}
+
+.labelPaginationLayout{
+	top: 5px !important;
+}
+
+.btnBoxCombo {
+	padding-left: 0;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	border-style: solid;
+	border-color: rgb(171, 171, 171);
+	border-width: 1px;
+	border-left-style: none;
+	margin-top: 6px;
+	height: 22px;
+}
+
+.gwt-SuggestBoxPopup {
+	z-index: 300000;
+	background-color: white;
+	border-style: solid;
+	border-color: rgb(171, 171, 171);
+	border-width: 1px;
+	width: 145px;
+	max-height: 200px;
+}
+
+.suggestPopupContent {
+	max-height: 200px;
+	overflow-y: auto;
+	width: 145px;
+}
+
+.suggestPopupContent .item {
+	width: 145px;
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+}
+
+.suggestPopupContent .item-selected {
+	width: 145px;
+	background-color: rgb(235, 235, 235);
+	font-family: Arial, Verdana, sans-serif;
+	font-size: 11px;
+}
+
+
+.navPreviousPaginationButton, .navNextPaginationButton {
+	position: relative !important;
+	left: 0 !important;
+	top: 6px !important;
+}
+
+.navPreviousPaginationButton {
+	float: left;
+}
+
+.navNextPaginationButton {
+	float: right;
+}
+
+.itemViewNav .checkBoxForm {
+	top: 5px !important;
+}

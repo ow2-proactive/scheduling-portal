@@ -45,6 +45,8 @@ import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksNavigationView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksPaginationView;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -98,6 +100,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     private static final String EXECUTIONS_ATTR = "executions";
     private static final String NODE_FAILURE_ATTR = "nodeFailure";
     private static final String DESCRIPTION_ATTR = "description";
+    private static final String TAG_ATTR = "tag";
 
     /**
      * Entries in the Tasks Grid
@@ -128,6 +131,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                     t.getMaxNumberOfExecOnFailure();
 
             setAttribute(NAME_ATTR, t.getName());
+            setAttribute(TAG_ATTR, t.getTag());
             setAttribute(STATUS_ATTR, t.getStatus().toString());
             setAttribute(EXEC_DURATION_ATTR, t.getExecutionTime());
             setAttribute(EXECUTIONS_ATTR, execs);
@@ -184,6 +188,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             DataSourceTextField descrF = new DataSourceTextField(DESCRIPTION_ATTR, "Description");
             descrF.setRequired(true);
 
+            DataSourceTextField tagF = new DataSourceTextField(TAG_ATTR, "Tag");
+            tagF.setRequired(true);
+
             DataSourceTextField hostF = new DataSourceTextField(HOST_ATTR, "Hostname");
             hostF.setRequired(true);
 
@@ -214,16 +221,31 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
 
+
+
     private SchedulerController controller = null;
+
+    /**
+     * View that contains the tasks navigation controls.
+     */
+    private TasksNavigationView navigationView = null;
+    
+    /**
+     * The view for the pagination of the tasks.
+     */
+    private TasksPaginationView paginationView = null;
+
+
 
     public TasksView(SchedulerController controller) {
         this.controller = controller;
+
         this.controller.getEventDispatcher().addTasksUpdatedListener(this);
         this.controller.getEventDispatcher().addRemoteHintListener(this);
-
         this.visuButtons = new HashMap<String, ImgButton>();
         visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
     }
+
 
     public void tasksUpdating(boolean jobChanged) {
         if (jobChanged) {
@@ -241,7 +263,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.show();
     }
 
-    public void tasksUpdated(List<Task> tasks) {
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
 
         TaskRecord[] data = new TaskRecord[tasks.size()];
@@ -266,6 +288,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         if (this.expandRecord != null) {
             this.tasksGrid.expandRecord(this.expandRecord);
         }
+        //this.controller.updateTaskPagination();
     }
 
     private ListGridRecord expandRecord;
@@ -406,27 +429,27 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 boolean enabled;
                 TaskRecord jr = (TaskRecord) tasksGrid.getSelectedRecord();
                 switch (TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase())) {
-                    case SUBMITTED:
-                    case WAITING_ON_ERROR:
-                    case WAITING_ON_FAILURE:
-                        enabled = false;
-                        break;
-                    case PENDING:
-                    case PAUSED:
-                    case RUNNING:
-                        enabled = true;
-                        break;
-                    case SKIPPED:
-                    case FINISHED:
-                    case FAULTY:
-                    case FAILED:
-                    case ABORTED:
-                    case NOT_STARTED:
-                    case NOT_RESTARTED:
-                        enabled = false;
-                        break;
-                    default:
-                        enabled = false;
+                case SUBMITTED:
+                case WAITING_ON_ERROR:
+                case WAITING_ON_FAILURE:
+                    enabled = false;
+                    break;
+                case PENDING:
+                case PAUSED:
+                case RUNNING:
+                    enabled = true;
+                    break;
+                case SKIPPED:
+                case FINISHED:
+                case FAULTY:
+                case FAILED:
+                case ABORTED:
+                case NOT_STARTED:
+                case NOT_RESTARTED:
+                    enabled = false;
+                    break;
+                default:
+                    enabled = false;
                 }
 
                 restart.setEnabled(enabled);
@@ -445,6 +468,8 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         idField.setWidth(60);
 
         ListGridField nameField = new ListGridField(NAME_ATTR, "Name");
+
+        ListGridField tagField = new ListGridField(TAG_ATTR, "Tag");
 
         ListGridField statusField = new ListGridField(STATUS_ATTR, "Status");
         statusField.setWidth(80);
@@ -470,13 +495,14 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         ListGridField visu = new ListGridField("visu", " ");
         visu.setWidth(20);
 
-        this.tasksGrid.setFields(idField, statusField, nameField, execDuration, nodeCount, executions,
+        this.tasksGrid.setFields(idField, statusField, nameField, tagField, execDuration, nodeCount, executions,
                 failures, visu);
         this.tasksGrid.sort(ID_ATTR, SortDirection.ASCENDING);
 
         this.loadingLabel = new Label("fetching tasks...");
         this.loadingLabel.setIcon("loading.gif");
         this.loadingLabel.setWidth100();
+        this.loadingLabel.setHeight100();
         this.loadingLabel.setAlign(Alignment.CENTER);
         this.loadingLabel.hide();
 
@@ -485,13 +511,25 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
 
-        HLayout layout = new HLayout();
-        layout.addMember(this.tasksGrid);
-        layout.addMember(this.loadingLabel);
-        layout.addMember(this.errorLabel);
+        this.navigationView = new TasksNavigationView(this.controller);
+        Layout navTools = this.navigationView.build();
+        
+        this.paginationView = new TasksPaginationView(this.controller);
+        Layout paginationBar = this.paginationView.build();
 
-        return layout;
+        VLayout tasksViewLayout = new VLayout();
+        tasksViewLayout.addMember(navTools);
+        tasksViewLayout.addMember(this.tasksGrid);
+        tasksViewLayout.addMember(this.loadingLabel);
+        tasksViewLayout.addMember(this.errorLabel);
+        tasksViewLayout.addMember(paginationBar);
+
+        return tasksViewLayout;
     }
+
+
+
+
 
     /*
      * (non-Javadoc)
@@ -520,6 +558,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             visuButtonsClickHandlers.put(button, clickHandler);
         }
     }
+
+
+
 
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {
         final Window window = new Window();

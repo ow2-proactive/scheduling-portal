@@ -80,4 +80,5 @@ public interface SchedulerEventDispatcher extends EventDispatcher {
 
     void setThirdPartyCredentialsListener(
             SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener);
+
 }

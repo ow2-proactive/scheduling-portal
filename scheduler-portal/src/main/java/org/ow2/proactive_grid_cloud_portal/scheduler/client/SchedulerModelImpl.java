@@ -57,8 +57,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -94,7 +95,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private boolean fetchPending = true;
     private boolean fetchRunning = true;
     private boolean fetchFinished = true;
-    private int currentJobPage = 0;
     private List<SchedulerUser> users = null;
     private List<SchedulerUser> usersWithJobs = null;
     private HashMap<String, String> schedulerStats = null;
@@ -105,6 +105,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private Map<String, StatHistory> statistics = null;
     private Map<String, Range> requestedStatRange = null;
     private List<JobUsage> usage = null;
+
 
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
@@ -120,6 +121,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ArrayList<StatsListener> statsListeners = null;
     private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
+
+
+    private PaginationModel jobsPaginationModel;
+
+    private TasksNavigationModel tasksNavigationModel;
+
 
     SchedulerModelImpl() {
         super();
@@ -146,6 +153,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
     }
+
+
+
 
     @Override
     public boolean isLoggedIn() {
@@ -227,6 +237,23 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             if (empty)
                 listener.jobsUpdating();
         }
+        
+        if(this.selectedJob != null){
+            Job oldSel = this.selectedJob;
+            this.selectedJob = jobs.get(oldSel.getId());
+            if(this.selectedJob == null){
+                for(JobSelectedListener listener: this.jobSelectedListeners){
+                    listener.jobUnselected();
+                }
+            }
+            else{
+                if (this.selectedJob != null && !this.selectedJob.isEqual(oldSel)) {
+                    for(JobSelectedListener listener: this.jobSelectedListeners){
+                        listener.selectedJobUpdated();
+                    }
+                }
+            }
+        }
     }
 
     void jobSubmitted(Job j) {
@@ -240,6 +267,17 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             listener.jobsUpdating();
         }
     }
+
+
+
+
+    public PaginationModel getJobsPaginationModel() {
+        return jobsPaginationModel;
+    }
+
+
+
+
 
     /**
      * Modifies the Job selection,
@@ -268,11 +306,13 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         // tasks list will change, notify tasks listeners
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             if (j == null)
-                list.tasksUpdated(new ArrayList<Task>());
+                list.tasksUpdated(new ArrayList<Task>(), 0);
             else
                 list.tasksUpdating(selChanged);
         }
     }
+
+
 
     @Override
     public Job getSelectedJob() {
@@ -294,24 +334,11 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return this.jobsRev;
     }
 
-    @Override
-    public int getJobPageSize() {
-        return SchedulerConfig.get().getJobsPageSize();
-    }
 
-    @Override
-    public int getJobPage() {
-        return this.currentJobPage;
-    }
 
-    /**
-     * change current page
-     * 
-     * @param page new page number
-     */
-    void setJobPage(int page) {
-        this.currentJobPage = page;
-    }
+
+
+
 
     /**
      * Modifies the tasks set
@@ -319,12 +346,19 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      * 
      * @param tasks the new TaskSet
      */
-    void setTasks(List<Task> tasks) {
+    void setTasks(List<Task> tasks, long totalTasks) {
         this.selectedTasks = tasks;
+        this.tasksNavigationModel.getPaginationModel().setTotalItems(totalTasks);
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            list.tasksUpdated(tasks);
+            if(this.selectedJob == null){
+                list.tasksUpdated(tasks, 0);
+            }
+            else{
+                list.tasksUpdated(tasks, totalTasks);
+            }
         }
     }
+
 
     /**
      * Notify task updated listeners that updating failed
@@ -371,7 +405,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
         if (stat == null) {
             throw new IllegalStateException("Trying to set output for a task in job " + jobId +
-                " for which there is no local representation");
+                    " for which there is no local representation");
         }
 
         List<String> lines = new ArrayList<String>();
@@ -675,6 +709,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
+
+
+
     public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
         thirdPartyCredentialsListener.keysUpdated(thirdPartyCredentialsKeys);
     }
@@ -696,6 +733,8 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             return Range.MINUTE_1;
         return r;
     }
+
+
 
     @Override
     public void logMessage(String message) {
@@ -803,6 +842,9 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.remoteHintListeners.add(listener);
     }
 
+
+
+
     /*
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addVisualizationListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener)
@@ -823,7 +865,28 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     @Override
     public void setThirdPartyCredentialsListener(
-      SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
+            SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener) {
         this.thirdPartyCredentialsListener = thirdPartyCredentialsListener;
+    }
+
+
+
+
+    public TasksNavigationModel getTasksNavigationModel() {
+        return tasksNavigationModel;
+    }
+
+
+
+
+    public void setJobsPaginationModel(PaginationModel jobsPaginationModel) {
+        this.jobsPaginationModel = jobsPaginationModel;
+    }
+
+
+
+
+    public void setTasksNavigationModel(TasksNavigationModel tasksNavigationModel) {
+        this.tasksNavigationModel = tasksNavigationModel;
     }
 }

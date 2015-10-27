@@ -196,5 +196,11 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener {
         this.label.show();
         this.displayedJob = null;
     }
+    
+    
+    @Override
+    public void selectedJobUpdated() {
+        // TODO Auto-generated method stub
+    }
 
 }
