@@ -130,14 +130,7 @@ public class JobsController {
         this.view = new JobsView(this);
         return this.view.build();
     }
-    
-    /**
-     * Builds the view that shows the filter pane.
-     * @return a layout that show the filter pane.
-     */
-    public Layout buildFilterPane(){
-        return this.view.buildFilterPane();
-    }
+   
     
     
     /**

@@ -51,7 +51,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.P
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -59,7 +58,6 @@ import com.google.gwt.user.client.Window;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
-import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
@@ -68,10 +66,6 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.MouseOutEvent;
-import com.smartgwt.client.widgets.events.MouseOutHandler;
-import com.smartgwt.client.widgets.events.MouseOverEvent;
-import com.smartgwt.client.widgets.events.MouseOverHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
@@ -135,8 +129,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     private AboutWindow aboutWindow = null;
     /** client settings */
     private SettingsWindow settingsWindow = null;
-    /** jobs filtering */
-    private Layout filterPane = null;
+    
 
     private Menu adminMenu = null;
 
@@ -242,7 +235,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
 
-        final Layout topPane = buildTopPane();
+        final Layout topPane = this.controller.buildJobsView();
 
         SectionStackSection jobsSection = new SectionStackSection();
         jobsSection.setTitle("Jobs list");
@@ -632,77 +625,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.adminMenu.redraw();
     }
 
-    /**
-     * Builds and return the top pane: the jobs list and filtering options
-     *
-     * <pre>
-     * +- HLayout -----------------------------------------------+
-     * |+- ListGrid -----------++--++- VLayout -----------------+|
-     * || JobsView#build()     ||  || JobsView#buildFilterPane()||
-     * ||                      ||>>|| hidden/shown upon click   ||
-     * ||                      ||  || on the '>>' canvas        ||
-     * |+----------------------++--++---------------------------+|
-     * +---------------------------------------------------------+
-     * </pre>
-     */
-    private Layout buildTopPane() {
-        final HLayout topPane = new HLayout();
-
-        Layout jobs = this.controller.buildJobsView();
-
-        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
-            + "Filters apply only to the current page.<br>"
-            + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
-            + "controls to view more results.");
-        label.setHeight(55);
-
-        this.filterPane = new VLayout();
-        this.filterPane.setBackgroundColor("#fafafa");
-        this.filterPane.addMember(label);
-        Layout gridFilter = this.controller.getJobsController().buildFilterPane();
-        this.filterPane.setPadding(5);
-        this.filterPane.setMembersMargin(10);
-        this.filterPane.setOverflow(Overflow.AUTO);
-        this.filterPane.addMember(gridFilter);
-        this.filterPane.hide();
-
-        final VLayout filterButton = new VLayout();
-        filterButton.setBackgroundColor("#fafafa");
-        filterButton.setAlign(VerticalAlignment.CENTER);
-        filterButton.setWidth(12);
-        filterButton.setHeight100();
-        final Img filterButtonLabel = new Img(SchedulerImages.instance.section_left_10().getSafeUri()
-                .asString(), 10, 13);
-        filterButton.addMember(filterButtonLabel);
-        filterButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (!filterPane.isVisible()) {
-                    filterPane.setWidth(490);
-                    filterButtonLabel.setSrc(SchedulerImages.instance.section_right_10().getSafeUri()
-                            .asString());
-                    topPane.showMember(filterPane);
-                } else {
-                    filterButtonLabel.setSrc(SchedulerImages.instance.section_left_10().getSafeUri()
-                            .asString());
-                    topPane.hideMember(filterPane);
-                }
-            }
-        });
-        filterButton.addMouseOverHandler(new MouseOverHandler() {
-            public void onMouseOver(MouseOverEvent event) {
-                filterButton.setBackgroundColor("#eee");
-            }
-        });
-        filterButton.addMouseOutHandler(new MouseOutHandler() {
-            public void onMouseOut(MouseOutEvent event) {
-                filterButton.setBackgroundColor("#fafafa");
-            }
-        });
-
-        topPane.setMembers(jobs, filterButton, filterPane);
-
-        return topPane;
-    }
+    
 
     /**
      * Builds and returns the bottom pane: currently selected job somewhat in a master/detail fashion

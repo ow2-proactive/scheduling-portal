@@ -62,12 +62,19 @@ import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
+import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.types.TopOperatorAppearance;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.MouseOutEvent;
+import com.smartgwt.client.widgets.events.MouseOutHandler;
+import com.smartgwt.client.widgets.events.MouseOverEvent;
+import com.smartgwt.client.widgets.events.MouseOverHandler;
 import com.smartgwt.client.widgets.form.FilterBuilder;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
@@ -96,6 +103,9 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
 
     
     private static final String JOB_ATTR = "job";
+    
+    /** jobs filtering */
+    private Layout filterPane = null;
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
       new SortSpecifier(JobsColumns.STATE_ATTR.getName(), SortDirection.ASCENDING),
@@ -492,7 +502,7 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
      * +------------------------+
      * </pre>
      */
-    public Layout build() {
+    public Layout buildGridPane() {
         this.jobsLoading = new Label("Fetching jobs...");
         this.jobsLoading.setWidth100();
         this.jobsLoading.setAlign(Alignment.CENTER);
@@ -562,6 +572,81 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
 
         return layout;
     }
+    
+    
+    /**
+     * Builds and return the top pane: the jobs list and filtering options
+     *
+     * <pre>
+     * +- HLayout -----------------------------------------------+
+     * |+- ListGrid -----------++--++- VLayout -----------------+|
+     * || JobsView#build()     ||  || JobsView#buildFilterPane()||
+     * ||                      ||>>|| hidden/shown upon click   ||
+     * ||                      ||  || on the '>>' canvas        ||
+     * |+----------------------++--++---------------------------+|
+     * +---------------------------------------------------------+
+     * </pre>
+     */
+    public Layout build() {
+        final HLayout topPane = new HLayout();
+
+        Layout jobs = this.buildGridPane();
+
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
+            + "Filters apply only to the current page.<br>"
+            + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
+            + "controls to view more results.");
+        label.setHeight(55);
+
+        this.filterPane = new VLayout();
+        this.filterPane.setBackgroundColor("#fafafa");
+        this.filterPane.addMember(label);
+        Layout gridFilter = this.buildFilterPane();
+        this.filterPane.setPadding(5);
+        this.filterPane.setMembersMargin(10);
+        this.filterPane.setOverflow(Overflow.AUTO);
+        this.filterPane.addMember(gridFilter);
+        this.filterPane.hide();
+
+        final VLayout filterButton = new VLayout();
+        filterButton.setBackgroundColor("#fafafa");
+        filterButton.setAlign(VerticalAlignment.CENTER);
+        filterButton.setWidth(12);
+        filterButton.setHeight100();
+        final Img filterButtonLabel = new Img(SchedulerImages.instance.section_left_10().getSafeUri()
+                .asString(), 10, 13);
+        filterButton.addMember(filterButtonLabel);
+        filterButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!filterPane.isVisible()) {
+                    filterPane.setWidth(490);
+                    filterButtonLabel.setSrc(SchedulerImages.instance.section_right_10().getSafeUri()
+                            .asString());
+                    topPane.showMember(filterPane);
+                } else {
+                    filterButtonLabel.setSrc(SchedulerImages.instance.section_left_10().getSafeUri()
+                            .asString());
+                    topPane.hideMember(filterPane);
+                }
+            }
+        });
+        filterButton.addMouseOverHandler(new MouseOverHandler() {
+            public void onMouseOver(MouseOverEvent event) {
+                filterButton.setBackgroundColor("#eee");
+            }
+        });
+        filterButton.addMouseOutHandler(new MouseOutHandler() {
+            public void onMouseOut(MouseOutEvent event) {
+                filterButton.setBackgroundColor("#fafafa");
+            }
+        });
+
+        topPane.setMembers(jobs, filterButton, filterPane);
+
+        return topPane;
+    }
+    
 
     /**
      * A custom sort for status:
