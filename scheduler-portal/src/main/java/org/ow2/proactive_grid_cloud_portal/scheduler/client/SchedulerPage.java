@@ -96,7 +96,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  *
  * @author mschnoor
  */
-public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListener, LogListener, PaginationListener {
+public class SchedulerPage implements SchedulerStatusListener, LogListener {
 
     static SchedulerPage inst;
 
@@ -133,10 +133,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
 
     private Menu adminMenu = null;
 
-    /** job page number */
-    private Label pageLabel = null;
-    private ToolStripButton pagePreviousButton = null;
-    private ToolStripButton pageNextButton = null;
 
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
@@ -153,53 +149,16 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public SchedulerPage(SchedulerController controller) {
         this.controller = controller;
         buildAndShow();
-        ((SchedulerModelImpl) this.controller.getModel()).getJobsModel().getPaginationModel().addPaginationListener(this);
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
-        ((SchedulerModelImpl) this.controller.getModel()).getJobsModel().addJobsUpdatedListener(this);
         LogModel.getInstance().addLogListener(this);
         inst = this;
     }
 
-    /**
-     * Clicked next/previous page, set inderterminate state until {@link #jobsUpdated(JobSet)}
-     */
-    public void pageChanged() {
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-        this.pageLabel.setContents(this.controller.getJobsController().getPaginationController().getPaginationRangeLabel());
-    }
+    
 
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdated(org.ow2.proactive_grid_cloud_portal.shared.job.JobSet)
-     */
-    public void jobsUpdated(Map<Integer, Job> jobs) {
-        PaginationController paginationController = this.controller.getJobsController().getPaginationController();
-        this.pageLabel.setContents(paginationController.getPaginationRangeLabel());
+    
 
-        this.pageNextButton.disable();
-        this.pagePreviousButton.disable();
-
-        if (paginationController.hasPrevious())
-            this.pagePreviousButton.enable();
-
-        if (paginationController.hasNext())
-            this.pageNextButton.enable();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobsUpdating()
-     */
-    public void jobsUpdating() {
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobsUpdatedListener#jobSubmitted(org.ow2.proactive_grid_cloud_portal.client.Job)
-     */
-    public void jobSubmitted(Job j) {
-    }
+    
 
     /**
      * Creates the layout and adds it to the page
@@ -242,27 +201,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         jobsSection.setExpanded(true);
         jobsSection.setItems(topPane);
 
-        final PaginationController paginationController = this.controller.getJobsController().getPaginationController();
-        
-        this.pageNextButton = new ToolStripButton("Next >");
-        this.pageNextButton.disable();
-        this.pageNextButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.nextPage();
-            }
-        });
-        this.pagePreviousButton = new ToolStripButton("< Previous");
-        this.pagePreviousButton.disable();
-        this.pagePreviousButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.previousPage();
-            }
-        });
-        this.pageLabel = new Label("");
-        this.pageLabel.setAlign(Alignment.CENTER);
-        this.pageLabel.setWidth(60);
-        this.pageLabel.setMargin(0);
-        this.pageLabel.setPadding(0);
 
         final CheckboxItem c1 = new CheckboxItem("myjobs", "My jobs");
         c1.setValue(false);
@@ -313,8 +251,7 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
 
         Canvas fill = new Canvas();
         fill.setWidth(5);
-        jobsSection.setControls(checkBoxes, fill, pagePreviousButton, pageLabel, pageNextButton);
-        this.pageChanged();
+        jobsSection.setControls(checkBoxes, fill);
 
         Canvas tools = buildTools();
 
@@ -784,10 +721,5 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     public void logCriticalMessage(String message) {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
-    }
-    
-    
-    @Override
-    public void totalItemChanged() {
     }
 }

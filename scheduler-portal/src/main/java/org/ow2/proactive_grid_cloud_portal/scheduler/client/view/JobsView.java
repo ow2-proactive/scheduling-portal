@@ -94,6 +94,7 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
 /**
@@ -105,7 +106,11 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
     private static final String JOB_ATTR = "job";
     
     /** jobs filtering */
-    private Layout filterPane = null;
+    protected Layout filterPane = null;
+    
+    protected Layout contentPane = null;
+    
+    protected Img filterButtonLabel = null;
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
       new SortSpecifier(JobsColumns.STATE_ATTR.getName(), SortDirection.ASCENDING),
@@ -279,9 +284,19 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
      * @return a widget for filtering the grid
      */
     public Layout buildFilterPane() {
-        VLayout layout = new VLayout();
-        layout.setWidth100();
-        layout.setHeight100();
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
+            + "Filters apply only to the current page.<br>"
+            + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
+            + "controls to view more results.");
+        label.setHeight(55);
+
+        this.filterPane = new VLayout();
+        this.filterPane.setBackgroundColor("#fafafa");
+        this.filterPane.addMember(label);
+        
+        Layout gridFilterPane = new VLayout();
+        gridFilterPane.setWidth100();
+        gridFilterPane.setHeight100();
 
         filterBuilder = new FilterBuilder();
         filterBuilder.setDataSource(this.ds);
@@ -313,10 +328,17 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
         buttons.setMembersMargin(5);
         buttons.setMembers(clear, ok);
 
-        layout.addMember(filterBuilder);
-        layout.addMember(buttons);
+        gridFilterPane.addMember(filterBuilder);
+        gridFilterPane.addMember(buttons);
+        
+        this.filterPane.setPadding(5);
+        this.filterPane.setMembersMargin(10);
+        this.filterPane.setOverflow(Overflow.AUTO);
+        this.filterPane.addMember(gridFilterPane);
+        this.filterPane.setBorder("1px solid #bfbfbf");
+        this.filterPane.hide();
 
-        return layout;
+        return this.filterPane;
     }
 
     
@@ -502,7 +524,7 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
      * +------------------------+
      * </pre>
      */
-    public Layout buildGridPane() {
+    public ListGrid buildGridPane() {
         this.jobsLoading = new Label("Fetching jobs...");
         this.jobsLoading.setWidth100();
         this.jobsLoading.setAlign(Alignment.CENTER);
@@ -535,9 +557,6 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
         this.jobsGrid.setWidth100();
         this.jobsGrid.setHeight100();
 
-        HLayout layout = new HLayout();
-        layout.addMember(jobsLoading);
-        layout.addMember(jobsGrid);
 
         // right click on an entry : popup a menu for job-contextual operations
         this.jobsGrid.addCellContextClickHandler(new CellContextClickHandler() {
@@ -569,10 +588,79 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
                 }
             }
         });
-
+        
+        return this.jobsGrid;
+    }
+    
+    
+    protected Layout buildToolBar(){
+        ToolStrip toolbar = new ToolStrip();
+        toolbar.addStyleName("itemViewNav");
+        toolbar.setHeight(34);
+        toolbar.setWidth100();
+        toolbar.setBackgroundImage("");
+        toolbar.setBackgroundColor("#fafafa");
+        toolbar.setBorder("0px");
+        
+        return toolbar;
+    }
+    
+    public Layout build(){
+        VLayout layout = new VLayout();
+        
+        Layout toolBarLayout = this.buildToolBar();
+        Layout contentLayout = this.buildContent();
+        Layout paginationLayout = this.controller.getPaginationController().buildView();
+        
+        layout.addMember(toolBarLayout);
+        layout.addMember(contentLayout);
+        layout.addMember(paginationLayout);
         return layout;
     }
     
+    
+    protected void toggleFilterPane(){
+        if (!filterPane.isVisible()) {
+            filterPane.setWidth(490);
+            filterButtonLabel.setSrc(SchedulerImages.instance.section_right_10().getSafeUri()
+                    .asString());
+            contentPane.showMember(filterPane);
+        } else {
+            filterButtonLabel.setSrc(SchedulerImages.instance.section_left_10().getSafeUri()
+                    .asString());
+            contentPane.hideMember(filterPane);
+        }
+    }
+    
+    
+    protected Layout buildFilterButton(){
+        final VLayout filterButton = new VLayout();
+        filterButton.setBackgroundColor("#bfbfbf");
+        filterButton.setAlign(VerticalAlignment.CENTER);
+        filterButton.setWidth(12);
+        filterButton.setHeight100();
+        filterButton.setBorder("1px solid #bfbfbf");
+        filterButtonLabel = new Img(SchedulerImages.instance.section_left_10().getSafeUri()
+                .asString(), 10, 13);
+        filterButton.addMember(filterButtonLabel);
+        filterButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                toggleFilterPane();
+            }
+        });
+        filterButton.addMouseOverHandler(new MouseOverHandler() {
+            public void onMouseOver(MouseOverEvent event) {
+                filterButton.setBackgroundColor("#eee");
+            }
+        });
+        filterButton.addMouseOutHandler(new MouseOutHandler() {
+            public void onMouseOut(MouseOutEvent event) {
+                filterButton.setBackgroundColor("#bfbfbf");
+            }
+        });
+        return filterButton;
+    }
     
     /**
      * Builds and return the top pane: the jobs list and filtering options
@@ -587,64 +675,20 @@ public class JobsView extends AbstractGridItemsView implements JobsUpdatedListen
      * +---------------------------------------------------------+
      * </pre>
      */
-    public Layout build() {
-        final HLayout topPane = new HLayout();
+    public Layout buildContent() {
+        this.buildGridPane();
 
-        Layout jobs = this.buildGridPane();
+        HLayout contentGridLayout = new HLayout();
+        contentGridLayout.addMember(jobsGrid);
+        contentGridLayout.addMember(jobsLoading);
+        
+        Layout filterButton = this.buildFilterButton();
+        Layout filterPane = this.buildFilterPane();
+        
+        contentPane = new HLayout();
+        contentPane.setMembers(contentGridLayout, filterButton, filterPane);
 
-        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
-            + "Filters apply only to the current page.<br>"
-            + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
-            + "controls to view more results.");
-        label.setHeight(55);
-
-        this.filterPane = new VLayout();
-        this.filterPane.setBackgroundColor("#fafafa");
-        this.filterPane.addMember(label);
-        Layout gridFilter = this.buildFilterPane();
-        this.filterPane.setPadding(5);
-        this.filterPane.setMembersMargin(10);
-        this.filterPane.setOverflow(Overflow.AUTO);
-        this.filterPane.addMember(gridFilter);
-        this.filterPane.hide();
-
-        final VLayout filterButton = new VLayout();
-        filterButton.setBackgroundColor("#fafafa");
-        filterButton.setAlign(VerticalAlignment.CENTER);
-        filterButton.setWidth(12);
-        filterButton.setHeight100();
-        final Img filterButtonLabel = new Img(SchedulerImages.instance.section_left_10().getSafeUri()
-                .asString(), 10, 13);
-        filterButton.addMember(filterButtonLabel);
-        filterButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!filterPane.isVisible()) {
-                    filterPane.setWidth(490);
-                    filterButtonLabel.setSrc(SchedulerImages.instance.section_right_10().getSafeUri()
-                            .asString());
-                    topPane.showMember(filterPane);
-                } else {
-                    filterButtonLabel.setSrc(SchedulerImages.instance.section_left_10().getSafeUri()
-                            .asString());
-                    topPane.hideMember(filterPane);
-                }
-            }
-        });
-        filterButton.addMouseOverHandler(new MouseOverHandler() {
-            public void onMouseOver(MouseOverEvent event) {
-                filterButton.setBackgroundColor("#eee");
-            }
-        });
-        filterButton.addMouseOutHandler(new MouseOutHandler() {
-            public void onMouseOut(MouseOutEvent event) {
-                filterButton.setBackgroundColor("#fafafa");
-            }
-        });
-
-        topPane.setMembers(jobs, filterButton, filterPane);
-
-        return topPane;
+        return contentPane;
     }
     
 

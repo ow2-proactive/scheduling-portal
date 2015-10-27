@@ -36,6 +36,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsPaginationView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 
 import com.smartgwt.client.widgets.layout.Layout;
@@ -48,6 +49,8 @@ import com.smartgwt.client.widgets.layout.Layout;
 public class JobsPaginationController extends PaginationController{
 
     protected JobsController itemsController;
+    
+    protected JobsPaginationView view;
     
     public JobsPaginationController(JobsController jobsController) {
         this.itemsController = jobsController;
@@ -69,7 +72,7 @@ public class JobsPaginationController extends PaginationController{
     
     @Override
     public Layout buildView() {
-        // TODO Auto-generated method stub
-        return null;
+        this.view = new JobsPaginationView(itemsController);
+        return this.view.build();
     }
 }
