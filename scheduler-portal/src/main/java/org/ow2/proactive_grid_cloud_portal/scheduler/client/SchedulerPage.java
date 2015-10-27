@@ -49,7 +49,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
@@ -115,8 +114,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
 
-    /** grid displaying the jobs */
-    private JobsView jobGrid = null;
     /** view displaying info about the selected job */
     private JobInfoView jobInfo = null;
     
@@ -838,7 +835,6 @@ public class SchedulerPage implements SchedulerStatusListener, JobsUpdatedListen
         this.settingsWindow.destroy();
 
         this.rootLayout = null;
-        this.jobGrid = null;
         this.jobInfo = null;
         this.controller = null;
         this.logWindow = null;

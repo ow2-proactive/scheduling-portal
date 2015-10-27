@@ -36,6 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +53,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.TasksColumns;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.data.fields.DataSourceDateField;
-import com.smartgwt.client.data.fields.DataSourceIntegerField;
-import com.smartgwt.client.data.fields.DataSourceTextField;
+import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
@@ -91,20 +92,8 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  *
  * @author mschnoor
  */
-public class TasksView implements TasksUpdatedListener, RemoteHintListener {
+public class TasksView extends AbstractGridItemsView implements TasksUpdatedListener, RemoteHintListener {
 
-    private static final String ID_ATTR = "id";
-    private static final String STATUS_ATTR = "status";
-    private static final String NAME_ATTR = "name";
-    private static final String HOST_ATTR = "host";
-    private static final String START_TIME_ATTR = "startTime";
-    private static final String FINISHED_TIME_ATTR = "finishedTime";
-    private static final String EXEC_DURATION_ATTR = "execDuration";
-    private static final String NODE_COUNT_ATTR = "nodeCount";
-    private static final String EXECUTIONS_ATTR = "executions";
-    private static final String NODE_FAILURE_ATTR = "nodeFailure";
-    private static final String DESCRIPTION_ATTR = "description";
-    private static final String TAG_ATTR = "tag";
 
     /**
      * Entries in the Tasks Grid
@@ -114,7 +103,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         private Task task = null;
 
         public TaskRecord(Task t) {
-            setAttribute(ID_ATTR, t.getId().longValue());
+            setAttribute(TasksColumns.ID_ATTR.getName(), t.getId().longValue());
             this.task = t;
             update(t);
         }
@@ -134,18 +123,18 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             String fails = (t.getMaxNumberOfExecOnFailure() - t.getNumberOfExecOnFailureLeft()) + " / " +
                     t.getMaxNumberOfExecOnFailure();
 
-            setAttribute(NAME_ATTR, t.getName());
-            setAttribute(TAG_ATTR, t.getTag());
-            setAttribute(STATUS_ATTR, t.getStatus().toString());
-            setAttribute(EXEC_DURATION_ATTR, t.getExecutionTime());
-            setAttribute(EXECUTIONS_ATTR, execs);
-            setAttribute(NODE_FAILURE_ATTR, fails);
-            setAttribute(NODE_COUNT_ATTR, t.getNodeCount());
+            setAttribute(TasksColumns.NAME_ATTR.getName(), t.getName());
+            setAttribute(TasksColumns.TAG_ATTR.getName(), t.getTag());
+            setAttribute(TasksColumns.STATUS_ATTR.getName(), t.getStatus().toString());
+            setAttribute(TasksColumns.EXEC_DURATION_ATTR.getName(), t.getExecutionTime());
+            setAttribute(TasksColumns.EXECUTIONS_ATTR.getName(), execs);
+            setAttribute(TasksColumns.NODE_FAILURE_ATTR.getName(), fails);
+            setAttribute(TasksColumns.NODE_COUNT_ATTR.getName(), t.getNodeCount());
 
             if (t.getStartTime() > 0)
-                setAttribute(START_TIME_ATTR, JSUtil.getTime(t.getStartTime()));
+                setAttribute(TasksColumns.START_TIME_ATTR.getName(), JSUtil.getTime(t.getStartTime()));
             if (t.getFinishTime() > t.getStartTime())
-                setAttribute(FINISHED_TIME_ATTR, JSUtil.getTime(t.getFinishTime()));
+                setAttribute(TasksColumns.FINISHED_TIME_ATTR.getName(), JSUtil.getTime(t.getFinishTime()));
         }
 
         public Task getTask() {
@@ -161,45 +150,8 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         public TaskDS(String id) {
             setID(id);
             setClientOnly(true);
-
-            DataSourceIntegerField idF = new DataSourceIntegerField(ID_ATTR, "Id");
-            idF.setPrimaryKey(true);
-
-            DataSourceTextField nameF = new DataSourceTextField(NAME_ATTR, "Name");
-            nameF.setRequired(true);
-
-            DataSourceTextField statusF = new DataSourceTextField(STATUS_ATTR, "Status");
-            statusF.setRequired(true);
-
-            DataSourceTextField execDurF = new DataSourceTextField(EXEC_DURATION_ATTR, "Duration");
-            execDurF.setRequired(true);
-
-            DataSourceTextField execsF = new DataSourceTextField(EXECUTIONS_ATTR, "Executions");
-            execsF.setRequired(true);
-
-            DataSourceTextField nodeFailF = new DataSourceTextField(NODE_FAILURE_ATTR, "Failures");
-            nodeFailF.setRequired(true);
-
-            DataSourceTextField nodeCountF = new DataSourceTextField(NODE_COUNT_ATTR, "Nodes");
-            nodeCountF.setRequired(true);
-
-            DataSourceDateField startF = new DataSourceDateField(START_TIME_ATTR, "Started at");
-            startF.setRequired(true);
-
-            DataSourceDateField finishF = new DataSourceDateField(FINISHED_TIME_ATTR, "Finished at");
-            finishF.setRequired(true);
-
-            DataSourceTextField descrF = new DataSourceTextField(DESCRIPTION_ATTR, "Description");
-            descrF.setRequired(true);
-
-            DataSourceTextField tagF = new DataSourceTextField(TAG_ATTR, "Tag");
-            tagF.setRequired(true);
-
-            DataSourceTextField hostF = new DataSourceTextField(HOST_ATTR, "Hostname");
-            hostF.setRequired(true);
-
-            setFields(idF, nameF, statusF, execDurF, execsF, nodeFailF, nodeCountF, startF, finishF, descrF,
-                    hostF);
+            DataSourceField [] fields = buildDatasourceFields();
+            setFields(fields);
         }
     }
 
@@ -262,8 +214,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
         int i = 0;
         for (Task t : tasks) {
             data[i] = new TaskRecord(t);
+            String idAttr = TasksColumns.ID_ATTR.getName();
             if (this.expandRecord != null &&
-                    data[i].getAttribute(ID_ATTR).equals(this.expandRecord.getAttribute(ID_ATTR))) {
+                    data[i].getAttribute(idAttr).equals(this.expandRecord.getAttribute(idAttr))) {
                 this.expandRecord = data[i];
             }
             i++;
@@ -285,6 +238,43 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
     private ListGridRecord expandRecord;
 
+    
+    protected EnumMap<TasksColumns, ListGridField> getColumnsForListGridField(){
+        EnumMap<TasksColumns, ListGridField> columns = new EnumMap<TasksColumns, ListGridField>(TasksColumns.class);
+        for(TasksColumns col: TasksColumns.values()){
+            if(!col.getDetail()){
+                columns.put(col, null);
+            }
+        }
+        return columns;
+    }
+    
+    
+    protected EnumMap<TasksColumns, ListGridField> buildListGridField(){
+        EnumMap<TasksColumns, ListGridField> fields = super.<TasksColumns>buildListGridField();
+        
+        ListGridField idField = fields.get(TasksColumns.ID_ATTR);
+        idField.setType(ListGridFieldType.INTEGER);
+        idField.setAlign(Alignment.LEFT);
+        idField.setCellAlign(Alignment.LEFT);
+
+        ListGridField execDuration = fields.get(TasksColumns.EXEC_DURATION_ATTR);
+        execDuration.setCellFormatter(new CellFormatter() {
+            public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
+                long l = Long.parseLong(value.toString());
+                return Job.formatDuration(l);
+            }
+        });
+
+        return fields;
+    }
+    
+    
+    protected DetailViewerField buildDetailViewer(TasksColumns column){
+        return new DetailViewerField(column.getName(), column.getTitle());
+    }
+    
+    
     public Layout build() {
         this.tasksGrid = new ListGrid() {
 
@@ -303,18 +293,19 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                 detail.setHeight100();
                 detail.setCanSelectText(true);
 
-                DetailViewerField dfh = new DetailViewerField(HOST_ATTR, "Hostname");
-                DetailViewerField df2 = new DetailViewerField(START_TIME_ATTR, "Started time");
-                DetailViewerField df3 = new DetailViewerField(FINISHED_TIME_ATTR, "Finished time");
-                DetailViewerField df1 = new DetailViewerField(DESCRIPTION_ATTR, "Description");
+                DetailViewerField [] fields = new DetailViewerField[4];
+                fields[0] = buildDetailViewer(TasksColumns.HOST_ATTR);
+                fields[1] = buildDetailViewer(TasksColumns.START_TIME_ATTR);
+                fields[2] = buildDetailViewer(TasksColumns.FINISHED_TIME_ATTR);
+                fields[3] = buildDetailViewer(TasksColumns.DESCRIPTION_ATTR);
 
-                detail.setFields(dfh, df2, df3, df1);
+                detail.setFields(fields);
 
                 DetailViewerRecord r1 = new DetailViewerRecord();
-                r1.setAttribute(HOST_ATTR, (t.getHostName().equals("null") ? "" : t.getHostName()));
-                r1.setAttribute(DESCRIPTION_ATTR, t.getDescription());
-                r1.setAttribute(START_TIME_ATTR, rec.getAttribute(START_TIME_ATTR));
-                r1.setAttribute(FINISHED_TIME_ATTR, rec.getAttribute(FINISHED_TIME_ATTR));
+                r1.setAttribute(TasksColumns.HOST_ATTR.getName(), (t.getHostName().equals("null") ? "" : t.getHostName()));
+                r1.setAttribute(TasksColumns.DESCRIPTION_ATTR.getName(), t.getDescription());
+                r1.setAttribute(TasksColumns.START_TIME_ATTR.getName(), rec.getAttribute(TasksColumns.START_TIME_ATTR.getName()));
+                r1.setAttribute(TasksColumns.FINISHED_TIME_ATTR.getName(), rec.getAttribute(TasksColumns.FINISHED_TIME_ATTR.getName()));
 
                 detail.setData(new DetailViewerRecord[]{r1});
 
@@ -328,7 +319,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             protected String getCellCSSText(ListGridRecord record, int rowNum, int colNum) {
                 String base = super.getCellCSSText(record, rowNum, colNum);
                 if (colNum == 2) {
-                    String st = record.getAttribute(STATUS_ATTR);
+                    String st = record.getAttribute(TasksColumns.STATUS_ATTR.getName());
                     if (st.equals(TaskStatus.PENDING.toString()) ||
                             st.equals(TaskStatus.SUBMITTED.toString()))
                         return "color:#1a8bba;" + base;
@@ -360,7 +351,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
                     button.setShowRollOver(false);
                     button.setShowOverCanvas(false);
                     button.setShowDown(false);
-                    visuButtons.put(record.getAttributeAsString(ID_ATTR), button);
+                    visuButtons.put(record.getAttributeAsString(TasksColumns.ID_ATTR.getName()), button);
 
                     for (RemoteHint rh : controller.getModel().getRemoteHints()) {
                         loadRemoteHint(rh, record);
@@ -393,43 +384,10 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
             }
         });
 
-        ListGridField idField = new ListGridField(ID_ATTR, "Id");
-        idField.setType(ListGridFieldType.INTEGER);
-        idField.setAlign(Alignment.LEFT);
-        idField.setCellAlign(Alignment.LEFT);
-        idField.setWidth(60);
-
-        ListGridField nameField = new ListGridField(NAME_ATTR, "Name");
-
-        ListGridField tagField = new ListGridField(TAG_ATTR, "Tag");
-
-        ListGridField statusField = new ListGridField(STATUS_ATTR, "Status");
-        statusField.setWidth(80);
-
-        ListGridField execDuration = new ListGridField(EXEC_DURATION_ATTR, "Duration");
-        execDuration.setWidth(80);
-        execDuration.setCellFormatter(new CellFormatter() {
-            public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                long l = Long.parseLong(value.toString());
-                return Job.formatDuration(l);
-            }
-        });
-
-        ListGridField nodeCount = new ListGridField(NODE_COUNT_ATTR, "Nodes");
-        nodeCount.setWidth(40);
-
-        ListGridField executions = new ListGridField(EXECUTIONS_ATTR, "Executions");
-        executions.setWidth(60);
-
-        ListGridField failures = new ListGridField(NODE_FAILURE_ATTR, "Failures");
-        executions.setWidth(60);
-
-        ListGridField visu = new ListGridField("visu", " ");
-        visu.setWidth(20);
-
-        this.tasksGrid.setFields(idField, statusField, nameField, tagField, execDuration, nodeCount, executions,
-                failures, visu);
-        this.tasksGrid.sort(ID_ATTR, SortDirection.ASCENDING);
+        Collection<ListGridField> fieldsCollection = this.buildListGridField().values();
+        ListGridField [] fields = new ListGridField[fieldsCollection.size()];
+        this.tasksGrid.setFields(fieldsCollection.toArray(fields));
+        this.tasksGrid.sort(TasksColumns.ID_ATTR.getName(), SortDirection.ASCENDING);
 
         this.loadingLabel = new Label("fetching tasks...");
         this.loadingLabel.setIcon("loading.gif");
@@ -459,7 +417,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
 
     protected void taskClickHandler(){
-        final String taskName = tasksGrid.getSelectedRecord().getAttributeAsString(NAME_ATTR);
+        final String taskName = tasksGrid.getSelectedRecord().getAttributeAsString(TasksColumns.NAME_ATTR.getName());
 
         Menu menu = new Menu();
         menu.setShowShadow(true);
@@ -489,7 +447,7 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
 
         boolean enabled;
         ListGridRecord jr = this.tasksGrid.getSelectedRecord();
-        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(STATUS_ATTR).toUpperCase()); 
+        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(TasksColumns.STATUS_ATTR.getName()).toUpperCase()); 
         switch (status) {
         case SUBMITTED:
         case WAITING_ON_ERROR:
@@ -534,9 +492,9 @@ public class TasksView implements TasksUpdatedListener, RemoteHintListener {
     }
 
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
-        String taskId = rec.getAttributeAsString(ID_ATTR);
+        String taskId = rec.getAttributeAsString(TasksColumns.ID_ATTR.getName());
         String jobId = this.controller.getModel().getParentModel().getJobsModel().getSelectedJob().getId().toString();
-        final String taskName = rec.getAttributeAsString(NAME_ATTR);
+        final String taskName = rec.getAttributeAsString(TasksColumns.NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
