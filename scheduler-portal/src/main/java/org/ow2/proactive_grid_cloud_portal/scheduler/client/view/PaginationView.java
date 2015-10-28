@@ -1,8 +1,5 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.List;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 
@@ -58,6 +55,8 @@ public class PaginationView implements PaginationListener{
      */
     protected TextBox txtPageNumber = null;
     
+    protected String itemTypeName;
+    
     
     /**
      * Builds the view content.
@@ -102,7 +101,7 @@ public class PaginationView implements PaginationListener{
             }
         });
 
-        this.offsetRangeLabel = new Label("tasks 0 - 0");
+        this.offsetRangeLabel = new Label(this.itemTypeName + " 0 - 0");
         this.offsetRangeLabel.addStyleName("navPaginationLabel");
         this.offsetRangeLabel.setAlign(Alignment.CENTER);
         this.offsetRangeLabel.setWidth100();
@@ -203,7 +202,7 @@ public class PaginationView implements PaginationListener{
     @Override
     public void pageChanged() {
         this.disableAllControls();
-        this.offsetRangeLabel.setContents("tasks " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
     

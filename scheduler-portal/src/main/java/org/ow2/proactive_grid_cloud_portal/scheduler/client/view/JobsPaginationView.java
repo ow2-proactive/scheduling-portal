@@ -9,6 +9,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsContr
 public class JobsPaginationView extends PaginationView implements JobsUpdatedListener{
 
     public JobsPaginationView(JobsController controller){
+        this.itemTypeName = "jobs";
         this.paginationController = controller.getPaginationController();
         this.paginationController.getModel().addPaginationListener(this);
         controller.getModel().addJobsUpdatedListener(this);

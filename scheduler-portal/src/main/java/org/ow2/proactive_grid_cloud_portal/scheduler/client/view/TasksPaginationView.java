@@ -46,6 +46,7 @@ public class TasksPaginationView extends PaginationView implements TasksUpdatedL
     
    
     public TasksPaginationView(TasksController controller){
+        this.itemTypeName = "tasks";
         this.paginationController = controller.getTaskNavigationController().getPaginationController();
         this.paginationController.getModel().addPaginationListener(this);
         controller.getModel().addTasksUpdatedListener(this);
@@ -64,9 +65,4 @@ public class TasksPaginationView extends PaginationView implements TasksUpdatedL
     @Override
     public void tasksUpdatedFailure(String message) {
     }
-    
-    
-    
-    
-    
 }
