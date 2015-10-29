@@ -87,7 +87,7 @@ public class JobInfoView implements JobSelectedListener, JobsUpdatedListener {
      * @param controller the Controller that created this View
      */
     public JobInfoView(SchedulerController controller) {
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         jobsModel.addJobsUpdatedListener(this);
     }

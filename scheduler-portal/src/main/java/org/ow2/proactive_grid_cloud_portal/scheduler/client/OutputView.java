@@ -101,7 +101,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     public OutputView(SchedulerController controller) {
         this.controller = controller;
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         this.controller.getEventDispatcher().addJobOutputListener(this);
         ((SchedulerModelImpl) this.controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
@@ -146,7 +146,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                     mode = SchedulerServiceAsync.LOG_STDOUT;
                 }
 
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
                 int jobId = jobsModel.getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     OutputView.this.controller.getJobOutput(mode);
@@ -202,7 +202,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 if (isLive)
                     return;
 
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
                 Job sel = jobsModel.getSelectedJob();
                 if (sel != null) {
                     JobOutput out = controller.getModel().getJobOutput(sel.getId());

@@ -53,6 +53,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedJobs;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
@@ -80,7 +81,7 @@ public class JobsController {
     /**
      * The parent controller of this controller.
      */
-    protected SchedulerController parentController;
+    protected ExecutionsController parentController;
     
     /**
      * The view controlled by this controller.
@@ -91,7 +92,7 @@ public class JobsController {
      * Builds a jobs controller from a parent scheduler controller.
      * @param parentController the parent controller.
      */
-    public JobsController(SchedulerController parentController) {
+    public JobsController(ExecutionsController parentController) {
         this.parentController = parentController;
     }
 
@@ -118,9 +119,9 @@ public class JobsController {
      * @return a layout that displays the view.
      */
     public Layout buildView(){
-        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) this.parentController.getModel();
-        this.model = new JobsModel(schedulerModel);
-        schedulerModel.setJobsModel(this.model);
+        ExecutionsModel executionsModel = this.parentController.getModel();
+        this.model = new JobsModel(executionsModel);
+        executionsModel.setJobsModel(this.model);
        
         this.paginationController = new JobsPaginationController(this);
         this.view = new JobsView(this);
@@ -142,13 +143,13 @@ public class JobsController {
         Job selectedJob = model.getSelectedJob();
         // cancel async requests relative to the old selection
         if (selectedJob == null || id != selectedJob.getId()) {
-            this.parentController.cancelOutputRequests();
-            this.parentController.resetPendingTasksRequests();
+            this.parentController.getParentController().cancelOutputRequests();
+            this.parentController.getParentController().resetPendingTasksRequests();
         }
 
         this.model.selectJob(id);
         this.parentController.getTasksController().updatingTasks();
-        this.parentController.visuFetch(jobId);
+        this.parentController.getParentController().visuFetch(jobId);
     }
     
     
@@ -340,12 +341,12 @@ public class JobsController {
                 }
                 int httpErrorCodeFromException = JSONUtils.getJsonErrorCode(caught);
                 if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
-                    parentController.teardown("You have been disconnected from the server.");
+                    parentController.getParentController().teardown("You have been disconnected from the server.");
                 } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
                     LogModel.getInstance().logImportantMessage(
                             "Failed to fetch jobs because of permission (automatic refresh will be disabled)"
                                     + JSONUtils.getJsonErrorMessage(caught));
-                    parentController.stopTimer();
+                    parentController.getParentController().stopTimer();
                     // display empty message in jobs view
                     model.emptyJobs();
                 } else {
@@ -470,7 +471,7 @@ public class JobsController {
                     return;
                 }
                 if (JSONUtils.getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
-                    parentController.teardown("You have been disconnected from the server.");
+                    parentController.getParentController().teardown("You have been disconnected from the server.");
                 }
                 LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " + JSONUtils.getJsonErrorMessage(caught));
             }

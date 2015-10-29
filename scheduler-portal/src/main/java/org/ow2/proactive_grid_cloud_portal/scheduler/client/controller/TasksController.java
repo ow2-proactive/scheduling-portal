@@ -17,6 +17,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUt
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
 import com.google.gwt.http.client.Request;
@@ -34,7 +35,7 @@ public class TasksController {
     protected TasksModel model;
     
     
-    protected TasksView view;
+    protected AbstractGridItemsView view;
     
     
     protected SchedulerController parentController;
@@ -52,14 +53,13 @@ public class TasksController {
     }
 
 
-
-
     public Layout buildView(){
         this.model = new TasksModel((SchedulerModelImpl) this.parentController.getModel());
         this.taskNavigationController = new TasksNavigationController(this);
         this.view = new TasksView(this);
         return this.view.build();
     }
+    
     
         
     
@@ -125,7 +125,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -150,7 +150,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void restartTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.restartTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -175,7 +175,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -204,7 +204,7 @@ public class TasksController {
     
     
     public String computeNoVncPageUrl(String taskName){
-        String jobId = String.valueOf(model.getParentModel().getJobsModel().getSelectedJob().getId());
+        String jobId = String.valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }

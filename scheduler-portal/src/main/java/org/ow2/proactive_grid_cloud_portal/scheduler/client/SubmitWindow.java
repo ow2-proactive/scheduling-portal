@@ -289,7 +289,7 @@ public class SubmitWindow {
                         SubmitWindow.this.destroy();
                         LogModel.getInstance()
                                 .logMessage("Successfully submitted job " + fileName + ": " + id);
-                        controller.getJobsController().addSubmittingJob(id, fileName);
+                        controller.getExecutionController().getJobsController().addSubmittingJob(id, fileName);
                     }
                     /*
                      *  submission with edition:
@@ -395,7 +395,7 @@ public class SubmitWindow {
                                         SubmitWindow.this.destroy();
                                         LogModel.getInstance().logMessage(
                                                 "Successfully submitted job " + fileName + ": " + id);
-                                        controller.getJobsController().addSubmittingJob(id, fileName);
+                                        controller.getExecutionController().getJobsController().addSubmittingJob(id, fileName);
                                     } else {
                                         failure = true;
                                     }

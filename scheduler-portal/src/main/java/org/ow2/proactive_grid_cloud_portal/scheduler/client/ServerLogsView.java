@@ -89,7 +89,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      */
     public ServerLogsView(SchedulerController controller) {
         this.controller = controller;
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
     }
@@ -111,7 +111,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
                 ServerLogsView.this.label.setIcon("loading.gif");
                 ServerLogsView.this.label.show();
 
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
                 int jobId = jobsModel.getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     ServerLogsView.this.controller.getJobServerLogs(jobId, new ShowLogsCallback());

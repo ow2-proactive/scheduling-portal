@@ -43,10 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ExpandableTasksListGrid;
 
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
@@ -56,20 +53,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class TasksView extends AbstractGridItemsView implements TasksUpdatedListener {
    
-
-    /**
-     * the Grid widget displayed in the view
-     */
-    private ExpandableTasksListGrid tasksGrid = null;
-    /**
-     * shown when loading
-     */
-    private Label loadingLabel = null;
-    /**
-     * shown upon error
-     */
-    private Label errorLabel = null;
-    
    
     protected TasksController controller;
 
@@ -77,59 +60,35 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     public TasksView(TasksController controller) {
         this.controller = controller;
         this.controller.getModel().addTasksUpdatedListener(this);
+        this.itemName = "tasks";
     }
 
 
     public void tasksUpdating(boolean jobChanged) {
         if (jobChanged) {
-            this.errorLabel.hide();
-            this.tasksGrid.hide();
-            this.loadingLabel.show();
+            this.itemUpdating();
         }
     }
 
     public void tasksUpdatedFailure(String message) {
-        this.errorLabel.setContents(message);
-        this.tasksGrid.hide();
-        this.loadingLabel.hide();
-        this.errorLabel.show();
+        this.itemUpdatedFailure(message);
     }
 
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
-        this.errorLabel.hide();
-        this.loadingLabel.hide();
-        this.tasksGrid.show();
+        this.itemUpdated();
     }
 
     
-
+    protected Layout buildToolbar(){
+        return this.controller.getTaskNavigationController().buildView();
+    }
     
-    public Layout build() {
-        this.tasksGrid = new ExpandableTasksListGrid(this.controller);
-        this.tasksGrid.build();
- 
-        this.loadingLabel = new Label("fetching tasks...");
-        this.loadingLabel.setIcon("loading.gif");
-        this.loadingLabel.setWidth100();
-        this.loadingLabel.setHeight100();
-        this.loadingLabel.setAlign(Alignment.CENTER);
-        this.loadingLabel.hide();
-
-        this.errorLabel = new Label("");
-        this.errorLabel.setWidth100();
-        this.errorLabel.setAlign(Alignment.CENTER);
-        this.errorLabel.hide();
-        
-        Layout navTools = this.controller.getTaskNavigationController().buildView();
-        Layout paginationBar = this.controller.getTaskNavigationController().getPaginationController().buildView();
-
-        VLayout tasksViewLayout = new VLayout();
-        tasksViewLayout.addMember(navTools);
-        tasksViewLayout.addMember(this.tasksGrid);
-        tasksViewLayout.addMember(this.loadingLabel);
-        tasksViewLayout.addMember(this.errorLabel);
-        tasksViewLayout.addMember(paginationBar);
-
-        return tasksViewLayout;
+    protected Layout buildPagination(){
+        return this.controller.getTaskNavigationController().getPaginationController().buildView();
+    }
+    
+    protected void buildGrid(){
+        this.itemsGrid = new ExpandableTasksListGrid(this.controller);
+        this.itemsGrid.build();
     }
 }

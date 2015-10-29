@@ -36,8 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.Map;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -46,16 +44,12 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
-import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.VisibilityMode;
@@ -63,13 +57,8 @@ import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
-import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.SectionStack;
@@ -154,11 +143,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         inst = this;
     }
 
-    
-
-    
-
-    
 
     /**
      * Creates the layout and adds it to the page
@@ -194,69 +178,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
 
-        final Layout topPane = this.controller.buildJobsView();
-
-        SectionStackSection jobsSection = new SectionStackSection();
-        jobsSection.setTitle("Jobs list");
-        jobsSection.setExpanded(true);
-        jobsSection.setItems(topPane);
-
-
-        final CheckboxItem c1 = new CheckboxItem("myjobs", "My jobs");
-        c1.setValue(false);
-        c1.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchMyJobsOnly(c1.getValueAsBoolean());
-            }
-        });
-        final CheckboxItem c2 = new CheckboxItem("pending", "Pending");
-        c2.setValue(true);
-        c2.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchPending(c2.getValueAsBoolean());
-            }
-        });
-        final CheckboxItem c3 = new CheckboxItem("running", "Running");
-        c3.setValue(true);
-        c3.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchRunning(c3.getValueAsBoolean());
-            }
-        });
-        final CheckboxItem c4 = new CheckboxItem("finished", "Finished");
-        c4.setValue(true);
-        c4.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchFinished(c4.getValueAsBoolean());
-            }
-        });
-
-        // for some reason IE9 standards fails to detect the right width
-        if (SC.isIE()) {
-            c1.setWidth(60);
-            c2.setWidth(60);
-            c3.setWidth(60);
-            c4.setWidth(60);
-        }
-
-        DynamicForm checkBoxes = new DynamicForm();
-        checkBoxes.setNumCols(8);
-        checkBoxes.setItems(c1, c2, c3, c4);
-
-        String user = LoginModel.getInstance().getLogin();
-        // login unknown: credentials login; fetching only my jobs will be impossible server side
-        if (user == null || user.trim().length() == 0) {
-            c1.setDisabled(true);
-        }
-
-        Canvas fill = new Canvas();
-        fill.setWidth(5);
-        jobsSection.setControls(checkBoxes, fill);
-
+        
         Canvas tools = buildTools();
 
+        SectionStackSection executionsSections = this.controller.buildExecutionsView();
+        
         Layout botPane = buildBotPane();
-
         SectionStackSection detailsSection = new SectionStackSection();
         detailsSection.setTitle("Details");
         detailsSection.setExpanded(true);
@@ -269,7 +196,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
-        stack.setSections(jobsSection, detailsSection);
+        stack.setSections(executionsSections, detailsSection);
 
         contentLayout.addMember(tools);
         contentLayout.addMember(stack);
@@ -640,7 +567,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
 
                 if (leftTabSet.getSelectedTab().equals(visuTab)) {
                     controller.setVisuFetchEnabled(true);
-                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel(); 
+                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel(); 
                     if (jobsModel.getSelectedJob() != null) {
                         controller.visuFetch(jobsModel.getSelectedJob().getId().toString());
                     }

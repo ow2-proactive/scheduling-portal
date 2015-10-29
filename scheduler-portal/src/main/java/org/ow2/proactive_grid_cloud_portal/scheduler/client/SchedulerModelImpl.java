@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,18 +47,13 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -105,7 +99,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
 
 
-    private JobsModel jobsModel;
+    private ExecutionsModel executionsModel;
 
     private TasksModel tasksModel;
 
@@ -164,7 +158,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
      */
     void setTaskOutput(int jobId, Task task, String output) {
         JobStatus stat = null;
-        for (Job j : this.jobsModel.getJobs().values()) {
+        for (Job j : this.executionsModel.getJobsModel().getJobs().values()) {
             if (jobId == j.getId())
                 stat = j.getStatus();
         }
@@ -520,13 +514,13 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     }
 
 
-    public JobsModel getJobsModel() {
-        return jobsModel;
+    public ExecutionsModel getExecutionsModel() {
+        return executionsModel;
     }
 
 
-    public void setJobsModel(JobsModel jobsModel) {
-        this.jobsModel = jobsModel;
+    public void setExecutionsModel(ExecutionsModel executionsModel) {
+        this.executionsModel = executionsModel;
     }
     
 }

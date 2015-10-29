@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
@@ -115,6 +116,11 @@ public class SchedulerListeners {
 
     }
 
+    public interface ExecutionDisplayModeListener{
+        public void modeSwitched(ExecutionListMode mode);
+    }
+    
+    
     public interface TasksUpdatedListener {
 
         /**

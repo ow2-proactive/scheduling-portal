@@ -44,13 +44,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     
     
     
-    /** To disable selection listener while fetching data */
-    private boolean fetchingData;
-    
-    /**
-     * current job filtering criteria, or null
-     */
-    private AdvancedCriteria filter = null;
+   
     
    
     
@@ -130,31 +124,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     }
 
     
- // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
-    private void transparentUpdate(int nbOfJobs) {
-        DataSource dataSource = this.getDataSource();
-        Integer[] visibleRows = this.getVisibleRows();
-
-        DSRequest request = new DSRequest();
-        request.setStartRow(0);
-        request.setEndRow(nbOfJobs + visibleRows[1]);
-        request.setSortBy(this.getSort());
-
-        dataSource.fetchData(this.filter, new DSCallback() {
-            @Override
-            public void execute(DSResponse response, Object rawData, DSRequest request) {
-                ListGridRecord[] keepSelectedRecords = getSelectedRecords();
-                setData(new RecordList(response.getData()));
-                // manual reset of selection (otherwise it is lost)
-                if (keepSelectedRecords != null) {
-                    fetchingData = true;
-                    selectRecords(keepSelectedRecords);
-                    fetchingData = false;
-                }
-            }
-
-        }, request);
-    }
+ 
     
     
     private List<Integer> listSelectedJobs() {
@@ -368,9 +338,6 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     }
     
     
-    public void applyFilter(AdvancedCriteria filter) {
-        this.filter = filter;
-        transparentUpdate(ds.getTestData().length);
-    }
+    
     
 }

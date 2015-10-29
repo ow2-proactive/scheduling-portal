@@ -198,7 +198,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String taskId = rec.getAttributeAsString(TasksColumns.ID_ATTR.getName());
-        String jobId = this.controller.getModel().getParentModel().getJobsModel().getSelectedJob().getId().toString();
+        String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
         final String taskName = rec.getAttributeAsString(TasksColumns.NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);

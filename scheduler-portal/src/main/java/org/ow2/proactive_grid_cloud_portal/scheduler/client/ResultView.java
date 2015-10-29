@@ -91,7 +91,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
     public ResultView(SchedulerController controller) {
         this.controller = controller;
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
     }
 
@@ -209,7 +209,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         root.showMember(visuPane);
         root.hideMember(label);
 
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         Job j = jobsModel.getSelectedJob();
         if (j != null && controller.getModel().isLiveOutput("" + j.getId())) {
             visuButton.setDisabled(true);

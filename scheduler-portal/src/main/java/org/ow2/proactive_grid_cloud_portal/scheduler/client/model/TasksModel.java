@@ -13,17 +13,17 @@ public class TasksModel {
 
     public static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
     
-    private List<Task> selectedTasks = null;
-    private boolean tasksDirty = false;
-    private List<RemoteHint> remoteHints = null;
+    protected List<Task> selectedTasks = null;
+    protected boolean tasksDirty = false;
+    protected List<RemoteHint> remoteHints = null;
     
-    private ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
-    private ArrayList<RemoteHintListener> remoteHintListeners = null;
+    protected ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
+    protected ArrayList<RemoteHintListener> remoteHintListeners = null;
     
     
-    private SchedulerModelImpl parentModel;
+    protected SchedulerModelImpl parentModel;
     
-    private TasksNavigationModel tasksNavigationModel;
+    protected TasksNavigationModel tasksNavigationModel;
     
     public static class RemoteHint {
         public String taskId;
@@ -36,11 +36,16 @@ public class TasksModel {
         this.parentModel = parentModel;
         this.parentModel.setTasksModel(this);
         
-        this.tasksNavigationModel = new TasksNavigationModel(this);
+        this.initNavigationModel();
         
         this.remoteHints = new ArrayList<RemoteHint>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
         this.remoteHintListeners = new ArrayList<RemoteHintListener>();
+    }
+    
+    
+    protected void initNavigationModel(){
+        this.tasksNavigationModel = new TasksNavigationModel(this);
     }
     
     

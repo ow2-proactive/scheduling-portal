@@ -68,7 +68,7 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
 
     public VisualizationViewSwitcher(SchedulerController controller) {
         controller.getEventDispatcher().addVisualizationListener(this);
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
 

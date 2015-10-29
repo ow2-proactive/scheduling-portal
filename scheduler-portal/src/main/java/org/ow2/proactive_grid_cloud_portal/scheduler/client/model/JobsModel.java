@@ -102,7 +102,7 @@ public class JobsModel {
     /**
      * The parent model.
      */
-    private SchedulerModelImpl parentModel;
+    private ExecutionsModel parentModel;
     
     /**
      * The model for the job pagination logic.
@@ -113,7 +113,7 @@ public class JobsModel {
      * Builds a jobs model from the scheduler parent model.
      * @param parentModel the scheduler parent model.
      */
-    public JobsModel(SchedulerModelImpl parentModel) {
+    public JobsModel(ExecutionsModel parentModel) {
         this.parentModel = parentModel;
         this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
         this.jobSelectedListeners = new ArrayList<JobSelectedListener>();

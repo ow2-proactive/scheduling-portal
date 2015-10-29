@@ -54,7 +54,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -71,6 +71,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.SectionStackSection;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -152,7 +153,7 @@ public class SchedulerController extends Controller implements UncaughtException
     protected TasksController tasksController;
 
 
-    protected JobsController jobsController;
+    protected ExecutionsController executionController;
 
 
     /**
@@ -282,7 +283,7 @@ public class SchedulerController extends Controller implements UncaughtException
         this.loginView = null;
         this.schedulerView = new SchedulerPage(this);
 
-        this.jobsController.fetchJobs(true);
+        this.executionController.getJobsController().fetchJobs(true);
         
         this.startTimer();
 
@@ -346,10 +347,11 @@ public class SchedulerController extends Controller implements UncaughtException
     }
     
     
-    public Layout buildJobsView(){
-        this.jobsController = new JobsController(this);
-        return this.jobsController.buildView();
+    public SectionStackSection buildExecutionsView(){
+        this.executionController = new ExecutionsController(this);
+        return this.executionController.buildView();
     }
+    
    
     
     void setVisuFetchEnabled(boolean b) {
@@ -521,7 +523,7 @@ public class SchedulerController extends Controller implements UncaughtException
      * Auto fetch the output for the currently selected job
      */
     public void getLiveOutput() {
-        Job j = this.jobsController.getModel().getSelectedJob();
+        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
         if (j == null)
             return;
 
@@ -544,7 +546,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void deleteLiveLogJob() {
-        Job j = this.jobsController.getModel().getSelectedJob();
+        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
         if (j == null)
             return;
 
@@ -569,7 +571,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     doFetchLiveLog(jobId);
 
                     int id = Integer.parseInt(jobId);
-                    Job j = jobsController.getModel().getJobs().get(id);
+                    Job j = executionController.getJobsController().getModel().getJobs().get(id);
                     if (j == null || j.isExecuted()) {
                         LogModel.getInstance().logMessage("stop fetching live logs for job " + jobId);
                         it.remove();
@@ -618,10 +620,10 @@ public class SchedulerController extends Controller implements UncaughtException
      * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
      */
     public void getJobOutput(int logMode) {
-        if (this.jobsController.getModel().getSelectedJob() == null)
+        if (this.executionController.getJobsController().getModel().getSelectedJob() == null)
             return;
 
-        Job j = this.jobsController.getModel().getSelectedJob();
+        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
         if (this.model.getTasksModel().getTasks().isEmpty()) {
             // notify the listeners, they will figure out there is no output
             this.model.updateOutput(j.getId());
@@ -794,7 +796,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                 SchedulerController.this.updateSchedulerStatus();
 
-                jobsController.jobsStateRevision();
+                executionController.getJobsController().jobsStateRevision();
 
                 if (timerUpdate % userFetchTick == 0) {
                     final long t1 = System.currentTimeMillis();
@@ -1146,10 +1148,8 @@ public class SchedulerController extends Controller implements UncaughtException
         }
     }
 
-    public JobsController getJobsController() {
-        return jobsController;
+    public ExecutionsController getExecutionController() {
+        return executionController;
     }
-    
-    
     
 }

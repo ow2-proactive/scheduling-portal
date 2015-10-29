@@ -267,7 +267,7 @@ public class VisualizationViewImage implements VisualizationView {
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#imageUpdated(java.lang.String, java.lang.String)
      */
     public void imageUpdated(String jobId, String path) {
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 
@@ -286,7 +286,7 @@ public class VisualizationViewImage implements VisualizationView {
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#mapUpdated(java.lang.String, org.ow2.proactive_grid_cloud_portal.shared.JobVisuMap)
      */
     public void mapUpdated(String jobId, JobVisuMap map) {
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 

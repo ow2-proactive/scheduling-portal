@@ -50,25 +50,25 @@ public class TasksNavigationController {
     /**
      * The main controller of the project.
      */
-    private TasksController parentController;
+    protected TasksController parentController;
 
     /**
      * The controller for the tasks pagination logic.
      */
-    private TasksPaginationController paginationController;
+    protected TasksPaginationController paginationController;
 
     /**
      * The controller for the tag suggestions logic.
      */
-    private PrefixWordSuggestOracle tagSuggestionOracle;
+    protected PrefixWordSuggestOracle tagSuggestionOracle;
 
     /**
      * The model for the tasks navigation.
      */
-    private TasksNavigationModel model;
+    protected TasksNavigationModel model;
     
     
-    private TasksNavigationView view;
+    protected TasksNavigationView view;
 
     /**
      * Builds a controller for the tasks navigation logic.
