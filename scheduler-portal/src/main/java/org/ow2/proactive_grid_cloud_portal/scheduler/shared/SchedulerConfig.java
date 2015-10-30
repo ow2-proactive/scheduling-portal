@@ -58,7 +58,9 @@ public class SchedulerConfig extends Config {
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
     private static final String d_REST_URL = "http://localhost:8080/rest";
+
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
+    private static final String d_REST_PUBLIC_URL = "http://hostname:8080/rest";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
@@ -111,6 +113,7 @@ public class SchedulerConfig extends Config {
 
     private void setDefaults() {
         properties.put(REST_URL, d_REST_URL);
+        properties.put(REST_PUBLIC_URL, d_REST_PUBLIC_URL);
         properties.put(NOVNC_URL, d_NOVNC_URL);
         properties.put(NOVNC_PAGE_URL, d_NOVNC_PAGE_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
@@ -133,13 +136,7 @@ public class SchedulerConfig extends Config {
     }
 
     @Override
-    protected String getRestPublicUrlIfDefinedOrOverridden() {
-        String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(d_REST_URL)) {
-            return getRestUrl();
-        }
-        return restPublicUrl;
-    }
+    public String getRestPublicUrlIfDefinedOrOverridden() { return properties.get(REST_PUBLIC_URL);}
 
     public String getNoVncUrl() {
         return properties.get(NOVNC_URL);
