@@ -44,7 +44,6 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 
 
 /**
@@ -229,16 +228,15 @@ public class JobsModel {
         boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
         this.selectedJob = j;
 
-        // notify job selection listeners
-        for (JobSelectedListener listener : this.jobSelectedListeners) {
-            if (j == null)
-                listener.jobUnselected();
-            else
-                listener.jobSelected(j);
+        if(selChanged){
+            // notify job selection listeners
+            for (JobSelectedListener listener : this.jobSelectedListeners) {
+                if (j == null)
+                    listener.jobUnselected();
+                else
+                    listener.jobSelected(j);
+            }
         }
-
-        // tasks list will change, notify tasks listeners
-        this.parentModel.getTasksModel().notifyTasksChanging(j, selChanged);
     }
 
 

@@ -64,10 +64,8 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
 
 
-    public void tasksUpdating(boolean jobChanged) {
-        if (jobChanged) {
-            this.itemUpdating();
-        }
+    public void tasksUpdating() {
+        this.itemUpdating();
     }
 
     public void tasksUpdatedFailure(String message) {

@@ -54,7 +54,7 @@ public class TasksPaginationView extends PaginationView implements TasksUpdatedL
 
     
     @Override
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
 
     @Override

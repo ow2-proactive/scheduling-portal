@@ -48,8 +48,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedJobs;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;

@@ -72,9 +72,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     protected EnumMap<TasksColumns, ListGridField> getColumnsForListGridField(){
         EnumMap<TasksColumns, ListGridField> columns = new EnumMap<TasksColumns, ListGridField>(TasksColumns.class);
         for(TasksColumns col: TasksColumns.values()){
-            if(!col.getDetail()){
-                columns.put(col, null);
-            }
+            columns.put(col, null);
         }
         return columns;
     }
@@ -134,7 +132,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
 
     
     @Override
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
     
     @Override

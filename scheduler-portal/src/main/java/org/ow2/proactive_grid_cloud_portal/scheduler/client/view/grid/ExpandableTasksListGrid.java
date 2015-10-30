@@ -1,12 +1,12 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
 
-import java.util.List;
+import java.util.EnumMap;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
@@ -66,10 +66,8 @@ public class ExpandableTasksListGrid extends TasksListGrid{
 
 
     @Override
-    public void tasksUpdating(boolean jobChanged) {
-        if(jobChanged){
-            this.expandRecord = null;
-        }
+    public void tasksUpdating() {
+        this.expandRecord = null;
     }
 
     
@@ -82,6 +80,17 @@ public class ExpandableTasksListGrid extends TasksListGrid{
             this.expandRecord = record;
         }
         return record;
+    }
+    
+    
+    protected EnumMap<TasksColumns, ListGridField> getColumnsForListGridField(){
+        EnumMap<TasksColumns, ListGridField> columns = new EnumMap<TasksColumns, ListGridField>(TasksColumns.class);
+        for(TasksColumns col: TasksColumns.values()){
+            if(!col.getDetail()){
+                columns.put(col, null);
+            }
+        }
+        return columns;
     }
 
 }

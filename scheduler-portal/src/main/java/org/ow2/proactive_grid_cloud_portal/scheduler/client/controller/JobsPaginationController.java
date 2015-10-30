@@ -60,8 +60,8 @@ public class JobsPaginationController extends PaginationController{
 
 
     @Override
-    public void fetch() {
-        this.itemsController.fetchJobs(false);
+    public void fetch(boolean silentFetch) {
+        this.itemsController.fetchJobs(silentFetch);
     }
     
     

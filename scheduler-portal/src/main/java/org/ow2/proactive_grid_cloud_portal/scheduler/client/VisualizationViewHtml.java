@@ -90,7 +90,7 @@ public class VisualizationViewHtml implements VisualizationView {
         hideHtml();
     }
 
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
 
     public void tasksUpdated(List<Task> tasks, long totalTasks) {

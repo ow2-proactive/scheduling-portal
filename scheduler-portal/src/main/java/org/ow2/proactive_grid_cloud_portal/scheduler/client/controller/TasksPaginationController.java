@@ -57,9 +57,8 @@ public class TasksPaginationController extends PaginationController{
     }
 
     @Override
-    public void fetch() {
-        Job job = this.itemsController.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob();
-        this.itemsController.updateTasks(job);
+    public void fetch(boolean silentUpdate) {
+        this.itemsController.updateTasks(!silentUpdate);
     }
     
     

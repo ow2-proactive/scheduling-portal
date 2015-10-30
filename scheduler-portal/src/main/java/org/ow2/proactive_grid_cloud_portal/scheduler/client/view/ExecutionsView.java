@@ -24,6 +24,14 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
     
     protected Layout tasksPane;
     
+    protected CheckboxItem chkMy;
+    
+    protected CheckboxItem chkPending;
+    
+    protected CheckboxItem chkRunning;
+    
+    protected CheckboxItem chkFinished;
+    
     public ExecutionsView(ExecutionsController controller) {
         this.controller = controller;
         this.controller.getModel().addExecutionsDisplayModeListener(this);
@@ -42,40 +50,40 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
         executionsSection.setExpanded(true);
         executionsSection.setItems(panesLayout);
         
-        this.jobsPane.hide();
+        this.tasksPane.hide();
 
-        final CheckboxItem c1 = new CheckboxItem("myjobs", "My jobs");
-        c1.setValue(false);
-        c1.addChangedHandler(new ChangedHandler() {
+        chkMy = new CheckboxItem("myjobs", "My jobs");
+        chkMy.setValue(false);
+        chkMy.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchMyJobsOnly(c1.getValueAsBoolean());
+                controller.getJobsController().fetchMyJobsOnly(chkMy.getValueAsBoolean());
             }
         });
-        final CheckboxItem c2 = new CheckboxItem("pending", "Pending");
-        c2.setValue(true);
-        c2.addChangedHandler(new ChangedHandler() {
+        chkPending = new CheckboxItem("pending", "Pending");
+        chkPending.setValue(true);
+        chkPending.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchPending(c2.getValueAsBoolean());
+                controller.getJobsController().fetchPending(chkPending.getValueAsBoolean());
             }
         });
-        final CheckboxItem c3 = new CheckboxItem("running", "Running");
-        c3.setValue(true);
-        c3.addChangedHandler(new ChangedHandler() {
+        chkRunning = new CheckboxItem("running", "Running");
+        chkRunning.setValue(true);
+        chkRunning.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchRunning(c3.getValueAsBoolean());
+                controller.getJobsController().fetchRunning(chkRunning.getValueAsBoolean());
             }
         });
-        final CheckboxItem c4 = new CheckboxItem("finished", "Finished");
-        c4.setValue(true);
-        c4.addChangedHandler(new ChangedHandler() {
+        chkFinished = new CheckboxItem("finished", "Finished");
+        chkFinished.setValue(true);
+        chkFinished.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchFinished(c4.getValueAsBoolean());
+                controller.getJobsController().fetchFinished(chkFinished.getValueAsBoolean());
             }
         });
         
         final SelectItem modeSelect = new SelectItem();
         modeSelect.setValueMap(ExecutionListMode.JOB_CENTRIC.name, ExecutionListMode.TASK_CENTRIC.name);
-        modeSelect.setValue(ExecutionListMode.TASK_CENTRIC.name);
+        modeSelect.setValue(ExecutionListMode.JOB_CENTRIC.name);
         modeSelect.setShowTitle(false);
         modeSelect.addChangedHandler(new ChangedHandler() {
             @Override
@@ -86,20 +94,20 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
 
         // for some reason IE9 standards fails to detect the right width
         if (SC.isIE()) {
-            c1.setWidth(60);
-            c2.setWidth(60);
-            c3.setWidth(60);
-            c4.setWidth(60);
+            chkMy.setWidth(60);
+            chkPending.setWidth(60);
+            chkRunning.setWidth(60);
+            chkFinished.setWidth(60);
         }
 
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(10);
-        checkBoxes.setItems(c1, c2, c3, c4, modeSelect);
+        checkBoxes.setItems(chkMy, chkPending, chkRunning, chkFinished, modeSelect);
 
         String user = LoginModel.getInstance().getLogin();
         // login unknown: credentials login; fetching only my jobs will be impossible server side
         if (user == null || user.trim().length() == 0) {
-            c1.setDisabled(true);
+            chkMy.setDisabled(true);
         }
 
         Canvas fill = new Canvas();
@@ -116,10 +124,14 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
         case JOB_CENTRIC:
             this.tasksPane.hide();
             this.jobsPane.show();
+            chkMy.setTitle("My jobs");
+            chkMy.redraw();
             break;
         case TASK_CENTRIC:
             this.jobsPane.hide();
             this.tasksPane.show();
+            chkMy.setTitle("My tasks");
+            chkMy.redraw();
         }
         
     }

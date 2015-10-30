@@ -162,7 +162,7 @@ public class TasksNavigationModel {
         if(result){
             this.tasksTagFilter = tag;
             for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-                list.tasksUpdating(true);
+                list.tasksUpdating();
             }
         }
         return result;

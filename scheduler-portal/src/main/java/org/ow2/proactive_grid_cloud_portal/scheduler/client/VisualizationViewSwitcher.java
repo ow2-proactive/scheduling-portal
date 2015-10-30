@@ -94,8 +94,8 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
     }
 
     @Override
-    public void tasksUpdating(boolean jobChanged) {
-        this.activeVisualization.tasksUpdating(jobChanged);
+    public void tasksUpdating() {
+        this.activeVisualization.tasksUpdating();
     }
 
     @Override

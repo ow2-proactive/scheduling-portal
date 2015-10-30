@@ -423,7 +423,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.text.show();
     }
 
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
 
     public void tasksUpdated(List<Task> tasks, long totalTasks) {

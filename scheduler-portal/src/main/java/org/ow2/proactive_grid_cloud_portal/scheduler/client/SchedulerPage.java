@@ -44,7 +44,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -85,7 +87,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  *
  * @author mschnoor
  */
-public class SchedulerPage implements SchedulerStatusListener, LogListener {
+public class SchedulerPage implements SchedulerStatusListener, LogListener, ExecutionDisplayModeListener {
 
     static SchedulerPage inst;
 
@@ -93,6 +95,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
     // to control the scroll viewport of tab's 'paneContainer' which is
     // not accessible anywhere
     Tab visuTab;
+    
+    protected Tab tasksTab;
+    
+    protected TabSet leftTabSet;
+    
+    
+    protected Layout tasksPane;
+    
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -140,6 +150,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         buildAndShow();
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
         LogModel.getInstance().addLogListener(this);
+        this.controller.getExecutionController().getModel().addExecutionsDisplayModeListener(this);
         inst = this;
     }
 
@@ -520,16 +531,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
      *
      */
     private Layout buildBotPane() {
-        final TabSet leftTabSet = new TabSet();
+        leftTabSet = new TabSet();
         leftTabSet.setWidth("50%");
         leftTabSet.setHeight100();
         leftTabSet.setTabBarPosition(Side.TOP);
         leftTabSet.setShowResizeBar(true);
 
-        final Tab tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri()
-                .asString());
-        
-        tasksTab.setPane(this.controller.buildTaskView());
+        tasksPane = this.controller.buildTaskView();
+        this.buildTasksTab();
 
         visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
         this.visuView = new VisualizationViewSwitcher(this.controller);
@@ -602,7 +611,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
         rightTabSet.addTab(resultTab);
-
+        
+       
         HLayout layout = new HLayout();
 
         layout.addMember(leftTabSet);
@@ -649,4 +659,27 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
     }
+    
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        switch(mode){
+        case JOB_CENTRIC:
+            this.buildTasksTab();
+            leftTabSet.addTab(this.tasksTab, 0);
+            break;
+        case TASK_CENTRIC:
+            leftTabSet.updateTab(tasksTab, null);
+            leftTabSet.removeTab(tasksTab);
+        }
+        leftTabSet.markForRedraw();
+    }
+    
+    
+    protected void buildTasksTab(){
+        tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri()
+                .asString());
+        
+        tasksTab.setPane(tasksPane);
+    }
+   
 }

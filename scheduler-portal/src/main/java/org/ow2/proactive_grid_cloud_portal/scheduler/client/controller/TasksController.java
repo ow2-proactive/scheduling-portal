@@ -60,6 +60,11 @@ public class TasksController {
         return this.view.build();
     }
     
+    public Layout rebuildView(){
+        this.view = new TasksView(this);
+        return this.view.build();
+    }
+    
     
         
     
@@ -68,15 +73,24 @@ public class TasksController {
     }
 
 
+    
+    
+    
+    
 
     /**
      * Updates the current task list depending the current job selection in the model 
      */
-    public void updateTasks(Job selectedJob) {
-
+    public void updateTasks(boolean showUpdating) {
+        Job selectedJob = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob();
+        
+        if(showUpdating){
+            this.model.notifyTasksChanging(selectedJob);
+        }
+        
         if (selectedJob == null) {
             model.setTasks(new ArrayList<Task>(), 0);
-        } else {
+        } else {  
             final String jobId = "" + selectedJob.getId();
 
             AsyncCallback<String> callback = new AsyncCallback<String>() {

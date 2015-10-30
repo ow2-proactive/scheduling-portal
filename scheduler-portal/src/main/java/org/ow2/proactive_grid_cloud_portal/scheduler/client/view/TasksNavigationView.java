@@ -166,7 +166,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
 
     @Override
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
         this.tagSearchTextBox.setEnabled(false);
     }
 

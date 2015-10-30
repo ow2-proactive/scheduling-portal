@@ -55,12 +55,12 @@ public class TasksModel {
     }
 
 
-    public void notifyTasksChanging(Job selectedJob, boolean selectionJobChanged){
+    public void notifyTasksChanging(Job selectedJob){
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             if (selectedJob == null)
                 list.tasksUpdated(new ArrayList<Task>(), 0);
             else
-                list.tasksUpdating(selectionJobChanged);
+                list.tasksUpdating();
         }
     }
     

@@ -83,7 +83,7 @@ public class SchedulerListeners {
         
         
         /**
-         * Called when the selected job has been updated bacause of jobs revision.
+         * Called when the selected job has been updated because of jobs revision.
          */
         public void selectedJobUpdated();
 
@@ -133,7 +133,7 @@ public class SchedulerListeners {
          *  @param jobChanged false when the tasks in the next {@link #tasksUpdated(TaskSet)} event
          *  	are part of the same job as the tasks in the last {@link #tasksUpdated(TaskSet)}
          */
-        public void tasksUpdating(boolean jobChanged);
+        public void tasksUpdating();
 
         /**
          * The tasks list has been updated and new values are available

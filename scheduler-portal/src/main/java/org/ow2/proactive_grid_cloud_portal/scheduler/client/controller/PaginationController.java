@@ -66,7 +66,7 @@ public abstract class PaginationController {
      */
     public void nextPage() {
         model.setPage(model.getPage() + 1);
-        this.fetch();
+        this.fetch(false);
     }
 
 
@@ -78,7 +78,7 @@ public abstract class PaginationController {
         if (curPage == 0)
             return;
         model.setPage(curPage - 1);
-        this.fetch();
+        this.fetch(false);
     }
     
     
@@ -87,7 +87,7 @@ public abstract class PaginationController {
      */
     public void firstPage(){
         model.setPage(0);
-        this.fetch();
+        this.fetch(false);
     }
     
     /**
@@ -95,7 +95,7 @@ public abstract class PaginationController {
      */
     public void lastPage(){
         this.model.setPage(this.model.getMaxPage());
-        this.fetch();
+        this.fetch(false);
     }
     
     
@@ -114,7 +114,7 @@ public abstract class PaginationController {
         }
         
         this.model.setPage(pageNumber);
-        this.fetch();
+        this.fetch(false);
     }
 
     
@@ -130,7 +130,7 @@ public abstract class PaginationController {
     /**
      * Fetch the items for the current page.
      */
-    public abstract void fetch();
+    public abstract void fetch(boolean silentFetch);
     
     
     public abstract Layout buildView();
@@ -207,5 +207,10 @@ public abstract class PaginationController {
     public void resetPagination(){
         this.model.setPage(-1);
         this.model.setTotalItems(0);
+    }
+    
+    
+    public void refresh(){
+        this.fetch(true);
     }
 }

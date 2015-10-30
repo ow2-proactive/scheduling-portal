@@ -166,7 +166,7 @@ public class TasksNavigationController {
      */
     public void refresh(){
         if(this.model.getTaskAutoRefreshOption()){
-            this.paginationController.fetch();
+            this.paginationController.refresh();
         }
     }
 }

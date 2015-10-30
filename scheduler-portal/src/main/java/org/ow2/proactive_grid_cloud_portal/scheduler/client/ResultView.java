@@ -177,7 +177,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         return this.root;
     }
 
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
 
     public void tasksUpdated(List<Task> tasks, long totalTasks) {

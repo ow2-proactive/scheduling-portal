@@ -20,10 +20,8 @@ public class FilteringTasksView extends FilteringGridItemView implements TasksUp
     }
     
     @Override
-    public void tasksUpdating(boolean jobChanged) {
-        if (jobChanged) {
-            this.itemUpdating();
-        }
+    public void tasksUpdating() {
+        this.itemUpdating();
     }
 
     @Override
@@ -48,7 +46,7 @@ public class FilteringTasksView extends FilteringGridItemView implements TasksUp
 
     @Override
     protected void buildGrid() {
-        this.itemsGrid = new ExpandableTasksListGrid(this.controller);
+        this.itemsGrid = new TasksListGrid(this.controller);
         this.itemsGrid.build();
     }
 }

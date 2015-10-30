@@ -228,7 +228,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean
      * )
      */
-    public void tasksUpdating(boolean jobChanged) {
+    public void tasksUpdating() {
     }
 
     /*
