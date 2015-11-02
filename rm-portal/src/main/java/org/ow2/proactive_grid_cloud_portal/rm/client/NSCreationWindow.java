@@ -78,14 +78,11 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 
 /**
- * NodeSource creation dialog
+ * NodeSource creation dialog.
  * <p>
- * dynamically downloads infrastructure and policy
- * info when created
- * 
- * 
- * @author mschnoor
+ * Dynamically downloads infrastructure and policy info when created.
  *
+ * @author mschnoor
  */
 public class NSCreationWindow {
 
@@ -165,8 +162,9 @@ public class NSCreationWindow {
                             .substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
-                    ArrayList<FormItem> forms = new ArrayList<FormItem>();
-                    for (Field f : inf.getConfigurableFields()) {
+                    List<Field> configurableFields = inf.getConfigurableFields();
+                    ArrayList<FormItem> forms = new ArrayList<FormItem>(configurableFields.size());
+                    for (Field f : configurableFields) {
                         FormItem infra = null;
                         if (f.isPassword()) {
                             infra = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
@@ -208,8 +206,9 @@ public class NSCreationWindow {
                             .substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
-                    ArrayList<FormItem> forms = new ArrayList<FormItem>();
-                    for (Field f : inf.getConfigurableFields()) {
+                    List<Field> configurableFields = inf.getConfigurableFields();
+                    ArrayList<FormItem> forms = new ArrayList<FormItem>(configurableFields.size());
+                    for (Field f : configurableFields) {
                         FormItem pol = null;
                         if (f.isPassword()) {
                             pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
