@@ -41,9 +41,9 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 /**
  * Scheduler specific configuration
- * 
- * 
- * 
+ *
+ *
+ *
  * @author mschnoor
  *
  */
@@ -57,16 +57,26 @@ public class SchedulerConfig extends Config {
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
+<<<<<<< HEAD
     private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
+=======
+
+>>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
+<<<<<<< HEAD
     private static final String DEFAULT_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
     private static final String DEFAULT_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
+=======
+
+    /** URL of the remote noVNC webpage */
+    public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
+>>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
@@ -124,6 +134,7 @@ public class SchedulerConfig extends Config {
     }
 
     private void setDefaults() {
+<<<<<<< HEAD
         properties.put(REST_URL, DEFAULT_REST_URL);
         properties.put(NOVNC_URL, DEFAULT_NOVNC_URL);
         properties.put(NOVNC_PAGE_URL, DEFAULT_NOVNC_PAGE_URL);
@@ -137,6 +148,15 @@ public class SchedulerConfig extends Config {
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
+=======
+        properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
+        properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
+        properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
+        properties.put(VERSION, d_VERSION);
+        properties.put(SCHED_VERSION, d_SCHED_VERSION);
+        properties.put(REST_VERSION, d_REST_VERSION);
+        properties.put(MOTD_URL, d_MOTD_URL);
+>>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
     }
 
     @Override
@@ -146,24 +166,74 @@ public class SchedulerConfig extends Config {
 
     @Override
     public String getRestUrl() {
-        return properties.get(REST_URL);
+        String restUrlFromProperties = properties.get(REST_URL);
+        if (restUrlFromProperties == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String port = com.google.gwt.user.client.Window.Location.getPort();
+            String restUrl = protocol + "://localhost:" + port + "/rest";
+            return restUrl;
+        }
+
+        return restUrlFromProperties;
     }
 
+    /**
+     * @return the URL from the window location
+     */
+    public String getWindowsLocationUrl() {
+        String urlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
+        urlFromCurrentLocation = urlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(), "");
+        return urlFromCurrentLocation;
+    }
+
+    /**
+     * @return the REST_PUBLIC_URL if it is set or take it from the window location
+     */
     @Override
+<<<<<<< HEAD
     protected String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
         if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
             return getRestUrl();
+=======
+    public String getRestPublicUrlIfDefinedOrOverridden() {
+        String restPublicUrl = properties.get(REST_PUBLIC_URL);
+        if (restPublicUrl == null) {
+            String restUrlFromCurrentLocation = getWindowsLocationUrl();
+            restUrlFromCurrentLocation += "/rest";
+            return restUrlFromCurrentLocation;
+>>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
         }
         return restPublicUrl;
     }
 
+    /**
+     * @return the NOVNC_URL if it is set or take it from the window location
+     */
     public String getNoVncUrl() {
-        return properties.get(NOVNC_URL);
+        String noVncUrl = properties.get(NOVNC_URL);
+        if (noVncUrl == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String host = com.google.gwt.user.client.Window.Location.getHost();
+            String noVncUrlFromCurrentLocation = protocol + "://" + host + ":5900/rest/novnc";
+            noVncUrlFromCurrentLocation.replace(":","\\:");
+            return noVncUrlFromCurrentLocation;
+        }
+        return noVncUrl;
     }
 
+    /**
+     * @return the NOVNC_PAGE_URL if it is set or take it from the window location
+     */
     public String getNoVncPageUrl() {
-        return properties.get(NOVNC_PAGE_URL);
+        String noVncPageUrl = properties.get(NOVNC_PAGE_URL);
+        if (noVncPageUrl == null) {
+            String noVncPageUrlFromCurrentLocation = getWindowsLocationUrl();
+            noVncPageUrlFromCurrentLocation += "/rest/novnc.html";
+            noVncPageUrlFromCurrentLocation.replace(":","\\:");
+            return noVncPageUrlFromCurrentLocation;
+        }
+        return noVncPageUrl;
     }
 
     @Override
