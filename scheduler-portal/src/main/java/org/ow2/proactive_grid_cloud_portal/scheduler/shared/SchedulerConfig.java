@@ -41,9 +41,9 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 /**
  * Scheduler specific configuration
- * 
- * 
- * 
+ *
+ *
+ *
  * @author mschnoor
  *
  */
@@ -57,18 +57,14 @@ public class SchedulerConfig extends Config {
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
-    private static final String d_REST_URL = "http://localhost:8080/rest";
 
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
-    private static final String d_REST_PUBLIC_URL = "http://hostname:8080/rest";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
-    private static final String d_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
-    private static final String d_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
@@ -112,10 +108,6 @@ public class SchedulerConfig extends Config {
     }
 
     private void setDefaults() {
-        properties.put(REST_URL, d_REST_URL);
-        properties.put(REST_PUBLIC_URL, d_REST_PUBLIC_URL);
-        properties.put(NOVNC_URL, d_NOVNC_URL);
-        properties.put(NOVNC_PAGE_URL, d_NOVNC_PAGE_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
         properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
@@ -132,18 +124,67 @@ public class SchedulerConfig extends Config {
 
     @Override
     public String getRestUrl() {
-        return properties.get(REST_URL);
+        String restUrlFromProperties = properties.get(REST_URL);
+        if (restUrlFromProperties == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String port = com.google.gwt.user.client.Window.Location.getPort();
+            String restUrl = protocol + "://localhost:" + port + "/rest";
+            return restUrl;
+        }
+
+        return restUrlFromProperties;
     }
 
+    /**
+     * @return the URL from the window location
+     */
+    public String getWindowsLocationUrl() {
+        String urlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
+        urlFromCurrentLocation = urlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(), "");
+        return urlFromCurrentLocation;
+    }
+
+    /**
+     * @return the REST_PUBLIC_URL if it is set or take it from the window location
+     */
     @Override
-    public String getRestPublicUrlIfDefinedOrOverridden() { return properties.get(REST_PUBLIC_URL);}
-
-    public String getNoVncUrl() {
-        return properties.get(NOVNC_URL);
+    public String getRestPublicUrlIfDefinedOrOverridden() {
+        String restPublicUrl = properties.get(REST_PUBLIC_URL);
+        if (restPublicUrl == null) {
+            String restUrlFromCurrentLocation = getWindowsLocationUrl();
+            restUrlFromCurrentLocation += "/rest";
+            return restUrlFromCurrentLocation;
+        }
+        return restPublicUrl;
     }
 
+    /**
+     * @return the NOVNC_URL if it is set or take it from the window location
+     */
+    public String getNoVncUrl() {
+        String noVncUrl = properties.get(NOVNC_URL);
+        if (noVncUrl == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String host = com.google.gwt.user.client.Window.Location.getHost();
+            String noVncUrlFromCurrentLocation = protocol + "://" + host + ":5900/rest/novnc";
+            noVncUrlFromCurrentLocation.replace(":","\\:");
+            return noVncUrlFromCurrentLocation;
+        }
+        return noVncUrl;
+    }
+
+    /**
+     * @return the NOVNC_PAGE_URL if it is set or take it from the window location
+     */
     public String getNoVncPageUrl() {
-        return properties.get(NOVNC_PAGE_URL);
+        String noVncPageUrl = properties.get(NOVNC_PAGE_URL);
+        if (noVncPageUrl == null) {
+            String noVncPageUrlFromCurrentLocation = getWindowsLocationUrl();
+            noVncPageUrlFromCurrentLocation += "/rest/novnc.html";
+            noVncPageUrlFromCurrentLocation.replace(":","\\:");
+            return noVncPageUrlFromCurrentLocation;
+        }
+        return noVncPageUrl;
     }
 
     @Override
