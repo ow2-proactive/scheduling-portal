@@ -58,7 +58,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 /**
  * NS Creation requires reading one or multiple files from the client,
  * which cannot be done client-side
- * 
+ *
  * @author mschnoor
  *
  */
@@ -163,12 +163,12 @@ public class NSCreationServlet extends HttpServlet {
              * so that the browser, upon receiving it, will evaluate
              * the JS and call the function */
             response.getWriter().write("<script type='text/javascript'>");
-            response.getWriter().write("window.top." + callbackName + "(" + ret + ");");
+            response.getWriter().write("window.opener." + callbackName + "(" + ret + "); window.close();");
             response.getWriter().write("</script>");
         } catch (RestServerException e) {
             try {
                 response.getWriter().write("<script type='text/javascript'>");
-                response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
+                response.getWriter().write("window.opener." + callbackName + " ({ \"errorMessage\" : \"" + e.getMessage() + "\" }); window.close();");
                 response.getWriter().write("</script>");
             } catch (Throwable e1) {
                 LOGGER.warn("Failed to write script back to client", e);
@@ -178,8 +178,7 @@ public class NSCreationServlet extends HttpServlet {
                 response.getWriter().write("<script type='text/javascript'>");
                 response.getWriter()
                         .write(
-                                "window.top." + callbackName + "({ \"errorMessage\" : \"" + t.getMessage() +
-                                    "\" });");
+                                "window.opener." + callbackName + "({ \"errorMessage\" : \"" + t.getMessage() + "\" }); window.close();");
                 response.getWriter().write("</script>");
             } catch (Throwable e1) {
                 LOGGER.warn("Failed to write script back to client", e1);
