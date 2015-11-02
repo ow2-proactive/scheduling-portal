@@ -41,8 +41,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.FilteringGridItemView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.JobsListGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;

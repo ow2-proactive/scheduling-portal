@@ -41,7 +41,9 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ExpandableTasksListGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandTasksColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandableTasksColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandableTasksListGrid;
 
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -86,7 +88,9 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
     
     protected void buildGrid(){
-        this.itemsGrid = new ExpandableTasksListGrid(this.controller);
+        ExpandableTasksColumnsFactory expandableFactory = new ExpandableTasksColumnsFactory();
+        ExpandTasksColumnsFactory expandFactory = new ExpandTasksColumnsFactory();
+        this.itemsGrid = new ExpandableTasksListGrid(this.controller, expandableFactory, expandFactory, "tasksDS_");
         this.itemsGrid.build();
     }
 }

@@ -1,29 +1,41 @@
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
-
-import java.util.EnumMap;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
 import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
+/**
+ * A task list grid that has expand compoenent to show detail data.
+ * @author the activeeon team.
+ *
+ */
 public class ExpandableTasksListGrid extends TasksListGrid{
 
+    /**
+     * The record for the expand component to be shown.
+     */
     private ListGridRecord expandRecord;
     
-    public ExpandableTasksListGrid(TasksController controller) {
-        super(controller);
+    /**
+     * The columns and record factory used to build the expand component and the shown data.
+     */
+    protected ExpandTasksColumnsFactory expandTasksColumnsFactory;
+    
+    public ExpandableTasksListGrid(TasksController controller, ExpandableTasksColumnsFactory expandableFactory, ExpandTasksColumnsFactory expandFactory, String datasourceNamePrefix) {
+        super(controller, expandableFactory, datasourceNamePrefix);
+        this.expandTasksColumnsFactory = expandFactory;
         this.setCanExpandRecords(true);
     }
     
     
-    protected DetailViewerField buildDetailViewer(TasksColumns column){
+    protected DetailViewerField buildDetailViewer(GridColumns column){
         return new DetailViewerField(column.getName(), column.getTitle());
     }
     
@@ -43,20 +55,15 @@ public class ExpandableTasksListGrid extends TasksListGrid{
         detail.setCanSelectText(true);
 
         DetailViewerField [] fields = new DetailViewerField[4];
-        fields[0] = buildDetailViewer(TasksColumns.HOST_ATTR);
-        fields[1] = buildDetailViewer(TasksColumns.START_TIME_ATTR);
-        fields[2] = buildDetailViewer(TasksColumns.FINISHED_TIME_ATTR);
-        fields[3] = buildDetailViewer(TasksColumns.DESCRIPTION_ATTR);
+        fields[0] = buildDetailViewer(TasksColumnsFactory.HOST_ATTR);
+        fields[1] = buildDetailViewer(TasksColumnsFactory.START_TIME_ATTR);
+        fields[2] = buildDetailViewer(TasksColumnsFactory.FINISHED_TIME_ATTR);
+        fields[3] = buildDetailViewer(TasksColumnsFactory.DESCRIPTION_ATTR);
 
         detail.setFields(fields);
 
-        DetailViewerRecord r1 = new DetailViewerRecord();
-        r1.setAttribute(TasksColumns.HOST_ATTR.getName(), (t.getHostName().equals("null") ? "" : t.getHostName()));
-        r1.setAttribute(TasksColumns.DESCRIPTION_ATTR.getName(), t.getDescription());
-        r1.setAttribute(TasksColumns.START_TIME_ATTR.getName(), rec.getAttribute(TasksColumns.START_TIME_ATTR.getName()));
-        r1.setAttribute(TasksColumns.FINISHED_TIME_ATTR.getName(), rec.getAttribute(TasksColumns.FINISHED_TIME_ATTR.getName()));
-
-        detail.setData(new DetailViewerRecord[]{r1});
+        DetailViewerRecord detailRecord = (DetailViewerRecord) this.expandTasksColumnsFactory.buildRecord(t);
+        detail.setData(new DetailViewerRecord[]{detailRecord});
 
         VLayout layout = new VLayout();
         layout.addMember(detail);
@@ -74,23 +81,11 @@ public class ExpandableTasksListGrid extends TasksListGrid{
     @Override
     protected TaskRecord updateTaskRecord(Task task) {
         TaskRecord record = super.updateTaskRecord(task);
-        String idAttr = TasksColumns.ID_ATTR.getName();
+        String idAttr = TasksColumnsFactory.ID_ATTR.getName();
         if (this.expandRecord != null &&
                 record.getAttribute(idAttr).equals(this.expandRecord.getAttribute(idAttr))) {
             this.expandRecord = record;
         }
         return record;
     }
-    
-    
-    protected EnumMap<TasksColumns, ListGridField> getColumnsForListGridField(){
-        EnumMap<TasksColumns, ListGridField> columns = new EnumMap<TasksColumns, ListGridField>(TasksColumns.class);
-        for(TasksColumns col: TasksColumns.values()){
-            if(!col.getDetail()){
-                columns.put(col, null);
-            }
-        }
-        return columns;
-    }
-
 }

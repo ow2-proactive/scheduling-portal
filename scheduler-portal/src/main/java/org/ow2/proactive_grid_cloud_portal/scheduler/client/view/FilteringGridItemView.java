@@ -1,7 +1,6 @@
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;

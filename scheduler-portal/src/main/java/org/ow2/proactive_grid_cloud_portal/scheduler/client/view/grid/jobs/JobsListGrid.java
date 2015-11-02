@@ -1,7 +1,6 @@
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +10,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
-import com.smartgwt.client.data.AdvancedCriteria;
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
-import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
@@ -34,23 +33,26 @@ import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
-public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
+/**
+ * A list grid that shows jobs.
+ * @author The activeeon team.
+ *
+ */
+public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListener{
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
-        new SortSpecifier(JobsColumns.STATE_ATTR.getName(), SortDirection.ASCENDING),
-        new SortSpecifier(JobsColumns.ID_ATTR.getName(), SortDirection.DESCENDING) };
+        new SortSpecifier(JobsColumnsFactory.STATE_ATTR.getName(), SortDirection.ASCENDING),
+        new SortSpecifier(JobsColumnsFactory.ID_ATTR.getName(), SortDirection.DESCENDING) };
     
+    /**
+     * The controller for the jobs grid.
+     */
     protected JobsController controller;
     
     
-    
-   
-    
-   
-    
     public JobsListGrid(final JobsController controller) {
+        super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
-        this.datasourceNamePrefix = "jobs_";
         this.controller = controller;
         this.controller.getModel().addJobsUpdatedListener(this);     
     }
@@ -67,7 +69,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     protected void selectionChangedHandler(SelectionEvent event){
         if (event.getState() && !fetchingData) {
             Record record = event.getRecord();
-            String attName = JobsColumns.ID_ATTR.getName();
+            String attName = JobsColumnsFactory.ID_ATTR.getName();
             controller.selectJob(Integer.toString(record.getAttributeAsInt(attName)));
         }
     }
@@ -81,9 +83,9 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
-            JobRecord jobRecord = new JobRecord(j);
+            Record jobRecord = this.columnsFactory.buildRecord(j);
             data.add(jobRecord);
-            boolean isSelectedJob = selectedIds.contains(jobRecord.getAttributeAsInt(JobsColumns.ID_ATTR.getName()));
+            boolean isSelectedJob = selectedIds.contains(jobRecord.getAttributeAsInt(JobsColumnsFactory.ID_ATTR.getName()));
             jobRecord.setAttribute("isSelected", isSelectedJob);
             if (isSelectedJob) {
                 selectedJobRemoved = false;
@@ -124,13 +126,10 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     }
 
     
- 
-    
-    
     private List<Integer> listSelectedJobs() {
         List<Integer> selectedIds = new ArrayList<Integer>();
         for (ListGridRecord listGridRecord : this.getSelectedRecords()) {
-            selectedIds.add(listGridRecord.getAttributeAsInt(JobsColumns.ID_ATTR.getName()));
+            selectedIds.add(listGridRecord.getAttributeAsInt(JobsColumnsFactory.ID_ATTR.getName()));
         }
         return selectedIds;
     }
@@ -146,9 +145,9 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
         String fieldName = this.getFieldName(colNum);
 
         /* change the color of the job status field  */
-        if (fieldName.equals(JobsColumns.STATE_ATTR.getName())) {
+        if (fieldName.equals(JobsColumnsFactory.STATE_ATTR.getName())) {
             try {
-                switch (JobStatus.valueOf(record.getAttribute(JobsColumns.STATE_ATTR.getName()).toUpperCase())) {
+                switch (JobStatus.valueOf(record.getAttribute(JobsColumnsFactory.STATE_ATTR.getName()).toUpperCase())) {
                     case KILLED:
                         return "color:#d37a11;font-weight:bold;" + base;
                     case CANCELED:
@@ -172,31 +171,23 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
     }
     
     
-    protected EnumMap<JobsColumns, ListGridField> getColumnsForListGridField(){
-        EnumMap<JobsColumns, ListGridField> columns = new EnumMap<JobsColumns, ListGridField>(JobsColumns.class);
-        for(JobsColumns col: JobsColumns.values()){
-           columns.put(col, null); 
-        }
-        return columns;
-    }
-    
-    protected EnumMap<JobsColumns, ListGridField> buildListGridField(){
-        EnumMap<JobsColumns, ListGridField> fields = super.<JobsColumns>buildListGridField();
+    protected Map<GridColumns, ListGridField> buildListGridField(){
+        Map<GridColumns, ListGridField> fields = super.buildListGridField();
         
-        ListGridField idField = fields.get(JobsColumns.ID_ATTR);
+        ListGridField idField = fields.get(JobsColumnsFactory.ID_ATTR);
         idField.setType(ListGridFieldType.INTEGER);
         idField.setAlign(Alignment.LEFT);
         idField.setCellAlign(Alignment.LEFT);
 
-        ListGridField stateField = fields.get(JobsColumns.STATE_ATTR);
+        ListGridField stateField = fields.get(JobsColumnsFactory.STATE_ATTR);
         stateField.setSortNormalizer(sortStatusAndGroup());
 
-        ListGridField progressField = fields.get(JobsColumns.PROGRESS_ATTR);
+        ListGridField progressField = fields.get(JobsColumnsFactory.PROGRESS_ATTR);
         progressField.setType(ListGridFieldType.FLOAT);
         progressField.setAlign(Alignment.CENTER);
         progressField.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                int pw = getFieldWidth(JobsColumns.PROGRESS_ATTR.getName());
+                int pw = getFieldWidth(JobsColumnsFactory.PROGRESS_ATTR.getName());
                 float progress = Float.parseFloat(value.toString());
                 int bx = new Double(Math.ceil(pw * progress)).intValue() - 601;
                 String progressUrl = SchedulerImages.instance.progressbar().getSafeUri().asString();
@@ -215,7 +206,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
         });
 
         
-        ListGridField duration = fields.get(JobsColumns.DURATION_ATTR);
+        ListGridField duration = fields.get(JobsColumnsFactory.DURATION_ATTR);
         duration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
                 long l = Long.parseLong(value.toString());
@@ -260,7 +251,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
 
         final ArrayList<String> ids = new ArrayList<String>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
-            switch (JobStatus.valueOf(rec.getAttribute(JobsColumns.STATE_ATTR.getName()).toUpperCase())) {
+            switch (JobStatus.valueOf(rec.getAttribute(JobsColumnsFactory.STATE_ATTR.getName()).toUpperCase())) {
                 case PENDING:
                 case RUNNING:
                 case STALLED:
@@ -277,7 +268,7 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
                     selPause = false;
             }
 
-            ids.add(rec.getAttribute(JobsColumns.ID_ATTR.getName()));
+            ids.add(rec.getAttribute(JobsColumnsFactory.ID_ATTR.getName()));
         }
         
         MenuItem pauseItem = new MenuItem("Pause", SchedulerImages.instance.scheduler_pause_16()
@@ -336,8 +327,4 @@ public class JobsListGrid extends ItemsListGrid implements JobsUpdatedListener{
 
         menu.setItems(pauseItem, resumeItem, priorityItem, removeItem, killItem);
     }
-    
-    
-    
-    
 }

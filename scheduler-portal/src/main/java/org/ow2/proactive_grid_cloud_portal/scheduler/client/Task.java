@@ -66,6 +66,10 @@ public class Task implements Serializable, Comparable<Task> {
     private int maxNumberOfExecOnFailure;
     private int numberOfExecOnFailureLeft;
     private int nodeCount;
+    
+    private long jobId = 0;
+    
+    private String jobName = "a job";
 
     /**
      * The constructor that has no arguments required by the Serializable interface
@@ -278,6 +282,23 @@ public class Task implements Serializable, Comparable<Task> {
     public String getIdName() {
         return "id";
     }
+    
+
+    public long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(long jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
+    }
 
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "hostName=" +
@@ -344,6 +365,7 @@ public class Task implements Serializable, Comparable<Task> {
         Task result = new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
                 executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
         result.setTag(tag);
+        
         return result;
     }
 
@@ -365,4 +387,6 @@ public class Task implements Serializable, Comparable<Task> {
                 this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
                 this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
     }
+    
+    
 }

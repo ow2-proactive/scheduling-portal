@@ -1,7 +1,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
 
 import java.util.Collection;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -26,14 +26,31 @@ import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.menu.Menu;
 
-public abstract class ItemsListGrid extends ListGrid{
+/**
+ * A generic list grid that show items for scheduler-portal.
+ * @author the activeeon team.
+ *
+ * @param <I> the type of the item to be shown in the grid.
+ */
+public abstract class ItemsListGrid<I> extends ListGrid{
 
+    /**
+     * The prefix part of the name of the datasource associated with the grid.
+     */
     protected String datasourceNamePrefix;
     
+    /**
+     * The message to be shown when the grid is empty.
+     */
     protected String emptyMessage;
     
     /**
-     * current job filtering criteria, or null
+     * A factory that gets the columns list and records.
+     */
+    protected ColumnsFactory<I> columnsFactory;
+    
+    /**
+     * current filtering criteria, or null
      */
     protected AdvancedCriteria filter = null;
     
@@ -45,6 +62,19 @@ public abstract class ItemsListGrid extends ListGrid{
     /** To disable selection listener while fetching data */
     protected boolean fetchingData;
     
+    
+    public ItemsListGrid() {
+    }
+    
+    public ItemsListGrid(ColumnsFactory<I> columnsFactory, String datasourceNamePrefix) {
+        this.columnsFactory = columnsFactory;
+        this.datasourceNamePrefix = datasourceNamePrefix;
+    }
+    
+    /**
+     *  a datasource for the grid.
+     * 
+     */
     protected class ItemDS extends DataSource {
 
         public ItemDS(String id) {
@@ -55,7 +85,9 @@ public abstract class ItemsListGrid extends ListGrid{
         }
     }
     
-    
+    /**
+     * Builds the grid, and its associated datasource.
+     */
     public void build(){
         this.ds = new ItemDS(this.datasourceNamePrefix + LoginModel.getInstance().getSessionId());
         
@@ -104,31 +136,35 @@ public abstract class ItemsListGrid extends ListGrid{
         });
     }
     
-    
-    protected abstract <K extends Enum<K>> EnumMap<K, ListGridField> getColumnsForListGridField();
-    
-    protected <K extends Enum<K>> EnumMap<K, ListGridField> buildListGridField(){
-        EnumMap<K, ListGridField> fields = getColumnsForListGridField();
-        for(Map.Entry<K, ListGridField> current: fields.entrySet()){
-            GridColumns key = (GridColumns) current.getKey();
-            ListGridField field = new ListGridField(key.getName(), key.getTitle());
-            if(key.getWidth() > 0){
-                field.setWidth(key.getWidth());
+    /**
+     * Builds the fields to be shown in the grid.
+     * @return the fields, indexed by their column specification.
+     */
+    protected Map<GridColumns, ListGridField> buildListGridField(){
+        HashMap<GridColumns, ListGridField> result = new HashMap<>();
+        for(GridColumns current: this.columnsFactory.getColumns()){
+            ListGridField field = new ListGridField(current.getName(), current.getTitle());
+            if(current.getWidth() > 0){
+                field.setWidth(current.getWidth());
             }
-            current.setValue(field);
+            result.put(current, field);
         }
-        return fields;
+        return result;
     }
     
+    /**
+     * Build the datasource fields
+     * @return
+     */
     protected DataSourceField [] buildDatasourceFields(){
-        JobsColumns [] columns = JobsColumns.values();
+        GridColumns [] columns = this.columnsFactory.getColumns();
         DataSourceField [] result = new DataSourceField[columns.length];
         for(int i = 0; i < columns.length; i++){
-            switch(columns[i]){
-            case ID_ATTR:
+            if(columns[i].getName().equals(this.columnsFactory.getPrimaryKeyName())){
                 result[i] = new DataSourceIntegerField(columns[i].getName());
                 result[i].setPrimaryKey(true);
-            default:
+            }
+            else{
                 result[i] = new DataSourceTextField(columns[i].getName(), columns[i].getTitle());
                 result[i].setRequired(true);
             }   
@@ -136,24 +172,37 @@ public abstract class ItemsListGrid extends ListGrid{
         return result;
     }
     
-    
+    /**
+     * Builds the contextual menu when clicking on an item.
+     * @param menu
+     */
     protected abstract void buildCellContextualMenu(Menu menu);
     
+    /**
+     * Called when the selection in the grid changed.
+     * @param event
+     */
     protected abstract void selectionChangedHandler(SelectionEvent event);
     
+    
+    /**
+     * Apply the local filter to the grid.
+     * @param filter the filter to be applied.
+     */
     public void applyFilter(AdvancedCriteria filter) {
         this.filter = filter;
         transparentUpdate(ds.getTestData().length);
     }
     
+   
  // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
-    protected void transparentUpdate(int nbOfJobs) {
+    protected void transparentUpdate(int nbOfItems) {
         DataSource dataSource = this.getDataSource();
         Integer[] visibleRows = this.getVisibleRows();
 
         DSRequest request = new DSRequest();
         request.setStartRow(0);
-        request.setEndRow(nbOfJobs + visibleRows[1]);
+        request.setEndRow(nbOfItems + visibleRows[1]);
         request.setSortBy(this.getSort());
 
         dataSource.fetchData(this.filter, new DSCallback() {

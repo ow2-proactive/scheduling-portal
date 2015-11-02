@@ -1,6 +1,5 @@
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +13,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
@@ -38,24 +40,36 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
-public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener, RemoteHintListener{
+/**
+ * A grid that shows tasks
+ * @author The actieveeon team.
+ *
+ */
+public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedListener, RemoteHintListener{
 
-    
+    /**
+     * The controller for this grid.
+     */
     protected TasksController controller;
     
+    /**
+     * The buttons to be shown when remote visu is available for a task.
+     */
     private HashMap<String, ImgButton> visuButtons = null;
 
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
     
-    public TasksListGrid(TasksController controller) {
+    
+    
+    public TasksListGrid(TasksController controller, TasksColumnsFactory factory, String datasourceNamePrefix) {
+        super(factory, datasourceNamePrefix);
         this.controller = controller;
         this.visuButtons = new HashMap<String, ImgButton>();
         this.visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
         this.controller.getModel().addTasksUpdatedListener(this);
         this.controller.getModel().addRemoteHintListener(this);
         this.emptyMessage = "No tasks to show.";
-        this.datasourceNamePrefix = "taskds_";
     }
     
     
@@ -63,30 +77,22 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     public void build() {
         super.build();
         this.setSelectionType(SelectionStyle.SINGLE);
-        this.sort(TasksColumns.ID_ATTR.getName(), SortDirection.ASCENDING);
+        this.sort(TasksColumnsFactory.ID_ATTR.getName(), SortDirection.ASCENDING);
         this.setShowRecordComponents(true);
         this.setShowRecordComponentsByCell(true);
     }
     
     
-    protected EnumMap<TasksColumns, ListGridField> getColumnsForListGridField(){
-        EnumMap<TasksColumns, ListGridField> columns = new EnumMap<TasksColumns, ListGridField>(TasksColumns.class);
-        for(TasksColumns col: TasksColumns.values()){
-            columns.put(col, null);
-        }
-        return columns;
-    }
     
-    
-    protected EnumMap<TasksColumns, ListGridField> buildListGridField(){
-        EnumMap<TasksColumns, ListGridField> fields = super.<TasksColumns>buildListGridField();
+    protected Map<GridColumns, ListGridField> buildListGridField(){
+        Map<GridColumns, ListGridField> fields = super.buildListGridField();
         
-        ListGridField idField = fields.get(TasksColumns.ID_ATTR);
+        ListGridField idField = fields.get(TasksColumnsFactory.ID_ATTR);
         idField.setType(ListGridFieldType.INTEGER);
         idField.setAlign(Alignment.LEFT);
         idField.setCellAlign(Alignment.LEFT);
 
-        ListGridField execDuration = fields.get(TasksColumns.EXEC_DURATION_ATTR);
+        ListGridField execDuration = fields.get(TasksColumnsFactory.EXEC_DURATION_ATTR);
         execDuration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
                 long l = Long.parseLong(value.toString());
@@ -112,14 +118,15 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     }
     
     
+    
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
 
-        TaskRecord[] data = new TaskRecord[tasks.size()];
+        Record[] data = new TaskRecord[tasks.size()];
         int i = 0;
         for (Task t : tasks) {
-            data[i] = new TaskRecord(t);
+            data[i] = this.columnsFactory.buildRecord(t);
             i++;
         }
 
@@ -146,7 +153,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     protected String getCellCSSText(ListGridRecord record, int rowNum, int colNum) {
         String base = super.getCellCSSText(record, rowNum, colNum);
         if (colNum == 2) {
-            String st = record.getAttribute(TasksColumns.STATUS_ATTR.getName());
+            String st = record.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName());
             if (st.equals(TaskStatus.PENDING.toString()) ||
                     st.equals(TaskStatus.SUBMITTED.toString()))
                 return "color:#1a8bba;" + base;
@@ -181,7 +188,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
             button.setShowRollOver(false);
             button.setShowOverCanvas(false);
             button.setShowDown(false);
-            visuButtons.put(record.getAttributeAsString(TasksColumns.ID_ATTR.getName()), button);
+            visuButtons.put(record.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName()), button);
 
             for (RemoteHint rh : controller.getModel().getRemoteHints()) {
                 loadRemoteHint(rh, record);
@@ -195,9 +202,9 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
     
     
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
-        String taskId = rec.getAttributeAsString(TasksColumns.ID_ATTR.getName());
+        String taskId = rec.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName());
         String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
-        final String taskName = rec.getAttributeAsString(TasksColumns.NAME_ATTR.getName());
+        final String taskName = rec.getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
@@ -304,7 +311,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
 
     @Override
     protected void buildCellContextualMenu(Menu menu) {
-        final String taskName = this.getSelectedRecord().getAttributeAsString(TasksColumns.NAME_ATTR.getName());
+        final String taskName = this.getSelectedRecord().getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
         
         MenuItem restart = new MenuItem("Restart");
         restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
@@ -330,7 +337,7 @@ public class TasksListGrid extends ItemsListGrid implements TasksUpdatedListener
 
         boolean enabled;
         ListGridRecord jr = this.getSelectedRecord();
-        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(TasksColumns.STATUS_ATTR.getName()).toUpperCase()); 
+        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName()).toUpperCase()); 
         switch (status) {
         case SUBMITTED:
         case WAITING_ON_ERROR:

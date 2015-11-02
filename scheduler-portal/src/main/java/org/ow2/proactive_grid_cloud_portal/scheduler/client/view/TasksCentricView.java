@@ -1,19 +1,21 @@
-package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksCentricColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksListGrid;
 
 import com.smartgwt.client.widgets.layout.Layout;
 
-public class FilteringTasksView extends FilteringGridItemView implements TasksUpdatedListener{
+public class TasksCentricView extends FilteringGridItemView implements TasksUpdatedListener{
 
     protected TasksController controller;
 
     
-    public FilteringTasksView(TasksController controller) {
+    public TasksCentricView(TasksController controller) {
         this.controller = controller;
         this.controller.getModel().addTasksUpdatedListener(this);
         this.itemName = "tasks";
@@ -46,7 +48,8 @@ public class FilteringTasksView extends FilteringGridItemView implements TasksUp
 
     @Override
     protected void buildGrid() {
-        this.itemsGrid = new TasksListGrid(this.controller);
+        TasksCentricColumnsFactory factory = new TasksCentricColumnsFactory();
+        this.itemsGrid = new TasksListGrid(this.controller, factory, "tasksCentricDS_");
         this.itemsGrid.build();
     }
 }
