@@ -346,7 +346,9 @@ public class NSCreationWindow {
 
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+                infraForm.setValue("infra", infraSelect.getValueAsString());
                 infraForm.setValue("nsName", nameItem.getValueAsString());
+                infraForm.setValue("policy", policySelect.getValueAsString());
                 infraForm.setValue("sessionId", controller.getModel().getSessionId());
                 infraForm.setCanSubmit(true);
 
