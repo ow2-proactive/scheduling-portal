@@ -68,25 +68,7 @@ public class JobsModel {
      */
     private Job selectedJob = null;
     
-    /**
-     * True if the portal fetches my jobs only.
-     */
-    private boolean fetchMyJobsOnly = false;
     
-    /**
-     * True if the portal fetches the pending jobs. 
-     */
-    private boolean fetchPending = true;
-    
-    /**
-     * True if the portal fetches the running jobs. 
-     */
-    private boolean fetchRunning = true;
-    
-    /**
-     * True if the portal fetches the finished jobs. 
-     */
-    private boolean fetchFinished = true;
     
     /**
      * Listener for the updates of the jobs list.
@@ -267,66 +249,6 @@ public class JobsModel {
      */
     public long getJobsRevision() {
         return this.jobsRev;
-    }
-    
-    /**
-     * @return true if the model should only store the jobs of the current user
-     */
-    public boolean isFetchMyJobsOnly() {
-        return fetchMyJobsOnly;
-    }
-
-    /**
-     * Sets if the portal should fetch my jobs only.
-     * @param b true if the portal should fetch my jobs only.
-     */
-    public void fetchMyJobsOnly(boolean b) {
-        this.fetchMyJobsOnly = b;
-    }
-
-    /**
-     * @return true if the model should store pending jobs
-     */
-    public boolean isFetchPendingJobs() {
-        return this.fetchPending;
-    }
-
-    /**
-     * Sets if the portal should fetch pending jobs.
-     * @param b true if the portal should fetch pending jobs.
-     */
-    public void fetchPending(boolean f) {
-        this.fetchPending = f;
-    }
-
-    /**
-     * @return true if the model should store running jobs
-     */
-    public boolean isFetchRunningJobs() {
-        return this.fetchRunning;
-    }
-
-    /**
-     * Sets if the portal should fetch running jobs.
-     * @param b true if the portal should fetch running jobs.
-     */
-    public void fetchRunning(boolean f) {
-        this.fetchRunning = f;
-    }
-
-    /**
-     * @return true if the model should store finished jobs
-     */
-    public boolean isFetchFinishedJobs() {
-        return this.fetchFinished;
-    }
-
-    /**
-     * Sets if the portal should fetch finished jobs.
-     * @param b true if the portal should fetch finished jobs.
-     */
-    public void fetchFinished(boolean f) {
-        this.fetchFinished = f;
     }
     
     

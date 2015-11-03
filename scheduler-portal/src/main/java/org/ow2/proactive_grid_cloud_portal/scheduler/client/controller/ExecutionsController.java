@@ -1,5 +1,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
@@ -86,4 +87,108 @@ public class ExecutionsController {
         return parentController;
     }
     
+    
+    public void executionStateRevision(){
+        switch(this.model.getMode()){
+        case JOB_CENTRIC:
+            this.jobsController.jobsStateRevision();
+            break;
+        case TASK_CENTRIC:
+            this.tasksController.tasksStateRevision();
+            break;
+        }
+    }
+    
+    
+    protected void fetchFirstPage(){
+        switch(this.model.getMode()){
+        case JOB_CENTRIC:
+            this.jobsController.getPaginationController().firstPage();
+            break;
+        case TASK_CENTRIC:
+            this.tasksController.getPaginationController().firstPage();
+            break;
+        }
+    }
+    
+    
+    /**
+     * Invalidates the current job list if toggling state,
+     * refetch immediately a new job list
+     * 
+     * @param b true to fetch only jobs submitted by the current user, or false to fetch all jobs
+     */
+    public void fetchMyExecutionsOnly(boolean b) {
+        if (b == model.isFetchMyExecutionsOnly())
+            return;
+
+        model.fetchMyExecutionsOnly(b);
+
+        if (b)
+            LogModel.getInstance().logMessage("Fetching only my executions");
+        else
+            LogModel.getInstance().logMessage("Fetching all executions");
+        
+        this.fetchFirstPage();
+    }
+
+    /**
+     * Invalidates the current job list if toggling state,
+     * refetch immediately a new job list
+     * 
+     * @param f true to fetch pending jobs
+     */
+    public void fetchPending(boolean f) {
+        if (f == model.isFetchPendingExecutions())
+            return;
+
+        model.fetchPending(f);
+
+        if (f)
+            LogModel.getInstance().logMessage("Fetching pending executions");
+        else
+            LogModel.getInstance().logMessage("Dot not fetch pending executions");
+
+        this.fetchFirstPage();
+    }
+
+    /**
+     * Invalidates the current job list if toggling state,
+     * refetch immediately a new job list
+     * 
+     * @param f true to fetch running jobs
+     */
+    public void fetchRunning(boolean f) {
+        if (f == model.isFetchRunningExecutions())
+            return;
+
+        model.fetchRunning(f);
+
+        if (f)
+            LogModel.getInstance().logMessage("Fetching running executions");
+        else
+            LogModel.getInstance().logMessage("Dot not fetch running executions");
+
+        this.fetchFirstPage();
+    }
+
+    /**
+     * Invalidates the current job list if toggling state,
+     * refetch immediately a new job list
+     * 
+     * @param f true to fetch finished jobs
+     */
+    public void fetchFinished(boolean f) {
+        if (f == model.isFetchFinishedExecutions())
+            return;
+
+        model.fetchFinished(f);
+
+        if (f)
+            LogModel.getInstance().logMessage("Fetching finished executions");
+        else
+            LogModel.getInstance().logMessage("Dot not fetch finished executions");
+
+        this.fetchFirstPage();
+    }
 }

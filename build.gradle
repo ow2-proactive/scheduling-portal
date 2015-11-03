@@ -9,8 +9,8 @@ subprojects {
     sourceCompatibility = 1.7
 
     repositories {
-        if (project.hasProperty('local')) mavenLocal()
-
+        //if (project.hasProperty('local')) mavenLocal()
+		mavenLocal()
         jcenter()
         maven { url 'http://repository.sonatype.org/content/groups/forge/' }
         maven { url 'http://repository.activeeon.com/content/repositories/thirdparty/' }
@@ -32,9 +32,9 @@ subprojects {
     }
 
     dependencies {
-        providedCompile 'com.google.gwt:gwt-user:2.7.0'
-        providedCompile 'com.google.gwt:gwt-dev:2.7.0'
-		providedCompile 'com.google.gwt:gwt-codeserver:2.7.0'
+        //providedCompile 'com.google.gwt:gwt-user:2.7.0'
+        //providedCompile 'com.google.gwt:gwt-dev:2.7.0'
+		//providedCompile 'com.google.gwt:gwt-codeserver:2.7.0'
         // needed on the server side because we use GWT-RPC
         compile 'com.smartgwt:smartgwt:5.1d-2015-05-23'
         providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
@@ -47,6 +47,9 @@ subprojects {
         compile 'commons-fileupload:commons-fileupload:1.2'
         compile 'org.apache.httpcomponents:httpclient:4.2.6'
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
+		
+		compile 'ObjectFaker:ObjectFaker:0.2-SNAPSHOT'
+		compile 'com.google.code.gson:gson:2.4'
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.11.Final'
         compile 'org.apache.httpcomponents:httpmime:4.2.6'

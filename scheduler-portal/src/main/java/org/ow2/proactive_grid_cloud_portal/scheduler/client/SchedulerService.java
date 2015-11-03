@@ -164,6 +164,14 @@ public interface SchedulerService extends RemoteService {
      */
     String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit) throws RestServerException, ServiceException;
     
+    
+    String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
+              boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException;
+    
+    
+    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
+            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException;
+    
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
      * @param sessionId a valid session id

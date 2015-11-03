@@ -27,7 +27,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 public class TasksController {
 
     /** pending taskUpdate request, or null */
-    private Request taskUpdateRequest = null;
+    protected Request taskUpdateRequest = null;
     
     protected TasksNavigationController taskNavigationController;
     
@@ -64,8 +64,6 @@ public class TasksController {
         this.view = new TasksView(this);
         return this.view.build();
     }
-    
-    
         
     
     public TasksModel getModel() {
@@ -73,22 +71,18 @@ public class TasksController {
     }
 
 
-    
-    
-    
-    
-
     /**
      * Updates the current task list depending the current job selection in the model 
      */
     public void updateTasks(boolean showUpdating) {
         Job selectedJob = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob();
         
+        boolean emptyTaskList = (selectedJob == null);
         if(showUpdating){
-            this.model.notifyTasksChanging(selectedJob);
+            this.model.notifyTasksChanging(emptyTaskList);
         }
         
-        if (selectedJob == null) {
+        if (emptyTaskList) {
             model.setTasks(new ArrayList<Task>(), 0);
         } else {  
             final String jobId = "" + selectedJob.getId();

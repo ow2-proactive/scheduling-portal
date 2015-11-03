@@ -84,7 +84,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     /**
      * Controller for the navigation logic.
      */
-    private TasksNavigationController controller;
+    protected TasksNavigationController controller;
     
     
 

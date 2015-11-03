@@ -55,9 +55,9 @@ public class TasksModel {
     }
 
 
-    public void notifyTasksChanging(Job selectedJob){
+    public void notifyTasksChanging(boolean emptyTaskList){
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
-            if (selectedJob == null)
+            if (emptyTaskList)
                 list.tasksUpdated(new ArrayList<Task>(), 0);
             else
                 list.tasksUpdating();

@@ -10,7 +10,7 @@ public class TasksCentricModel extends TasksModel{
 
     @Override
     protected void initNavigationModel() {
-        this.tasksNavigationModel = new TasksNavigationModel(this);
+        this.tasksNavigationModel = new TasksCentricNavigationModel(this);
     }
     
 }

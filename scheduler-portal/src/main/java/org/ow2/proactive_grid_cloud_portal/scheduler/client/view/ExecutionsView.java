@@ -56,28 +56,28 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
         chkMy.setValue(false);
         chkMy.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchMyJobsOnly(chkMy.getValueAsBoolean());
+                controller.fetchMyExecutionsOnly(chkMy.getValueAsBoolean());
             }
         });
         chkPending = new CheckboxItem("pending", "Pending");
         chkPending.setValue(true);
         chkPending.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchPending(chkPending.getValueAsBoolean());
+                controller.fetchPending(chkPending.getValueAsBoolean());
             }
         });
         chkRunning = new CheckboxItem("running", "Running");
         chkRunning.setValue(true);
         chkRunning.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchRunning(chkRunning.getValueAsBoolean());
+                controller.fetchRunning(chkRunning.getValueAsBoolean());
             }
         });
         chkFinished = new CheckboxItem("finished", "Finished");
         chkFinished.setValue(true);
         chkFinished.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                controller.getJobsController().fetchFinished(chkFinished.getValueAsBoolean());
+                controller.fetchFinished(chkFinished.getValueAsBoolean());
             }
         });
         

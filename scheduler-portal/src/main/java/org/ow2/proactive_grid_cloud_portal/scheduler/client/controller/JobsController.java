@@ -327,9 +327,15 @@ public class JobsController {
         int offset = paginationController.getModel().getOffset();
         int range = paginationController.getModel().getRange();
 
+        ExecutionsModel executionModel = this.parentController.getModel();
+        boolean fetchMyJobs = executionModel.isFetchMyExecutionsOnly();
+        boolean fetchPending = executionModel.isFetchPendingExecutions();
+        boolean fetchRunning = executionModel.isFetchRunningExecutions();
+        boolean fetchFinished = executionModel.isFetchFinishedExecutions();
+        
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, model.isFetchMyJobsOnly(),
-                model.isFetchPendingJobs(), model.isFetchRunningJobs(), model.isFetchFinishedJobs(),
+        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, fetchMyJobs,
+                fetchPending, fetchRunning, fetchFinished,
                 new AsyncCallback<String>() {
 
             public void onFailure(Throwable caught) {
@@ -371,88 +377,6 @@ public class JobsController {
                 }
             }
         });
-    }
-
-    
-    
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param b true to fetch only jobs submitted by the current user, or false to fetch all jobs
-     */
-    public void fetchMyJobsOnly(boolean b) {
-        if (b == model.isFetchMyJobsOnly())
-            return;
-
-        model.fetchMyJobsOnly(b);
-
-        if (b)
-            LogModel.getInstance().logMessage("Fetching only my jobs");
-        else
-            LogModel.getInstance().logMessage("Fetching all jobs");
-
-        this.paginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch pending jobs
-     */
-    public void fetchPending(boolean f) {
-        if (f == model.isFetchPendingJobs())
-            return;
-
-        model.fetchPending(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching pending jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch pending jobs");
-
-        this.paginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch running jobs
-     */
-    public void fetchRunning(boolean f) {
-        if (f == model.isFetchRunningJobs())
-            return;
-
-        model.fetchRunning(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching running jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch running jobs");
-
-        this.paginationController.firstPage();
-    }
-
-    /**
-     * Invalidates the current job list if toggling state,
-     * refetch immediately a new job list
-     * 
-     * @param f true to fetch finished jobs
-     */
-    public void fetchFinished(boolean f) {
-        if (f == model.isFetchFinishedJobs())
-            return;
-
-        model.fetchFinished(f);
-
-        if (f)
-            LogModel.getInstance().logMessage("Fetching finished jobs");
-        else
-            LogModel.getInstance().logMessage("Dot not fetch finished jobs");
-
-        this.paginationController.firstPage();
     }
 
 

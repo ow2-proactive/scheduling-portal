@@ -37,6 +37,8 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,16 +59,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -77,11 +69,24 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
-import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 
 
 /**
@@ -465,6 +470,18 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 return restClient.getJobTaskStatesByTagPaginated(sessionId, jobId, tag, offset, limit);
             }
         });
+    }
+    
+    
+    public String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
+            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
+        return ServerFixture.getInstance().getTasksAsJson(null, fromDate, toDate, pending, running, finished, offset, limit);
+    }
+    
+    
+    public String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
+            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
+        return ServerFixture.getInstance().getTasksAsJson(tag, fromDate, toDate, pending, running, finished, offset, limit);
     }
     
     

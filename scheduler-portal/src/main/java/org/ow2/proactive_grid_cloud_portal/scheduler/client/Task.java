@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -57,7 +58,7 @@ public class Task implements Serializable, Comparable<Task> {
     private String hostName;
     private TaskStatus status;
     private long startTime;
-    private long finishedTime;
+    private long finishTime;
     private long executionDuration;
     private String description;
     private String tag;
@@ -102,7 +103,7 @@ public class Task implements Serializable, Comparable<Task> {
         this.status = status;
         this.hostName = hostName;
         this.startTime = startTime;
-        this.finishedTime = finishedTime;
+        this.finishTime = finishedTime;
         this.executionDuration = executionDuration;
         this.description = description;
         this.nodeCount = nodeCount;
@@ -197,7 +198,7 @@ public class Task implements Serializable, Comparable<Task> {
      * @param finishedTime the finishTime to set
      */
     public void setFinishTime(long finishedTime) {
-        this.finishedTime = finishedTime;
+        this.finishTime = finishedTime;
     }
 
     /**
@@ -205,7 +206,7 @@ public class Task implements Serializable, Comparable<Task> {
      * @return the finishTime
      */
     public long getFinishTime() {
-        return finishedTime;
+        return finishTime;
     }
 
     /**
@@ -303,7 +304,7 @@ public class Task implements Serializable, Comparable<Task> {
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "hostName=" +
                 hostName + "; " + "startTime=" + new Date(startTime) + "; " + "finishTime=" +
-                new Date(finishedTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
+                new Date(finishTime) + "; " + "executionDuration=" + executionDuration + "; " + "description=" +
                 description + "]";
     }
 
@@ -336,9 +337,24 @@ public class Task implements Serializable, Comparable<Task> {
         }
         long id = (long) taskInfo.get("taskId").isObject().get("id").isNumber().doubleValue();
         String status = taskInfo.get("taskStatus").isString().stringValue();
+        TaskStatus taskStatus = TaskStatus.valueOf(status);
         long startTime = (long) taskInfo.get("startTime").isNumber().doubleValue();
         long finishedTime = (long) taskInfo.get("finishedTime").isNumber().doubleValue();
         long executionDuration = (long) taskInfo.get("executionDuration").isNumber().doubleValue();
+        
+        
+        long jobId = 0;
+        JSONValue jobIdValue = taskInfo.get("jobId");
+        if(jobIdValue != null && jobIdValue instanceof JSONNumber){
+            jobId = (long) jobIdValue.isNumber().doubleValue();
+        }
+        String jobName = "";
+        JSONValue jobNameValue = taskInfo.get("jobName");
+        if(jobNameValue != null && jobNameValue instanceof JSONString){
+            jobName = jobNameValue.isString().stringValue();
+        }
+                
+        
         String description = "";
         if (jsonTask.containsKey("description")) {
             JSONString desc = jsonTask.get("description").isString();
@@ -362,12 +378,15 @@ public class Task implements Serializable, Comparable<Task> {
             }
         }
 
-        Task result = new Task(id, name, TaskStatus.valueOf(status), hostName, startTime, finishedTime,
+        Task result = new Task(id, name, taskStatus, hostName, startTime, finishedTime,
                 executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
         result.setTag(tag);
-        
+        result.setJobId(jobId);
+        result.setJobName(jobName);
         return result;
     }
+    
+    
 
     /**
      * @param task
@@ -377,14 +396,14 @@ public class Task implements Serializable, Comparable<Task> {
     public boolean isEquals(Task task) {
         return this.id == task.getId() && this.name.equals(task.getName()) &&
                 this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
-                this.startTime == task.getStartTime() && this.finishedTime == task.getFinishTime() &&
+                this.startTime == task.getStartTime() && this.finishTime == task.getFinishTime() &&
                 this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
     }
 
     public boolean isEqual(Task t) {
         return this.id == t.getId() && this.name.equals(t.getName()) &&
                 this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
-                this.startTime == t.getStartTime() && this.finishedTime == t.getFinishTime() &&
+                this.startTime == t.getStartTime() && this.finishTime == t.getFinishTime() &&
                 this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
     }
     
