@@ -50,33 +50,23 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 public class SchedulerConfig extends Config {
 
     /**
-     * Path to the user-defined RM property file, relative
+     * Path to the user-defined Scheduler property file, relative
      * to the webapp file path
      */
     public static final String CONFIG_PATH = "scheduler.conf";
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
-<<<<<<< HEAD
-    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
-=======
 
->>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
+    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
+
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
-<<<<<<< HEAD
-    private static final String DEFAULT_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
-    private static final String DEFAULT_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
-=======
-
-    /** URL of the remote noVNC webpage */
-    public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
->>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
@@ -90,7 +80,6 @@ public class SchedulerConfig extends Config {
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
     private static final String DEFAULT_JOBS_PAGE_SIZE = "50";
     
-    
     /** task page size */
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
     private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
@@ -102,7 +91,6 @@ public class SchedulerConfig extends Config {
     /** the delay applied before refreshing the tag suggestions for a running job. */
     public static final String  TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
     private static final String DEFAULT_TAG_SUGGESTIONS_DELAY = "30000";
-    
 
     /** release version string */
     public static final String VERSION = "sched.version";
@@ -134,10 +122,6 @@ public class SchedulerConfig extends Config {
     }
 
     private void setDefaults() {
-<<<<<<< HEAD
-        properties.put(REST_URL, DEFAULT_REST_URL);
-        properties.put(NOVNC_URL, DEFAULT_NOVNC_URL);
-        properties.put(NOVNC_PAGE_URL, DEFAULT_NOVNC_PAGE_URL);
         properties.put(CLIENT_REFRESH_TIME, DEFAULT_CLIENT_REFRESH_TIME);
         properties.put(LIVELOGS_REFRESH_TIME, DEFAULT_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, DEFAULT_JOBS_PAGE_SIZE);
@@ -148,15 +132,6 @@ public class SchedulerConfig extends Config {
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
-=======
-        properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
-        properties.put(LIVELOGS_REFRESH_TIME, d_LIVELOGS_REFRESH_TIME);
-        properties.put(JOBS_PAGE_SIZE, d_JOBS_PAGE_SIZE);
-        properties.put(VERSION, d_VERSION);
-        properties.put(SCHED_VERSION, d_SCHED_VERSION);
-        properties.put(REST_VERSION, d_REST_VERSION);
-        properties.put(MOTD_URL, d_MOTD_URL);
->>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
     }
 
     @Override
@@ -173,7 +148,6 @@ public class SchedulerConfig extends Config {
             String restUrl = protocol + "://localhost:" + port + "/rest";
             return restUrl;
         }
-
         return restUrlFromProperties;
     }
 
@@ -190,19 +164,12 @@ public class SchedulerConfig extends Config {
      * @return the REST_PUBLIC_URL if it is set or take it from the window location
      */
     @Override
-<<<<<<< HEAD
-    protected String getRestPublicUrlIfDefinedOrOverridden() {
-        String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
-            return getRestUrl();
-=======
     public String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
         if (restPublicUrl == null) {
             String restUrlFromCurrentLocation = getWindowsLocationUrl();
             restUrlFromCurrentLocation += "/rest";
             return restUrlFromCurrentLocation;
->>>>>>> d54d699... improve approach to set REST_PUBLIC_URL
         }
         return restPublicUrl;
     }
@@ -275,8 +242,7 @@ public class SchedulerConfig extends Config {
     	}
     	return 0;
     }
-    
-    
+
     /**
      * @return the number of tag suggestions that should be displayed for autocompletion.
      */
@@ -284,15 +250,12 @@ public class SchedulerConfig extends Config {
         return Integer.parseInt(this.properties.get(TAG_SUGGESTIONS_SIZE));
     }
     
-    
     /**
      * @return the delay applied before refreshing the tag suggestions for a running job.
      */
     public long getTagSuggestionDelay(){
         return Long.parseLong(this.properties.get(TAG_SUGGESTIONS_DELAY));
     }
-    
-    
 
     /**
      * @return refresh rate for live logs in millis
