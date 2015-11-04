@@ -250,12 +250,12 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     }
 
     private void downloadFullJobLogs(String sessionId, String jobId) {
-        String url = SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/" + jobId + "/log/full?sessionid="+sessionId;
+        String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId + "/log/full?sessionid="+sessionId;
         Window.open(url, "_blank", "");
     }
 
     private void downloadFullTaskLogs(String sessionId, String jobId, String taskName) {
-        String url = SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/" + jobId + "/tasks/" + taskName + "/result/log/full?sessionid="+sessionId;
+        String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId + "/tasks/" + taskName + "/result/log/full?sessionid="+sessionId;
         Window.open(url, "_blank", "");
     }
 
