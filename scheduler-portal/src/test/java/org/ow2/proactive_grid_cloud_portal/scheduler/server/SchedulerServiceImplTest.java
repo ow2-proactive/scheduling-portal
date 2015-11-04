@@ -53,8 +53,7 @@ public class SchedulerServiceImplTest {
 
     @Test
     public void scheduler_config_is_loaded() throws Exception {
-        assertEquals("http://localhost:8080/rest",
-          SchedulerConfig.get().getRestUrl());
+
         System.setProperty(SchedulerConfig.VERSION, "a_version");
 
         SchedulerServiceImpl service = new SchedulerServiceImpl();
