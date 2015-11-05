@@ -468,8 +468,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
     
     
-    public String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
+    public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks, final boolean pending, 
+            final boolean running, final boolean finished, final int offset, final int limit) throws RestServerException, ServiceException {
     	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -479,8 +479,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
     
     
-    public String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
+    public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate, final boolean myTasks, final boolean pending, 
+            final boolean running, final boolean finished, final int offset, final int limit) throws RestServerException, ServiceException {
     	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {

@@ -130,10 +130,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             i++;
         }
 
-        this.setData(data);
         this.invalidateCache();
-        //this.ds.setTestData(data);
-        //this.tasksGrid.fetchData();
+        this.ds.setTestData(data);
+        applyCurrentLocalFilter();
         
     }
 

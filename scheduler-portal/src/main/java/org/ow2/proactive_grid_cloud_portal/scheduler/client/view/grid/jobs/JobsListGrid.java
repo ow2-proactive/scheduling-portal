@@ -97,7 +97,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
 
         this.ds.setTestData(data.toArray());
-        transparentUpdate(jobs.size() + 1);
+        applyCurrentLocalFilter();
         
     }
 
@@ -122,7 +122,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 }
             }
         }, customErrorHandling);
-        transparentUpdate(this.ds.getTestData().length + 1);
+        applyCurrentLocalFilter();
     }
 
     
