@@ -3,8 +3,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.RemoteHintListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
@@ -13,10 +13,13 @@ public class TasksModel {
 
     public static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
     
-    protected List<Task> selectedTasks = null;
+    protected List<Task> tasks = null;
     protected boolean tasksDirty = false;
     protected List<RemoteHint> remoteHints = null;
     
+    protected Task selectedTask;
+    
+    protected ArrayList<TaskSelectedListener> tasksSelectedListeners = null;
     protected ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
     protected ArrayList<RemoteHintListener> remoteHintListeners = null;
     
@@ -41,6 +44,7 @@ public class TasksModel {
         this.remoteHints = new ArrayList<RemoteHint>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
         this.remoteHintListeners = new ArrayList<RemoteHintListener>();
+        this.tasksSelectedListeners = new ArrayList<TaskSelectedListener>();
     }
     
     
@@ -72,7 +76,7 @@ public class TasksModel {
      * @param tasks the new TaskSet
      */
     public void setTasks(List<Task> tasks, long totalTasks) {
-        this.selectedTasks = tasks;
+        this.tasks = tasks;
         this.tasksNavigationModel.getPaginationModel().setTotalItems(totalTasks);
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             list.tasksUpdated(tasks, totalTasks);
@@ -86,7 +90,7 @@ public class TasksModel {
      * @param message the error message
      */
     public void taskUpdateError(String message) {
-        this.selectedTasks = new ArrayList<Task>();
+        this.tasks = new ArrayList<Task>();
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             list.tasksUpdatedFailure(message);
         }
@@ -96,7 +100,7 @@ public class TasksModel {
      * @return the list of tasks corresponding the currently selected job
      */
     public List<Task> getTasks() {
-        return this.selectedTasks;
+        return this.tasks;
     }
 
     /**
@@ -108,6 +112,14 @@ public class TasksModel {
 
     public void setTasksDirty(boolean b) {
         this.tasksDirty = b;
+    }
+    
+    
+    public void selectTask(Task task){
+    	this.selectedTask = task;
+    	for(TaskSelectedListener listener: this.tasksSelectedListeners){
+    		listener.taskSelected(task);
+    	}
     }
     
     
@@ -161,6 +173,11 @@ public class TasksModel {
     
     public void addRemoteHintListener(RemoteHintListener listener) {
         this.remoteHintListeners.add(listener);
+    }
+    
+    
+    public void addTaskSelectedListener(TaskSelectedListener listener){
+    	this.tasksSelectedListeners.add(listener);
     }
 
     public TasksNavigationModel getTasksNavigationModel() {

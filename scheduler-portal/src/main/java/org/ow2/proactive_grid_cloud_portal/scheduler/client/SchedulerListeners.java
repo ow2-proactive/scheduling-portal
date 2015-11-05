@@ -88,6 +88,10 @@ public class SchedulerListeners {
         public void selectedJobUpdated();
 
     }
+    
+    
+    
+    
 
     public interface JobsUpdatedListener {
 
@@ -115,10 +119,32 @@ public class SchedulerListeners {
         public void jobSubmitted(Job j);
 
     }
+    
+    
+    
+    
+    
 
     public interface ExecutionDisplayModeListener{
         public void modeSwitched(ExecutionListMode mode);
     }
+    
+    
+    public interface TaskSelectedListener{
+    	/**
+         * Called when a task is selected in the main Scheduler View Grid
+         *
+         * @param job the selected job
+         */
+        public void taskSelected(Task task);
+
+        /**
+         * Called when the task selection in the main Scheduler View Grid is canceled
+         */
+        public void taskUnselected();
+        
+    }
+    
     
     
     public interface TasksUpdatedListener {

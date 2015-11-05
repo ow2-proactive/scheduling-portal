@@ -4,7 +4,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
-import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.data.Record;
 
 /**
  * A factory that give columns and records for jobs.
@@ -16,7 +16,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
     public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true);
     public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true);
     public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true);
-    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 100, true);
+    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 100, true);
     public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true);
     
     @Override
@@ -25,7 +25,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
     }
 
     @Override
-    public ListGridRecord buildRecord(Job item) {
+    public Record buildRecord(Job item) {
         JobRecord record =  new JobRecord(item);
         record.setAttribute(ID_ATTR.getName(), item.getId());
         float progress = (float) item.getFinishedTasks() / (float) item.getTotalTasks();
