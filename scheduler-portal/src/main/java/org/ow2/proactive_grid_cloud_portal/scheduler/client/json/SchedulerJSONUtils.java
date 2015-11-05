@@ -81,7 +81,7 @@ public class SchedulerJSONUtils extends JSONUtils {
             throw new JSONException("Expected JSON Object: " + value.toString());
         }
         
-        JSONValue jsonTasksValue = jsonTasksTotal.get("tasks");
+        JSONValue jsonTasksValue = jsonTasksTotal.get("list");
         if(jsonTasksValue == null){
             throw new JSONException("Expected JSON Object with attribute tasks: " + value.toString());
         }

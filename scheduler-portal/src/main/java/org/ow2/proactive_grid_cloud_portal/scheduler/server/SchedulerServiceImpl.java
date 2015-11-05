@@ -69,7 +69,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -82,11 +81,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 
 
 /**
@@ -475,13 +470,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     
     public String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
             boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
-        return ServerFixture.getInstance().getTasksAsJson(null, fromDate, toDate, pending, running, finished, offset, limit);
+    	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+            	return restClient.getTaskStates(sessionId, fromDate, toDate, myTasks, running, pending, finished, offset, limit);
+            }
+        });
     }
     
     
     public String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
             boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException {
-        return ServerFixture.getInstance().getTasksAsJson(tag, fromDate, toDate, pending, running, finished, offset, limit);
+    	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+            	return restClient.getTaskStatesByTag(sessionId, tag, fromDate, toDate, myTasks, running, pending, finished, offset, limit);
+            }
+        });
     }
     
     

@@ -343,17 +343,10 @@ public class Task implements Serializable, Comparable<Task> {
         long executionDuration = (long) taskInfo.get("executionDuration").isNumber().doubleValue();
         
         
-        long jobId = 0;
-        JSONValue jobIdValue = taskInfo.get("jobId");
-        if(jobIdValue != null && jobIdValue instanceof JSONNumber){
-            jobId = (long) jobIdValue.isNumber().doubleValue();
-        }
-        String jobName = "";
-        JSONValue jobNameValue = taskInfo.get("jobName");
-        if(jobNameValue != null && jobNameValue instanceof JSONString){
-            jobName = jobNameValue.isString().stringValue();
-        }
-                
+        JSONObject jobIdInfo = taskInfo.get("jobId").isObject();
+        
+        long jobId = (long) jobIdInfo.get("id").isNumber().doubleValue();
+        String jobName = jobIdInfo.get("readableName").isString().stringValue();         
         
         String description = "";
         if (jsonTask.containsKey("description")) {
