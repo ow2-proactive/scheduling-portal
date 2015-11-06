@@ -38,11 +38,11 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 public class TasksCentricNavigationModel extends TasksNavigationModel{
-    
+
     protected long fromDate;
-    
+
     protected long toDate;
-    
+
     public TasksCentricNavigationModel(TasksModel parentModel) {
         super(parentModel);
     }
@@ -62,6 +62,6 @@ public class TasksCentricNavigationModel extends TasksNavigationModel{
     public void setToDate(long toDate) {
         this.toDate = toDate;
     }
-    
+
 
 }

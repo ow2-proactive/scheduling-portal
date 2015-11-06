@@ -50,11 +50,11 @@ public class JobRecord extends ListGridRecord {
      * the attribute to store the job.
      */
     private static final String JOB_ATTR = "job";
-    
+
     public JobRecord(Job j) {
         setAttribute(JOB_ATTR, j);  
     }
-    
+
     /**
      * Gets the job stored in a job record.
      * @param record the record that contains the job.
@@ -63,5 +63,5 @@ public class JobRecord extends ListGridRecord {
     public static Job getJob(ListGridRecord record){
         return (Job) record.getAttributeAsObject(JOB_ATTR);
     }
-    
+
 }

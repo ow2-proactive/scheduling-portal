@@ -55,8 +55,8 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author mschnoor
  */
 public class TasksView extends AbstractGridItemsView implements TasksUpdatedListener {
-   
-   
+
+
     protected TasksController controller;
 
 
@@ -79,16 +79,16 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
         this.itemUpdated();
     }
 
-    
+
     protected Layout buildToolbar(){
         return this.controller.getTaskNavigationController().buildView();
     }
-    
+
     protected Layout buildPagination(){
         PaginationController paginationController = this.controller.getTaskNavigationController().getPaginationController();
         return buildPagination(paginationController);
     }
-    
+
     protected void buildGrid(){
         ExpandableTasksColumnsFactory expandableFactory = new ExpandableTasksColumnsFactory();
         ExpandTasksColumnsFactory expandFactory = new ExpandTasksColumnsFactory();
@@ -97,17 +97,17 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
 
 
-	@Override
-	public void pageChanged() {
-		this.controller.selectTask(null);
-	}
+    @Override
+    public void pageChanged() {
+        this.controller.selectTask(null);
+    }
 
 
-	@Override
-	public void totalItemChanged() {
-	
-	}
-    
-    
-    
+    @Override
+    public void totalItemChanged() {
+
+    }
+
+
+
 }

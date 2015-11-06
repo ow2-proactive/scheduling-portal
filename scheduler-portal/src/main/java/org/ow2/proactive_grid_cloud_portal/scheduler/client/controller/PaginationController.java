@@ -51,7 +51,7 @@ public abstract class PaginationController {
      */
     protected PaginationModel model;
 
-   
+
 
     /**
      * Builds a controller for the pagination logic.
@@ -80,8 +80,8 @@ public abstract class PaginationController {
         model.setPage(curPage - 1);
         this.fetch(false);
     }
-    
-    
+
+
     /**
      * Fetch the first item list page.
      */
@@ -89,7 +89,7 @@ public abstract class PaginationController {
         model.setPage(0);
         this.fetch(false);
     }
-    
+
     /**
      * Fetch the last item list page.
      */
@@ -97,8 +97,8 @@ public abstract class PaginationController {
         this.model.setPage(this.model.getMaxPage());
         this.fetch(false);
     }
-    
-    
+
+
     /**
      * Fetch the page with the given number.
      * @param pageNumber the number of the page to be displayed.
@@ -107,17 +107,17 @@ public abstract class PaginationController {
         if(pageNumber < 0){
             pageNumber = 0;
         }
-        
+
         int maxPage = this.model.getMaxPage();
         if(pageNumber > maxPage){
             pageNumber = maxPage;
         }
-        
+
         this.model.setPage(pageNumber);
         this.fetch(false);
     }
 
-    
+
     /**
      * Computes the number of the last page of items.
      * @param nbItem total number of items without pagination.
@@ -125,14 +125,14 @@ public abstract class PaginationController {
     public void computeMaxPage(long nbItem){
         this.model.setTotalItems(nbItem);
     }
-    
+
 
     /**
      * Fetch the items for the current page.
      */
     public abstract void fetch(boolean silentFetch);
-    
-    
+
+
     public abstract Layout buildView();
 
 
@@ -144,16 +144,16 @@ public abstract class PaginationController {
     public String getPaginationRangeLabel(){
         int page = this.model.getPage();
         int size = this.model.getPageSize();
-        
+
         long index = page * size;
         long total = this.model.getTotalItems();
         long range = index + size;
-        
+
         index++;
         if(index < 0){
             index = 0;
         }
-        
+
         if(range < total){
             return index + " - " + range;
         }
@@ -161,12 +161,12 @@ public abstract class PaginationController {
             return index + " - " + total;
         }
     }
-    
-    
+
+
     public String getNumberPageText(){
         return "" + (this.model.getPage() + 1);
     }
-    
+
 
     /**
      * Returns true if there is item before the current list of items, false otherwise.
@@ -192,7 +192,7 @@ public abstract class PaginationController {
     public PaginationModel getModel() {
         return model;
     }
-    
+
     /**
      * Get the numero of the last page. 
      * @return the numero of the last page.
@@ -208,8 +208,8 @@ public abstract class PaginationController {
         this.model.setPage(-1);
         this.model.setTotalItems(0);
     }
-    
-    
+
+
     public void refresh(){
         this.fetch(true);
     }

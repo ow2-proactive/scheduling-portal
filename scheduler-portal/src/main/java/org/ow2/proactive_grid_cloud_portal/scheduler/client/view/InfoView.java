@@ -47,25 +47,25 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
 public class InfoView<T> {
 
-	/** label when no job is selected */
+    /** label when no job is selected */
     protected Label label = null;
     /** widget shown when a job is selected */
     protected DetailViewer details = null;
-    
+
     /** currently displayed job */
     protected T displayedItem = null;
-    
+
     protected ColumnsFactory<T> factory;
-    
+
     protected String emptyMessage;
-    
-    
+
+
     public InfoView(ColumnsFactory<T> factory, String emptyMessage) {
-		this.factory = factory;
-		this.emptyMessage = emptyMessage;
-	}
-    
-    
+        this.factory = factory;
+        this.emptyMessage = emptyMessage;
+    }
+
+
     /**
      * @return the Widget to display, ready to be added in a container
      */
@@ -88,7 +88,7 @@ public class InfoView<T> {
         GridColumns[] lines = this.factory.getColumns();
         DetailViewerField [] fields = new DetailViewerField[lines.length];
         for(int i = 0; i < lines.length; i++){
-        	fields[i] = new DetailViewerField(lines[i].getName(), lines[i].getTitle());
+            fields[i] = new DetailViewerField(lines[i].getName(), lines[i].getTitle());
         }
 
         this.details.setFields(fields);
@@ -98,16 +98,16 @@ public class InfoView<T> {
 
         return root;
     }
-    
+
     public void hideDetails(){
-    	this.details.hide();
+        this.details.hide();
         this.label.show();
         this.displayedItem = null;
     }
-    
-    
+
+
     public void displayItem(){
-    	DetailViewerRecord [] records = new DetailViewerRecord[1];
+        DetailViewerRecord [] records = new DetailViewerRecord[1];
         records[0] = new DetailViewerRecord();
         this.factory.buildRecord(this.displayedItem, records[0]);
 

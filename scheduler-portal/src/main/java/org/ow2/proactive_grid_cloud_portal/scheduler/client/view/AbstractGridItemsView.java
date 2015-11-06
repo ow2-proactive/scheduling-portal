@@ -59,48 +59,48 @@ public abstract class AbstractGridItemsView implements PaginationListener{
      * shown upon error
      */
     protected Label errorLabel = null;
-    
+
     protected String itemName;
-    
-    
+
+
     protected void itemUpdating(){
         this.errorLabel.hide();
         this.itemsGrid.hide();
         this.loadingLabel.show();
     }
-    
-    
+
+
     protected void itemUpdatedFailure(String message){
         this.errorLabel.setContents(message);
         this.itemsGrid.hide();
         this.loadingLabel.hide();
         this.errorLabel.show();
     }
-    
-    
+
+
     protected void itemUpdated(){
         this.errorLabel.hide();
         this.loadingLabel.hide();
         this.itemsGrid.show();
     }
-    
+
     protected abstract Layout buildToolbar();
-    
+
     protected abstract Layout buildPagination();
-    
+
     protected Layout buildPagination(PaginationController paginationController){
-    	Layout result = paginationController.buildView();
+        Layout result = paginationController.buildView();
         paginationController.getModel().addPaginationListener(this);
         return result;
     }
-    
+
     protected abstract void buildGrid();
-    
-    
+
+
     protected Layout buildContent(){
         VLayout layout = new VLayout();
         this.buildGrid();
-        
+
         this.loadingLabel = new Label("fetching " + this.itemName + "...");
         this.loadingLabel.setIcon("loading.gif");
         this.loadingLabel.setWidth100();
@@ -112,15 +112,15 @@ public abstract class AbstractGridItemsView implements PaginationListener{
         this.errorLabel.setWidth100();
         this.errorLabel.setAlign(Alignment.CENTER);
         this.errorLabel.hide();
-        
+
         layout.addMember(this.itemsGrid);
         layout.addMember(this.loadingLabel);
         layout.addMember(this.errorLabel);
-        
+
         return layout;
     }
-    
-    
+
+
     public Layout build() {
         Layout content = this.buildContent();
         Layout navTools = this.buildToolbar();

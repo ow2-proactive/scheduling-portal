@@ -41,33 +41,33 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
  *
  */
 public class GridColumns{
-    
+
     /**
      * The name of the column
      */
     protected final String name;
-    
+
     /**
      * The title of the column, as shown in the grid header.
      */
     protected final String title;
-    
+
     /**
      * The width of the column in the grid.
      */
     protected final int width;
-    
+
     /**
      * True if this column is bound to a data in the datasource, false otherwise.
      */
     protected final boolean hasData;
-    
+
     /**
      * True if this column is part of the primary key.
      */
     protected final boolean isPrimaryKey;
-    
-    
+
+
     public GridColumns(String name, String title, int width, boolean hasData, boolean isPrimaryKey) {
         this.name = name;
         this.title = title;
@@ -81,5 +81,5 @@ public class GridColumns{
     public int getWidth() {return width;}
     public boolean hasData() {return hasData;}
     public boolean isPrimaryKey() {return isPrimaryKey;}
- 
+
 }

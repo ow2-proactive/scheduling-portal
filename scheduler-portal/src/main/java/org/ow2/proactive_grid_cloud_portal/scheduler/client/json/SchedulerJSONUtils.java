@@ -66,7 +66,7 @@ public class SchedulerJSONUtils extends JSONUtils {
         JSONValue val = parseJSON(jsonString);
         return parseJSONPaginatedTasks(val);
     }
-    
+
     /**
      * Parse a paginated list of tasks
      * @param jsonString the JSON representing the paginated list of tasks.
@@ -78,24 +78,24 @@ public class SchedulerJSONUtils extends JSONUtils {
         if(jsonTasksTotal == null){
             throw new JSONException("Expected JSON Object: " + value.toString());
         }
-        
+
         JSONValue jsonTasksValue = jsonTasksTotal.get("list");
         if(jsonTasksValue == null){
             throw new JSONException("Expected JSON Object with attribute tasks: " + value.toString());
         }
-        
+
         JSONArray arr = jsonTasksValue.isArray();
         if (arr == null) {
             throw new JSONException("Expected JSON Array: " + jsonTasksValue.toString());
         }
-        
+
         List<Task> tasks = new ArrayList<Task>();
 
         for (int i = 0; i < arr.size(); i++) {
             JSONObject jsonTask = arr.get(i).isObject();
             tasks.add(Task.parseJson(jsonTask));
         }
-        
+
         JSONValue jsonTotalValue = jsonTasksTotal.get("size");
         if(jsonTotalValue == null){
             throw new JSONException("Expected JSON Object with attribute total: " + value.toString());
@@ -105,13 +105,13 @@ public class SchedulerJSONUtils extends JSONUtils {
             throw new JSONException("Expected JSON number: " + jsonTasksValue.toString());
         }
         long totalTasks = (long) jsonTotal.doubleValue();
-        
+
         JSONPaginatedTasks result = new JSONPaginatedTasks(tasks, totalTasks);
         return result;
     }
-    
-    
-    
+
+
+
     /**
      * @param arr list of tags as a JSON array
      * @return the list of tags
@@ -122,7 +122,7 @@ public class SchedulerJSONUtils extends JSONUtils {
         if (arr == null) {
             throw new JSONException("Expected JSON Array: " + val.toString());
         }
-        
+
         List<String> tags = new ArrayList<String>(arr.size());
 
         for (int i = 0; i < arr.size(); i++) {
@@ -131,9 +131,9 @@ public class SchedulerJSONUtils extends JSONUtils {
 
         return tags;
     }
-    
-    
-    
+
+
+
     public static JSONPaginatedJobs getJobsFromJson(String result) throws JSONException{
         JSONPaginatedJobs resultJobs = new JSONPaginatedJobs();
         Map<Integer, Job> jobs = resultJobs.getJobs();
@@ -150,15 +150,15 @@ public class SchedulerJSONUtils extends JSONUtils {
         JSONArray jsonArr = jsonInfo.get(key).isArray();
         if (jsonArr == null)
             throw new JSONException("Expected JSONArray: " + jsonInfo.toString());
-        
+
         for (int i = 0; i < jsonArr.size(); i++) {
             JSONObject jsonJob = jsonArr.get(i).isObject();
             Job j = Job.parseJson(jsonJob);
             jobs.put(j.getId(), j);
         }
-        
+
         resultJobs.setTotal(jobs.size());
-        
+
         return resultJobs;
     }
 }

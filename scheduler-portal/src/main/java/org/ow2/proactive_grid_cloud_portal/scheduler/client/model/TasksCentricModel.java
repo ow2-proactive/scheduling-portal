@@ -49,5 +49,5 @@ public class TasksCentricModel extends TasksModel{
     protected void initNavigationModel() {
         this.tasksNavigationModel = new TasksCentricNavigationModel(this);
     }
-    
+
 }

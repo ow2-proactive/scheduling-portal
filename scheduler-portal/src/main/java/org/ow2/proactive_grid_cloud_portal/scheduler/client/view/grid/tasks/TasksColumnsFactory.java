@@ -62,7 +62,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
     public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true, false);
     public static GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", 100, true, false);
     public static GridColumns VISU_ATTR = new GridColumns("visu", " ", 20, false, false);
-    
+
     @Override
     public GridColumns[] getColumns() {
         return new GridColumns[]{ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, EXEC_DURATION_ATTR, NODE_COUNT_ATTR, 
@@ -70,7 +70,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
                 DESCRIPTION_ATTR, VISU_ATTR};
     }
 
-    
+
     @Override
     public void buildRecord(Task item, Record record) {
         record.setAttribute(ID_ATTR.getName(), item.getId().longValue());
@@ -92,7 +92,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
         record.setAttribute(NODE_COUNT_ATTR.getName(), item.getNodeCount());
     }
 
-    
+
     /**
      * Builds the record attribute for data that could be shown in detail section in a expandable grid.
      * @param record the record that contains the attributes.
@@ -101,7 +101,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
     protected void buildDetailsColumns(Record record, Task item){
         record.setAttribute(HOST_ATTR.getName(), (item.getHostName().equals("null") ? "" : item.getHostName()));
         record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
-        
+
         if (item.getStartTime() > 0)
             record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
         if (item.getFinishTime() > item.getStartTime())

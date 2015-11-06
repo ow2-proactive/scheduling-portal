@@ -45,16 +45,16 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 public class JSONPaginatedJobs {
 
     protected Map<Integer, Job> jobs;
-    
+
     protected long revision;
-    
+
     protected long total;
 
     public JSONPaginatedJobs() {
         this.jobs = new LinkedHashMap<Integer, Job>();
     }
-    
-    
+
+
     public Map<Integer, Job> getJobs() {
         return jobs;
     }
@@ -79,6 +79,6 @@ public class JSONPaginatedJobs {
         this.total = total;
     }
 
-    
-    
+
+
 }

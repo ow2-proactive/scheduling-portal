@@ -57,23 +57,23 @@ public class ExpandableTasksListGrid extends TasksListGrid{
      * The record for the expand component to be shown.
      */
     private ListGridRecord expandRecord;
-    
+
     /**
      * The columns and record factory used to build the expand component and the shown data.
      */
     protected ExpandTasksColumnsFactory expandTasksColumnsFactory;
-    
+
     public ExpandableTasksListGrid(TasksController controller, ExpandableTasksColumnsFactory expandableFactory, ExpandTasksColumnsFactory expandFactory, String datasourceNamePrefix) {
         super(controller, expandableFactory, datasourceNamePrefix);
         this.expandTasksColumnsFactory = expandFactory;
         this.setCanExpandRecords(true);
     }
-    
-    
+
+
     protected DetailViewerField buildDetailViewer(GridColumns column){
         return new DetailViewerField(column.getName(), column.getTitle());
     }
-    
+
     @Override
     protected Canvas getExpansionComponent(final ListGridRecord record) {
         if (expandRecord != null && expandRecord != record) {
@@ -112,7 +112,7 @@ public class ExpandableTasksListGrid extends TasksListGrid{
         this.expandRecord = null;
     }
 
-    
+
     @Override
     protected TaskRecord updateTaskRecord(Task task) {
         TaskRecord record = super.updateTaskRecord(task);

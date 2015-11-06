@@ -51,11 +51,11 @@ public class TasksCentricNavigationView extends TasksNavigationView{
         super(controller);
     }
 
-    
+
     @Override
     public Layout build() {
         Layout layout = super.build();
-        
+
         RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "from");
         fromDateItem.addChangedHandler(new ChangedHandler() {   
             @Override
@@ -70,27 +70,27 @@ public class TasksCentricNavigationView extends TasksNavigationView{
                 toDateChangedHandler(event);
             }
         });
-        
+
         DynamicForm form = new DynamicForm();
         form.setLeft(5);
         form.setNumCols(4);
         form.setItems(fromDateItem, toDateItem);
         layout.addMember(form);
-        
+
         return layout;
     }
-    
-    
+
+
     protected void fromDateChangedHandler(ChangedEvent event){
         Date value = (Date) event.getValue();
         long time = value.getTime();
         ((TasksCentricNavigationController) this.controller).changeFromDate(time);
     }
-    
+
     protected void toDateChangedHandler(ChangedEvent event){
         Date value = (Date) event.getValue();
         long time = value.getTime();
         ((TasksCentricNavigationController) this.controller).changeToDate(time);
     }
-    
+
 }

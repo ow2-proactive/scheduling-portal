@@ -48,36 +48,36 @@ import com.smartgwt.client.widgets.layout.SectionStackSection;
 public class ExecutionsController {
 
     protected ExecutionsView view;
-    
+
     protected JobsController jobsController;
-    
+
     protected TasksCentricController tasksController;
-    
+
     protected ExecutionsModel model;
-    
+
     protected SchedulerController parentController;
-    
-    
+
+
     public ExecutionsController(SchedulerController controller) {
         this.parentController = controller;
         SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getModel(); 
         this.model = new ExecutionsModel(schedulerModel);
         schedulerModel.setExecutionsModel(this.model);
     }
-    
-    
+
+
     public SectionStackSection buildView(){
         this.view = new ExecutionsView(this);
         return this.view.build();
     }
-    
-    
+
+
     public Layout buildJobsView(){
         this.jobsController = new JobsController(this);
         return this.jobsController.buildView();
     }
-    
-    
+
+
     public Layout buildTasksView(){
         this.tasksController = new TasksCentricController(this.parentController);
         return this.tasksController.buildView();
@@ -102,8 +102,8 @@ public class ExecutionsController {
     public void setTasksController(TasksCentricController tasksController) {
         this.tasksController = tasksController;
     }
-    
-    
+
+
     public void switchMode(String mode){
         if(mode.equals(ExecutionListMode.JOB_CENTRIC.name)){
             this.model.setMode(ExecutionListMode.JOB_CENTRIC);
@@ -122,8 +122,8 @@ public class ExecutionsController {
     public SchedulerController getParentController() {
         return parentController;
     }
-    
-    
+
+
     public void executionStateRevision(){
         switch(this.model.getMode()){
         case JOB_CENTRIC:
@@ -134,8 +134,8 @@ public class ExecutionsController {
             break;
         }
     }
-    
-    
+
+
     protected void fetchFirstPage(){
         switch(this.model.getMode()){
         case JOB_CENTRIC:
@@ -146,8 +146,8 @@ public class ExecutionsController {
             break;
         }
     }
-    
-    
+
+
     /**
      * Invalidates the current job list if toggling state,
      * refetch immediately a new job list
@@ -164,7 +164,7 @@ public class ExecutionsController {
             LogModel.getInstance().logMessage("Fetching only my executions");
         else
             LogModel.getInstance().logMessage("Fetching all executions");
-        
+
         this.fetchFirstPage();
     }
 

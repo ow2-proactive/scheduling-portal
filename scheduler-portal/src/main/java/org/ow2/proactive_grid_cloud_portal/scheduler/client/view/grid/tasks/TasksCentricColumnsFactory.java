@@ -49,7 +49,7 @@ public class TasksCentricColumnsFactory extends TasksColumnsFactory{
 
     public static GridColumns JOB_ID_ATTR = new GridColumns("jobId", "Job Id", 60, true, true);
     public static GridColumns JOB_NAME_ATTR = new GridColumns("jobName", "Job Name", 100, true, false);
-    
+
     @Override
     public GridColumns[] getColumns() {
         return new GridColumns[]{ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, JOB_ID_ATTR, JOB_NAME_ATTR, EXEC_DURATION_ATTR, NODE_COUNT_ATTR, 
@@ -64,6 +64,6 @@ public class TasksCentricColumnsFactory extends TasksColumnsFactory{
         record.setAttribute(JOB_ID_ATTR.getName(), item.getJobId());
         record.setAttribute(JOB_NAME_ATTR.getName(), item.getJobName());
     }
-    
-    
+
+
 }

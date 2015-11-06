@@ -66,8 +66,8 @@ public class TasksNavigationController {
      * The model for the tasks navigation.
      */
     protected TasksNavigationModel model;
-    
-    
+
+
     protected TasksNavigationView view;
 
     /**
@@ -80,8 +80,8 @@ public class TasksNavigationController {
         this.paginationController = new TasksPaginationController(parentController);
         this.tagSuggestionOracle = new PrefixWordSuggestOracle(model);
     }
-    
-    
+
+
     public Layout buildView(){
         this.view = new TasksNavigationView(this);
         return this.view.build();
@@ -145,8 +145,8 @@ public class TasksNavigationController {
         this.model.clearTagSuggestions();
         this.paginationController.firstPage();
     }
-    
-    
+
+
     public void stopNavigation(){
         this.tagSuggestionOracle.resetTagSuggestions();
         this.paginationController.resetPagination();
@@ -160,7 +160,7 @@ public class TasksNavigationController {
     public TasksNavigationModel getModel() {
         return model;
     }
-    
+
     /**
      * Refresh the paginated tasks list.
      */

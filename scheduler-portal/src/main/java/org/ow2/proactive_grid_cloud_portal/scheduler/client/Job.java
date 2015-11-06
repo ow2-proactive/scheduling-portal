@@ -250,10 +250,10 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public boolean isEqual(Job job) {
         return this.id == job.getId() && this.name.equals(job.getName()) &&
-            this.priority.equals(job.getPriority()) && this.status.equals(job.getStatus()) &&
-            this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
-            runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
-            finishTime == job.finishTime;
+                this.priority.equals(job.getPriority()) && this.status.equals(job.getStatus()) &&
+                this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
+                runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
+                finishTime == job.finishTime;
     }
 
     public int compareTo(Job job) {
@@ -263,7 +263,7 @@ public class Job implements Serializable, Comparable<Job> {
     @Override
     public String toString() {
         return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "priority=" +
-            priority + "; " + "user=" + user + "]";
+                priority + "; " + "user=" + user + "]";
     }
 
     /**
@@ -274,7 +274,7 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public boolean isExecuted() {
         return this.status == JobStatus.CANCELED || this.status == JobStatus.FINISHED ||
-            this.status == JobStatus.FAILED || this.status == JobStatus.KILLED;
+                this.status == JobStatus.FAILED || this.status == JobStatus.KILLED;
     }
 
     /**
@@ -298,7 +298,7 @@ public class Job implements Serializable, Comparable<Job> {
         String name = jsonInfoId.get("readableName").isString().stringValue();
 
         return new Job(id, name, JobStatus.valueOf(status), JobPriority.findPriority(priority), user,
-            pending, running, finished, total, submittedTime, startTime, finishedTime);
+                pending, running, finished, total, submittedTime, startTime, finishedTime);
     }
 
     /**

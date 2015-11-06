@@ -55,12 +55,12 @@ public class PaginationView implements PaginationListener{
 
     protected PaginationController paginationController;
 
-    
+
     /**
      * Task page number
      */
     protected Label offsetRangeLabel = null;
-    
+
     /**
      * Task previous page button
      */
@@ -69,8 +69,8 @@ public class PaginationView implements PaginationListener{
      * Task next page button
      */
     protected ToolStripButton pageNextButton = null;
-    
-    
+
+
     /**
      * Task first page button
      */
@@ -79,20 +79,20 @@ public class PaginationView implements PaginationListener{
      * Task last page button
      */
     protected ToolStripButton pageLastButton = null;
-    
+
     /**
      * Label that indicates the max number of pages
      */
     protected Label pageMaxLabel = null;
-    
+
     /**
      * A textbox that allows the user to choose which page to display.
      */
     protected TextBox txtPageNumber = null;
-    
+
     protected String itemTypeName;
-    
-    
+
+
     /**
      * Builds the view content.
      * @return a layout containing the view content.
@@ -106,7 +106,7 @@ public class PaginationView implements PaginationListener{
                 paginationController.firstPage();
             }
         });
-        
+
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
@@ -115,8 +115,8 @@ public class PaginationView implements PaginationListener{
                 paginationController.previousPage();
             }
         });
-        
-        
+
+
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navNextPaginationButton");
@@ -125,8 +125,8 @@ public class PaginationView implements PaginationListener{
                 paginationController.nextPage();
             }
         });
-        
-        
+
+
         this.pageLastButton = new ToolStripButton("Last >>");
         this.pageLastButton.disable();
         this.pageLastButton.addStyleName("navNextPaginationButton");
@@ -141,20 +141,20 @@ public class PaginationView implements PaginationListener{
         this.offsetRangeLabel.setAlign(Alignment.CENTER);
         this.offsetRangeLabel.setWidth100();
         this.offsetRangeLabel.setPadding(0);
-        
-        
+
+
         Label pageLabel = new Label("page");
         pageLabel.setWidth100();
         pageLabel.setAlign(Alignment.RIGHT);
         pageLabel.setMinWidth(30);
         pageLabel.setMargin(4);
-        
+
         this.pageMaxLabel = new Label("of 0");
         this.pageMaxLabel.setAlign(Alignment.LEFT);
         this.pageMaxLabel.setWidth100();
         this.pageMaxLabel.setMinWidth(40);
         this.pageMaxLabel.setMargin(4);
-        
+
         this.txtPageNumber = new TextBox();
         this.txtPageNumber.setValue("0");
         this.txtPageNumber.setWidth("25px");
@@ -168,14 +168,14 @@ public class PaginationView implements PaginationListener{
             }
         });
 
-        
+
         HLayout labelLayout = new HLayout();
         labelLayout.addStyleName("labelPaginationLayout");
         labelLayout.addMember(pageLabel);
         labelLayout.addMember(this.txtPageNumber);
         labelLayout.addMember(this.pageMaxLabel);
         labelLayout.addMember(this.offsetRangeLabel);
-        
+
         ToolStrip paginationLayout = new ToolStrip();
         paginationLayout.addStyleName("itemPaginationBar");
         paginationLayout.setHeight(30);
@@ -183,16 +183,16 @@ public class PaginationView implements PaginationListener{
         paginationLayout.setBackgroundImage("");
         paginationLayout.setBackgroundColor("#fafafa");
         paginationLayout.setBorder("0px");
-        
+
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
         paginationLayout.addMember(labelLayout);
         paginationLayout.addMember(this.pageLastButton);
         paginationLayout.addMember(this.pageNextButton);
-        
+
         return paginationLayout;
     }
-    
+
     protected void changePageNumberHandler(){
         String text = this.txtPageNumber.getText();
         try{
@@ -200,11 +200,11 @@ public class PaginationView implements PaginationListener{
             this.paginationController.goToPage(pageNumber);
         }
         catch(Exception ex){
-            
+
         }
     }
-    
-    
+
+
     /**
      * Disable all the buttons for the pagination.
      */
@@ -232,7 +232,7 @@ public class PaginationView implements PaginationListener{
         }
         this.txtPageNumber.setEnabled(true);
     }
-    
+
 
     @Override
     public void pageChanged() {
@@ -240,15 +240,15 @@ public class PaginationView implements PaginationListener{
         this.offsetRangeLabel.setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
-    
-    
+
+
     @Override
     public void totalItemChanged() {
         this.pageMaxLabel.setContents("of " + this.paginationController.getMaxPageNumberLabel());
         this.enablePaginationControls();
     }
-    
-    
+
+
     protected void itemsUpdated(long totalItems){
         this.disableAllControls();
         this.paginationController.computeMaxPage(totalItems);

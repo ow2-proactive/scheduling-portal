@@ -57,18 +57,18 @@ public class PaginationModel {
      * The type of item to be paginated.
      */
     private PaginatedItemType itemType;
-    
+
     /**
      * The number of the last page.
      */
     private int maxPage = 0;
-    
+
     /**
      * The total number of items to be displayed without pagination.
      */
     private long totalItems = 0;
-    
-    
+
+
 
     /**
      * Listeners for pagination events.
@@ -178,7 +178,7 @@ public class PaginationModel {
         if(this.totalItems % pageSize != 0){
             this.maxPage++;
         }
-        
+
         for(PaginationListener listener: this.paginationListeners){
             listener.totalItemChanged();
         }

@@ -45,19 +45,19 @@ import com.smartgwt.client.widgets.grid.ListGridRecord;
  */
 public class TaskRecord extends ListGridRecord {
 
-	/**
+    /**
      * the attribute to store the job.
      */
     private static final String TASK_ATTR = "job";
-	
+
 
     public TaskRecord(Task t) {
         setAttribute(TASK_ATTR, t);
     }
 
-    
+
     public static Task getTask(Record record){
-    	return (Task) record.getAttributeAsObject(TASK_ATTR);
+        return (Task) record.getAttributeAsObject(TASK_ATTR);
     }
-    
+
 }

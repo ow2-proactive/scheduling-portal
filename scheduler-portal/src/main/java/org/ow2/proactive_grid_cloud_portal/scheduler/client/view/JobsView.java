@@ -52,11 +52,11 @@ import com.smartgwt.client.widgets.toolbar.ToolStrip;
  * Contains the ListGrid that displays jobs
  */
 public class JobsView extends FilteringGridItemView implements JobsUpdatedListener {
-    
-  
+
+
     private JobsController controller = null;
 
-    
+
     /**
      * @param controller Controller used to create this view
      */
@@ -70,7 +70,7 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
     }
 
     public void jobSubmitted(Job j) {
-        
+
     }
 
     public void jobsUpdated(Map<Integer, Job> jobs) {
@@ -87,7 +87,7 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
         toolbar.setBackgroundImage("");
         toolbar.setBackgroundColor("#fafafa");
         toolbar.setBorder("0px");
-        
+
         return toolbar;
     }
 
@@ -103,17 +103,17 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
         this.itemsGrid.build();
     }
 
-	@Override
-	public void pageChanged() {
-		this.controller.selectJob(null);
-	}
+    @Override
+    public void pageChanged() {
+        this.controller.selectJob(null);
+    }
 
-	@Override
-	public void totalItemChanged() {
-		// TODO Auto-generated method stub
-		
-	}
-    
-    
-    
+    @Override
+    public void totalItemChanged() {
+        // TODO Auto-generated method stub
+
+    }
+
+
+
 }

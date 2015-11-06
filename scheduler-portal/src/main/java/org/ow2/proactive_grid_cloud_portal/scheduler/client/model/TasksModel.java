@@ -49,48 +49,48 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 public class TasksModel {
 
     public static final String PA_REMOTE_CONNECTION = "PA_REMOTE_CONNECTION";
-    
+
     protected List<Task> tasks = null;
     protected boolean tasksDirty = false;
     protected List<RemoteHint> remoteHints = null;
-    
+
     protected Task selectedTask;
-    
+
     protected ArrayList<TaskSelectedListener> tasksSelectedListeners = null;
     protected ArrayList<TasksUpdatedListener> tasksUpdatedListeners = null;
     protected ArrayList<RemoteHintListener> remoteHintListeners = null;
-    
-    
+
+
     protected SchedulerModelImpl parentModel;
-    
+
     protected TasksNavigationModel tasksNavigationModel;
-    
+
     public static class RemoteHint {
         public String taskId;
         public String jobId;
         public String type;
         public String argument;
     }
-    
+
     public TasksModel(SchedulerModelImpl parentModel) {
         this.parentModel = parentModel;
         this.parentModel.setTasksModel(this);
-        
+
         this.initNavigationModel();
-        
+
         this.remoteHints = new ArrayList<RemoteHint>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
         this.remoteHintListeners = new ArrayList<RemoteHintListener>();
         this.tasksSelectedListeners = new ArrayList<TaskSelectedListener>();
     }
-    
-    
+
+
     protected void initNavigationModel(){
         this.tasksNavigationModel = new TasksNavigationModel(this);
     }
-    
-    
-       
+
+
+
     public SchedulerModelImpl getParentModel() {
         return parentModel;
     }
@@ -104,8 +104,8 @@ public class TasksModel {
                 list.tasksUpdating();
         }
     }
-    
-    
+
+
     /**
      * Modifies the tasks set
      * triggers TasksUpdated event
@@ -119,8 +119,8 @@ public class TasksModel {
             list.tasksUpdated(tasks, totalTasks);
         }
     }
-    
-    
+
+
     /**
      * Notify task updated listeners that updating failed
      * 
@@ -150,27 +150,27 @@ public class TasksModel {
     public void setTasksDirty(boolean b) {
         this.tasksDirty = b;
     }
-    
-    
+
+
     public void selectTask(Task task){
-    	this.selectedTask = task;
-    	for(TaskSelectedListener listener: this.tasksSelectedListeners){
-    		if(task == null){
-    			listener.taskUnselected();
-    		}
-    		else{
-    			listener.taskSelected(task);
-    		}
-    	}
+        this.selectedTask = task;
+        for(TaskSelectedListener listener: this.tasksSelectedListeners){
+            if(task == null){
+                listener.taskUnselected();
+            }
+            else{
+                listener.taskSelected(task);
+            }
+        }
     }
-    
-    
+
+
     public Task getSelectedTask() {
-		return selectedTask;
-	}
+        return selectedTask;
+    }
 
 
-	/**
+    /**
      * Add a remote hint
      * will notify listeners if it is well formed
      * 
@@ -197,8 +197,8 @@ public class TasksModel {
             rhl.remoteHintRead(rh);
         }
     }
-    
-    
+
+
     /**
      * Return all the remote hints that have been read so far by the model
      * this corresponds to all log lines containing 'PA_REMOTE_CONNECTION' that
@@ -210,27 +210,27 @@ public class TasksModel {
     public List<RemoteHint> getRemoteHints() {
         return this.remoteHints;
     }
-    
-    
-    
+
+
+
     public void addTasksUpdatedListener(TasksUpdatedListener listener) {
         this.tasksUpdatedListeners.add(listener);
     }
-    
-    
+
+
     public void addRemoteHintListener(RemoteHintListener listener) {
         this.remoteHintListeners.add(listener);
     }
-    
-    
+
+
     public void addTaskSelectedListener(TaskSelectedListener listener){
-    	this.tasksSelectedListeners.add(listener);
+        this.tasksSelectedListeners.add(listener);
     }
 
     public TasksNavigationModel getTasksNavigationModel() {
         return tasksNavigationModel;
     }
-    
+
     public void setTasksNavigationModel(TasksNavigationModel tasksNavigationModel) {
         this.tasksNavigationModel = tasksNavigationModel;
     }

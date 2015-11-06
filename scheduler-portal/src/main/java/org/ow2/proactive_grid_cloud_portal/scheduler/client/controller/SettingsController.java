@@ -54,17 +54,17 @@ public class SettingsController {
      * The scheduler controller.
      */
     protected SchedulerController mainController;
-    
+
     /**
      * The config of the scheduler portal, read from config files.
      */
     protected SchedulerConfig config = SchedulerConfig.get();
-    
-    
+
+
     public SettingsController(SchedulerController mainController){
         this.mainController = mainController;
     }
-    
+
     /**
      * Apply new settings.
      * @param newSettings the form that contains the new settings to be applied.
@@ -74,28 +74,28 @@ public class SettingsController {
         if (!newSettings.validate())
             return;
 
-        
+
         if(setSetting(SchedulerConfig.CLIENT_REFRESH_TIME, 
-                     newSettings.getValueAsString("refreshTime")) || forceRefresh){
+                newSettings.getValueAsString("refreshTime")) || forceRefresh){
             this.mainController.restartTimer();
         }
-        
+
         if(setSetting(SchedulerConfig.LIVELOGS_REFRESH_TIME, 
                 newSettings.getValueAsString("logTime")) || forceRefresh){
             this.mainController.restartLiveTimer();
         }
-        
+
         if(setSetting(SchedulerConfig.JOBS_PAGE_SIZE, 
                 newSettings.getValueAsString("jobPageSize")) || forceRefresh){
             this.mainController.getExecutionController().getJobsController().getPaginationController().firstPage();
         }
-        
+
         if(setSetting(SchedulerConfig.TASKS_PAGE_SIZE, 
                 newSettings.getValueAsString("taskPageSize")) || forceRefresh){
             this.mainController.getTasksController().getTaskNavigationController().getPaginationController().firstPage();
         }
-        
-        
+
+
         boolean tagSuggestionSizeChanged = setSetting(SchedulerConfig.TAG_SUGGESTIONS_SIZE, 
                 newSettings.getValueAsString("tagSuggestionsSize"));
         boolean tagSuggestionsDelayChanged = setSetting(SchedulerConfig.TAG_SUGGESTIONS_DELAY, 
@@ -104,8 +104,8 @@ public class SettingsController {
             this.mainController.getTasksController().getTaskNavigationController().getTagSuggestionOracle().resetTagSuggestions();
         }
     }
-    
-    
+
+
     /**
      * Reset the scheduler portal settings
      * @param formSettings the form that contains the settings to be reset.
@@ -115,9 +115,9 @@ public class SettingsController {
         initForm(formSettings);
         applySettings(formSettings, true);
     }
-    
-    
-    
+
+
+
     public void initForm(DynamicForm formSettings){
         formSettings.setValue("refreshTime", config.getClientRefreshTime());
         formSettings.setValue("logTime", config.getLivelogsRefreshTime());
@@ -126,8 +126,8 @@ public class SettingsController {
         formSettings.setValue("tagSuggestionsSize", config.getTagSuggestionSize());
         formSettings.setValue("tagSuggestionsDelay", config.getTagSuggestionDelay());
     }
-    
-    
+
+
     /**
      * Set the new value of a setting.
      * @param settingName the name of the setting to be set.

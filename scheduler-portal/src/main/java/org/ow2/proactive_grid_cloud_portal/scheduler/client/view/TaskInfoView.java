@@ -50,43 +50,43 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 
 public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener, TasksUpdatedListener, ExecutionDisplayModeListener{
 
-	protected SchedulerController controller;
-	
-	public TaskInfoView(SchedulerController controller, TaskDetailColumnsFactory factory) {
-		super(factory, "No task selected");
-		this.controller = controller;
-		ExecutionsModel executionsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
-		TasksModel tasksCentricModel = executionsModel.getTasksModel();
-		tasksCentricModel.addTaskSelectedListener(this);
-		tasksCentricModel.addTasksUpdatedListener(this);
-		
-		TasksModel taskModel = ((SchedulerModelImpl) controller.getModel()).getTasksModel();
-		taskModel.addTaskSelectedListener(this);
-		taskModel.addTasksUpdatedListener(this);
-		
-		executionsModel.addExecutionsDisplayModeListener(this);
-	}
+    protected SchedulerController controller;
 
-	@Override
-	public void taskSelected(Task task) {
-		this.displayedItem = task;
-		this.displayItem();
-	}
+    public TaskInfoView(SchedulerController controller, TaskDetailColumnsFactory factory) {
+        super(factory, "No task selected");
+        this.controller = controller;
+        ExecutionsModel executionsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
+        TasksModel tasksCentricModel = executionsModel.getTasksModel();
+        tasksCentricModel.addTaskSelectedListener(this);
+        tasksCentricModel.addTasksUpdatedListener(this);
 
-	@Override
-	public void taskUnselected() {
-		this.hideDetails();
-	}
+        TasksModel taskModel = ((SchedulerModelImpl) controller.getModel()).getTasksModel();
+        taskModel.addTaskSelectedListener(this);
+        taskModel.addTasksUpdatedListener(this);
 
-	@Override
-	public void tasksUpdating() {
-		// TODO Auto-generated method stub
-		
-	}
+        executionsModel.addExecutionsDisplayModeListener(this);
+    }
 
-	@Override
-	public void tasksUpdated(List<Task> tasks, long totalTasks) {
-		if (this.displayedItem == null)
+    @Override
+    public void taskSelected(Task task) {
+        this.displayedItem = task;
+        this.displayItem();
+    }
+
+    @Override
+    public void taskUnselected() {
+        this.hideDetails();
+    }
+
+    @Override
+    public void tasksUpdating() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
+        if (this.displayedItem == null)
             return;
 
         for (Task t : tasks) {
@@ -94,24 +94,24 @@ public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener
                 taskSelected(t);
             }
         }
-		
-	}
 
-	@Override
-	public void tasksUpdatedFailure(String message) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	public void modeSwitched(ExecutionListMode mode) {
-		Task task = this.controller.getSelectedTask();
-		if(task == null){
-			this.taskUnselected();
-		}
-		else{
-			this.taskSelected(task);
-		}
-	}
+    @Override
+    public void tasksUpdatedFailure(String message) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        Task task = this.controller.getSelectedTask();
+        if(task == null){
+            this.taskUnselected();
+        }
+        else{
+            this.taskSelected(task);
+        }
+    }
 
 }

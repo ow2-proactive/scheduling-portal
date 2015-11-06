@@ -49,12 +49,12 @@ public class JSONPaginatedTasks{
      * The page of tasks.
      */
     private List<Task> tasks;
-    
+
     /**
      * Total number of tasks without pagination.
      */
     private long totalTasks;
-    
+
     /**
      * Builds a wrapper around a paginated list of tasks.
      * @param tasks
@@ -65,8 +65,8 @@ public class JSONPaginatedTasks{
         this.tasks = tasks;
         this.totalTasks = totalTasks;
     }
-    
-    
+
+
     /**
      * Gets the page of tasks.
      * @return the page of tasks.
@@ -74,7 +74,7 @@ public class JSONPaginatedTasks{
     public List<Task> getTasks() {
         return tasks;
     }
-    
+
     /**
      * Gets the total number of tasks without pagination.
      * @return the total number of tasks without pagination.

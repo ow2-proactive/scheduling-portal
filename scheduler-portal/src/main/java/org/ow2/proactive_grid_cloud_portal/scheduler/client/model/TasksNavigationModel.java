@@ -87,21 +87,21 @@ public class TasksNavigationModel {
 
 
     protected TasksModel parentModel;
-    
-    
+
+
 
     public TasksNavigationModel(TasksModel parentModel) {
         this.parentModel = parentModel;
         this.parentModel.setTasksNavigationModel(this);
-        
+
         this.availableTags = new PatriciaTrie<String>();
         this.paginationModel = new PaginationModel(PaginatedItemType.TASK);
 
         this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
     }
-    
-    
+
+
     public TasksModel getParentModel() {
         return parentModel;
     }
@@ -173,12 +173,12 @@ public class TasksNavigationModel {
         return this.tasksTagFilter;
     }
 
-    
+
     public void resetTagFilter(){
         this.tasksTagFilter = "";
     }
-    
-    
+
+
 
     /**
      * Add a listener to the tags suggestions modifications.

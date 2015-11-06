@@ -74,19 +74,19 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      */
     private CheckboxItem autoRefreshOption;
 
-    
+
     /**
      * The main controller of the application.
      */
     //private SchedulerController schedulerController;
-    
-    
+
+
     /**
      * Controller for the navigation logic.
      */
     protected TasksNavigationController controller;
-    
-    
+
+
 
 
     /**
@@ -181,7 +181,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     }
 
 
-    
+
     @Override
     public void tagSuggestionListUpdated(){
         this.tagSearchTextBox.showSuggestionList();
@@ -213,7 +213,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.tagSearchTextBox.setText("");
         this.tagSearchTextBox.setEnabled(false);
         this.controller.stopNavigation();
-       
+
     }
 
 
@@ -224,8 +224,8 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public TasksPaginationController getTaskPaginationController() {
         return controller.getPaginationController();
     }
-    
-    
+
+
 
     @Override
     public void selectedJobUpdated() {

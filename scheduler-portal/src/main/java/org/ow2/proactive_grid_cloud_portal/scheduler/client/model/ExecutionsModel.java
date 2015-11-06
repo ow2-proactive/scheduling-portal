@@ -46,36 +46,36 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 public class ExecutionsModel {
 
     protected ExecutionListMode mode = ExecutionListMode.JOB_CENTRIC;
-    
+
     protected ArrayList<ExecutionDisplayModeListener> modeListeners;
-    
+
     protected JobsModel jobsModel;
-    
+
     protected TasksCentricModel tasksModel;
-    
+
     protected SchedulerModelImpl parentModel;
-    
-    
+
+
     /**
      * True if the portal fetches my executions only.
      */
     protected boolean fetchMyExecutionsOnly = false;
-    
+
     /**
      * True if the portal fetches the pending executions. 
      */
     protected boolean fetchPending = true;
-    
+
     /**
      * True if the portal fetches the running executions. 
      */
     protected boolean fetchRunning = true;
-    
+
     /**
      * True if the portal fetches the finished executions. 
      */
     protected boolean fetchFinished = true;
-    
+
     public ExecutionsModel(SchedulerModelImpl schedulerModel) {
         this.parentModel = schedulerModel;
         this.modeListeners = new ArrayList<ExecutionDisplayModeListener>();
@@ -91,7 +91,7 @@ public class ExecutionsModel {
             listener.modeSwitched(mode);
         }
     }
-    
+
     public void addExecutionsDisplayModeListener(ExecutionDisplayModeListener listener){
         this.modeListeners.add(listener);
     }
@@ -115,7 +115,7 @@ public class ExecutionsModel {
     public SchedulerModelImpl getParentModel() {
         return parentModel;
     }
-    
+
     /**
      * @return true if the model should only store the executions of the current user
      */

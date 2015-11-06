@@ -63,12 +63,12 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
      */
     public JobInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
         super(factory, "No job selected");
-    	JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         jobsModel.addJobsUpdatedListener(this);
     }
 
-    
+
     public void jobSelected(Job job) {
         this.displayedItem = job;
         this.displayItem();
@@ -92,9 +92,9 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
     }
 
     public void jobUnselected() {
-    	this.hideDetails();
+        this.hideDetails();
     }
-    
+
 
     @Override
     public void selectedJobUpdated() {
@@ -102,10 +102,10 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
     }
 
 
-	@Override
-	public void modeSwitched(ExecutionListMode mode) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

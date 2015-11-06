@@ -50,13 +50,13 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
 
     protected TasksController controller;
 
-    
+
     public TasksCentricView(TasksController controller) {
         this.controller = controller;
         this.controller.getModel().addTasksUpdatedListener(this);
         this.itemName = "tasks";
     }
-    
+
     @Override
     public void tasksUpdating() {
         this.itemUpdating();
@@ -80,7 +80,7 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
     @Override
     protected Layout buildPagination() {
         PaginationController paginationController = this.controller.getTaskNavigationController().getPaginationController();
-    	return this.buildPagination(paginationController);
+        return this.buildPagination(paginationController);
     }
 
     @Override
@@ -90,12 +90,12 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
         this.itemsGrid.build();
     }
 
-	@Override
-	public void pageChanged() {
-		this.controller.selectTask(null);
-	}
+    @Override
+    public void pageChanged() {
+        this.controller.selectTask(null);
+    }
 
-	@Override
-	public void totalItemChanged() {
-	}
+    @Override
+    public void totalItemChanged() {
+    }
 }

@@ -52,28 +52,28 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory{
     public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished time", 50, true, false);
     public static GridColumns PENDING_DURATION_ATTR = new GridColumns("pendingDuration", "Pending duration", 50, true, false);
     public static GridColumns TOTAL_DURATION_ATTR = new GridColumns("totalDuration", "Total duration", 50, true, false);
-    
-    
+
+
     @Override
     public GridColumns[] getColumns() {
-    	return new GridColumns[] {ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, PENDING_TASKS_ATTR, RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR,
-    			SUBMITTED_TIME_ATTR, STARTED_TIME_ATTR, FINISHED_TIME_ATTR, PENDING_DURATION_ATTR, DURATION_ATTR, TOTAL_DURATION_ATTR
-    	};
+        return new GridColumns[] {ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, PENDING_TASKS_ATTR, RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR,
+                SUBMITTED_TIME_ATTR, STARTED_TIME_ATTR, FINISHED_TIME_ATTR, PENDING_DURATION_ATTR, DURATION_ATTR, TOTAL_DURATION_ATTR
+        };
     }
-    
-    
+
+
     @Override
     public void buildRecord(Job item, Record record) {
-    	super.buildCommonRecordAttributes(item, record);
-    	
-    	long submitTime = item.getSubmitTime();
+        super.buildCommonRecordAttributes(item, record);
+
+        long submitTime = item.getSubmitTime();
         long startTime = item.getStartTime();
         long finishTime = item.getFinishTime();
 
         String pendingDuration = "";
         if (startTime > submitTime)
             pendingDuration = Job.formatDuration(startTime - submitTime);
-   
+
         String totalDuration = "";
         if (finishTime > startTime) {
             totalDuration = Job.formatDuration(finishTime - submitTime);
@@ -90,7 +90,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory{
         record.setAttribute(FINISHED_TIME_ATTR.getName(), (finishTime > startTime) ? JSUtil.getTime(finishTime)
                 : "");
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
-        
+
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
     }
 }

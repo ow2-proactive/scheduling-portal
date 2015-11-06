@@ -44,18 +44,18 @@ public abstract class ItemGrid implements Serializable, Comparable<ItemGrid> {
 
     protected long id;
     protected String name;
-    
+
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
     public ItemGrid() {
     }
-    
+
     public ItemGrid(long id, String name) {
         this.id = id;
         this.name = name;
     }
-    
+
     /**
      * Setter of the job ID.
      * @param id the new ID that will be set.
@@ -87,20 +87,20 @@ public abstract class ItemGrid implements Serializable, Comparable<ItemGrid> {
     public String getName() {
         return name;
     }
-    
-    
+
+
     public int compareTo(ItemGrid item) {
         return ((Long) this.id).compareTo(item.getId());
     }
-    
-    
+
+
     @Override
     public int hashCode() {
         return (int) this.id;
     }
-    
-    
-    
+
+
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ItemGrid))

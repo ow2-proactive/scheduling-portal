@@ -51,7 +51,7 @@ public class ExpandTasksColumnsFactory extends TasksColumnsFactory{
     public GridColumns[] getColumns() {
         return new GridColumns[]{HOST_ATTR, START_TIME_ATTR, FINISHED_TIME_ATTR,DESCRIPTION_ATTR};
     }
-    
+
     @Override
     public void buildRecord(Task item, Record record) {
         //DetailViewerRecord record = new DetailViewerRecord();

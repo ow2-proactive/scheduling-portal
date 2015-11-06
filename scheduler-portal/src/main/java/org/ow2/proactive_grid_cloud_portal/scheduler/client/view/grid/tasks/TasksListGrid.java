@@ -87,7 +87,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
      * The controller for this grid.
      */
     protected TasksController controller;
-    
+
     /**
      * The buttons to be shown when remote visu is available for a task.
      */
@@ -95,9 +95,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     /** To avoid opening severial popup on button's click */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
-    
-    
-    
+
+
+
     public TasksListGrid(TasksController controller, TasksColumnsFactory factory, String datasourceNamePrefix) {
         super(factory, datasourceNamePrefix);
         this.controller = controller;
@@ -107,8 +107,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.controller.getModel().addRemoteHintListener(this);
         this.emptyMessage = "No tasks to show.";
     }
-    
-    
+
+
     @Override
     public void build() {
         super.build();
@@ -118,12 +118,12 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.setShowRecordComponents(true);
         this.setShowRecordComponentsByCell(true);
     }
-    
-    
-    
+
+
+
     protected Map<GridColumns, ListGridField> buildListGridField(){
         Map<GridColumns, ListGridField> fields = super.buildListGridField();
-        
+
         ListGridField idField = fields.get(TasksColumnsFactory.ID_ATTR);
         idField.setType(ListGridFieldType.INTEGER);
         idField.setAlign(Alignment.LEFT);
@@ -139,9 +139,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
         return fields;
     }
-    
-    
-    
+
+
+
     @Override
     public void remoteHintRead(RemoteHint hint) {
         for (ListGridRecord rec : this.getRecords()) {
@@ -153,43 +153,43 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     protected TaskRecord updateTaskRecord(Task task){
         return new TaskRecord(task);
     }
-    
-    
-    
+
+
+
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
         Task selectedTask = this.controller.getModel().getSelectedTask();
-        
+
         RecordList data = new RecordList();
         TaskRecord selectedRecord = null;
         for (Task t : tasks) {
-        	TaskRecord record = new TaskRecord(t);
-        	this.columnsFactory.buildRecord(t, record);
-        	data.add(record);
-        	
-        	if(t.equals(selectedTask)){
-        		record.setAttribute("isSelected", true);
-        		selectedRecord = record;
-        	}
+            TaskRecord record = new TaskRecord(t);
+            this.columnsFactory.buildRecord(t, record);
+            data.add(record);
+
+            if(t.equals(selectedTask)){
+                record.setAttribute("isSelected", true);
+                selectedRecord = record;
+            }
         }
 
         this.ds.setTestData(data.toArray());
         applyCurrentLocalFilter();
     }
 
-    
+
     @Override
     public void tasksUpdating() {
     }
-    
+
     @Override
     public void tasksUpdatedFailure(String message) {
     }
 
-    
 
-    
+
+
     @Override
     protected String getCellCSSText(ListGridRecord record, int rowNum, int colNum) {
         String base = super.getCellCSSText(record, rowNum, colNum);
@@ -212,10 +212,10 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
         return base;
     }
-    
-    
-    
-    
+
+
+
+
     @Override
     protected Canvas createRecordComponent(final ListGridRecord record, Integer colNum) {
         String fieldName = this.getFieldName(colNum);
@@ -240,8 +240,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             return null;
         }
     }
-    
-    
+
+
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String taskId = rec.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName());
         String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
@@ -260,8 +260,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             visuButtonsClickHandlers.put(button, clickHandler);
         }
     }
-    
-    
+
+
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {
         final Window window = new Window();
 
@@ -348,12 +348,12 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         return !!(elem.getContext && elem.getContext('2d'));
     }-*/;
 
-   
+
 
     @Override
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
-        
+
         MenuItem restart = new MenuItem("Restart");
         restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
@@ -408,16 +408,16 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         preempt.setEnabled(enabled);
 
         menu.setItems(restart, preempt, kill);
-        
+
     }
 
     @Override
     protected void selectionChangedHandler(SelectionEvent event) {
-    	if (event.getState() && !fetchingData) {
+        if (event.getState() && !fetchingData) {
             Record record = event.getRecord();
             Task task = TaskRecord.getTask(record);
             controller.selectTask(task);
         }
     }
-    
+
 }

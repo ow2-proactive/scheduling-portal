@@ -109,12 +109,12 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
      *
      */
     public static class TagSuggestion implements Suggestion, IsSerializable {
-        
+
         /**
          * The string displayed as a suggestion.
          */
         private String displayString;
-        
+
         /**
          * The string that replace the current text if the suggestion is selected. 
          */
@@ -230,7 +230,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     }
 
 
-   
+
     @Override
     public void jobSelected(Job job) {
         this.resetTagSuggestions();
@@ -241,15 +241,15 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     public void jobUnselected() {
         this.resetTagSuggestions();
     }
-    
-    
+
+
     public void resetTagSuggestions(){
         this.lastRequest = "";
         this.lastRequestTime = -1;
         this.model.clearTagSuggestions();
     }
-    
-    
+
+
     @Override
     public void selectedJobUpdated() {   
     }

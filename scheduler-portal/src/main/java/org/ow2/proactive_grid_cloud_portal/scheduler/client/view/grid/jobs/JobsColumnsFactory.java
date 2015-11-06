@@ -53,16 +53,16 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
     public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true, false);
     public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 100, true, false);
     public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
-    
+
     @Override
     public GridColumns[] getColumns() {
         return new GridColumns[]{ID_ATTR, STATE_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
     }
 
-    
+
     protected void buildCommonRecordAttributes(Job item, Record record){
-    	record.setAttribute(ID_ATTR.getName(), item.getId());
-        
+        record.setAttribute(ID_ATTR.getName(), item.getId());
+
         long duration = -1;
         if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
             duration = item.getFinishTime() - item.getStartTime();
@@ -74,14 +74,14 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(DURATION_ATTR.getName(), duration);
     }
-    
-    
+
+
     @Override
     public void buildRecord(Job item, Record record) {
         buildCommonRecordAttributes(item, record);
-        
+
         float progress = (float) item.getFinishedTasks() / (float) item.getTotalTasks();
         record.setAttribute(PROGRESS_ATTR.getName(), progress);
     }
-    
+
 }

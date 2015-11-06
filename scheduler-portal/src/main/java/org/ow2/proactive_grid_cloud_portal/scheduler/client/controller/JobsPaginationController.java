@@ -49,9 +49,9 @@ import com.smartgwt.client.widgets.layout.Layout;
 public class JobsPaginationController extends PaginationController{
 
     protected JobsController itemsController;
-    
+
     protected JobsPaginationView view;
-    
+
     public JobsPaginationController(JobsController jobsController) {
         this.itemsController = jobsController;
         this.model = new PaginationModel(PaginatedItemType.JOB);
@@ -63,13 +63,13 @@ public class JobsPaginationController extends PaginationController{
     public void fetch(boolean silentFetch) {
         this.itemsController.fetchJobs(silentFetch);
     }
-    
-    
+
+
     @Override
     public boolean hasNext() {
         return this.model.getTotalItems() == this.model.getPageSize();
     }
-    
+
     @Override
     public Layout buildView() {
         this.view = new JobsPaginationView(itemsController);

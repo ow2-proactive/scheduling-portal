@@ -72,39 +72,39 @@ public abstract class ItemsListGrid<I> extends ListGrid{
      * The prefix part of the name of the datasource associated with the grid.
      */
     protected String datasourceNamePrefix;
-    
+
     /**
      * The message to be shown when the grid is empty.
      */
     protected String emptyMessage;
-    
+
     /**
      * A factory that gets the columns list and records.
      */
     protected ColumnsFactory<I> columnsFactory;
-    
+
     /**
      * current filtering criteria, or null
      */
     protected AdvancedCriteria filter = null;
-    
+
     /**
      * data-source: contains the actual data
      */
     protected ItemDS ds = null;
-    
+
     /** To disable selection listener while fetching data */
     protected boolean fetchingData;
-    
-    
+
+
     public ItemsListGrid() {
     }
-    
+
     public ItemsListGrid(ColumnsFactory<I> columnsFactory, String datasourceNamePrefix) {
         this.columnsFactory = columnsFactory;
         this.datasourceNamePrefix = datasourceNamePrefix;
     }
-    
+
     /**
      *  a datasource for the grid.
      * 
@@ -118,15 +118,15 @@ public abstract class ItemsListGrid<I> extends ListGrid{
             setClientOnly(true);
         }
     }
-    
+
     /**
      * Builds the grid, and its associated datasource.
      */
     public void build(){
         this.ds = new ItemDS(this.datasourceNamePrefix + LoginModel.getInstance().getSessionId());
-        
+
         this.setDataSource(this.ds);
-        
+
         this.setCanGroupBy(false);
         this.setCanReorderFields(true);
         this.setCanPickFields(true);
@@ -134,16 +134,16 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         this.setEmptyMessage(this.emptyMessage);
         this.setAutoFetchData(true);
         this.setShowSortNumerals(false);
-        
+
         Collection<ListGridField> fieldsCollection = this.buildListGridField().values();
         ListGridField [] fields = new ListGridField[fieldsCollection.size()];
         this.setFields(fieldsCollection.toArray(fields));
 
         this.setWidth100();
         this.setHeight100();
-        
-        
-     // right click on an entry : popup a menu for job-contextual operations
+
+
+        // right click on an entry : popup a menu for job-contextual operations
         this.addCellContextClickHandler(new CellContextClickHandler() {
             public void onCellContextClick(CellContextClickEvent event) {
                 Menu menu = new Menu();
@@ -169,7 +169,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
             }
         });
     }
-    
+
     /**
      * Builds the fields to be shown in the grid.
      * @return the fields, indexed by their column specification.
@@ -185,7 +185,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         }
         return result;
     }
-    
+
     /**
      * Build the datasource fields
      * @return
@@ -205,20 +205,20 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         }
         return result;
     }
-    
+
     /**
      * Builds the contextual menu when clicking on an item.
      * @param menu
      */
     protected abstract void buildCellContextualMenu(Menu menu);
-    
+
     /**
      * Called when the selection in the grid changed.
      * @param event
      */
     protected abstract void selectionChangedHandler(SelectionEvent event);
-    
-    
+
+
     /**
      * Apply the local filter to the grid.
      * @param filter the filter to be applied.
@@ -227,11 +227,11 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         this.filter = filter;
         applyCurrentLocalFilter();
     }
-    
-   
- // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
+
+
+    // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
     protected void applyCurrentLocalFilter() {
-    	int nbOfItems = this.ds.getTestData().length + 1;
+        int nbOfItems = this.ds.getTestData().length + 1;
         DataSource dataSource = this.getDataSource();
         Integer[] visibleRows = this.getVisibleRows();
 
@@ -239,7 +239,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         request.setStartRow(0);
         request.setEndRow(nbOfItems + visibleRows[1]);
         request.setSortBy(this.getSort());
-        
+
         dataSource.fetchData(this.filter, new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {

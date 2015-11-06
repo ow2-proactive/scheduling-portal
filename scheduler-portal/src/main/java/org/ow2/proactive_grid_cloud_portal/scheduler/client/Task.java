@@ -66,9 +66,9 @@ public class Task implements Serializable, Comparable<Task> {
     private int maxNumberOfExecOnFailure;
     private int numberOfExecOnFailureLeft;
     private int nodeCount;
-    
+
     private long jobId = 0;
-    
+
     private String jobName = "a job";
 
     /**
@@ -282,7 +282,7 @@ public class Task implements Serializable, Comparable<Task> {
     public String getIdName() {
         return "id";
     }
-    
+
 
     public long getJobId() {
         return jobId;
@@ -309,8 +309,8 @@ public class Task implements Serializable, Comparable<Task> {
 
     public boolean equals(Object o) {
         return o instanceof Task && 
-        		this.id == ((Task) o).getId() && 
-        		this.jobId == ((Task) o).getJobId();
+                this.id == ((Task) o).getId() && 
+                this.jobId == ((Task) o).getJobId();
     }
 
     @Override
@@ -342,13 +342,13 @@ public class Task implements Serializable, Comparable<Task> {
         long startTime = (long) taskInfo.get("startTime").isNumber().doubleValue();
         long finishedTime = (long) taskInfo.get("finishedTime").isNumber().doubleValue();
         long executionDuration = (long) taskInfo.get("executionDuration").isNumber().doubleValue();
-        
-        
+
+
         JSONObject jobIdInfo = taskInfo.get("jobId").isObject();
-        
+
         long jobId = (long) jobIdInfo.get("id").isNumber().doubleValue();
         String jobName = jobIdInfo.get("readableName").isString().stringValue();         
-        
+
         String description = "";
         if (jsonTask.containsKey("description")) {
             JSONString desc = jsonTask.get("description").isString();
@@ -379,8 +379,8 @@ public class Task implements Serializable, Comparable<Task> {
         result.setJobName(jobName);
         return result;
     }
-    
-    
+
+
 
     /**
      * @param task
@@ -400,6 +400,6 @@ public class Task implements Serializable, Comparable<Task> {
                 this.startTime == t.getStartTime() && this.finishTime == t.getFinishTime() &&
                 this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
     }
-    
-    
+
+
 }

@@ -58,9 +58,9 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
 
     /** jobs filtering */
     protected Layout filterPane = null;
-    
+
     protected Layout contentPane = null;
-    
+
     protected Img filterButtonLabel = null;
 
 
@@ -68,7 +68,7 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
      * ui panel used to edit filters
      */
     protected FilterBuilder filterBuilder = null;
-    
+
     /**
      * Construct and return the pane used to filter the job's datasource
      *
@@ -76,15 +76,15 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
      */
     public Layout buildFilterPane() {
         Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>"
-            + "Filters apply only to the current page.<br>"
-            + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
-            + "controls to view more results.");
+                + "Filters apply only to the current page.<br>"
+                + "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> "
+                + "controls to view more results.");
         label.setHeight(55);
 
         this.filterPane = new VLayout();
         this.filterPane.setBackgroundColor("#fafafa");
         this.filterPane.addMember(label);
-        
+
         Layout gridFilterPane = new VLayout();
         gridFilterPane.setWidth100();
         gridFilterPane.setHeight100();
@@ -119,7 +119,7 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
 
         gridFilterPane.addMember(filterBuilder);
         gridFilterPane.addMember(buttons);
-        
+
         this.filterPane.setPadding(5);
         this.filterPane.setMembersMargin(10);
         this.filterPane.setOverflow(Overflow.AUTO);
@@ -129,8 +129,8 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
 
         return this.filterPane;
     }
-    
-    
+
+
     protected void toggleFilterPane(){
         if (!filterPane.isVisible()) {
             filterPane.setWidth(490);
@@ -143,8 +143,8 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
             contentPane.hideMember(filterPane);
         }
     }
-    
-    
+
+
     protected Layout buildFilterButton(){
         final VLayout filterButton = new VLayout();
         filterButton.setBackgroundColor("#bfbfbf");
@@ -173,8 +173,8 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
         });
         return filterButton;
     }
-    
-    
+
+
     /**
      * Builds and return the top pane: the jobs list and filtering options
      *
@@ -192,7 +192,7 @@ public abstract class FilteringGridItemView extends AbstractGridItemsView{
         Layout contentGridLayout = super.buildContent();
         Layout filterButton = this.buildFilterButton();
         Layout filterPane = this.buildFilterPane();
-        
+
         contentPane = new HLayout();
         contentPane.setMembers(contentGridLayout, filterButton, filterPane);
 

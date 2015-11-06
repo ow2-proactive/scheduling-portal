@@ -65,26 +65,26 @@ public class TasksController {
 
     /** pending taskUpdate request, or null */
     protected Request taskUpdateRequest = null;
-    
+
     protected TasksNavigationController taskNavigationController;
-    
-    
+
+
     protected TasksModel model;
-    
-    
+
+
     protected AbstractGridItemsView view;
-    
-    
+
+
     protected SchedulerController parentController;
-    
-    
+
+
     public TasksController(SchedulerController parentController) {
         this.parentController = parentController;
     }
-    
-    
-    
-    
+
+
+
+
     public SchedulerController getParentController() {
         return parentController;
     }
@@ -96,13 +96,13 @@ public class TasksController {
         this.view = new TasksView(this);
         return this.view.build();
     }
-    
+
     public Layout rebuildView(){
         this.view = new TasksView(this);
         return this.view.build();
     }
-        
-    
+
+
     public TasksModel getModel() {
         return model;
     }
@@ -113,12 +113,12 @@ public class TasksController {
      */
     public void updateTasks(boolean showUpdating) {
         Job selectedJob = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob();
-        
+
         boolean emptyTaskList = (selectedJob == null);
         if(showUpdating){
             this.model.notifyTasksChanging(emptyTaskList);
         }
-        
+
         if (emptyTaskList) {
             model.setTasks(new ArrayList<Task>(), 0);
         } else {  
@@ -162,8 +162,8 @@ public class TasksController {
             }
         }
     }
-    
-    
+
+
     /**
      * Kill a task within a job 
      * @param jobId job id
@@ -236,8 +236,8 @@ public class TasksController {
             }
         });
     }
-    
-    
+
+
     public TasksNavigationController getTaskNavigationController() {
         return taskNavigationController;
     }
@@ -246,27 +246,27 @@ public class TasksController {
             TasksNavigationController taskNavigationController) {
         this.taskNavigationController = taskNavigationController;
     }
-    
-    
+
+
     public String computeNoVncPageUrl(String taskName){
         String jobId = String.valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }
-    
-    
+
+
     public void resetPendingTasksRequests(){
         if (this.taskUpdateRequest != null) {
             this.taskUpdateRequest.cancel();
             this.taskUpdateRequest = null;
         }
     }
-    
+
     public void updatingTasks(){
         this.model.setTasksDirty(true);
     }
-    
-    
+
+
     /**
      * Select another task.
      *
@@ -275,5 +275,5 @@ public class TasksController {
     public void selectTask(Task task) {
         this.model.selectTask(task);
     }
-    
+
 }

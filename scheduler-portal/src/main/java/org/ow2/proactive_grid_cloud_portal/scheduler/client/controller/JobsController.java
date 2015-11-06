@@ -54,13 +54,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUt
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobRecord;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.data.Record;
-import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.widgets.layout.Layout;
 
 /**
@@ -74,22 +70,22 @@ public class JobsController {
      * Model for the jobs logic.
      */
     protected JobsModel model;
-    
+
     /**
      * Controller for the jobs pagination logic.
      */
     protected JobsPaginationController paginationController;
-    
+
     /**
      * The parent controller of this controller.
      */
     protected ExecutionsController parentController;
-    
+
     /**
      * The view controlled by this controller.
      */
     protected JobsView view;
-    
+
     /**
      * Builds a jobs controller from a parent scheduler controller.
      * @param parentController the parent controller.
@@ -114,8 +110,8 @@ public class JobsController {
     public void setModel(JobsModel model) {
         this.model = model;
     }
-    
-    
+
+
     /**
      * Builds the view controlled by this controller.
      * @return a layout that displays the view.
@@ -124,14 +120,14 @@ public class JobsController {
         ExecutionsModel executionsModel = this.parentController.getModel();
         this.model = new JobsModel(executionsModel);
         executionsModel.setJobsModel(this.model);
-       
+
         this.paginationController = new JobsPaginationController(this);
         this.view = new JobsView(this);
         return this.view.build();
     }
-   
-    
-    
+
+
+
     /**
      * Select another job.
      *
@@ -149,8 +145,8 @@ public class JobsController {
         this.parentController.getTasksController().updatingTasks();
         this.parentController.getParentController().visuFetch(job.getId().toString());
     }
-    
-    
+
+
     /**
      * Pauses the given job, depending its current state
      * 
@@ -247,7 +243,7 @@ public class JobsController {
         });
     }
 
-    
+
 
     /**
      * Apply the specified priority to the given job
@@ -276,8 +272,8 @@ public class JobsController {
             }
         });
     }
-    
-    
+
+
     /**
      * Gets the jobs pagination controller.
      * @return the jobs pagination controller.
@@ -295,7 +291,7 @@ public class JobsController {
         this.paginationController = jobsPaginationController;
     }
 
-    
+
     /**
      * Add a fake submitted job to the list
      * the name is not important, it will be updated
@@ -309,9 +305,9 @@ public class JobsController {
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }
-    
-    
-    
+
+
+
     /**
      * Fetch the complete JobBag from the server,
      * update the local scheduler revision number,
@@ -321,7 +317,7 @@ public class JobsController {
         if(showUpdating){
             model.jobsUpdating();
         }
-        
+
         final long t1 = System.currentTimeMillis();
 
         int offset = paginationController.getModel().getOffset();
@@ -332,7 +328,7 @@ public class JobsController {
         boolean fetchPending = executionModel.isFetchPendingExecutions();
         boolean fetchRunning = executionModel.isFetchRunningExecutions();
         boolean fetchFinished = executionModel.isFetchFinishedExecutions();
-        
+
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, fetchMyJobs,
                 fetchPending, fetchRunning, fetchFinished,
@@ -365,7 +361,7 @@ public class JobsController {
                     Map<Integer, Job> jobs = resultJobs.getJobs();
                     paginationController.computeMaxPage(jobs.size());
                     model.setJobs(jobs, resultJobs.getRevision());
-                    
+
                     int jn = jobs.size();
                     if (jn > 0) {
                         long t = (System.currentTimeMillis() - t1);
@@ -405,6 +401,6 @@ public class JobsController {
             }
         });
     }
-    
-    
+
+
 }

@@ -57,39 +57,39 @@ public class JobsModel {
      * The jobs that are fetched from the server.
      */
     private Map<Integer, Job> jobs = null;
-    
+
     /**
      * The jobs revision. Jobs are updated only if we fetch a greater revision number.
      */
     private long jobsRev = -1;
-    
+
     /**
      * The current selected job.
      */
     private Job selectedJob = null;
-    
-    
-    
+
+
+
     /**
      * Listener for the updates of the jobs list.
      */
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
-    
+
     /**
      * Listener for the job selection changes.
      */
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
-    
+
     /**
      * The parent model.
      */
     private ExecutionsModel parentModel;
-    
+
     /**
      * The model for the job pagination logic.
      */
     private PaginationModel paginationModel;
-    
+
     /**
      * Builds a jobs model from the scheduler parent model.
      * @param parentModel the scheduler parent model.
@@ -99,7 +99,7 @@ public class JobsModel {
         this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
         this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
     }
-    
+
     /**
      * @return local view of all the jobs known by the scheduler server
      */
@@ -113,7 +113,7 @@ public class JobsModel {
     public void emptyJobs() {
         setJobs(null, -1);
     }
-    
+
 
     /**
      * Modifies the local joblist
@@ -138,7 +138,7 @@ public class JobsModel {
             if (empty)
                 listener.jobsUpdating();
         }
-        
+
         if(this.selectedJob != null){
             Job oldSel = this.selectedJob;
             this.selectedJob = jobs.get(oldSel.getId());
@@ -167,7 +167,7 @@ public class JobsModel {
         }
     }
 
-    
+
     /**
      * Notifies that jobs are updating.
      */
@@ -185,7 +185,7 @@ public class JobsModel {
     public PaginationModel getPaginationModel() {
         return paginationModel;
     }
-    
+
     /**
      * Sets the jobs pagination model.
      * @param jobsPaginationModel the jobs pagination model.
@@ -193,7 +193,7 @@ public class JobsModel {
     public void setPaginationModel(PaginationModel jobsPaginationModel) {
         this.paginationModel = jobsPaginationModel;
     }
-    
+
     /**
      * Modifies the Job selection,
      * triggers a JobSelected event
@@ -211,7 +211,7 @@ public class JobsModel {
                 else
                     listener.jobSelected(job);
             }
-            
+
             this.parentModel.getParentModel().getTasksModel().selectTask(null);
         }
     }
@@ -223,8 +223,8 @@ public class JobsModel {
     public Job getSelectedJob() {
         return this.selectedJob;
     }
-    
-    
+
+
     /**
      * @param jobId the Id of a Job
      * @return the corresponding job if known by the Model, or null
@@ -238,15 +238,15 @@ public class JobsModel {
         return null;
     }
 
-   
+
     /**
      * @return the revision id associated with the currently held JobBag
      */
     public long getJobsRevision() {
         return this.jobsRev;
     }
-    
-    
+
+
     /**
      * Add a listener for jobs list updates
      * @param listener a listener for jobs list updates.

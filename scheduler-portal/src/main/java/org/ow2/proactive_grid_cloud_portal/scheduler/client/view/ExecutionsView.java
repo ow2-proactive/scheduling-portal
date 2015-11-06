@@ -54,24 +54,24 @@ import com.smartgwt.client.widgets.layout.SectionStackSection;
 public class ExecutionsView implements ExecutionDisplayModeListener{
 
     protected ExecutionsController controller;
-    
+
     protected Layout jobsPane;
-    
+
     protected Layout tasksPane;
-    
+
     protected CheckboxItem chkMy;
-    
+
     protected CheckboxItem chkPending;
-    
+
     protected CheckboxItem chkRunning;
-    
+
     protected CheckboxItem chkFinished;
-    
+
     public ExecutionsView(ExecutionsController controller) {
         this.controller = controller;
         this.controller.getModel().addExecutionsDisplayModeListener(this);
     }
-    
+
     public SectionStackSection build(){
         this.jobsPane = this.controller.buildJobsView();
         this.tasksPane = this.controller.buildTasksView();
@@ -79,12 +79,12 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
         HLayout panesLayout = new HLayout();
         panesLayout.addMember(jobsPane);
         panesLayout.addMember(tasksPane);
-        
+
         SectionStackSection executionsSection = new SectionStackSection();
         executionsSection.setTitle("Executions list");
         executionsSection.setExpanded(true);
         executionsSection.setItems(panesLayout);
-        
+
         this.tasksPane.hide();
 
         chkMy = new CheckboxItem("myjobs", "My jobs");
@@ -115,7 +115,7 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
                 controller.fetchFinished(chkFinished.getValueAsBoolean());
             }
         });
-        
+
         final SelectItem modeSelect = new SelectItem();
         modeSelect.setValueMap(ExecutionListMode.JOB_CENTRIC.name, ExecutionListMode.TASK_CENTRIC.name);
         modeSelect.setValue(ExecutionListMode.JOB_CENTRIC.name);
@@ -151,8 +151,8 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
 
         return executionsSection;
     }
-    
-    
+
+
     @Override
     public void modeSwitched(ExecutionListMode mode) {
         switch(mode){
@@ -168,6 +168,6 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
             chkMy.setTitle("My tasks");
             chkMy.redraw();
         }
-        
+
     }
 }
