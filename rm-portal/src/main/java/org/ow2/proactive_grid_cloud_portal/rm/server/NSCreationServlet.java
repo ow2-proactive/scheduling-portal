@@ -58,14 +58,15 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 /**
  * NS Creation requires reading one or multiple files from the client,
  * which cannot be done client-side
- * 
- * @author mschnoor
  *
+ * @author ActiveEon Team
  */
 @SuppressWarnings("serial")
 public class NSCreationServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NSCreationServlet.class);
+
+    public static final int MAX_UPLOAD_SIZE = 1048576; // in Bytes
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -83,36 +84,39 @@ public class NSCreationServlet extends HttpServlet {
         String callbackName = "";
         String nsName = "";
         String infra = "";
-        ArrayList<String> infraParams = new ArrayList<String>();
-        ArrayList<String> infraFileParams = new ArrayList<String>();
         String policy = "";
-        ArrayList<String> policyParams = new ArrayList<String>();
-        ArrayList<String> policyFileParams = new ArrayList<String>();
-        boolean readingInfraParams = false, readingPolicyParams = false;
+
+        ArrayList<String> infraParams = new ArrayList<>();
+        ArrayList<String> infraFileParams = new ArrayList<>();
+        ArrayList<String> policyParams = new ArrayList<>();
+        ArrayList<String> policyFileParams = new ArrayList<>();
+
+        boolean readingInfraParams = false;
+        boolean readingPolicyParams = false;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
             factory.setSizeThreshold(4096);
             factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(1000000);
+            upload.setSizeMax(MAX_UPLOAD_SIZE);
 
             List<?> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
                 FileItem fi = (FileItem) i.next();
+                String fieldName = fi.getFieldName();
                 if (fi.isFormField()) {
-
-                    if (fi.getFieldName().equals("sessionId")) {
+                    if (fieldName.equals("sessionId")) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("nsCallback")) {
+                    } else if (fieldName.equals("nsCallback")) {
                         callbackName = fi.getString();
-                    } else if (fi.getFieldName().equals("nsName")) {
+                    } else if (fieldName.equals("nsName")) {
                         nsName = fi.getString();
-                    } else if (fi.getFieldName().equals("infra")) {
+                    } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
-                    } else if (fi.getFieldName().equals("policy")) {
+                    } else if (fieldName.equals("policy")) {
                         policy = fi.getString();
                         readingPolicyParams = true;
                         readingInfraParams = false;
@@ -121,7 +125,7 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (readingPolicyParams) {
                         policyParams.add(fi.getString());
                     } else {
-                        LOGGER.warn("unexpected param " + fi.getFieldName());
+                        LOGGER.warn("Unexpected param " + fieldName);
                     }
                 } else {
                     if (readingInfraParams) {
@@ -131,7 +135,7 @@ public class NSCreationServlet extends HttpServlet {
                         byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("unexpected param " + fi.getFieldName());
+                        LOGGER.warn("Unexpected param " + fieldName);
                     }
                 }
             }
@@ -143,47 +147,60 @@ public class NSCreationServlet extends HttpServlet {
             } else if (infra.length() == 0 || infra.equals("undefined")) {
                 failFast = "No Infrastructure selected";
             }
+
             if (failFast != null) {
-                throw new RestServerException("{ \"errorMessage\" : \"" + failFast + "\" } ");
+                throw new RestServerException(failFast);
             }
 
-            String[] infAr = infraParams.toArray(new String[infraParams.size()]);
-            String[] polAr = policyParams.toArray(new String[policyParams.size()]);
-            String[] infFileAr = infraFileParams.toArray(new String[infraFileParams.size()]);
-            String[] polFileAr = policyFileParams.toArray(new String[policyFileParams.size()]);
+            String jsonResult =
+                    ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(
+                            sessionId, nsName, infra,
+                            toArray(infraParams), toArray(infraFileParams),
+                            policy, toArray(policyParams), toArray(policyFileParams));
 
-            String ret = ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(sessionId, nsName, infra,
-                    infAr, infFileAr, policy, polAr, polFileAr);
-
-            if (ret.equals("true")) {
-                ret = "{ \"result\" : true }";
+            if (jsonResult.equals("true")) {
+                jsonResult = createNonEscapedSimpleJsonPair("result", "true");
             }
 
-            /* writing the callback name in as an inlined script,
-             * so that the browser, upon receiving it, will evaluate
-             * the JS and call the function */
-            response.getWriter().write("<script type='text/javascript'>");
-            response.getWriter().write("window.top." + callbackName + "(" + ret + ");");
-            response.getWriter().write("</script>");
-        } catch (RestServerException e) {
-            try {
-                response.getWriter().write("<script type='text/javascript'>");
-                response.getWriter().write("window.top." + callbackName + " (" + e.getMessage() + ")");
-                response.getWriter().write("</script>");
-            } catch (Throwable e1) {
-                LOGGER.warn("Failed to write script back to client", e);
-            }
+            write(response, createJavascriptPayload(callbackName, jsonResult));
         } catch (Throwable t) {
-            try {
-                response.getWriter().write("<script type='text/javascript'>");
-                response.getWriter()
-                        .write(
-                                "window.top." + callbackName + "({ \"errorMessage\" : \"" + t.getMessage() +
-                                    "\" });");
-                response.getWriter().write("</script>");
-            } catch (Throwable e1) {
-                LOGGER.warn("Failed to write script back to client", e1);
-            }
+            write(response,
+                    createJavascriptPayload(
+                            callbackName,
+                            createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
         }
     }
+
+    private void write(HttpServletResponse response, String s) {
+        try {
+            response.getWriter().write(s);
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to write script back to client", t);
+        }
+    }
+
+    private String createEscapedSimpleJsonPair(String key, String value) {
+        return createSimpleJsonPair(key, value, true);
+    }
+
+    private String createNonEscapedSimpleJsonPair(String key, String value) {
+        return createSimpleJsonPair(key, value, false);
+    }
+
+    private String createSimpleJsonPair(String key, String value, boolean escapeValue) {
+        if (escapeValue) {
+            value = "\"" + value + "\"";
+        }
+
+        return "{ \"" + key + "\" : " + value + " }";
+    }
+
+    private String createJavascriptPayload(String callbackName, String json) {
+        return "<script type='text/javascript'>window.opener.focus(); window.opener." + callbackName + "(" + json + "); window.close();</script>";
+    }
+
+    private String[] toArray(ArrayList<String> list) {
+        return list.toArray(new String[list.size()]);
+    }
+
 }
