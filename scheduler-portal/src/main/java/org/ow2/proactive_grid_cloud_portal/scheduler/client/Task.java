@@ -39,7 +39,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -309,7 +308,9 @@ public class Task implements Serializable, Comparable<Task> {
     }
 
     public boolean equals(Object o) {
-        return o instanceof Task && this.id == ((Task) o).getId();
+        return o instanceof Task && 
+        		this.id == ((Task) o).getId() && 
+        		this.jobId == ((Task) o).getJobId();
     }
 
     @Override

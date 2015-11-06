@@ -1,7 +1,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
@@ -77,28 +76,21 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     
     @Override
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        boolean selectedJobRemoved = this.getSelectedRecord() != null;
-        List<Integer> selectedIds = listSelectedJobs();
+        Job selectedJob = this.controller.getModel().getSelectedJob();
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
             JobRecord jobRecord = new JobRecord(j);
             this.columnsFactory.buildRecord(j, jobRecord);
             data.add(jobRecord);
-            boolean isSelectedJob = selectedIds.contains(jobRecord.getAttributeAsInt(JobsColumnsFactory.ID_ATTR.getName()));
-            jobRecord.setAttribute("isSelected", isSelectedJob);
-            if (isSelectedJob) {
-                selectedJobRemoved = false;
+            
+            if(j.equals(selectedJob)){
+            	jobRecord.setAttribute("isSelected", true);
             }
-        }
-
-        if (selectedJobRemoved) {
-            this.controller.selectJob(null);
         }
 
         this.ds.setTestData(data.toArray());
         applyCurrentLocalFilter();
-        
     }
 
     @Override
@@ -123,15 +115,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         }, customErrorHandling);
         applyCurrentLocalFilter();
-    }
-
-    
-    private List<Integer> listSelectedJobs() {
-        List<Integer> selectedIds = new ArrayList<Integer>();
-        for (ListGridRecord listGridRecord : this.getSelectedRecords()) {
-            selectedIds.add(listGridRecord.getAttributeAsInt(JobsColumnsFactory.ID_ATTR.getName()));
-        }
-        return selectedIds;
     }
     
     
@@ -188,7 +171,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         progressField.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
                 int pw = getFieldWidth(JobsColumnsFactory.PROGRESS_ATTR.getName());
-                float progress = Float.parseFloat(value.toString());
+                float progress = 0;
+                if(value != null){
+                	progress = Float.parseFloat(value.toString());
+                }
                 int bx = new Double(Math.ceil(pw * progress)).intValue() - 601;
                 String progressUrl = SchedulerImages.instance.progressbar().getSafeUri().asString();
 
@@ -209,8 +195,13 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         ListGridField duration = fields.get(JobsColumnsFactory.DURATION_ATTR);
         duration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                long l = Long.parseLong(value.toString());
-                return Job.formatDuration(l);
+                if(value != null){
+                	long l = Long.parseLong(value.toString());
+                	return Job.formatDuration(l);
+                }
+                else{
+                	return "";
+                }
             }
         });
         

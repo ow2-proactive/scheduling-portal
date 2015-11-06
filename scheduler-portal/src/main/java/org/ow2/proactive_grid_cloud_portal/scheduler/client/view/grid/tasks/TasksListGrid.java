@@ -19,6 +19,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListG
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
@@ -77,6 +78,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     public void build() {
         super.build();
         this.setSelectionType(SelectionStyle.SINGLE);
+        this.setSelectionProperty("isSelected");
         this.sort(TasksColumnsFactory.ID_ATTR.getName(), SortDirection.ASCENDING);
         this.setShowRecordComponents(true);
         this.setShowRecordComponentsByCell(true);
@@ -122,17 +124,22 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
-
-        TaskRecord[] data = new TaskRecord[tasks.size()];
-        int i = 0;
+        Task selectedTask = this.controller.getModel().getSelectedTask();
+        
+        RecordList data = new RecordList();
+        TaskRecord selectedRecord = null;
         for (Task t : tasks) {
-        	data[i] = new TaskRecord(t);
-        	this.columnsFactory.buildRecord(t, data[i]);
-            i++;
+        	TaskRecord record = new TaskRecord(t);
+        	this.columnsFactory.buildRecord(t, record);
+        	data.add(record);
+        	
+        	if(t.equals(selectedTask)){
+        		record.setAttribute("isSelected", true);
+        		selectedRecord = record;
+        	}
         }
 
-        this.invalidateCache();
-        this.ds.setTestData(data);
+        this.ds.setTestData(data.toArray());
         applyCurrentLocalFilter();
     }
 

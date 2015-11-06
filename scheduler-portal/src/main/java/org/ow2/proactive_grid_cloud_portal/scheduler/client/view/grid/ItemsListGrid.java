@@ -17,7 +17,6 @@ import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
-import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.CellContextClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellContextClickHandler;
 import com.smartgwt.client.widgets.grid.events.CellOutEvent;
@@ -209,14 +208,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         dataSource.fetchData(this.filter, new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {
-                ListGridRecord[] keepSelectedRecords = getSelectedRecords();
                 setData(new RecordList(response.getData()));
-                // manual reset of selection (otherwise it is lost)
-                if (keepSelectedRecords != null) {
-                    fetchingData = true;
-                    selectRecords(keepSelectedRecords);
-                    fetchingData = false;
-                }
             }
 
         }, request);

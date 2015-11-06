@@ -54,9 +54,13 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUt
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobRecord;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.widgets.layout.Layout;
 
 /**
@@ -401,4 +405,6 @@ public class JobsController {
             }
         });
     }
+    
+    
 }
