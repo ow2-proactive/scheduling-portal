@@ -32,6 +32,7 @@ public class TasksCentricController extends TasksController{
     public Layout buildView() {
         SchedulerModelImpl schedulerModel = (SchedulerModelImpl) this.parentController.getModel();
         this.model = new TasksCentricModel(schedulerModel);
+        schedulerModel.getExecutionsModel().setTasksModel((TasksCentricModel) this.model);
         this.taskNavigationController = new TasksCentricNavigationController(this);
         this.view = new TasksCentricView(this);
         return this.view.build();

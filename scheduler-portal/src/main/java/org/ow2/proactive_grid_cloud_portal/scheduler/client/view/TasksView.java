@@ -40,6 +40,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandTasksColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandableTasksColumnsFactory;
@@ -84,7 +85,8 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
     
     protected Layout buildPagination(){
-        return this.controller.getTaskNavigationController().getPaginationController().buildView();
+        PaginationController paginationController = this.controller.getTaskNavigationController().getPaginationController();
+        return buildPagination(paginationController);
     }
     
     protected void buildGrid(){
@@ -93,4 +95,19 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
         this.itemsGrid = new ExpandableTasksListGrid(this.controller, expandableFactory, expandFactory, "tasksDS_");
         this.itemsGrid.build();
     }
+
+
+	@Override
+	public void pageChanged() {
+		this.controller.selectTask(null);
+	}
+
+
+	@Override
+	public void totalItemChanged() {
+	
+	}
+    
+    
+    
 }

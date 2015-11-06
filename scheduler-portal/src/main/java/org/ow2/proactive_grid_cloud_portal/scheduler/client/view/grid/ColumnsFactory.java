@@ -20,13 +20,8 @@ public interface ColumnsFactory<I> {
     /**
      * Builds a record from a given item according to the columns provided by this factory.
      * @param item the item used to build a new record.
-     * @return the new record.
+     * @param record the new record to be built with new attributes.
      */
-    public Record buildRecord(I item);
+    public void buildRecord(I item, Record record);
     
-    /**
-     * Get the name of the column used as a primary key for the record built by this factory.
-     * @return
-     */
-    public String getPrimaryKeyName();
 }

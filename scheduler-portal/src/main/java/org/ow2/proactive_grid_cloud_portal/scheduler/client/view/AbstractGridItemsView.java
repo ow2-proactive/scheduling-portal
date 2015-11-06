@@ -1,5 +1,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
 import com.smartgwt.client.types.Alignment;
@@ -8,7 +10,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
-public abstract class AbstractGridItemsView {
+public abstract class AbstractGridItemsView implements PaginationListener{
 
     /**
      * the Grid widget displayed in the view
@@ -50,6 +52,12 @@ public abstract class AbstractGridItemsView {
     protected abstract Layout buildToolbar();
     
     protected abstract Layout buildPagination();
+    
+    protected Layout buildPagination(PaginationController paginationController){
+    	Layout result = paginationController.buildView();
+        paginationController.getModel().addPaginationListener(this);
+        return result;
+    }
     
     protected abstract void buildGrid();
     

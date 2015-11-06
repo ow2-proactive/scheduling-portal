@@ -3,20 +3,33 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksCentricColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
 
-public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener, TasksUpdatedListener{
+public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener, TasksUpdatedListener, ExecutionDisplayModeListener{
 
-	public TaskInfoView(SchedulerController controller, TasksCentricColumnsFactory factory) {
-		super(factory);
-		TasksModel tasksModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getTasksModel();
-		tasksModel.addTaskSelectedListener(this);
-		tasksModel.addTasksUpdatedListener(this);
+	protected SchedulerController controller;
+	
+	public TaskInfoView(SchedulerController controller, TaskDetailColumnsFactory factory) {
+		super(factory, "No task selected");
+		this.controller = controller;
+		ExecutionsModel executionsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
+		TasksModel tasksCentricModel = executionsModel.getTasksModel();
+		tasksCentricModel.addTaskSelectedListener(this);
+		tasksCentricModel.addTasksUpdatedListener(this);
+		
+		TasksModel taskModel = ((SchedulerModelImpl) controller.getModel()).getTasksModel();
+		taskModel.addTaskSelectedListener(this);
+		taskModel.addTasksUpdatedListener(this);
+		
+		executionsModel.addExecutionsDisplayModeListener(this);
 	}
 
 	@Override
@@ -55,5 +68,15 @@ public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener
 		
 	}
 
-	
+	@Override
+	public void modeSwitched(ExecutionListMode mode) {
+		Task task = this.controller.getSelectedTask();
+		if(task == null){
+			this.taskUnselected();
+		}
+		else{
+			this.taskSelected(task);
+		}
+	}
+
 }

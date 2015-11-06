@@ -56,6 +56,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -1152,4 +1153,16 @@ public class SchedulerController extends Controller implements UncaughtException
         return executionController;
     }
     
+    
+    public Task getSelectedTask(){
+    	ExecutionsModel executionsModel = this.model.getExecutionsModel();
+    	switch(executionsModel.getMode()){
+    	case JOB_CENTRIC:
+    		return this.model.getTasksModel().getSelectedTask();
+    	case TASK_CENTRIC:
+    		return executionsModel.getTasksModel().getSelectedTask();
+    	default:
+    		return null;
+    	}
+    }
 }

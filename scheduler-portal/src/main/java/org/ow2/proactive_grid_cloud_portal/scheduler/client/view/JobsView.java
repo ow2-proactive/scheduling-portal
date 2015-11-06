@@ -41,6 +41,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.smartgwt.client.widgets.layout.Layout;
@@ -92,7 +93,8 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
 
     @Override
     protected Layout buildPagination() {
-        return this.controller.getPaginationController().buildView();
+        PaginationController paginationController =  this.controller.getPaginationController();
+        return this.buildPagination(paginationController);
     }
 
     @Override
@@ -100,4 +102,18 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
         this.itemsGrid = new JobsListGrid(this.controller);
         this.itemsGrid.build();
     }
+
+	@Override
+	public void pageChanged() {
+		this.controller.selectJob(null);
+	}
+
+	@Override
+	public void totalItemChanged() {
+		// TODO Auto-generated method stub
+		
+	}
+    
+    
+    
 }

@@ -34,14 +34,18 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 
 
@@ -49,16 +53,16 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFac
  * Displays detailed info about the currently selected job
  *
  *
- * @author mschnoor
+ * @author the activeeon team
  *
  */
-public class JobInfoView extends InfoView<Job> implements JobSelectedListener, JobsUpdatedListener {
+public class JobInfoView extends InfoView<Job> implements JobSelectedListener, JobsUpdatedListener, ExecutionDisplayModeListener {
 
     /**
      * @param controller the Controller that created this View
      */
     public JobInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
-        super(factory);
+        super(factory, "No job selected");
     	JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         jobsModel.addJobsUpdatedListener(this);
@@ -96,5 +100,12 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
     public void selectedJobUpdated() {
         // TODO Auto-generated method stub
     }
+
+
+	@Override
+	public void modeSwitched(ExecutionListMode mode) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

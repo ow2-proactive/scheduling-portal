@@ -46,8 +46,7 @@ public class ExpandableTasksListGrid extends TasksListGrid{
         }
         this.expandRecord = record;
 
-        TaskRecord rec = (TaskRecord) record;
-        Task t = rec.getTask();
+        Task t = TaskRecord.getTask(record);
 
         DetailViewer detail = new DetailViewer();
         detail.setWidth100();
@@ -62,7 +61,8 @@ public class ExpandableTasksListGrid extends TasksListGrid{
 
         detail.setFields(fields);
 
-        DetailViewerRecord detailRecord = (DetailViewerRecord) this.expandTasksColumnsFactory.buildRecord(t);
+        DetailViewerRecord detailRecord = new DetailViewerRecord();
+        this.expandTasksColumnsFactory.buildRecord(t, detailRecord);
         detail.setData(new DetailViewerRecord[]{detailRecord});
 
         VLayout layout = new VLayout();

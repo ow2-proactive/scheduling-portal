@@ -133,21 +133,17 @@ public class JobsController {
      *
      * @param jobId of the new job selection. you can use null to cancel the current selection
      */
-    public void selectJob(final String jobId) {
-        int id = 0;
-        if (jobId != null)
-            id = Integer.parseInt(jobId);
-
+    public void selectJob(Job job) {
         Job selectedJob = model.getSelectedJob();
         // cancel async requests relative to the old selection
-        if (selectedJob == null || id != selectedJob.getId()) {
+        if (!job.equals(selectedJob)) {
             this.parentController.getParentController().cancelOutputRequests();
             this.parentController.getParentController().resetPendingTasksRequests();
         }
 
-        this.model.selectJob(id);
+        this.model.selectJob(job);
         this.parentController.getTasksController().updatingTasks();
-        this.parentController.getParentController().visuFetch(jobId);
+        this.parentController.getParentController().visuFetch(job.getId().toString());
     }
     
     

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksCentricColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksListGrid;
@@ -43,7 +44,8 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
 
     @Override
     protected Layout buildPagination() {
-        return this.controller.getTaskNavigationController().getPaginationController().buildView();
+        PaginationController paginationController = this.controller.getTaskNavigationController().getPaginationController();
+    	return this.buildPagination(paginationController);
     }
 
     @Override
@@ -52,4 +54,13 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
         this.itemsGrid = new TasksListGrid(this.controller, factory, "tasksCentricDS_");
         this.itemsGrid.build();
     }
+
+	@Override
+	public void pageChanged() {
+		this.controller.selectTask(null);
+	}
+
+	@Override
+	public void totalItemChanged() {
+	}
 }

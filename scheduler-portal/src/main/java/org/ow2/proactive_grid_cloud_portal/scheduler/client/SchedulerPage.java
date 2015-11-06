@@ -48,9 +48,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.E
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksCentricColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -601,7 +602,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         jobinfoTab.setPane(this.jobInfo.build());
         
         Tab taskinfoTab = new Tab("Task Info", SchedulerImages.instance.info_16().getSafeUri().asString());
-        this.taskInfo = new TaskInfoView(this.controller, new TasksCentricColumnsFactory());
+        this.taskInfo = new TaskInfoView(this.controller, new TaskDetailColumnsFactory());
         taskinfoTab.setPane(this.taskInfo.build());
 
         Tab outputTab = new Tab("Output", SchedulerImages.instance.output_16().getSafeUri().asString());

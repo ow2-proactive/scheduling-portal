@@ -16,7 +16,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListG
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
-import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.types.Alignment;
@@ -68,9 +67,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     
     protected void selectionChangedHandler(SelectionEvent event){
         if (event.getState() && !fetchingData) {
-            Record record = event.getRecord();
-            String attName = JobsColumnsFactory.ID_ATTR.getName();
-            controller.selectJob(Integer.toString(record.getAttributeAsInt(attName)));
+            ListGridRecord record = event.getRecord();
+            Job job = JobRecord.getJob(record);
+            controller.selectJob(job);
         }
     }
     
@@ -83,7 +82,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
-            Record jobRecord = this.columnsFactory.buildRecord(j);
+            JobRecord jobRecord = new JobRecord(j);
+            this.columnsFactory.buildRecord(j, jobRecord);
             data.add(jobRecord);
             boolean isSelectedJob = selectedIds.contains(jobRecord.getAttributeAsInt(JobsColumnsFactory.ID_ATTR.getName()));
             jobRecord.setAttribute("isSelected", isSelectedJob);

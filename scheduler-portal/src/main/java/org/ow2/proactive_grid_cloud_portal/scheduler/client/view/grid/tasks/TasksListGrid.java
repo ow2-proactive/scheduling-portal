@@ -123,17 +123,17 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
 
-        Record[] data = new TaskRecord[tasks.size()];
+        TaskRecord[] data = new TaskRecord[tasks.size()];
         int i = 0;
         for (Task t : tasks) {
-            data[i] = this.columnsFactory.buildRecord(t);
+        	data[i] = new TaskRecord(t);
+        	this.columnsFactory.buildRecord(t, data[i]);
             i++;
         }
 
         this.invalidateCache();
         this.ds.setTestData(data);
         applyCurrentLocalFilter();
-        
     }
 
     
@@ -371,6 +371,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     @Override
     protected void selectionChangedHandler(SelectionEvent event) {
+    	if (event.getState() && !fetchingData) {
+            Record record = event.getRecord();
+            Task task = TaskRecord.getTask(record);
+            controller.selectTask(task);
+        }
     }
     
 }

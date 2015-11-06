@@ -22,8 +22,12 @@ public class InfoView<T> {
     
     protected ColumnsFactory<T> factory;
     
-    public InfoView(ColumnsFactory<T> factory) {
+    protected String emptyMessage;
+    
+    
+    public InfoView(ColumnsFactory<T> factory, String emptyMessage) {
 		this.factory = factory;
+		this.emptyMessage = emptyMessage;
 	}
     
     
@@ -36,7 +40,7 @@ public class InfoView<T> {
         root.setWidth100();
         root.setHeight100();
 
-        this.label = new Label("No job selected.");
+        this.label = new Label(this.emptyMessage);
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
@@ -69,7 +73,8 @@ public class InfoView<T> {
     
     public void displayItem(){
     	DetailViewerRecord [] records = new DetailViewerRecord[1];
-        records[0] = (DetailViewerRecord) this.factory.buildRecord(this.displayedItem);
+        records[0] = new DetailViewerRecord();
+        this.factory.buildRecord(this.displayedItem, records[0]);
 
         this.details.setData(records);
 

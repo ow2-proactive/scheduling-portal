@@ -11,24 +11,23 @@ import com.smartgwt.client.data.Record;
  */
 public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "id", 80, true);
-    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true);
-    public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true);
-    public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true);
-    public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true);
-    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 100, true);
-    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true);
+    public static GridColumns ID_ATTR = new GridColumns("id", "id", 80, true, true);
+    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true, false);
+    public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true, false);
+    public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true, false);
+    public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true, false);
+    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 100, true, false);
+    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
     
     @Override
     public GridColumns[] getColumns() {
         return new GridColumns[]{ID_ATTR, STATE_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
     }
 
-    @Override
-    public Record buildRecord(Job item) {
-        JobRecord record =  new JobRecord(item);
-        record.setAttribute(ID_ATTR.getName(), item.getId());
-        float progress = (float) item.getFinishedTasks() / (float) item.getTotalTasks();
+    
+    protected void buildCommonRecordAttributes(Job item, Record record){
+    	record.setAttribute(ID_ATTR.getName(), item.getId());
+        
         long duration = -1;
         if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
             duration = item.getFinishTime() - item.getStartTime();
@@ -39,15 +38,15 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(DURATION_ATTR.getName(), duration);
-        record.setAttribute(PROGRESS_ATTR.getName(), progress);
-        
-        return record;
     }
     
     
     @Override
-    public String getPrimaryKeyName() {
-        return ID_ATTR.getName();
+    public void buildRecord(Job item, Record record) {
+        buildCommonRecordAttributes(item, record);
+        
+        float progress = (float) item.getFinishedTasks() / (float) item.getTotalTasks();
+        record.setAttribute(PROGRESS_ATTR.getName(), progress);
     }
     
 }

@@ -118,12 +118,22 @@ public class TasksModel {
     public void selectTask(Task task){
     	this.selectedTask = task;
     	for(TaskSelectedListener listener: this.tasksSelectedListeners){
-    		listener.taskSelected(task);
+    		if(task == null){
+    			listener.taskUnselected();
+    		}
+    		else{
+    			listener.taskSelected(task);
+    		}
     	}
     }
     
     
-    /**
+    public Task getSelectedTask() {
+		return selectedTask;
+	}
+
+
+	/**
      * Add a remote hint
      * will notify listeners if it is well formed
      * 

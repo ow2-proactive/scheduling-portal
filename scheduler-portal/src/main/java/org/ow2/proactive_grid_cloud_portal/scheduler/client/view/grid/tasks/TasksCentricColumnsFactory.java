@@ -12,8 +12,8 @@ import com.smartgwt.client.data.Record;
  */
 public class TasksCentricColumnsFactory extends TasksColumnsFactory{
 
-    public static GridColumns JOB_ID_ATTR = new GridColumns("jobId", "Job Id", 60, true);
-    public static GridColumns JOB_NAME_ATTR = new GridColumns("jobName", "Job Name", 100, true);
+    public static GridColumns JOB_ID_ATTR = new GridColumns("jobId", "Job Id", 60, true, true);
+    public static GridColumns JOB_NAME_ATTR = new GridColumns("jobName", "Job Name", 100, true, false);
     
     @Override
     public GridColumns[] getColumns() {
@@ -23,11 +23,12 @@ public class TasksCentricColumnsFactory extends TasksColumnsFactory{
     }
 
     @Override
-    public Record buildRecord(Task item) {
-        Record record = super.buildRecord(item);
+    public void buildRecord(Task item, Record record) {
+        super.buildRecord(item, record);
         buildDetailsColumns(record, item);
         record.setAttribute(JOB_ID_ATTR.getName(), item.getJobId());
         record.setAttribute(JOB_NAME_ATTR.getName(), item.getJobName());
-        return record;
     }
+    
+    
 }

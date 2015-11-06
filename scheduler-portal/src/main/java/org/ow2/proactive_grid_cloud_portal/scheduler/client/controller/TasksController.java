@@ -218,9 +218,6 @@ public class TasksController {
     }
     
     
-
-    
-    
     public void resetPendingTasksRequests(){
         if (this.taskUpdateRequest != null) {
             this.taskUpdateRequest.cancel();
@@ -231,4 +228,15 @@ public class TasksController {
     public void updatingTasks(){
         this.model.setTasksDirty(true);
     }
+    
+    
+    /**
+     * Select another task.
+     *
+     * @param taskId of the new job selection. you can use null to cancel the current selection
+     */
+    public void selectTask(Task task) {
+        this.model.selectTask(task);
+    }
+    
 }

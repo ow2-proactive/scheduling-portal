@@ -160,7 +160,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         GridColumns [] columns = this.columnsFactory.getColumns();
         DataSourceField [] result = new DataSourceField[columns.length];
         for(int i = 0; i < columns.length; i++){
-            if(columns[i].getName().equals(this.columnsFactory.getPrimaryKeyName())){
+            if(columns[i].isPrimaryKey()){
                 result[i] = new DataSourceIntegerField(columns[i].getName());
                 result[i].setPrimaryKey(true);
             }
@@ -205,7 +205,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         request.setStartRow(0);
         request.setEndRow(nbOfItems + visibleRows[1]);
         request.setSortBy(this.getSort());
-
+        
         dataSource.fetchData(this.filter, new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {

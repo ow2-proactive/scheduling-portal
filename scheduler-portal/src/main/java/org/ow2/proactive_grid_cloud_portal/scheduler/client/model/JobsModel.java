@@ -199,25 +199,20 @@ public class JobsModel {
      * triggers a JobSelected event
      *
      */
-    public void selectJob(int jobId) {
-        Job j = null;
-        // find the job
-        for (Job it : this.jobs.values()) {
-            if (it.getId() == jobId) {
-                j = it;
-            }
-        }
-        boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(j);
-        this.selectedJob = j;
+    public void selectJob(Job job) {
+        boolean selChanged = this.selectedJob == null || !this.selectedJob.equals(job);
+        this.selectedJob = job;
 
         if(selChanged){
             // notify job selection listeners
             for (JobSelectedListener listener : this.jobSelectedListeners) {
-                if (j == null)
+                if (job == null)
                     listener.jobUnselected();
                 else
-                    listener.jobSelected(j);
+                    listener.jobSelected(job);
             }
+            
+            this.parentModel.getParentModel().getTasksModel().selectTask(null);
         }
     }
 

@@ -27,17 +27,24 @@ public class GridColumns{
      */
     protected final boolean hasData;
     
-    public GridColumns(String name, String title, int width, boolean hasData) {
+    /**
+     * True if this column is part of the primary key.
+     */
+    protected final boolean isPrimaryKey;
+    
+    
+    public GridColumns(String name, String title, int width, boolean hasData, boolean isPrimaryKey) {
         this.name = name;
         this.title = title;
         this.width = width;
         this.hasData = hasData;
+        this.isPrimaryKey = isPrimaryKey;
     }
 
     public String getName() {return name;}
     public String getTitle() {return title;}
     public int getWidth() {return width;}
     public boolean hasData() {return hasData;}
-    
+    public boolean isPrimaryKey() {return isPrimaryKey;}
  
 }

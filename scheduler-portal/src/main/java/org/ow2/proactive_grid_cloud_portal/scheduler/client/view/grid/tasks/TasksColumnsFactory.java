@@ -14,19 +14,19 @@ import com.smartgwt.client.data.Record;
  */
 public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 60, true);
-    public static GridColumns STATUS_ATTR = new GridColumns("status", "Status", 80, true);
-    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", 100, true);
-    public static GridColumns TAG_ATTR = new GridColumns("tag", "Tag", 100, true);
-    public static GridColumns EXEC_DURATION_ATTR = new GridColumns("execDuration", "Duration", 80, true);
-    public static GridColumns NODE_COUNT_ATTR = new GridColumns("nodeCount", "Nodes", 40, true);
-    public static GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 60, true);
-    public static GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Failures", 60, true);
-    public static GridColumns HOST_ATTR = new GridColumns("host", "Host", 100, true);
-    public static GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 100, true);
-    public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true);
-    public static GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", 100, true);
-    public static GridColumns VISU_ATTR = new GridColumns("visu", " ", 20, false);
+    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 60, true, true);
+    public static GridColumns STATUS_ATTR = new GridColumns("status", "Status", 80, true, false);
+    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", 100, true, false);
+    public static GridColumns TAG_ATTR = new GridColumns("tag", "Tag", 100, true, false);
+    public static GridColumns EXEC_DURATION_ATTR = new GridColumns("execDuration", "Duration", 80, true, false);
+    public static GridColumns NODE_COUNT_ATTR = new GridColumns("nodeCount", "Nodes", 40, true, false);
+    public static GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 60, true, false);
+    public static GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Failures", 60, true, false);
+    public static GridColumns HOST_ATTR = new GridColumns("host", "Host", 100, true, false);
+    public static GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 100, true, false);
+    public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true, false);
+    public static GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", 100, true, false);
+    public static GridColumns VISU_ATTR = new GridColumns("visu", " ", 20, false, false);
     
     @Override
     public GridColumns[] getColumns() {
@@ -37,9 +37,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
 
     
     @Override
-    public Record buildRecord(Task item) {
-        TaskRecord record = new TaskRecord(item);
-        
+    public void buildRecord(Task item, Record record) {
         record.setAttribute(ID_ATTR.getName(), item.getId().longValue());
         String execs = (item.getMaxNumberOfExec() - item.getNumberOfExecLeft()) + " / " +
                 item.getMaxNumberOfExec();
@@ -57,13 +55,6 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
         record.setAttribute(EXECUTIONS_ATTR.getName(), execs);
         record.setAttribute(NODE_FAILURE_ATTR.getName(), fails);
         record.setAttribute(NODE_COUNT_ATTR.getName(), item.getNodeCount());
-        
-        return record;
-    }
-
-    @Override
-    public String getPrimaryKeyName() {
-        return ID_ATTR.getName();
     }
 
     
