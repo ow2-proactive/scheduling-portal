@@ -42,15 +42,18 @@ import java.util.Map.Entry;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.user.client.Window;
@@ -78,7 +81,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class OutputView implements JobSelectedListener, JobOutputListener, TasksUpdatedListener {
+public class OutputView implements JobSelectedListener, JobOutputListener, TasksUpdatedListener, TaskSelectedListener, ExecutionDisplayModeListener {
 
     private static final String TASKS_ALL = "All Tasks";
 
@@ -103,15 +106,25 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     private int jobId = 0;
     /** true if the log for the current task is live */
     private boolean isLive = false;
+    
+    
+    protected Task task;
 
     private OutputController controller;
 
     public OutputView(OutputController controller) {
         this.controller = controller;
-        JobsModel jobsModel = controller.getParentController().getExecutionController().getJobsController().getModel();
+        ExecutionsController executionsController = controller.getParentController().getExecutionController();
+        JobsModel jobsModel = executionsController.getJobsController().getModel();
         jobsModel.addJobSelectedListener(this);
         this.controller.getModel().addJobOutputListener(this);
         this.controller.getModel().getParentModel().getTasksModel().addTasksUpdatedListener(this);
+        
+        TasksCentricModel tasksCentricModel = this.controller.getModel().getParentModel().getExecutionsModel().getTasksModel();
+        tasksCentricModel.addTaskSelectedListener(this);
+        tasksCentricModel.addJobSelectedListener(this);
+        
+        executionsController.getModel().addExecutionsDisplayModeListener(this);
     }
 
     /**
@@ -127,52 +140,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.refreshButton.setTooltip("Request fetching the Output for this job");
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-
-                String selMode = outSelect.getValueAsString();
-                if(selMode.equals(LOG_FULL)) {
-                    if (taskSelect.getValue().equals(TASKS_ALL)) {
-                        downloadFullJobLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId));
-                    } else {
-                        downloadFullTaskLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId), (String) taskSelect.getValue());
-                    }
-                    return;
-                }
-
-                OutputView.this.text.hide();
-                OutputView.this.label.setContents("Please wait...");
-                OutputView.this.label.setIcon("loading.gif");
-                OutputView.this.label.show();
-
-                isLive = false;
-                int mode;
-                if (selMode.equals(LOG_OUT_ERR)) {
-                    mode = SchedulerServiceAsync.LOG_ALL;
-                } else if (selMode.equals(LOG_ERR)) {
-                    mode = SchedulerServiceAsync.LOG_STDERR;
-                } else {
-                    mode = SchedulerServiceAsync.LOG_STDOUT;
-                }
-
-                JobsModel jobsModel = controller.getModel().getParentModel().getExecutionsModel().getJobsModel();
-                int jobId = jobsModel.getSelectedJob().getId();
-                if (taskSelect.getValue().equals(TASKS_ALL)) {
-                    OutputView.this.controller.getJobOutput(mode);
-                } else {
-
-                    String taskName = (String) taskSelect.getValue();
-                    Task task = null;
-                    for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
-                        if (taskName.equals(t.getName())) {
-                            task = t;
-                            break;
-                        }
-                    }
-                    if (task != null) {
-                        OutputView.this.controller.getTaskOutput(jobId, task, mode);
-                    } else {
-                        clear();
-                    }
-                }
+                refreshButtonHandler();
             }
         });
 
@@ -181,44 +149,15 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.liveCheck.setTooltip("Stream output to peek in currently running tasks");
         this.liveCheck.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                if (liveCheck.getValueAsBoolean()) {
-                    taskSelect.hide();
-                    outSelect.hide();
-                    refreshButton.hide();
-
-                    OutputView.this.text.hide();
-                    OutputView.this.label.setContents("Please wait...");
-                    OutputView.this.label.setIcon("loading.gif");
-                    OutputView.this.label.show();
-
-                    OutputView.this.controller.getLiveOutput();
-                    isLive = true;
-                } else {
-                    taskSelect.show();
-                    outSelect.show();
-                    refreshButton.show();
-                    OutputView.this.controller.deleteLiveLogJob();
-                }
-            }
+                liveLogCheckChanged();
+            }    
         });
 
         this.taskSelect = new SelectItem();
         this.taskSelect.setShowTitle(false);
         this.taskSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
-                if (isLive)
-                    return;
-
-                JobsModel jobsModel = controller.getModel().getParentModel().getExecutionsModel().getJobsModel();
-                Job sel = jobsModel.getSelectedJob();
-                if (sel != null) {
-                    JobOutput out = controller.getModel().getJobOutput(sel.getId());
-                    if (out != null && !out.getLines().isEmpty()) {
-                        update(out);
-                    } else {
-                        clear();
-                    }
-                }
+                taskSelectChangedhandler();
             }
         });
 
@@ -274,11 +213,15 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     public void jobSelected(Job job) {
         this.refreshButton.setDisabled(false);
-        if (job.getId() == this.jobId)
-            return;
-
-        this.taskSelect.setValueMap(TASKS_ALL);
-        this.taskSelect.setValue(TASKS_ALL);
+        boolean taskCentricMode = (this.controller.getParentController().getExecutionController().getModel().getMode() 
+                == ExecutionListMode.TASK_CENTRIC);
+        if(!taskCentricMode){
+            this.taskSelect.setValueMap(TASKS_ALL);
+            this.taskSelect.setValue(TASKS_ALL);
+            
+            if (job.getId() == this.jobId)
+                return;
+        }
 
         this.jobId = job.getId();
         this.isLive = this.controller.getModel().isLiveOutput("" + this.jobId);
@@ -354,6 +297,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
         this.text.hide();
         this.refreshButton.show();
+        this.refreshButton.setDisabled(false);
         this.liveCheck.show();
         if (!this.liveCheck.getValueAsBoolean()) {
             this.taskSelect.show();
@@ -403,15 +347,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 }
             }
         } else {
-            String taskName = (String) this.taskSelect.getValue();
-            Task task = null;
-            for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
-                if (taskName.equals(t.getName())) {
-                    task = t;
-                    break;
-                }
-            }
-
             List<String> lines = out.getLines().get(task);
             if (lines == null || lines.isEmpty()) {
                 clear();
@@ -462,7 +397,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             }
             this.taskSelect.setValueMap(values);
             this.taskSelect.setValue(TASKS_ALL);
-            this.refreshButton.setDisabled(false);
         }
     }
 
@@ -473,4 +407,125 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     @Override
     public void selectedJobUpdated() {
     }
+    
+    protected void liveLogCheckChanged(){
+        if (liveCheck.getValueAsBoolean()) {
+            taskSelect.hide();
+            outSelect.hide();
+            refreshButton.hide();
+
+            this.text.hide();
+            this.label.setContents("Please wait...");
+            this.label.setIcon("loading.gif");
+            this.label.show();
+
+            this.controller.getLiveOutput();
+            isLive = true;
+        } else {
+            taskSelect.show();
+            outSelect.show();
+            refreshButton.show();
+            this.controller.deleteLiveLogJob();
+        }
+    }
+    
+    
+    protected void refreshButtonHandler(){
+        String selMode = outSelect.getValueAsString();
+        if(selMode.equals(LOG_FULL)) {
+            if (taskSelect.getValue().equals(TASKS_ALL)) {
+                downloadFullJobLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId));
+            } else {
+                downloadFullTaskLogs(LoginModel.getInstance().getSessionId(), String.valueOf(jobId), (String) taskSelect.getValue());
+            }
+            return;
+        }
+
+        this.text.hide();
+        this.label.setContents("Please wait...");
+        this.label.setIcon("loading.gif");
+        this.label.show();
+
+        isLive = false;
+        int mode;
+        if (selMode.equals(LOG_OUT_ERR)) {
+            mode = SchedulerServiceAsync.LOG_ALL;
+        } else if (selMode.equals(LOG_ERR)) {
+            mode = SchedulerServiceAsync.LOG_STDERR;
+        } else {
+            mode = SchedulerServiceAsync.LOG_STDOUT;
+        }
+
+        int jobId = controller.getParentController().getSelectedJob().getId();
+        if (taskSelect.getValue().equals(TASKS_ALL)) {
+            this.controller.getJobOutput(mode);
+        } else {
+            if (task != null) {
+                this.controller.getTaskOutput(jobId, task, mode);
+            } else {
+                clear();
+            }
+        }
+    }
+    
+    
+    
+    protected void taskSelectChangedhandler(){
+        if (isLive)
+            return;
+
+        String taskName = (String) taskSelect.getValue();
+        for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
+            if (taskName.equals(t.getName())) {
+                task = t;
+                break;
+            }
+        }
+        
+        
+        Job sel = controller.getParentController().getSelectedJob();
+        if (sel != null) {
+            JobOutput out = controller.getModel().getJobOutput(sel.getId());
+            if (out != null && !out.getLines().isEmpty()) {
+                update(out);
+            } else {
+                clear();
+            }
+        }
+    }
+
+    @Override
+    public void taskSelected(Task task) {
+        String taskName = task.getName(); 
+        taskSelect.setValueMap(taskName);
+        taskSelect.setValue(taskName);
+        this.task = task;
+    }
+
+    @Override
+    public void taskUnselected() {
+        this.jobId = 0;
+        this.refreshButton.hide();
+        this.clear();
+        this.refreshButton.hide();
+        this.liveCheck.hide();
+        this.taskSelect.hide();
+        this.outSelect.hide();
+        this.taskSelect.setValueMap("<i>all tasks</i>");
+        this.label.setContents("No task selected");
+    }
+
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        Job job = this.controller.getParentController().getSelectedJob();
+        if(job == null){
+            jobUnselected();
+        }
+        else{
+            jobSelected(job);
+        }
+    }
+    
+    
+    
 }

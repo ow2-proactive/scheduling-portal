@@ -39,6 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
@@ -91,6 +92,19 @@ public class ExecutionsModel {
             listener.modeSwitched(mode);
         }
     }
+    
+    
+    public Job getSelectedJob(){
+        switch(this.mode){
+        case JOB_CENTRIC:
+            return this.jobsModel.getSelectedJob();
+        case TASK_CENTRIC:
+            return this.tasksModel.getSelectedTaskJob();
+        default:
+            return null;
+        }
+    }
+    
 
     public void addExecutionsDisplayModeListener(ExecutionDisplayModeListener listener){
         this.modeListeners.add(listener);

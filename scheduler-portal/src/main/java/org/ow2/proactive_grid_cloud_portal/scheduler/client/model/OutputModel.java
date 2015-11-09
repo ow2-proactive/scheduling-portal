@@ -99,16 +99,6 @@ public class OutputModel {
      * 
      */
     public void setTaskOutput(int jobId, Task task, String output) {
-        JobStatus stat = null;
-        for (Job j : this.parentModel.getExecutionsModel().getJobsModel().getJobs().values()) {
-            if (jobId == j.getId())
-                stat = j.getStatus();
-        }
-        if (stat == null) {
-            throw new IllegalStateException("Trying to set output for a task in job " + jobId +
-                    " for which there is no local representation");
-        }
-
         List<String> lines = new ArrayList<String>();
 
         for (String line : lineByLine(output)) {

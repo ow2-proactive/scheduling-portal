@@ -913,6 +913,8 @@ public class SchedulerController extends Controller implements UncaughtException
         return executionController;
     }
     
+   
+    
     
     public Task getSelectedTask(){
     	ExecutionsModel executionsModel = this.model.getExecutionsModel();
@@ -928,14 +930,6 @@ public class SchedulerController extends Controller implements UncaughtException
     
     
     public Job getSelectedJob(){
-        ExecutionsModel executionsModel = this.model.getExecutionsModel();
-        switch(executionsModel.getMode()){
-        case JOB_CENTRIC:
-            return executionsModel.getJobsModel().getSelectedJob();
-        case TASK_CENTRIC:
-            return executionsModel.getTasksModel().getSelectedTaskJob();
-        default:
-            return null;
-        }
+        return this.model.getExecutionsModel().getSelectedJob();
     }
 }

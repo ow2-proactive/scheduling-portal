@@ -37,6 +37,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
 
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -91,6 +92,16 @@ public class TasksCentricNavigationView extends TasksNavigationView{
         Date value = (Date) event.getValue();
         long time = value.getTime();
         ((TasksCentricNavigationController) this.controller).changeToDate(time);
+    }
+
+    
+    @Override
+    public void jobSelected(Job job) {
+    }
+
+
+    @Override
+    public void jobUnselected() {
     }
 
 }
