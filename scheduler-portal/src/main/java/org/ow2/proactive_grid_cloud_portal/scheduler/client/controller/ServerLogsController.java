@@ -44,7 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ServerLogsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ServerLogsView.ShowLogsCallback;
 
@@ -78,8 +78,8 @@ public class ServerLogsController {
     
     
     protected int getCurrentJobId(){
-        JobsModel jobsModel = ((SchedulerModelImpl) parentController.getModel()).getExecutionsModel().getJobsModel();
-        return jobsModel.getSelectedJob().getId();
+        ExecutionsModel executionsModel = ((SchedulerModelImpl) parentController.getModel()).getExecutionsModel();
+        return executionsModel.getSelectedJob().getId();
     }
     
     

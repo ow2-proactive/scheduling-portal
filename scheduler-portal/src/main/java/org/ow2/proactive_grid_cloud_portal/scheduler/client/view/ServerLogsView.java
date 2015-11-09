@@ -39,12 +39,17 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.StringUtil;
@@ -70,7 +75,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener {
+public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener, TaskSelectedListener, ExecutionDisplayModeListener {
 
     private static final String TASKS_ALL = "All Tasks";
 
@@ -97,6 +102,13 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
         JobsModel jobsModel = schedulerModel.getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
         schedulerModel.getTasksModel().addTasksUpdatedListener(this);
+        
+        ExecutionsModel executionsModel = schedulerModel.getExecutionsModel();
+        TasksCentricModel tasksCentricModel = executionsModel.getTasksModel();
+        tasksCentricModel.addTaskSelectedListener(this);
+        tasksCentricModel.addJobSelectedListener(this);
+        
+        executionsModel.addExecutionsDisplayModeListener(this);
     }
 
     /**
@@ -171,8 +183,12 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
     public void jobSelected(Job job) {
         this.refreshButton.setDisabled(false);
 
-        this.taskSelect.setValueMap(TASKS_ALL);
-        this.taskSelect.setValue(TASKS_ALL);
+        boolean taskCentricMode = (this.controller.getParentController().getExecutionController().getModel().getMode() 
+                == ExecutionListMode.TASK_CENTRIC);
+        if(!taskCentricMode){
+            this.taskSelect.setValueMap(TASKS_ALL);
+            this.taskSelect.setValue(TASKS_ALL);
+        }
 
         this.clear();
     }
@@ -190,11 +206,16 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
      */
     public void jobUnselected() {
+        this.reset();
+        this.label.setContents("No job selected");
+    }
+    
+    
+    protected void reset(){
         this.clear();
         this.refreshButton.hide();
         this.taskSelect.hide();
         this.taskSelect.setValueMap("<i>all tasks</i>");
-        this.label.setContents("No job selected");
     }
 
     private void clear() {
@@ -278,4 +299,32 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
             this.controller.getTaskServerLogs(taskName, new ShowLogsCallback());
         }
     }
+
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        Job job = this.controller.getParentController().getSelectedJob();
+        if(job == null){
+            jobUnselected();
+        }
+        else{
+            jobSelected(job);
+        }
+        
+    }
+
+    @Override
+    public void taskSelected(Task task) {
+        String taskName = task.getName(); 
+        taskSelect.setValueMap(taskName);
+        taskSelect.setValue(taskName);
+    }
+
+    @Override
+    public void taskUnselected() {
+        this.reset();
+        this.label.setContents("No task selected");
+    }
+    
+    
+    
 }
