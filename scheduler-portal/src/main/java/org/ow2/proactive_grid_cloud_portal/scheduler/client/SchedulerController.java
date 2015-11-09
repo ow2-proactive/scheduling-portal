@@ -39,10 +39,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
@@ -53,15 +50,14 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
@@ -154,6 +150,8 @@ public class SchedulerController extends Controller implements UncaughtException
     protected ExecutionsController executionController;
     
     protected OutputController outputController;
+    
+    protected ServerLogsController serverLogsController;
 
 
     /**
@@ -165,7 +163,6 @@ public class SchedulerController extends Controller implements UncaughtException
         this.scheduler = scheduler;
         this.model = new SchedulerModelImpl();
         
-
         init();
     }
 
@@ -357,6 +354,13 @@ public class SchedulerController extends Controller implements UncaughtException
         return this.outputController.buildView();
     }
     
+    
+    public Layout buildServerLogsView(){
+        this.serverLogsController = new ServerLogsController(this);
+        return this.serverLogsController.buildView();
+    }
+    
+    
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
     }
@@ -523,75 +527,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
 
-    /**
-     * Fetch server logs for a single task
-     * 
-     * @param jobId id of the job containing this task
-     * @param taskname task for which the output should be fetched
-     * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
-     *   {@link SchedulerServiceAsync#LOG_STDOUT}
-     */
-    public void getTaskServerLogs(final int jobId, final String taskname, final ShowLogsCallback logs) {
-        Request req = this.scheduler.getTaskServerLogs(LoginModel.getInstance().getSessionId(), jobId, taskname,
-                new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                // might be an exception
-                try {
-                    JSONObject json = parseJSON(caught.getMessage()).isObject();
-                    if (json.containsKey("stackTrace")) {
-                        msg = json.get("stackTrace").isString().stringValue();
-                        msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-                        msg = msg.replace("\n", "<br>");
-                    }
-                } catch (Throwable t) {
-                    // not json
-                }
-                LogModel.getInstance().logMessage("Failed to get server logs for task " +
-                        taskname + " in job " + jobId /* + ": " + msg */);
-            }
-
-            public void onSuccess(String result) {
-                LogModel.getInstance().logMessage("Successfully fetched server logs for task " + taskname +
-                        " in job " + jobId);
-                logs.show(result);
-            }
-        });
-    }
-
-    /**
-     * Fetch server logs for a single job
-     * 
-     * @param jobId id of the job containing this task
-     * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
-     *   {@link SchedulerServiceAsync#LOG_STDOUT}
-     */
-    public void getJobServerLogs(final int jobId, final ShowLogsCallback logs) {
-        Request req = this.scheduler.getJobServerLogs(LoginModel.getInstance().getSessionId(), jobId,
-                new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                // might be an exception
-                try {
-                    JSONObject json = parseJSON(caught.getMessage()).isObject();
-                    if (json.containsKey("stackTrace")) {
-                        msg = json.get("stackTrace").isString().stringValue();
-                        msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-                        msg = msg.replace("\n", "<br>");
-                    }
-                } catch (Throwable t) {
-                    // not json
-                }
-                LogModel.getInstance().logMessage("Failed to get server logs for a job " +
-                        jobId);
-            }
-
-            public void onSuccess(String result) {
-                LogModel.getInstance().logMessage("Successfully fetched server logs for job " + jobId);
-                logs.show(result);
-            }
-        });
-    }
+    
 
     
     

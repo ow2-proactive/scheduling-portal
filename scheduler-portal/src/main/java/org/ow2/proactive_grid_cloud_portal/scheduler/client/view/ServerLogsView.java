@@ -34,12 +34,16 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 
 import com.smartgwt.client.types.Alignment;
@@ -81,17 +85,18 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
     /** display a message */
     private Label label = null;
 
-    private SchedulerController controller;
+    private ServerLogsController controller;
 
     /**
      * Default constructor
      * @param controller
      */
-    public ServerLogsView(SchedulerController controller) {
+    public ServerLogsView(ServerLogsController controller) {
         this.controller = controller;
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getParentController().getModel();
+        JobsModel jobsModel = schedulerModel.getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
-        ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
+        schedulerModel.getTasksModel().addTasksUpdatedListener(this);
     }
 
     /**
@@ -106,19 +111,7 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
         this.refreshButton.setTooltip("Request fetching the Output for this job");
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                ServerLogsView.this.text.hide();
-                ServerLogsView.this.label.setContents("Please wait...");
-                ServerLogsView.this.label.setIcon("loading.gif");
-                ServerLogsView.this.label.show();
-
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
-                int jobId = jobsModel.getSelectedJob().getId();
-                if (taskSelect.getValue().equals(TASKS_ALL)) {
-                    ServerLogsView.this.controller.getJobServerLogs(jobId, new ShowLogsCallback());
-                } else {
-                    String taskName = (String) taskSelect.getValue();
-                    ServerLogsView.this.controller.getTaskServerLogs(jobId, taskName, new ShowLogsCallback());
-                }
+                refreshLogs();
             }
         });
 
@@ -268,5 +261,21 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
     
     @Override
     public void selectedJobUpdated() {   
+    }
+    
+    
+    public void refreshLogs(){
+        this.text.hide();
+        this.label.setContents("Please wait...");
+        this.label.setIcon("loading.gif");
+        this.label.show();
+
+        
+        if (taskSelect.getValue().equals(TASKS_ALL)) {
+            this.controller.getJobServerLogs(new ShowLogsCallback());
+        } else {
+            String taskName = (String) taskSelect.getValue();
+            this.controller.getTaskServerLogs(taskName, new ShowLogsCallback());
+        }
     }
 }
