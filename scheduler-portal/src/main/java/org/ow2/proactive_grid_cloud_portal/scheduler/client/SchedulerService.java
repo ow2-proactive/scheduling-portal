@@ -201,6 +201,18 @@ public interface SchedulerService extends RemoteService {
      *
      */
     String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException;
+    
+    /**
+     * Gets the job info details.
+     * @param sessionId the session id of the user which is logged in.
+     * @param jobId the job id for which the details are asked.
+     * @return the job detailed information as json
+     * @throws RestServerException
+     * @throws ServiceException
+     *
+     */
+    String getJobInfoDetails(String sessionId, String jobId) throws RestServerException, ServiceException;
+    
 
     /**
      * Changes the priority for a job.

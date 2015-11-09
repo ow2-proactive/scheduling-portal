@@ -45,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 
@@ -58,14 +59,21 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFac
  */
 public class JobInfoView extends InfoView<Job> implements JobSelectedListener, JobsUpdatedListener, ExecutionDisplayModeListener {
 
+    protected SchedulerController controller;
+    
     /**
      * @param controller the Controller that created this View
      */
     public JobInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
         super(factory, "No job selected");
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        this.controller = controller;
+        ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
+        JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
         jobsModel.addJobsUpdatedListener(this);
+        
+        executionModel.getTasksModel().addJobSelectedListener(this);
+        executionModel.addExecutionsDisplayModeListener(this);
     }
 
 
@@ -92,20 +100,26 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
     }
 
     public void jobUnselected() {
+        this.displayedItem = null;
         this.hideDetails();
     }
 
 
     @Override
     public void selectedJobUpdated() {
-        // TODO Auto-generated method stub
+        jobSelected(this.controller.getSelectedJob());
     }
 
 
     @Override
     public void modeSwitched(ExecutionListMode mode) {
-        // TODO Auto-generated method stub
-
+        Job job = this.controller.getSelectedJob();
+        if(job == null){
+            this.jobUnselected();
+        }
+        else{
+            jobSelected(job);
+        }
     }
 
 }

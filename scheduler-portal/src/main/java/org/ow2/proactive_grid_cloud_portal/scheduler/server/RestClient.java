@@ -380,6 +380,22 @@ public interface RestClient {
     InputStream job(@HeaderParam("sessionid")
                                     String sessionId, @PathParam("jobid")
                                     String jobId);
+    
+    
+    /**
+     * Returns the job info associated to the job referenced by the 
+     * id <code>jobid</code>
+     * @param sessionId a valid session id
+     * @return  a ClientResponse containing the job info of the corresponding job
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/info")
+    @Produces("application/json")
+    InputStream jobInfo(
+            @HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId);
+    
 
     /**
      * Changes the priority of a job.

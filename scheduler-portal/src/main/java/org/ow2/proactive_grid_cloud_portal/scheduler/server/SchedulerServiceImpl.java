@@ -527,6 +527,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
+    
+    
+    public String getJobInfoDetails(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.jobInfo(sessionId, jobId);
+            }
+        });
+    }
+    
 
     /*
      * (non-Javadoc)

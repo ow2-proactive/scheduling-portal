@@ -37,13 +37,16 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
@@ -56,8 +59,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
 public class TasksCentricController extends TasksController{
-
-
 
 
     public TasksCentricController(SchedulerController parentController) {
@@ -146,4 +147,40 @@ public class TasksCentricController extends TasksController{
         return this.taskNavigationController.getPaginationController();
     }
 
+    
+    /**
+     * Select another task.
+     *
+     * @param taskId of the new task selection. you can use null to cancel the current selection
+     */
+    public void selectTask(final Task task) {
+        super.selectTask(task);
+        if(task != null){
+            final String jobId = Long.toString(task.getJobId());
+            String sessionId = LoginModel.getInstance().getSessionId();
+            SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+            scheduler.getJobInfoDetails(sessionId, jobId, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                    caught.printStackTrace();
+                    String msg = JSONUtils.getJsonErrorMessage(caught);
+                    LogModel.getInstance().logImportantMessage("Failed to get job info for job " + jobId + ": " + msg);
+                }
+
+                @Override
+                public void onSuccess(String result) {
+                    try {
+                        Job job = SchedulerJSONUtils.getJobInfoFromJson(result);
+                        ((TasksCentricModel) model).setTaskSelectedJob(job);
+                    } catch (JSONException e) {
+                        LogModel.getInstance().logCriticalMessage(e.getMessage());
+                    }
+                }
+            });
+        }
+        else{
+            ((TasksCentricModel) model).setTaskSelectedJob(null);
+        }
+    }
 }

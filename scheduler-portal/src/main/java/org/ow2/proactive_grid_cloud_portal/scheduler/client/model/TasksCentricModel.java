@@ -37,12 +37,25 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
+import java.util.ArrayList;
+
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 
 public class TasksCentricModel extends TasksModel{
 
+    protected Job selectedTaskJob;
+    
+    /**
+     * Listener for the job selection changes.
+     */
+    private ArrayList<JobSelectedListener> jobSelectedListeners = null;
+    
     public TasksCentricModel(SchedulerModelImpl parentModel) {
         super(parentModel);
+        this.jobSelectedListeners = new ArrayList<>();
     }
 
     @Override
@@ -50,4 +63,27 @@ public class TasksCentricModel extends TasksModel{
         this.tasksNavigationModel = new TasksCentricNavigationModel(this);
     }
 
+    
+    public void setTaskSelectedJob(Job job){
+        this.selectedTaskJob = job;
+        for(JobSelectedListener listener: this.jobSelectedListeners){
+            if(this.selectedTaskJob != null){
+                listener.jobSelected(this.selectedTaskJob);
+            }
+            else{
+                listener.jobUnselected();
+            }
+        }
+    }
+    
+    
+    public void addJobSelectedListener(JobSelectedListener listener){
+        this.jobSelectedListeners.add(listener);
+    }
+
+    public Job getSelectedTaskJob() {
+        return selectedTaskJob;
+    }
+    
+    
 }

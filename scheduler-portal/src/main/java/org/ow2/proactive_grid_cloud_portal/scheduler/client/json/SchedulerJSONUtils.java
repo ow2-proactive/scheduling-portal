@@ -161,4 +161,15 @@ public class SchedulerJSONUtils extends JSONUtils {
 
         return resultJobs;
     }
+    
+    
+    public static Job getJobInfoFromJson(String jsonString) throws JSONException{
+        JSONValue val = parseJSON(jsonString);
+        JSONObject jsonJobInfo = val.isObject();
+        if(jsonJobInfo == null){
+            throw new JSONException("Expected JSON Object: " + jsonString);
+        }
+        
+        return Job.parseJSONInfo(jsonJobInfo);
+    }
 }

@@ -282,21 +282,27 @@ public class Job implements Serializable, Comparable<Job> {
      * @return a POJO equivalent
      */
     public static Job parseJson(JSONObject jsonJob) {
-        int id = Integer.parseInt(jsonJob.get("jobid").isString().stringValue());
-        String user = jsonJob.get("jobOwner").isString().stringValue();
         JSONObject jsonInfo = jsonJob.get("jobInfo").isObject(); // TODO to update jobInfo
-        String priority = jsonInfo.get("priority").isString().stringValue();
-        String status = jsonInfo.get("status").isString().stringValue();
-        int pending = (int) jsonInfo.get("numberOfPendingTasks").isNumber().doubleValue();
-        int running = (int) jsonInfo.get("numberOfRunningTasks").isNumber().doubleValue();
-        int finished = (int) jsonInfo.get("numberOfFinishedTasks").isNumber().doubleValue();
-        int total = (int) jsonInfo.get("totalNumberOfTasks").isNumber().doubleValue();
-        long submittedTime = (long) jsonInfo.get("submittedTime").isNumber().doubleValue();
-        long startTime = (long) jsonInfo.get("startTime").isNumber().doubleValue();
-        long finishedTime = (long) jsonInfo.get("finishedTime").isNumber().doubleValue();
-        JSONObject jsonInfoId = jsonInfo.get("jobId").isObject();
+        return parseJSONInfo(jsonInfo);
+    }
+    
+    
+    public static Job parseJSONInfo(JSONObject jsonJobInfo){
+        String user = jsonJobInfo.get("jobOwner").isString().stringValue();
+        String priority = jsonJobInfo.get("priority").isString().stringValue();
+        String status = jsonJobInfo.get("status").isString().stringValue();
+        int pending = (int) jsonJobInfo.get("numberOfPendingTasks").isNumber().doubleValue();
+        int running = (int) jsonJobInfo.get("numberOfRunningTasks").isNumber().doubleValue();
+        int finished = (int) jsonJobInfo.get("numberOfFinishedTasks").isNumber().doubleValue();
+        int total = (int) jsonJobInfo.get("totalNumberOfTasks").isNumber().doubleValue();
+        long submittedTime = (long) jsonJobInfo.get("submittedTime").isNumber().doubleValue();
+        long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
+        long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
+        
+        JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
         String name = jsonInfoId.get("readableName").isString().stringValue();
-
+        int id = (int) jsonInfoId.get("id").isNumber().doubleValue();
+        
         return new Job(id, name, JobStatus.valueOf(status), JobPriority.findPriority(priority), user,
                 pending, running, finished, total, submittedTime, startTime, finishedTime);
     }

@@ -70,6 +70,9 @@ public class Task implements Serializable, Comparable<Task> {
     private long jobId = 0;
 
     private String jobName = "a job";
+    
+    
+    
 
     /**
      * The constructor that has no arguments required by the Serializable interface

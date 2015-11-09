@@ -1165,4 +1165,17 @@ public class SchedulerController extends Controller implements UncaughtException
     		return null;
     	}
     }
+    
+    
+    public Job getSelectedJob(){
+        ExecutionsModel executionsModel = this.model.getExecutionsModel();
+        switch(executionsModel.getMode()){
+        case JOB_CENTRIC:
+            return executionsModel.getJobsModel().getSelectedJob();
+        case TASK_CENTRIC:
+            return executionsModel.getTasksModel().getSelectedTaskJob();
+        default:
+            return null;
+        }
+    }
 }

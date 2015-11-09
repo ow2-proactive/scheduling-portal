@@ -182,6 +182,15 @@ public interface SchedulerServiceAsync {
      * @param callback the result returned.
      */
     void getJobInfo(String sessionId, String jobId, AsyncCallback<String> callback);
+    
+    /**
+     * Gets the job info details by making an asynchronous call to the server. 
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job for which the request is done.
+     * @param callback the result returned.
+     */
+    void getJobInfoDetails(String sessionId, String jobId, AsyncCallback<String> callback);
+    
 
     /**
      * Sets the priority of a job.
