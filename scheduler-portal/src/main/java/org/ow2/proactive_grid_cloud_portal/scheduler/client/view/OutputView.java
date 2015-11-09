@@ -255,14 +255,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     }
 
     public void jobUnselected() {
-        this.jobId = 0;
-        this.refreshButton.hide();
-        this.clear();
-        this.refreshButton.hide();
-        this.liveCheck.hide();
-        this.taskSelect.hide();
-        this.outSelect.hide();
-        this.taskSelect.setValueMap("<i>all tasks</i>");
+        this.reset();
         this.label.setContents("No job selected");
     }
 
@@ -504,6 +497,12 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     @Override
     public void taskUnselected() {
+        reset();
+        this.label.setContents("No task selected");
+    }
+    
+    
+    protected void reset(){
         this.jobId = 0;
         this.refreshButton.hide();
         this.clear();
@@ -512,7 +511,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.taskSelect.hide();
         this.outSelect.hide();
         this.taskSelect.setValueMap("<i>all tasks</i>");
-        this.label.setContents("No task selected");
     }
 
     @Override
