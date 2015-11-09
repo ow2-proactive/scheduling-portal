@@ -82,7 +82,7 @@ public class SettingsController {
 
         if(setSetting(SchedulerConfig.LIVELOGS_REFRESH_TIME, 
                 newSettings.getValueAsString("logTime")) || forceRefresh){
-            this.mainController.restartLiveTimer();
+            this.mainController.getOutputController().restartLiveTimer();
         }
 
         if(setSetting(SchedulerConfig.JOBS_PAGE_SIZE, 

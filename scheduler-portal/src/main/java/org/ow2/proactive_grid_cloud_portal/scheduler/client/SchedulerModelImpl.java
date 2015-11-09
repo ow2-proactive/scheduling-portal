@@ -39,26 +39,23 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.OutputModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 
 /**
@@ -70,13 +67,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  */
 public class SchedulerModelImpl extends SchedulerModel implements SchedulerEventDispatcher {
 
-    private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
     
-
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
-    private HashMap<Integer, JobOutput> output = null;
-    private HashSet<String> isLiveOutput = null;
-    private HashMap<String, StringBuffer> liveOutput = null;
+    
     private List<SchedulerUser> users = null;
     private List<SchedulerUser> usersWithJobs = null;
     private HashMap<String, String> schedulerStats = null;
@@ -89,7 +82,7 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private List<JobUsage> usage = null;
 
     private ArrayList<SchedulerStatusListener> schedulerStateListeners = null;
-    private ArrayList<JobOutputListener> jobOutputListeners = null;
+    
     private ArrayList<UsersListener> usersListeners = null;
     private ArrayList<UsersListener> usersWithJobsListeners = null;
     private ArrayList<StatisticsListener> statisticsListeners = null;
@@ -102,15 +95,12 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private ExecutionsModel executionsModel;
 
     private TasksModel tasksModel;
+    
+    private OutputModel outputModel;
 
     SchedulerModelImpl() {
         super();
-
-        this.output = new HashMap<Integer, JobOutput>();
-        this.isLiveOutput = new HashSet<String>();
-        this.liveOutput = new HashMap<String, StringBuffer>();
         this.schedulerStateListeners = new ArrayList<SchedulerStatusListener>();
-        this.jobOutputListeners = new ArrayList<JobOutputListener>();
         this.usersListeners = new ArrayList<UsersListener>();
         this.usersWithJobsListeners = new ArrayList<UsersListener>();
         this.statisticsListeners = new ArrayList<StatisticsListener>();
@@ -140,144 +130,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
         for (SchedulerStatusListener listener : this.schedulerStateListeners) {
             listener.statusChanged(this.schedulerStatus);
-        }
-    }
-
-   
-
-    @Override
-    public JobOutput getJobOutput(int jobId) {
-        return this.output.get(jobId);
-    }
-
-    /**
-     * Set the output for a given task in a given job
-     * 
-     * notify listeners
-     * 
-     */
-    void setTaskOutput(int jobId, Task task, String output) {
-        JobStatus stat = null;
-        for (Job j : this.executionsModel.getJobsModel().getJobs().values()) {
-            if (jobId == j.getId())
-                stat = j.getStatus();
-        }
-        if (stat == null) {
-            throw new IllegalStateException("Trying to set output for a task in job " + jobId +
-                    " for which there is no local representation");
-        }
-
-        List<String> lines = new ArrayList<String>();
-
-        for (String line : lineByLine(output)) {
-            addRemoteHintIfNecessary(line);
-            line = formatLine(line);
-
-            if (!line.trim().isEmpty()) {
-                lines.add(line);
-            }
-        }
-
-        if (this.output.get(jobId) == null) {
-            JobOutput jo = new JobOutput(jobId);
-            jo.update(task, lines);
-            this.output.put(jobId, jo);
-        } else {
-            this.output.get(jobId).update(task, lines);
-        }
-
-        this.updateOutput(jobId);
-    }
-
-    private String[] lineByLine(String lines) {
-        return lines.split(PLATFORM_INDEPENDENT_LINE_BREAK);
-    }
-
-    private void addRemoteHintIfNecessary(String line) {
-        if (line.contains(TasksModel.PA_REMOTE_CONNECTION)) {
-            tasksModel.addRemoteHint(line);
-        }
-    }
-
-    
-
-    /**
-     * Notify listeners that the output of a given job has changed
-     * 
-     * @param jobId the job for which the output changed
-     */
-    void updateOutput(int jobId) {
-        if (this.output.get(jobId) == null) {
-            JobOutput jo = new JobOutput(jobId);
-            this.output.put(jobId, jo);
-        }
-
-        for (JobOutputListener listener : this.jobOutputListeners) {
-            listener.jobOutputUpdated(this.output.get(jobId));
-        }
-    }
-
-    /**
-     * Append a job output fragment to the stored live output
-     * @param jobId id of the job to which this fragment belongs
-     * @param out job output fragment
-     */
-    void appendLiveOutput(String jobId, String out) {
-        String[] expl = lineByLine(out);
-        out = "";
-        for (String str : expl) {
-            addRemoteHintIfNecessary(str);
-            out += formatLine(str);
-        }
-
-        StringBuffer buf = this.liveOutput.get(jobId);
-        if (buf == null) {
-            buf = new StringBuffer();
-            this.liveOutput.put(jobId, buf);
-        }
-        buf.append(out);
-
-        for (JobOutputListener list : this.jobOutputListeners) {
-            list.liveOutputUpdated(jobId, buf.toString());
-        }
-    }
-
-    private String formatLine(String str) {
-        if (str.matches("\\[.*\\].*")) {
-            str = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
-            return "<nobr><span style='color:gray;'>" + str +"</nobr><br>";
-        }
-        return "";
-    }
-
-    @Override
-    public String getLiveOutput(String jobId) {
-        StringBuffer buf = this.liveOutput.get(jobId);
-        if (buf == null) {
-            return "";
-        } else {
-            return buf.toString();
-        }
-    }
-
-    @Override
-    public boolean isLiveOutput(String jobId) {
-        return this.isLiveOutput.contains(jobId);
-    }
-
-    /**
-     * The output for this job should be fetched live
-     * @param jobId id of the job
-     * @param isLiveOutput true to live fetch
-     */
-    void setLiveOutput(String jobId, boolean isLiveOutput) {
-        if (isLiveOutput) {
-            this.isLiveOutput.add(jobId);
-            if(!liveOutput.containsKey(jobId)){
-                this.liveOutput.put(jobId, new StringBuffer());
-            }
-        } else {
-            this.isLiveOutput.remove(jobId);
         }
     }
 
@@ -443,15 +295,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     public void addSchedulerStatusListener(SchedulerStatusListener listener) {
         this.schedulerStateListeners.add(listener);
     }
-
-    /*
-     * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addJobOutputListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.JobOutputListener)
-     */
-    public void addJobOutputListener(JobOutputListener listener) {
-        this.jobOutputListeners.add(listener);
-    }
-
     
 
     /*
@@ -521,6 +364,16 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     public void setExecutionsModel(ExecutionsModel executionsModel) {
         this.executionsModel = executionsModel;
+    }
+
+
+    public OutputModel getOutputModel() {
+        return outputModel;
+    }
+
+
+    public void setOutputModel(OutputModel outputModel) {
+        this.outputModel = outputModel;
     }
     
 }

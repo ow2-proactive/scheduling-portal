@@ -37,9 +37,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.EventDispatcher;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
@@ -55,8 +52,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.V
 public interface SchedulerEventDispatcher extends EventDispatcher {
 
     void addSchedulerStatusListener(SchedulerStatusListener listener);
-
-    void addJobOutputListener(JobOutputListener listener);
 
     void addUsersListener(UsersListener listener);
 

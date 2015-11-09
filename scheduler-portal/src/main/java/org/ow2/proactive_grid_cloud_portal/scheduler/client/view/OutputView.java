@@ -34,15 +34,22 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -97,14 +104,14 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     /** true if the log for the current task is live */
     private boolean isLive = false;
 
-    private SchedulerController controller;
+    private OutputController controller;
 
-    public OutputView(SchedulerController controller) {
+    public OutputView(OutputController controller) {
         this.controller = controller;
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        JobsModel jobsModel = controller.getParentController().getExecutionController().getJobsController().getModel();
         jobsModel.addJobSelectedListener(this);
-        this.controller.getEventDispatcher().addJobOutputListener(this);
-        ((SchedulerModelImpl) this.controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
+        this.controller.getModel().addJobOutputListener(this);
+        this.controller.getModel().getParentModel().getTasksModel().addTasksUpdatedListener(this);
     }
 
     /**
@@ -146,7 +153,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                     mode = SchedulerServiceAsync.LOG_STDOUT;
                 }
 
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+                JobsModel jobsModel = controller.getModel().getParentModel().getExecutionsModel().getJobsModel();
                 int jobId = jobsModel.getSelectedJob().getId();
                 if (taskSelect.getValue().equals(TASKS_ALL)) {
                     OutputView.this.controller.getJobOutput(mode);
@@ -154,7 +161,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
                     String taskName = (String) taskSelect.getValue();
                     Task task = null;
-                    for (Task t : ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks()) {
+                    for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
                         if (taskName.equals(t.getName())) {
                             task = t;
                             break;
@@ -202,7 +209,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
                 if (isLive)
                     return;
 
-                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+                JobsModel jobsModel = controller.getModel().getParentModel().getExecutionsModel().getJobsModel();
                 Job sel = jobsModel.getSelectedJob();
                 if (sel != null) {
                     JobOutput out = controller.getModel().getJobOutput(sel.getId());
@@ -398,7 +405,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         } else {
             String taskName = (String) this.taskSelect.getValue();
             Task task = null;
-            for (Task t : ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks()) {
+            for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
                 if (taskName.equals(t.getName())) {
                     task = t;
                     break;

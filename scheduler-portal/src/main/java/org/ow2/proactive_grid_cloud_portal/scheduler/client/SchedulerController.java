@@ -55,6 +55,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.ServerLogsView.ShowLogsCallback;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -121,8 +122,7 @@ public class SchedulerController extends Controller implements UncaughtException
     /** main page when logged in, or null */
     private SchedulerPage schedulerView = null;
 
-    /** contains all pending getTaskOutput requests, taskId as key */
-    private Map<String, Request> taskOutputRequests = null;
+    
     
     /** periodically updates the local job view */
     private Timer schedulerTimerUpdate = null;
@@ -130,10 +130,7 @@ public class SchedulerController extends Controller implements UncaughtException
  // incremented each time #fetchJobs is called
     private int timerUpdate = 0;
 
-    /** ids of jobs we should auto fetch */
-    private Set<String> liveOutputJobs = null;
-    /** periodically fetches live output */
-    private Timer liveOutputUpdater = null;
+    
 
     /** frequency of user info fetch */
     private int userFetchTick = active_tick;
@@ -155,6 +152,8 @@ public class SchedulerController extends Controller implements UncaughtException
 
 
     protected ExecutionsController executionController;
+    
+    protected OutputController outputController;
 
 
     /**
@@ -165,8 +164,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public SchedulerController(SchedulerServiceAsync scheduler) {
         this.scheduler = scheduler;
         this.model = new SchedulerModelImpl();
-        this.taskOutputRequests = new HashMap<String, Request>();
-        this.liveOutputJobs = new HashSet<String>();
+        
 
         init();
     }
@@ -354,6 +352,10 @@ public class SchedulerController extends Controller implements UncaughtException
     }
     
    
+    public Layout buildOutputView(){
+        this.outputController = new OutputController(this);
+        return this.outputController.buildView();
+    }
     
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
@@ -520,179 +522,6 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-    /**
-     * Auto fetch the output for the currently selected job
-     */
-    public void getLiveOutput() {
-        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
-        if (j == null)
-            return;
-
-        if (this.model.getTasksModel().getTasks().isEmpty())
-            return;
-
-        final String jobId = "" + j.getId();
-
-        if (this.liveOutputJobs.contains(jobId)) {
-            model.appendLiveOutput(jobId, "");
-            return;
-        }
-
-        this.model.setLiveOutput(jobId, true);
-        this.liveOutputJobs.add(jobId);
-
-        if (this.liveOutputUpdater == null) {
-            this.startLiveTimer();
-        }
-    }
-
-    public void deleteLiveLogJob() {
-        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
-        if (j == null)
-            return;
-
-        if (this.model.getTasksModel().getTasks().isEmpty())
-            return;
-
-        final String jobId = String.valueOf(j.getId());
-        liveOutputJobs.remove(jobId);
-        model.setLiveOutput(jobId, false);
-    }
-
-    /**
-     * Start the timer that will periodically fetch live logs
-     */
-    private void startLiveTimer() {
-        this.liveOutputUpdater = new Timer() {
-
-            @Override
-            public void run() {
-                for (Iterator<String> it = SchedulerController.this.liveOutputJobs.iterator(); it.hasNext();) {
-                    final String jobId = it.next();
-                    doFetchLiveLog(jobId);
-
-                    int id = Integer.parseInt(jobId);
-                    Job j = executionController.getJobsController().getModel().getJobs().get(id);
-                    if (j == null || j.isExecuted()) {
-                        LogModel.getInstance().logMessage("stop fetching live logs for job " + jobId);
-                        it.remove();
-                        model.setLiveOutput(jobId, false);
-                        model.appendLiveOutput(jobId, "");
-                    }
-                }
-            }
-        };
-        this.liveOutputUpdater.scheduleRepeating(SchedulerConfig.get().getLivelogsRefreshTime());
-    }
-
-    private void doFetchLiveLog(final String jobId) {
-        SchedulerController.this.scheduler.getLiveLogJob(LoginModel.getInstance().getSessionId(), jobId,
-                new AsyncCallback<String>() {
-            public void onSuccess(String result) {
-                if (result.length() > 0) {
-                    LogModel.getInstance().logMessage("Fetched livelog chunk for job " + jobId + " (" +
-                            result.length() + " chars)");
-                    model.appendLiveOutput(jobId, result);
-                }
-            }
-
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to fetch live log for job " + jobId + ": " + msg);
-            }
-        });
-    }
-
-    /**
-     * Stop the timer that will periodically fetch live logs
-     */
-    private void stopLiveTimer() {
-        if (this.liveOutputUpdater == null)
-            return;
-
-        this.liveOutputUpdater.cancel();
-        this.liveOutputUpdater = null;
-    }
-
-    /**
-     * Fetch the output for the currently selected job
-     * store the result (or error msg) in the model
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
-     * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
-     */
-    public void getJobOutput(int logMode) {
-        if (this.executionController.getJobsController().getModel().getSelectedJob() == null)
-            return;
-
-        Job j = this.executionController.getJobsController().getModel().getSelectedJob();
-        if (this.model.getTasksModel().getTasks().isEmpty()) {
-            // notify the listeners, they will figure out there is no output
-            this.model.updateOutput(j.getId());
-        }
-
-        for (Task t : this.model.getTasksModel().getTasks()) {
-            switch (t.getStatus()) {
-            case SKIPPED:
-            case PENDING:
-            case SUBMITTED:
-            case NOT_STARTED:
-                break;
-            default:
-                this.getTaskOutput(j.getId(), t, logMode);
-                break;
-            }
-        }
-    }
-
-    /**
-     * Fetch the output for a single task,
-     * store the result (or error message) in the model
-     * 
-     * @param jobId id of the job containing this task
-     * @param task task for which the output should be fetched
-     * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
-     * 	 {@link SchedulerServiceAsync#LOG_STDOUT}
-     */
-    public void getTaskOutput(final int jobId, final Task task, final int logMode) {
-        this.model.setLiveOutput("" + jobId, false);
-        this.liveOutputJobs.remove("" + jobId);
-        if (this.liveOutputJobs.isEmpty()) {
-            stopLiveTimer();
-        }
-
-        Request req = this.scheduler.getTaskOutput(LoginModel.getInstance().getSessionId(), "" + jobId, task.getName(), logMode,
-                new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                // might be an exception
-                try {
-                    JSONObject json = parseJSON(caught.getMessage()).isObject();
-                    if (json.containsKey("stackTrace")) {
-                        msg = json.get("stackTrace").isString().stringValue();
-                        msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-                        msg = msg.replace("\n", "<br>");
-                    }
-                } catch (Throwable t) {
-                    // not json
-                }
-                SchedulerController.this.model.setTaskOutput(jobId, task,
-                        "[" + task.getName() + "] <span style='color:red;'>" + msg + "</span>");
-                LogModel.getInstance().logMessage("Failed to get output for task " +
-                        task.getName() + " in job " + jobId /* + ": " + msg */);
-
-                taskOutputRequests.remove("" + task.getId());
-            }
-
-            public void onSuccess(String result) {
-                SchedulerController.this.model.setTaskOutput(jobId, task, result);
-                LogModel.getInstance().logMessage("Successfully fetched output for task " +
-                        task.getName() + " in job " + jobId);
-
-                taskOutputRequests.remove("" + task.getId());
-            }
-        });
-        this.taskOutputRequests.put("" + task.getId(), req);
-    }
 
     /**
      * Fetch server logs for a single task
@@ -764,16 +593,16 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
+    
+    
+
+    public OutputController getOutputController() {
+        return outputController;
+    }
 
     public void restartTimer(){
         this.stopTimer();
         this.startTimer();
-    }
-    
-    
-    public void restartLiveTimer(){
-        this.stopLiveTimer();
-        this.startLiveTimer();
     }
     
 
@@ -1009,7 +838,7 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public void teardown(String message) {
         this.stopTimer();
-        this.stopLiveTimer();
+        this.outputController.stopLiveTimer();
         this.model = new SchedulerModelImpl();
 
         SchedulerController.this.schedulerView.destroy();
@@ -1130,7 +959,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
 
     public void resetPendingTasksRequests(){
-        this.taskOutputRequests.clear();
+        this.outputController.resetPendingOutputTaskRequest();
         this.tasksController.resetPendingTasksRequests();
     }
 
@@ -1143,11 +972,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
     
     
-    public void cancelOutputRequests(){
-        for (Request req : this.taskOutputRequests.values()) {
-            req.cancel();
-        }
-    }
 
     public ExecutionsController getExecutionController() {
         return executionController;

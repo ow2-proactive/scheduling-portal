@@ -37,12 +37,9 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 
@@ -59,29 +56,6 @@ public abstract class SchedulerModel implements Model {
      */
     public abstract SchedulerStatus getSchedulerStatus();
 
-
-    /**
-     * If it has been previously stored, the model may have cached the partial or
-     * complete output of a given job.
-     * 
-     * @param jobId id of the job for which the output should be fetched
-     * @return a wrapper for the job output
-     */
-    public abstract JobOutput getJobOutput(int jobId);
-
-    /**
-     * The locally stored live log for the given job
-     * @param jobId id of the job
-     * @return output of the given job, as stored locally. may not contain
-     *  the actual output fully
-     */
-    public abstract String getLiveOutput(String jobId);
-
-    /**
-     * @param jobId the id of a job
-     * @return true if the specified job's output is streamed
-     */
-    public abstract boolean isLiveOutput(String jobId);
 
     /**
      * @param jobId the id of a job

@@ -154,7 +154,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         visuButton = new IButton("Activate");
         visuButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                ResultView.this.controller.getLiveOutput();
+                ResultView.this.controller.getOutputController().getLiveOutput();
                 visuButton.setDisabled(true);
             }
         });
@@ -211,7 +211,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
         JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
         Job j = jobsModel.getSelectedJob();
-        if (j != null && controller.getModel().isLiveOutput("" + j.getId())) {
+        if (j != null && controller.getOutputController().getModel().isLiveOutput("" + j.getId())) {
             visuButton.setDisabled(true);
         } else {
             visuButton.setDisabled(false);

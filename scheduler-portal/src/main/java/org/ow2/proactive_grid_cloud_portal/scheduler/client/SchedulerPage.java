@@ -116,8 +116,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     /** view displaying info about the selected task */
     private TaskInfoView taskInfo = null;
     
-    /** output for the selected job */
-    private OutputView outputView = null;
+    
     /** server logs for the selected job */
     private ServerLogsView serverLogsView = null;
     /** result download view */
@@ -606,8 +605,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         taskinfoTab.setPane(this.taskInfo.build());
 
         Tab outputTab = new Tab("Output", SchedulerImages.instance.output_16().getSafeUri().asString());
-        this.outputView = new OutputView(this.controller);
-        outputTab.setPane(this.outputView.build());
+        outputTab.setPane(this.controller.buildOutputView());
 
         Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
         this.serverLogsView = new ServerLogsView(this.controller);
