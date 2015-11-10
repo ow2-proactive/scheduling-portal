@@ -107,6 +107,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     /** true if the log for the current task is live */
     private boolean isLive = false;
     
+    protected boolean taskCentricMode = false;
     
     protected Task task;
 
@@ -213,8 +214,6 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     public void jobSelected(Job job) {
         this.refreshButton.setDisabled(false);
-        boolean taskCentricMode = (this.controller.getParentController().getExecutionController().getModel().getMode() 
-                == ExecutionListMode.TASK_CENTRIC);
         if(!taskCentricMode){
             this.taskSelect.setValueMap(TASKS_ALL);
             this.taskSelect.setValue(TASKS_ALL);
@@ -226,7 +225,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
         this.jobId = job.getId();
         this.isLive = this.controller.getModel().isLiveOutput("" + this.jobId);
 
-        if (job.isExecuted() && !this.isLive) {
+        if (taskCentricMode || (job.isExecuted() && !this.isLive)) {
             this.liveCheck.setDisabled(true);
         } else {
             this.liveCheck.setDisabled(false);
@@ -273,7 +272,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     }
 
     public void liveOutputUpdated(String jobId, String out) {
-        if (!controller.getModel().isLiveOutput(jobId))
+        if (this.taskCentricMode || !controller.getModel().isLiveOutput(jobId))
             return;
 
         if (jobId.equals("" + this.jobId)) {
@@ -515,6 +514,16 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
     @Override
     public void modeSwitched(ExecutionListMode mode) {
+        switch(mode){
+        case JOB_CENTRIC:
+            this.taskCentricMode = false;
+            break;
+        case TASK_CENTRIC:
+            this.taskCentricMode = true;
+            break;
+        }
+        
+        
         Job job = this.controller.getParentController().getSelectedJob();
         if(job == null){
             jobUnselected();

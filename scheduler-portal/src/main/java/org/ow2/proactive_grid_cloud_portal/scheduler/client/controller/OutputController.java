@@ -254,11 +254,13 @@ public class OutputController {
      * Auto fetch the output for the currently selected job
      */
     public void getLiveOutput() {
-        Job j = this.parentController.getExecutionController().getJobsController().getModel().getSelectedJob();
+        Job j = this.parentController.getExecutionController().getModel().getSelectedJob();
         if (j == null)
             return;
 
-        if (this.model.getParentModel().getTasksModel().getTasks().isEmpty())
+        boolean jobCentricMode = (this.parentController.getExecutionController().getModel().getMode() 
+                == ExecutionListMode.JOB_CENTRIC);
+        if (jobCentricMode && this.model.getParentModel().getTasksModel().getTasks().isEmpty())
             return;
 
         final String jobId = "" + j.getId();
