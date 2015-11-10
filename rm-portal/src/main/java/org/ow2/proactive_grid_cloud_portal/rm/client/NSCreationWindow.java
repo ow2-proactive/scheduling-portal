@@ -350,7 +350,7 @@ public class NSCreationWindow {
                 infraForm.setValue("infra", infraSelect.getValueAsString());
                 infraForm.setValue("nsName", nameItem.getValueAsString());
                 infraForm.setValue("policy", policySelect.getValueAsString());
-                infraForm.setValue("sessionId", controller.getModel().getSessionId());
+                infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 infraForm.setCanSubmit(true);
 
                 /* this smartGWT form looks nice but cannot do callbacks ;
