@@ -5,7 +5,7 @@
  *    Parallel, Distributed, Multi-Core Computing for
  *    Enterprise Grids & Clouds
  *
- * Copyright (C) 1997-2011 INRIA/University of
+ * Copyright (C) 1997-2015 INRIA/University of
  *                 Nice-Sophia Antipolis/ActiveEon
  * Contact: proactive@ow2.org or contact@activeeon.com
  *
@@ -41,32 +41,32 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 /**
  * Scheduler specific configuration
- * 
- * 
- * 
+ *
+ *
+ *
  * @author mschnoor
  *
  */
 public class SchedulerConfig extends Config {
 
     /**
-     * Path to the user-defined RM property file, relative
+     * Path to the user-defined Scheduler property file, relative
      * to the webapp file path
      */
     public static final String CONFIG_PATH = "scheduler.conf";
 
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
+
     private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
+
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
     public static final String NOVNC_URL = "sched.novnc.url";
-    private static final String DEFAULT_NOVNC_URL = "http://localhost:8080/rest/novnc";
 
     /** URL of the remote noVNC webpage */
     public static final String NOVNC_PAGE_URL = "sched.novnc.page.url";
-    private static final String DEFAULT_NOVNC_PAGE_URL = "http://localhost:8080/rest/novnc.html";
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
@@ -80,7 +80,6 @@ public class SchedulerConfig extends Config {
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
     private static final String DEFAULT_JOBS_PAGE_SIZE = "50";
     
-    
     /** task page size */
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
     private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
@@ -92,7 +91,6 @@ public class SchedulerConfig extends Config {
     /** the delay applied before refreshing the tag suggestions for a running job. */
     public static final String  TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
     private static final String DEFAULT_TAG_SUGGESTIONS_DELAY = "30000";
-    
 
     /** release version string */
     public static final String VERSION = "sched.version";
@@ -124,9 +122,6 @@ public class SchedulerConfig extends Config {
     }
 
     private void setDefaults() {
-        properties.put(REST_URL, DEFAULT_REST_URL);
-        properties.put(NOVNC_URL, DEFAULT_NOVNC_URL);
-        properties.put(NOVNC_PAGE_URL, DEFAULT_NOVNC_PAGE_URL);
         properties.put(CLIENT_REFRESH_TIME, DEFAULT_CLIENT_REFRESH_TIME);
         properties.put(LIVELOGS_REFRESH_TIME, DEFAULT_LIVELOGS_REFRESH_TIME);
         properties.put(JOBS_PAGE_SIZE, DEFAULT_JOBS_PAGE_SIZE);
@@ -146,24 +141,66 @@ public class SchedulerConfig extends Config {
 
     @Override
     public String getRestUrl() {
-        return properties.get(REST_URL);
+        String restUrlFromProperties = properties.get(REST_URL);
+        if (restUrlFromProperties == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String port = com.google.gwt.user.client.Window.Location.getPort();
+            String restUrl = protocol + "://localhost:" + port + "/rest";
+            return restUrl;
+        }
+        return restUrlFromProperties;
     }
 
+    /**
+     * @return the URL from the window location
+     */
+    public String getWindowsLocationUrl() {
+        String urlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
+        urlFromCurrentLocation = urlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(), "");
+        return urlFromCurrentLocation;
+    }
+
+    /**
+     * @return the REST_PUBLIC_URL if it is set or take it from the window location
+     */
     @Override
-    protected String getRestPublicUrlIfDefinedOrOverridden() {
+    public String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
-            return getRestUrl();
+        if (restPublicUrl == null) {
+            String restUrlFromCurrentLocation = getWindowsLocationUrl();
+            restUrlFromCurrentLocation += "/rest";
+            return restUrlFromCurrentLocation;
         }
         return restPublicUrl;
     }
 
+    /**
+     * @return the NOVNC_URL if it is set or take it from the window location
+     */
     public String getNoVncUrl() {
-        return properties.get(NOVNC_URL);
+        String noVncUrl = properties.get(NOVNC_URL);
+        if (noVncUrl == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String host = com.google.gwt.user.client.Window.Location.getHost();
+            String noVncUrlFromCurrentLocation = protocol + "://" + host + ":5900/rest/novnc";
+            noVncUrlFromCurrentLocation.replace(":","\\:");
+            return noVncUrlFromCurrentLocation;
+        }
+        return noVncUrl;
     }
 
+    /**
+     * @return the NOVNC_PAGE_URL if it is set or take it from the window location
+     */
     public String getNoVncPageUrl() {
-        return properties.get(NOVNC_PAGE_URL);
+        String noVncPageUrl = properties.get(NOVNC_PAGE_URL);
+        if (noVncPageUrl == null) {
+            String noVncPageUrlFromCurrentLocation = getWindowsLocationUrl();
+            noVncPageUrlFromCurrentLocation += "/rest/novnc.html";
+            noVncPageUrlFromCurrentLocation.replace(":","\\:");
+            return noVncPageUrlFromCurrentLocation;
+        }
+        return noVncPageUrl;
     }
 
     @Override
@@ -205,8 +242,7 @@ public class SchedulerConfig extends Config {
     	}
     	return 0;
     }
-    
-    
+
     /**
      * @return the number of tag suggestions that should be displayed for autocompletion.
      */
@@ -214,15 +250,12 @@ public class SchedulerConfig extends Config {
         return Integer.parseInt(this.properties.get(TAG_SUGGESTIONS_SIZE));
     }
     
-    
     /**
      * @return the delay applied before refreshing the tag suggestions for a running job.
      */
     public long getTagSuggestionDelay(){
         return Long.parseLong(this.properties.get(TAG_SUGGESTIONS_DELAY));
     }
-    
-    
 
     /**
      * @return refresh rate for live logs in millis
