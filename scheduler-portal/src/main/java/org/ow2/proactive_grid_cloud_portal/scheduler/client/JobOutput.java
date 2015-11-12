@@ -71,6 +71,10 @@ public class JobOutput {
 
     /** id of the job */
     private int jobId;
+    
+    
+    protected boolean complete = false;
+    
 
     /**
      * Default constructor
@@ -112,4 +116,13 @@ public class JobOutput {
     public int getJobId() {
         return this.jobId;
     }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+    
 }

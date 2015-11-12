@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
@@ -120,6 +121,7 @@ public class OutputController {
             this.model.updateOutput(j.getId());
         }
 
+        int jobId = j.getId();
         for (Task t : tasks) {
             switch (t.getStatus()) {
             case SKIPPED:
@@ -128,10 +130,13 @@ public class OutputController {
             case NOT_STARTED:
                 break;
             default:
-                this.getTaskOutput(j.getId(), t, logMode);
+                this.getTaskOutput(jobId, t, logMode);
                 break;
             }
         }
+        
+        JobOutput out = this.model.getJobOutput(jobId, true);  
+        out.setComplete(true);
     }
 
     /**
@@ -311,7 +316,4 @@ public class OutputController {
     public SchedulerController getParentController() {
         return parentController;
     }
-    
-    
-    
 }

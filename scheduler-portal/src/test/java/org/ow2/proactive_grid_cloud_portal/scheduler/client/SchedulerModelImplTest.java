@@ -82,7 +82,7 @@ public class SchedulerModelImplTest {
         Task task = new Task();
         outputModel.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        JobOutput jobOutput = outputModel.getJobOutput(42);
+        JobOutput jobOutput = outputModel.getJobOutput(42, false);
         String firstLine = jobOutput.getLines().get(task).get(0);
         String secondLine = jobOutput.getLines().get(task).get(1);
 
@@ -100,7 +100,7 @@ public class SchedulerModelImplTest {
         Task task = new Task();
         outputModel.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        JobOutput jobOutput = outputModel.getJobOutput(42);
+        JobOutput jobOutput = outputModel.getJobOutput(42, false);
         String firstLine = jobOutput.getLines().get(task).get(0);
         String secondLine = jobOutput.getLines().get(task).get(1);
 

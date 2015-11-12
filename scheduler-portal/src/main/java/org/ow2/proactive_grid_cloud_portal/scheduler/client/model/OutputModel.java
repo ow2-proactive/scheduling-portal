@@ -88,8 +88,13 @@ public class OutputModel {
      * @param jobId id of the job for which the output should be fetched
      * @return a wrapper for the job output
      */
-    public JobOutput getJobOutput(int jobId) {
-        return this.output.get(jobId);
+    public JobOutput getJobOutput(int jobId, boolean createIfNotExists) {
+        JobOutput result = this.output.get(jobId);
+        if(result == null && createIfNotExists){
+            result = new JobOutput(jobId);
+            this.output.put(jobId, result);
+        }
+        return result;
     }
     
     /**

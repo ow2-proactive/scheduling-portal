@@ -218,8 +218,8 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             this.taskSelect.setValueMap(TASKS_ALL);
             this.taskSelect.setValue(TASKS_ALL);
             
-            if (job.getId() == this.jobId)
-                return;
+//            if (job.getId() == this.jobId)
+//                return;
         }
 
         this.jobId = job.getId();
@@ -244,7 +244,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             }
         } else {
             this.refreshButton.setDisabled(true);
-            JobOutput out = this.controller.getModel().getJobOutput(job.getId());
+            JobOutput out = this.controller.getModel().getJobOutput(job.getId(), false);
             if (out != null && !out.getLines().isEmpty()) {
                 this.update(out);
             } else {
@@ -319,6 +319,11 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
 
         String content = " "; // whitespace otherwise it logs are empty, they won't be replaced in text panel
         if (this.taskSelect.getValueAsString().equals(TASKS_ALL)) {
+            if(!out.isComplete()){
+                clear();
+                return;
+            }
+            
             // alternate bgcolors for each entry
             boolean even = false;
             for (Entry<Task, List<String>> taskOutputLines : out.getLines().entrySet()) {
@@ -467,17 +472,22 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             return;
 
         String taskName = (String) taskSelect.getValue();
-        for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
-            if (taskName.equals(t.getName())) {
-                task = t;
-                break;
+        if(!taskName.equals(TASKS_ALL)){
+            for (Task t : controller.getModel().getParentModel().getTasksModel().getTasks()) {
+                if (taskName.equals(t.getName())) {
+                    task = t;
+                    break;
+                }
             }
+        }
+        else{
+            task = null;
         }
         
         
         Job sel = controller.getParentController().getSelectedJob();
         if (sel != null) {
-            JobOutput out = controller.getModel().getJobOutput(sel.getId());
+            JobOutput out = controller.getModel().getJobOutput(sel.getId(), false);
             if (out != null && !out.getLines().isEmpty()) {
                 update(out);
             } else {
@@ -503,6 +513,7 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
     
     protected void reset(){
         this.jobId = 0;
+        this.task = null;
         this.refreshButton.hide();
         this.clear();
         this.refreshButton.hide();
@@ -520,6 +531,13 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             break;
         case TASK_CENTRIC:
             this.taskCentricMode = true;
+            Task selectedTask = this.controller.getParentController().getSelectedTask();
+            if(selectedTask == null){
+                taskUnselected();
+            }
+            else{
+                taskSelected(selectedTask);
+            }
             break;
         }
         
@@ -532,7 +550,4 @@ public class OutputView implements JobSelectedListener, JobOutputListener, Tasks
             jobSelected(job);
         }
     }
-    
-    
-    
 }
