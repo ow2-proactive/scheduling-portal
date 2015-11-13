@@ -110,7 +110,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
 
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs) {
+    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
         Job selectedJob = this.controller.getModel().getSelectedJob();
 
         RecordList data = new RecordList();

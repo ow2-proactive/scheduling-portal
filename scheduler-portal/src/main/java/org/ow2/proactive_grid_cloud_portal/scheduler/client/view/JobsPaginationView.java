@@ -51,8 +51,8 @@ public class JobsPaginationView extends PaginationView implements JobsUpdatedLis
     }
 
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs) {
-        // TODO Auto-generated method stub
+    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
+        itemsUpdated(totalJobs);
 
     }
 

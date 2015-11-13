@@ -66,6 +66,60 @@ public class SchedulerJSONUtils extends JSONUtils {
         JSONValue val = parseJSON(jsonString);
         return parseJSONPaginatedTasks(val);
     }
+    
+    
+    /**
+     * Parse a paginated list of jobs
+     * @param jsonString the JSON as a string representing the paginated list of tasks.
+     * @return An object wrapping the list of tasks and the total number of tasks without pagination.
+     * @throws JSONException if it fails to parse the JSON.
+     */
+    public static JSONPaginatedJobs parseJSONPaginatedJobs(String jsonString) throws JSONException{
+        JSONValue val = parseJSON(jsonString);
+        return getJobsFromJson(val);
+    }
+    
+    
+    protected static JSONObject getObject(JSONValue value) throws JSONException{
+        JSONObject jsonObject = value.isObject();
+        if(jsonObject == null){
+            throw new JSONException("Expected JSON Object: " + value.toString());
+        }
+        return jsonObject;
+    }
+    
+    
+    protected static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException{
+        JSONValue jsonValue = obj.get(propertyName);
+        if(jsonValue == null){
+            throw new JSONException("Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
+        }
+        return jsonValue;
+    }
+    
+    
+    protected static JSONArray getArray(JSONValue value) throws JSONException{
+        JSONArray arr = value.isArray();
+        if (arr == null) {
+            throw new JSONException("Expected JSON Array: " + value.toString());
+        }
+        return arr;
+    }
+    
+    
+    
+    protected static long getSize(JSONObject obj) throws JSONException{
+        JSONValue jsonTotalValue = obj.get("size");
+        if(jsonTotalValue == null){
+            throw new JSONException("Expected JSON Object with attribute total: " + obj.toString());
+        }
+        JSONNumber jsonTotal = jsonTotalValue.isNumber();
+        if(jsonTotal == null){
+            throw new JSONException("Expected JSON number: " + jsonTotalValue.toString());
+        }
+        return (long) jsonTotal.doubleValue();
+    }
+    
 
     /**
      * Parse a paginated list of tasks
@@ -74,20 +128,9 @@ public class SchedulerJSONUtils extends JSONUtils {
      * @throws JSONException if it fails to parse the JSON.
      */
     public static JSONPaginatedTasks parseJSONPaginatedTasks(JSONValue value) throws JSONException{
-        JSONObject jsonTasksTotal = value.isObject();
-        if(jsonTasksTotal == null){
-            throw new JSONException("Expected JSON Object: " + value.toString());
-        }
+        JSONObject jsonTasksTotal = getObject(value);
 
-        JSONValue jsonTasksValue = jsonTasksTotal.get("list");
-        if(jsonTasksValue == null){
-            throw new JSONException("Expected JSON Object with attribute tasks: " + value.toString());
-        }
-
-        JSONArray arr = jsonTasksValue.isArray();
-        if (arr == null) {
-            throw new JSONException("Expected JSON Array: " + jsonTasksValue.toString());
-        }
+        JSONArray arr = getArray(getProperty(jsonTasksTotal, "list"));
 
         List<Task> tasks = new ArrayList<Task>();
 
@@ -96,15 +139,7 @@ public class SchedulerJSONUtils extends JSONUtils {
             tasks.add(Task.parseJson(jsonTask));
         }
 
-        JSONValue jsonTotalValue = jsonTasksTotal.get("size");
-        if(jsonTotalValue == null){
-            throw new JSONException("Expected JSON Object with attribute total: " + value.toString());
-        }
-        JSONNumber jsonTotal = jsonTotalValue.isNumber();
-        if(jsonTotal == null){
-            throw new JSONException("Expected JSON number: " + jsonTasksValue.toString());
-        }
-        long totalTasks = (long) jsonTotal.doubleValue();
+        long totalTasks = getSize(jsonTasksTotal);
 
         JSONPaginatedTasks result = new JSONPaginatedTasks(tasks, totalTasks);
         return result;
@@ -132,24 +167,19 @@ public class SchedulerJSONUtils extends JSONUtils {
         return tags;
     }
 
+    
 
-
-    public static JSONPaginatedJobs getJobsFromJson(String result) throws JSONException{
+    public static JSONPaginatedJobs getJobsFromJson(JSONValue value) throws JSONException{
         JSONPaginatedJobs resultJobs = new JSONPaginatedJobs();
         Map<Integer, Job> jobs = resultJobs.getJobs();
-
-        JSONValue jsonVal = parseJSON(result);
-        JSONObject jsonInfo = jsonVal.isObject();
-        if (jsonInfo == null) {
-            throw new JSONException("Expected JSON Object: " + result);
-        }
-
-        String key = jsonInfo.keySet().iterator().next();
+        
+        JSONObject jsonInfo = getObject(value);
+        JSONObject jsonMap = getObject(getProperty(jsonInfo, "map"));
+        
+        String key = jsonMap.keySet().iterator().next();
         resultJobs.setRevision(Long.parseLong(key));
 
-        JSONArray jsonArr = jsonInfo.get(key).isArray();
-        if (jsonArr == null)
-            throw new JSONException("Expected JSONArray: " + jsonInfo.toString());
+        JSONArray jsonArr = getArray(getProperty(jsonMap, key));
 
         for (int i = 0; i < jsonArr.size(); i++) {
             JSONObject jsonJob = jsonArr.get(i).isObject();
@@ -157,7 +187,9 @@ public class SchedulerJSONUtils extends JSONUtils {
             jobs.put(j.getId(), j);
         }
 
-        resultJobs.setTotal(jobs.size());
+        long total = getSize(jsonInfo);
+        
+        resultJobs.setTotal(total);
 
         return resultJobs;
     }

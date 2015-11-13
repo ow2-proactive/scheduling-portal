@@ -88,7 +88,8 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
     public void jobSubmitted(Job j) {
     }
 
-    public void jobsUpdated(Map<Integer, Job> jobs) {
+    @Override
+    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
         if (this.displayedItem == null)
             return;
 

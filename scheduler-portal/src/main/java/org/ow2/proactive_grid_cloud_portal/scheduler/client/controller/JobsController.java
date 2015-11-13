@@ -136,14 +136,17 @@ public class JobsController {
     public void selectJob(Job job) {
         Job selectedJob = model.getSelectedJob();
         // cancel async requests relative to the old selection
-        if (!job.equals(selectedJob)) {
+        if (selectedJob != null && !selectedJob.equals(job)) {
             this.parentController.getParentController().getOutputController().cancelOutputRequests();
             this.parentController.getParentController().resetPendingTasksRequests();
         }
 
         this.model.selectJob(job);
-        this.parentController.getTasksController().updatingTasks();
-        this.parentController.getParentController().visuFetch(job.getId().toString());
+        
+        if(job != null){
+            this.parentController.getTasksController().updatingTasks();
+            this.parentController.getParentController().visuFetch(job.getId().toString());
+        }
     }
 
 
@@ -357,10 +360,11 @@ public class JobsController {
             public void onSuccess(String result) {
                 JSONPaginatedJobs resultJobs;
                 try {
-                    resultJobs = SchedulerJSONUtils.getJobsFromJson(result);
+                    resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);
                     Map<Integer, Job> jobs = resultJobs.getJobs();
-                    paginationController.computeMaxPage(jobs.size());
-                    model.setJobs(jobs, resultJobs.getRevision());
+                    long revision = resultJobs.getRevision();
+                    long totalJobs = resultJobs.getTotal();
+                    model.setJobs(jobs, revision, totalJobs);
 
                     int jn = jobs.size();
                     if (jn > 0) {

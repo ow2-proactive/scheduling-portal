@@ -73,7 +73,8 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
 
     }
 
-    public void jobsUpdated(Map<Integer, Job> jobs) {
+    @Override
+    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
         this.itemUpdated();
     }
 

@@ -252,7 +252,7 @@ public class PaginationView implements PaginationListener{
     protected void itemsUpdated(long totalItems){
         this.disableAllControls();
         this.paginationController.computeMaxPage(totalItems);
-        this.offsetRangeLabel.setContents("tasks " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
 }

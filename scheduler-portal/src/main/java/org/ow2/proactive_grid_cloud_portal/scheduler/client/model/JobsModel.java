@@ -111,7 +111,7 @@ public class JobsModel {
      * Empties the jobs list.
      */
     public void emptyJobs() {
-        setJobs(null, -1);
+        setJobs(null, -1, 0);
     }
 
 
@@ -123,7 +123,7 @@ public class JobsModel {
      * @param jobs a jobset, or null
      * @param rev the revision of this jobset
      */
-    public void setJobs(Map<Integer, Job> jobs, long rev) {
+    public void setJobs(Map<Integer, Job> jobs, long rev, long totalJobs) {
         this.jobs = jobs;
         this.jobsRev = rev;
         boolean empty = false;
@@ -134,7 +134,7 @@ public class JobsModel {
         }
 
         for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobsUpdated(this.jobs);
+            listener.jobsUpdated(this.jobs, totalJobs);
             if (empty)
                 listener.jobsUpdating();
         }

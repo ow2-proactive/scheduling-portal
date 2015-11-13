@@ -66,11 +66,6 @@ public class JobsPaginationController extends PaginationController{
 
 
     @Override
-    public boolean hasNext() {
-        return this.model.getTotalItems() == this.model.getPageSize();
-    }
-
-    @Override
     public Layout buildView() {
         this.view = new JobsPaginationView(itemsController);
         return this.view.build();

@@ -100,7 +100,7 @@ public class SchedulerListeners {
          *
          * @param jobs the last JobSet received by the model
          */
-        public void jobsUpdated(Map<Integer, Job> jobs);
+        public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs);
 
         /**
          * The job list has changed, and the new version is currently being fetched
