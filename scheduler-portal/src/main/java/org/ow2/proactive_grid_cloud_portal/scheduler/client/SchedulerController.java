@@ -562,7 +562,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                 SchedulerController.this.updateSchedulerStatus();
 
-                executionController.executionStateRevision();
+                executionController.executionStateRevision(false);
 
                 if (timerUpdate % userFetchTick == 0) {
                     final long t1 = System.currentTimeMillis();

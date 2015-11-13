@@ -77,9 +77,9 @@ public class TasksCentricController extends TasksController{
     }
 
 
-    public void tasksStateRevision(){
+    public void tasksStateRevision(boolean forceRefresh){
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
-        if(navigationModel.getTaskAutoRefreshOption()){
+        if(navigationModel.getTaskAutoRefreshOption() || forceRefresh){
             this.updateTasks(false);
         }
     }

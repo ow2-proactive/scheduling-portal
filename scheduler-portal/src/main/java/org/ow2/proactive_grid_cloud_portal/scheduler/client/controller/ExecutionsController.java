@@ -111,6 +111,7 @@ public class ExecutionsController {
         else{
             this.model.setMode(ExecutionListMode.TASK_CENTRIC);
         }
+        executionStateRevision(true);
     }
 
 
@@ -124,13 +125,13 @@ public class ExecutionsController {
     }
 
 
-    public void executionStateRevision(){
+    public void executionStateRevision(boolean forceRefresh){
         switch(this.model.getMode()){
         case JOB_CENTRIC:
             this.jobsController.jobsStateRevision();
             break;
         case TASK_CENTRIC:
-            this.tasksController.tasksStateRevision();
+            this.tasksController.tasksStateRevision(forceRefresh);
             break;
         }
     }
