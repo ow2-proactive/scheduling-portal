@@ -95,17 +95,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     static SchedulerPage inst;
 
-    // this is ugly but I need this stupid object for the visu view
-    // to control the scroll viewport of tab's 'paneContainer' which is
-    // not accessible anywhere
-    Tab visuTab;
-    
-    protected Tab tasksTab;
-    
     protected TabSet leftTabSet;
     
-    
+    protected Tab tasksTab;
     protected Layout tasksPane;
+    
+    protected Tab visuTab;
+    protected Canvas visuPane;
     
 
     /** root layout: parent to all widgets of this view */
@@ -543,9 +539,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tasksPane = this.controller.buildTaskView();
         this.buildTasksTab();
 
-        visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
         this.visuView = new VisualizationViewSwitcher(this.controller);
-        visuTab.setPane(this.visuView.build());
+        this.visuPane = this.visuView.build();
+        this.buildVisuTab();
 
         final Tab usersTab = new Tab("Users", Images.instance.user_16().getSafeUri().asString());
         this.usersView = new UsersView(this.controller);
@@ -671,11 +667,15 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         switch(mode){
         case JOB_CENTRIC:
             this.buildTasksTab();
+            this.buildVisuTab();
             leftTabSet.addTab(this.tasksTab, 0);
+            leftTabSet.addTab(this.visuTab, 1);
             break;
         case TASK_CENTRIC:
             leftTabSet.updateTab(tasksTab, null);
             leftTabSet.removeTab(tasksTab);
+            leftTabSet.updateTab(visuTab, null);
+            leftTabSet.removeTab(visuTab);
         }
         leftTabSet.markForRedraw();
     }
@@ -686,6 +686,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 .asString());
         
         tasksTab.setPane(tasksPane);
+    }
+    
+    
+    protected void buildVisuTab(){
+        visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
+        visuTab.setPane(this.visuPane);
     }
    
 }
