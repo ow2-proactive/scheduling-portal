@@ -147,7 +147,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(1);
         checkBoxes.setItems(autoRefreshOption);
-        checkBoxes.addStyleName("checkBoxForm");
+        checkBoxes.addStyleName("form");
 
         ToolStrip navTools = new ToolStrip();
         navTools.addStyleName("itemViewNav");

@@ -75,7 +75,8 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
     public SectionStackSection build(){
         this.jobsPane = this.controller.buildJobsView();
         this.tasksPane = this.controller.buildTasksView();
-
+        this.tasksPane.setStyleName("executionView");
+        
         HLayout panesLayout = new HLayout();
         panesLayout.addMember(jobsPane);
         panesLayout.addMember(tasksPane);

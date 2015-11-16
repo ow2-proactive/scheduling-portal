@@ -73,11 +73,11 @@ public class TasksCentricNavigationView extends TasksNavigationView{
         });
 
         DynamicForm form = new DynamicForm();
-        form.setLeft(5);
         form.setNumCols(4);
         form.setItems(fromDateItem, toDateItem);
+        form.setStyleName("form");
         layout.addMember(form);
-
+        
         return layout;
     }
 

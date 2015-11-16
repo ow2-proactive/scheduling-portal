@@ -84,6 +84,10 @@
 	float: right;
 }
 
-.itemViewNav .checkBoxForm {
+.itemViewNav .form {
 	top: 5px !important;
+}
+
+.executionView .itemViewNav {
+	left: 5px !important;
 }
