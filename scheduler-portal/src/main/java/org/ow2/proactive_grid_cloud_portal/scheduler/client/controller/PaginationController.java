@@ -153,6 +153,9 @@ public abstract class PaginationController {
         if(index < 0){
             index = 0;
         }
+        if(index > total){
+            index = total;
+        }
 
         if(range < total){
             return index + " - " + range;
@@ -164,7 +167,12 @@ public abstract class PaginationController {
 
 
     public String getNumberPageText(){
-        return "" + (this.model.getPage() + 1);
+        if(this.model.getTotalItems() > 0){
+            return "" + (this.model.getPage() + 1);
+        }
+        else{
+            return "0";
+        }
     }
 
 
