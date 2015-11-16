@@ -136,6 +136,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.autoRefreshOption.setTextBoxStyle("navBarOptionTextBox");
         this.autoRefreshOption.setTitleStyle("navbarOptionTitle");
         this.autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
+        this.autoRefreshOption.setValue(true);
         this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {

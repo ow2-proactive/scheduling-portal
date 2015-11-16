@@ -68,7 +68,7 @@ public class TasksNavigationModel {
     /**
      * Indicates if the tasks are automatically refreshed.
      */
-    private boolean taskAutoRefreshOption = false;
+    private boolean taskAutoRefreshOption = true;
 
     /**
      * Model for the pagination of the tasks.
