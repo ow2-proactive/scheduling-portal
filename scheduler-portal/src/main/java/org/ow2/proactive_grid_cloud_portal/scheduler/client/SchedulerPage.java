@@ -49,6 +49,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;

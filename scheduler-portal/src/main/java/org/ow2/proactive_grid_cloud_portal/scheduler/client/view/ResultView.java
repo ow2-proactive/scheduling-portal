@@ -34,15 +34,25 @@
  * ################################################################
  * $$PROACTIVE_INITIAL_DEV$$
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 
 import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.types.Alignment;
@@ -69,7 +79,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class ResultView implements TasksUpdatedListener, JobSelectedListener {
+public class ResultView implements TasksUpdatedListener, JobSelectedListener, TaskSelectedListener, ExecutionDisplayModeListener {
 
     private static final String OPT_TEXT = "View as text";
     private static final String OPT_BIN = "Download as binary";
@@ -90,9 +100,18 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
 
     public ResultView(SchedulerController controller) {
         this.controller = controller;
-        ((SchedulerModelImpl) controller.getModel()).getTasksModel().addTasksUpdatedListener(this);
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getModel();
+        schedulerModel.getTasksModel().addTasksUpdatedListener(this);
+        JobsModel jobsModel = schedulerModel.getExecutionsModel().getJobsModel();
         jobsModel.addJobSelectedListener(this);
+        
+        ExecutionsModel executionsModel = schedulerModel.getExecutionsModel();
+        TasksCentricModel tasksCentricModel = executionsModel.getTasksModel();
+        tasksCentricModel.addTaskSelectedListener(this);
+        tasksCentricModel.addJobSelectedListener(this);
+        
+        executionsModel.addExecutionsDisplayModeListener(this);
+        
     }
 
     /**
@@ -154,7 +173,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         visuButton = new IButton("Activate");
         visuButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                ResultView.this.controller.getOutputController().getLiveOutput();
+                controller.getOutputController().getLiveOutput();
                 visuButton.setDisabled(true);
             }
         });
@@ -209,20 +228,28 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
         root.showMember(visuPane);
         root.hideMember(label);
 
-        JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+        ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
+        JobsModel jobsModel = executionModel.getJobsModel();
         Job j = jobsModel.getSelectedJob();
-        if (j != null && controller.getOutputController().getModel().isLiveOutput("" + j.getId())) {
+        
+        boolean isLiveOutput = controller.getOutputController().getModel().isLiveOutput("" + j.getId());
+        boolean taskCentric = (executionModel.getMode() == ExecutionListMode.TASK_CENTRIC);
+        if ((j != null && isLiveOutput) || taskCentric) {
             visuButton.setDisabled(true);
         } else {
             visuButton.setDisabled(false);
         }
     }
 
-    public void jobUnselected() {
-
+    
+    protected void reset(){
         root.hideMember(formPane);
         root.hideMember(visuPane);
         root.showMember(label);
+    }
+    
+    public void jobUnselected() {
+        reset();
     }
     
     
@@ -230,4 +257,33 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener {
     public void selectedJobUpdated() {    
     }
 
+    @Override
+    public void modeSwitched(ExecutionListMode mode) {
+        Job job = this.controller.getSelectedJob();
+        if(job == null){
+            jobUnselected();
+        }
+        else{
+            jobSelected(job);
+        }
+        
+        if(mode == ExecutionListMode.JOB_CENTRIC){
+            TasksModel tasksModel = this.controller.getTasksController().getModel();
+            List<Task> tasks = tasksModel.getTasks();
+            long size = tasksModel.getTasksNavigationModel().getPaginationModel().getTotalItems();
+            tasksUpdated(tasks, size);
+        }
+    }
+
+    @Override
+    public void taskSelected(Task task) {
+        String taskName = task.getName(); 
+        taskSelect.setValueMap(taskName);
+        taskSelect.setValue(taskName);
+    }
+
+    @Override
+    public void taskUnselected() {
+        reset();
+    }
 }
