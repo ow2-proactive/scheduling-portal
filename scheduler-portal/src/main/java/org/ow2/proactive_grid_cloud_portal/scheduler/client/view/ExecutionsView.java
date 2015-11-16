@@ -127,13 +127,10 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
             }
         });
 
-        // for some reason IE9 standards fails to detect the right width
-        if (SC.isIE()) {
-            chkMy.setWidth(60);
-            chkPending.setWidth(60);
-            chkRunning.setWidth(60);
-            chkFinished.setWidth(60);
-        }
+        chkMy.setWidth(60);
+        chkPending.setWidth(60);
+        chkRunning.setWidth(60);
+        chkFinished.setWidth(80);
 
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(10);
