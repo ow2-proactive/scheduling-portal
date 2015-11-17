@@ -28,6 +28,10 @@
 	top: 5px !important;
 }
 
+.executionView .labelPaginationLayout {
+	top: 3px !important;
+}
+
 .btnBoxCombo {
 	padding-left: 0;
 	border-top-right-radius: 5px;
