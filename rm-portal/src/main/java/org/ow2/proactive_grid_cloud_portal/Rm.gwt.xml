@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='portal'>
 
+	<inherits name="com.google.gwt.logging.Logging"/>
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.smartgwt.SmartGwtNoScriptNoTheme" />
 	<inherits name="com.google.gwt.json.JSON" />
@@ -15,5 +16,7 @@
 	<source path='common/shared' />
 	<source path='rm/client' />
 	<source path='rm/shared' />
+
+
 
 </module>
