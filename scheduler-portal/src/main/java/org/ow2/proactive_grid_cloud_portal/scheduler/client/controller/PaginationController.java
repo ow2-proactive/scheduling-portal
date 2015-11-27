@@ -55,7 +55,6 @@ public abstract class PaginationController {
 
     /**
      * Builds a controller for the pagination logic.
-     * @param schedulerController the main controller.
      */
     public PaginationController(){
     }

@@ -133,12 +133,10 @@ public class TasksCentricController extends TasksController{
         boolean running = executionsModel.isFetchRunningExecutions();
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
-
-        if(tagFilter.equals("")){
+        if (tagFilter.isEmpty()){
             this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, callback);
-        }
-        else{
+        } else{
             this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, callback);
         }
