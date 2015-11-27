@@ -189,7 +189,7 @@ public abstract class PaginationController {
      * @return true if there is item after the current list of items, false otherwise.
      */
     public boolean hasNext(){
-        return (this.model.getRange() < this.model.getTotalItems());
+        return this.model.getTotalItems() > (this.model.getOffset() + this.model.getPageSize());
     }
 
 

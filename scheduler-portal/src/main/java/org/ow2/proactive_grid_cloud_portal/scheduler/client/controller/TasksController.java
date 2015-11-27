@@ -151,7 +151,7 @@ public class TasksController {
 
             PaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
-            int limit = paginationModel.getRange();
+            int limit = paginationModel.getPageSize();
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
             if(tagFilter.equals("")){

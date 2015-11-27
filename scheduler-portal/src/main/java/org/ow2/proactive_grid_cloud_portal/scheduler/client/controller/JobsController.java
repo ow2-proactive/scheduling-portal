@@ -324,7 +324,7 @@ public class JobsController {
         final long t1 = System.currentTimeMillis();
 
         int offset = paginationController.getModel().getOffset();
-        int range = paginationController.getModel().getRange();
+        int limit = paginationController.getModel().getPageSize();
 
         ExecutionsModel executionModel = this.parentController.getModel();
         boolean fetchMyJobs = executionModel.isFetchMyExecutionsOnly();
@@ -333,7 +333,7 @@ public class JobsController {
         boolean fetchFinished = executionModel.isFetchFinishedExecutions();
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, fetchMyJobs,
+        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, limit, fetchMyJobs,
                 fetchPending, fetchRunning, fetchFinished,
                 new AsyncCallback<String>() {
 
