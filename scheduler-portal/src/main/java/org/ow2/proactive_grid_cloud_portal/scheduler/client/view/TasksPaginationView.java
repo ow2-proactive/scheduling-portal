@@ -43,15 +43,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCont
 
 public class TasksPaginationView extends PaginationView implements TasksUpdatedListener{
 
-
-
     public TasksPaginationView(TasksController controller){
-        this.itemTypeName = "tasks";
+        this.itemTypeName = "Tasks";
         this.paginationController = controller.getTaskNavigationController().getPaginationController();
         this.paginationController.getModel().addPaginationListener(this);
         controller.getModel().addTasksUpdatedListener(this);
     }
-
 
     @Override
     public void tasksUpdating() {

@@ -143,7 +143,7 @@ public class PaginationView implements PaginationListener{
         this.offsetRangeLabel.setPadding(0);
 
 
-        Label pageLabel = new Label("page");
+        Label pageLabel = new Label("Page");
         pageLabel.setWidth100();
         pageLabel.setAlign(Alignment.RIGHT);
         pageLabel.setMinWidth(30);
