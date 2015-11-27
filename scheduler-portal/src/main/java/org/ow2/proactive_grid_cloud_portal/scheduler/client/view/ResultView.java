@@ -200,7 +200,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener, Ta
     }
 
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
-        if (tasks.size() == this.taskSelect.getClientPickListData().length) {
+        if (tasks == null || tasks.size() == this.taskSelect.getClientPickListData().length) {
             return;
         }
 

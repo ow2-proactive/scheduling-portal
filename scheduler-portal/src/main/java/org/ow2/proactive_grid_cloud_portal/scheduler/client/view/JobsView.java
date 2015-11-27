@@ -45,7 +45,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Paginatio
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
 /**
@@ -63,6 +62,7 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
     public JobsView(JobsController controller) {
         this.controller = controller;
         this.controller.getModel().addJobsUpdatedListener(this);
+        this.hasToolBar = false;
     }
 
     public void jobsUpdating() {
@@ -81,15 +81,16 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
 
     @Override
     protected Layout buildToolbar() {
-        ToolStrip toolbar = new ToolStrip();
-        toolbar.addStyleName("itemViewNav");
-        toolbar.setHeight(34);
-        toolbar.setWidth100();
-        toolbar.setBackgroundImage("");
-        toolbar.setBackgroundColor("#fafafa");
-        toolbar.setBorder("0px");
-
-        return toolbar;
+//        ToolStrip toolbar = new ToolStrip();
+//        toolbar.addStyleName("itemViewNav");
+//        toolbar.setHeight(34);
+//        toolbar.setWidth100();
+//        toolbar.setBackgroundImage("");
+//        toolbar.setBackgroundColor("#fafafa");
+//        toolbar.setBorder("0px");
+//
+//        return toolbar;
+        return null;
     }
 
     @Override
