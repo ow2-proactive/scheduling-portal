@@ -849,12 +849,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * (java.lang.String, int, int, boolean, boolean, boolean, boolean)
      */
     @Override
-    public String revisionAndjobsinfo(final String sessionId, final int index, final int range, final boolean myJobsOnly,
+    public String revisionAndjobsinfo(final String sessionId, final int index, final int limit, final boolean myJobsOnly,
                                       final boolean pending, final boolean running, final boolean finished) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                return restClient.revisionAndjobsinfo(sessionId, index, range, myJobsOnly, pending, running, finished);
+                return restClient.revisionAndjobsinfo(sessionId, index, limit, myJobsOnly, pending, running, finished);
             }
         });
     }

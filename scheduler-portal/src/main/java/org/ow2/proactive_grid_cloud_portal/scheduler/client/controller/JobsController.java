@@ -61,8 +61,8 @@ import com.smartgwt.client.widgets.layout.Layout;
 
 /**
  * Controller for the jobs logic.
- * @author the activeeon team
  *
+ * @author the activeeon team
  */
 public class JobsController {
 
@@ -131,7 +131,7 @@ public class JobsController {
     /**
      * Select another job.
      *
-     * @param jobId of the new job selection. you can use null to cancel the current selection
+     * @param job new job selected. You can use null to cancel the current selection.
      */
     public void selectJob(Job job) {
         Job selectedJob = model.getSelectedJob();
@@ -143,7 +143,7 @@ public class JobsController {
 
         this.model.selectJob(job);
         
-        if(job != null){
+        if (job != null){
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
         }
@@ -156,7 +156,7 @@ public class JobsController {
      * @param jobId id of the job to pause/resume
      */
     public void pauseJobs(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
+        final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
         }
@@ -180,7 +180,7 @@ public class JobsController {
      * @param jobId id of the job to pause/resume
      */
     public void resumeJobs(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
+        final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
         }
@@ -204,7 +204,7 @@ public class JobsController {
      * @param jobId id of the job
      */
     public void removeJob(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
+        final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
         }
@@ -228,7 +228,7 @@ public class JobsController {
      * @param jobId id of the job
      */
     public void killJob(List<String> jobId) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
+        final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
         }
@@ -255,7 +255,7 @@ public class JobsController {
      * @param priority new priority
      */
     public void setJobPriority(List<String> jobId, final JobPriority priority) {
-        final List<Integer> l = new ArrayList<Integer>(jobId.size());
+        final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
         }
@@ -317,14 +317,14 @@ public class JobsController {
      * update the model and views
      */
     public void fetchJobs(boolean showUpdating) {
-        if(showUpdating){
+        if (showUpdating){
             model.jobsUpdating();
         }
 
         final long t1 = System.currentTimeMillis();
 
         int offset = paginationController.getModel().getOffset();
-        int range = paginationController.getModel().getRange();
+        int limit = paginationController.getModel().getPageSize();
 
         ExecutionsModel executionModel = this.parentController.getModel();
         boolean fetchMyJobs = executionModel.isFetchMyExecutionsOnly();
@@ -333,7 +333,7 @@ public class JobsController {
         boolean fetchFinished = executionModel.isFetchFinishedExecutions();
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, range, fetchMyJobs,
+        scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, limit, fetchMyJobs,
                 fetchPending, fetchRunning, fetchFinished,
                 new AsyncCallback<String>() {
 
@@ -383,7 +383,7 @@ public class JobsController {
     /**
      * Fetch jobs state revision. If revision is more recent, fetch jobs.
      */
-    public void jobsStateRevision(){
+    public void jobsStateRevision() {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.schedulerStateRevision(LoginModel.getInstance().getSessionId(), new AsyncCallback<Long>() {
 

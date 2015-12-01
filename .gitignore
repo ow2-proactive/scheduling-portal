@@ -1,6 +1,7 @@
 *.iml
 build/
 .gradle
+.idea
 rm-portal/src/main/webapp/WEB-INF/deploy/
 rm-portal/src/main/webapp/portal/
 scheduler-portal/src/main/webapp/WEB-INF/deploy/

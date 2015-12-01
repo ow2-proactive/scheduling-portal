@@ -58,6 +58,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksCentricVie
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class TasksCentricController extends TasksController{
 
 
@@ -120,7 +123,7 @@ public class TasksCentricController extends TasksController{
 
         PaginationModel paginationModel = navigationModel.getPaginationModel();
         int offset = paginationModel.getOffset();
-        int limit = paginationModel.getRange();
+        int limit = paginationModel.getPageSize();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
@@ -130,12 +133,10 @@ public class TasksCentricController extends TasksController{
         boolean running = executionsModel.isFetchRunningExecutions();
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
-
-        if(tagFilter.equals("")){
+        if (tagFilter.isEmpty()){
             this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, callback);
-        }
-        else{
+        } else{
             this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, callback);
         }

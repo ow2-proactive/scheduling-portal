@@ -161,8 +161,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
             return false;
         }
 
-
-        if(this.lastRequest.equals("") || !query.startsWith(lastRequest)){
+        if(this.lastRequest.isEmpty() || !query.startsWith(lastRequest)){
             return true;
         }
 

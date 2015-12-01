@@ -344,7 +344,7 @@ public interface SchedulerService extends RemoteService {
      *   - the JobInfo class
      * @param sessionId a valid session id
      * @param index offset
-     * @param range max size of the result set
+     * @param limit max size of the result set
      * @param myJobs fetch only my jobs
      * @param pending fetch pending jobs
      * @param running fetch running jobs
@@ -356,8 +356,8 @@ public interface SchedulerService extends RemoteService {
     String revisionAndjobsinfo(@HeaderParam("sessionid")
 
     String sessionId, @QueryParam("index")
-    int index, @QueryParam("range")
-    int range, @QueryParam("myjobs")
+    int index, @QueryParam("limit")
+    int limit, @QueryParam("myjobs")
     boolean myJobs, boolean pending, boolean running, boolean finished) throws RestServerException,
             ServiceException;
 

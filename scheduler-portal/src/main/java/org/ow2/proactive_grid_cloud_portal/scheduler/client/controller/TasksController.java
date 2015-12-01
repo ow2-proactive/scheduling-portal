@@ -83,8 +83,6 @@ public class TasksController {
     }
 
 
-
-
     public SchedulerController getParentController() {
         return parentController;
     }
@@ -120,7 +118,7 @@ public class TasksController {
         }
 
         if (emptyTaskList) {
-            model.setTasks(new ArrayList<Task>(), 0);
+            model.setTasks(new ArrayList<Task>(0), 0);
         } else {  
             final String jobId = "" + selectedJob.getId();
 
@@ -151,13 +149,13 @@ public class TasksController {
 
             PaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
-            int limit = paginationModel.getRange();
+            int limit = paginationModel.getPageSize();
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-            if(tagFilter.equals("")){
+
+            if (tagFilter.isEmpty()){
                 this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
-            }
-            else{
+            } else{
                 this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
             }
         }
@@ -166,7 +164,6 @@ public class TasksController {
 
     /**
      * Kill a task within a job 
-     * @param jobId job id
      * @param taskName task name
      */
     public void killTask(final String taskName) {
@@ -191,7 +188,6 @@ public class TasksController {
 
     /**
      * Restart a task within a job 
-     * @param jobId job id
      * @param taskName task name
      */
     public void restartTask(final String taskName) {
@@ -216,7 +212,6 @@ public class TasksController {
 
     /**
      * Preempt a task within a job 
-     * @param jobId job id
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
@@ -270,7 +265,7 @@ public class TasksController {
     /**
      * Select another task.
      *
-     * @param taskId of the new job selection. you can use null to cancel the current selection
+     * @param task of the new job selection. you can use null to cancel the current selection
      */
     public void selectTask(Task task) {
         this.model.selectTask(task);

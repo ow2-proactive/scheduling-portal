@@ -139,16 +139,6 @@ public class PaginationModel {
         return (this.currentPage * this.getPageSize());
     }
 
-
-    /**
-     * Gets the index of the last item to be retrieved for the current page.
-     * @return the index of the last item to be retrieved for the current page.
-     */
-    public int getRange(){
-        return this.getPageSize() * (this.currentPage + 1);
-    }
-
-
     /**
      * Gets the number of the last page.
      * @return the number of the last page.
