@@ -61,6 +61,8 @@ public abstract class AbstractGridItemsView implements PaginationListener{
     protected Label errorLabel = null;
 
     protected String itemName;
+    
+    protected boolean hasToolBar = true;
 
 
     protected void itemUpdating(){
@@ -84,7 +86,9 @@ public abstract class AbstractGridItemsView implements PaginationListener{
         this.itemsGrid.show();
     }
 
-    protected abstract Layout buildToolbar();
+    protected Layout buildToolbar(){
+        return null;
+    }
 
     protected abstract Layout buildPagination();
 
@@ -122,13 +126,17 @@ public abstract class AbstractGridItemsView implements PaginationListener{
 
 
     public Layout build() {
-        Layout content = this.buildContent();
-        Layout navTools = this.buildToolbar();
-        Layout paginationBar = this.buildPagination();
-
         VLayout itemsViewLayout = new VLayout();
-        itemsViewLayout.addMember(navTools);
+        
+        if(this.hasToolBar){
+            Layout navTools = this.buildToolbar();
+            itemsViewLayout.addMember(navTools);
+        }
+        
+        Layout content = this.buildContent();
         itemsViewLayout.addMember(content);
+        
+        Layout paginationBar = this.buildPagination();
         itemsViewLayout.addMember(paginationBar);
 
         return itemsViewLayout;

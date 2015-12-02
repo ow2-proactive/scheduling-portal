@@ -61,7 +61,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
     public static GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 100, true, false);
     public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true, false);
     public static GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", 100, true, false);
-    public static GridColumns VISU_ATTR = new GridColumns("visu", " ", 20, false, false);
+    public static GridColumns VISU_ATTR = new GridColumns("visu", "visu", 30, false, false);
 
     @Override
     public GridColumns[] getColumns() {
