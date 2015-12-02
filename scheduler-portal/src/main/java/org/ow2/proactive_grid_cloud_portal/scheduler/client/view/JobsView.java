@@ -79,19 +79,7 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
     }
 
 
-    @Override
-    protected Layout buildToolbar() {
-//        ToolStrip toolbar = new ToolStrip();
-//        toolbar.addStyleName("itemViewNav");
-//        toolbar.setHeight(34);
-//        toolbar.setWidth100();
-//        toolbar.setBackgroundImage("");
-//        toolbar.setBackgroundColor("#fafafa");
-//        toolbar.setBorder("0px");
-//
-//        return toolbar;
-        return null;
-    }
+    
 
     @Override
     protected Layout buildPagination() {

@@ -86,7 +86,9 @@ public abstract class AbstractGridItemsView implements PaginationListener{
         this.itemsGrid.show();
     }
 
-    protected abstract Layout buildToolbar();
+    protected Layout buildToolbar(){
+        return null;
+    }
 
     protected abstract Layout buildPagination();
 
