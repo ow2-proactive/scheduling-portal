@@ -57,14 +57,14 @@ public class TasksCentricNavigationView extends TasksNavigationView{
     public Layout build() {
         Layout layout = super.build();
 
-        RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "from");
+        RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "From");
         fromDateItem.addChangedHandler(new ChangedHandler() {   
             @Override
             public void onChanged(ChangedEvent event) {
                 fromDateChangedHandler(event);
             }
         });
-        RelativeDateItem toDateItem = new RelativeDateItem("toDate", "to");
+        RelativeDateItem toDateItem = new RelativeDateItem("toDate", "To");
         toDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
