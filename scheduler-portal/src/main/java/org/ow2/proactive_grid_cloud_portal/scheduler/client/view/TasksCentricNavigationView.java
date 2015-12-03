@@ -35,42 +35,54 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Date;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
-
+import com.smartgwt.client.data.RelativeDate;
+import com.smartgwt.client.types.RelativeDateRangePosition;
+import com.smartgwt.client.util.DateUtil;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.Layout;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricNavigationModel;
 
-public class TasksCentricNavigationView extends TasksNavigationView{
+import java.util.Date;
+
+public class TasksCentricNavigationView extends TasksNavigationView {
 
     public TasksCentricNavigationView(TasksCentricNavigationController controller) {
         super(controller);
     }
-
 
     @Override
     public Layout build() {
         Layout layout = super.build();
 
         RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "From");
-        fromDateItem.addChangedHandler(new ChangedHandler() {   
+        fromDateItem.setValue("$yesterday");
+        fromDateItem.setRangePosition(RelativeDateRangePosition.START);
+        fromDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
                 fromDateChangedHandler(event);
             }
         });
+
         RelativeDateItem toDateItem = new RelativeDateItem("toDate", "To");
+        toDateItem.setValue("$tomorrow");
+        toDateItem.setRangePosition(RelativeDateRangePosition.END);
         toDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
                 toDateChangedHandler(event);
             }
         });
+
+
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) controller.getModel();
+        navigationModel.setFromDate(getTime(fromDateItem));
+        navigationModel.setToDate(getTime(toDateItem));
 
         DynamicForm form = new DynamicForm();
         form.setNumCols(4);
@@ -81,20 +93,27 @@ public class TasksCentricNavigationView extends TasksNavigationView{
         return layout;
     }
 
+    private long getTime(RelativeDateItem relativeDateItem) {
+        // Cannot use relativeDateItem#getRelativeDate() otherwise superdev mode freeze
+        return DateUtil.getAbsoluteDate(
+                new RelativeDate((String) relativeDateItem.getValue())).getTime();
+    }
 
     protected void fromDateChangedHandler(ChangedEvent event){
-        Date value = (Date) event.getValue();
-        long time = value.getTime();
+        long time = getTime(event);
         ((TasksCentricNavigationController) this.controller).changeFromDate(time);
     }
 
     protected void toDateChangedHandler(ChangedEvent event){
-        Date value = (Date) event.getValue();
-        long time = value.getTime();
+        long time = getTime(event);
         ((TasksCentricNavigationController) this.controller).changeToDate(time);
     }
 
-    
+    private long getTime(ChangedEvent event) {
+        Date value = (Date) event.getValue();
+        return value.getTime();
+    }
+
     @Override
     public void jobSelected(Job job) {
     }
