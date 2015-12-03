@@ -60,6 +60,7 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         Layout layout = super.build();
 
         RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "From");
+        fromDateItem.setPrompt("Filter tasks based on startTime or finishedTime (i.e. return tasks having startTime or finishedTime value greater or equals than selected value)");
         fromDateItem.setValue("$yesterday");
         fromDateItem.setRangePosition(RelativeDateRangePosition.START);
         fromDateItem.addChangedHandler(new ChangedHandler() {
@@ -70,6 +71,7 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         });
 
         RelativeDateItem toDateItem = new RelativeDateItem("toDate", "To");
+        toDateItem.setPrompt("Filter tasks based on startTime or finishedTime (i.e. return tasks having startTime or finishedTime value lower or equals than selected value)");
         toDateItem.setValue("$tomorrow");
         toDateItem.setRangePosition(RelativeDateRangePosition.END);
         toDateItem.addChangedHandler(new ChangedHandler() {
@@ -78,7 +80,6 @@ public class TasksCentricNavigationView extends TasksNavigationView {
                 toDateChangedHandler(event);
             }
         });
-
 
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) controller.getModel();
         navigationModel.setFromDate(getTime(fromDateItem));
