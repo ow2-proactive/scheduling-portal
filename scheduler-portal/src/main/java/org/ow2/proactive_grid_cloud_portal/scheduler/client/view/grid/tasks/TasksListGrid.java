@@ -75,6 +75,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
 
 /**
  * A grid that shows tasks
@@ -187,34 +188,33 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     public void tasksUpdatedFailure(String message) {
     }
 
-
-
-
     @Override
     protected String getCellCSSText(ListGridRecord record, int rowNum, int colNum) {
         String base = super.getCellCSSText(record, rowNum, colNum);
-        if (colNum == 2) {
+
+        String fieldName = this.getFieldName(colNum);
+
+        if (fieldName.equals(TasksColumnsFactory.STATUS_ATTR.getName())) {
             String st = record.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName());
             if (st.equals(TaskStatus.PENDING.toString()) ||
-                    st.equals(TaskStatus.SUBMITTED.toString()))
+                    st.equals(TaskStatus.SUBMITTED.toString())) {
                 return "color:#1a8bba;" + base;
-            else if (st.equals(TaskStatus.RUNNING.toString()))
+            } else if (st.equals(TaskStatus.RUNNING.toString())) {
                 return "color:#176925;font-weight:bold;" + base;
-            else if (st.equals(TaskStatus.ABORTED.toString()) ||
-                    st.equals(TaskStatus.FAILED.toString()))
+            } else if (st.equals(TaskStatus.ABORTED.toString()) ||
+                    st.equals(TaskStatus.FAILED.toString())) {
                 return "color:#d37a11;font-weight:bold;" + base;
-            else if (st.equals(TaskStatus.FAULTY.toString()) ||
+            } else if (st.equals(TaskStatus.FAULTY.toString()) ||
                     st.equals(TaskStatus.NOT_STARTED.toString()) ||
-                    st.equals(TaskStatus.NOT_RESTARTED.toString()))
+                    st.equals(TaskStatus.NOT_RESTARTED.toString())) {
                 return "color:#c50000;font-weight:bold;" + base;
-            else
+            } else {
                 return base;
+            }
         }
+        
         return base;
     }
-
-
-
 
     @Override
     protected Canvas createRecordComponent(final ListGridRecord record, Integer colNum) {
