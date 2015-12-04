@@ -163,6 +163,14 @@ public class JSUtil {
         min = seconds / 60;
         sec = seconds % 60;
 
+        if (seconds < 0) {
+            day = Math.abs(day);
+            hou = Math.abs(hou);
+            min = Math.abs(min);
+            sec = Math.abs(sec);
+            ret.append("in ");
+        }
+
         if (day > 0) {
             ret.append(day).append("d ");
             ret.append(hou).append("h ");
@@ -171,11 +179,12 @@ public class JSUtil {
             ret.append(min).append("mn ");
         } else if (min > 0) {
             ret.append(min).append("mn ");
-        } else {
+        } else if (sec > 0) {
             ret.append(sec).append("s ");
         }
 
-        ret.append("ago");
+        if (seconds > 0)
+            ret.append("ago");
 
         return ret.toString();
     }

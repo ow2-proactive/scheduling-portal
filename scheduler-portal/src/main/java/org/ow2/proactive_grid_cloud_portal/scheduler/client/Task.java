@@ -39,6 +39,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -59,6 +61,7 @@ public class Task implements Serializable, Comparable<Task> {
     private long startTime;
     private long finishTime;
     private long executionDuration;
+    private long startAtTime;
     private String description;
     private String tag;
     private int maxNumberOfExec;
@@ -94,7 +97,7 @@ public class Task implements Serializable, Comparable<Task> {
      * @param maxNumberOfExec maximum number of executions
      * @param numberOfExecLeft number of executions left
      * @param maxNumberOfExecOnFailure maximum number of executions on failure
-     * @param maxNumberOfExecOnFailureLeft maximum number of executions on failure left
+     * @param numberOfExecOnFailureLeft maximum number of executions on failure left
      */
     public Task(long id, String name, TaskStatus status, String hostName, long startTime, long finishedTime,
             long executionDuration, String description, int nodeCount, int maxNumberOfExec,
@@ -107,6 +110,7 @@ public class Task implements Serializable, Comparable<Task> {
         this.startTime = startTime;
         this.finishTime = finishedTime;
         this.executionDuration = executionDuration;
+        this.startAtTime = -1L;
         this.description = description;
         this.nodeCount = nodeCount;
         this.maxNumberOfExec = maxNumberOfExec;
@@ -225,6 +229,22 @@ public class Task implements Serializable, Comparable<Task> {
      */
     public long getExecutionTime() {
         return executionDuration;
+    }
+
+    /**
+     * Setter of the start_at of the task.
+     * @param startAtTime the next starting time to set
+     */
+    public void setStartAtTime(long startAtTime) {
+        this.startAtTime = startAtTime;
+    }
+
+    /**
+     * Getter of the start_at time of the task.
+     * @return the next starting time
+     */
+    public long getStartAtTime() {
+        return startAtTime;
     }
 
     public int getMaxNumberOfExec() {
@@ -380,6 +400,27 @@ public class Task implements Serializable, Comparable<Task> {
         result.setTag(tag);
         result.setJobId(jobId);
         result.setJobName(jobName);
+
+        long startAtTime = 0L;
+        JSONObject genericInformationsObject = jsonTask.get("genericInformations").isObject();
+        if (genericInformationsObject != null) {
+            JSONValue genericInformationsValue = genericInformationsObject.get("START_AT");
+            if (genericInformationsValue != null) {
+                String genericInformationsStr = genericInformationsValue.isString().stringValue();
+                DateTimeFormat dtf = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                Date startAtDate = dtf.parse(genericInformationsStr);
+                startAtTime = startAtDate.getTime();
+            }
+            else {
+                // NO START_AT info
+                startAtTime = -2L;
+            }
+        }
+        else {
+            // NO GENERIC INFORMATIONS
+            startAtTime = -1L;
+        }
+        result.setStartAtTime(startAtTime);
         return result;
     }
 
