@@ -37,6 +37,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Date;
 
+import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
 
@@ -51,20 +53,22 @@ public class TasksCentricNavigationView extends TasksNavigationView{
     public TasksCentricNavigationView(TasksCentricNavigationController controller) {
         super(controller);
     }
-
+    Canvas datesCanvas;
+    RelativeDateItem fromDateItem;
+    RelativeDateItem toDateItem;
 
     @Override
     public Layout build() {
         Layout layout = super.build();
 
-        RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "from");
-        fromDateItem.addChangedHandler(new ChangedHandler() {   
+        fromDateItem = new RelativeDateItem("fromDate", "from");
+        fromDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
                 fromDateChangedHandler(event);
             }
         });
-        RelativeDateItem toDateItem = new RelativeDateItem("toDate", "to");
+        toDateItem = new RelativeDateItem("toDate", "to");
         toDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
@@ -75,25 +79,54 @@ public class TasksCentricNavigationView extends TasksNavigationView{
         DynamicForm form = new DynamicForm();
         form.setNumCols(4);
         form.setItems(fromDateItem, toDateItem);
-        form.setStyleName("form");
+        //form.setStyleName("form");
         layout.addMember(form);
-        
+
+        datesCanvas = fromDateItem.getContainerWidget();
+        // The far right of the canvas border isn't visible
+        LayoutSpacer spacer = new LayoutSpacer(5,datesCanvas.getHeight());
+        layout.addMember(spacer);
+
         return layout;
     }
 
-
     protected void fromDateChangedHandler(ChangedEvent event){
         Date value = (Date) event.getValue();
-        long time = value.getTime();
-        ((TasksCentricNavigationController) this.controller).changeFromDate(time);
+        long fromDate = value.getTime();
+        if (dateRangeIsValid()) {
+            resetDatesCanvasBGColor();
+            ((TasksCentricNavigationController) this.controller).changeFromDate(fromDate);
+        }
+        else {
+            highlightDates();
+        }
     }
 
     protected void toDateChangedHandler(ChangedEvent event){
         Date value = (Date) event.getValue();
-        long time = value.getTime();
-        ((TasksCentricNavigationController) this.controller).changeToDate(time);
+        long toDate = value.getTime();
+        if (dateRangeIsValid()) {
+            resetDatesCanvasBGColor();
+            ((TasksCentricNavigationController) this.controller).changeToDate(toDate);
+        }
+        else {
+            highlightDates();
+        }
     }
 
+    private boolean dateRangeIsValid() {
+        long fromDate = RelativeDateItem.getAbsoluteDate(fromDateItem.getRelativeDate()).getTime();
+        long toDate = RelativeDateItem.getAbsoluteDate(toDateItem.getRelativeDate()).getTime();
+        return fromDate < toDate;
+    }
+
+    private void resetDatesCanvasBGColor() {
+        datesCanvas.setBorder("");
+    }
+
+    private void highlightDates() {
+        datesCanvas.setBorder("2px solid red");
+    }
     
     @Override
     public void jobSelected(Job job) {

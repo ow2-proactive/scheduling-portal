@@ -9,3 +9,10 @@ scheduler-portal/src/main/webapp/portal/
 
 /lib/
 /.settings/
+
+# eclipse
+*.project
+*.classpath
+*.settings
+applet/bin/
+rm-portal/bin/
