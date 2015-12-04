@@ -63,6 +63,7 @@ public class JobsView extends FilteringGridItemView implements JobsUpdatedListen
         this.controller = controller;
         this.controller.getModel().addJobsUpdatedListener(this);
         this.hasToolBar = false;
+        this.itemName = "jobs";
     }
 
     public void jobsUpdating() {
