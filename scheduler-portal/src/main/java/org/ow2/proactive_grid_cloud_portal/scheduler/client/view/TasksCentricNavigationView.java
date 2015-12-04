@@ -35,14 +35,25 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.smartgwt.client.data.RelativeDate;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.RelativeDateRangePosition;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.DateUtil;
+import com.smartgwt.client.widgets.Img;
+import com.smartgwt.client.widgets.ImgButton;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricNavigationModel;
@@ -60,7 +71,6 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         Layout layout = super.build();
 
         RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "From");
-        fromDateItem.setPrompt("Filter tasks based on startTime or finishedTime (i.e. return tasks having startTime or finishedTime value greater or equals than selected value)");
         fromDateItem.setValue("$yesterday");
         fromDateItem.setRangePosition(RelativeDateRangePosition.START);
         fromDateItem.addChangedHandler(new ChangedHandler() {
@@ -71,7 +81,7 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         });
 
         RelativeDateItem toDateItem = new RelativeDateItem("toDate", "To");
-        toDateItem.setPrompt("Filter tasks based on startTime or finishedTime (i.e. return tasks having startTime or finishedTime value lower or equals than selected value)");
+        toDateItem.setCellHeight(34);
         toDateItem.setValue("$tomorrow");
         toDateItem.setRangePosition(RelativeDateRangePosition.END);
         toDateItem.addChangedHandler(new ChangedHandler() {
@@ -87,10 +97,24 @@ public class TasksCentricNavigationView extends TasksNavigationView {
 
         DynamicForm form = new DynamicForm();
         form.setNumCols(4);
+        form.setLayoutAlign(VerticalAlignment.CENTER);
+        form.setHeight(34);
         form.setItems(fromDateItem, toDateItem);
-        form.setStyleName("form");
+        form.setAutoWidth();
+
+        Img imgButton = new Img();
+        imgButton.setSize(16);
+        imgButton.setLayoutAlign(VerticalAlignment.CENTER);
+        imgButton.setPrompt("Filtered tasks have at least one event (scheduled, started or finished) in this period of time.");
+        imgButton.setSrc(Images.instance.about_16().getSafeUri().asString());
+
+        layout.setAlign(VerticalAlignment.CENTER);
+        layout.addMember(new LayoutSpacer());
         layout.addMember(form);
-        
+        layout.addMember(new LayoutSpacer(4, 34));
+        layout.addMember(imgButton);
+        layout.addMember(new LayoutSpacer(12, 34));
+
         return layout;
     }
 

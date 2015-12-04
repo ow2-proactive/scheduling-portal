@@ -35,6 +35,7 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
@@ -143,9 +144,8 @@ public class ExecutionsView implements ExecutionDisplayModeListener{
             chkMy.setDisabled(true);
         }
 
-        Canvas fill = new Canvas();
-        fill.setWidth(5);
-        executionsSection.setControls(checkBoxes, fill);
+        LayoutSpacer space = new LayoutSpacer(1, 10);
+        executionsSection.setControls(checkBoxes, space);
 
         return executionsSection;
     }
