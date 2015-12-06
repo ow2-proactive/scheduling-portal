@@ -35,14 +35,6 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import com.smartgwt.client.widgets.layout.LayoutSpacer;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
-
-import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -50,7 +42,12 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.SectionStackSection;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 
 public class ExecutionsView implements ExecutionDisplayModeListener{
 

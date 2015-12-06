@@ -35,22 +35,16 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.smartgwt.client.data.RelativeDate;
-import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.RelativeDateRangePosition;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.DateUtil;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
-import com.smartgwt.client.widgets.ImgButton;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -66,11 +60,17 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         super(controller);
     }
 
+    private Canvas datesCanvas;
+
+    private RelativeDateItem fromDateItem;
+
+    private RelativeDateItem toDateItem;
+
     @Override
     public Layout build() {
         Layout layout = super.build();
 
-        RelativeDateItem fromDateItem = new RelativeDateItem("fromDate", "From");
+        fromDateItem = new RelativeDateItem("fromDate", "From");
         fromDateItem.setValue("$yesterday");
         fromDateItem.setRangePosition(RelativeDateRangePosition.START);
         fromDateItem.addChangedHandler(new ChangedHandler() {
@@ -80,8 +80,8 @@ public class TasksCentricNavigationView extends TasksNavigationView {
             }
         });
 
-        RelativeDateItem toDateItem = new RelativeDateItem("toDate", "To");
-        toDateItem.setCellHeight(34);
+        toDateItem = new RelativeDateItem("toDate", "To");
+        toDateItem.setCellHeight(32);
         toDateItem.setValue("$tomorrow");
         toDateItem.setRangePosition(RelativeDateRangePosition.END);
         toDateItem.addChangedHandler(new ChangedHandler() {
@@ -98,7 +98,7 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         DynamicForm form = new DynamicForm();
         form.setNumCols(4);
         form.setLayoutAlign(VerticalAlignment.CENTER);
-        form.setHeight(34);
+        form.setHeight(32);
         form.setItems(fromDateItem, toDateItem);
         form.setAutoWidth();
 
@@ -111,27 +111,28 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         layout.setAlign(VerticalAlignment.CENTER);
         layout.addMember(new LayoutSpacer());
         layout.addMember(form);
-        layout.addMember(new LayoutSpacer(4, 34));
+        layout.addMember(new LayoutSpacer(4, 32));
         layout.addMember(imgButton);
-        layout.addMember(new LayoutSpacer(12, 34));
+        layout.addMember(new LayoutSpacer(12, 32));
+
+        datesCanvas = fromDateItem.getContainerWidget();
 
         return layout;
     }
 
     private long getTime(RelativeDateItem relativeDateItem) {
-        // Cannot use relativeDateItem#getRelativeDate() otherwise superdev mode freeze
-        return DateUtil.getAbsoluteDate(
-                new RelativeDate((String) relativeDateItem.getValue())).getTime();
-    }
+        Object value = relativeDateItem.getValue();
 
-    protected void fromDateChangedHandler(ChangedEvent event){
-        long time = getTime(event);
-        ((TasksCentricNavigationController) this.controller).changeFromDate(time);
-    }
-
-    protected void toDateChangedHandler(ChangedEvent event){
-        long time = getTime(event);
-        ((TasksCentricNavigationController) this.controller).changeToDate(time);
+        if (value instanceof String) {
+            // Cannot use relativeDateItem#getRelativeDate() otherwise web page is blank
+            return DateUtil.getAbsoluteDate(
+                        new RelativeDate(
+                                (String) relativeDateItem.getValue())).getTime();
+        } else if (value instanceof Date) {
+            return ((Date) value).getTime();
+        } else {
+            return -1;
+        }
     }
 
     private long getTime(ChangedEvent event) {
@@ -139,10 +140,41 @@ public class TasksCentricNavigationView extends TasksNavigationView {
         return value.getTime();
     }
 
+    protected void fromDateChangedHandler(ChangedEvent event) {
+        if (dateRangeIsValid()) {
+            resetDatesCanvasBackgroundColor();
+            ((TasksCentricNavigationController) this.controller).changeFromDate(getTime(event));
+        } else {
+            highlightDates();
+        }
+    }
+
+    protected void toDateChangedHandler(ChangedEvent event){
+        if (dateRangeIsValid()) {
+            resetDatesCanvasBackgroundColor();
+            ((TasksCentricNavigationController) this.controller).changeToDate(getTime(event));
+        } else {
+            highlightDates();
+        }
+    }
+
+    private boolean dateRangeIsValid() {
+        long fromDate = getTime(fromDateItem);
+        long toDate = getTime(toDateItem);
+        return fromDate < toDate;
+    }
+
+    private void resetDatesCanvasBackgroundColor() {
+        datesCanvas.setBorder("");
+    }
+
+    private void highlightDates() {
+        datesCanvas.setBorder("2px solid red");
+    }
+
     @Override
     public void jobSelected(Job job) {
     }
-
 
     @Override
     public void jobUnselected() {
