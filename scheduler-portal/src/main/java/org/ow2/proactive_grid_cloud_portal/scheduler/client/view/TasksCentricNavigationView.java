@@ -35,40 +35,55 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Date;
-
+import com.smartgwt.client.data.RelativeDate;
+import com.smartgwt.client.types.RelativeDateRangePosition;
+import com.smartgwt.client.types.VerticalAlignment;
+import com.smartgwt.client.util.DateUtil;
 import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.layout.LayoutSpacer;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
-
+import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RelativeDateItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricNavigationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricNavigationModel;
 
-public class TasksCentricNavigationView extends TasksNavigationView{
+import java.util.Date;
+
+public class TasksCentricNavigationView extends TasksNavigationView {
 
     public TasksCentricNavigationView(TasksCentricNavigationController controller) {
         super(controller);
     }
-    Canvas datesCanvas;
-    RelativeDateItem fromDateItem;
-    RelativeDateItem toDateItem;
+
+    private Canvas datesCanvas;
+
+    private RelativeDateItem fromDateItem;
+
+    private RelativeDateItem toDateItem;
 
     @Override
     public Layout build() {
         Layout layout = super.build();
 
-        fromDateItem = new RelativeDateItem("fromDate", "from");
+        fromDateItem = new RelativeDateItem("fromDate", "From");
+        fromDateItem.setValue("$yesterday");
+        fromDateItem.setRangePosition(RelativeDateRangePosition.START);
         fromDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
                 fromDateChangedHandler(event);
             }
         });
-        toDateItem = new RelativeDateItem("toDate", "to");
+
+        toDateItem = new RelativeDateItem("toDate", "To");
+        toDateItem.setCellHeight(32);
+        toDateItem.setValue("$tomorrow");
+        toDateItem.setRangePosition(RelativeDateRangePosition.END);
         toDateItem.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
@@ -76,62 +91,90 @@ public class TasksCentricNavigationView extends TasksNavigationView{
             }
         });
 
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) controller.getModel();
+        navigationModel.setFromDate(getTime(fromDateItem));
+        navigationModel.setToDate(getTime(toDateItem));
+
         DynamicForm form = new DynamicForm();
         form.setNumCols(4);
+        form.setLayoutAlign(VerticalAlignment.CENTER);
+        form.setHeight(32);
         form.setItems(fromDateItem, toDateItem);
-        //form.setStyleName("form");
+        form.setAutoWidth();
+
+        Img imgButton = new Img();
+        imgButton.setSize(16);
+        imgButton.setLayoutAlign(VerticalAlignment.CENTER);
+        imgButton.setPrompt("Filtered tasks have at least one event (scheduled, started or finished) in this period of time.");
+        imgButton.setSrc(Images.instance.about_16().getSafeUri().asString());
+
+        layout.setAlign(VerticalAlignment.CENTER);
+        layout.addMember(new LayoutSpacer());
         layout.addMember(form);
+        layout.addMember(new LayoutSpacer(4, 32));
+        layout.addMember(imgButton);
+        layout.addMember(new LayoutSpacer(12, 32));
 
         datesCanvas = fromDateItem.getContainerWidget();
-        // The far right of the canvas border isn't visible
-        LayoutSpacer spacer = new LayoutSpacer(5,datesCanvas.getHeight());
-        layout.addMember(spacer);
 
         return layout;
     }
 
-    protected void fromDateChangedHandler(ChangedEvent event){
-        Date value = (Date) event.getValue();
-        long fromDate = value.getTime();
-        if (dateRangeIsValid()) {
-            resetDatesCanvasBGColor();
-            ((TasksCentricNavigationController) this.controller).changeFromDate(fromDate);
+    private long getTime(RelativeDateItem relativeDateItem) {
+        Object value = relativeDateItem.getValue();
+
+        if (value instanceof String) {
+            // Cannot use relativeDateItem#getRelativeDate() otherwise web page is blank
+            return DateUtil.getAbsoluteDate(
+                        new RelativeDate(
+                                (String) relativeDateItem.getValue())).getTime();
+        } else if (value instanceof Date) {
+            return ((Date) value).getTime();
+        } else {
+            return -1;
         }
-        else {
+    }
+
+    private long getTime(ChangedEvent event) {
+        Date value = (Date) event.getValue();
+        return value.getTime();
+    }
+
+    protected void fromDateChangedHandler(ChangedEvent event) {
+        if (dateRangeIsValid()) {
+            resetDatesCanvasBackgroundColor();
+            ((TasksCentricNavigationController) this.controller).changeFromDate(getTime(event));
+        } else {
             highlightDates();
         }
     }
 
     protected void toDateChangedHandler(ChangedEvent event){
-        Date value = (Date) event.getValue();
-        long toDate = value.getTime();
         if (dateRangeIsValid()) {
-            resetDatesCanvasBGColor();
-            ((TasksCentricNavigationController) this.controller).changeToDate(toDate);
-        }
-        else {
+            resetDatesCanvasBackgroundColor();
+            ((TasksCentricNavigationController) this.controller).changeToDate(getTime(event));
+        } else {
             highlightDates();
         }
     }
 
     private boolean dateRangeIsValid() {
-        long fromDate = RelativeDateItem.getAbsoluteDate(fromDateItem.getRelativeDate()).getTime();
-        long toDate = RelativeDateItem.getAbsoluteDate(toDateItem.getRelativeDate()).getTime();
+        long fromDate = getTime(fromDateItem);
+        long toDate = getTime(toDateItem);
         return fromDate < toDate;
     }
 
-    private void resetDatesCanvasBGColor() {
+    private void resetDatesCanvasBackgroundColor() {
         datesCanvas.setBorder("");
     }
 
     private void highlightDates() {
         datesCanvas.setBorder("2px solid red");
     }
-    
+
     @Override
     public void jobSelected(Job job) {
     }
-
 
     @Override
     public void jobUnselected() {
