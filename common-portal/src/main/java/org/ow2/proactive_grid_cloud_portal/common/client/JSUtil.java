@@ -183,8 +183,9 @@ public class JSUtil {
             ret.append(sec).append("s ");
         }
 
-        if (seconds > 0)
+        if (seconds > 0) {
             ret.append("ago");
+        }
 
         return ret.toString();
     }

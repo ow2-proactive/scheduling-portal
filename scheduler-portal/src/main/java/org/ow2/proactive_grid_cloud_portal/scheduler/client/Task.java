@@ -401,26 +401,8 @@ public class Task implements Serializable, Comparable<Task> {
         result.setJobId(jobId);
         result.setJobName(jobName);
 
-        long startAtTime = 0L;
-        JSONObject genericInformationsObject = jsonTask.get("genericInformations").isObject();
-        if (genericInformationsObject != null) {
-            JSONValue genericInformationsValue = genericInformationsObject.get("START_AT");
-            if (genericInformationsValue != null) {
-                String genericInformationsStr = genericInformationsValue.isString().stringValue();
-                DateTimeFormat dtf = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-                Date startAtDate = dtf.parse(genericInformationsStr);
-                startAtTime = startAtDate.getTime();
-            }
-            else {
-                // NO START_AT info
-                startAtTime = -2L;
-            }
-        }
-        else {
-            // NO GENERIC INFORMATIONS
-            startAtTime = -1L;
-        }
-        result.setStartAtTime(startAtTime);
+        long scheduledTime = (long) taskInfo.get("scheduledTime").isNumber().doubleValue();
+        result.setStartAtTime(scheduledTime);
         return result;
     }
 
