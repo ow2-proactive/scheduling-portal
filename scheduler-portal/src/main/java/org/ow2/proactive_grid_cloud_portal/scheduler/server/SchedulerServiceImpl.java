@@ -45,11 +45,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
@@ -116,8 +112,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        SchedulerConfig.get().load(
-                ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH)));
+        final HashMap<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
+        SchedulerConfig.get().load(props);
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
     }
 

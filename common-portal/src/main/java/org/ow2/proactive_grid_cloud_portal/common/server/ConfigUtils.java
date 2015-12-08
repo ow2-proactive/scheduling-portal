@@ -34,19 +34,22 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.server;
 
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 
 public class ConfigUtils {
 
     public static void loadSystemProperties(Config config) {
-        HashMap<String, String> systemPropertiesAsString = new HashMap<String, String>();
+        HashMap<String, String> systemPropertiesAsString = new HashMap<>();
+
         for (Map.Entry entry : System.getProperties().entrySet()) {
             systemPropertiesAsString.put(entry.getKey().toString(), entry.getValue().toString());
         }
+
         config.load(systemPropertiesAsString);
     }
+
 }
