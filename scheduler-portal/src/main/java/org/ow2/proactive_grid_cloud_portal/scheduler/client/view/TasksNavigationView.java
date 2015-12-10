@@ -229,7 +229,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
 
     @Override
-    public void selectedJobUpdated() {
+    public void selectedJobUpdated(Job job) {
         this.controller.refresh();
     }
 

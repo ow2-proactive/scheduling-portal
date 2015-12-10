@@ -192,6 +192,6 @@ public class VisualizationViewHtml implements VisualizationView {
     
     
     @Override
-    public void selectedJobUpdated() {   
+    public void selectedJobUpdated(Job job) {   
     }
 }

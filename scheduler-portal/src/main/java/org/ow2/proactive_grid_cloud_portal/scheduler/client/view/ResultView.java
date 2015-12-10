@@ -173,7 +173,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener, Ta
         visuButton = new IButton("Activate");
         visuButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.getOutputController().getLiveOutput();
+                controller.getOutputController().toggleLive(true);
                 visuButton.setDisabled(true);
             }
         });
@@ -232,7 +232,7 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener, Ta
         JobsModel jobsModel = executionModel.getJobsModel();
         Job j = jobsModel.getSelectedJob();
         
-        boolean isLiveOutput = controller.getOutputController().getModel().isLiveOutput("" + j.getId());
+        boolean isLiveOutput = controller.getOutputController().getModel().getCurrentOutput().isLive();
         boolean taskCentric = (executionModel.getMode() == ExecutionListMode.TASK_CENTRIC);
         if ((j != null && isLiveOutput) || taskCentric) {
             visuButton.setDisabled(true);

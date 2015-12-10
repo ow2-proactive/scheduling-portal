@@ -65,13 +65,16 @@ public class TasksCentricModel extends TasksModel{
 
     
     public void setTaskSelectedJob(Job job){
+        boolean selJobChanged = !((job == null && this.selectedTaskJob == null) || job.equals(this.selectedTaskJob));
         this.selectedTaskJob = job;
-        for(JobSelectedListener listener: this.jobSelectedListeners){
-            if(this.selectedTaskJob != null){
-                listener.jobSelected(this.selectedTaskJob);
-            }
-            else{
-                listener.jobUnselected();
+        if(selJobChanged){
+            for(JobSelectedListener listener: this.jobSelectedListeners){
+                if(this.selectedTaskJob != null){
+                    listener.jobSelected(this.selectedTaskJob);
+                }
+                else{
+                    listener.jobUnselected();
+                }
             }
         }
     }

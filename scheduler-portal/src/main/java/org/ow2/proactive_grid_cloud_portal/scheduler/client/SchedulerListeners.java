@@ -189,15 +189,13 @@ public class SchedulerListeners {
          * @param output the output of a job
          */
         public void jobOutputUpdated(JobOutput output);
-
-        /**
-         * The output of a job that output is being streamed has been
-         * updated.
-         * 
-         * @param jobId id of the job
-         * @param output live output for the whole job, no per-task separation
-         */
-        public void liveOutputUpdated(String jobId, String output);
+        
+        
+        public void liveToggled(boolean newValue);
+        
+        
+        public void liveEnabled(boolean newValue);
+        
 
     }
 

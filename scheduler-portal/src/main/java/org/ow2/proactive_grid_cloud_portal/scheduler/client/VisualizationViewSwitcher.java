@@ -158,7 +158,7 @@ public class VisualizationViewSwitcher implements JobSelectedListener, Visualiza
     
     
     @Override
-    public void selectedJobUpdated() {
+    public void selectedJobUpdated(Job job) {
     }
 
 }

@@ -137,7 +137,7 @@ public class JobsController {
         Job selectedJob = model.getSelectedJob();
         // cancel async requests relative to the old selection
         if (selectedJob != null && !selectedJob.equals(job)) {
-            this.parentController.getParentController().getOutputController().cancelOutputRequests();
+            this.parentController.getParentController().getOutputController().cancelCurrentRequests();
             this.parentController.getParentController().resetPendingTasksRequests();
         }
 

@@ -527,11 +527,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
 
-    
-
-    
-    
-
     public OutputController getOutputController() {
         return outputController;
     }
@@ -774,7 +769,7 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public void teardown(String message) {
         this.stopTimer();
-        this.outputController.stopLiveTimer();
+        this.outputController.stopLiveOutput();
         this.model = new SchedulerModelImpl();
 
         SchedulerController.this.schedulerView.destroy();
@@ -895,7 +890,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
 
     public void resetPendingTasksRequests(){
-        this.outputController.resetPendingOutputTaskRequest();
+        this.outputController.cancelOutputRequests();
         this.tasksController.resetPendingTasksRequests();
     }
 
