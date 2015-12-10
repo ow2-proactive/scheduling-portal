@@ -152,7 +152,7 @@ public class TasksCentricController extends TasksController{
     /**
      * Select another task.
      *
-     * @param taskId of the new task selection. you can use null to cancel the current selection
+     * @param task of the new task selection. you can use null to cancel the current selection
      */
     public void selectTask(final Task task) {
         super.selectTask(task);
