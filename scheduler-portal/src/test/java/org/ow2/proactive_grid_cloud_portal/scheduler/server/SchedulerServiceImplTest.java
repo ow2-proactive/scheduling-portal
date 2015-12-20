@@ -34,38 +34,50 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import org.junit.Test;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
 public class SchedulerServiceImplTest {
 
-    @Test
-    public void scheduler_config_is_loaded() throws Exception {
+    private SchedulerServiceImpl service;
 
-        System.setProperty(SchedulerConfig.VERSION, "a_version");
-
-        SchedulerServiceImpl service = new SchedulerServiceImpl();
+    public void setUp() throws ServletException {
+        service = new SchedulerServiceImpl();
 
         // mock servlet context
         ServletContext servletContext = mock(ServletContext.class);
         when(servletContext.getRealPath("scheduler.conf")).thenReturn(resourceAsFilePath("/scheduler.conf"));
 
         service.init(mockServletContext(servletContext));
+    }
 
-        assertEquals("a_test_url", SchedulerConfig.get().getRestUrl());
-        assertEquals("a_version", SchedulerConfig.get().getVersion());
+    @Test
+    public void testLoadingFromConfigurationFile() throws Exception {
+        setUp();
+        assertEquals("test", SchedulerConfig.get().getRestUrl());
+    }
+
+    @Test
+    public void testPrecedenceBetweenSystemPropertiesAndConfigurationFile() throws ServletException {
+        System.setProperty(SchedulerConfig.REST_URL, "unknown");
+        System.setProperty(SchedulerConfig.VERSION, "x.x.x");
+
+        setUp();
+
+        assertEquals("unknown", SchedulerConfig.get().getRestUrl());
+        assertEquals("x.x.x", SchedulerConfig.get().getVersion());
     }
 
     private String resourceAsFilePath(String resourcePath) {

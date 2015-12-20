@@ -46,7 +46,7 @@ import com.smartgwt.client.data.Record;
  */
 public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "id", 80, true, true);
+    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
     public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true, false);
     public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true, false);
     public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true, false);

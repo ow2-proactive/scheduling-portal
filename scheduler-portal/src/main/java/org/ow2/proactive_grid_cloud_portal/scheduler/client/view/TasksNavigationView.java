@@ -35,16 +35,6 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.List;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
-
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -54,8 +44,17 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.toolbar.ToolStrip;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
+
+import java.util.List;
 
 /**
  * View for the tasks navigation bar.
@@ -107,9 +106,8 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      */
     public Layout build() {
         this.tagSearchTextBox = new SuggestBox(this.controller.getTagSuggestionOracle());
-
         this.tagSearchTextBox.addStyleName("searchBox");
-        this.tagSearchTextBox.getElement().setAttribute("placeholder", "tag...");
+        this.tagSearchTextBox.getElement().setAttribute("placeholder", "Tag");
         this.tagSearchTextBox.setEnabled(false);
         this.tagSearchTextBox.addKeyDownHandler(new KeyDownHandler() {
             @Override
@@ -121,7 +119,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         });
 
         Button btnFilter = new Button("Filter");
-        btnFilter.setWidth("40");
         btnFilter.addStyleName("btnBoxCombo");
         btnFilter.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
@@ -129,7 +126,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
                 changeTagFilterHandler();
             }
         });
-
 
         this.autoRefreshOption = new CheckboxItem("autoRefreshOption", "Auto-refresh");
         this.autoRefreshOption.setCellStyle("navBarOption");
@@ -144,22 +140,17 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
             }
         });
 
-        DynamicForm checkBoxes = new DynamicForm();
-        checkBoxes.setNumCols(1);
-        checkBoxes.setItems(autoRefreshOption);
-        checkBoxes.addStyleName("form");
+        DynamicForm autoRefreshForm = new DynamicForm();
+        autoRefreshForm.setItems(autoRefreshOption);
+        autoRefreshForm.addStyleName("form");
 
-        ToolStrip navTools = new ToolStrip();
+        HLayout navTools = new HLayout();
         navTools.addStyleName("itemViewNav");
         navTools.setHeight(34);
-        navTools.setWidth100();
-        navTools.setBackgroundImage("");
-        navTools.setBackgroundColor("#fafafa");
-        navTools.setBorder("0px");
 
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
-        navTools.addMember(checkBoxes);
+        navTools.addMember(autoRefreshForm);
 
         return navTools;
     }
