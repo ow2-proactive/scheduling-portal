@@ -52,6 +52,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
@@ -153,6 +154,8 @@ public class SchedulerController extends Controller implements UncaughtException
     
     protected ServerLogsController serverLogsController;
 
+    
+    protected ResultController resultController;
 
     /**
      * Default constructor
@@ -360,6 +363,11 @@ public class SchedulerController extends Controller implements UncaughtException
         return this.serverLogsController.buildView();
     }
     
+    
+    public Layout buildPreviewView(){
+        this.resultController = new ResultController(this);
+        return this.resultController.buildView();
+    }
     
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
@@ -890,7 +898,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
 
     public void resetPendingTasksRequests(){
-        this.outputController.cancelOutputRequests();
+        this.outputController.cancelCurrentRequests();
         this.tasksController.resetPendingTasksRequests();
     }
 
