@@ -34,56 +34,57 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class JobOutputTest {
 
     @Test
     public void testLinesCanBeRetrievedByTask() throws Exception {
-        JobOutput jobOutput = new JobOutput(1);
+        JobOutput jobOutput = new JobOutput("1");
         Task aTask = new Task();
-        jobOutput.update(aTask, Collections.singletonList("output"));
+        aTask.setJobId(1);
+        aTask.setId(1);
+        jobOutput.update(aTask, "[...] output", OutputMode.LOG_OUT_ERR);
 
-        List<String> taskOutput = jobOutput.getLines().get(aTask);
+        List<String> taskOutput = jobOutput.getLines(aTask);
 
-        assertEquals("output", taskOutput.get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output</nobr><br>", taskOutput.get(0));
     }
 
     @Test
     public void testLinesAreSortedByTaskFinishTime() throws Exception {
-        JobOutput jobOutput = new JobOutput(1);
+        JobOutput jobOutput = new JobOutput("1");
         Task firstTask = createTask(1, 42);
         Task secondTask = createTask(2, 57);
-        jobOutput.update(secondTask, Collections.singletonList("output_second"));
-        jobOutput.update(firstTask, Collections.singletonList("output_first"));
+        jobOutput.update(secondTask, "[...] output_second", OutputMode.LOG_OUT_ERR);
+        jobOutput.update(firstTask, "[...] output_first", OutputMode.LOG_OUT_ERR);
 
-        List<List<String>> allTaskOutput = new ArrayList<List<String>>(jobOutput.getLines().values());
+        List<List<String>> allTaskOutput = new ArrayList<List<String>>(jobOutput.getLines());
 
-        assertEquals("output_first", allTaskOutput.get(0).get(0));
-        assertEquals("output_second", allTaskOutput.get(1).get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output_first</nobr><br>", allTaskOutput.get(0).get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output_second</nobr><br>", allTaskOutput.get(1).get(0));
     }
 
     // PORTAL-348
     @Test
     public void tasks_are_unique_in_job_ouput() throws Exception {
-        JobOutput jobOutput = new JobOutput(1);
+        JobOutput jobOutput = new JobOutput("1");
         Task firstTask = createTask(1, 42);
 
-        jobOutput.update(firstTask, Collections.singletonList("output"));
+        jobOutput.update(firstTask, "output", OutputMode.LOG_OUT_ERR);
 
         firstTask.setFinishTime(123);
-        jobOutput.update(firstTask, Collections.singletonList("finished"));
+        jobOutput.update(firstTask, "finished", OutputMode.LOG_OUT_ERR);
 
         assertEquals(1, jobOutput.getLines().size());
 
         Task firstTaskDifferentObject = createTask(1, 456);
-        jobOutput.update(firstTaskDifferentObject, Collections.singletonList("finished_new_object"));
+        jobOutput.update(firstTaskDifferentObject, "finished_new_object", OutputMode.LOG_OUT_ERR);
 
         assertEquals(1, jobOutput.getLines().size());
     }

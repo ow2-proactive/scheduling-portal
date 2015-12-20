@@ -38,8 +38,10 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,11 +82,11 @@ public class SchedulerModelImplTest {
         addJob(42);
 
         Task task = new Task();
-        outputModel.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
+        outputModel.setTaskOutput("42", task, "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        JobOutput jobOutput = outputModel.getJobOutput(42, false);
-        String firstLine = jobOutput.getLines().get(task).get(0);
-        String secondLine = jobOutput.getLines().get(task).get(1);
+        JobOutput jobOutput = outputModel.getJobOutput("42", false);
+        String firstLine = jobOutput.getLines(task).get(0);
+        String secondLine = jobOutput.getLines(task).get(1);
 
         assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
@@ -98,11 +100,11 @@ public class SchedulerModelImplTest {
         addJob(42);
 
         Task task = new Task();
-        outputModel.setTaskOutput(42, task, "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
+        outputModel.setTaskOutput("42", task, "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        JobOutput jobOutput = outputModel.getJobOutput(42, false);
-        String firstLine = jobOutput.getLines().get(task).get(0);
-        String secondLine = jobOutput.getLines().get(task).get(1);
+        JobOutput jobOutput = outputModel.getJobOutput("42", false);
+        String firstLine = jobOutput.getLines(task).get(0);
+        String secondLine = jobOutput.getLines(task).get(1);
 
         assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
@@ -115,14 +117,19 @@ public class SchedulerModelImplTest {
     public void testAppendLiveOutput_LinuxLineBreak() {
         addJob(42);
 
+        JobOutput out = outputModel.getJobOutput("42", true);
+        outputModel.setCurrentOutput(out);
+        outputModel.getCurrentOutput().setLive(true);
         outputModel.appendLiveOutput("42", "[Compute1@192.168.1.168;16:07:40] first line\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        String jobOutput = outputModel.getLiveOutput("42");
+        Collection<List<String>> jobOutput = outputModel.getCurrentOutput().getLines();
 
-        assertTrue(jobOutput.contains("first"));
-        assertTrue(jobOutput.contains(STYLE_FOR_TASK_NAME));
-        assertTrue(jobOutput.contains("second"));
-        assertTrue(jobOutput.contains(STYLE_FOR_TASK_NAME));
+        List<String> output = jobOutput.iterator().next();
+        
+        assertTrue(output.get(0).contains("first"));
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
+        assertTrue(output.get(1).contains("second"));
+        assertTrue(output.get(1).contains(STYLE_FOR_TASK_NAME));
     }
 
     // PORTAL-244 PORTAL-243
@@ -130,25 +137,35 @@ public class SchedulerModelImplTest {
     public void testAppendLiveOutput_WindowsLineBreak() {
         addJob(42);
 
+        JobOutput out = outputModel.getJobOutput("42", true);
+        outputModel.setCurrentOutput(out);
+        outputModel.getCurrentOutput().setLive(true);
         outputModel.appendLiveOutput("42", "[Compute1@192.168.1.168;16:07:40] first line\r\n[Compute1@192.168.1.168;16:07:40] second line");
 
-        String jobOutput = outputModel.getLiveOutput("42");
+        Collection<List<String>> jobOutput = outputModel.getCurrentOutput().getLines();
 
-        assertTrue(jobOutput.contains("first"));
-        assertTrue(jobOutput.contains(STYLE_FOR_TASK_NAME));
-        assertTrue(jobOutput.contains("second"));
-        assertTrue(jobOutput.contains(STYLE_FOR_TASK_NAME));
+        List<String> output = jobOutput.iterator().next();
+
+        assertTrue(output.get(0).contains("first"));
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
+        assertTrue(output.get(1).contains("second"));
+        assertTrue(output.get(1).contains(STYLE_FOR_TASK_NAME));
     }
 
     @Test
     public void testAppendLiveOutput_WrongFormat() {
         addJob(42);
 
+        JobOutput out = outputModel.getJobOutput("42", true);
+        outputModel.setCurrentOutput(out);
+        outputModel.getCurrentOutput().setLive(true);
         outputModel.appendLiveOutput("42", "first line\r\nsecond line");
 
-        String jobOutput = outputModel.getLiveOutput("42");
+        Collection<List<String>> jobOutput = outputModel.getCurrentOutput().getLines();
 
-        assertTrue(jobOutput.isEmpty());
+        List<String> output = jobOutput.iterator().next();
+
+        assertTrue(output.isEmpty());
     }
 
     private void addJob(int jobId) {
