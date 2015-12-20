@@ -85,7 +85,8 @@ public class SchedulerListeners {
         /**
          * Called when the selected job has been updated because of jobs revision.
          */
-        public void selectedJobUpdated();
+        public void selectedJobUpdated(Job job);
+        
 
     }
     
@@ -188,7 +189,7 @@ public class SchedulerListeners {
          * 
          * @param output the output of a job
          */
-        public void jobOutputUpdated(JobOutput output);
+        public void jobOutputUpdated(JobOutput output, SelectionTarget target);
         
         
         public void liveToggled(boolean newValue);
@@ -316,4 +317,11 @@ public class SchedulerListeners {
     	 */
     	void totalItemChanged();
     }
+    
+    
+    public interface ServerLogsListener {
+        
+        public void logsUpdated(String logs, String jobId);
+    }
+    
 }
