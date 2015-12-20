@@ -212,14 +212,18 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
     }
     
     public void toggleLive(boolean live){
-        this.model.setLive(live, true);
         if(live){
             this.cancelCurrentRequests();
             this.startLiveOutput();
         }
         else{
             this.stopLiveOutput();
+            JobOutput jobOutput = this.model.getCurrentOutput();
+            if(!jobOutput.isComplete()){
+                jobOutput.resetLines();
+            }
         }
+        this.model.setLive(live, true);
     }
     
     /**

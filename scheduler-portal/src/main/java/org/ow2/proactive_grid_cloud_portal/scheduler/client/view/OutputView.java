@@ -244,11 +244,6 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
     protected void goToTargetSelectedState(JobOutput output){
         super.goToTargetSelectedState();
         
-        this.liveCheck.show();
-        this.liveCheck.setValue(output.isLive());
-        this.liveCheck.setDisabled(!output.isLiveEnabled());
-        
-        this.outSelect.show();
         this.outSelect.enable();
         this.outSelect.setValue(output.getOutputMode().label);
     }
