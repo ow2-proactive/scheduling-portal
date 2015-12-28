@@ -56,14 +56,7 @@ public abstract class AbstractSelectedTargetController<M extends AbstractSelecte
     
     public String getNoTargetLabelContent(){
         SelectionTarget target = this.model.getSelectionTarget();
-        switch(target){
-        case TASK_TARGET:
-            return "No task selected";
-        case JOB_TARGET:
-            return "No job selected";
-        default:
-            return "";
-        }
+        return target.noSelectionLabel;
     }
     
     public M getModel() {

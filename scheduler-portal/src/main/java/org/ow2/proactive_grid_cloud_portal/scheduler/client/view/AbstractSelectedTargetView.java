@@ -103,7 +103,7 @@ public abstract class AbstractSelectedTargetView<M extends AbstractSelectedTarge
     protected void buildTargetSelect(){
         this.targetSelect = new SelectItem();
         this.targetSelect.setShowTitle(false);
-        this.targetSelect.setValueMap(SelectionTarget.getValuesString());
+        this.targetSelect.setValueMap(SelectionTarget.toStringArray());
         this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
         this.targetSelect.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {

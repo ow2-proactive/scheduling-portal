@@ -14,7 +14,7 @@ public enum OutputMode {
     }
  
     
-    public static String [] getValuesString(){
+    public static String [] toStringArray(){
         OutputMode [] modes = OutputMode.values();
         String [] result = new String[modes.length];
         for(int i = 0; i < modes.length; i++){

@@ -45,13 +45,13 @@ public class ResultController {
         Task task = this.parentController.getSelectedTask();
         if(task != null){
             String taskId = task.getName();
-            form.getField("taskId").setValue(taskId);
+            form.getField(ResultView.taskIdFieldName).setValue(taskId);
 
             String jobId = Long.toString(task.getJobId());
-            form.getField("jobId").setValue(jobId);
+            form.getField(ResultView.jobIdFieldName).setValue(jobId);
 
             DownloadOption dlOption = this.model.getDownloadOption();
-            form.getField("media").setValue(dlOption.formDownload);
+            form.getField(ResultView.mediaFieldName).setValue(dlOption.formDownload);
 
             form.submitForm();
         }

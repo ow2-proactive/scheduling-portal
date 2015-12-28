@@ -74,6 +74,11 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ResultView implements TaskSelectedListener, JobOutputListener {
 
+    public static final String taskIdFieldName = "taskId";
+    public static final String mediaFieldName = "media";
+    public static final String jobIdFieldName = "jobId";
+    public static final String sessionIdFieldName = "sessionId";
+    
     protected final String visuActivatedMessage = "Remote viszualization activated";
     
     protected final String visuDesactivatedMessage = "Remote viszualization desactivated. Please toggle streaming in output view for a job to activate the remote visuzalization";
@@ -171,12 +176,12 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
             }
         });
 
-        final HiddenItem sess = new HiddenItem("sessionId");
+        final HiddenItem sess = new HiddenItem(sessionIdFieldName);
         sess.setValue(LoginModel.getInstance().getSessionId());
 
-        final HiddenItem job = new HiddenItem("jobId");
-        final HiddenItem media = new HiddenItem("media");
-        final HiddenItem task = new HiddenItem("taskId");
+        final HiddenItem job = new HiddenItem(jobIdFieldName);
+        final HiddenItem media = new HiddenItem(mediaFieldName);
+        final HiddenItem task = new HiddenItem(taskIdFieldName);
 
         this.downloadForm = new DynamicForm();
         this.downloadForm.setWidth(250);

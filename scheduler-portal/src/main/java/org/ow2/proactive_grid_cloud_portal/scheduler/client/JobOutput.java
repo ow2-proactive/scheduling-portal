@@ -106,26 +106,26 @@ public class JobOutput {
     }
     
     
-    public List<String> update(Task task, String out, OutputMode outputMode){
+    public List<String> update(Task task, String out, OutputMode outputMode) {
         ArrayList<String> remoteVisuLines = new ArrayList<String>();
 
         
-        if(this.outputMode != outputMode){
+        if(this.outputMode != outputMode) {
             this.outputMode = outputMode;
             this.resetLines();
         }
         
         List<String> taskLines = this.lines.get(task);
-        if(taskLines == null){
+        if(taskLines == null) {
             taskLines = new ArrayList<String>();
             this.lines.put(task, taskLines);
         }
-        else{
+        else {
             taskLines.clear();
         }
 
         for (String line : lineByLine(out)) {
-            if(line.contains(TasksModel.PA_REMOTE_CONNECTION)){
+            if (line.contains(TasksModel.PA_REMOTE_CONNECTION)){
                 remoteVisuLines.add(line);
             }
             line = formatLine(line);
@@ -143,17 +143,17 @@ public class JobOutput {
      * @param out the out chunk to append
      * @return a list of line that contain PA_REMOTE_CONNECTION for remote visu
      */
-    public List<String> updateLive(String out){
+    public List<String> updateLive(String out) {
         ArrayList<String> remoteVisuLines = new ArrayList<String>();
         
         String[] expl = lineByLine(out);
         String formatedLine;
         for (String str : expl) {
-            if(str.contains(TasksModel.PA_REMOTE_CONNECTION)){
+            if (str.contains(TasksModel.PA_REMOTE_CONNECTION)){
                 remoteVisuLines.add(str);
             }
             formatedLine = formatLine(str);
-            if(!formatedLine.isEmpty()){
+            if (!formatedLine.isEmpty()) {
                 this.liveContent.get(0).add(formatedLine);
             }
         }
@@ -166,10 +166,10 @@ public class JobOutput {
      * @return the output lines, exploded in a list, per task (finished time as key for sorting)
      */
     public Collection<List<String>> getLines() {
-        if(this.isLive){
+        if(this.isLive) {
             return this.liveContent;
         }
-        else{
+        else {
             return this.lines.values();
         }
     }
@@ -198,7 +198,7 @@ public class JobOutput {
 
     public void setLive(boolean isLive) {
         this.isLive = isLive;
-        if(isLive && this.liveContent == null){
+        if (isLive && this.liveContent == null) {
             this.liveContent = new ArrayList<List<String>>();
             this.liveContent.add(new ArrayList<String>());
         }
@@ -244,7 +244,7 @@ public class JobOutput {
     }
     
     
-    public void resetLines(){
+    public void resetLines() {
         this.complete = false;
         this.lines.clear();
     }

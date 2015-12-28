@@ -113,7 +113,7 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.outSelect = new SelectItem();
         this.outSelect.setShowTitle(false);
-        this.outSelect.setValueMap(OutputMode.getValuesString());
+        this.outSelect.setValueMap(OutputMode.toStringArray());
         this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
         this.outSelect.addChangedHandler(new ChangedHandler() {
             @Override

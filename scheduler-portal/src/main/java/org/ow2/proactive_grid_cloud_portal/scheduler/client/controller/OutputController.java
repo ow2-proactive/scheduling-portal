@@ -360,7 +360,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
             Task task = this.parentController.getSelectedTask();
             List<String> lines = output.getLines(task);
             
-            Collection<List<String>> result = new ArrayList<List<String>>();
+            Collection<List<String>> result = new ArrayList<List<String>>(1);
             
             if(lines != null){
                 result.add(lines);
