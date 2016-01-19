@@ -35,6 +35,7 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import com.smartgwt.client.data.SortSpecifier;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
@@ -140,5 +141,9 @@ public abstract class AbstractGridItemsView implements PaginationListener{
         itemsViewLayout.addMember(paginationBar);
 
         return itemsViewLayout;
+    }
+
+    public SortSpecifier[] getSort() {
+        return itemsGrid.getSort();
     }
 }
