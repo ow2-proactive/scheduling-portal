@@ -153,7 +153,6 @@ public abstract class AbstractGridItemsView implements PaginationListener{
     }
 
     public HandlerRegistration addSortChangedHandler(SortChangedHandler sortChangedHandler) {
-        GWT.log("AbstractGridItemsView.addSortChangedHandler() !!!!!!!!!!!!!");
         return itemsGrid.addSortChangedHandler(sortChangedHandler);
     }
 }

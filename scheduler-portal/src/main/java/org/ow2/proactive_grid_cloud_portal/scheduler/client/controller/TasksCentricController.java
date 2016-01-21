@@ -116,9 +116,6 @@ public class TasksCentricController extends TasksController implements SortChang
             public void onSuccess(String result) {
                 try {
                     JSONPaginatedTasks tasks = SchedulerJSONUtils.parseJSONPaginatedTasks(result);
-                    GWT.log("# DEBUT #############################################################");
-                    GWT.log(result);
-                    GWT.log("#  FIN  #############################################################");
                     model.setTasksDirty(false);
                     model.setTasks(tasks.getTasks(), tasks.getTotalTasks());
                     // do not model.logMessage() : this is repeated by a timer
@@ -148,21 +145,13 @@ public class TasksCentricController extends TasksController implements SortChang
         SortSpecifierRestContainer sortParameters = null;
         SortSpecifier[] sorts = this.view.getSort();
         if (sorts != null && sorts.length > 0) {
-            for (SortSpecifier s : sorts) {
-                GWT.log("[field=" + s.getField() + ", direction=" + s.getSortDirection() + "]");
-            }
             sortParameters = new SortSpecifierRestContainer(sorts.length);
             for (SortSpecifier s : sorts) {
                 sortParameters.add(s.getField(), s.getSortDirection().getValue());
             }
         }
-        else {
-            GWT.log("SortSpecifier[] null !");
-        }
 
         if (tagFilter.isEmpty()){
-            GWT.log("scheduler.getTaskCentric(...) doing the request to the scheduler via REST");
-            GWT.log("sending " + sortParameters.toString());
             this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, sortParameters, callback);
         } else{
@@ -216,7 +205,6 @@ public class TasksCentricController extends TasksController implements SortChang
 
     @Override
     public void onSortChanged(SortEvent sortEvent) {
-        GWT.log("onSortChanged !");
         tasksStateRevision(true);
     }
 

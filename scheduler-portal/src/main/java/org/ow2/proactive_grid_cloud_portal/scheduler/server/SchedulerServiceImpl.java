@@ -473,7 +473,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                GWT.log("SchedulerServiceImpl.getTaskCentric() sending " + sortParameters.toString());
                 return restClient.getTaskStates(sessionId, fromDate, toDate, myTasks, running, pending, finished,
                         offset, limit, sortParameters);
             }
