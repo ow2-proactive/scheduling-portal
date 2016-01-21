@@ -55,6 +55,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.gwt.core.client.GWT;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -472,6 +473,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
+                GWT.log("SchedulerServiceImpl.getTaskCentric() sending " + sortParameters.toString());
                 return restClient.getTaskStates(sessionId, fromDate, toDate, myTasks, running, pending, finished,
                         offset, limit, sortParameters);
             }

@@ -220,7 +220,7 @@ public class TasksCentricController extends TasksController implements SortChang
         tasksStateRevision(true);
     }
 
-    public class SortSpecifierRestContainer implements Serializable {
+    public static class SortSpecifierRestContainer implements Serializable {
 
         protected List<SortSpecifierRestItem> sortParameters = null;
 
@@ -228,7 +228,7 @@ public class TasksCentricController extends TasksController implements SortChang
             sortParameters = new ArrayList<>();
         }
 
-        protected class SortSpecifierRestItem implements Serializable {
+        public static class SortSpecifierRestItem implements Serializable {
 
             protected String field;
             protected String order;
@@ -240,7 +240,7 @@ public class TasksCentricController extends TasksController implements SortChang
 
             public SortSpecifierRestItem() {
                 this.field = "NOTSET";
-                this.order = "ASCENDING";
+                this.order = "ascending";
             }
 
             public String toString() {
@@ -268,7 +268,7 @@ public class TasksCentricController extends TasksController implements SortChang
             StringBuilder sb = new StringBuilder();
             for (int i = 0 ; i < sortParameters.size(); i++) {
                 sb.append(sortParameters.get(i).toString());
-                if (i < sortParameters.size()) sb.append(";");
+                if (i < sortParameters.size() - 1) sb.append(";");
             }
             return sb.toString();
         }
