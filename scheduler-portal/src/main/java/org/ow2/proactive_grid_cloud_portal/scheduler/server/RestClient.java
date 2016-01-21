@@ -54,6 +54,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -311,7 +312,8 @@ public interface RestClient {
             @QueryParam("pending") @DefaultValue("true") boolean pending,
             @QueryParam("finished") @DefaultValue("true") boolean finished,
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("-1") int limit);
+            @QueryParam("limit") @DefaultValue("-1") int limit,
+            @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
     
     
     

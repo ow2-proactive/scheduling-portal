@@ -77,6 +77,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
@@ -462,14 +463,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
-    
-    public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks, final boolean pending, 
-            final boolean running, final boolean finished, final int offset, final int limit) throws RestServerException, ServiceException {
-    	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+
+
+    public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
+                                 final boolean pending, final boolean running, final boolean finished, final int offset,
+                                 final int limit, final TasksCentricController.SortSpecifierRestContainer sortParameters)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-            	return restClient.getTaskStates(sessionId, fromDate, toDate, myTasks, running, pending, finished, offset, limit);
+                return restClient.getTaskStates(sessionId, fromDate, toDate, myTasks, running, pending, finished,
+                        offset, limit, sortParameters);
             }
         });
     }

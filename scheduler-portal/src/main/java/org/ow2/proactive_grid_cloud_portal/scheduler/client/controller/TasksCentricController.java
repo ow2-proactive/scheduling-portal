@@ -37,6 +37,9 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import com.google.gwt.core.client.GWT;
+import com.smartgwt.client.data.SortSpecifier;
+import com.smartgwt.client.widgets.grid.events.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -58,11 +61,13 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksCentricVie
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TasksCentricController extends TasksController{
+public class TasksCentricController extends TasksController implements SortChangedHandler {
 
+    private boolean isHeaderClickHandler = false;
 
     public TasksCentricController(SchedulerController parentController) {
         super(parentController);
@@ -84,6 +89,10 @@ public class TasksCentricController extends TasksController{
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         if(navigationModel.getTaskAutoRefreshOption() || forceRefresh){
             this.updateTasks(false);
+            if (!isHeaderClickHandler) {
+                this.view.addSortChangedHandler(this);
+                isHeaderClickHandler = true;
+            }
         }
     }
 
@@ -107,6 +116,9 @@ public class TasksCentricController extends TasksController{
             public void onSuccess(String result) {
                 try {
                     JSONPaginatedTasks tasks = SchedulerJSONUtils.parseJSONPaginatedTasks(result);
+                    GWT.log("# DEBUT #############################################################");
+                    GWT.log(result);
+                    GWT.log("#  FIN  #############################################################");
                     model.setTasksDirty(false);
                     model.setTasks(tasks.getTasks(), tasks.getTotalTasks());
                     // do not model.logMessage() : this is repeated by a timer
@@ -119,7 +131,7 @@ public class TasksCentricController extends TasksController{
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();
         long fromDate = navigationModel.getFromDate();
-        long toDate  = navigationModel.getToDate(); 
+        long toDate  = navigationModel.getToDate();
 
         PaginationModel paginationModel = navigationModel.getPaginationModel();
         int offset = paginationModel.getOffset();
@@ -133,9 +145,26 @@ public class TasksCentricController extends TasksController{
         boolean running = executionsModel.isFetchRunningExecutions();
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
+        SortSpecifierRestContainer sortParameters = null;
+        SortSpecifier[] sorts = this.view.getSort();
+        if (sorts != null && sorts.length > 0) {
+            for (SortSpecifier s : sorts) {
+                GWT.log("[field=" + s.getField() + ", direction=" + s.getSortDirection() + "]");
+            }
+            sortParameters = new SortSpecifierRestContainer(sorts.length);
+            for (SortSpecifier s : sorts) {
+                sortParameters.add(s.getField(), s.getSortDirection().getValue());
+            }
+        }
+        else {
+            GWT.log("SortSpecifier[] null !");
+        }
+
         if (tagFilter.isEmpty()){
+            GWT.log("scheduler.getTaskCentric(...) doing the request to the scheduler via REST");
+            GWT.log("sending " + sortParameters.toString());
             this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
-                    running, finished, offset, limit, callback);
+                    running, finished, offset, limit, sortParameters, callback);
         } else{
             this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
                     running, finished, offset, limit, callback);
@@ -184,4 +213,66 @@ public class TasksCentricController extends TasksController{
             ((TasksCentricModel) model).setTaskSelectedJob(null);
         }
     }
+
+    @Override
+    public void onSortChanged(SortEvent sortEvent) {
+        GWT.log("onSortChanged !");
+        tasksStateRevision(true);
+    }
+
+    public class SortSpecifierRestContainer implements Serializable {
+
+        protected List<SortSpecifierRestItem> sortParameters = null;
+
+        public SortSpecifierRestContainer() {
+            sortParameters = new ArrayList<>();
+        }
+
+        protected class SortSpecifierRestItem implements Serializable {
+
+            protected String field;
+            protected String order;
+
+            SortSpecifierRestItem(String field, String order) {
+                this.field = field;
+                this.order = order;
+            }
+
+            public SortSpecifierRestItem() {
+                this.field = "NOTSET";
+                this.order = "ASCENDING";
+            }
+
+            public String toString() {
+                return field + "," + order;
+            }
+        }
+
+        SortSpecifierRestContainer(int size) {
+            sortParameters = new ArrayList<>(size);
+        }
+
+        SortSpecifierRestContainer(String values) {
+            sortParameters = new ArrayList<>();
+            for (String s : values.split(";")) {
+                String[] sortParam = s.split(",");
+                add(sortParam[0], sortParam[1]);
+            }
+        }
+
+        public void add(String field, String order) {
+            sortParameters.add(new SortSpecifierRestItem(field, order));
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0 ; i < sortParameters.size(); i++) {
+                sb.append(sortParameters.get(i).toString());
+                if (i < sortParameters.size()) sb.append(";");
+            }
+            return sb.toString();
+        }
+
+    }
+
 }
