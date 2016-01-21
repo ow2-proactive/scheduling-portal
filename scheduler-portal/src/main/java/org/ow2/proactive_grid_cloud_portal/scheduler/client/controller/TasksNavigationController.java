@@ -72,7 +72,7 @@ public class TasksNavigationController {
 
     /**
      * Builds a controller for the tasks navigation logic.
-     * @param controller the main controller.
+     * @param parentController the main controller.
      */
     public TasksNavigationController(TasksController parentController){
         this.parentController = parentController;
