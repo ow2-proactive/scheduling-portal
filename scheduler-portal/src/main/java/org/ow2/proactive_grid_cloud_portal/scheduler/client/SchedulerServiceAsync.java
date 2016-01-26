@@ -153,10 +153,12 @@ public interface SchedulerServiceAsync {
                            boolean running, boolean finished, int offset, int limit,
                            TasksCentricController.SortSpecifierRestContainer sortParameters,
                            AsyncCallback<String> callback);
-    
-    
-    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit, AsyncCallback<String> callback);
+
+
+    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending,
+                                boolean running, boolean finished, int offset, int limit,
+                                TasksCentricController.SortSpecifierRestContainer sortParameters,
+                                AsyncCallback<String> callback);
     
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern

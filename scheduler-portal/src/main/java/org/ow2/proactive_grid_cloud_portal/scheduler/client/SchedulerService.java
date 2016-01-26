@@ -170,10 +170,12 @@ public interface SchedulerService extends RemoteService {
                           boolean running, boolean finished, int offset, int limit,
                           TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException;
-    
-    
-    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException;
+
+
+    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate,
+                               boolean myTasks, boolean pending, boolean running, boolean finished,
+                               int offset, int limit, TasksCentricController.SortSpecifierRestContainer sortParameters)
+            throws RestServerException, ServiceException;
     
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern

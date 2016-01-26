@@ -480,12 +480,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
     
     
-    public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate, final boolean myTasks, final boolean pending, 
-            final boolean running, final boolean finished, final int offset, final int limit) throws RestServerException, ServiceException {
+    public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate,
+                                      final boolean myTasks, final boolean pending, final boolean running,
+                                      final boolean finished, final int offset, final int limit,
+                                      final TasksCentricController.SortSpecifierRestContainer sortParameters)
+            throws RestServerException, ServiceException {
     	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-            	return restClient.getTaskStatesByTag(sessionId, tag, fromDate, toDate, myTasks, running, pending, finished, offset, limit);
+            	return restClient.getTaskStatesByTag(sessionId, tag, fromDate, toDate, myTasks, running, pending,
+                        finished, offset, limit, sortParameters);
             }
         });
     }

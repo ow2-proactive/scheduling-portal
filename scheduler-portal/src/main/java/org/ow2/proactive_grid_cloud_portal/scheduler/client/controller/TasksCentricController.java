@@ -37,9 +37,7 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.data.SortSpecifier;
-import com.smartgwt.client.widgets.grid.events.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -50,7 +48,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
@@ -65,12 +62,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TasksCentricController extends TasksController implements SortChangedHandler {
+public class TasksCentricController extends TasksController {
 
     private boolean isHeaderClickHandler = false;
+    private TasksCentricSortChangedHandler tasksCentricSortChangedHandler;
 
     public TasksCentricController(SchedulerController parentController) {
         super(parentController);
+        tasksCentricSortChangedHandler = new TasksCentricSortChangedHandler(this);
     }
 
 
@@ -90,7 +89,7 @@ public class TasksCentricController extends TasksController implements SortChang
         if(navigationModel.getTaskAutoRefreshOption() || forceRefresh){
             this.updateTasks(false);
             if (!isHeaderClickHandler) {
-                this.view.addSortChangedHandler(this);
+                this.view.addSortChangedHandler(tasksCentricSortChangedHandler);
                 isHeaderClickHandler = true;
             }
         }
@@ -105,25 +104,7 @@ public class TasksCentricController extends TasksController implements SortChang
             this.model.notifyTasksChanging(false);
         }
 
-        AsyncCallback<String> callback = new AsyncCallback<String>() {
-
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                model.taskUpdateError(msg);
-                LogModel.getInstance().logImportantMessage("Failed to update tasks for job : " + msg);
-            }
-
-            public void onSuccess(String result) {
-                try {
-                    JSONPaginatedTasks tasks = SchedulerJSONUtils.parseJSONPaginatedTasks(result);
-                    model.setTasksDirty(false);
-                    model.setTasks(tasks.getTasks(), tasks.getTotalTasks());
-                    // do not model.logMessage() : this is repeated by a timer
-                } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
-                    LogModel.getInstance().logCriticalMessage(e.getMessage());
-                }
-            }
-        };
+        AsyncCallback<String> callback = new TasksAsyncUpdater(model);
 
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();
@@ -142,24 +123,27 @@ public class TasksCentricController extends TasksController implements SortChang
         boolean running = executionsModel.isFetchRunningExecutions();
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
+        if (tagFilter.isEmpty()){
+            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
+                    running, finished, offset, limit, getSortParameters(), callback);
+        } else{
+            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
+                    running, finished, offset, limit, getSortParameters(), callback);
+        }
+    }
+
+
+    private SortSpecifierRestContainer getSortParameters() {
         SortSpecifierRestContainer sortParameters = null;
         SortSpecifier[] sorts = this.view.getSort();
         if (sorts != null && sorts.length > 0) {
             sortParameters = new SortSpecifierRestContainer(sorts.length);
-            for (SortSpecifier s : sorts) {
-                sortParameters.add(s.getField(), s.getSortDirection().getValue());
+            for (SortSpecifier sortSpecifier : sorts) {
+                sortParameters.add(sortSpecifier.getField(), sortSpecifier.getSortDirection().getValue());
             }
         }
-
-        if (tagFilter.isEmpty()){
-            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
-                    running, finished, offset, limit, sortParameters, callback);
-        } else{
-            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
-                    running, finished, offset, limit, callback);
-        }
+        return sortParameters;
     }
-
 
 
     public TasksPaginationController getPaginationController(){
@@ -178,34 +162,12 @@ public class TasksCentricController extends TasksController implements SortChang
             final String jobId = Long.toString(task.getJobId());
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-            scheduler.getJobInfoDetails(sessionId, jobId, new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-
-                    caught.printStackTrace();
-                    String msg = JSONUtils.getJsonErrorMessage(caught);
-                    LogModel.getInstance().logImportantMessage("Failed to get job info for job " + jobId + ": " + msg);
-                }
-
-                @Override
-                public void onSuccess(String result) {
-                    try {
-                        Job job = SchedulerJSONUtils.getJobInfoFromJson(result);
-                        ((TasksCentricModel) model).setTaskSelectedJob(job);
-                    } catch (JSONException e) {
-                        LogModel.getInstance().logCriticalMessage(e.getMessage());
-                    }
-                }
-            });
+            AsyncCallback<String> callback = new TasksCentricAsyncSelector((TasksCentricModel) model, jobId);
+            scheduler.getJobInfoDetails(sessionId, jobId, callback);
         }
         else{
             ((TasksCentricModel) model).setTaskSelectedJob(null);
         }
-    }
-
-    @Override
-    public void onSortChanged(SortEvent sortEvent) {
-        tasksStateRevision(true);
     }
 
     public static class SortSpecifierRestContainer implements Serializable {
@@ -242,8 +204,8 @@ public class TasksCentricController extends TasksController implements SortChang
 
         SortSpecifierRestContainer(String values) {
             sortParameters = new ArrayList<>();
-            for (String s : values.split(";")) {
-                String[] sortParam = s.split(",");
+            for (String term : values.split(";")) {
+                String[] sortParam = term.split(",");
                 add(sortParam[0], sortParam[1]);
             }
         }
@@ -254,9 +216,12 @@ public class TasksCentricController extends TasksController implements SortChang
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
+            int paddedSize = sortParameters.size() - 1;
             for (int i = 0 ; i < sortParameters.size(); i++) {
                 sb.append(sortParameters.get(i).toString());
-                if (i < sortParameters.size() - 1) sb.append(";");
+                if (i < paddedSize) {
+                    sb.append(";");
+                }
             }
             return sb.toString();
         }
