@@ -54,6 +54,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -296,6 +297,7 @@ public interface RestClient {
      * @param finished  fetch finished tasks. Default value is <code>True</code>.
      * @param offset  the index of the first task to fetch (for pagination).
      * @param limit  the index of the last (excluded) task to fetch (for pagination).
+     * @param sortParameters  the tasks sorting parameters.
      * @return a list of <code>TaskStateData</code>  and the total number of them.
      */
     @GET
@@ -311,7 +313,8 @@ public interface RestClient {
             @QueryParam("pending") @DefaultValue("true") boolean pending,
             @QueryParam("finished") @DefaultValue("true") boolean finished,
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("-1") int limit);
+            @QueryParam("limit") @DefaultValue("-1") int limit,
+            @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
     
     
     
@@ -331,6 +334,7 @@ public interface RestClient {
      * @param finished  fetch finished tasks. Default value is <code>True</code>.
      * @param offset  the index of the first task to fetch (for pagination).
      * @param limit  the index of the last (excluded) task to fetch (for pagination).
+     * @param sortParameters  the tasks sorting parameters.
      * @return a list of <code>TaskStateData</code>  and the total number of them.
      */
     @GET
@@ -347,7 +351,8 @@ public interface RestClient {
             @QueryParam("pending") @DefaultValue("true") boolean pending,
             @QueryParam("finished") @DefaultValue("true") boolean finished,
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("-1") int limit);
+            @QueryParam("limit") @DefaultValue("-1") int limit,
+            @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
     
     
     

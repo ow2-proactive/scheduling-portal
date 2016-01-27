@@ -46,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -147,13 +148,17 @@ public interface SchedulerServiceAsync {
      */
     Request getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit, AsyncCallback<String> callback);
 
-    
-    Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit, AsyncCallback<String> callback);
-    
-    
-    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit, AsyncCallback<String> callback);
+
+    Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
+                           boolean running, boolean finished, int offset, int limit,
+                           TasksCentricController.SortSpecifierRestContainer sortParameters,
+                           AsyncCallback<String> callback);
+
+
+    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending,
+                                boolean running, boolean finished, int offset, int limit,
+                                TasksCentricController.SortSpecifierRestContainer sortParameters,
+                                AsyncCallback<String> callback);
     
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern

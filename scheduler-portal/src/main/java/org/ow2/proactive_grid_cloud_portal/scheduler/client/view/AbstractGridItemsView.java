@@ -35,6 +35,12 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.smartgwt.client.data.SortSpecifier;
+import com.smartgwt.client.widgets.grid.events.HeaderClickEvent;
+import com.smartgwt.client.widgets.grid.events.HeaderClickHandler;
+import com.smartgwt.client.widgets.grid.events.SortChangedHandler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
@@ -140,5 +146,13 @@ public abstract class AbstractGridItemsView implements PaginationListener{
         itemsViewLayout.addMember(paginationBar);
 
         return itemsViewLayout;
+    }
+
+    public SortSpecifier[] getSort() {
+        return itemsGrid.getSort();
+    }
+
+    public HandlerRegistration addSortChangedHandler(SortChangedHandler sortChangedHandler) {
+        return itemsGrid.addSortChangedHandler(sortChangedHandler);
     }
 }

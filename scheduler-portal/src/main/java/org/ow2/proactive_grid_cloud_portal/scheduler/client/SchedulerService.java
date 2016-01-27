@@ -49,6 +49,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -163,14 +164,18 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException 
      */
     String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit) throws RestServerException, ServiceException;
-    
-    
-    String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending, 
-              boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException;
-    
-    
-    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending, 
-            boolean running, boolean finished, int offset, int limit) throws RestServerException, ServiceException;
+
+
+    String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
+                          boolean running, boolean finished, int offset, int limit,
+                          TasksCentricController.SortSpecifierRestContainer sortParameters)
+            throws RestServerException, ServiceException;
+
+
+    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate,
+                               boolean myTasks, boolean pending, boolean running, boolean finished,
+                               int offset, int limit, TasksCentricController.SortSpecifierRestContainer sortParameters)
+            throws RestServerException, ServiceException;
     
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
