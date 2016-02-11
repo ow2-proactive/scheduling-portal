@@ -250,7 +250,7 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
 
 
     @Override
-    public void selectedJobUpdated() {   
+    public void selectedJobUpdated(Job job) {   
     }
 
 }

@@ -150,7 +150,7 @@ public class JobsModel {
             else{
                 if (this.selectedJob != null && !this.selectedJob.isEqual(oldSel)) {
                     for(JobSelectedListener listener: this.jobSelectedListeners){
-                        listener.selectedJobUpdated();
+                        listener.selectedJobUpdated(this.selectedJob);
                     }
                 }
             }

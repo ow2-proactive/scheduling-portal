@@ -39,44 +39,46 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
-
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 
 
 /**
  * Model for an output view.
- * @author the actieveon team.
+ * @author the activeeon team.
  *
  */
-public class OutputModel {
+public class OutputModel extends AbstractSelectedTargetModel{
 
-    private static final String PLATFORM_INDEPENDENT_LINE_BREAK = "\r\n?|\n";
+    protected HashMap<String, JobOutput> outputs = null;
     
-    private HashMap<Integer, JobOutput> output = null;
-    private HashSet<String> isLiveOutput = null;
-    private HashMap<String, StringBuffer> liveOutput = null;
+    protected JobOutput currentOutput = null;
     
-    private ArrayList<JobOutputListener> jobOutputListeners = null;
+    protected ArrayList<JobOutputListener> jobOutputListeners = null;
     
     
-    protected SchedulerModelImpl parentModel; 
+    
+    protected OutputMode outputMode = OutputMode.LOG_OUT_ERR;
+    
+    protected boolean liveEnabled = false;
+    
+    protected boolean live = false;
+    
+    
+   
     
     public OutputModel(SchedulerModelImpl parentModel) {
-        this.parentModel = parentModel;
+        super(parentModel);
         this.parentModel.setOutputModel(this);
         
-        this.output = new HashMap<Integer, JobOutput>();
-        this.isLiveOutput = new HashSet<String>();
-        this.liveOutput = new HashMap<String, StringBuffer>();
+        this.outputs = new HashMap<String, JobOutput>();
+        
         
         this.jobOutputListeners = new ArrayList<JobOutputListener>();
     }
@@ -88,11 +90,11 @@ public class OutputModel {
      * @param jobId id of the job for which the output should be fetched
      * @return a wrapper for the job output
      */
-    public JobOutput getJobOutput(int jobId, boolean createIfNotExists) {
-        JobOutput result = this.output.get(jobId);
+    public JobOutput getJobOutput(String jobId, boolean createIfNotExists) {
+        JobOutput result = this.outputs.get(jobId);
         if(result == null && createIfNotExists){
             result = new JobOutput(jobId);
-            this.output.put(jobId, result);
+            this.outputs.put(jobId, result);
         }
         return result;
     }
@@ -103,29 +105,39 @@ public class OutputModel {
      * notify listeners
      * 
      */
-    public void setTaskOutput(int jobId, Task task, String output) {
-        List<String> lines = new ArrayList<String>();
-
-        for (String line : lineByLine(output)) {
-            addRemoteHintIfNecessary(line);
-            line = formatLine(line);
-
-            if (!line.trim().isEmpty()) {
-                lines.add(line);
-            }
+    public void setTaskOutput(String jobId, Task task, String output) {
+        JobOutput jobOutput = this.getJobOutput(jobId, true);
+        List<String> remoteVisuLines = jobOutput.update(task, output, this.outputMode);
+        
+        processRemoteVisuLines(remoteVisuLines);
+        
+        if(this.currentOutput != null && this.currentOutput.getJobId() == jobId){
+            this.notifyUpdatedCurrentOutput();
         }
-
-        if (this.output.get(jobId) == null) {
-            JobOutput jo = new JobOutput(jobId);
-            jo.update(task, lines);
-            this.output.put(jobId, jo);
-        } else {
-            this.output.get(jobId).update(task, lines);
-        }
-
-        this.updateOutput(jobId);
     }
     
+    
+    
+    /**
+     * Append a job output fragment to the stored live output
+     * @param jobId id of the job to which this fragment belongs
+     * @param out job output fragment
+     */
+    public void appendLiveOutput(String jobId, String out) {
+        JobOutput jobOutput = this.getJobOutput(jobId, true);
+        List<String> remoteVisuLines = jobOutput.updateLive(out);
+        
+        processRemoteVisuLines(remoteVisuLines);
+        
+        this.notifyUpdatedCurrentOutput();
+    }
+    
+    
+    protected void processRemoteVisuLines(List<String> lines){
+        for(String line: lines){
+            this.parentModel.getTasksModel().addRemoteHint(line);
+        }
+    }
     
     
     /**
@@ -133,102 +145,50 @@ public class OutputModel {
      * 
      * @param jobId the job for which the output changed
      */
-    public void updateOutput(int jobId) {
-        if (this.output.get(jobId) == null) {
-            JobOutput jo = new JobOutput(jobId);
-            this.output.put(jobId, jo);
-        }
-
+    public void notifyUpdatedCurrentOutput() {
         for (JobOutputListener listener : this.jobOutputListeners) {
-            listener.jobOutputUpdated(this.output.get(jobId));
+            listener.jobOutputUpdated(this.currentOutput, this.selectionTarget);
         }
     }
-
-    /**
-     * Append a job output fragment to the stored live output
-     * @param jobId id of the job to which this fragment belongs
-     * @param out job output fragment
-     */
-    public void appendLiveOutput(String jobId, String out) {
-        String[] expl = lineByLine(out);
-        out = "";
-        for (String str : expl) {
-            addRemoteHintIfNecessary(str);
-            out += formatLine(str);
-        }
-
-        StringBuffer buf = this.liveOutput.get(jobId);
-        if (buf == null) {
-            buf = new StringBuffer();
-            this.liveOutput.put(jobId, buf);
-        }
-        buf.append(out);
-
-        for (JobOutputListener list : this.jobOutputListeners) {
-            list.liveOutputUpdated(jobId, buf.toString());
+    
+    public void notifyToggleLive(boolean newValue) {
+        for (JobOutputListener listener : this.jobOutputListeners) {
+            listener.liveToggled(newValue);
         }
     }
     
     
-    /**
-     * The locally stored live log for the given job
-     * @param jobId id of the job
-     * @return output of the given job, as stored locally. may not contain
-     *  the actual output fully
-     */
-    public String getLiveOutput(String jobId) {
-        StringBuffer buf = this.liveOutput.get(jobId);
-        if (buf == null) {
-            return "";
-        } else {
-            return buf.toString();
+    public void notifyLiveEnabled(boolean enabled){
+        for (JobOutputListener listener : this.jobOutputListeners) {
+            listener.liveEnabled(enabled);
         }
     }
-
-    
-    /**
-     * @param jobId the id of a job
-     * @return true if the specified job's output is streamed
-     */
-    public boolean isLiveOutput(String jobId) {
-        return this.isLiveOutput.contains(jobId);
-    }
     
     
-    /**
-     * The output for this job should be fetched live
-     * @param jobId id of the job
-     * @param isLiveOutput true to live fetch
-     */
-    public void setLiveOutput(String jobId, boolean isLiveOutput) {
-        if (isLiveOutput) {
-            this.isLiveOutput.add(jobId);
-            if(!liveOutput.containsKey(jobId)){
-                this.liveOutput.put(jobId, new StringBuffer());
+    public void setLive(boolean live, boolean affectCurrentOutput){
+        if(live != this.live){
+            this.live = live;
+            if(affectCurrentOutput && this.currentOutput != null){
+                this.currentOutput.setLive(live);
+                this.notifyUpdatedCurrentOutput();
             }
-        } else {
-            this.isLiveOutput.remove(jobId);
+            
+            this.notifyToggleLive(live);
         }
     }
     
-    
-    private String[] lineByLine(String lines) {
-        return lines.split(PLATFORM_INDEPENDENT_LINE_BREAK);
-    }
 
-    private void addRemoteHintIfNecessary(String line) {
-        if (line.contains(TasksModel.PA_REMOTE_CONNECTION)) {
-            parentModel.getTasksModel().addRemoteHint(line);
+    public void setLiveEnabled(boolean liveEnabled, boolean affectCurrentOutput){
+        if(this.liveEnabled != liveEnabled){
+            this.liveEnabled = liveEnabled;
+            this.notifyLiveEnabled(liveEnabled);
+            
+            if(affectCurrentOutput && this.currentOutput != null){
+                this.currentOutput.setLiveEnabled(this.liveEnabled);
+            }
         }
     }
     
-    private String formatLine(String str) {
-        if (str.matches("\\[.*\\].*")) {
-            str = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
-            return "<nobr><span style='color:gray;'>" + str +"</nobr><br>";
-        }
-        return "";
-    }
     
     
     /*
@@ -239,8 +199,57 @@ public class OutputModel {
         this.jobOutputListeners.add(listener);
     }
 
-    public SchedulerModelImpl getParentModel() {
-        return parentModel;
+    
+
+    public JobOutput getCurrentOutput() {
+        return currentOutput;
     }
+    
+    
+    public void setCurrentOutput(JobOutput output){
+        this.currentOutput = output;
+
+        if(this.currentOutput == null){
+            this.setLiveEnabled(false, false);
+        }
+        else{
+            if(this.selectionTarget == SelectionTarget.JOB_TARGET){
+                boolean live = this.currentOutput.isLive();
+                this.setLive(live, false);
+                this.setLiveEnabled(this.currentOutput.isLiveEnabled() || live, false);
+            }
+        }
+
+        this.notifyUpdatedCurrentOutput();
+    }
+
+    
+
+    
+
+    public OutputMode getOutputMode() {
+        return outputMode;
+    }
+
+    public boolean setOutputMode(OutputMode outputMode) {
+        if(this.outputMode != outputMode){
+            this.outputMode = outputMode;
+            this.notifyUpdatedCurrentOutput();
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean isLiveEnabled() {
+        return liveEnabled;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+    
+    
     
 }

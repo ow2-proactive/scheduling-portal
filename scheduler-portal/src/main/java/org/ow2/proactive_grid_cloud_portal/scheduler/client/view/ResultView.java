@@ -36,26 +36,19 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.DownloadOption;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 
 import com.google.gwt.core.client.GWT;
-import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -64,8 +57,8 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -79,39 +72,49 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class ResultView implements TasksUpdatedListener, JobSelectedListener, TaskSelectedListener, ExecutionDisplayModeListener {
+public class ResultView implements TaskSelectedListener, JobOutputListener {
 
-    private static final String OPT_TEXT = "View as text";
-    private static final String OPT_BIN = "Download as binary";
+    public static final String taskIdFieldName = "taskId";
+    public static final String mediaFieldName = "media";
+    public static final String jobIdFieldName = "jobId";
+    public static final String sessionIdFieldName = "sessionId";
+    
+    protected final String visuActivatedMessage = "Remote viszualization activated";
+    
+    protected final String visuDesactivatedMessage = "Remote viszualization desactivated. Please toggle streaming in output view for a job to activate the remote visuzalization";
 
-    private Layout root = null;
+    protected final String noTaskSelectedMessage = "No Task selected";
+    
+    protected Layout root = null;
+    
+    
+    protected Label visuLabelValue = null;
+    protected Layout visuPane = null;
+    
+    
+    
+    protected Layout formPane = null;
+    protected Label taskSelectedLabel = null;
+    protected RadioGroupItem downloadTypeRadio;
+    protected DynamicForm downloadForm;
+    protected IButton cmdDownload;
 
-    private SelectItem taskSelect = null;
+    
+    
+    protected ResultController controller = null;
 
-    private SchedulerController controller = null;
-
-    private Label label = null;
-
-    private Layout formPane = null;
-    private Layout visuPane = null;
-    private IButton visuButton = null;
-
-    private String jobId = null;
-
-    public ResultView(SchedulerController controller) {
+    
+    public ResultView(ResultController controller) {
         this.controller = controller;
-        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getModel();
-        schedulerModel.getTasksModel().addTasksUpdatedListener(this);
-        JobsModel jobsModel = schedulerModel.getExecutionsModel().getJobsModel();
-        jobsModel.addJobSelectedListener(this);
+        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getParentController().getModel();
+        
+        schedulerModel.getTasksModel().addTaskSelectedListener(this);
         
         ExecutionsModel executionsModel = schedulerModel.getExecutionsModel();
         TasksCentricModel tasksCentricModel = executionsModel.getTasksModel();
         tasksCentricModel.addTaskSelectedListener(this);
-        tasksCentricModel.addJobSelectedListener(this);
         
-        executionsModel.addExecutionsDisplayModeListener(this);
-        
+        schedulerModel.getOutputModel().addJobOutputListener(this);
     }
 
     /**
@@ -122,168 +125,136 @@ public class ResultView implements TasksUpdatedListener, JobSelectedListener, Ta
     public Layout build() {
         this.root = new VLayout();
         this.root.setWidth100();
-        this.root.setHeight100();
+        this.root.setPadding(20);
+        
+        this.buildRemoteVisuPane();
+        this.buildTaskPreviewPane();
 
-        this.label = new Label("No job selected");
-        this.label.setAlign(Alignment.CENTER);
-        this.label.setWidth100();
-        this.label.setHeight100();
-
-        this.taskSelect = new SelectItem("tid", "Task result");
-
-        final RadioGroupItem radio = new RadioGroupItem("type", "Type");
-        radio.setValueMap(OPT_TEXT, OPT_BIN);
-        radio.setValue("Text");
-
-        final HiddenItem sess = new HiddenItem("sessionId");
-        sess.setValue(LoginModel.getInstance().getSessionId());
-
-        final HiddenItem job = new HiddenItem("jobId");
-        final HiddenItem media = new HiddenItem("media");
-        final HiddenItem task = new HiddenItem("taskId");
-
-        final DynamicForm form = new DynamicForm();
-        form.setWidth(250);
-        form.setMethod(FormMethod.POST);
-        form.setTarget("_blank");
-        form.setFields(taskSelect, radio, sess, job, media, task);
-        form.setAction(GWT.getModuleBaseURL() + "downloader");
-
-        final IButton dl = new IButton("Download");
-        dl.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                String val = radio.getValueAsString();
-                if (OPT_TEXT.equals(val)) {
-                    media.setValue("text/plain");
-                } else if (OPT_BIN.equals(val)) {
-                    media.setValue("application/octet-stream");
-                } else {
-                    return;
-                }
-                task.setValue(taskSelect.getValueAsString());
-                job.setValue(jobId);
-                form.submitForm();
-            }
-        });
-        formPane = new HLayout();
-        formPane.setMembersMargin(10);
-        formPane.setWidth100();
-        formPane.setMembers(form, dl);
-
-        visuButton = new IButton("Activate");
-        visuButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                controller.getOutputController().getLiveOutput();
-                visuButton.setDisabled(true);
-            }
-        });
-
-        Label visuLabel = new Label(
-            "<span style='text-align:center;color:#003168'>Remote Visualization :</span>");
-        visuLabel.setAlign(Alignment.RIGHT);
-        visuLabel.setWidth(150);
-
-        visuPane = new HLayout();
-        visuPane.setMembersMargin(20);
-        visuPane.setHeight(22);
-        visuPane.setWidth100();
-        visuPane.setMembers(visuLabel, visuButton);
-
-        this.root.setMembersMargin(30);
-        this.root.setMembers(label, visuPane, formPane);
-        jobUnselected();
-
+        this.root.setMembers(visuPane, formPane);
+        
+        this.goToNoSelectedTaskState();
+        
         return this.root;
     }
-
-    public void tasksUpdating() {
-    }
-
-    public void tasksUpdated(List<Task> tasks, long totalTasks) {
-        if (tasks == null || tasks.size() == this.taskSelect.getClientPickListData().length) {
-            return;
-        }
-
-        String[] values = new String[tasks.size()];
-        int i = 0;
-        String defaultVal = "";
-
-        for (Task t : tasks) {
-                    defaultVal = t.getName();
-                    values[i] = t.getName();
-                    i++;
-        }
-        this.taskSelect.setValueMap(values);
-        this.taskSelect.setValue(defaultVal);
-    }
-
-    public void tasksUpdatedFailure(String message) {
-        this.tasksUpdated(new ArrayList<Task>(), 0);
-    }
-
-    public void jobSelected(Job job) {
-        taskSelect.setValues();
-        this.jobId = (job != null) ? "" + job.getId() : "";
-        root.showMember(formPane);
-        root.showMember(visuPane);
-        root.hideMember(label);
-
-        ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
-        JobsModel jobsModel = executionModel.getJobsModel();
-        Job j = jobsModel.getSelectedJob();
+    
+    
+    protected void buildRemoteVisuPane(){
+        Label visuLabelTitle = new Label(
+            "<span style='text-align:center;color:#003168'><b>Remote Visualization :</b></span>");
+        visuLabelTitle.setHeight(30);
         
-        boolean isLiveOutput = controller.getOutputController().getModel().isLiveOutput("" + j.getId());
-        boolean taskCentric = (executionModel.getMode() == ExecutionListMode.TASK_CENTRIC);
-        if ((j != null && isLiveOutput) || taskCentric) {
-            visuButton.setDisabled(true);
-        } else {
-            visuButton.setDisabled(false);
-        }
-    }
-
-    
-    protected void reset(){
-        root.hideMember(formPane);
-        root.hideMember(visuPane);
-        root.showMember(label);
-    }
-    
-    public void jobUnselected() {
-        reset();
-    }
-    
-    
-    @Override
-    public void selectedJobUpdated() {    
-    }
-
-    @Override
-    public void modeSwitched(ExecutionListMode mode) {
-        Job job = this.controller.getSelectedJob();
-        if(job == null){
-            jobUnselected();
-        }
-        else{
-            jobSelected(job);
-        }
+        this.visuLabelValue = new Label(this.visuDesactivatedMessage);
+        this.visuLabelValue.setHeight(50);
+        this.visuLabelValue.setLeft(40);
         
-        if(mode == ExecutionListMode.JOB_CENTRIC){
-            TasksModel tasksModel = this.controller.getTasksController().getModel();
-            List<Task> tasks = tasksModel.getTasks();
-            long size = tasksModel.getTasksNavigationModel().getPaginationModel().getTotalItems();
-            tasksUpdated(tasks, size);
-        }
+        visuPane = new VLayout();
+        
+        visuPane.setWidth100();
+        visuPane.setHeight(120);
+        visuPane.setMembers(visuLabelTitle, this.visuLabelValue);
+    }
+    
+    
+    protected void buildTaskPreviewPane(){
+        Label taskPreviewLabelTitle = new Label(
+                "<span style='text-align:center;color:#003168'><b>Task preview :</b></span>");
+        taskPreviewLabelTitle.setHeight(30);
+        
+        this.taskSelectedLabel = new Label(this.noTaskSelectedMessage);
+        this.taskSelectedLabel.setHeight(30);
+        this.taskSelectedLabel.setLeft(20);
+        
+        this.downloadTypeRadio = new RadioGroupItem("type");
+        this.downloadTypeRadio.setShowTitle(false);
+        this.downloadTypeRadio.setWidth(200);
+        this.downloadTypeRadio.setValueMap(DownloadOption.OPT_TEXT.label, DownloadOption.OPT_BIN.label);
+        this.downloadTypeRadio.setValue(DownloadOption.OPT_TEXT.label);
+        this.downloadTypeRadio.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                downloadTypeChangedHandler();
+            }
+        });
+
+        final HiddenItem sess = new HiddenItem(sessionIdFieldName);
+        sess.setValue(LoginModel.getInstance().getSessionId());
+
+        final HiddenItem job = new HiddenItem(jobIdFieldName);
+        final HiddenItem media = new HiddenItem(mediaFieldName);
+        final HiddenItem task = new HiddenItem(taskIdFieldName);
+
+        this.downloadForm = new DynamicForm();
+        this.downloadForm.setWidth(250);
+        this.downloadForm.setMethod(FormMethod.POST);
+        this.downloadForm.setTarget("_blank");
+        this.downloadForm.setFields(this.downloadTypeRadio, sess, job, media, task);
+        this.downloadForm.setAction(GWT.getModuleBaseURL() + "downloader");
+
+        this.cmdDownload = new IButton("Download");
+        this.cmdDownload.setLeft(20);
+        cmdDownload.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                controller.doDownload(downloadForm);
+            }
+        });
+        formPane = new VLayout();
+        formPane.setMembersMargin(10);
+        formPane.setWidth100();
+        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, cmdDownload);
     }
 
+    
+
+    protected void downloadTypeChangedHandler(){
+        String val = this.downloadTypeRadio.getValueAsString();
+        this.controller.changeDownloadType(val);
+    }
+    
+    
+    
+    protected void goToNoSelectedTaskState(){
+        this.cmdDownload.setDisabled(true);
+        this.downloadTypeRadio.setDisabled(true);
+        this.taskSelectedLabel.setContents(this.noTaskSelectedMessage);
+    }
+    
+    
     @Override
     public void taskSelected(Task task) {
-        String taskName = task.getName(); 
-        taskSelect.setValueMap(taskName);
-        taskSelect.setValue(taskName);
+        if(task == null){
+            this.goToNoSelectedTaskState();
+        }
+        else{
+            this.cmdDownload.setDisabled(false);
+            this.downloadTypeRadio.setDisabled(false);
+            String label = "Task " + task.getName() + " (id: " + Long.toString(task.getId()) + ") from job " + task.getJobName() + " (id: " + Long.toString(task.getJobId()) + ")";
+            this.taskSelectedLabel.setContents(label);
+        }
     }
 
     @Override
     public void taskUnselected() {
-        reset();
+        this.goToNoSelectedTaskState();
     }
+    
+    
+    @Override
+    public void liveToggled(boolean newValue) {
+        if(newValue){
+            this.visuLabelValue.setContents(this.visuActivatedMessage);
+        }
+        else{
+            this.visuLabelValue.setContents(this.visuDesactivatedMessage);
+        }
+    }
+    
+    
+    @Override
+    public void jobOutputUpdated(JobOutput output, SelectionTarget target) {
+    }
+
+    @Override
+    public void liveEnabled(boolean newValue) {
+    }
+    
 }

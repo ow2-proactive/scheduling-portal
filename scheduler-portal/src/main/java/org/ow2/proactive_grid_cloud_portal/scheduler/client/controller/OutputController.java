@@ -37,24 +37,24 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.OutputModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.OutputView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -62,6 +62,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -71,29 +72,23 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author the activeeon team.
  *
  */
-public class OutputController {
+public class OutputController extends AbstractSelectedTargetController<OutputModel>{
 
-    /** ids of jobs we should auto fetch */
-    private Set<String> liveOutputJobs = null;
     /** periodically fetches live output */
     private Timer liveOutputUpdater = null;
     
     /** contains all pending getTaskOutput requests, taskId as key */
     private Map<String, Request> taskOutputRequests = null;
     
-    protected SchedulerController parentController;
-    
-    protected OutputModel model;
     
     protected OutputView view;
     
     public OutputController(SchedulerController parentController) {
-        this.parentController = parentController;
+        super(parentController);
         SchedulerModelImpl schedulerModel = (SchedulerModelImpl) parentController.getModel();
         this.model = new OutputModel(schedulerModel);
         
         this.taskOutputRequests = new HashMap<String, Request>();
-        this.liveOutputJobs = new HashSet<String>();
     }
     
     
@@ -103,25 +98,44 @@ public class OutputController {
     }
     
     
+    
+    public void refreshOutput(){
+        OutputMode outputMode = this.model.getOutputMode();
+        String jobId = this.model.getCurrentOutput().getJobId();
+        if(outputMode == OutputMode.LOG_FULL){
+            String sessionId = LoginModel.getInstance().getSessionId();
+            if(this.model.getSelectionTarget() == SelectionTarget.JOB_TARGET){
+                this.downloadFullJobLogs(sessionId, jobId);
+            }
+            else{
+                Task task = this.parentController.getSelectedTask();
+                downloadFullTaskLogs(sessionId, jobId, task.getName());
+            }
+        }
+        else{
+            if(this.model.getSelectionTarget() == SelectionTarget.JOB_TARGET){
+                this.fetchJobOutput(outputMode);
+            }
+            else{
+                Task task = this.parentController.getSelectedTask();
+                this.fetchTaskOutput(jobId, task, outputMode);
+            }
+        }
+    }
+    
+    
     /**
      * Fetch the output for the currently selected job
      * store the result (or error msg) in the model
      * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
-    public void getJobOutput(int logMode) {
-        JobsModel jobsModel = this.parentController.getExecutionController().getJobsController().getModel();
-        Job j = jobsModel.getSelectedJob();
-        if (j == null)
-            return;
+    public void fetchJobOutput(OutputMode logMode) {
+        JobOutput currentOutput = this.model.getCurrentOutput();
+        String jobId = currentOutput.getJobId();
 
         List<Task> tasks = this.model.getParentModel().getTasksModel().getTasks();
-        if (tasks.isEmpty()) {
-            // notify the listeners, they will figure out there is no output
-            this.model.updateOutput(j.getId());
-        }
 
-        int jobId = j.getId();
         for (Task t : tasks) {
             switch (t.getStatus()) {
             case SKIPPED:
@@ -130,13 +144,12 @@ public class OutputController {
             case NOT_STARTED:
                 break;
             default:
-                this.getTaskOutput(jobId, t, logMode);
+                this.fetchTaskOutput(jobId, t, logMode);
                 break;
             }
         }
         
-        JobOutput out = this.model.getJobOutput(jobId, true);  
-        out.setComplete(true);
+        currentOutput.setComplete(true);
     }
 
     /**
@@ -148,13 +161,7 @@ public class OutputController {
      * @param logMode one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
-    public void getTaskOutput(final int jobId, final Task task, final int logMode) {
-        this.model.setLiveOutput("" + jobId, false);
-        this.liveOutputJobs.remove("" + jobId);
-        if (this.liveOutputJobs.isEmpty()) {
-            stopLiveTimer();
-        }
-
+    public void fetchTaskOutput(final String jobId, final Task task, final OutputMode logMode) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         Request req = scheduler.getTaskOutput(LoginModel.getInstance().getSessionId(), "" + jobId, task.getName(), logMode,
                 new AsyncCallback<String>() {
@@ -190,52 +197,80 @@ public class OutputController {
         this.taskOutputRequests.put("" + task.getId(), req);
     }
     
+    
+    public void checkLiveEnabled(Job job){
+        if(this.model.isLiveEnabled() && job != null){
+            if(job.isExecuted()){
+                if(this.model.isLive()){
+                    this.model.getCurrentOutput().setLiveEnabled(false);
+                }
+                else{
+                    this.model.setLiveEnabled(false, true);
+                }
+            }
+        }
+    }
+    
+    public void toggleLive(boolean live){
+        if(live){
+            this.cancelCurrentRequests();
+            this.startLiveOutput();
+        }
+        else{
+            this.stopLiveOutput();
+            JobOutput jobOutput = this.model.getCurrentOutput();
+            if(!jobOutput.isComplete()){
+                jobOutput.resetLines();
+            }
+        }
+        this.model.setLive(live, true);
+    }
+    
     /**
      * Start the timer that will periodically fetch live logs
      */
-    public void startLiveTimer() {
+    public void startLiveOutput() {
         this.liveOutputUpdater = new Timer() {
 
             @Override
             public void run() {
-                for (Iterator<String> it = liveOutputJobs.iterator(); it.hasNext();) {
-                    final String jobId = it.next();
-                    doFetchLiveLog(jobId);
-
-                    int id = Integer.parseInt(jobId);
-                    Job j = parentController.getExecutionController().getJobsController().getModel().getJobs().get(id);
-                    if (j == null || j.isExecuted()) {
-                        LogModel.getInstance().logMessage("stop fetching live logs for job " + jobId);
-                        it.remove();
-                        model.setLiveOutput(jobId, false);
-                        model.appendLiveOutput(jobId, "");
-                    }
-                }
+                doFetchLiveLog();
             }
         };
-        this.liveOutputUpdater.scheduleRepeating(SchedulerConfig.get().getLivelogsRefreshTime());
+        int refreshTime = SchedulerConfig.get().getLivelogsRefreshTime();
+        this.liveOutputUpdater.scheduleRepeating(refreshTime);
+        this.doFetchLiveLog();
     }
+    
+    
+    
     
     
     /**
      * Stop the timer that will periodically fetch live logs
      */
-    public void stopLiveTimer() {
-        if (this.liveOutputUpdater == null)
-            return;
-
-        this.liveOutputUpdater.cancel();
-        this.liveOutputUpdater = null;
+    public void stopLiveOutput() {
+        if (this.liveOutputUpdater != null){
+            this.liveOutputUpdater.cancel();
+            this.liveOutputUpdater = null;
+        }
     }
     
     
     public void restartLiveTimer(){
-        this.stopLiveTimer();
-        this.startLiveTimer();
+        this.stopLiveOutput();
+        this.startLiveOutput();
     }
     
     
-    private void doFetchLiveLog(final String jobId) {
+    protected void doFetchLiveLog() {
+        JobOutput currentOutput = this.model.getCurrentOutput();
+        final String jobId = currentOutput.getJobId();
+        if (!(currentOutput.isLive() && currentOutput.isLiveEnabled())) {
+            LogModel.getInstance().logMessage("stop fetching live logs and disable live for job " + jobId);
+            return;
+        }
+        
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.getLiveLogJob(LoginModel.getInstance().getSessionId(), jobId,
                 new AsyncCallback<String>() {
@@ -254,66 +289,105 @@ public class OutputController {
         });
     }
     
-    
-    /**
-     * Auto fetch the output for the currently selected job
-     */
-    public void getLiveOutput() {
-        Job j = this.parentController.getExecutionController().getModel().getSelectedJob();
-        if (j == null)
-            return;
-
-        boolean jobCentricMode = (this.parentController.getExecutionController().getModel().getMode() 
-                == ExecutionListMode.JOB_CENTRIC);
-        if (jobCentricMode && this.model.getParentModel().getTasksModel().getTasks().isEmpty())
-            return;
-
-        final String jobId = "" + j.getId();
-
-        if (this.liveOutputJobs.contains(jobId)) {
-            model.appendLiveOutput(jobId, "");
-            return;
+ 
+    public void cancelCurrentRequests(){
+        if(this.model.isLive()){
+            this.stopLiveOutput();
         }
-
-        this.model.setLiveOutput(jobId, true);
-        this.liveOutputJobs.add(jobId);
-
-        if (this.liveOutputUpdater == null) {
-            this.startLiveTimer();
+        else{
+            for (Request req : this.taskOutputRequests.values()) {
+                req.cancel();
+            }
+            this.taskOutputRequests.clear();
         }
     }
+    
+    
+    public void downloadFullJobLogs(String sessionId, String jobId) {
+        String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId + "/log/full?sessionid="+sessionId;
+        Window.open(url, "_blank", "");
+    }
 
-    public void deleteLiveLogJob() {
-        Job j = this.parentController.getExecutionController().getJobsController().getModel().getSelectedJob();
-        if (j == null)
-            return;
-
-        if (this.model.getParentModel().getTasksModel().getTasks().isEmpty())
-            return;
-
-        final String jobId = String.valueOf(j.getId());
-        liveOutputJobs.remove(jobId);
-        model.setLiveOutput(jobId, false);
+    public void downloadFullTaskLogs(String sessionId, String jobId, String taskName) {
+        String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId + "/tasks/" + taskName + "/result/log/full?sessionid="+sessionId;
+        Window.open(url, "_blank", "");
     }
     
     
-    public void resetPendingOutputTaskRequest(){
-        this.taskOutputRequests.clear();
+    
+    public void changeJobOutputContext(Job job){
+        this.cancelCurrentRequests();
+        if(job == null){
+            this.changeCurrentOutput(null, false);
+        }
+        else{
+            this.changeCurrentOutput(job.getId().toString(), true);
+            this.checkLiveEnabled(job);
+            if(this.model.isLive()){
+                this.startLiveOutput();
+            }
+        }
+        
     }
     
-    public void cancelOutputRequests(){
-        for (Request req : this.taskOutputRequests.values()) {
-            req.cancel();
+    
+    public void changeTaskOutputContext(Task task){
+        this.cancelCurrentRequests();
+        if(task == null){
+            this.changeCurrentOutput(null, false);
+        }
+        else{
+            String jobId = Long.toString(task.getJobId());
+            this.changeCurrentOutput(jobId, false);
+        }
+        this.model.setLiveEnabled(false, false);
+        this.model.setLive(false, false);
+    }
+    
+    
+    public void changeOutputMode(OutputMode outputMode){
+        this.cancelCurrentRequests();
+        boolean changed = this.model.setOutputMode(outputMode);
+        if(changed){
+            this.refreshOutput();
         }
     }
-
-
-    public OutputModel getModel() {
-        return model;
+    
+    
+    
+    public Collection<List<String>> getLinesToDisplay(JobOutput output){
+        if(this.model.getSelectionTarget() == SelectionTarget.TASK_TARGET){
+            Task task = this.parentController.getSelectedTask();
+            List<String> lines = output.getLines(task);
+            
+            Collection<List<String>> result = new ArrayList<List<String>>(1);
+            
+            if(lines != null){
+                result.add(lines);
+            }
+            
+            return result;
+        }
+        else{
+            return output.getLines();
+        }
     }
-
-
-    public SchedulerController getParentController() {
-        return parentController;
+    
+    
+    
+    
+    
+    public void changeCurrentOutput(String jobId, boolean resetIfNotComplete){
+        if(jobId == null){
+            this.model.setCurrentOutput(null);
+        }
+        else{
+            JobOutput jobOutput = this.model.getJobOutput(jobId, true);
+            if(resetIfNotComplete && !jobOutput.isLive() && !jobOutput.isComplete()){
+                jobOutput.resetLines();
+            }
+            
+            this.model.setCurrentOutput(jobOutput);
+        }
     }
 }

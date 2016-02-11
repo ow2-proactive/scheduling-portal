@@ -40,13 +40,15 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ServerLogsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ServerLogsView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ServerLogsView.ShowLogsCallback;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONObject;
@@ -59,15 +61,18 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author the activeeon team.
  *
  */
-public class ServerLogsController {
+public class ServerLogsController extends AbstractSelectedTargetController<ServerLogsModel>{
 
-    protected SchedulerController parentController;
     
     protected ServerLogsView view;
     
+    protected Request currentRequest = null;
+    
     
     public ServerLogsController(SchedulerController parentController) {
-        this.parentController = parentController;
+        super(parentController);
+        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) parentController.getModel();
+        this.model = new ServerLogsModel(schedulerModel);
     }
     
     public Layout buildView(){
@@ -75,12 +80,6 @@ public class ServerLogsController {
         return this.view.build();
     }
     
-    
-    
-    protected int getCurrentJobId(){
-        ExecutionsModel executionsModel = ((SchedulerModelImpl) parentController.getModel()).getExecutionsModel();
-        return executionsModel.getSelectedJob().getId();
-    }
     
     
     /**
@@ -91,10 +90,9 @@ public class ServerLogsController {
      * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
-    public void getTaskServerLogs(final String taskname, final ShowLogsCallback logs) {
-        final int jobId = getCurrentJobId();
+    public void getTaskServerLogs(final int jobId, final String taskname) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        Request req = scheduler.getTaskServerLogs(LoginModel.getInstance().getSessionId(), jobId, taskname,
+        this.currentRequest = scheduler.getTaskServerLogs(LoginModel.getInstance().getSessionId(), jobId, taskname,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -111,12 +109,14 @@ public class ServerLogsController {
                 }
                 LogModel.getInstance().logMessage("Failed to get server logs for task " +
                         taskname + " in job " + jobId /* + ": " + msg */);
+                currentRequest = null;
             }
 
             public void onSuccess(String result) {
                 LogModel.getInstance().logMessage("Successfully fetched server logs for task " + taskname +
                         " in job " + jobId);
-                logs.show(result);
+                model.setLogs(result, Integer.toString(jobId));
+                currentRequest = null;
             }
         });
     }
@@ -128,10 +128,9 @@ public class ServerLogsController {
      * @param logs one of {@link SchedulerServiceAsync#LOG_ALL}, {@link SchedulerServiceAsync#LOG_STDERR},
      *   {@link SchedulerServiceAsync#LOG_STDOUT}
      */
-    public void getJobServerLogs(final ShowLogsCallback logs) {
-        final int jobId = getCurrentJobId();
+    public void getJobServerLogs(final int jobId) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        Request req = scheduler.getJobServerLogs(LoginModel.getInstance().getSessionId(), jobId,
+        this.currentRequest = scheduler.getJobServerLogs(LoginModel.getInstance().getSessionId(), jobId,
                 new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -148,21 +147,63 @@ public class ServerLogsController {
                 }
                 LogModel.getInstance().logMessage("Failed to get server logs for a job " +
                         jobId);
+                currentRequest = null;
             }
 
             public void onSuccess(String result) {
                 LogModel.getInstance().logMessage("Successfully fetched server logs for job " + jobId);
-                logs.show(result);
+                model.setLogs(result, Integer.toString(jobId));
+                currentRequest = null;
             }
         });
     }
 
+    @Override
+    public void changeJobOutputContext(Job job) {
+        this.cancelCurrentRequest();
+        String jobId = null;
+        if(job != null){
+            jobId = job.getId().toString();
+        }
+        this.model.resetLogs(jobId);
+    }
 
+    @Override
+    public void changeTaskOutputContext(Task task) {
+        this.cancelCurrentRequest();
+        String jobId = null;
+        if(task != null){
+            jobId = Long.toString(task.getJobId());
+        }
+        this.model.resetLogs(jobId);
+    }
 
-    public SchedulerController getParentController() {
-        return parentController;
+    @Override
+    public void refreshOutput() {
+        this.cancelCurrentRequest();
+        if(this.model.getSelectionTarget() == SelectionTarget.JOB_TARGET){
+            Job job = this.parentController.getSelectedJob();
+            if(job != null){
+                int jobId = job.getId();
+                this.getJobServerLogs(jobId);
+            }
+        }
+        else{
+            Task task = this.parentController.getSelectedTask();
+            if(task != null){
+                String taskName = task.getName();
+                int jobId = (int) task.getJobId();
+                this.getTaskServerLogs(jobId, taskName);
+            }
+        }
     }
     
     
+    protected void cancelCurrentRequest(){
+        if(this.currentRequest != null){
+            this.currentRequest.cancel();
+            this.currentRequest = null;
+        }
+    }
     
 }

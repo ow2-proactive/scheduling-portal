@@ -36,33 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ServerLogsListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ServerLogsModel;
 
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.util.StringUtil;
 import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.HTMLPane;
-import com.smartgwt.client.widgets.IButton;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -75,40 +55,24 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener, TaskSelectedListener, ExecutionDisplayModeListener {
-
-    private static final String TASKS_ALL = "All Tasks";
+public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, ServerLogsController> implements ServerLogsListener{
 
     /** contains the layout */
     private Layout root = null;
-    /** displays the job output */
-    private HTMLPane text = null;
-    /** click to fetch/refetch */
-    private IButton refreshButton = null;
-    /** drop down list of task names */
-    private SelectItem taskSelect = null;
-    /** display a message */
-    private Label label = null;
-
-    private ServerLogsController controller;
+    
 
     /**
      * Default constructor
      * @param controller
      */
     public ServerLogsView(ServerLogsController controller) {
-        this.controller = controller;
-        SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getParentController().getModel();
-        JobsModel jobsModel = schedulerModel.getExecutionsModel().getJobsModel();
-        jobsModel.addJobSelectedListener(this);
-        schedulerModel.getTasksModel().addTasksUpdatedListener(this);
+        super(controller);
+        this.refreshButtonLabel = "Fetch logs";
+        this.refreshButtonTooltip = "Request fetching the Output for this job";
+        this.noOutputMessage = "No logs available<br><br>"
+                + "Click <strong>Fetch logs</strong> to retrieve logs for tasks<br>";
         
-        ExecutionsModel executionsModel = schedulerModel.getExecutionsModel();
-        TasksCentricModel tasksCentricModel = executionsModel.getTasksModel();
-        tasksCentricModel.addTaskSelectedListener(this);
-        tasksCentricModel.addJobSelectedListener(this);
-        
-        executionsModel.addExecutionsDisplayModeListener(this);
+        controller.getModel().addServerlogsListener(this);
     }
 
     /**
@@ -119,29 +83,14 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
         this.root.setWidth100();
         this.root.setHeight100();
 
-        this.refreshButton = new IButton("Fetch logs");
-        this.refreshButton.setTooltip("Request fetching the Output for this job");
-        this.refreshButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                refreshLogs();
-            }
-        });
+        this.buildRefreshButton();
 
-        this.taskSelect = new SelectItem();
-        this.taskSelect.setShowTitle(false);
-        this.taskSelect.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                //                Job sel = controller.getModel().getSelectedJob();
-                //                if (sel != null) {
-                //                    List<Task> tasks = controller.getModel().getTasks();
-                //                }
-            }
-        });
+        this.buildTargetSelect();
 
         DynamicForm form = new DynamicForm();
         form.setColWidths("*", "*");
         form.setNumCols(2);
-        form.setFields(taskSelect);
+        form.setFields(this.targetSelect);
 
         HLayout buttons = new HLayout();
         buttons.setWidth100();
@@ -152,179 +101,40 @@ public class ServerLogsView implements JobSelectedListener, TasksUpdatedListener
         fill.setWidth100();
 
         buttons.setMembers(form, fill, refreshButton);
-
-        this.label = new Label();
-        this.label.setWidth100();
-        this.label.setAlign(Alignment.CENTER);
-        this.label.hide();
-
-        this.text = new HTMLPane();
-        this.text.setHeight100();
-        this.text.setWidth100();
-        this.text.setShowEdges(true);
-        this.text.hide();
+        
+        VLayout textlayout = this.buildOutputPane();
 
         this.root.addMember(buttons);
-        this.root.addMember(this.text);
-        this.root.addMember(this.label);
-
-        jobUnselected();
+        this.root.addMember(textlayout);
+        
+        this.goToNoTargetState();
 
         return this.root;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.
-     * ow2.proactive_grid_cloud_portal.shared.job.Job)
-     */
-    public void jobSelected(Job job) {
-        this.refreshButton.setDisabled(false);
-
-        boolean taskCentricMode = (this.controller.getParentController().getExecutionController().getModel().getMode() 
-                == ExecutionListMode.TASK_CENTRIC);
-        if(!taskCentricMode){
-            this.taskSelect.setValueMap(TASKS_ALL);
-            this.taskSelect.setValue(TASKS_ALL);
-        }
-
-        this.clear();
-    }
-
-    public void showLogs(String logs) {
-        this.clear();
-        this.label.hide();
-        this.text.setContents("<pre>" + StringUtil.asHTML(logs) + "</pre>");
-        this.text.show();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
-     */
-    public void jobUnselected() {
-        this.reset();
-        this.label.setContents("No job selected");
-    }
-    
-    
-    protected void reset(){
-        this.clear();
-        this.refreshButton.hide();
-        this.taskSelect.hide();
-        this.taskSelect.setValueMap("<i>all tasks</i>");
-    }
-
-    private void clear() {
-        this.text.setContents("");
-        this.text.hide();
-        this.refreshButton.show();
-        this.taskSelect.show();
-        this.label.setContents("No logs available<br><br>"
-            + "Click <strong>Fetch logs</strong> to retrieve logs for tasks<br>");
-        this.label.setIcon(null);
-        this.label.show();
-    }
-
-    public class ShowLogsCallback {
-        public void show(String logs) {
-            showLogs(logs);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean
-     * )
-     */
-    public void tasksUpdating() {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(org
-     * .ow2.proactive_grid_cloud_portal.shared.task.TaskSet)
-     */
-    public void tasksUpdated(List<Task> tasks, long totalTasks) {
-        if (tasks.size() + 1 == this.taskSelect.getClientPickListData().length) {
-            return;
-        }
-
-        String[] values = new String[tasks.size() + 1];
-        values[0] = TASKS_ALL;
-        int i = 1;
-
-        for (Task t : tasks) {
-            values[i] = t.getName();
-            i++;
-        }
-        this.taskSelect.setValueMap(values);
-        this.taskSelect.setValue(TASKS_ALL);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure
-     * (java.lang.String)
-     */
-    public void tasksUpdatedFailure(String message) {
-    }
-    
+   
     
     @Override
-    public void selectedJobUpdated() {   
+    public void selectedJobUpdated(Job job) {   
+        this.controller.refreshOutput();
     }
     
-    
-    public void refreshLogs(){
-        this.text.hide();
-        this.label.setContents("Please wait...");
-        this.label.setIcon("loading.gif");
-        this.label.show();
-
-        
-        if (taskSelect.getValue().equals(TASKS_ALL)) {
-            this.controller.getJobServerLogs(new ShowLogsCallback());
-        } else {
-            String taskName = (String) taskSelect.getValue();
-            this.controller.getTaskServerLogs(taskName, new ShowLogsCallback());
-        }
-    }
 
     @Override
-    public void modeSwitched(ExecutionListMode mode) {
-        Job job = this.controller.getParentController().getSelectedJob();
-        if(job == null){
-            jobUnselected();
+    public void logsUpdated(String logs, String jobId) {
+        if(jobId == null){
+            this.goToNoTargetState();
         }
         else{
-            jobSelected(job);
+            this.goToTargetSelectedState();
+            if(logs == null){
+                this.goToUnavailableOutputState();
+            }
+            else{
+                this.showContent(logs);
+            }
         }
         
     }
-
-    @Override
-    public void taskSelected(Task task) {
-        String taskName = task.getName(); 
-        taskSelect.setValueMap(taskName);
-        taskSelect.setValue(taskName);
-    }
-
-    @Override
-    public void taskUnselected() {
-        this.reset();
-        this.label.setContents("No task selected");
-    }
-    
-    
     
 }

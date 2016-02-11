@@ -76,6 +76,7 @@ import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
@@ -660,19 +661,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws ServiceException
      */
     @Override
-    public String getTaskOutput(String sessionId, String jobId, String taskName, int logMode)
+    public String getTaskOutput(String sessionId, String jobId, String taskName, OutputMode logMode)
             throws RestServerException, ServiceException {
 
         RestClient restClientProxy = getRestClientProxy();
 
         try {
-            if (logMode == SchedulerServiceAsync.LOG_ALL) {
+            switch(logMode){
+            case LOG_OUT_ERR:
                 return restClientProxy.tasklog(sessionId, jobId, taskName);
-            } else if (logMode == SchedulerServiceAsync.LOG_STDOUT) {
+            case LOG_OUT:
                 return restClientProxy.taskStdout(sessionId, jobId, taskName);
-            } else if (logMode == SchedulerServiceAsync.LOG_STDERR) {
+            case LOG_ERR:
                 return restClientProxy.taskStderr(sessionId, jobId, taskName);
-            } else {
+            default:
                 throw new RestServerException("Invalid logMode value: " + logMode);
             }
         } catch (WebApplicationException e) {

@@ -257,7 +257,7 @@ public interface SchedulerServiceAsync {
      * @param logMode one of {@link #LOG_ALL}, {@link #LOG_STDOUT}, {@link #LOG_STDERR}
      * @param callback async callback for the client, containing the task output or the error message
      */
-    Request getTaskOutput(String sessionId, String jobId, String taskName, int logMode,
+    Request getTaskOutput(String sessionId, String jobId, String taskName, OutputMode logMode,
             AsyncCallback<String> callback);
 
     /**

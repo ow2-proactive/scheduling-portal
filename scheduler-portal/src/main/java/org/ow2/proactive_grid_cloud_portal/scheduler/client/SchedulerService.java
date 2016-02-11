@@ -295,7 +295,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String getTaskOutput(final String sessionId, final String jobId, final String taskName, final int logMode)
+    String getTaskOutput(final String sessionId, final String jobId, final String taskName, final OutputMode logMode)
             throws RestServerException, ServiceException;
 
     /**

@@ -51,6 +51,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.U
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.VisualizationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.OutputModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ResultModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ServerLogsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
@@ -97,6 +99,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     private TasksModel tasksModel;
     
     private OutputModel outputModel;
+    
+    private ServerLogsModel serverLogsModel;
+    
+    private ResultModel resultModel;
 
     SchedulerModelImpl() {
         super();
@@ -375,5 +381,27 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
     public void setOutputModel(OutputModel outputModel) {
         this.outputModel = outputModel;
     }
+
+
+    public ServerLogsModel getServerLogsModel() {
+        return serverLogsModel;
+    }
+
+
+    public void setServerLogsModel(ServerLogsModel serverLogsModel) {
+        this.serverLogsModel = serverLogsModel;
+    }
+
+
+    public ResultModel getResultModel() {
+        return resultModel;
+    }
+
+
+    public void setResultModel(ResultModel resultModel) {
+        this.resultModel = resultModel;
+    }
+    
+    
     
 }

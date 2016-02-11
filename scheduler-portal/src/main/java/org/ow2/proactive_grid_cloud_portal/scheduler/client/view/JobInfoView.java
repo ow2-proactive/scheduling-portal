@@ -107,8 +107,8 @@ public class JobInfoView extends InfoView<Job> implements JobSelectedListener, J
 
 
     @Override
-    public void selectedJobUpdated() {
-        jobSelected(this.controller.getSelectedJob());
+    public void selectedJobUpdated(Job job) {
+        jobSelected(job);
     }
 
 
