@@ -49,7 +49,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
@@ -436,14 +435,21 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
+        ToolStripButton resourceManagerLinkButton = getResourceManagerLinkButton();
+        ToolStripButton studioLinkButton = getStudioLinkButton();
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(submitButton);
-        tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(studioLinkButton);
+        tools.addButton(resourceManagerLinkButton);
+        tools.addSeparator();
+        tools.addButton(logoutButton);
+        tools.addSeparator();
         tools.addMember(new Img(SchedulerImagesUnbundled.LOGO_32, 156, 32));
 
         // disable all controls at first, next event will sort it out
@@ -451,6 +457,32 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         return tools;
     }
+
+    private ToolStripButton getResourceManagerLinkButton() {
+        ToolStripButton resourceManagerButton = new ToolStripButton("Resource Manager");
+
+        resourceManagerButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/rm", "", "");
+            }
+        });
+
+        return resourceManagerButton;
+    }
+
+    private ToolStripButton getStudioLinkButton() {
+        ToolStripButton studioButton = new ToolStripButton("Studio");
+
+        studioButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/studio", "", "");
+            }
+        });
+
+        return studioButton;
+    }
+
+
 
     /*
      * (non-Javadoc)
