@@ -395,7 +395,7 @@ public class RMPage implements LogListener {
 
         schedulerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                Window.open("/rm", "", "");
+                Window.open("/Scheduler", "", "");
             }
         });
 
