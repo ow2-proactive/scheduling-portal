@@ -58,6 +58,7 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.DrawEvent;
@@ -131,6 +132,11 @@ public class RMPage implements LogListener {
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
     private long lastCriticalMessage = 0;
+
+    // Logo strip properties
+    private int logoStripHeight = 34;
+    private String logoStripBackgroundColor = "#fafafa";
+    private String logoStripBorder = "0px";
 
     RMPage(RMController controller) {
         this.controller = controller;
@@ -249,12 +255,38 @@ public class RMPage implements LogListener {
             }
         });
 
+        rl.addMember(buildLogoStrip());
         rl.addMember(header);
         rl.addMember(stack);
 
         this.logWindow = new LogWindow(controller);
 
         this.rootLayout.draw();
+    }
+
+    private ToolStrip buildLogoStrip() {
+        ToolStrip logoStrip = new ToolStrip();
+
+        final Label schedulerLabel = new Label("ProActive Resources");
+        schedulerLabel.setStyleName("rmHeadline");
+        schedulerLabel.setHeight100();
+        schedulerLabel.setAutoWidth();
+
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+
+        Img proactiveIcon = new Img(RMImagesUnbundled.PA_ICON, 24, 24);
+        logoStrip.addMember(proactiveIcon);
+        logoStrip.addMember(schedulerLabel);
+        logoStrip.addFill();
+        logoStrip.addMember(new Img(RMImagesUnbundled.AE_ICON, logoStripHeight, logoStripHeight));
+        logoStrip.addFill();
+        logoStrip.addMember(new Img(RMImagesUnbundled.AE_LOGO, 115, 32));
+
+        return logoStrip;
     }
 
     private ToolStrip buildTools() {
@@ -384,8 +416,6 @@ public class RMPage implements LogListener {
         tools.addButton(schedulerLinkButton);
         tools.addSeparator();
         tools.addButton(logoutButton);
-        tools.addSeparator();
-        tools.addMember(new Img(RMImagesUnbundled.LOGO_32, 156, 32));
 
         return tools;
     }
