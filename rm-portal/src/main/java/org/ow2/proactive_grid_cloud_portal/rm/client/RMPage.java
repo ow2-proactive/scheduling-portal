@@ -46,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Alignment;
@@ -370,16 +371,47 @@ public class RMPage implements LogListener {
         });
         errorButton.hide();
 
+        ToolStripButton studioLinkButton = getStudioLinkButton();
+        ToolStripButton schedulerLinkButton = getSchedulerLinkButton();
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
-        tools.addButton(logoutButton);
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(studioLinkButton);
+        tools.addButton(schedulerLinkButton);
+        tools.addSeparator();
+        tools.addButton(logoutButton);
+        tools.addSeparator();
         tools.addMember(new Img(RMImagesUnbundled.LOGO_32, 156, 32));
 
         return tools;
+    }
+
+    private ToolStripButton getSchedulerLinkButton() {
+        ToolStripButton schedulerButton = new ToolStripButton("Scheduler");
+
+        schedulerButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/Scheduler", "", "");
+            }
+        });
+
+        return schedulerButton;
+    }
+
+    private ToolStripButton getStudioLinkButton() {
+        ToolStripButton studioButton = new ToolStripButton("Studio");
+
+        studioButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/studio", "", "");
+            }
+        });
+
+        return studioButton;
     }
 
     private Canvas buildTopPane() {
