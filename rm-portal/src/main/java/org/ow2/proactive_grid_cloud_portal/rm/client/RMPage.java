@@ -267,10 +267,10 @@ public class RMPage implements LogListener {
     private ToolStrip buildLogoStrip() {
         ToolStrip logoStrip = new ToolStrip();
 
-        final Label schedulerLabel = new Label("ProActive Resources");
-        schedulerLabel.setStyleName("rmHeadline");
-        schedulerLabel.setHeight100();
-        schedulerLabel.setAutoWidth();
+        final Label resourcesLabel = new Label("ProActive Resources");
+        resourcesLabel.setStyleName("rmHeadline");
+        resourcesLabel.setHeight100();
+        resourcesLabel.setAutoWidth();
 
         logoStrip.setHeight(logoStripHeight);
         logoStrip.setWidth100();
@@ -278,9 +278,8 @@ public class RMPage implements LogListener {
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
 
-        Img proactiveIcon = new Img(RMImagesUnbundled.PA_ICON, 24, 24);
-        logoStrip.addMember(proactiveIcon);
-        logoStrip.addMember(schedulerLabel);
+        logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, 24, 24));
+        logoStrip.addMember(resourcesLabel);
         logoStrip.addFill();
         logoStrip.addMember(new Img(RMImagesUnbundled.AE_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
