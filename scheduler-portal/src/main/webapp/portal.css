@@ -11,6 +11,17 @@
 	margin-top: 6px;
 }
 
+.schedulerHeadline {
+	font-size: 18px;
+	color: #777;
+	float: left;
+	padding: 15px 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .txtPageNumber, .searchBox {
 	font-family: Arial, Verdana, sans-serif;
 	font-size: 11px;

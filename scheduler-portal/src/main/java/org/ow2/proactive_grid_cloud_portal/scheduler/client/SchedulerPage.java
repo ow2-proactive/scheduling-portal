@@ -63,6 +63,7 @@ import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -136,6 +137,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private long lastCriticalMessage = 0;
 
     private SchedulerController controller = null;
+
+    // Logo strip properties
+    private int logoStripHeight = 34;
+    private String logoStripBackgroundColor = "#fafafa";
+    private String schedulerLabelFontColor = "#fafafa";
+    private String logoStripBorder = "0px";
     
 
     /**
@@ -207,6 +214,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         stack.setOverflow(Overflow.HIDDEN);
         stack.setSections(executionsSections, detailsSection);
 
+        contentLayout.addMember(buildLogoStrip());
         contentLayout.addMember(tools);
         contentLayout.addMember(stack);
         this.logWindow = new LogWindow(controller);
@@ -217,6 +225,30 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     /** admin scheduler functionalities */
     private MenuItem schedStartButton, schedStopButton, schedFreezeButton, schedResumeButton,
             schedPauseButton, schedKillButton;
+
+    private ToolStrip buildLogoStrip() {
+        ToolStrip logoStrip = new ToolStrip();
+
+        final Label schedulerLabel = new Label("ProActive Scheduler");
+        schedulerLabel.setStyleName("schedulerHeadline");
+        schedulerLabel.setHeight100();
+        schedulerLabel.setAutoWidth();
+
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
+        logoStrip.addMember(schedulerLabel);
+        logoStrip.addFill();
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
+        logoStrip.addFill();
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_LOGO, 115, 32));
+
+        return logoStrip;
+    }
 
     /**
      * Builds and returns the toolbar
@@ -449,8 +481,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(resourceManagerLinkButton);
         tools.addSeparator();
         tools.addButton(logoutButton);
-        tools.addSeparator();
-        tools.addMember(new Img(SchedulerImagesUnbundled.LOGO_32, 156, 32));
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.KILLED);
