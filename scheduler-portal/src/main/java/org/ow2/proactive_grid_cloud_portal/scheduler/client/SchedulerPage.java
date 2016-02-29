@@ -243,7 +243,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(schedulerLabel);
         logoStrip.addFill();
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_ICON, logoStripHeight, logoStripHeight));
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_LOGO, 115, 32));
 

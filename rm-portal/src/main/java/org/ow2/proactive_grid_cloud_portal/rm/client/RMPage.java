@@ -281,7 +281,7 @@ public class RMPage implements LogListener {
         logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(resourcesLabel);
         logoStrip.addFill();
-        logoStrip.addMember(new Img(RMImagesUnbundled.AE_ICON, logoStripHeight, logoStripHeight));
+        logoStrip.addMember(new Img(RMImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
         logoStrip.addMember(new Img(RMImagesUnbundled.AE_LOGO, 115, 32));
 
