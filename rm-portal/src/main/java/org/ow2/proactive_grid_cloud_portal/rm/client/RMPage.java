@@ -277,7 +277,7 @@ public class RMPage implements LogListener {
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(15);
+        logoStrip.setMargin(5);
 
         logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(resourcesLabel);

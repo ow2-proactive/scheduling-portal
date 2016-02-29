@@ -231,7 +231,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(15);
+        logoStrip.setMargin(5);
 
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(schedulerLabel);

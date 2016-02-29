@@ -20,6 +20,7 @@
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
 	white-space: nowrap;
+	
 }
 
 .txtPageNumber, .searchBox {
