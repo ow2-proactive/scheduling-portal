@@ -193,12 +193,12 @@ public class RMPage implements LogListener {
                 compactView.setViewMyNodes(c1.getValueAsBoolean());
             }
         });
-        
+
         // for some reason IE9 standards fails to detect the right width
         if (SC.isIE()) {
             c1.setWidth(60);
         }
-        
+
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(8);
         checkBoxes.setItems(c1);
@@ -277,6 +277,7 @@ public class RMPage implements LogListener {
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(15);
 
         logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(resourcesLabel);
@@ -296,16 +297,16 @@ public class RMPage implements LogListener {
         tools.setBackgroundColor("#fafafa");
         tools.setBorder("0px");
 
-        MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri()
-                .asString());
+        MenuItem settingsMenuItem = new MenuItem("Settings",
+            Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 RMPage.this.settingsWindow.show();
             }
         });
 
-        MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri()
-                .asString());
+        MenuItem credMenuItem = new MenuItem("Create credentials",
+            Images.instance.key_16().getSafeUri().asString());
         credMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 RMPage.this.credentialsWindow.show();
@@ -335,7 +336,8 @@ public class RMPage implements LogListener {
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
-        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(),
+                logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
@@ -390,8 +392,8 @@ public class RMPage implements LogListener {
             }
         });
 
-        errorButton = new ToolStripButton("<strong>Error</strong>", Images.instance.net_error_16()
-                .getSafeUri().asString());
+        errorButton = new ToolStripButton("<strong>Error</strong>",
+            Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
         errorButton.addClickHandler(new ClickHandler() {
             @Override

@@ -97,13 +97,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     static SchedulerPage inst;
 
     protected TabSet leftTabSet;
-    
+
     protected Tab tasksTab;
     protected Layout tasksPane;
-    
+
     protected Tab visuTab;
     protected Canvas visuPane;
-    
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -112,9 +111,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private JobInfoView jobInfo = null;
     /** view displaying info about the selected task */
     private TaskInfoView taskInfo = null;
-    
-    
-    
+
     /** displays connected users */
     private UsersView usersView = null;
     /** displays scheduler & accounting stats */
@@ -127,10 +124,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private AboutWindow aboutWindow = null;
     /** client settings */
     private SettingsWindow settingsWindow = null;
-    
 
     private Menu adminMenu = null;
-
 
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
@@ -143,7 +138,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private String logoStripBackgroundColor = "#fafafa";
     private String schedulerLabelFontColor = "#fafafa";
     private String logoStripBorder = "0px";
-    
 
     /**
      * Default constructor
@@ -158,7 +152,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.controller.getExecutionController().getModel().addExecutionsDisplayModeListener(this);
         inst = this;
     }
-
 
     /**
      * Creates the layout and adds it to the page
@@ -194,11 +187,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
 
-        
         Canvas tools = buildTools();
 
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
-        
+
         Layout botPane = buildBotPane();
         SectionStackSection detailsSection = new SectionStackSection();
         detailsSection.setTitle("Details");
@@ -239,6 +231,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(15);
 
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(schedulerLabel);
@@ -273,16 +266,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.setBackgroundColor("#fafafa");
         tools.setBorder("0px");
 
-        MenuItem submitMenuItem = new MenuItem("Submit job", SchedulerImages.instance.job_submit_16()
-                .getSafeUri().asString());
+        MenuItem submitMenuItem = new MenuItem("Submit job",
+            SchedulerImages.instance.job_submit_16().getSafeUri().asString());
         submitMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 SubmitWindow w = new SubmitWindow(SchedulerPage.this.controller);
                 w.show();
             }
         });
-        MenuItem flatSubmitMenuItem = new MenuItem("Submit command file", SchedulerImages.instance
-                .script_16().getSafeUri().asString());
+        MenuItem flatSubmitMenuItem = new MenuItem("Submit command file",
+            SchedulerImages.instance.script_16().getSafeUri().asString());
         flatSubmitMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 FlatSubmitWindow w = new FlatSubmitWindow(SchedulerPage.this.controller);
@@ -290,16 +283,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri()
-                .asString());
+        MenuItem settingsMenuItem = new MenuItem("Settings",
+            Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 SchedulerPage.this.settingsWindow.show();
             }
         });
 
-        MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri()
-                .asString());
+        MenuItem credMenuItem = new MenuItem("Create credentials",
+            Images.instance.key_16().getSafeUri().asString());
         credMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 CredentialsWindow credentialsWindow = new CredentialsWindow();
@@ -307,17 +300,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        MenuItem thirdPartyCredentialsMenuItem = new MenuItem("Manage third-party credentials", Images.instance.key_16().getSafeUri()
-          .asString());
-        thirdPartyCredentialsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(SchedulerPage.this.controller);
-                credentialsWindow.show();
-            }
-        });
+        MenuItem thirdPartyCredentialsMenuItem = new MenuItem("Manage third-party credentials",
+            Images.instance.key_16().getSafeUri().asString());
+        thirdPartyCredentialsMenuItem
+                .addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+                    public void onClick(MenuItemClickEvent event) {
+                        ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(
+                            SchedulerPage.this.controller);
+                        credentialsWindow.show();
+                    }
+                });
 
-        MenuItem serversMenuItem = new MenuItem("Data servers", Images.instance.server_16().getSafeUri()
-                .asString());
+        MenuItem serversMenuItem = new MenuItem("Data servers",
+            Images.instance.server_16().getSafeUri().asString());
         serversMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 String url = GWT.getModuleBaseURL() + "servers?codebase=" + GWT.getHostPageBaseURL();
@@ -341,7 +336,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
         portalMenu.setItems(submitMenuItem, flatSubmitMenuItem, new MenuItemSeparator(), credMenuItem,
-          thirdPartyCredentialsMenuItem, serversMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+                thirdPartyCredentialsMenuItem, serversMenuItem, settingsMenuItem, new MenuItemSeparator(),
+                logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
@@ -420,11 +416,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             public void onClick(MenuItemClickEvent event) {
                 SC.confirm("Do you really want to <strong>kill</strong> the Scheduler?",
                         new BooleanCallback() {
-                            public void execute(Boolean value) {
-                                if (value)
-                                    SchedulerPage.this.controller.killScheduler();
-                            }
-                        });
+                    public void execute(Boolean value) {
+                        if (value)
+                            SchedulerPage.this.controller.killScheduler();
+                    }
+                });
             }
         });
 
@@ -455,8 +451,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        errorButton = new ToolStripButton("<strong>Network error</strong>", Images.instance.net_error_16()
-                .getSafeUri().asString());
+        errorButton = new ToolStripButton("<strong>Network error</strong>",
+            Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
         errorButton.addClickHandler(new ClickHandler() {
             @Override
@@ -512,11 +508,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         return studioButton;
     }
 
-
-
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.SchedulerStatusListener#statusChanged(org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatus)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.SchedulerStatusListener#statusChanged(
+     * org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatus)
      */
     public void statusChanged(SchedulerStatus status) {
         // this only changes the enable status of scheduler admin buttons
@@ -560,8 +557,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         }
         this.adminMenu.redraw();
     }
-
-    
 
     /**
      * Builds and returns the bottom pane: currently selected job somewhat in a master/detail fashion
@@ -637,7 +632,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
                 if (leftTabSet.getSelectedTab().equals(visuTab)) {
                     controller.setVisuFetchEnabled(true);
-                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel(); 
+                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel()
+                            .getJobsModel();
                     if (jobsModel.getSelectedJob() != null) {
                         controller.visuFetch(jobsModel.getSelectedJob().getId().toString());
                     }
@@ -655,7 +651,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab jobinfoTab = new Tab("Job Info", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.jobInfo = new JobInfoView(this.controller, new JobsDetailColumnsFactory());
         jobinfoTab.setPane(this.jobInfo.build());
-        
+
         Tab taskinfoTab = new Tab("Task Info", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.taskInfo = new TaskInfoView(this.controller, new TaskDetailColumnsFactory());
         taskinfoTab.setPane(this.taskInfo.build());
@@ -663,7 +659,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab outputTab = new Tab("Output", SchedulerImages.instance.output_16().getSafeUri().asString());
         outputTab.setPane(this.controller.buildOutputView());
 
-        Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
+        Tab serverLogsTab = new Tab("Server Logs",
+            SchedulerImages.instance.output_16().getSafeUri().asString());
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
         Tab resultTab = new Tab("Preview", Images.instance.search_16().getSafeUri().asString());
@@ -674,8 +671,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
         rightTabSet.addTab(resultTab);
-        
-       
+
         HLayout layout = new HLayout();
 
         layout.addMember(leftTabSet);
@@ -722,37 +718,34 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
     }
-    
+
     @Override
     public void modeSwitched(ExecutionListMode mode) {
-        switch(mode){
-        case JOB_CENTRIC:
-            this.buildTasksTab();
-            this.buildVisuTab();
-            leftTabSet.addTab(this.tasksTab, 0);
-            leftTabSet.addTab(this.visuTab, 1);
-            break;
-        case TASK_CENTRIC:
-            leftTabSet.updateTab(tasksTab, null);
-            leftTabSet.removeTab(tasksTab);
-            leftTabSet.updateTab(visuTab, null);
-            leftTabSet.removeTab(visuTab);
+        switch (mode) {
+            case JOB_CENTRIC:
+                this.buildTasksTab();
+                this.buildVisuTab();
+                leftTabSet.addTab(this.tasksTab, 0);
+                leftTabSet.addTab(this.visuTab, 1);
+                break;
+            case TASK_CENTRIC:
+                leftTabSet.updateTab(tasksTab, null);
+                leftTabSet.removeTab(tasksTab);
+                leftTabSet.updateTab(visuTab, null);
+                leftTabSet.removeTab(visuTab);
         }
         leftTabSet.markForRedraw();
     }
-    
-    
-    protected void buildTasksTab(){
-        tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri()
-                .asString());
-        
+
+    protected void buildTasksTab() {
+        tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri().asString());
+
         tasksTab.setPane(tasksPane);
     }
-    
-    
-    protected void buildVisuTab(){
+
+    protected void buildVisuTab() {
         visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
         visuTab.setPane(this.visuPane);
     }
-   
+
 }
