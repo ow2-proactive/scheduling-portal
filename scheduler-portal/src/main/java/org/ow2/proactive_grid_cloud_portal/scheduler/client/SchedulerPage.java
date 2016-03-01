@@ -136,7 +136,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     // Logo strip properties
     private int logoStripHeight = 34;
     private String logoStripBackgroundColor = "#fafafa";
-    private String schedulerLabelFontColor = "#fafafa";
     private String logoStripBorder = "0px";
 
     /**
@@ -231,7 +230,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(5);
+        logoStrip.setMargin(0);
 
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
         logoStrip.addMember(schedulerLabel);
