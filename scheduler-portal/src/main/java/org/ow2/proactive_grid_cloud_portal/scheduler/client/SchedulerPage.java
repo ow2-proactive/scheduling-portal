@@ -134,7 +134,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private SchedulerController controller = null;
 
     // Logo strip properties
-    private int logoStripHeight = 34;
+    private int logoStripHeight = 40;
     private String logoStripBackgroundColor = "#fafafa";
     private String logoStripBorder = "0px";
 
@@ -225,6 +225,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         schedulerLabel.setHeight100();
         schedulerLabel.setAutoWidth();
 
+        logoStrip.setStyleName("paddingLeftAndRight");
         logoStrip.setHeight(logoStripHeight);
         logoStrip.setWidth100();
         logoStrip.setBackgroundImage("");
@@ -232,12 +233,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.setBorder(logoStripBorder);
         logoStrip.setMargin(0);
 
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, 24, 24));
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addMember(schedulerLabel);
         logoStrip.addFill();
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_LOGO, 115, 32));
+        logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight));
 
         return logoStrip;
     }

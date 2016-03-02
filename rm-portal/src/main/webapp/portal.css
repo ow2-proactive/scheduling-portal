@@ -2,9 +2,16 @@
 	font-size: 18px;
 	color: #777;
 	float: left;
-	padding: 15px 15px;
+	padding-top: 10px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-o-text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+
+.paddingLeftAndRight {
+	padding-left: 10px;
+	padding-right: 10px;
+	
 }

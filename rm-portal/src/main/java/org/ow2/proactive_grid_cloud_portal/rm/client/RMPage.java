@@ -134,7 +134,7 @@ public class RMPage implements LogListener {
     private long lastCriticalMessage = 0;
 
     // Logo strip properties
-    private int logoStripHeight = 34;
+    private int logoStripHeight = 40;
     private String logoStripBackgroundColor = "#fafafa";
     private String logoStripBorder = "0px";
 
@@ -272,6 +272,7 @@ public class RMPage implements LogListener {
         resourcesLabel.setHeight100();
         resourcesLabel.setAutoWidth();
 
+        logoStrip.setStyleName("paddingLeftAndRight");
         logoStrip.setHeight(logoStripHeight);
         logoStrip.setWidth100();
         logoStrip.setBackgroundImage("");
@@ -279,12 +280,12 @@ public class RMPage implements LogListener {
         logoStrip.setBorder(logoStripBorder);
         logoStrip.setMargin(0);
 
-        logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, 24, 24));
+        logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addMember(resourcesLabel);
         logoStrip.addFill();
         logoStrip.addMember(new Img(RMImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
-        logoStrip.addMember(new Img(RMImagesUnbundled.AE_LOGO, 115, 32));
+        logoStrip.addMember(new Img(RMImagesUnbundled.AE_LOGO, 146, logoStripHeight));
 
         return logoStrip;
     }
