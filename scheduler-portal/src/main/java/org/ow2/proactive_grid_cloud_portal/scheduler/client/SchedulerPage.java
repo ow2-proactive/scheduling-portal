@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
@@ -348,6 +349,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
+        MenuItem documentationMenuItem = new MenuItem("Documentation",
+            Images.instance.log_16().getSafeUri().asString());
+        documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            public void onClick(MenuItemClickEvent event) {
+                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "latest"
+                        : Config.get().getVersion();
+                Window.open("http://doc.activeeon.com/" + docVersion, "", "");
+            }
+        });
+
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -356,7 +367,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
-        helpMenu.setItems(logMenuItem, aboutMenuItem);
+        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
         ToolStripButton submitButton = new ToolStripButton("Submit job");
