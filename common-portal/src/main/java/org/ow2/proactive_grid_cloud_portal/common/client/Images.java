@@ -102,4 +102,7 @@ public interface Images extends ClientBundle {
     @Source("images/net_error_16.png")
     ImageResource net_error_16();
 
+    @Source("images/icon_manual.png")
+    ImageResource icon_manual();
+
 }

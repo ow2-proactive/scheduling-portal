@@ -36,11 +36,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.shared;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.gwt.i18n.client.DateTimeFormat;
 
 
 /**
@@ -131,8 +128,8 @@ public abstract class Config {
         String restPublicUrl = getRestPublicUrlIfDefinedOrOverridden();
         if (restPublicUrl == null || restPublicUrl.isEmpty()) {
             String restUrlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
-            restUrlFromCurrentLocation = restUrlFromCurrentLocation.replace(
-                    com.google.gwt.user.client.Window.Location.getPath(), "");
+            restUrlFromCurrentLocation = restUrlFromCurrentLocation
+                    .replace(com.google.gwt.user.client.Window.Location.getPath(), "");
             restUrlFromCurrentLocation += "/rest";
             return restUrlFromCurrentLocation;
         }
@@ -170,26 +167,22 @@ public abstract class Config {
 
     private static final String ABOUT = "about";
     private static final String d_ABOUT = "<h3>ProActive @application_name@ Portal</h3>" +
-            "Version: @version@" +
-            "<br><br>" +
-            "Copyright (C) 1997-2015 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
-            "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
-            "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
-            "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a>" +
-            "<br><br><br>" +
-            "<table style='color:#404040'>" +
-            "<tr><td>REST server</td><td>@rest_public_url@</td></tr>" +
-            "<tr><td>REST version</td><td>@rest_version@</td></tr>" +
-            "<tr><td> @application_name@ version</td><td>@application_version@</td></tr>" +
-            "</table>";
+        "Version: @version@" + "<br><br>" +
+        "Copyright (C) 1997-2016 INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
+        "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
+        "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
+        "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a>" +
+        "<br><br><br>" + "<table style='color:#404040'>" +
+        "<tr><td>REST server</td><td>@rest_public_url@</td></tr>" +
+        "<tr><td>REST version</td><td>@rest_version@</td></tr>" +
+        "<tr><td> @application_name@ version</td><td>@application_version@</td></tr>" + "</table>";
 
     private void setCommonDefaults() {
         properties.put(ABOUT, d_ABOUT);
     }
 
     private String fillTemplate(String template) {
-        return template.replace("@application_name@", getApplicationName())
-                .replace("@version@", getVersion())
+        return template.replace("@application_name@", getApplicationName()).replace("@version@", getVersion())
                 .replace("@rest_public_url@", getRestPublicUrlOrGuessRestUrl())
                 .replace("@rest_version@", getRestVersion())
                 .replace("@application_version@", getApplicationVersion());

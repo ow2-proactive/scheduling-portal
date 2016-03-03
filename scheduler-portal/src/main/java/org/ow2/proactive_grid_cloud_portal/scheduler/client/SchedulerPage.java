@@ -350,7 +350,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
-            Images.instance.log_16().getSafeUri().asString());
+            Images.instance.icon_manual().getSafeUri().asString());
         documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "latest"
