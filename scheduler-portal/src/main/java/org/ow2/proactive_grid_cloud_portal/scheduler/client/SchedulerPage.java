@@ -221,7 +221,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private ToolStrip buildLogoStrip() {
         ToolStrip logoStrip = new ToolStrip();
 
-        final Label schedulerLabel = new Label("ProActive Scheduler");
+        final Label schedulerLabel = new Label("ProActive Scheduling & Orchestration");
         schedulerLabel.setStyleName("schedulerHeadline");
         schedulerLabel.setHeight100();
         schedulerLabel.setAutoWidth();
@@ -496,7 +496,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     private ToolStripButton getResourceManagerLinkButton() {
-        ToolStripButton resourceManagerButton = new ToolStripButton("Resource Manager");
+        ToolStripButton resourceManagerButton = new ToolStripButton("Proactive Resource Manager");
 
         resourceManagerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -508,7 +508,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("Studio");
+        ToolStripButton studioButton = new ToolStripButton("ProActive Workflow Studio");
 
         studioButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

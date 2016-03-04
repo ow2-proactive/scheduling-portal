@@ -70,14 +70,13 @@ public class AboutWindow {
     private void build() {
         HLayout pane = new HLayout();
         pane.setWidth100();
-        pane.setHeight(210);
+        pane.setHeight(240);
         pane.setBackgroundColor("#ffffff");
 
-        String str = Config.get().getAboutText();
-
         HTMLPane text = new HTMLPane();
-        text.setContents(str);
+        text.setContents(Config.get().getAboutText());
         text.setWidth100();
+        text.setStyleName("paddingLeftAndRight");
 
         Img img = new Img(ImagesUnbundled.ABOUT_115, 115, 130);
 
@@ -113,8 +112,8 @@ public class AboutWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(root);
-        this.window.setWidth(520);
-        this.window.setHeight(290);
+        this.window.setWidth(600);
+        this.window.setHeight(319);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
     }

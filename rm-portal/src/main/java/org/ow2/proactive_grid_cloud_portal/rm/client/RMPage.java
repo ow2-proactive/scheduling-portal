@@ -268,7 +268,7 @@ public class RMPage implements LogListener {
     private ToolStrip buildLogoStrip() {
         ToolStrip logoStrip = new ToolStrip();
 
-        final Label resourcesLabel = new Label("ProActive Resources");
+        final Label resourcesLabel = new Label("Proactive Resource Manager");
         resourcesLabel.setStyleName("rmHeadline");
         resourcesLabel.setHeight100();
         resourcesLabel.setAutoWidth();
@@ -434,7 +434,7 @@ public class RMPage implements LogListener {
     }
 
     private ToolStripButton getSchedulerLinkButton() {
-        ToolStripButton schedulerButton = new ToolStripButton("Scheduler");
+        ToolStripButton schedulerButton = new ToolStripButton("ProActive Scheduling & Orchestration");
 
         schedulerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -446,7 +446,7 @@ public class RMPage implements LogListener {
     }
 
     private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("Studio");
+        ToolStripButton studioButton = new ToolStripButton("ProActive Workflow Studio");
 
         studioButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
