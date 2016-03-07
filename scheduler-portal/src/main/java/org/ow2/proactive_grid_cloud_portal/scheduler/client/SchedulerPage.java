@@ -496,7 +496,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     private ToolStripButton getResourceManagerLinkButton() {
-        ToolStripButton resourceManagerButton = new ToolStripButton("Proactive Resource Manager");
+        ToolStripButton resourceManagerButton = new ToolStripButton("Resource Manager");
 
         resourceManagerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -508,7 +508,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("ProActive Workflow Studio");
+        ToolStripButton studioButton = new ToolStripButton("Workflow Studio");
 
         studioButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

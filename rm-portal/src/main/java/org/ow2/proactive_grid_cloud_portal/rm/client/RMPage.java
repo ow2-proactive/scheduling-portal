@@ -434,7 +434,7 @@ public class RMPage implements LogListener {
     }
 
     private ToolStripButton getSchedulerLinkButton() {
-        ToolStripButton schedulerButton = new ToolStripButton("ProActive Scheduling & Orchestration");
+        ToolStripButton schedulerButton = new ToolStripButton("Scheduling & Orchestration");
 
         schedulerButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -446,7 +446,7 @@ public class RMPage implements LogListener {
     }
 
     private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("ProActive Workflow Studio");
+        ToolStripButton studioButton = new ToolStripButton("Workflow Studio");
 
         studioButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
