@@ -99,6 +99,8 @@ public class RMPage implements LogListener {
 
     private static final int EXPAND_COLLAPSE_SECTION_LABEL_WIDTH = 80;
 
+    private static final String GREY_BUTTON_BORDER = "1px solid #858585";
+
     private RMController controller = null;
     /** parent of all widgets held by this page */
     private Canvas rootLayout = null;
@@ -392,6 +394,7 @@ public class RMPage implements LogListener {
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
         logoutButton.setIcon(Images.instance.exit_16().getSafeUri().asString());
         logoutButton.setTooltip("Logout");
+        logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
@@ -417,7 +420,9 @@ public class RMPage implements LogListener {
         errorButton.hide();
 
         ToolStripButton studioLinkButton = getStudioLinkButton();
+        studioLinkButton.setBorder(GREY_BUTTON_BORDER);
         ToolStripButton schedulerLinkButton = getSchedulerLinkButton();
+        schedulerLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -426,6 +431,7 @@ public class RMPage implements LogListener {
         tools.addButton(errorButton);
         tools.addFill();
         tools.addButton(studioLinkButton);
+        tools.addSpacer(10);
         tools.addButton(schedulerLinkButton);
         tools.addSeparator();
         tools.addButton(logoutButton);
