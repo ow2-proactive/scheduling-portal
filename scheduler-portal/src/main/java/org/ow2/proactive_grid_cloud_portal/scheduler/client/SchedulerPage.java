@@ -95,6 +95,8 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  */
 public class SchedulerPage implements SchedulerStatusListener, LogListener, ExecutionDisplayModeListener {
 
+    private static final String GREY_BUTTON_BORDER = "1px solid #858585";
+
     static SchedulerPage inst;
 
     protected TabSet leftTabSet;
@@ -450,6 +452,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
         logoutButton.setIcon(Images.instance.exit_16().getSafeUri().asString());
         logoutButton.setTooltip("Logout");
+        logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
@@ -475,7 +478,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         errorButton.hide();
 
         ToolStripButton resourceManagerLinkButton = getResourceManagerLinkButton();
+        resourceManagerLinkButton.setBorder(GREY_BUTTON_BORDER);
+
         ToolStripButton studioLinkButton = getStudioLinkButton();
+        studioLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
@@ -485,6 +491,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(errorButton);
         tools.addFill();
         tools.addButton(studioLinkButton);
+        tools.addSpacer(10);
         tools.addButton(resourceManagerLinkButton);
         tools.addSeparator();
         tools.addButton(logoutButton);
