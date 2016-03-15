@@ -43,9 +43,9 @@ installed is SCHEDULING_HOME:
   (https://github.com/ow2-proactive/scheduling-portal). Execute 'gradle build'.
   The command will produce two wars that you need to symlink to SCHEDULING_HOME/dist/war:
 
-    `$> ln -s SCHEDULING_PORTAL_HOME/rm-portal/build/libs/rm-portal-6.3.0-SNAPSHOT.war SCHEDULING_HOME/dist/war/rm.war`
+    `$> ln -s SCHEDULING_PORTAL_HOME/rm-portal/build/libs/rm-portal-6.3.0.war SCHEDULING_HOME/dist/war/rm.war`
 
-    `$> ln -s SCHEDULING_PORTAL_HOME/scheduler-portal/build/libs/scheduler-portal-6.3.0-SNAPSHOT.war SCHEDULING_HOME/dist/war/scheduler.war`
+    `$> ln -s SCHEDULING_PORTAL_HOME/scheduler-portal/build/libs/scheduler-portal-6.3.0.war SCHEDULING_HOME/dist/war/scheduler.war`
 
 Once you restart the scheduler, you should have the Web interfaces deployed.
 
