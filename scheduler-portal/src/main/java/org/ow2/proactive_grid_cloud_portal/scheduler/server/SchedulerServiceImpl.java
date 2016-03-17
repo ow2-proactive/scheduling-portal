@@ -37,15 +37,18 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 
-import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
@@ -55,7 +58,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.gwt.core.client.GWT;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -69,18 +83,8 @@ import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
 
 /**
@@ -246,6 +250,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 return restClientProxy.pauseJob(sessionId, Integer.toString(jobId));
             }
         }, jobIdList, "job paused");
+    }
+
+    @Override
+    public int restartAllInErrorTasks(final String sessionId,
+            List<Integer> jobIdList) throws RestServerException, ServiceException {
+        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClientProxy, Integer jobId) {
+                return restClientProxy.restartAllTasksInError(sessionId, Integer.toString(jobId));
+            }
+        }, jobIdList, "restart all in error tasks in a job");
     }
 
     @Override
@@ -415,6 +430,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             @Override
             public InputStream apply(RestClient restClient) {
                 return restClient.restartTask(sessionId, jobId.toString(), taskName);
+            }
+        });
+    }
+
+    @Override
+    public boolean restartTaskOnError(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
+            ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.restartTaskOnError(sessionId, jobId.toString(), taskName);
             }
         });
     }

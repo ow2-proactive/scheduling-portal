@@ -49,14 +49,15 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
-
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -187,17 +188,29 @@ public class TasksController {
     }
 
     /**
-     * Restart a task within a job 
+     * Restart a task within a job
      * @param taskName task name
+     * @param taskStatusName
      */
-    public void restartTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+    public void restartTask(final String taskName, String taskStatusName) {
+        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
+        Job selectedJob = executionsModel.getSelectedJob();
+        Integer jobId = selectedJob.getId();
+
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.restartTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
+
+        if (TaskStatus.from(taskStatusName) == TaskStatus.PAUSED_ON_ERROR) {
+            scheduler.restartTaskOnError(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
+        } else {
+            scheduler.restartTask(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
+        }
+    }
+
+    private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId) {
+        return new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-
                 caught.printStackTrace();
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to restart task: " + msg);
@@ -207,7 +220,7 @@ public class TasksController {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance().logMessage("Successfully restarted task " + taskName + " in job " + jobId);
             }
-        });
+        };
     }
 
     /**

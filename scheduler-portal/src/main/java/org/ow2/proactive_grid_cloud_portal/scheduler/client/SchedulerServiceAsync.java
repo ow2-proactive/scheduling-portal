@@ -43,10 +43,9 @@ import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -82,6 +81,15 @@ public interface SchedulerServiceAsync {
      * or not.
      */
     void pauseJobs(String sessionId, List<Integer> jobIdList, AsyncCallback<Integer> asyncCallback);
+
+    /**
+     * By making an asynchronous call to the server, all in error tasks from the selected jobs are restarted.
+     * @param sessionId the session id of the user which is logged in
+     * @param list the list of jobs which are to be resumed
+     * @param asyncCallback the result retrieved from the server which shows if the in error tasks were successfully
+     * or not.
+     */
+    void restartAllInErrorTasks(String sessionId, List<Integer> list, AsyncCallback<Integer> asyncCallback);
 
     /**
      * By making an asynchronous call to the server, several jobs are resumed.
@@ -127,6 +135,17 @@ public interface SchedulerServiceAsync {
      * @param cb
      */
     void restartTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+
+    /**
+     * Restart a task paused on error.
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void restartTaskOnError(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
     /**
      * Method used for making an asynchronous call to the server for returning a list of
