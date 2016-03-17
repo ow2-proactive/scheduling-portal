@@ -175,20 +175,45 @@ public class JobsController {
     }
 
     /**
+     * Restarts all in error tasks the given job, depending its current state.
+     *
+     * @param jobId id of the job to pause/resume
+     */
+    public void restartAllInErrorTasks(List<String> jobId) {
+        final List<Integer> selectedJobs = new ArrayList<>(jobId.size());
+        for (String id : jobId) {
+            selectedJobs.add(Integer.parseInt(id));
+        }
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.restartAllInErrorTasks(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
+            public void onSuccess(Integer result) {
+                LogModel.getInstance().logMessage("Successfully restarted in error tasks  " + result + "/" + selectedJobs.size() + " for selected jobs");
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to restart all in error tasks for selected jobs : " + message);
+            }
+        });
+    }
+
+
+    /**
      * Pauses or resumes the given job, depending its current state
      * 
      * @param jobId id of the job to pause/resume
      */
     public void resumeJobs(List<String> jobId) {
-        final List<Integer> l = new ArrayList<>(jobId.size());
+        final List<Integer> selectedJobs = new ArrayList<>(jobId.size());
         for (String id : jobId) {
-            l.add(Integer.parseInt(id));
+            selectedJobs.add(Integer.parseInt(id));
         }
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
+        scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully resumed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + " jobs");
             }
 
             public void onFailure(Throwable caught) {

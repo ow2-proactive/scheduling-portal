@@ -46,10 +46,9 @@ import javax.ws.rs.QueryParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -85,6 +84,15 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException
      */
     int pauseJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
+
+    /**
+     * By making an asynchronous call to the server, all in error tasks from the selected jobs are restarted.
+     *
+     * @param sessionId     the session id of the user which is logged in
+     * @param list          the list of jobs which are to be resumed
+     *                      or not.
+     */
+    int restartAllInErrorTasks(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
     /**
      * Resumes a job.
@@ -131,7 +139,7 @@ public interface SchedulerService extends RemoteService {
             ServiceException;
 
     /**
-     * Restart a task
+     * Restart a task.
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of a task to restart within that job
@@ -140,6 +148,18 @@ public interface SchedulerService extends RemoteService {
      * @throws ServiceException
      */
     boolean restartTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
+     * Restart a task paused on error.
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to restart within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean restartTaskOnError(String sessionId, Integer jobId, String taskName) throws RestServerException,
             ServiceException;
 
     /**
@@ -452,4 +472,5 @@ public interface SchedulerService extends RemoteService {
     Set<String> thirdPartyCredentialKeySet(String sessionId) throws ServiceException, RestServerException;
 
     void removeThirdPartyCredential(String sessionId, String key) throws RestServerException;
+
 }
