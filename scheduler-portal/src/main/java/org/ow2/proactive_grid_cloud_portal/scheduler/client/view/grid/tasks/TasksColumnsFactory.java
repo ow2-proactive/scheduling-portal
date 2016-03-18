@@ -55,8 +55,8 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
     public static GridColumns TAG_ATTR = new GridColumns("tag", "Tag", 100, true, false);
     public static GridColumns EXEC_DURATION_ATTR = new GridColumns("execDuration", "Duration", 80, true, false);
     public static GridColumns NODE_COUNT_ATTR = new GridColumns("nodeCount", "Nodes", 40, true, false);
-    public static GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 60, true, false);
-    public static GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Failures", 60, true, false);
+    public static GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 80, true, false);
+    public static GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Node Failures", 80, true, false);
     public static GridColumns HOST_ATTR = new GridColumns("host", "Host", 100, true, false);
     public static GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 100, true, false);
     public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true, false);
