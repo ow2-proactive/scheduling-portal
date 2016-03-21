@@ -450,8 +450,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             login = "";
 
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.exit_18().getSafeUri().asString());
-        logoutButton.setIconSize(18);
+        logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
+        logoutButton.setIconSize(25);
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
@@ -479,13 +479,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         errorButton.hide();
 
         ToolStripButton resourceManagerLinkButton = getResourceManagerLinkButton();
-        resourceManagerLinkButton.setIcon(Images.instance.rm_18().getSafeUri().asString());
-        resourceManagerLinkButton.setIconSize(18);
+        resourceManagerLinkButton.setIcon(Images.instance.rm_30().getSafeUri().asString());
+        resourceManagerLinkButton.setIconSize(25);
         resourceManagerLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         ToolStripButton studioLinkButton = getStudioLinkButton();
-        studioLinkButton.setIcon(Images.instance.studio_18().getSafeUri().asString());
-        studioLinkButton.setIconSize(18);
+        studioLinkButton.setIcon(Images.instance.studio_30().getSafeUri().asString());
+        studioLinkButton.setIconSize(25);
         studioLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
