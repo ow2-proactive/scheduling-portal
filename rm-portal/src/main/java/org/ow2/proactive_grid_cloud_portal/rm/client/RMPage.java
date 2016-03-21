@@ -392,8 +392,8 @@ public class RMPage implements LogListener {
         });
 
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.exit_18().getSafeUri().asString());
-        logoutButton.setIconSize(18);
+        logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
+        logoutButton.setIconSize(25);
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
@@ -421,12 +421,12 @@ public class RMPage implements LogListener {
         errorButton.hide();
 
         ToolStripButton studioLinkButton = getStudioLinkButton();
-        studioLinkButton.setIcon(Images.instance.studio_18().getSafeUri().asString());
-        studioLinkButton.setIconSize(18);
+        studioLinkButton.setIcon(Images.instance.studio_30().getSafeUri().asString());
+        studioLinkButton.setIconSize(25);
         studioLinkButton.setBorder(GREY_BUTTON_BORDER);
         ToolStripButton schedulerLinkButton = getSchedulerLinkButton();
-        schedulerLinkButton.setIcon(Images.instance.scheduler_18().getSafeUri().asString());
-        schedulerLinkButton.setIconSize(18);
+        schedulerLinkButton.setIcon(Images.instance.scheduler_30().getSafeUri().asString());
+        schedulerLinkButton.setIconSize(25);
         schedulerLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
