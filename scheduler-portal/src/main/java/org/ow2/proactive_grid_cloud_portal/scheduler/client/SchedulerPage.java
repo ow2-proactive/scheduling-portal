@@ -263,7 +263,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
      */
     private ToolStrip buildTools() {
         ToolStrip tools = new ToolStrip();
-        tools.setHeight(34);
+        tools.setHeight(50);
         tools.setWidth100();
         tools.setBackgroundImage("");
         tools.setBackgroundColor("#fafafa");
@@ -323,7 +323,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_16().getSafeUri().asString());
+        MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_18().getSafeUri().asString());
         logoutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
@@ -450,7 +450,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             login = "";
 
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.exit_16().getSafeUri().asString());
+        logoutButton.setIcon(Images.instance.exit_18().getSafeUri().asString());
+        logoutButton.setIconSize(18);
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
@@ -478,9 +479,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         errorButton.hide();
 
         ToolStripButton resourceManagerLinkButton = getResourceManagerLinkButton();
+        resourceManagerLinkButton.setIcon(Images.instance.rm_18().getSafeUri().asString());
+        resourceManagerLinkButton.setIconSize(18);
         resourceManagerLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         ToolStripButton studioLinkButton = getStudioLinkButton();
+        studioLinkButton.setIcon(Images.instance.studio_18().getSafeUri().asString());
+        studioLinkButton.setIconSize(18);
         studioLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
@@ -491,10 +496,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(errorButton);
         tools.addFill();
         tools.addButton(studioLinkButton);
-        tools.addSpacer(10);
+        tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
+        tools.addSpacer(2);
         tools.addButton(logoutButton);
+        tools.addSpacer(10);
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.KILLED);
