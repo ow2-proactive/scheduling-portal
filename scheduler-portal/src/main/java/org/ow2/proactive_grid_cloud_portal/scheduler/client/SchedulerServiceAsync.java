@@ -145,7 +145,7 @@ public interface SchedulerServiceAsync {
      * @throws RestServerException
      * @throws ServiceException
      */
-    void restartTaskOnError(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+    void restartInErrorTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
     /**
      * Method used for making an asynchronous call to the server for returning a list of

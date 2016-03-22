@@ -87,7 +87,7 @@ public enum JobStatus implements java.io.Serializable {
      * the execution of the job that is suspended (because some tasks are
      * in the paused on error state).
      */
-    PAUSED_ON_ERROR("In Error");
+    IN_ERROR("In-Error");
 
     /** The textual definition of the status */
     private String definition;
@@ -100,14 +100,6 @@ public enum JobStatus implements java.io.Serializable {
         definition = def;
     }
 
-    /**
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return definition;
-    }
-
     public static JobStatus from(String name) {
         for (JobStatus jobStatus : values()) {
             if (jobStatus.definition.equals(name)) {
@@ -116,6 +108,14 @@ public enum JobStatus implements java.io.Serializable {
         }
 
         return null;
+    }
+
+    /**
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+        return definition;
     }
 
 }

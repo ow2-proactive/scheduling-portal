@@ -200,7 +200,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 return "color:#176925;font-weight:bold;" + base;
             } else if (st.equals(TaskStatus.ABORTED.toString()) ||
                     st.equals(TaskStatus.FAILED.toString()) || st.equals(
-                    TaskStatus.PAUSED_ON_ERROR.toString())) {
+                    TaskStatus.IN_ERROR.toString())) {
                 return "color:#d37a11;font-weight:bold;" + base;
             } else if (st.equals(TaskStatus.FAULTY.toString()) ||
                     st.equals(TaskStatus.NOT_STARTED.toString()) ||
@@ -389,7 +389,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             case PENDING:
             case PAUSED:
             case RUNNING:
-            case PAUSED_ON_ERROR:
+            case IN_ERROR:
                 enabled = true;
                 break;
             case SKIPPED:

@@ -435,12 +435,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
-    public boolean restartTaskOnError(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
+    public boolean restartInErrorTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
             ServiceException {
         return executeFunction(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                return restClient.restartTaskOnError(sessionId, jobId.toString(), taskName);
+                return restClient.restartInErrorTask(sessionId, jobId.toString(), taskName);
             }
         });
     }

@@ -165,7 +165,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             try {
                 switch (getJobStatus(record)) {
                     case KILLED:
-                    case PAUSED_ON_ERROR:
+                    case IN_ERROR:
                         return "color:#d37a11;font-weight:bold;" + base;
                     case CANCELED:
                     case FAILED:
@@ -290,7 +290,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                     selPausedOnError = true;
                     selRunning = false;
                     break;
-                case PAUSED_ON_ERROR:
+                case IN_ERROR:
                     selFinished = false;
                     selPausedOnError = true;
                     selRunning = true;
@@ -313,7 +313,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         });
         pauseItem.setEnabled(selRunning);
 
-        MenuItem restartOnErrorTaskItem = new MenuItem("Restart All In Error Tasks", SchedulerImages.instance.scheduler_resume_16()
+        MenuItem restartOnErrorTaskItem = new MenuItem("Restart All In-Error Tasks", SchedulerImages.instance.scheduler_resume_16()
                 .getSafeUri().asString());
         restartOnErrorTaskItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
