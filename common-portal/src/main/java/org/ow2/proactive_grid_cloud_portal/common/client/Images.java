@@ -51,14 +51,17 @@ public interface Images extends ClientBundle {
 
     public static final Images instance = GWT.create(Images.class);
 
-    @Source("images/rm_18.png")
-    ImageResource rm_18();
+    @Source("images/rm_30.png")
+    ImageResource rm_30();
 
-    @Source("images/scheduler_18.png")
-    ImageResource scheduler_18();
+    @Source("images/scheduler_30.png")
+    ImageResource scheduler_30();
 
-    @Source("images/studio_18.png")
-    ImageResource studio_18();
+    @Source("images/studio_30.png")
+    ImageResource studio_30();
+
+    @Source("images/logout_30.png")
+    ImageResource logout_30();
 
     @Source("images/about_16.png")
     ImageResource about_16();
