@@ -200,8 +200,8 @@ public class TasksController {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-        if (TaskStatus.from(taskStatusName) == TaskStatus.PAUSED_ON_ERROR) {
-            scheduler.restartTaskOnError(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
+        if (TaskStatus.from(taskStatusName) == TaskStatus.IN_ERROR) {
+            scheduler.restartInErrorTask(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
         } else {
             scheduler.restartTask(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
         }

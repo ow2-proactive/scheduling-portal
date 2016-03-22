@@ -149,7 +149,7 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and true - if the job was successfully restarted, false - otherwise.
      */
     @PUT
-    @Path("jobs/{jobid}/restartAllTasksInError")
+    @Path("jobs/{jobid}/restartAllInErrorTasks")
     InputStream restartAllTasksInError(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId);
@@ -229,8 +229,8 @@ public interface RestClient {
      * @return
      */
     @PUT
-    @Path("jobs/{jobid}/tasks/{taskname}/restartTaskOnError")
-    InputStream restartTaskOnError(@HeaderParam("sessionid")
+    @Path("jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
+    InputStream restartInErrorTask(@HeaderParam("sessionid")
     String sessionId, @PathParam("jobid")
     String jobId, @PathParam("taskname")
     String taskName);
