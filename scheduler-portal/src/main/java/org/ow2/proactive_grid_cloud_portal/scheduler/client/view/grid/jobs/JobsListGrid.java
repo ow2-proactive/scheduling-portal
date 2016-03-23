@@ -162,10 +162,10 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
             try {
                 switch (getJobStatus(record)) {
                     case KILLED:
-                    case IN_ERROR:
                         return "color:#d37a11;font-weight:bold;" + base;
                     case CANCELED:
                     case FAILED:
+                    case IN_ERROR:
                         return "color:#c50000;font-weight:bold;" + base;
                     case RUNNING:
                         return "color:#176925;font-weight:bold;" + base;

@@ -199,12 +199,12 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             } else if (st.equals(TaskStatus.RUNNING.toString())) {
                 return "color:#176925;font-weight:bold;" + base;
             } else if (st.equals(TaskStatus.ABORTED.toString()) ||
-                    st.equals(TaskStatus.FAILED.toString()) || st.equals(
-                    TaskStatus.IN_ERROR.toString())) {
+                    st.equals(TaskStatus.FAILED.toString())) {
                 return "color:#d37a11;font-weight:bold;" + base;
             } else if (st.equals(TaskStatus.FAULTY.toString()) ||
                     st.equals(TaskStatus.NOT_STARTED.toString()) ||
-                    st.equals(TaskStatus.NOT_RESTARTED.toString())) {
+                    st.equals(TaskStatus.NOT_RESTARTED.toString()) ||
+                    st.equals(TaskStatus.IN_ERROR.toString())) {
                 return "color:#c50000;font-weight:bold;" + base;
             } else {
                 return base;
