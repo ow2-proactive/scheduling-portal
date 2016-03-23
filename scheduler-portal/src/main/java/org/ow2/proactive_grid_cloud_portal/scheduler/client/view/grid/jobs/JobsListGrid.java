@@ -46,7 +46,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
-
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
@@ -66,6 +65,9 @@ import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
+
 
 /**
  * A list grid that shows jobs.
@@ -75,8 +77,8 @@ import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListener {
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
-            new SortSpecifier(JobsColumnsFactory.STATE_ATTR.getName(), SortDirection.ASCENDING),
-            new SortSpecifier(JobsColumnsFactory.ID_ATTR.getName(), SortDirection.DESCENDING) };
+            new SortSpecifier(STATE_ATTR.getName(), SortDirection.ASCENDING),
+            new SortSpecifier(ID_ATTR.getName(), SortDirection.DESCENDING) };
 
     /**
      * The controller for the jobs grid.
@@ -158,7 +160,7 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
         String fieldName = this.getFieldName(colNum);
 
         /* change the color of the job status field */
-        if (fieldName.equals(JobsColumnsFactory.STATE_ATTR.getName())) {
+        if (fieldName.equals(STATE_ATTR.getName())) {
             try {
                 switch (getJobStatus(record)) {
                     case KILLED:
@@ -187,20 +189,20 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
     protected Map<GridColumns, ListGridField> buildListGridField() {
         Map<GridColumns, ListGridField> fields = super.buildListGridField();
 
-        ListGridField idField = fields.get(JobsColumnsFactory.ID_ATTR);
-        idField.setType(ListGridFieldType.INTEGER);
-        idField.setAlign(Alignment.LEFT);
-        idField.setCellAlign(Alignment.LEFT);
+        alignCells(fields);
 
-        ListGridField stateField = fields.get(JobsColumnsFactory.STATE_ATTR);
+        ListGridField idField = fields.get(ID_ATTR);
+        idField.setType(ListGridFieldType.INTEGER);
+
+        ListGridField stateField = fields.get(STATE_ATTR);
         stateField.setSortNormalizer(sortStatusAndGroup());
 
-        ListGridField progressField = fields.get(JobsColumnsFactory.PROGRESS_ATTR);
+        ListGridField progressField = fields.get(PROGRESS_ATTR);
         progressField.setType(ListGridFieldType.FLOAT);
         progressField.setAlign(Alignment.CENTER);
         progressField.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                int pw = getFieldWidth(JobsColumnsFactory.PROGRESS_ATTR.getName());
+                int pw = getFieldWidth(PROGRESS_ATTR.getName());
                 float progress = 0;
                 if (value != null) {
                     progress = Float.parseFloat(value.toString());
@@ -221,7 +223,7 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
             }
         });
 
-        ListGridField duration = fields.get(JobsColumnsFactory.DURATION_ATTR);
+        ListGridField duration = fields.get(DURATION_ATTR);
         duration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
                 if (value != null) {
@@ -234,6 +236,18 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
         });
 
         return fields;
+    }
+
+    private void alignCells(Map<GridColumns, ListGridField> fields) {
+        GridColumns[] columnsToAlignCenter =
+                new GridColumns[]{ ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
+                        PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR};
+
+        for (GridColumns column : columnsToAlignCenter) {
+            ListGridField listGridField = fields.get(column);
+            listGridField.setAlign(Alignment.CENTER);
+            listGridField.setCellAlign(Alignment.CENTER);
+        }
     }
 
     /**
@@ -298,7 +312,7 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
                     selPause = false;
             }
 
-            ids.add(rec.getAttribute(JobsColumnsFactory.ID_ATTR.getName()));
+            ids.add(rec.getAttribute(ID_ATTR.getName()));
         }
 
         MenuItem pauseItem = new MenuItem("Pause",
@@ -368,7 +382,7 @@ public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListen
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
-        String jobStatusName = rec.getAttribute(JobsColumnsFactory.STATE_ATTR.getName());
+        String jobStatusName = rec.getAttribute(STATE_ATTR.getName());
         return JobStatus.from(jobStatusName);
     }
 }

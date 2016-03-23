@@ -75,6 +75,10 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
+
 /**
  * A grid that shows tasks
  *
@@ -129,7 +133,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         idField.setAlign(Alignment.LEFT);
         idField.setCellAlign(Alignment.LEFT);
 
-        ListGridField execDuration = fields.get(TasksColumnsFactory.EXEC_DURATION_ATTR);
+        ListGridField execDuration = fields.get(EXEC_DURATION_ATTR);
         execDuration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
                 long l = Long.parseLong(value.toString());
@@ -191,8 +195,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
         String fieldName = this.getFieldName(colNum);
 
-        if (fieldName.equals(TasksColumnsFactory.STATUS_ATTR.getName())) {
-            String st = record.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName());
+        if (fieldName.equals(STATUS_ATTR.getName())) {
+            String st = record.getAttribute(STATUS_ATTR.getName());
             if (st.equals(TaskStatus.PENDING.toString()) ||
                     st.equals(TaskStatus.SUBMITTED.toString())) {
                 return "color:#1a8bba;" + base;
@@ -243,7 +247,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String taskId = rec.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName());
         String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
-        final String taskName = rec.getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
+        final String taskName = rec.getAttributeAsString(NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
@@ -350,9 +354,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(
-                TasksColumnsFactory.NAME_ATTR.getName());
+                NAME_ATTR.getName());
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(
-                TasksColumnsFactory.STATUS_ATTR.getName());
+                STATUS_ATTR.getName());
 
         MenuItem restart = new MenuItem("Restart");
         restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
