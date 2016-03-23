@@ -328,7 +328,7 @@ public class JobsController {
      * @param name name of the job
      */
     public void addSubmittingJob(int jobId, String name) {
-        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, LoginModel.getInstance().getLogin(), 0, 0, 0, 0, -1,
+        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, LoginModel.getInstance().getLogin(), 0, 0, 0, 0, 0, 0, 0, -1,
                 -1, -1);
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
@@ -383,6 +383,8 @@ public class JobsController {
             }
 
             public void onSuccess(String result) {
+
+                LogModel.getInstance().logMessage("<span style='color:gray;'>CONTENT" + result + " jobs in ");
                 JSONPaginatedJobs resultJobs;
                 try {
                     resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);
