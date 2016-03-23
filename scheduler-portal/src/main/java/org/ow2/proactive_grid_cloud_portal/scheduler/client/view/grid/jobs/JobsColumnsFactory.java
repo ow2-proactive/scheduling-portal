@@ -48,6 +48,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
     public static GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
     public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true, false);
+    public static GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
     public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true, false);
     public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true, false);
     public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true, false);
@@ -56,7 +57,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[]{ID_ATTR, STATE_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
+        return new GridColumns[]{ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
     }
 
 
@@ -69,12 +70,22 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         }
 
         record.setAttribute(STATE_ATTR.getName(), item.getStatus().toString());
+        record.setAttribute(ISSUES_ATTR.getName(), buildIssuesAttr(item));
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(DURATION_ATTR.getName(), duration);
     }
 
+    private Object buildIssuesAttr(Job item) {
+        int nbIssues = item.getFailedTasks() + item.getFaultyTasks() + item.getInErrorTasks();
+
+        if (nbIssues == 0) {
+            return "";
+        }
+
+        return nbIssues;
+    }
 
     @Override
     public void buildRecord(Job item, Record record) {
