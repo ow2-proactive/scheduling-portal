@@ -46,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
+
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
@@ -65,12 +66,13 @@ import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
+
 /**
  * A list grid that shows jobs.
  *
  * @author The activeeon team.
  */
-public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListener {
+public class JobsListGrid extends ItemsListGrid<Job>implements JobsUpdatedListener {
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
             new SortSpecifier(JobsColumnsFactory.STATE_ATTR.getName(), SortDirection.ASCENDING),
@@ -81,14 +83,12 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      */
     protected JobsController controller;
 
-
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
         this.controller = controller;
         this.controller.getModel().addJobsUpdatedListener(this);
     }
-
 
     @Override
     public void build() {
@@ -97,7 +97,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         this.setSort(DEFAULT_SORT);
     }
 
-
     protected void selectionChangedHandler(SelectionEvent event) {
         if (event.getState() && !fetchingData) {
             ListGridRecord record = event.getRecord();
@@ -105,7 +104,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             controller.selectJob(job);
         }
     }
-
 
     @Override
     public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
@@ -150,7 +148,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         applyCurrentLocalFilter();
     }
 
-
     @Override
     protected String getCellCSSText(ListGridRecord record, int rowNum, int colNum) {
         String base = super.getCellCSSText(record, rowNum, colNum);
@@ -160,7 +157,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     protected String getJobStatusFieldColor(ListGridRecord record, int rowNum, int colNum, String base) {
         String fieldName = this.getFieldName(colNum);
 
-        /* change the color of the job status field  */
+        /* change the color of the job status field */
         if (fieldName.equals(JobsColumnsFactory.STATE_ATTR.getName())) {
             try {
                 switch (getJobStatus(record)) {
@@ -187,7 +184,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         return base;
     }
 
-
     protected Map<GridColumns, ListGridField> buildListGridField() {
         Map<GridColumns, ListGridField> fields = super.buildListGridField();
 
@@ -213,18 +209,17 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 String progressUrl = SchedulerImages.instance.progressbar().getSafeUri().asString();
 
                 String style = "display:block; " + //
-                        "border: 1px solid #acbac7; " + //
-                        "background-image:url(" + progressUrl + ");" + //
-                        "background-position:" + bx + "px 0px;" + //
-                        "background-repeat: no-repeat;" + //
-                        "background-color:#a7cef6";
+                    "border: 1px solid #acbac7; " + //
+                    "background-image:url(" + progressUrl + ");" + //
+                    "background-position:" + bx + "px 0px;" + //
+                    "background-repeat: no-repeat;" + //
+                    "background-color:#a7cef6";
 
                 Job job = JobRecord.getJob(record);
                 String progressCounters = job.getFinishedTasks() + " / " + job.getTotalTasks();
                 return "<div style='" + style + "'>" + progressCounters + "</div>";
             }
         });
-
 
         ListGridField duration = fields.get(JobsColumnsFactory.DURATION_ATTR);
         duration.setCellFormatter(new CellFormatter() {
@@ -241,7 +236,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         return fields;
     }
 
-
     /**
      * A custom sort for status:
      * - pending first
@@ -255,9 +249,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 String status = record.getAttribute(fieldName);
                 if (status.equals(JobStatus.PENDING.toString())) {
                     return 0;
-                } else if (status.equals(JobStatus.RUNNING.toString())
-                        || status.equals(JobStatus.STALLED.toString())
-                        || status.equals(JobStatus.PAUSED.toString())) {
+                } else if (status.equals(JobStatus.RUNNING.toString()) ||
+                    status.equals(JobStatus.STALLED.toString()) ||
+                    status.equals(JobStatus.PAUSED.toString())) {
                     return 1;
                 } else {
                     return 2;
@@ -265,7 +259,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         };
     }
-
 
     protected void buildCellContextualMenu(Menu menu) {
         boolean selPause = true; // ALL selected jobs are paused
@@ -280,10 +273,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
             switch (status) {
                 case PENDING:
-                case RUNNING:
                 case STALLED:
                     selPause = false;
                     selFinished = false;
+                    break;
+                case RUNNING:
+                    selPause = false;
+                    selFinished = false;
+                    selPausedOnError = true;
                     break;
                 case PAUSED:
                     selFinished = false;
@@ -304,8 +301,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             ids.add(rec.getAttribute(JobsColumnsFactory.ID_ATTR.getName()));
         }
 
-        MenuItem pauseItem = new MenuItem("Pause", SchedulerImages.instance.scheduler_pause_16()
-                .getSafeUri().asString());
+        MenuItem pauseItem = new MenuItem("Pause",
+            SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
         pauseItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.pauseJobs(ids);
@@ -313,8 +310,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         });
         pauseItem.setEnabled(selRunning);
 
-        MenuItem restartOnErrorTaskItem = new MenuItem("Restart All In-Error Tasks", SchedulerImages.instance.scheduler_resume_16()
-                .getSafeUri().asString());
+        MenuItem restartOnErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
+            SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         restartOnErrorTaskItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.restartAllInErrorTasks(ids);
@@ -322,8 +319,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         });
         restartOnErrorTaskItem.setEnabled(selPausedOnError);
 
-        MenuItem resumeItem = new MenuItem("Resume", SchedulerImages.instance.scheduler_resume_16()
-                .getSafeUri().asString());
+        MenuItem resumeItem = new MenuItem("Resume",
+            SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         resumeItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.resumeJobs(ids);
@@ -348,16 +345,16 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         priorityItem.setSubmenu(priorityMenu);
 
-        MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16()
-                .getSafeUri().asString());
+        MenuItem removeItem = new MenuItem("Remove",
+            SchedulerImages.instance.job_kill_16().getSafeUri().asString());
         removeItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.removeJob(ids);
             }
         });
 
-        MenuItem killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16()
-                .getSafeUri().asString());
+        MenuItem killItem = new MenuItem("Kill",
+            SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.killJob(ids);
