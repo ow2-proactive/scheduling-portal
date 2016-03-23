@@ -74,7 +74,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
-        record.setAttribute(DURATION_ATTR.getName(), duration);
+        record.setAttribute(DURATION_ATTR.getName(), duration == -1 ? "" : duration);
     }
 
     private Object buildIssuesAttr(Job item) {
