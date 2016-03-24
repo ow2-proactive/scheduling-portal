@@ -47,12 +47,12 @@ import com.smartgwt.client.data.Record;
 public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
     public static GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
-    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true, false);
+    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 80, true, false);
     public static GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
     public static GridColumns USER_ATTR = new GridColumns("user","User", 120, true, false);
     public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 120, true, false);
     public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority", 100, true, false);
-    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 120, true, false);
+    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
     public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
 
     @Override
