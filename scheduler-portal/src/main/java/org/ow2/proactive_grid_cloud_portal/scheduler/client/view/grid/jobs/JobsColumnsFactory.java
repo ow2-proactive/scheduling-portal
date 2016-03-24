@@ -46,18 +46,26 @@ import com.smartgwt.client.data.Record;
  */
 public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
-    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 80, true, false);
-    public static GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
-    public static GridColumns USER_ATTR = new GridColumns("user","User", 120, true, false);
-    public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 120, true, false);
-    public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority", 100, true, false);
-    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
-    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+    public static final GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
+    public static final GridColumns STATE_ATTR = new GridColumns("state", "State", 80, true, false);
+    public static final GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
+    public static final GridColumns USER_ATTR = new GridColumns("user","User", 120, true, false);
+    public static final GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 120, true, false);
+    public static final GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority", 100, true, false);
+    public static final GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
+    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+
+    private static final GridColumns[] COLUMNS =
+            new GridColumns[] {ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR, PROGRESS_ATTR,
+                    PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
+
+    protected static final GridColumns[] COLUMNS_TO_ALIGN =
+            new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
+            PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR };
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[]{ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
+        return COLUMNS;
     }
 
 

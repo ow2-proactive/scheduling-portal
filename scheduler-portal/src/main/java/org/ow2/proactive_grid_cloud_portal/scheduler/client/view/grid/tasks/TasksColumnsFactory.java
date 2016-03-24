@@ -39,7 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
-
 import com.smartgwt.client.data.Record;
 
 /**
@@ -49,26 +48,35 @@ import com.smartgwt.client.data.Record;
  */
 public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 60, true, true);
-    public static GridColumns STATUS_ATTR = new GridColumns("status", "Status", 80, true, false);
-    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", 100, true, false);
-    public static GridColumns TAG_ATTR = new GridColumns("tag", "Tag", 100, true, false);
-    public static GridColumns EXEC_DURATION_ATTR = new GridColumns("execDuration", "Duration", 80, true, false);
-    public static GridColumns NODE_COUNT_ATTR = new GridColumns("nodeCount", "Nodes", 40, true, false);
-    public static GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 80, true, false);
-    public static GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Node Failures", 80, true, false);
-    public static GridColumns HOST_ATTR = new GridColumns("host", "Host", 100, true, false);
-    public static GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 100, true, false);
-    public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 100, true, false);
-    public static GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", -1, true, false);
-    public static GridColumns NEXT_TIME_ATTR = new GridColumns("scheduledAt", "Scheduled at", 100, true, false);
-    public static GridColumns VISU_ATTR = new GridColumns("visu", "Visu", -1, false, false);
+    public static final GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
+    public static final GridColumns STATUS_ATTR = new GridColumns("status", "Status", 120, true, false);
+    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", 120, true, false);
+    public static final GridColumns TAG_ATTR = new GridColumns("tag", "Tag", 120, true, false);
+    public static final GridColumns EXEC_DURATION_ATTR = new GridColumns("execDuration", "Duration", 120, true, false);
+    public static final GridColumns NODE_COUNT_ATTR = new GridColumns("nodeCount", "Nodes", 80, true, false);
+    public static final GridColumns EXECUTIONS_ATTR = new GridColumns("executions", "Executions", 80, true, false);
+    public static final GridColumns NODE_FAILURE_ATTR = new GridColumns("nodeFailure", "Node Failures", 80, true, false);
+    public static final GridColumns HOST_ATTR = new GridColumns("host", "Host", 120, true, false);
+    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 120, true, false);
+    public static final GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished at", 120, true, false);
+    public static final GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", -1, true, false);
+    public static final GridColumns NEXT_TIME_ATTR = new GridColumns("scheduledAt", "Scheduled at", 120, true, false);
+    public static final GridColumns VISU_ATTR = new GridColumns("visu", "Visu", -1, false, false);
+
+    private static final GridColumns[] COLUMNS = new GridColumns[]{
+            ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, EXEC_DURATION_ATTR, NODE_COUNT_ATTR,
+            EXECUTIONS_ATTR, NODE_FAILURE_ATTR, HOST_ATTR, START_TIME_ATTR, FINISHED_TIME_ATTR,
+            DESCRIPTION_ATTR, VISU_ATTR};
+
+    protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[]{
+            TasksColumnsFactory.ID_ATTR, TasksColumnsFactory.STATUS_ATTR,
+            TasksColumnsFactory.NAME_ATTR, TasksColumnsFactory.TAG_ATTR,
+            TasksColumnsFactory.EXEC_DURATION_ATTR, TasksColumnsFactory.NODE_COUNT_ATTR,
+            TasksColumnsFactory.EXECUTIONS_ATTR, TasksColumnsFactory.NODE_FAILURE_ATTR};
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[]{ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, EXEC_DURATION_ATTR, NODE_COUNT_ATTR, 
-                EXECUTIONS_ATTR, NODE_FAILURE_ATTR, HOST_ATTR, START_TIME_ATTR, FINISHED_TIME_ATTR,
-                DESCRIPTION_ATTR, VISU_ATTR};
+        return COLUMNS;
     }
 
 
