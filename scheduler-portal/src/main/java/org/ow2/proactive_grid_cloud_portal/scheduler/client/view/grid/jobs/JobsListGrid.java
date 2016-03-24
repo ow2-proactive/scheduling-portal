@@ -191,7 +191,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     private String highlightRowHavingIssues(int rowNum, String base) {
         Object issues = getEditedCell(rowNum, ISSUES_ATTR.getName());
 
-        if (issues instanceof Integer) {
+        ListGridRecord selectedRecord = getSelectedRecord();
+        
+        if (issues instanceof Integer &&
+                (selectedRecord == null || rowNum != getRecordIndex(selectedRecord))) {
             base = "background-color: #FFDEDE;";
         }
 
