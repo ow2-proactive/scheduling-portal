@@ -147,7 +147,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean restartTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
+    boolean restartRunningTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
             ServiceException;
 
     /**

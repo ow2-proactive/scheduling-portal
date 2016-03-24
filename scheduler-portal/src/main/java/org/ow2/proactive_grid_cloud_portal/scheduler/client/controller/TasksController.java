@@ -49,7 +49,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
@@ -187,12 +186,15 @@ public class TasksController {
         });
     }
 
-    /**
-     * Restart a task within a job
-     * @param taskName task name
-     * @param taskStatusName
-     */
-    public void restartTask(final String taskName, String taskStatusName) {
+    public void restartInErrorTask(final String taskName) {
+        restartTask(taskName, RestartType.IN_ERROR_TASK);
+    }
+
+    public void restartRunningTask(final String taskName) {
+        restartTask(taskName, RestartType.RUNNING_TASK);
+    }
+
+    protected void restartTask(String taskName, RestartType restartType) {
         ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
         Job selectedJob = executionsModel.getSelectedJob();
         Integer jobId = selectedJob.getId();
@@ -200,25 +202,39 @@ public class TasksController {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-        if (TaskStatus.from(taskStatusName) == TaskStatus.IN_ERROR) {
-            scheduler.restartInErrorTask(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
-        } else {
-            scheduler.restartTask(sessionId, jobId, taskName, callbackHandlerForRestartTask(taskName, jobId));
+        if (restartType == RestartType.IN_ERROR_TASK) {
+            scheduler.restartInErrorTask(
+                    sessionId, jobId, taskName,
+                    callbackHandlerForRestartTask(taskName, jobId, true));
+        } else if (restartType == RestartType.RUNNING_TASK) {
+            scheduler.restartRunningTask(
+                    sessionId, jobId, taskName,
+                    callbackHandlerForRestartTask(taskName, jobId, false));
         }
     }
 
-    private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId) {
+    private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId, final boolean isTaskInError) {
         return new AsyncCallback<Boolean>() {
+
+            private String context = "";
+
+            {
+                if (isTaskInError) {
+                    context = "In-Error ";
+                }
+            }
+
+
             @Override
             public void onFailure(Throwable caught) {
                 caught.printStackTrace();
                 String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to restart task: " + msg);
+                LogModel.getInstance().logImportantMessage("Failed to restart " + context + "task: " + msg);
             }
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully restarted task " + taskName + " in job " + jobId);
+                LogModel.getInstance().logMessage("Successfully restarted " + context + "task " + taskName + " in job " + jobId);
             }
         };
     }
@@ -283,5 +299,12 @@ public class TasksController {
     public void selectTask(Task task) {
         this.model.selectTask(task);
     }
+
+    private enum RestartType {
+
+        IN_ERROR_TASK, RUNNING_TASK
+
+    }
+
 
 }
