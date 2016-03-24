@@ -75,6 +75,7 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.COLUMNS_TO_ALIGN;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
@@ -97,14 +98,16 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     private HashMap<String, ImgButton> visuButtons = null;
 
     /**
-     * To avoid opening severial popup on button's click
+     * To avoid opening several popup on button's click
      */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
 
+    protected final boolean usedWithTaskCentricView;
 
     public TasksListGrid(TasksController controller, TasksColumnsFactory factory,
-            String datasourceNamePrefix) {
+            String datasourceNamePrefix, boolean usedWithTaskCentricView) {
         super(factory, datasourceNamePrefix);
+        this.usedWithTaskCentricView = usedWithTaskCentricView;
         this.controller = controller;
         this.visuButtons = new HashMap<String, ImgButton>();
         this.visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
@@ -112,7 +115,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.controller.getModel().addRemoteHintListener(this);
         this.emptyMessage = "No tasks to show.";
     }
-
 
     @Override
     public void build() {
@@ -124,14 +126,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.setShowRecordComponentsByCell(true);
     }
 
-
     protected Map<GridColumns, ListGridField> buildListGridField() {
         Map<GridColumns, ListGridField> fields = super.buildListGridField();
 
         ListGridField idField = fields.get(TasksColumnsFactory.ID_ATTR);
         idField.setType(ListGridFieldType.INTEGER);
-        idField.setAlign(Alignment.LEFT);
-        idField.setCellAlign(Alignment.LEFT);
+
+        alignCells(fields);
 
         ListGridField execDuration = fields.get(EXEC_DURATION_ATTR);
         execDuration.setCellFormatter(new CellFormatter() {
@@ -142,6 +143,20 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         });
 
         return fields;
+    }
+
+    private void alignCells(Map<GridColumns, ListGridField> fields) {
+        GridColumns[] columnsToAlign = COLUMNS_TO_ALIGN;
+
+        if (usedWithTaskCentricView) {
+            columnsToAlign = TasksCentricColumnsFactory.COLUMNS_TO_ALIGN;
+        }
+
+        for (GridColumns column : columnsToAlign) {
+            ListGridField listGridField = fields.get(column);
+            listGridField.setAlign(Alignment.CENTER);
+            listGridField.setCellAlign(Alignment.CENTER);
+        }
     }
 
 

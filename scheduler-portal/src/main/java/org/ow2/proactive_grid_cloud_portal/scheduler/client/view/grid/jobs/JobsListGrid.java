@@ -65,8 +65,12 @@ import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.DURATION_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
 
 
 /**
@@ -254,11 +258,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     private void alignCells(Map<GridColumns, ListGridField> fields) {
-        GridColumns[] columnsToAlignCenter =
-                new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
-                        PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR };
-
-        for (GridColumns column : columnsToAlignCenter) {
+        for (GridColumns column : COLUMNS_TO_ALIGN) {
             ListGridField listGridField = fields.get(column);
             listGridField.setAlign(Alignment.CENTER);
             listGridField.setCellAlign(Alignment.CENTER);

@@ -51,7 +51,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  * @author the activeeon team.
  *
  */
-public class ExpandableTasksListGrid extends TasksListGrid{
+public class ExpandableTasksListGrid extends TasksListGrid {
 
     /**
      * The record for the expand component to be shown.
@@ -64,7 +64,7 @@ public class ExpandableTasksListGrid extends TasksListGrid{
     protected ExpandTasksColumnsFactory expandTasksColumnsFactory;
 
     public ExpandableTasksListGrid(TasksController controller, ExpandableTasksColumnsFactory expandableFactory, ExpandTasksColumnsFactory expandFactory, String datasourceNamePrefix) {
-        super(controller, expandableFactory, datasourceNamePrefix);
+        super(controller, expandableFactory, datasourceNamePrefix, false);
         this.expandTasksColumnsFactory = expandFactory;
         this.setCanExpandRecords(true);
     }
