@@ -294,7 +294,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         boolean selRunning = true; // ALL selected jobs are running/stalled/pending
         boolean selFinished = true; // ALL selected jobs are finished
         boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
-        boolean selPausedOnError = false;
+        boolean selInError = false;
 
         final ArrayList<String> ids = new ArrayList<String>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
@@ -309,16 +309,16 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 case RUNNING:
                     selPause = false;
                     selFinished = false;
-                    selPausedOnError = true;
+                    selInError = true;
                     break;
                 case PAUSED:
                     selFinished = false;
-                    selPausedOnError = true;
+                    selInError = true;
                     selRunning = false;
                     break;
                 case IN_ERROR:
                     selFinished = false;
-                    selPausedOnError = true;
+                    selInError = true;
                     selRunning = true;
                     break;
                 default:
@@ -339,16 +339,16 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         });
         pauseItem.setEnabled(selRunning);
 
-        MenuItem restartOnErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
+        MenuItem restartInErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
                 SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
-        restartOnErrorTaskItem.addClickHandler(new ClickHandler() {
+        restartInErrorTaskItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.restartAllInErrorTasks(ids);
             }
         });
-        restartOnErrorTaskItem.setEnabled(selPausedOnError);
+        restartInErrorTaskItem.setEnabled(selInError);
 
-        MenuItem resumeItem = new MenuItem("Resume",
+        MenuItem resumeItem = new MenuItem("Resume All Paused Tasks",
                 SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         resumeItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -356,6 +356,16 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         });
         resumeItem.setEnabled(selPause);
+
+        MenuItem resumeAndRestartItemTask = new MenuItem("Resume All Paused Tasks  & Restart All In-Error Tasks",
+                SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+        resumeAndRestartItemTask.addClickHandler(new ClickHandler() {
+            public void onClick(MenuItemClickEvent event) {
+                controller.resumeJobs(ids);
+                controller.restartAllInErrorTasks(ids);
+            }
+        });
+        resumeAndRestartItemTask.setEnabled(selInError || selPause);
 
         MenuItem priorityItem = new MenuItem("Priority");
         Menu priorityMenu = new Menu();
@@ -393,7 +403,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         killItem.setEnabled(selPauseOrRunning);
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(pauseItem, resumeItem, restartOnErrorTaskItem, priorityItem, removeItem, killItem);
+        menu.setItems(
+                pauseItem, restartInErrorTaskItem, resumeItem,
+                resumeAndRestartItemTask, priorityItem, removeItem, killItem);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
