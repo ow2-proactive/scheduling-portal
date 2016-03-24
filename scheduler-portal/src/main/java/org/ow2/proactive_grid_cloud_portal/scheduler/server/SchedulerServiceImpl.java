@@ -424,7 +424,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
-    public boolean restartTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
+    public boolean restartRunningTask(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
             ServiceException {
         return executeFunction(new Function<RestClient, InputStream>() {
             @Override

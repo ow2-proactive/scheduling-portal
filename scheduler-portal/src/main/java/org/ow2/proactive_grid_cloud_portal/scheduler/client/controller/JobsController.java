@@ -383,8 +383,6 @@ public class JobsController {
             }
 
             public void onSuccess(String result) {
-
-                LogModel.getInstance().logMessage("<span style='color:gray;'>CONTENT" + result + " jobs in ");
                 JSONPaginatedJobs resultJobs;
                 try {
                     resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);

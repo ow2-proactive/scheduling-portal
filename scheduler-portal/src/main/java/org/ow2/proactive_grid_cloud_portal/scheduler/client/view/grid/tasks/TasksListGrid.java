@@ -373,13 +373,22 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(
                 STATUS_ATTR.getName());
 
-        MenuItem restart = new MenuItem("Restart");
-        restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+        MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
+        restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartTask(taskName, taskStatusName);
+                controller.restartInErrorTask(taskName);
             }
         });
+
+        MenuItem restartRunningTask = new MenuItem("Restart Running Task");
+        restartRunningTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.restartRunningTask(taskName);
+            }
+        });
+
         MenuItem preempt = new MenuItem("Preempt");
         preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
@@ -395,21 +404,29 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             }
         });
 
-        boolean enabled;
-
         TaskStatus status = TaskStatus.from(taskStatusName);
+
+        boolean enableKill = false;
+        boolean enablePreempt = false;
+        boolean enableRestartRunningTask = false;
+        boolean enableRestartInErrorTask = false;
 
         switch (status) {
             case SUBMITTED:
             case WAITING_ON_ERROR:
             case WAITING_ON_FAILURE:
-                enabled = false;
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = false;
                 break;
             case PENDING:
             case PAUSED:
             case RUNNING:
-            case IN_ERROR:
-                enabled = true;
+                enableKill = true;
+                enablePreempt = true;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = true;;
                 break;
             case SKIPPED:
             case FINISHED:
@@ -418,17 +435,24 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             case ABORTED:
             case NOT_STARTED:
             case NOT_RESTARTED:
-                enabled = false;
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = false;
                 break;
-            default:
-                enabled = false;
+            case IN_ERROR:
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = true;
+                enableRestartRunningTask = false;
         }
 
-        restart.setEnabled(enabled);
-        kill.setEnabled(enabled);
-        preempt.setEnabled(enabled);
+        kill.setEnabled(enableKill);
+        preempt.setEnabled(enablePreempt);
+        restartInErrorTask.setEnabled(enableRestartInErrorTask);
+        restartRunningTask.setEnabled(enableRestartRunningTask);
 
-        menu.setItems(restart, preempt, kill);
+        menu.setItems(restartInErrorTask, restartRunningTask, preempt, kill);
     }
 
     @Override

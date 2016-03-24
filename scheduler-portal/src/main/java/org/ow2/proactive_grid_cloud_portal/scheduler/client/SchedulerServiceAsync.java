@@ -134,7 +134,7 @@ public interface SchedulerServiceAsync {
      * @param taskName name of the task to restart
      * @param cb
      */
-    void restartTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+    void restartRunningTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
     /**
      * Restart a task paused on error.
