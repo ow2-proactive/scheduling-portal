@@ -42,6 +42,7 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.UsersListener;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
@@ -118,22 +119,31 @@ public class UsersView implements UsersListener {
         this.usersGrid.setSelectionType(SelectionStyle.NONE);
 
         ListGridField hostField = new ListGridField(HOST_ATTR, "Hostname");
+        alignCenter(hostField);
 
         ListGridField userField = new ListGridField(USER_ATTR, "User");
-        userField.setWidth(80);
+        userField.setWidth(120);
+        alignCenter(userField);
 
         ListGridField connField = new ListGridField(CONN_TIME_ATTR, "Connected at");
-
+        alignCenter(connField);
         ListGridField subTimeField = new ListGridField(SUBMIT_TIME_ATTR, "Last submit");
+        alignCenter(subTimeField);
 
         ListGridField subNumField = new ListGridField(SUBMIT_NUM_ATTR, "Jobs");
-        subNumField.setWidth(60);
+        subNumField.setWidth(80);
+        alignCenter(subNumField);
 
         this.usersGrid.setFields(userField, subNumField, connField, subTimeField, hostField);
 
         this.root.addMember(this.usersGrid);
 
         return this.root;
+    }
+
+    private void alignCenter(ListGridField field) {
+        field.setAlign(Alignment.CENTER);
+        field.setCellAlign(Alignment.CENTER);
     }
 
     /*
