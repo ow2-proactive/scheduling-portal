@@ -59,6 +59,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
+
 /**
  * Controller for the jobs logic.
  *
@@ -94,7 +95,6 @@ public class JobsController {
         this.parentController = parentController;
     }
 
-
     /**
      * Gets the models for this controller.
      * @return the model for this controller.
@@ -111,12 +111,11 @@ public class JobsController {
         this.model = model;
     }
 
-
     /**
      * Builds the view controlled by this controller.
      * @return a layout that displays the view.
      */
-    public Layout buildView(){
+    public Layout buildView() {
         ExecutionsModel executionsModel = this.parentController.getModel();
         this.model = new JobsModel(executionsModel);
         executionsModel.setJobsModel(this.model);
@@ -125,8 +124,6 @@ public class JobsController {
         this.view = new JobsView(this);
         return this.view.build();
     }
-
-
 
     /**
      * Select another job.
@@ -142,13 +139,12 @@ public class JobsController {
         }
 
         this.model.selectJob(job);
-        
-        if (job != null){
+
+        if (job != null) {
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
         }
     }
-
 
     /**
      * Pauses the given job, depending its current state
@@ -186,18 +182,21 @@ public class JobsController {
         }
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.restartAllInErrorTasks(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully restarted in error tasks  " + result + "/" + selectedJobs.size() + " for selected jobs");
-            }
+        scheduler.restartAllInErrorTasks(LoginModel.getInstance().getSessionId(), selectedJobs,
+                new AsyncCallback<Integer>() {
+                    public void onSuccess(Integer result) {
+                        LogModel.getInstance().logMessage("Successfully restarted in error tasks  " + result +
+                            "/" + selectedJobs.size() + " for selected jobs");
+                        parentController.getParentController().getTasksController().updateTasks(false);
+                    }
 
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to restart all in error tasks for selected jobs : " + message);
-            }
-        });
+                    public void onFailure(Throwable caught) {
+                        String message = JSONUtils.getJsonErrorMessage(caught);
+                        LogModel.getInstance().logImportantMessage(
+                                "Failed to restart all in error tasks for selected jobs : " + message);
+                    }
+                });
     }
-
 
     /**
      * Pauses or resumes the given job, depending its current state
@@ -211,16 +210,18 @@ public class JobsController {
         }
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
-            public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + " jobs");
-            }
+        scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), selectedJobs,
+                new AsyncCallback<Integer>() {
+                    public void onSuccess(Integer result) {
+                        LogModel.getInstance().logMessage(
+                                "Successfully resumed " + result + "/" + selectedJobs.size() + " jobs");
+                    }
 
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to resume jobs : " + message);
-            }
-        });
+                    public void onFailure(Throwable caught) {
+                        String message = JSONUtils.getJsonErrorMessage(caught);
+                        LogModel.getInstance().logImportantMessage("Failed to resume jobs : " + message);
+                    }
+                });
     }
 
     /**
@@ -237,7 +238,8 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.removeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance()
+                        .logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
             }
 
             public void onFailure(Throwable caught) {
@@ -271,8 +273,6 @@ public class JobsController {
         });
     }
 
-
-
     /**
      * Apply the specified priority to the given job
      * 
@@ -288,19 +288,18 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.setPriorityByName(LoginModel.getInstance().getSessionId(), l, priority.name(),
                 new AsyncCallback<Void>() {
-            public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully set priority to " + priority.name() + " for " +
-                        l.size() + " jobs");
-            }
+                    public void onSuccess(Void result) {
+                        LogModel.getInstance().logMessage("Successfully set priority to " + priority.name() +
+                            " for " + l.size() + " jobs");
+                    }
 
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to set priority to " + priority.name() + " : " +
-                        message);
-            }
-        });
+                    public void onFailure(Throwable caught) {
+                        String message = JSONUtils.getJsonErrorMessage(caught);
+                        LogModel.getInstance().logImportantMessage(
+                                "Failed to set priority to " + priority.name() + " : " + message);
+                    }
+                });
     }
-
 
     /**
      * Gets the jobs pagination controller.
@@ -314,11 +313,9 @@ public class JobsController {
      * Sets the jobs pagination controller.
      * @param jobsPaginationController the jobs pagination controller.
      */
-    public void setPaginationController(
-            JobsPaginationController jobsPaginationController) {
+    public void setPaginationController(JobsPaginationController jobsPaginationController) {
         this.paginationController = jobsPaginationController;
     }
-
 
     /**
      * Add a fake submitted job to the list
@@ -328,13 +325,11 @@ public class JobsController {
      * @param name name of the job
      */
     public void addSubmittingJob(int jobId, String name) {
-        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL, LoginModel.getInstance().getLogin(), 0, 0, 0, 0, 0, 0, 0, -1,
-                -1, -1);
+        Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL,
+            LoginModel.getInstance().getLogin(), 0, 0, 0, 0, 0, 0, 0, -1, -1, -1);
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }
-
-
 
     /**
      * Fetch the complete JobBag from the server,
@@ -342,7 +337,7 @@ public class JobsController {
      * update the model and views
      */
     public void fetchJobs(boolean showUpdating) {
-        if (showUpdating){
+        if (showUpdating) {
             model.jobsUpdating();
         }
 
@@ -359,51 +354,51 @@ public class JobsController {
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(), offset, limit, fetchMyJobs,
-                fetchPending, fetchRunning, fetchFinished,
-                new AsyncCallback<String>() {
+                fetchPending, fetchRunning, fetchFinished, new AsyncCallback<String>() {
 
-            public void onFailure(Throwable caught) {
-                if (!LoginModel.getInstance().isLoggedIn()) {
-                    // might have been disconnected in between
-                    return;
-                }
-                int httpErrorCodeFromException = JSONUtils.getJsonErrorCode(caught);
-                if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
-                    parentController.getParentController().teardown("You have been disconnected from the server.");
-                } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
-                    LogModel.getInstance().logImportantMessage(
-                            "Failed to fetch jobs because of permission (automatic refresh will be disabled)"
-                                    + JSONUtils.getJsonErrorMessage(caught));
-                    parentController.getParentController().stopTimer();
-                    // display empty message in jobs view
-                    model.emptyJobs();
-                } else {
-                    LogModel.getInstance().logCriticalMessage("Error while fetching jobs:\n" + JSONUtils.getJsonErrorMessage(caught));
-                }
-            }
-
-            public void onSuccess(String result) {
-                JSONPaginatedJobs resultJobs;
-                try {
-                    resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);
-                    Map<Integer, Job> jobs = resultJobs.getJobs();
-                    long revision = resultJobs.getRevision();
-                    long totalJobs = resultJobs.getTotal();
-                    model.setJobs(jobs, revision, totalJobs);
-
-                    int jn = jobs.size();
-                    if (jn > 0) {
-                        long t = (System.currentTimeMillis() - t1);
-                        LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + jn + " jobs in " + t +
-                                " ms</span>");
+                    public void onFailure(Throwable caught) {
+                        if (!LoginModel.getInstance().isLoggedIn()) {
+                            // might have been disconnected in between
+                            return;
+                        }
+                        int httpErrorCodeFromException = JSONUtils.getJsonErrorCode(caught);
+                        if (httpErrorCodeFromException == Response.SC_UNAUTHORIZED) {
+                            parentController.getParentController()
+                                    .teardown("You have been disconnected from the server.");
+                        } else if (httpErrorCodeFromException == Response.SC_FORBIDDEN) {
+                            LogModel.getInstance().logImportantMessage(
+                                    "Failed to fetch jobs because of permission (automatic refresh will be disabled)" +
+                                        JSONUtils.getJsonErrorMessage(caught));
+                            parentController.getParentController().stopTimer();
+                            // display empty message in jobs view
+                            model.emptyJobs();
+                        } else {
+                            LogModel.getInstance().logCriticalMessage(
+                                    "Error while fetching jobs:\n" + JSONUtils.getJsonErrorMessage(caught));
+                        }
                     }
-                } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
-                    LogModel.getInstance().logCriticalMessage(e.getMessage());
-                }
-            }
-        });
-    }
 
+                    public void onSuccess(String result) {
+                        JSONPaginatedJobs resultJobs;
+                        try {
+                            resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);
+                            Map<Integer, Job> jobs = resultJobs.getJobs();
+                            long revision = resultJobs.getRevision();
+                            long totalJobs = resultJobs.getTotal();
+                            model.setJobs(jobs, revision, totalJobs);
+
+                            int jn = jobs.size();
+                            if (jn > 0) {
+                                long t = (System.currentTimeMillis() - t1);
+                                LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + jn +
+                                    " jobs in " + t + " ms</span>");
+                            }
+                        } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                            LogModel.getInstance().logCriticalMessage(e.getMessage());
+                        }
+                    }
+                });
+    }
 
     /**
      * Fetch jobs state revision. If revision is more recent, fetch jobs.
@@ -418,9 +413,11 @@ public class JobsController {
                     return;
                 }
                 if (JSONUtils.getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
-                    parentController.getParentController().teardown("You have been disconnected from the server.");
+                    parentController.getParentController()
+                            .teardown("You have been disconnected from the server.");
                 }
-                LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " + JSONUtils.getJsonErrorMessage(caught));
+                LogModel.getInstance().logCriticalMessage(
+                        "Failed to get Scheduler Revision: " + JSONUtils.getJsonErrorMessage(caught));
             }
 
             public void onSuccess(Long result) {
@@ -430,6 +427,5 @@ public class JobsController {
             }
         });
     }
-
 
 }
