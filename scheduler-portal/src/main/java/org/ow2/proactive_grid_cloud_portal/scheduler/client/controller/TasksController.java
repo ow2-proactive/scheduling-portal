@@ -57,9 +57,11 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
+
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
+
 
 public class TasksController {
 
@@ -68,43 +70,35 @@ public class TasksController {
 
     protected TasksNavigationController taskNavigationController;
 
-
     protected TasksModel model;
-
 
     protected AbstractGridItemsView view;
 
-
     protected SchedulerController parentController;
-
 
     public TasksController(SchedulerController parentController) {
         this.parentController = parentController;
     }
 
-
     public SchedulerController getParentController() {
         return parentController;
     }
 
-
-    public Layout buildView(){
+    public Layout buildView() {
         this.model = new TasksModel((SchedulerModelImpl) this.parentController.getModel());
         this.taskNavigationController = new TasksNavigationController(this);
         this.view = new TasksView(this);
         return this.view.build();
     }
 
-    public Layout rebuildView(){
+    public Layout rebuildView() {
         this.view = new TasksView(this);
         return this.view.build();
     }
 
-
     public TasksModel getModel() {
         return model;
     }
-
 
     /**
      * Updates the current task list depending the current job selection in the model 
@@ -113,13 +107,13 @@ public class TasksController {
         Job selectedJob = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob();
 
         boolean emptyTaskList = (selectedJob == null);
-        if(showUpdating){
+        if (showUpdating) {
             this.model.notifyTasksChanging(emptyTaskList);
         }
 
         if (emptyTaskList) {
             model.setTasks(new ArrayList<Task>(0), 0);
-        } else {  
+        } else {
             final String jobId = "" + selectedJob.getId();
 
             AsyncCallback<String> callback = new AsyncCallback<String>() {
@@ -128,8 +122,8 @@ public class TasksController {
                     String msg = JSONUtils.getJsonErrorMessage(caught);
 
                     model.taskUpdateError(msg);
-                    LogModel.getInstance().logImportantMessage("Failed to update tasks for job " +
-                            jobId + ": " + msg);
+                    LogModel.getInstance()
+                            .logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
                 }
 
                 public void onSuccess(String result) {
@@ -153,21 +147,22 @@ public class TasksController {
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-            if (tagFilter.isEmpty()){
+            if (tagFilter.isEmpty()) {
                 this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
-            } else{
-                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
+            } else {
+                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit,
+                        callback);
             }
         }
     }
-
 
     /**
      * Kill a task within a job 
      * @param taskName task name
      */
     public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
+                .getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -181,7 +176,8 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully killed task " + taskName + " in job " + jobId);
+                LogModel.getInstance()
+                        .logMessage("Successfully killed task " + taskName + " in job " + jobId);
             }
         });
     }
@@ -203,17 +199,16 @@ public class TasksController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
         if (restartType == RestartType.IN_ERROR_TASK) {
-            scheduler.restartInErrorTask(
-                    sessionId, jobId, taskName,
+            scheduler.restartInErrorTask(sessionId, jobId, taskName,
                     callbackHandlerForRestartTask(taskName, jobId, true));
         } else if (restartType == RestartType.RUNNING_TASK) {
-            scheduler.restartRunningTask(
-                    sessionId, jobId, taskName,
+            scheduler.restartRunningTask(sessionId, jobId, taskName,
                     callbackHandlerForRestartTask(taskName, jobId, false));
         }
     }
 
-    private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId, final boolean isTaskInError) {
+    private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId,
+            final boolean isTaskInError) {
         return new AsyncCallback<Boolean>() {
 
             private String context = "";
@@ -224,7 +219,6 @@ public class TasksController {
                 }
             }
 
-
             @Override
             public void onFailure(Throwable caught) {
                 caught.printStackTrace();
@@ -234,7 +228,9 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully restarted " + context + "task " + taskName + " in job " + jobId);
+                LogModel.getInstance().logMessage(
+                        "Successfully restarted " + context + "task " + taskName + " in job " + jobId);
+                getParentController().getTasksController().updateTasks(false);
             }
         };
     }
@@ -244,7 +240,8 @@ public class TasksController {
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
+                .getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -256,40 +253,37 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully preempted task " + taskName + " in job " + jobId);
+                LogModel.getInstance()
+                        .logMessage("Successfully preempted task " + taskName + " in job " + jobId);
             }
         });
     }
-
 
     public TasksNavigationController getTaskNavigationController() {
         return taskNavigationController;
     }
 
-    public void setTaskNavigationController(
-            TasksNavigationController taskNavigationController) {
+    public void setTaskNavigationController(TasksNavigationController taskNavigationController) {
         this.taskNavigationController = taskNavigationController;
     }
 
-
-    public String computeNoVncPageUrl(String taskName){
-        String jobId = String.valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
+    public String computeNoVncPageUrl(String taskName) {
+        String jobId = String
+                .valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }
 
-
-    public void resetPendingTasksRequests(){
+    public void resetPendingTasksRequests() {
         if (this.taskUpdateRequest != null) {
             this.taskUpdateRequest.cancel();
             this.taskUpdateRequest = null;
         }
     }
 
-    public void updatingTasks(){
+    public void updatingTasks() {
         this.model.setTasksDirty(true);
     }
-
 
     /**
      * Select another task.
@@ -305,6 +299,5 @@ public class TasksController {
         IN_ERROR_TASK, RUNNING_TASK
 
     }
-
 
 }
