@@ -79,28 +79,26 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
         return COLUMNS;
     }
 
-
     @Override
     public void buildRecord(Task item, Record record) {
         record.setAttribute(ID_ATTR.getName(), item.getId().longValue());
-        String execs = (item.getMaxNumberOfExec() - item.getNumberOfExecLeft()) + " / " +
-                item.getMaxNumberOfExec();
-        if (item.getNumberOfExecLeft() > 0)
-            execs = (item.getMaxNumberOfExec() - item.getNumberOfExecLeft() + 1) + " / " +
-                    item.getMaxNumberOfExec();
 
-        String fails = (item.getMaxNumberOfExecOnFailure() - item.getNumberOfExecOnFailureLeft()) + " / " +
-                item.getMaxNumberOfExecOnFailure();
+        String currentExecutionNumber =
+                (item.getMaxNumberOfExec() - item.getNumberOfExecLeft())
+                        + " / " + item.getMaxNumberOfExec();
+
+        String currentFailureNumber =
+                (item.getMaxNumberOfExecOnFailure() - item.getNumberOfExecOnFailureLeft())
+                        + " / " + item.getMaxNumberOfExecOnFailure();
 
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
         record.setAttribute(STATUS_ATTR.getName(), item.getStatus().toString());
         record.setAttribute(EXEC_DURATION_ATTR.getName(), item.getExecutionTime());
-        record.setAttribute(EXECUTIONS_ATTR.getName(), execs);
-        record.setAttribute(NODE_FAILURE_ATTR.getName(), fails);
+        record.setAttribute(EXECUTIONS_ATTR.getName(), currentExecutionNumber);
+        record.setAttribute(NODE_FAILURE_ATTR.getName(), currentFailureNumber);
         record.setAttribute(NODE_COUNT_ATTR.getName(), item.getNodeCount());
     }
-
 
     /**
      * Builds the record attribute for data that could be shown in detail section in a expandable grid.
