@@ -63,6 +63,7 @@ public class Job implements Serializable, Comparable<Job> {
     private int inErrorTasks;
     private long submitTime;
     private long startTime;
+    private long inErrorTime;
     private long finishTime;
 
     /**
@@ -89,7 +90,8 @@ public class Job implements Serializable, Comparable<Job> {
      * @param user the username of the user that submitted the job
      */
     public Job(int id, String name, JobStatus status, JobPriority priority, String user, int pending,
-            int running, int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime, long finishTime) {
+            int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
+            long startTime, long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
         this.setStatus(status);
@@ -106,6 +108,7 @@ public class Job implements Serializable, Comparable<Job> {
 
         this.submitTime = submitTime;
         this.startTime = startTime;
+        this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
     }
 
@@ -237,6 +240,13 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     /**
+     * @return time at which the job was started
+     */
+    public long getInErrorTime() {
+        return inErrorTime;
+    }
+
+    /**
      * @return time at which the job has finished
      */
     public long getFinishTime() {
@@ -274,7 +284,8 @@ public class Job implements Serializable, Comparable<Job> {
                 this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
                 runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
                 failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
-                inErrorTasks == job.inErrorTasks && finishTime == job.finishTime;
+                inErrorTasks == job.inErrorTasks && finishTime == job.finishTime &&
+                inErrorTime == job.inErrorTime;
     }
 
     public int compareTo(Job job) {
@@ -321,6 +332,7 @@ public class Job implements Serializable, Comparable<Job> {
         int inError = (int) jsonJobInfo.get("numberOfInErrorTasks").isNumber().doubleValue();
         long submittedTime = (long) jsonJobInfo.get("submittedTime").isNumber().doubleValue();
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
+        long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
         
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
@@ -328,7 +340,8 @@ public class Job implements Serializable, Comparable<Job> {
         int id = (int) jsonInfoId.get("id").isNumber().doubleValue();
         
         return new Job(id, name, JobStatus.valueOf(status), JobPriority.findPriority(priority), user,
-                pending, running, finished, total, failed, faulty, inError, submittedTime, startTime, finishedTime);
+                pending, running, finished, total, failed, faulty, inError, submittedTime, startTime,
+                inErrorTime, finishedTime);
     }
 
     /**

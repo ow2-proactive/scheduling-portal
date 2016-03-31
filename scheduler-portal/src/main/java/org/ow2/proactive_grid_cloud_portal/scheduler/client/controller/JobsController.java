@@ -326,7 +326,7 @@ public class JobsController {
      */
     public void addSubmittingJob(int jobId, String name) {
         Job j = new Job(jobId, name, JobStatus.PENDING, JobPriority.NORMAL,
-            LoginModel.getInstance().getLogin(), 0, 0, 0, 0, 0, 0, 0, -1, -1, -1);
+            LoginModel.getInstance().getLogin(), 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1);
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }

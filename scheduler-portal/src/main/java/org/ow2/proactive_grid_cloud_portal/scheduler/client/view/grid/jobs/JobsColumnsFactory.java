@@ -36,6 +36,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
@@ -82,7 +83,12 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
-        record.setAttribute(DURATION_ATTR.getName(), duration == -1 ? "" : duration);
+
+        if (item.getStatus() != JobStatus.IN_ERROR) {
+            record.setAttribute(DURATION_ATTR.getName(), duration == -1 ? "" : duration);
+        } else {
+            record.setAttribute(DURATION_ATTR.getName(), item.getInErrorTime() - item.getStartTime());
+        }
     }
 
     private Object buildIssuesAttr(Job item) {

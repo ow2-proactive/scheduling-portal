@@ -39,8 +39,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -59,6 +57,7 @@ public class Task implements Serializable, Comparable<Task> {
     private String hostName;
     private TaskStatus status;
     private long startTime;
+    private long inErrorTime;
     private long finishTime;
     private long executionDuration;
     private long startAtTime;
@@ -73,9 +72,6 @@ public class Task implements Serializable, Comparable<Task> {
     private long jobId = 0;
 
     private String jobName = "a job";
-    
-    
-    
 
     /**
      * The constructor that has no arguments required by the Serializable interface
@@ -99,8 +95,8 @@ public class Task implements Serializable, Comparable<Task> {
      * @param maxNumberOfExecOnFailure maximum number of executions on failure
      * @param numberOfExecOnFailureLeft maximum number of executions on failure left
      */
-    public Task(long id, String name, TaskStatus status, String hostName, long startTime, long finishedTime,
-            long executionDuration, String description, int nodeCount, int maxNumberOfExec,
+    public Task(long id, String name, TaskStatus status, String hostName, long startTime, long inErrorTime,
+            long finishedTime, long executionDuration, String description, int nodeCount, int maxNumberOfExec,
             int numberOfExecLeft, int maxNumberOfExecOnFailure, int numberOfExecOnFailureLeft) {
 
         this.id = id;
@@ -108,6 +104,7 @@ public class Task implements Serializable, Comparable<Task> {
         this.status = status;
         this.hostName = hostName;
         this.startTime = startTime;
+        this.inErrorTime = inErrorTime;
         this.finishTime = finishedTime;
         this.executionDuration = executionDuration;
         this.startAtTime = -1L;
@@ -247,6 +244,14 @@ public class Task implements Serializable, Comparable<Task> {
         return startAtTime;
     }
 
+    public long getInErrorTime() {
+        return inErrorTime;
+    }
+
+    public void setInErrorTime(long inErrorTime) {
+        this.inErrorTime = inErrorTime;
+    }
+
     public int getMaxNumberOfExec() {
         return maxNumberOfExec;
     }
@@ -363,6 +368,7 @@ public class Task implements Serializable, Comparable<Task> {
         String status = taskInfo.get("taskStatus").isString().stringValue();
         TaskStatus taskStatus = TaskStatus.valueOf(status);
         long startTime = (long) taskInfo.get("startTime").isNumber().doubleValue();
+        long inErrorTime = (long) taskInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) taskInfo.get("finishedTime").isNumber().doubleValue();
         long executionDuration = (long) taskInfo.get("executionDuration").isNumber().doubleValue();
 
@@ -395,7 +401,7 @@ public class Task implements Serializable, Comparable<Task> {
             }
         }
 
-        Task result = new Task(id, name, taskStatus, hostName, startTime, finishedTime,
+        Task result = new Task(id, name, taskStatus, hostName, startTime, inErrorTime, finishedTime,
                 executionDuration, description, nodes, maxExec, execLeft, maxExecOnFailure, execOnFailureLeft);
         result.setTag(tag);
         result.setJobId(jobId);
@@ -405,27 +411,5 @@ public class Task implements Serializable, Comparable<Task> {
         result.setStartAtTime(scheduledTime);
         return result;
     }
-
-
-
-    /**
-     * @param task
-     * @return Return true if and only if all the task field
-     * are equal to those of <code>this</code>
-     */
-    public boolean isEquals(Task task) {
-        return this.id == task.getId() && this.name.equals(task.getName()) &&
-                this.status.equals(task.getStatus()) && this.hostName.equals(task.getHostName()) &&
-                this.startTime == task.getStartTime() && this.finishTime == task.getFinishTime() &&
-                this.executionDuration == task.getExecutionTime() && this.description.equals(task.description);
-    }
-
-    public boolean isEqual(Task t) {
-        return this.id == t.getId() && this.name.equals(t.getName()) &&
-                this.hostName.equals(t.getHostName()) && this.status == t.getStatus() &&
-                this.startTime == t.getStartTime() && this.finishTime == t.getFinishTime() &&
-                this.executionDuration == t.getExecutionTime() && this.description.equals(t.getDescription());
-    }
-
 
 }

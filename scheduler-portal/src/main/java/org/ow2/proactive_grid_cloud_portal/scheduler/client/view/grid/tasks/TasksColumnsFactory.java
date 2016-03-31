@@ -35,8 +35,12 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import com.smartgwt.client.data.Record;
@@ -91,10 +95,21 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
                 (item.getMaxNumberOfExecOnFailure() - item.getNumberOfExecOnFailureLeft())
                         + " / " + item.getMaxNumberOfExecOnFailure();
 
+        TaskStatus taskStatus = item.getStatus();
+
+        long executionDuration = item.getExecutionTime();
+
+        if (taskStatus == TaskStatus.IN_ERROR) {
+            executionDuration = item.getInErrorTime() - item.getStartTime();
+        }
+
+        Logger logger = Logger.getLogger("NameOfYourLogger");
+        logger.log(Level.SEVERE, "tralala = " + item.getInErrorTime());
+
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
-        record.setAttribute(STATUS_ATTR.getName(), item.getStatus().toString());
-        record.setAttribute(EXEC_DURATION_ATTR.getName(), item.getExecutionTime());
+        record.setAttribute(STATUS_ATTR.getName(), taskStatus.toString());
+        record.setAttribute(EXEC_DURATION_ATTR.getName(), executionDuration);
         record.setAttribute(EXECUTIONS_ATTR.getName(), currentExecutionNumber);
         record.setAttribute(NODE_FAILURE_ATTR.getName(), currentFailureNumber);
         record.setAttribute(NODE_COUNT_ATTR.getName(), item.getNodeCount());
