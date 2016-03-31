@@ -74,9 +74,6 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(ID_ATTR.getName(), item.getId());
 
         long duration = -1;
-        if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
-            duration = item.getFinishTime() - item.getStartTime();
-        }
 
         record.setAttribute(STATE_ATTR.getName(), item.getStatus().toString());
         record.setAttribute(ISSUES_ATTR.getName(), buildIssuesAttr(item));
@@ -85,10 +82,14 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(NAME_ATTR.getName(), item.getName());
 
         if (item.getStatus() != JobStatus.IN_ERROR) {
-            record.setAttribute(DURATION_ATTR.getName(), duration == -1 ? "" : duration);
+            if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
+                duration = item.getFinishTime() - item.getStartTime();
+            }
         } else {
-            record.setAttribute(DURATION_ATTR.getName(), item.getInErrorTime() - item.getStartTime());
+            duration = item.getInErrorTime() - item.getStartTime();
         }
+
+        record.setAttribute(DURATION_ATTR.getName(), Job.formatDuration(duration));
     }
 
     private Object buildIssuesAttr(Job item) {

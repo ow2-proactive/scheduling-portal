@@ -242,18 +242,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         });
 
-        ListGridField duration = fields.get(DURATION_ATTR);
-        duration.setCellFormatter(new CellFormatter() {
-            public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                if (value != null) {
-                    long l = Long.parseLong(value.toString());
-                    return Job.formatDuration(l);
-                } else {
-                    return "";
-                }
-            }
-        });
-
         return fields;
     }
 
