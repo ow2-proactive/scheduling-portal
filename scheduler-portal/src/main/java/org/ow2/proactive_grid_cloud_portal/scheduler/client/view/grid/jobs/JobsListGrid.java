@@ -66,7 +66,6 @@ import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.DURATION_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
@@ -195,14 +194,23 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     private String highlightRowHavingIssues(int rowNum, String base) {
         Object issues = getEditedCell(rowNum, ISSUES_ATTR.getName());
 
-        ListGridRecord selectedRecord = getSelectedRecord();
-
-        if (issues instanceof Integer &&
-                (selectedRecord == null || rowNum != getRecordIndex(selectedRecord))) {
+        if (issues instanceof Integer && !isRowSelected(rowNum)) {
             base = "background-color: #FFE8E8; border-bottom:1px solid #FFD7D7; border-top:1px solid #FFD7D7;";
         }
 
         return base;
+    }
+
+    private boolean isRowSelected(int rowNum) {
+        for (ListGridRecord listGridRecord : getSelectedRecords()) {
+            int recordIndex = getRecordIndex(listGridRecord);
+
+            if (rowNum == recordIndex) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected Map<GridColumns, ListGridField> buildListGridField() {
