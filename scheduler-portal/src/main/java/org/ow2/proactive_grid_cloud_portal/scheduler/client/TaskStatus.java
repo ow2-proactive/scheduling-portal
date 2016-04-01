@@ -104,7 +104,7 @@ public enum TaskStatus implements java.io.Serializable {
      */
     SKIPPED("Skipped"),
     /**
-     * The task is paused on error and waiting for a manual resume action.
+     * The task is suspended after first error and is waiting for a manual restart action.
      */
     IN_ERROR("In-Error");
 
