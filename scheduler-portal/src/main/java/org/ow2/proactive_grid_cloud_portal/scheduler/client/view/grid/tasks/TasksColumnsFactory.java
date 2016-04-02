@@ -103,9 +103,6 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task>{
             executionDuration = item.getInErrorTime() - item.getStartTime();
         }
 
-        Logger logger = Logger.getLogger("NameOfYourLogger");
-        logger.log(Level.SEVERE, "tralala = " + item.getInErrorTime());
-
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
         record.setAttribute(STATUS_ATTR.getName(), taskStatus.toString());
