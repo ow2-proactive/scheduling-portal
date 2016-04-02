@@ -89,7 +89,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
             duration = item.getInErrorTime() - item.getStartTime();
         }
 
-        record.setAttribute(DURATION_ATTR.getName(), Job.formatDuration(duration));
+        record.setAttribute(DURATION_ATTR.getName(), duration);
     }
 
     private Object buildIssuesAttr(Job item) {

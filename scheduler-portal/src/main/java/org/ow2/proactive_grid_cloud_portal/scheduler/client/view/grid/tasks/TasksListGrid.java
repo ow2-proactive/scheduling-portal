@@ -137,8 +137,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         ListGridField execDuration = fields.get(EXEC_DURATION_ATTR);
         execDuration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                long l = Long.parseLong(value.toString());
-                return Job.formatDuration(l);
+                if (value != null) {
+                    return Job.formatDuration(value.toString());
+                } else {
+                    return "";
+                }
             }
         });
 

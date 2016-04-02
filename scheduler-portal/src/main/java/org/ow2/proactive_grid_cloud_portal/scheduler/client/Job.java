@@ -345,29 +345,49 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     /**
-     * @param millis a duration in milliseconds
-     * @return the same duration in a human readable format
+     * Format a duration in milliseconds to a human readable format.
+     *
+     * @param durationAsString a long that depicts the duration as String.
+     * @return the same duration in a human readable format.
+     */
+    public static String formatDuration(String durationAsString) {
+        return formatDuration(Long.parseLong(durationAsString));
+    }
+
+    /**
+     * Format a duration in milliseconds to a human readable format.
+     *
+     * @param millis a duration in milliseconds.
+     * @return the same duration in a human readable format.
      */
     public static String formatDuration(long millis) {
-        if (millis < 0)
+        if (millis < 0) {
             return "";
+        }
 
         long secs = millis / 1000;
         long mins = secs / 60;
         long h = mins / 60;
+
         millis = millis % 1000;
         secs = secs % 60;
         mins = mins % 60;
 
-        String ret = millis + "ms";
-        if (secs > 0)
-            ret = secs + "s " + ret;
-        if (mins > 0)
-            ret = mins + "m " + ret;
-        if (h > 0)
-            ret = h + "h " + ret;
+        String result = millis + "ms";
 
-        return ret;
+        if (secs > 0) {
+            result = secs + "s " + result;
+        }
+
+        if (mins > 0) {
+            result = mins + "m " + result;
+        }
+
+        if (h > 0) {
+            result = h + "h " + result;
+        }
+
+        return result;
     }
 
     public void setRunningTasks(int running) {
@@ -385,4 +405,5 @@ public class Job implements Serializable, Comparable<Job> {
     public void setTotalTasks(int total) {
         this.totalTasks = total;
     }
+
 }
