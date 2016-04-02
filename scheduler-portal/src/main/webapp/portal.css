@@ -1,12 +1,10 @@
 .searchBox {
 	background-image: url('images/magnifying_glass.png');
 	background-repeat: no-repeat;
-	background-position: right;
+	background-position: right 2px center;
 	background-size: 15px 15px;
 	vertical-align: top;
 	padding-left: 5px;
-	border-top-left-radius: 5px;
-	border-bottom-left-radius: 5px;
 	border-right-style: none;
 	margin-top: 6px;
 }
@@ -60,7 +58,9 @@
 }
 
 .btnBoxCombo {
-	padding-left: 0;
+	padding: 0 8px;
+	font-size: 11px;
+	font-family: Arial, Verdana, sans-serif;
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
 	border-style: solid;
