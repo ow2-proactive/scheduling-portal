@@ -415,6 +415,15 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         boolean enableRestartInErrorTask = false;
 
         switch (status) {
+            case ABORTED:
+            case FAILED:
+            case FAULTY:
+            case FINISHED:
+            case NOT_RESTARTED:
+            case NOT_STARTED:
+            case PAUSED:
+            case PENDING:
+            case SKIPPED:
             case SUBMITTED:
             case WAITING_ON_ERROR:
             case WAITING_ON_FAILURE:
@@ -423,25 +432,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 enableRestartInErrorTask = false;
                 enableRestartRunningTask = false;
                 break;
-            case PENDING:
-            case PAUSED:
             case RUNNING:
                 enableKill = true;
                 enablePreempt = true;
                 enableRestartInErrorTask = false;
                 enableRestartRunningTask = true;;
-                break;
-            case SKIPPED:
-            case FINISHED:
-            case FAULTY:
-            case FAILED:
-            case ABORTED:
-            case NOT_STARTED:
-            case NOT_RESTARTED:
-                enableKill = false;
-                enablePreempt = false;
-                enableRestartInErrorTask = false;
-                enableRestartRunningTask = false;
                 break;
             case IN_ERROR:
                 enableKill = false;
