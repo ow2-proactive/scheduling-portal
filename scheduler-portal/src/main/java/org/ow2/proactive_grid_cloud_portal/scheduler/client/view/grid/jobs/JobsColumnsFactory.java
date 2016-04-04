@@ -36,6 +36,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
@@ -46,17 +47,26 @@ import com.smartgwt.client.data.Record;
  */
 public class JobsColumnsFactory implements ColumnsFactory<Job>{
 
-    public static GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
-    public static GridColumns STATE_ATTR = new GridColumns("state", "State", 100, true, false);
-    public static GridColumns USER_ATTR = new GridColumns("user","User", 140, true, false);
-    public static GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 100, true, false);
-    public static GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority",150, true, false);
-    public static GridColumns DURATION_ATTR = new GridColumns("duration", "Execution duration", 100, true, false);
-    public static GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+    public static final GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
+    public static final GridColumns STATE_ATTR = new GridColumns("state", "State", 80, true, false);
+    public static final GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
+    public static final GridColumns USER_ATTR = new GridColumns("user","User", 120, true, false);
+    public static final GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 120, true, false);
+    public static final GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority", 100, true, false);
+    public static final GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
+    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+
+    private static final GridColumns[] COLUMNS =
+            new GridColumns[] {ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR, PROGRESS_ATTR,
+                    PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
+
+    protected static final GridColumns[] COLUMNS_TO_ALIGN =
+            new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
+            PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR };
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[]{ID_ATTR, STATE_ATTR, USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR, NAME_ATTR};
+        return COLUMNS;
     }
 
 
@@ -64,17 +74,33 @@ public class JobsColumnsFactory implements ColumnsFactory<Job>{
         record.setAttribute(ID_ATTR.getName(), item.getId());
 
         long duration = -1;
-        if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
-            duration = item.getFinishTime() - item.getStartTime();
-        }
 
         record.setAttribute(STATE_ATTR.getName(), item.getStatus().toString());
+        record.setAttribute(ISSUES_ATTR.getName(), buildIssuesAttr(item));
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
+
+        if (item.getStatus() != JobStatus.IN_ERROR) {
+            if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
+                duration = item.getFinishTime() - item.getStartTime();
+            }
+        } else {
+            duration = item.getInErrorTime() - item.getStartTime();
+        }
+
         record.setAttribute(DURATION_ATTR.getName(), duration);
     }
 
+    private Object buildIssuesAttr(Job item) {
+        int nbIssues = item.getFailedTasks() + item.getFaultyTasks() + item.getInErrorTasks();
+
+        if (nbIssues == 0) {
+            return "";
+        }
+
+        return nbIssues;
+    }
 
     @Override
     public void buildRecord(Job item, Record record) {

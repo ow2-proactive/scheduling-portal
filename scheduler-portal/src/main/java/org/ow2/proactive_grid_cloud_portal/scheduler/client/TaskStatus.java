@@ -102,7 +102,11 @@ public enum TaskStatus implements java.io.Serializable {
     /**
      * Skipped due to flow action
      */
-    SKIPPED("Skipped");
+    SKIPPED("Skipped"),
+    /**
+     * The task is suspended after first error and is waiting for a manual restart action.
+     */
+    IN_ERROR("In-Error");
 
     /** The name of the current status. */
     private String name;
@@ -123,4 +127,15 @@ public enum TaskStatus implements java.io.Serializable {
     public String toString() {
         return name;
     }
+
+    public static TaskStatus from(String name) {
+        for (TaskStatus taskStatus : values()) {
+            if (taskStatus.name.equals(name)) {
+                return taskStatus;
+            }
+        }
+
+        return null;
+    }
+
 }

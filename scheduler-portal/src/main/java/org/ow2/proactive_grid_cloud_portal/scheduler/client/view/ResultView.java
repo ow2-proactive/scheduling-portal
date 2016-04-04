@@ -78,11 +78,11 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
     public static final String JOB_ID_FIELD_NAME = "jobId";
     public static final String SESSION_ID_FIELD_NAME = "sessionId";
 
-    protected final String visuActivatedMessage = "Remote viszualization activated";
+    protected final String visuActivatedMessage = "Remote visualization is enabled.";
 
-    protected final String visuDesactivatedMessage = "Remote viszualization desactivated. Please toggle streaming in output view for a job to activate the remote visuzalization";
+    protected final String visuDesactivatedMessage = "Remote visualization is disabled. Please toggle streaming in output view for a job in order to enable the remote visualization.";
 
-    protected final String noTaskSelectedMessage = "No Task selected";
+    protected final String noTaskSelectedMessage = "No task selected.";
 
     protected Layout root = null;
 
@@ -133,33 +133,32 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
 
     protected void buildRemoteVisuPane() {
         Label visuLabelTitle = new Label(
-                "<span style='text-align:center;color:#003168'><b>Remote Visualization :</b></span>");
+                "<span style='text-align:center;color:#003168'><b>Remote Visualization</b></span>");
         visuLabelTitle.setHeight(30);
 
         this.visuLabelValue = new Label(this.visuDesactivatedMessage);
-        this.visuLabelValue.setHeight(50);
+        this.visuLabelValue.setHeight(30);
         this.visuLabelValue.setLeft(40);
 
         visuPane = new VLayout();
 
         visuPane.setWidth100();
-        visuPane.setHeight(120);
+        visuPane.setHeight(80);
         visuPane.setMembers(visuLabelTitle, this.visuLabelValue);
     }
 
 
     protected void buildTaskPreviewPane() {
         Label taskPreviewLabelTitle = new Label(
-                "<span style='text-align:center;color:#003168'><b>Task preview :</b></span>");
-        taskPreviewLabelTitle.setHeight(30);
+                "<span style='text-align:center;color:#003168'><b>Task Preview</b></span>");
+        taskPreviewLabelTitle.setHeight(20);
 
         this.taskSelectedLabel = new Label(this.noTaskSelectedMessage);
-        this.taskSelectedLabel.setHeight(30);
+        this.taskSelectedLabel.setHeight(20);
         this.taskSelectedLabel.setLeft(20);
 
         this.downloadTypeRadio = new RadioGroupItem("type");
         this.downloadTypeRadio.setShowTitle(false);
-        this.downloadTypeRadio.setWidth(200);
         this.downloadTypeRadio.setValueMap(DownloadOption.OPT_TEXT.label, DownloadOption.OPT_BIN.label);
         this.downloadTypeRadio.setValue(DownloadOption.OPT_TEXT.label);
         this.downloadTypeRadio.addChangedHandler(new ChangedHandler() {
@@ -177,7 +176,7 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         final HiddenItem task = new HiddenItem(TASK_ID_FIELD_NAME);
 
         this.downloadForm = new DynamicForm();
-        this.downloadForm.setWidth(250);
+        this.downloadForm.setWidth100();
         this.downloadForm.setMethod(FormMethod.POST);
         this.downloadForm.setTarget("_blank");
         this.downloadForm.setFields(this.downloadTypeRadio, sess, job, media, task);

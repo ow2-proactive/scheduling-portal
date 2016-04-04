@@ -58,8 +58,12 @@ public class Job implements Serializable, Comparable<Job> {
     private int runningTasks;
     private int finishedTasks;
     private int totalTasks;
+    private int failedTasks;
+    private int faultyTasks;
+    private int inErrorTasks;
     private long submitTime;
     private long startTime;
+    private long inErrorTime;
     private long finishTime;
 
     /**
@@ -86,7 +90,8 @@ public class Job implements Serializable, Comparable<Job> {
      * @param user the username of the user that submitted the job
      */
     public Job(int id, String name, JobStatus status, JobPriority priority, String user, int pending,
-            int running, int finished, int total, long submitTime, long startTime, long finishTime) {
+            int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
+            long startTime, long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
         this.setStatus(status);
@@ -96,8 +101,14 @@ public class Job implements Serializable, Comparable<Job> {
         this.runningTasks = running;
         this.finishedTasks = finished;
         this.totalTasks = total;
+
+        this.failedTasks = failed;
+        this.faultyTasks = faulty;
+        this.inErrorTasks = inError;
+
         this.submitTime = submitTime;
         this.startTime = startTime;
+        this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
     }
 
@@ -202,6 +213,18 @@ public class Job implements Serializable, Comparable<Job> {
         return this.finishedTasks;
     }
 
+    public int getFailedTasks() {
+        return failedTasks;
+    }
+
+    public int getFaultyTasks() {
+        return faultyTasks;
+    }
+
+    public int getInErrorTasks() {
+        return inErrorTasks;
+    }
+
     /**
      * @return time at which the job was submitted
      */
@@ -214,6 +237,13 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public long getStartTime() {
         return startTime;
+    }
+
+    /**
+     * @return time at which the job was started
+     */
+    public long getInErrorTime() {
+        return inErrorTime;
     }
 
     /**
@@ -253,7 +283,9 @@ public class Job implements Serializable, Comparable<Job> {
                 this.priority.equals(job.getPriority()) && this.status.equals(job.getStatus()) &&
                 this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
                 runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
-                finishTime == job.finishTime;
+                failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
+                inErrorTasks == job.inErrorTasks && finishTime == job.finishTime &&
+                inErrorTime == job.inErrorTime;
     }
 
     public int compareTo(Job job) {
@@ -295,8 +327,12 @@ public class Job implements Serializable, Comparable<Job> {
         int running = (int) jsonJobInfo.get("numberOfRunningTasks").isNumber().doubleValue();
         int finished = (int) jsonJobInfo.get("numberOfFinishedTasks").isNumber().doubleValue();
         int total = (int) jsonJobInfo.get("totalNumberOfTasks").isNumber().doubleValue();
+        int failed = (int) jsonJobInfo.get("numberOfFailedTasks").isNumber().doubleValue();
+        int faulty = (int) jsonJobInfo.get("numberOfFaultyTasks").isNumber().doubleValue();
+        int inError = (int) jsonJobInfo.get("numberOfInErrorTasks").isNumber().doubleValue();
         long submittedTime = (long) jsonJobInfo.get("submittedTime").isNumber().doubleValue();
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
+        long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
         
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
@@ -304,33 +340,54 @@ public class Job implements Serializable, Comparable<Job> {
         int id = (int) jsonInfoId.get("id").isNumber().doubleValue();
         
         return new Job(id, name, JobStatus.valueOf(status), JobPriority.findPriority(priority), user,
-                pending, running, finished, total, submittedTime, startTime, finishedTime);
+                pending, running, finished, total, failed, faulty, inError, submittedTime, startTime,
+                inErrorTime, finishedTime);
     }
 
     /**
-     * @param millis a duration in milliseconds
-     * @return the same duration in a human readable format
+     * Format a duration in milliseconds to a human readable format.
+     *
+     * @param durationAsString a long that depicts the duration as String.
+     * @return the same duration in a human readable format.
+     */
+    public static String formatDuration(String durationAsString) {
+        return formatDuration(Long.parseLong(durationAsString));
+    }
+
+    /**
+     * Format a duration in milliseconds to a human readable format.
+     *
+     * @param millis a duration in milliseconds.
+     * @return the same duration in a human readable format.
      */
     public static String formatDuration(long millis) {
-        if (millis < 0)
+        if (millis < 0) {
             return "";
+        }
 
         long secs = millis / 1000;
         long mins = secs / 60;
         long h = mins / 60;
+
         millis = millis % 1000;
         secs = secs % 60;
         mins = mins % 60;
 
-        String ret = millis + "ms";
-        if (secs > 0)
-            ret = secs + "s " + ret;
-        if (mins > 0)
-            ret = mins + "m " + ret;
-        if (h > 0)
-            ret = h + "h " + ret;
+        String result = millis + "ms";
 
-        return ret;
+        if (secs > 0) {
+            result = secs + "s " + result;
+        }
+
+        if (mins > 0) {
+            result = mins + "m " + result;
+        }
+
+        if (h > 0) {
+            result = h + "h " + result;
+        }
+
+        return result;
     }
 
     public void setRunningTasks(int running) {
@@ -348,4 +405,5 @@ public class Job implements Serializable, Comparable<Job> {
     public void setTotalTasks(int total) {
         this.totalTasks = total;
     }
+
 }

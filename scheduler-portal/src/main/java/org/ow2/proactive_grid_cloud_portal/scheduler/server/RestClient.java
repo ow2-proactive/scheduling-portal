@@ -52,9 +52,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -143,6 +143,18 @@ public interface RestClient {
                                          final String jobId);
 
     /**
+     * Restart all in error tasks in a job.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the job id which will be resumed
+     * @return a ClientResponse containing the response status and true - if the job was successfully restarted, false - otherwise.
+     */
+    @PUT
+    @Path("jobs/{jobid}/restartAllInErrorTasks")
+    InputStream restartAllTasksInError(@HeaderParam("sessionid")
+    final String sessionId, @PathParam("jobid")
+    final String jobId);
+
+    /**
      * Resumes a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the job id which will be resumed
@@ -195,7 +207,7 @@ public interface RestClient {
                                             String taskName);
 
     /**
-     * Restart a task
+     * Restart a running task.
      * @param sessionId
      * @param jobId
      * @param taskName
@@ -207,6 +219,21 @@ public interface RestClient {
                                             String sessionId, @PathParam("jobid")
                                             String jobId, @PathParam("taskname")
                                             String taskName);
+
+
+    /**
+     * Restart a task paused on error.
+     * @param sessionId
+     * @param jobId
+     * @param taskName
+     * @return
+     */
+    @PUT
+    @Path("jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
+    InputStream restartInErrorTask(@HeaderParam("sessionid")
+    String sessionId, @PathParam("jobid")
+    String jobId, @PathParam("taskname")
+    String taskName);
 
     /**
      * Gets the list of tasks in a JSON array for a given job.

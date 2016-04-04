@@ -46,7 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 
 import com.smartgwt.client.widgets.layout.Layout;
 
-public class TasksCentricView extends FilteringGridItemView implements TasksUpdatedListener{
+public class TasksCentricView extends FilteringGridItemView implements TasksUpdatedListener {
 
     protected TasksController controller;
 
@@ -86,7 +86,7 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
     @Override
     protected void buildGrid() {
         TasksCentricColumnsFactory factory = new TasksCentricColumnsFactory();
-        this.itemsGrid = new TasksListGrid(this.controller, factory, "tasksCentricDS_");
+        this.itemsGrid = new TasksListGrid(this.controller, factory, "tasksCentricDS_", true);
         this.itemsGrid.build();
     }
 

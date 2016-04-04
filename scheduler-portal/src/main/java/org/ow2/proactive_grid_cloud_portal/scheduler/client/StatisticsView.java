@@ -83,34 +83,73 @@ public class StatisticsView implements StatisticsListener {
 
         statsDetail = new DetailViewer();
         statsDetail.setCanSelectText(true);
-        DetailViewerField sd1 = new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
-        DetailViewerField sd2 = new DetailViewerField("FormattedJobSubmittingPeriod",
+
+        DetailViewerField jobSubmittingPeriod =
+                new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
+        DetailViewerField formattedJobSubmittingPeriod =
+                new DetailViewerField("FormattedJobSubmittingPeriod",
             "Formatted Job Submitting Period");
-        DetailViewerField sd3 = new DetailViewerField("MeanJobPendingTime", "Mean Job Pending Time");
-        DetailViewerField sd4 = new DetailViewerField("ConnectedUsersCount", "Connected Users Count");
-        DetailViewerField sd5 = new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
-        DetailViewerField sd6 = new DetailViewerField("RunningJobsCount", "Running Jobs Count");
-        DetailViewerField sd7 = new DetailViewerField("RunningTasksCount", "Running Tasks Count");
-        DetailViewerField sd8 = new DetailViewerField("FormattedMeanJobPendingTime",
-            "Formatted Mean Job Pending Time");
-        DetailViewerField sd9 = new DetailViewerField("MeanJobExecutionTime", "Mean Job Execution Time");
-        DetailViewerField sd10 = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
-        DetailViewerField sd11 = new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
-        DetailViewerField sd12 = new DetailViewerField("TotalTasksCount", "Total Tasks Count");
-        DetailViewerField sd13 = new DetailViewerField("FormattedMeanJobExecutionTime",
-            "Formatted Mean Job Execution Time");
-        DetailViewerField sd14 = new DetailViewerField("TotalJobsCount", "Total Jobs Count");
-        DetailViewerField sd15 = new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
-        statsDetail
-                .setFields(sd1, sd2, sd3, sd4, sd5, sd6, sd7, sd8, sd9, sd10, sd11, sd12, sd13, sd14, sd15);
+
+        DetailViewerField meanJobPendingTime =
+                new DetailViewerField("MeanJobPendingTime", "Mean Job Pending Time");
+        DetailViewerField formattedMeanJobPendingTime =
+                new DetailViewerField("FormattedMeanJobPendingTime",
+                "Formatted Mean Job Pending Time");
+
+        DetailViewerField meanJobExecutionTime =
+                new DetailViewerField("MeanJobExecutionTime", "Mean Job Execution Time");
+        DetailViewerField formattedMeanJobExecutionTime =
+                new DetailViewerField("FormattedMeanJobExecutionTime", "Formatted Mean Job Execution Time");
+
+        DetailViewerField connectedUsersCount =
+                new DetailViewerField("ConnectedUsersCount", "Users Sessions Count");
+
+        DetailViewerField pendingJobsCount =
+                new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
+        DetailViewerField runningJobsCount =
+                new DetailViewerField("RunningJobsCount", "Running Jobs Count");
+        DetailViewerField finishedJobsCount =
+                new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
+        DetailViewerField totalJobsCount =
+                new DetailViewerField("TotalJobsCount", "Total Jobs Count");
+
+        DetailViewerField pendingTasksCount =
+                new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
+        DetailViewerField runningTasksCount =
+                new DetailViewerField("RunningTasksCount", "Running Tasks Count");
+        DetailViewerField finishedTasksCount =
+                new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
+        DetailViewerField totalTasksCount =
+                new DetailViewerField("TotalTasksCount", "Total Tasks Count");
+
+        statsDetail.setFields(
+                connectedUsersCount,
+                jobSubmittingPeriod, formattedJobSubmittingPeriod,
+                meanJobPendingTime, formattedMeanJobPendingTime,
+                meanJobExecutionTime, formattedMeanJobExecutionTime,
+                pendingJobsCount, runningJobsCount, finishedJobsCount, totalJobsCount,
+                pendingTasksCount, runningTasksCount, finishedTasksCount, totalTasksCount);
 
         accountDetail = new DetailViewer();
         accountDetail.setCanSelectText(true);
-        DetailViewerField ad1 = new DetailViewerField("TotalTaskCount", "Total Task Count");
-        DetailViewerField ad2 = new DetailViewerField("TotalJobDuration", "Total Job Duration");
-        DetailViewerField ad3 = new DetailViewerField("TotalJobCount", "Total Job Count");
-        DetailViewerField ad4 = new DetailViewerField("TotalTaskDuration", "Total Task Duration");
-        accountDetail.setFields(ad1, ad2, ad3, ad4);
+
+        DetailViewerField totalJobCount =
+                new DetailViewerField("TotalJobCount", "Total Jobs Count");
+        DetailViewerField totalJobDuration =
+                new DetailViewerField("TotalJobDuration", "Total Jobs Duration");
+        DetailViewerField formattedTotalJobDuration =
+                new DetailViewerField("FormattedTotalJobDuration", "Formatted Total Jobs Duration");
+
+        DetailViewerField totalTaskCount =
+                new DetailViewerField("TotalTaskCount", "Total Tasks Count");
+        DetailViewerField totalTaskDuration =
+                new DetailViewerField("TotalTaskDuration", "Total Tasks Duration");
+        DetailViewerField formattedTotalTaskDuration =
+                new DetailViewerField("FormattedTotalTaskDuration", "Formatted Total Tasks Duration");
+
+        accountDetail.setFields(
+                totalJobCount, totalJobDuration, formattedTotalJobDuration,
+                totalTaskCount, totalTaskDuration, formattedTotalTaskDuration);
 
         l1 = new Label("<h3>Scheduler statistics</h3>");
         l1.setHeight(25);
@@ -162,8 +201,10 @@ public class StatisticsView implements StatisticsListener {
         DetailViewerRecord r = new DetailViewerRecord();
         r.setAttribute("TotalTaskCount", stats.get("TotalTaskCount"));
         r.setAttribute("TotalJobDuration", stats.get("TotalJobDuration"));
+        r.setAttribute("FormattedTotalJobDuration", Job.formatDuration(stats.get("TotalJobDuration")));
         r.setAttribute("TotalJobCount", stats.get("TotalJobCount"));
         r.setAttribute("TotalTaskDuration", stats.get("TotalTaskDuration"));
+        r.setAttribute("FormattedTotalTaskDuration", Job.formatDuration(stats.get("TotalTaskDuration")));
         this.accountDetail.setData(new DetailViewerRecord[] { r });
         l2.show();
     }

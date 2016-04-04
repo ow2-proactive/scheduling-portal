@@ -626,7 +626,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.visuPane = this.visuView.build();
         this.buildVisuTab();
 
-        final Tab usersTab = new Tab("Users", Images.instance.user_16().getSafeUri().asString());
+        final Tab usersTab = new Tab("Users Sessions", Images.instance.user_16().getSafeUri().asString());
         this.usersView = new UsersView(this.controller);
         usersTab.setPane(this.usersView.build());
 

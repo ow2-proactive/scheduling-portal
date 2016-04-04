@@ -35,12 +35,17 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory;
 
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.viewer.DetailFormatter;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -89,6 +94,20 @@ public class InfoView<T> {
         DetailViewerField [] fields = new DetailViewerField[lines.length];
         for(int i = 0; i < lines.length; i++){
             fields[i] = new DetailViewerField(lines[i].getName(), lines[i].getTitle());
+
+            if (lines[i] == TasksColumnsFactory.EXEC_DURATION_ATTR ||
+                    lines[i] == JobsColumnsFactory.DURATION_ATTR) {
+                fields[i].setDetailFormatter(new DetailFormatter() {
+                    @Override
+                    public String format(Object duration, Record record, DetailViewerField detailViewerField) {
+                        if (duration != null) {
+                            return Job.formatDuration(duration.toString());
+                        } else {
+                            return "";
+                        }
+                    }
+                });
+            }
         }
 
         this.details.setFields(fields);

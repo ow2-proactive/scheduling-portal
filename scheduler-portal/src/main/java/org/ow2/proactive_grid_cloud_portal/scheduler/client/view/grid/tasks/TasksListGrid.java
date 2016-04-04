@@ -50,7 +50,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCont
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.Record;
@@ -75,14 +74,18 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
+
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.COLUMNS_TO_ALIGN;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
 /**
  * A grid that shows tasks
- * @author The actieveeon team.
  *
+ * @author The actieveeon team.
  */
-public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedListener, RemoteHintListener{
+public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedListener, RemoteHintListener {
 
     /**
      * The controller for this grid.
@@ -94,13 +97,17 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
      */
     private HashMap<String, ImgButton> visuButtons = null;
 
-    /** To avoid opening severial popup on button's click */
+    /**
+     * To avoid opening several popup on button's click
+     */
     private Map<ImgButton, HandlerRegistration> visuButtonsClickHandlers;
 
+    protected final boolean usedWithTaskCentricView;
 
-
-    public TasksListGrid(TasksController controller, TasksColumnsFactory factory, String datasourceNamePrefix) {
+    public TasksListGrid(TasksController controller, TasksColumnsFactory factory,
+            String datasourceNamePrefix, boolean usedWithTaskCentricView) {
         super(factory, datasourceNamePrefix);
+        this.usedWithTaskCentricView = usedWithTaskCentricView;
         this.controller = controller;
         this.visuButtons = new HashMap<String, ImgButton>();
         this.visuButtonsClickHandlers = new HashMap<ImgButton, HandlerRegistration>();
@@ -108,7 +115,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.controller.getModel().addRemoteHintListener(this);
         this.emptyMessage = "No tasks to show.";
     }
-
 
     @Override
     public void build() {
@@ -120,27 +126,41 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.setShowRecordComponentsByCell(true);
     }
 
-
-
-    protected Map<GridColumns, ListGridField> buildListGridField(){
+    protected Map<GridColumns, ListGridField> buildListGridField() {
         Map<GridColumns, ListGridField> fields = super.buildListGridField();
 
         ListGridField idField = fields.get(TasksColumnsFactory.ID_ATTR);
         idField.setType(ListGridFieldType.INTEGER);
-        idField.setAlign(Alignment.LEFT);
-        idField.setCellAlign(Alignment.LEFT);
 
-        ListGridField execDuration = fields.get(TasksColumnsFactory.EXEC_DURATION_ATTR);
+        alignCells(fields);
+
+        ListGridField execDuration = fields.get(EXEC_DURATION_ATTR);
         execDuration.setCellFormatter(new CellFormatter() {
             public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-                long l = Long.parseLong(value.toString());
-                return Job.formatDuration(l);
+                if (value != null) {
+                    return Job.formatDuration(value.toString());
+                } else {
+                    return "";
+                }
             }
         });
 
         return fields;
     }
 
+    private void alignCells(Map<GridColumns, ListGridField> fields) {
+        GridColumns[] columnsToAlign = COLUMNS_TO_ALIGN;
+
+        if (usedWithTaskCentricView) {
+            columnsToAlign = TasksCentricColumnsFactory.COLUMNS_TO_ALIGN;
+        }
+
+        for (GridColumns column : columnsToAlign) {
+            ListGridField listGridField = fields.get(column);
+            listGridField.setAlign(Alignment.CENTER);
+            listGridField.setCellAlign(Alignment.CENTER);
+        }
+    }
 
 
     @Override
@@ -151,10 +171,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     }
 
 
-    protected TaskRecord updateTaskRecord(Task task){
+    protected TaskRecord updateTaskRecord(Task task) {
         return new TaskRecord(task);
     }
-
 
 
     @Override
@@ -169,7 +188,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             this.columnsFactory.buildRecord(t, record);
             data.add(record);
 
-            if(t.equals(selectedTask)){
+            if (t.equals(selectedTask)) {
                 record.setAttribute("isSelected", true);
                 selectedRecord = record;
             }
@@ -194,8 +213,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
         String fieldName = this.getFieldName(colNum);
 
-        if (fieldName.equals(TasksColumnsFactory.STATUS_ATTR.getName())) {
-            String st = record.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName());
+        if (fieldName.equals(STATUS_ATTR.getName())) {
+            String st = record.getAttribute(STATUS_ATTR.getName());
             if (st.equals(TaskStatus.PENDING.toString()) ||
                     st.equals(TaskStatus.SUBMITTED.toString())) {
                 return "color:#1a8bba;" + base;
@@ -206,13 +225,14 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 return "color:#d37a11;font-weight:bold;" + base;
             } else if (st.equals(TaskStatus.FAULTY.toString()) ||
                     st.equals(TaskStatus.NOT_STARTED.toString()) ||
-                    st.equals(TaskStatus.NOT_RESTARTED.toString())) {
+                    st.equals(TaskStatus.NOT_RESTARTED.toString()) ||
+                    st.equals(TaskStatus.IN_ERROR.toString())) {
                 return "color:#c50000;font-weight:bold;" + base;
             } else {
                 return base;
             }
         }
-        
+
         return base;
     }
 
@@ -245,11 +265,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String taskId = rec.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName());
         String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
-        final String taskName = rec.getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
+        final String taskName = rec.getAttributeAsString(NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);
             button.setSrc(SchedulerImages.instance.visu_16().getSafeUri().asString());
-            if(visuButtonsClickHandlers.containsKey(button)){
+            if (visuButtonsClickHandlers.containsKey(button)) {
                 visuButtonsClickHandlers.get(button).removeHandler();
             }
             HandlerRegistration clickHandler = button.addClickHandler(new ClickHandler() {
@@ -349,18 +369,29 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     }-*/;
 
 
-
     @Override
     protected void buildCellContextualMenu(Menu menu) {
-        final String taskName = this.getSelectedRecord().getAttributeAsString(TasksColumnsFactory.NAME_ATTR.getName());
+        final String taskName = this.getSelectedRecord().getAttributeAsString(
+                NAME_ATTR.getName());
+        final String taskStatusName = this.getSelectedRecord().getAttributeAsString(
+                STATUS_ATTR.getName());
 
-        MenuItem restart = new MenuItem("Restart");
-        restart.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+        MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
+        restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartTask(taskName);
+                controller.restartInErrorTask(taskName);
             }
         });
+
+        MenuItem restartRunningTask = new MenuItem("Restart Running Task");
+        restartRunningTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.restartRunningTask(taskName);
+            }
+        });
+
         MenuItem preempt = new MenuItem("Preempt");
         preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
@@ -376,39 +407,50 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             }
         });
 
-        boolean enabled;
-        ListGridRecord jr = this.getSelectedRecord();
-        TaskStatus status = TaskStatus.valueOf(jr.getAttribute(TasksColumnsFactory.STATUS_ATTR.getName()).toUpperCase()); 
+        TaskStatus status = TaskStatus.from(taskStatusName);
+
+        boolean enableKill = false;
+        boolean enablePreempt = false;
+        boolean enableRestartRunningTask = false;
+        boolean enableRestartInErrorTask = false;
+
         switch (status) {
-        case SUBMITTED:
-        case WAITING_ON_ERROR:
-        case WAITING_ON_FAILURE:
-            enabled = false;
-            break;
-        case PENDING:
-        case PAUSED:
-        case RUNNING:
-            enabled = true;
-            break;
-        case SKIPPED:
-        case FINISHED:
-        case FAULTY:
-        case FAILED:
-        case ABORTED:
-        case NOT_STARTED:
-        case NOT_RESTARTED:
-            enabled = false;
-            break;
-        default:
-            enabled = false;
+            case ABORTED:
+            case FAILED:
+            case FAULTY:
+            case FINISHED:
+            case NOT_RESTARTED:
+            case NOT_STARTED:
+            case PAUSED:
+            case PENDING:
+            case SKIPPED:
+            case SUBMITTED:
+            case WAITING_ON_ERROR:
+            case WAITING_ON_FAILURE:
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = false;
+                break;
+            case RUNNING:
+                enableKill = true;
+                enablePreempt = true;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = true;;
+                break;
+            case IN_ERROR:
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = true;
+                enableRestartRunningTask = false;
         }
 
-        restart.setEnabled(enabled);
-        kill.setEnabled(enabled);
-        preempt.setEnabled(enabled);
+        kill.setEnabled(enableKill);
+        preempt.setEnabled(enablePreempt);
+        restartInErrorTask.setEnabled(enableRestartInErrorTask);
+        restartRunningTask.setEnabled(enableRestartRunningTask);
 
-        menu.setItems(restart, preempt, kill);
-
+        menu.setItems(restartInErrorTask, restartRunningTask, preempt, kill);
     }
 
     @Override

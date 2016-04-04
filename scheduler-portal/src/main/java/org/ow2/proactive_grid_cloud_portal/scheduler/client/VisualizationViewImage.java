@@ -611,6 +611,7 @@ public class VisualizationViewImage implements VisualizationView {
                     ft.get(name).failed++;
                     break;
                 case PAUSED:
+                case IN_ERROR:
                     ft.get(name).running++;
                     break;
                 case PENDING:
