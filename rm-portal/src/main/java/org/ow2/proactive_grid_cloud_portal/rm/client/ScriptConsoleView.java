@@ -155,7 +155,7 @@ public class ScriptConsoleView implements NodeSelectedListener {
         helpMessage += "<br/><br/>Groovy example:<br/><br/>";
         helpMessage += "<div style='padding-left:20px'>println System.getenv(\"PATH\")</div>";
         helpMessage += "<div style='padding-left:20px'>println \"uname -a\".execute().text</div>";
-        helpMessage += "<div style='padding-left:20px;padding-bottom:10px'>println \"jstack pid\".execute().text</div>";
+        helpMessage += "<div style='padding-left:20px;padding-bottom:10px'>println \"jps pid\".execute().text</div>";
         helpMessage += "Use the 'println' command to see the output ";
         helpMessage += "(if you use System.out, it will go to the server's stdout, which is harder to see).";
 
