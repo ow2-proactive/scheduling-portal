@@ -428,6 +428,11 @@ public class RMPage implements LogListener {
         schedulerLinkButton.setIcon(Images.instance.scheduler_30().getSafeUri().asString());
         schedulerLinkButton.setIconSize(25);
         schedulerLinkButton.setBorder(GREY_BUTTON_BORDER);
+	ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
+         cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
+	 cloudAutomationLinkButton.setIconSize(25);
+	 cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -438,6 +443,8 @@ public class RMPage implements LogListener {
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
+	tools.addSpacer(12);
+        tools.addButton(cloudAutomationLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
@@ -469,6 +476,18 @@ public class RMPage implements LogListener {
         });
 
         return studioButton;
+    }
+
+    private ToolStripButton getCloudAutomationLinkButton() {
+        ToolStripButton cloudAutomationButton = new ToolStripButton("Cloud Automation");
+
+	cloudAutomationButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/cloud-automation", "", "");
+            }
+        });
+
+        return cloudAutomationButton;
     }
 
     private Canvas buildTopPane() {
