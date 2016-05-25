@@ -488,6 +488,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         studioLinkButton.setIconSize(25);
         studioLinkButton.setBorder(GREY_BUTTON_BORDER);
 
+	ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
+	cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
+	cloudAutomationLinkButton.setIconSize(25);
+	cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -498,6 +503,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
+	tools.addSpacer(12);
+	tools.addButton(cloudAutomationLinkButton);      
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
@@ -532,6 +539,18 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
 
         return studioButton;
+    }
+
+    private ToolStripButton getCloudAutomationLinkButton() {
+        ToolStripButton cloudAutomationButton = new ToolStripButton("Cloud Automation");
+
+        cloudAutomationButton.addClickHandler(new ClickHandler() {
+		public void onClick(ClickEvent event) {
+		    Window.open("/cloud-automation", "", "");
+		}
+	    });
+
+        return cloudAutomationButton;
     }
 
     /*
