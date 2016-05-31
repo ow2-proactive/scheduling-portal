@@ -36,47 +36,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.server;
 
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 
 public final class HttpUtils {
 
     private HttpUtils() {
-    }
-
-    public static DefaultHttpClient createDefaultExecutor() {
-        PoolingClientConnectionManager cm = new PoolingClientConnectionManager();
-        cm.setDefaultMaxPerRoute(50);
-        cm.setMaxTotal(50);
-        DefaultHttpClient httpClient = new DefaultHttpClient(cm);
-
-        try {
-            SSLSocketFactory socketFactory = new SSLSocketFactory(new RelaxedTrustStrategy(),
-              SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            Scheme https = new Scheme("https", 443, socketFactory);
-            httpClient.getConnectionManager().getSchemeRegistry().register(https);
-        } catch (Exception ignored) {
-        }
-
-        return httpClient;
-    }
-
-    private static class RelaxedTrustStrategy implements TrustStrategy {
-        @Override
-        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-            return true;
-        }
     }
 
     public static String convertToString(InputStream inputStream, boolean keepNewLines) throws IOException {
@@ -107,4 +75,5 @@ public final class HttpUtils {
     public static String convertToString(InputStream inputStream) throws IOException {
         return convertToString(inputStream, false);
     }
+
 }

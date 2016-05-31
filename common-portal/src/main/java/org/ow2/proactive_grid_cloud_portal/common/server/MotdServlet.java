@@ -36,40 +36,40 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.server;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
-import java.io.File;
-import java.io.IOException;
+import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.apache.commons.io.FileUtils;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Return the content of the motd.txt file,
- * of the reponse of the *.motd.url if defined 
- * 
- * @author mschnoor
+ * of the reponse of the *.motd.url if defined
  *
+ * @author mschnoor
  */
 @SuppressWarnings("serial")
 public class MotdServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MotdServlet.class);
 
+    private static final String MOTD_FILE_NAME = "motd.txt";
+
     private static long lastModified = 0L;
     private static String fileContent = "";
-    private static final String motdFileName = "motd.txt";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -77,13 +77,12 @@ public class MotdServlet extends HttpServlet {
         response.setContentType("text/html");
 
         try {
-
             String url = Config.get().getMotdUrl();
 
             // no MOTD URL : use local file
             if (url == null || url.trim().length() == 0) {
 
-                File f = new File(this.getServletContext().getRealPath(motdFileName));
+                File f = new File(this.getServletContext().getRealPath(MOTD_FILE_NAME));
                 long ft = f.lastModified();
                 if (ft != lastModified) {
                     lastModified = ft;
@@ -98,21 +97,19 @@ public class MotdServlet extends HttpServlet {
                 response.getWriter().write(fileContent);
 
             } else {
-                HttpClient httpclient = new DefaultHttpClient();
-
-                try {
+                try (CloseableHttpClient httpclient =
+                             new HttpClientBuilder()
+                                     .allowAnyCertificate(Config.get().isHttpsAllowAnyCertificate())
+                                     .allowAnyHostname(Config.get().isHttpsAllowAnyHostname()).build()) {
                     HttpGet httpget = new HttpGet(url);
 
                     ResponseHandler<String> responseHandler = new BasicResponseHandler();
                     String responseBody = httpclient.execute(httpget, responseHandler);
                     response.setStatus(Response.Status.OK.getStatusCode());
                     response.getWriter().write(responseBody);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     response.getWriter().write("Server error");
-                } finally {
-                    httpclient.getConnectionManager().shutdown();
                 }
             }
 

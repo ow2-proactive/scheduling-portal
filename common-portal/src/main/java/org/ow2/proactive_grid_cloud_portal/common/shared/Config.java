@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ow2.proactive.web.WebProperties;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DefaultDateTimeFormatInfo;
 
@@ -61,6 +62,10 @@ public abstract class Config {
     private Map<String, String> backup = null;
 
     private static Config instance = null;
+
+    public static final String HTTPS_ALLOW_ANY_CERTIFICATE = WebProperties.WEB_HTTPS_ALLOW_ANY_CERTIFICATE;
+
+    public static final String HTTPS_ALLOW_ANY_HOSTNAME = WebProperties.WEB_HTTPS_ALLOW_ANY_HOSTNAME;
 
     protected Config() {
         this.properties = new HashMap<String, String>();
@@ -112,6 +117,24 @@ public abstract class Config {
      */
     public Map<String, String> getProperties() {
         return this.properties;
+    }
+
+    public boolean isHttpsAllowAnyCertificate() {
+        return getBooleanValue(HTTPS_ALLOW_ANY_CERTIFICATE, false);
+    }
+
+    public boolean isHttpsAllowAnyHostname() {
+        return getBooleanValue(HTTPS_ALLOW_ANY_HOSTNAME, false);
+    }
+
+    private boolean getBooleanValue(String property, boolean defaultValue) {
+        String value = this.properties.get(property);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        return "true".equalsIgnoreCase(value);
     }
 
     /**

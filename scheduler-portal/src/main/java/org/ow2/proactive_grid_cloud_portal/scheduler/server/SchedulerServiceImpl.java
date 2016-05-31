@@ -58,10 +58,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobUsage;
@@ -77,12 +78,13 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
@@ -95,7 +97,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
-    private DefaultHttpClient httpClient;
+    private CloseableHttpClient httpClient;
 
     /**
      * Number of threads created for the threadPool shared by RestEasy client proxies.
@@ -111,7 +113,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     public void init() {
         loadProperties();
 
-        httpClient = HttpUtils.createDefaultExecutor();
+        Config config = Config.get();
+
+        httpClient =
+                new HttpClientBuilder()
+                        .maxConnections(50)
+                        .allowAnyCertificate(config.isHttpsAllowAnyCertificate())
+                        .allowAnyHostname(config.isHttpsAllowAnyHostname())
+                        .useSystemProperties().build();
+
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
@@ -472,8 +482,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
-    
+
+
     /*
      * (non-Javadoc)
      *
@@ -505,8 +515,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
-    
+
+
     public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate,
                                       final boolean myTasks, final boolean pending, final boolean running,
                                       final boolean finished, final int offset, final int limit,
@@ -520,8 +530,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
-    
+
+
     @Override
     public String getJobTaskTagsPrefix(final String sessionId, final String jobId, final String prefix) throws RestServerException, ServiceException {
     	return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
@@ -531,7 +541,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
+
 
     /*
      * (non-Javadoc)
@@ -559,8 +569,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
-    
+
+
     public String getJobInfoDetails(final String sessionId, final String jobId) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
@@ -569,7 +579,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             }
         });
     }
-    
+
 
     /*
      * (non-Javadoc)
@@ -1153,7 +1163,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private RestClient getRestClientProxy() {
-        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool).build();
+        ResteasyClient client =
+                new ResteasyClientBuilder().asyncExecutor(threadPool)
+                        .httpEngine(new ApacheHttpClient4Engine(httpClient)).build();
         ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
 
         return target.proxy(RestClient.class);
