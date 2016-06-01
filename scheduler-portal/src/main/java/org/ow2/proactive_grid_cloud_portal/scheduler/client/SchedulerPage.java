@@ -241,7 +241,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.addFill();
         logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
         logoStrip.addFill();
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight));
+
+        //by click on logo - open home activeeon page in new tab
+        Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
+        logoImg.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                Window.open("http://activeeon.com/", "", "");
+            }
+        });
+        logoStrip.addMember(logoImg);
 
         return logoStrip;
     }
@@ -452,6 +461,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
         logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
         logoutButton.setIconSize(25);
+        logoutButton.setIconOrientation("right");
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
         logoutButton.addClickHandler(new ClickHandler() {
