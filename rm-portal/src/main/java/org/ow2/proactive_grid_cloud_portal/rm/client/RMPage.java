@@ -290,7 +290,7 @@ public class RMPage implements LogListener {
         logoStrip.addFill();
 
         //by click on logo - open home activeeon page in new tab
-        Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
+        Img logoImg = new Img(RMImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
