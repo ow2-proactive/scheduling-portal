@@ -58,6 +58,11 @@ public abstract class RMModel implements Model {
     public abstract Map<String, NodeSource> getNodes();
 
     /**
+     * @return current limit of alive nodes.
+     */
+    public abstract long getMaxNumberOfNodes();
+
+    /**
      * @return node currently selected among all views, or null
      */
     public abstract Node getSelectedNode();
