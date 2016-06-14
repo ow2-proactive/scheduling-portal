@@ -36,33 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
-import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +46,35 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+
+import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
+import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMService;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
@@ -95,13 +97,21 @@ public class RMServiceImpl extends Service implements RMService {
      */
     private ExecutorService threadPool;
 
-    private DefaultHttpClient httpClient;
+    private CloseableHttpClient httpClient;
 
     @Override
     public void init() {
         loadProperties();
 
-        httpClient = HttpUtils.createDefaultExecutor();
+        Config config = Config.get();
+
+        httpClient =
+                new HttpClientBuilder()
+                        .maxConnections(50)
+                        .allowAnyCertificate(config.isHttpsAllowAnyCertificate())
+                        .allowAnyHostname(config.isHttpsAllowAnyHostname())
+                        .useSystemProperties().build();
+
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
@@ -117,7 +127,8 @@ public class RMServiceImpl extends Service implements RMService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
+        RMConfig.get().load(
+                ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
         ConfigUtils.loadSystemProperties(RMConfig.get());
     }
 
@@ -238,7 +249,7 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     private MultipartEntity createLoginPasswordSSHKeyMultipart(String login, String pass,
-                                                               String ssh) throws UnsupportedEncodingException {
+            String ssh) throws UnsupportedEncodingException {
         MultipartEntity entity = new MultipartEntity();
         entity.addPart("username", new StringBody(login));
         entity.addPart("password", new StringBody(pass));
@@ -253,9 +264,11 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#createNodeSource(java.lang.String, java.lang.String, java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, java.lang.String[], java.lang.String[])
      */
-    public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
-                                   final String[] infrastructureParameters, final String[] infrastructureFileParameters, final String policyType,
-                                   final String[] policyParameters, final String[] policyFileParameters) throws RestServerException,
+    public String createNodeSource(final String sessionId, final String nodeSourceName,
+            final String infrastructureType,
+            final String[] infrastructureParameters, final String[] infrastructureFileParameters,
+            final String policyType,
+            final String[] policyParameters, final String[] policyFileParameters) throws RestServerException,
             ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
@@ -297,7 +310,8 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#lockNodes(java.lang.String, java.util.Set)
      */
-    public String lockNodes(final String sessionId, Set<String> urls) throws RestServerException, ServiceException {
+    public String lockNodes(final String sessionId,
+            Set<String> urls) throws RestServerException, ServiceException {
         return executeFunction(new BiFunction<RestClient, Set<String>, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient, Set<String> strings) {
@@ -324,7 +338,8 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#removeNode(java.lang.String, java.lang.String)
      */
-    public String removeNode(final String sessionId, final String url, final boolean force) throws RestServerException,
+    public String removeNode(final String sessionId, final String url,
+            final boolean force) throws RestServerException,
             ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
@@ -352,7 +367,8 @@ public class RMServiceImpl extends Service implements RMService {
      * (non-Javadoc)
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#releaseNode(java.lang.String, java.lang.String)
      */
-    public String releaseNode(final String sessionId, final String url) throws RestServerException, ServiceException {
+    public String releaseNode(final String sessionId,
+            final String url) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -375,7 +391,8 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String getMBeanInfo(final String sessionId, String name, final List<String> attrs) throws RestServerException,
+    public String getMBeanInfo(final String sessionId, String name,
+            final List<String> attrs) throws RestServerException,
             ServiceException {
         try {
             final ObjectName obj = new ObjectName(name);
@@ -392,7 +409,8 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String getNodeMBeanInfo(final String sessionId, final String nodeJmxUrl, final String objectName, final List<String> attrs)
+    public String getNodeMBeanInfo(final String sessionId, final String nodeJmxUrl, final String objectName,
+            final List<String> attrs)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
@@ -403,7 +421,9 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String getNodeMBeanHistory(final String sessionId, final String nodeJmxUrl, final String objectName, final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
+    public String getNodeMBeanHistory(final String sessionId, final String nodeJmxUrl,
+            final String objectName, final List<String> attrs,
+            final String timeRange) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -414,7 +434,7 @@ public class RMServiceImpl extends Service implements RMService {
 
     @Override
     public String getNodeMBeansInfo(final String sessionId, final String nodeJmxUrl, final String objectNames,
-                                    final List<String> attrs) throws RestServerException, ServiceException {
+            final List<String> attrs) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -424,8 +444,9 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String getNodeMBeansHistory(final String sessionId, final String nodeJmxUrl, final String objectNames,
-                                       final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
+    public String getNodeMBeansHistory(final String sessionId, final String nodeJmxUrl,
+            final String objectNames,
+            final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -435,7 +456,8 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String getStatHistory(final String sessionId, final String range) throws RestServerException, ServiceException {
+    public String getStatHistory(final String sessionId,
+            final String range) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -445,7 +467,8 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String executeNodeScript(final String sessionId, final String script, final String engine, final String nodeUrl) throws RestServerException, ServiceException {
+    public String executeNodeScript(final String sessionId, final String script, final String engine,
+            final String nodeUrl) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
@@ -455,14 +478,17 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     private RestClient getRestClientProxy() {
-        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool).build();
+        ResteasyClient client =
+                new ResteasyClientBuilder().asyncExecutor(threadPool)
+                        .httpEngine(new ApacheHttpClient4Engine(httpClient)).build();
+
         ResteasyWebTarget target = client.target(RMConfig.get().getRestUrl());
 
         return target.proxy(RestClient.class);
     }
 
     private String executeFunction(BiFunction<RestClient, Set<String>, InputStream> action, Set<String> urls,
-                                   String actionName) throws ServiceException, RestServerException {
+            String actionName) throws ServiceException, RestServerException {
 
         RestClient restClientProxy = getRestClientProxy();
 
@@ -483,13 +509,15 @@ public class RMServiceImpl extends Service implements RMService {
         }
 
         if (failures > 0) {
-            throw new RestServerException("Failed to " + actionName + " all requested nodes: " + success + " succeeded, " + failures + " failed.");
+            throw new RestServerException(
+                    "Failed to " + actionName + " all requested nodes: " + success + " succeeded, " + failures + " failed.");
         }
 
         return "";
     }
 
-    private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
+    private String executeFunctionReturnStreamAsString(
+            Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         InputStream inputStream = null;

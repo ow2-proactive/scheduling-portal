@@ -42,10 +42,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 /**
  * Scheduler specific configuration
  *
- *
- *
  * @author mschnoor
- *
  */
 public class SchedulerConfig extends Config {
 

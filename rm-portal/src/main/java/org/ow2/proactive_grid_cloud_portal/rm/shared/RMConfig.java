@@ -41,10 +41,8 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 /**
  * RM specific configuration
- * 
- * 
- * @author mschnoor
  *
+ * @author mschnoor
  */
 public class RMConfig extends Config {
 
@@ -109,7 +107,6 @@ public class RMConfig extends Config {
     /** prefix used to form the jmx url to monitor the node sources in the RM */
     public static final String RM_JMX_PREFIX = "rm.jmx.prefix";
     public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
-    
     
     private static RMConfig instance = null;
 
