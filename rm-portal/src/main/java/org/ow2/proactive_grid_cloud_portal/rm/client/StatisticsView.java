@@ -117,7 +117,7 @@ public class StatisticsView implements NodesListener {
 
     public void nodesUpdated(Map<String, NodeSource> nodes) {
 
-        ListGridRecord[] r = new ListGridRecord[11];
+        ListGridRecord[] r = new ListGridRecord[12];
 
         ListGridRecord r1 = new ListGridRecord();
         r1.setAttribute("status", "Deploying");
@@ -181,21 +181,34 @@ public class StatisticsView implements NodesListener {
         r9.setAttribute("count", controller.getModel().getNumNodes());
         r[8] = r9;
 
+        ListGridRecord aliveLimit = new ListGridRecord();
+        if (isAliveNodesLimited()) {
+            aliveLimit.setAttribute("status", "Alive nodes limit");
+        } else {
+            aliveLimit.setAttribute("status", "Alive nodes unlimited");
+        }
+        aliveLimit.setAttribute("type", "Node");
+        aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
+        r[9] = aliveLimit;
+
         ListGridRecord r10 = new ListGridRecord();
         r10.setAttribute("status", "Physical");
         r10.setAttribute("type", "Host");
         r10.setAttribute("icon", RMImages.instance.host_16().getSafeUri().asString());
         r10.setAttribute("count", controller.getModel().getNumPhysicalHosts());
-        r[9] = r10;
+        r[10] = r10;
 
         ListGridRecord r11 = new ListGridRecord();
         r11.setAttribute("status", "Virtual");
         r11.setAttribute("type", "Host");
         r11.setAttribute("icon", RMImages.instance.host_virtual_16().getSafeUri().asString());
         r11.setAttribute("count", controller.getModel().getNumVirtualHosts());
-        r[10] = r11;
+        r[11] = r11;
 
         this.grid.setData(r);
     }
 
+    private boolean isAliveNodesLimited() {
+        return controller.getModel().getMaxNumberOfNodes() > -1;
+    }
 }

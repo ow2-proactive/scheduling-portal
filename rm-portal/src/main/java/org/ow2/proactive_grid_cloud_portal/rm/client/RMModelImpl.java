@@ -97,6 +97,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     private int numPhysicalHosts = 0;
     private int numVirtualHosts = 0;
 
+    private long maxNumberOfNodes = -1;
+
     RMModelImpl() {
         super();
 
@@ -395,6 +397,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setNumLost(int numLost) {
         this.numLost = numLost;
+    }
+
+    @Override
+    public long getMaxNumberOfNodes() {
+        return maxNumberOfNodes;
+    }
+
+    public void setMaxNumberOfNodes(long maxNumberOfNodes) {
+        this.maxNumberOfNodes = maxNumberOfNodes;
     }
 
     void setNumConfiguring(int numConfiguring) {
