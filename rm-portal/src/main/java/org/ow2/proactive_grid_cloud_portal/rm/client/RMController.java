@@ -248,6 +248,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
         this.rmPage = new RMPage(this);
         this.fetchRMMonitoring();
+        this.fetchNodesLimit();
         this.startTimer();
 
         Settings.get().setSetting(SESSION_SETTING, sessionId);
@@ -325,6 +326,28 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
         };
         this.statsUpdater.scheduleRepeating(RMConfig.get().getStatisticsRefreshTime());
+        }
+
+
+    private void fetchNodesLimit() {
+        this.rm.getState(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                // Parse json response to extract the current node limit
+                JSONObject rmState = JSONParser.parseStrict(result).isObject();
+                if (rmState == null) {
+                    LogModel.getInstance().logMessage("Failed to parse json rmState: " + result);
+                } else {
+                    JSONValue maxNumberOfNodes = rmState.get("maxNumberOfNodes");
+                    if (maxNumberOfNodes != null && maxNumberOfNodes.isNumber() != null) {
+                        model.setMaxNumberOfNodes(Long.parseLong(maxNumberOfNodes.isNumber().toString()));
+                    }
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logMessage("Failed to access node limit through rmState: " + caught.getMessage());
+            }
+        });
     }
 
     /**
