@@ -36,10 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.IButton;
@@ -49,6 +45,10 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 
 /**
@@ -72,10 +72,11 @@ public class AddNodeWindow {
         pane.setBackgroundColor("#ffffff");
 
         String str = "<h3>Connect a node to the Resource Manager using the following way</h3><ul>" +
-            "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
-            "/node.jar'>Download</a> the node's JAR file</li>" +
-            "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -r " +
-            RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
+                "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
+                "/node.jar'>Download</a> the node's JAR file</li>" +
+                "<li>Create credential file (Portal->Create Credentials) </li>"+
+                "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -f <CREDENTIAL_FILE> -r " +
+                RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
 
         HTMLPane text = new HTMLPane();
         text.setContents(str);
