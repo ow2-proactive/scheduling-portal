@@ -36,10 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.Map;
-
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
-
 import com.smartgwt.client.types.GroupStartOpen;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.widgets.Canvas;
@@ -47,6 +43,9 @@ import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+
+import java.util.Map;
 
 
 /**
@@ -79,7 +78,7 @@ public class StatisticsView implements NodesListener {
                 String base = super.getCellCSSText(record, rowNum, colNum);
                 if (colNum == 2) {
                     String num = record.getAttribute("count");
-                    if (Integer.parseInt(num) == 0) {
+                    if (num.contentEquals("0")) {
                         return "color:gray;" + base;
                     }
                 }
@@ -182,13 +181,13 @@ public class StatisticsView implements NodesListener {
         r[8] = r9;
 
         ListGridRecord aliveLimit = new ListGridRecord();
-        if (isAliveNodesLimited()) {
-            aliveLimit.setAttribute("status", "Alive nodes limit");
-        } else {
-            aliveLimit.setAttribute("status", "Alive nodes unlimited");
-        }
+        aliveLimit.setAttribute("status", "Node Limit");
         aliveLimit.setAttribute("type", "Node");
-        aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
+        if (isAliveNodesLimited()) {
+            aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
+        } else {
+            aliveLimit.setAttribute("count", "None");
+        }
         r[9] = aliveLimit;
 
         ListGridRecord r10 = new ListGridRecord();
