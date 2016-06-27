@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.user.client.ui.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -54,12 +55,8 @@ import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -182,7 +179,7 @@ public class SubmitWindow {
             }
         });
 
-        buttons.setMembers(uploadButton, cancelButton);
+        buttons.setMembers(cancelButton, uploadButton);
 
         // holds the form fields
         VerticalPanel formContent = new VerticalPanel();
@@ -199,23 +196,33 @@ public class SubmitWindow {
         formContent.add(fileUpload);
         formContent.add(editField);
 
+        final RadioButton importFromFileRadioButton = new RadioButton("selectWfRadioGroup", "Import xml file");
+        final RadioButton importFromCatalogRadioButton = new RadioButton("selectWfRadioGroup", "From catalog");
+        importFromFileRadioButton.setValue(true);
+        importFromCatalogRadioButton.setValue(false);
+        importFromCatalogRadioButton.setEnabled(false);
+        final VerticalPanel selectWfRadioGroupPanel = new VerticalPanel();
+        selectWfRadioGroupPanel.setSpacing(10);
+        selectWfRadioGroupPanel.add(importFromFileRadioButton);
+        selectWfRadioGroupPanel.add(importFromCatalogRadioButton);
+
         // actual form		
-        final FormPanel formPanel = new FormPanel();
-        formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        formPanel.setMethod(FormPanel.METHOD_POST);
-        formPanel.setAction(GWT.getModuleBaseURL() + "uploader");
-        formPanel.add(formContent);
-        formPanel.setWidth("350px");
-        formPanel.setHeight("30px");
+        final FormPanel importFromFileformPanel = new FormPanel();
+        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
+        importFromFileformPanel.setAction(GWT.getModuleBaseURL() + "uploader");
+        importFromFileformPanel.add(formContent);
+        importFromFileformPanel.setWidth("350px");
+        importFromFileformPanel.setHeight("30px");
 
         // wraps the GWT component so that we may show/hide it
         final HLayout formWrapper = new HLayout();
         formWrapper.setAlign(Alignment.CENTER);
         formWrapper.setHeight(30);
-        formWrapper.addChild(formPanel);
+        formWrapper.addChild(importFromFileformPanel);
 
         // error messages when applicable
-        final Label label = new Label("Submit an XML Job Descriptor:");
+        final Label label = new Label("Select workflow:");
         label.setHeight(30);
         label.setWidth100();
 
@@ -233,18 +240,19 @@ public class SubmitWindow {
         editForm.setFields(edit);
 
         layout.addMember(label);
+        layout.addMember(selectWfRadioGroupPanel);
         layout.addMember(formWrapper);
         layout.addMember(editForm);
         layout.addMember(buttons);
 
         this.window = new Window();
-        this.window.setTitle("Submit Job");
+        this.window.setTitle("Submit a new job");
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(layout);
         this.window.setWidth(420);
-        this.window.setHeight(180);
+        this.window.setHeight(320);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
 
@@ -255,7 +263,7 @@ public class SubmitWindow {
             public void onClick(ClickEvent e) {
                 editField.setValue(edit.getValueAsBoolean() ? "1" : "0");
 
-                formPanel.submit();
+                importFromFileformPanel.submit();
 
                 layout.removeMember(label);
                 layout.removeMember(formWrapper);
@@ -268,7 +276,7 @@ public class SubmitWindow {
 
         // form callback : silently close the window if no error,
         // else display message and allow new submission
-        formPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+        importFromFileformPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String fn = fileUpload.getFilename();
