@@ -36,12 +36,23 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.*;
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
+import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.DateUtil;
+import com.smartgwt.client.widgets.DateChooser;
+import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.grid.DateGrid;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -69,9 +80,6 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -79,18 +87,53 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
  * Popup Window for job submission
- * 
+ *
  * @author mschnoor
  */
 public class SubmitWindow {
+
+    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
 
     private Window window;
 
     private SchedulerController controller;
 
+    private HandlerRegistration todayClickHR = null;
+    private HandlerRegistration changedHourHR = null;
+    private HandlerRegistration changedMinuteHR = null;
+    private HandlerRegistration gridClickHR = null;
+
+    private VLayout rootPage; // ------------------------ the main layout of the window
+
+    private VLayout selectWfLayout; // ----------------- Select Workflow Panel
+    private FileUpload fileUpload; // ------------------- FileUpload button
+
+    // -------------------------------------------------- Variables Part
+    private VLayout varsLayout; // ---------------------- Variables Panel
+    private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
+    private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
+    private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
+    private Hidden startAtParameter; // ----------------- START_AT value to send along with the job
+    private FormPanel variablesActualForm; // ----------- Actual form to send
+
+    // -------------------------------------------------- Start At Part
+    private VLayout startAtLayout; // ------------------ Start At Panel
+    private VerticalPanel startAtRadioGroupPanel; // ---- Now or Later
+    private RadioButton startNowRB; // ------------------ As soon as possible radio button
+    private RadioButton startAtRB; // ------------------- at scheduled time radio button
+    private DateChooser dateChooser; // ----------------- DateChooser
+
+    private HLayout submitCancelButtons; // -------------------------- Cancel and Submit buttons
+
+    private VLayout loadingPanel; // --------------------- Loading Panel when uploading
+
+
+    private static final int width = 420;
+    private static final int height = 500;
+
     /**
      * Default constructor
-     * 
+     *
      * @param controller
      */
     public SubmitWindow(SchedulerController controller) {
@@ -100,7 +143,7 @@ public class SubmitWindow {
 
     /**
      * Shows the window created by the constructor,
-     * calling this after destroy will throw an NPE, 
+     * calling this after destroy will throw an NPE,
      * you must create a new SubmitWindow for each job submission
      */
     public void show() {
@@ -114,60 +157,212 @@ public class SubmitWindow {
         this.window.destroy();
     }
 
-    /**
-     * internal layout creation
-     * 
-     * <pre>
-     * +- Window ------------------+
-     * |+- VLayout ---------------+|
-     * ||+- Label --------+       || <-- error messages
-     * ||+----------------+       ||     when applicable
-     * ||+- Layout --------------+||
-     * |||+- FormPanel ---------+|||
-     * ||||+- VerticalPanel ---+||||
-     * ||||| form fields       ||||| <-- GWT form wrapped
-     * ||||+-------------------+||||     in SmartGWT layout
-     * |||+---------------------+|||
-     * ||+-----------------------+||
-     * ||+- DynamicForm ---------+||     SmartGWT form, check
-     * ||| form fields           ||| <-- to enable variable edition 
-     * ||+-----------------------+||
-     * ||           +- IButton --+|| <-- submit button
-     * ||           +------------+||
-     * |+-------------------------+|
-     * +---------------------------+
-     * </pre>
-     * 
-     * If the <code>Edit variables</code> checkbox is checked,
-     * the {@link UploadServlet} called by the GWT form will return the content
-     * of the job descriptor, and we will create a new form to edit the
-     * variables so that we may submit the job to a second servlet, {@link SubmitEditServlet}.
-     * If the {@link SubmitEditServlet} submission fails, we get back in the same state
-     * as before the first click to Submit
-     * 
-     * 
-     */
-    private void build() {
+    private void initRootPage() {
+        rootPage = new VLayout();
+        rootPage.setMargin(5);
+        rootPage.setWidth100();
+        rootPage.setHeight100();
+    }
 
-        /* mixing GWT's native FormPanel with SmartGWT containers,
-         * because SmartGWT's form somehow sucks when not using the datasource stuff
-         * as a result the layout is a bit messy */
+    private void initSelectWfPart() {
+        selectWfLayout = new VLayout();
+        selectWfLayout.setGroupTitle("1. Select workflow");
+        selectWfLayout.setIsGroup(true);
+        selectWfLayout.setHeight("130px");
 
-        // root page of the window
-        final VLayout layout = new VLayout();
-        layout.setMargin(10);
-        layout.setWidth100();
-        layout.setHeight100();
+        final RadioButton importFromFileRadioButton = new RadioButton("selectWfRadioGroup", "Import xml file");
+        final RadioButton importFromCatalogRadioButton = new RadioButton("selectWfRadioGroup", "From catalog");
+        importFromFileRadioButton.setValue(true);
+        importFromCatalogRadioButton.setValue(false);
+        importFromCatalogRadioButton.setEnabled(false);
+        final VerticalPanel selectWfRadioGroupPanel = new VerticalPanel();
+        selectWfRadioGroupPanel.add(importFromFileRadioButton);
+        selectWfRadioGroupPanel.add(importFromCatalogRadioButton);
+        selectWfRadioGroupPanel.setSpacing(5);
+        selectWfRadioGroupPanel.setHeight("50px");
 
-        // buttons 
-        final HLayout buttons = new HLayout();
-        buttons.setMembersMargin(5);
-        buttons.setHeight(20);
-        buttons.setWidth100();
-        buttons.setAlign(Alignment.RIGHT);
 
-        final IButton uploadButton = new IButton("Submit");
-        uploadButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        // TODO implement contextual zone for fetching from the catalog
+        // contextual zone
+        // - open file button
+        // or
+        // - dropdown list from bucket which workflow
+        final VLayout fromFilePanel = new VLayout();
+        fromFilePanel.setHeight("30px");
+        fileUpload = new FileUpload();
+        fileUpload.setName("job");
+
+        VerticalPanel formContent = new VerticalPanel();
+        formContent.setHeight("30px");
+
+        Hidden hiddenField = new Hidden();
+        hiddenField.setName("sessionId");
+        hiddenField.setValue(LoginModel.getInstance().getSessionId());
+        formContent.add(hiddenField);
+        formContent.add(fileUpload);
+
+        final FormPanel importFromFileformPanel = new FormPanel();
+        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
+        importFromFileformPanel.setAction(GWT.getModuleBaseURL() + "uploader");
+        importFromFileformPanel.add(formContent);
+        importFromFileformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
+        importFromFileformPanel.setHeight("30px");
+        fromFilePanel.addMember(importFromFileformPanel);
+
+        final Button uploadButton = new Button("Upload file");
+        uploadButton.addClickHandler(clickHandlerForUploadButton(importFromFileformPanel));
+
+        // put the buttons into a single panel for easy spacing
+        final VerticalPanel fromFileButtonsPanel = new VerticalPanel();
+        fromFileButtonsPanel.setSpacing(5);
+        fromFileButtonsPanel.setHeight("50px");
+        fromFileButtonsPanel.add(fromFilePanel);
+        fromFileButtonsPanel.add(uploadButton);
+
+        selectWfLayout.addMember(selectWfRadioGroupPanel);
+        selectWfLayout.addMember(fromFileButtonsPanel);
+
+        rootPage.addMember(selectWfLayout);
+    }
+
+    private void initVarsPart(Widget varsContent, Widget hiddenContent) {
+        varsLayout = new VLayout();
+        varsLayout.setIsGroup(true);
+        varsLayout.setGroupTitle("2. Fill workflow variables");
+        varsLayout.setWidth100();
+        varsLayout.setHeight("100px");
+        varsLayout.setMaxHeight(100);
+        varsLayout.setPadding(5);
+        varsLayout.setOverflow(Overflow.AUTO);
+        varsLayout.addMember(varsContent);
+        varsLayout.addMember(hiddenContent);
+        rootPage.addMember(varsLayout);
+        rootPage.reflow();
+    }
+
+    private void initVarsPart() {
+        varsLayout = new VLayout();
+        varsLayout.setIsGroup(true);
+        varsLayout.setGroupTitle("2. Fill workflow variables");
+        varsLayout.setWidth100();
+        varsLayout.setHeight("100px");
+        varsLayout.setMaxHeight(100);
+        varsLayout.setPadding(5);
+        varsLayout.setOverflow(Overflow.AUTO);
+        rootPage.addMember(varsLayout);
+        rootPage.reflow();
+    }
+
+    private void initSubmitAtPart() {
+        startAtLayout = new VLayout();
+        startAtLayout.setIsGroup(true);
+        startAtLayout.setGroupTitle("3. Scheduled time");
+
+        startAtParameter = new Hidden("START_AT");
+
+        startNowRB = new RadioButton("startAtRadioGroup", "As soon as possible");
+        startAtRB = new RadioButton("startAtRadioGroup", "At");
+        startNowRB.setValue(true);
+        startAtRB.setValue(false);
+
+        startNowRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                startAtRB.setText("At");
+                startAtLayout.removeMember(dateChooser);
+            }
+        });
+
+        startAtRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                startAtLayout.addMember(dateChooser);
+                DateTimeFormat dateTimeFormat =
+                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                startAtParameter.setValue(iso8601DateStr);
+                updateScheduledTimeForToday();
+                resetAllHandlers();
+            }
+        });
+
+        dateChooser = new DateChooser();
+        dateChooser.setShowTimeItem(true);
+        dateChooser.setUse24HourTime(true);
+        dateChooser.setShowTodayButton(true);
+        dateChooser.setShowApplyButton(false);
+        dateChooser.setWidth(width / 2);
+        dateChooser.setLayoutAlign(Alignment.CENTER);
+        dateChooser.setMargin(10);
+
+        startAtRadioGroupPanel = new VerticalPanel();
+        startAtRadioGroupPanel.setSpacing(10);
+        startAtRadioGroupPanel.add(startNowRB);
+        startAtRadioGroupPanel.add(startAtRB);
+        startAtRadioGroupPanel.setHeight("30px");
+
+        startAtLayout.addMember(startAtRadioGroupPanel);
+        rootPage.addMember(startAtLayout);
+    }
+
+    private void updateScheduledTimeAt() {
+        TimeItem dateTimeItem = dateChooser.getTimeItem();
+        int selectedHour = Integer.parseInt(dateTimeItem.getHourItem().getValueAsString());
+        int selectedMinute = Integer.parseInt(dateTimeItem.getMinuteItem().getValueAsString());
+        Date newDateTime = DateUtil.createLogicalTime(selectedHour, selectedMinute, 0, 0);
+        Date updatedDate = DateUtil.combineLogicalDateAndTime(dateChooser.getData(), newDateTime);
+        dateChooser.setData(updatedDate);
+        startAtRB.setText("At " + updatedDate.toString());
+    }
+
+    private void updateScheduledTimeForToday() {
+        Date newDate = new Date();
+        dateChooser.setData(newDate);
+        dateChooser.getTimeItem().setHours(Integer.parseInt(DateTimeFormat.getFormat("HH").format(newDate)));
+        dateChooser.getTimeItem().setMinutes(Integer.parseInt(DateTimeFormat.getFormat("mm").format(newDate)));
+        startAtRB.setText("At " + newDate.toString());
+    }
+
+    private void initButtonsPart() {
+        submitCancelButtons = new HLayout();
+        submitCancelButtons.setMargin(10);
+        submitCancelButtons.setMembersMargin(5);
+        submitCancelButtons.setHeight(30);
+        submitCancelButtons.setWidth100();
+        submitCancelButtons.setAlign(Alignment.RIGHT);
+
+        final IButton submitButton = new IButton("Submit");
+        submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        submitButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < fields.length; i++) {
+                    String val = "";
+                    if (fields[i].getValue() != null) {
+                        val = fields[i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
+                DateTimeFormat dateTimeFormat =
+                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                startAtParameter.setValue(iso8601DateStr);
+                hiddenPane.add(startAtParameter);
+                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(SubmitCompleteEvent event) {
+                        GWT.log("Job submitted to the scheduler");
+                        GWT.log(event.getResults());
+                    }
+                });
+                variablesActualForm.submit();
+                displayLoadingMessage();
+                SubmitWindow.this.window.removeMember(rootPage);
+                SubmitWindow.this.window.hide();
+                SubmitWindow.this.destroy();
+            }
+        });
 
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
@@ -178,142 +373,68 @@ public class SubmitWindow {
                 SubmitWindow.this.destroy();
             }
         });
+        submitCancelButtons.setMembers(cancelButton, submitButton);
+        rootPage.addMember(submitCancelButtons);
+    }
 
-        buttons.setMembers(cancelButton, uploadButton);
+    private void displayLoadingMessage() {
 
-        // holds the form fields
-        VerticalPanel formContent = new VerticalPanel();
-        Hidden hiddenField = new Hidden();
-        hiddenField.setName("sessionId");
-        hiddenField.setValue(LoginModel.getInstance().getSessionId());
-        formContent.add(hiddenField);
+        loadingPanel = new VLayout();
 
-        final FileUpload fileUpload = new FileUpload();
-        fileUpload.setName("job");
-        final Hidden editField = new Hidden("edit");
-        editField.setValue("0");
-
-        formContent.add(fileUpload);
-        formContent.add(editField);
-
-        final RadioButton importFromFileRadioButton = new RadioButton("selectWfRadioGroup", "Import xml file");
-        final RadioButton importFromCatalogRadioButton = new RadioButton("selectWfRadioGroup", "From catalog");
-        importFromFileRadioButton.setValue(true);
-        importFromCatalogRadioButton.setValue(false);
-        importFromCatalogRadioButton.setEnabled(false);
-        final VerticalPanel selectWfRadioGroupPanel = new VerticalPanel();
-        selectWfRadioGroupPanel.setSpacing(10);
-        selectWfRadioGroupPanel.add(importFromFileRadioButton);
-        selectWfRadioGroupPanel.add(importFromCatalogRadioButton);
-
-        // actual form		
-        final FormPanel importFromFileformPanel = new FormPanel();
-        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
-        importFromFileformPanel.setAction(GWT.getModuleBaseURL() + "uploader");
-        importFromFileformPanel.add(formContent);
-        importFromFileformPanel.setWidth("350px");
-        importFromFileformPanel.setHeight("30px");
-
-        // wraps the GWT component so that we may show/hide it
-        final HLayout formWrapper = new HLayout();
-        formWrapper.setAlign(Alignment.CENTER);
-        formWrapper.setHeight(30);
-        formWrapper.addChild(importFromFileformPanel);
-
-        // error messages when applicable
-        final Label label = new Label("Select workflow:");
-        label.setHeight(30);
-        label.setWidth100();
-
-        // shown during submission
         final Label waitLabel = new Label("Please wait...");
         waitLabel.setHeight(30);
         waitLabel.setIcon("loading.gif");
         waitLabel.setWidth100();
         waitLabel.setAlign(Alignment.CENTER);
 
-        final CheckboxItem edit = new CheckboxItem("edit", "Edit variables definitions");
-        final DynamicForm editForm = new DynamicForm();
-        editForm.setHeight100();
-        editForm.setColWidths(20, "*");
-        editForm.setFields(edit);
+        loadingPanel.addMember(waitLabel);
+        rootPage.removeMember(varsLayout);
+        rootPage.removeMember(startAtLayout);
+        rootPage.removeMember(submitCancelButtons);
+        rootPage.addMember(loadingPanel);
+        rootPage.reflow();
+    }
 
-        layout.addMember(label);
-        layout.addMember(selectWfRadioGroupPanel);
-        layout.addMember(formWrapper);
-        layout.addMember(editForm);
-        layout.addMember(buttons);
-
-        this.window = new Window();
-        this.window.setTitle("Submit a new job");
-        this.window.setShowMinimizeButton(false);
-        this.window.setIsModal(true);
-        this.window.setShowModalMask(true);
-        this.window.addItem(layout);
-        this.window.setWidth(420);
-        this.window.setHeight(320);
-        this.window.centerInPage();
-        this.window.setCanDragResize(true);
-
-        // click the upload button :
-        // hide the form, show a 'please wait' label,
-        // wait for the form's callback
-        uploadButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
-            public void onClick(ClickEvent e) {
-                editField.setValue(edit.getValueAsBoolean() ? "1" : "0");
-
-                importFromFileformPanel.submit();
-
-                layout.removeMember(label);
-                layout.removeMember(formWrapper);
-                layout.removeMember(editForm);
-                layout.removeMember(buttons);
-
-                layout.addMember(waitLabel);
+    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadButton(final FormPanel toSubmit) {
+        return new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                displayLoadingMessage();
+                toSubmit.submit();
             }
-        });
+        };
+    }
 
-        // form callback : silently close the window if no error,
-        // else display message and allow new submission
-        importFromFileformPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
+    private SubmitCompleteHandler fileUploadCompleteHandler() {
+        return new SubmitCompleteHandler() {
+            @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
+
                 String fn = fileUpload.getFilename();
 
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
-                boolean isError = false;
+                DynamicForm variablesVisualForm = null;
+                Layout fpanelWra = null;
+                variablesActualForm = null;
 
                 try {
                     JSONValue js = JSONParser.parseStrict(res);
                     JSONObject obj = js.isObject();
-                    /* 
-                     * submission with no edition successful, result is the job id 
-                     */
-                    if (obj.get("id") != null && obj.get("id").isNumber() != null) {
-                        int id = (int) obj.get("id").isNumber().doubleValue();
-                        SubmitWindow.this.destroy();
-                        LogModel.getInstance()
-                                .logMessage("Successfully submitted job " + fileName + ": " + id);
-                        controller.getExecutionController().getJobsController().addSubmittingJob(id, fileName);
-                    }
-                    /*
-                     *  submission with edition:
-                     */
-                    else if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
+
+                    if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
                         String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils
                                 .fromBase64(val));
                         final Map<String, String> variables = readVars(job);
 
                         // presentation form
-                        final DynamicForm varForm = new DynamicForm();
-                        final FormItem[] fields = new FormItem[variables.size()];
-                        final Hidden[] _fields = new Hidden[variables.size()];
+                        variablesVisualForm = new DynamicForm();
+                        fields = new FormItem[variables.size()];
+                        _fields = new Hidden[variables.size()];
                         int i = 0;
-                        final VerticalPanel hiddenPane = new VerticalPanel();
+                        hiddenPane = new VerticalPanel();
                         for (Entry<String, String> var : variables.entrySet()) {
                             TextItem t = new TextItem(var.getKey(), var.getKey());
                             t.setValue(var.getValue());
@@ -324,146 +445,113 @@ public class SubmitWindow {
                             fields[i] = t;
                             i++;
                         }
-                        varForm.setFields(fields);
-                        varForm.setWidth100();
-                        varForm.setHeight100();
+                        variablesVisualForm.setFields(fields);
 
                         // actual form used to POST
-                        final FormPanel fpanel = new FormPanel();
-                        fpanel.setMethod(FormPanel.METHOD_POST);
-                        fpanel.setAction(GWT.getModuleBaseURL() + "submitedit");
+                        variablesActualForm = new FormPanel();
+                        variablesActualForm.setMethod(FormPanel.METHOD_POST);
+                        variablesActualForm.setAction(GWT.getModuleBaseURL() + "submitedit");
                         hiddenPane.add(new Hidden("job", job));
                         hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
-                        fpanel.setWidget(hiddenPane);
-                        final Layout fpanelWrapper = new Layout();
-                        fpanelWrapper.addMember(fpanel);
-
-                        label.setContents("Edit the variable definitions for job <strong>" + fileName +
-                            "</strong>");
-
-                        final HLayout buttons2 = new HLayout();
-                        buttons2.setWidth100();
-                        buttons2.setHeight(20);
-                        buttons2.setAlign(Alignment.RIGHT);
-                        buttons2.setMembersMargin(5);
-                        final IButton reset = new IButton("Reset");
-                        reset.setIcon(Images.instance.clear_16().getSafeUri().asString());
-                        reset.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                for (FormItem it : fields) {
-                                    String key = it.getName();
-                                    String val = variables.get(key);
-                                    it.setValue(val);
-                                }
-                            }
-                        });
-                        final IButton submit2 = new IButton("Submit");
-                        submit2.setIcon(Images.instance.ok_16().getSafeUri().asString());
-                        submit2.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                for (int i = 0; i < fields.length; i++) {
-                                    String val = "";
-                                    if (fields[i].getValue() != null) {
-                                        val = fields[i].getValue().toString();
-                                    }
-                                    _fields[i].setValue(val);
-                                }
-
-                                fpanel.submit();
-
-                                layout.removeMember(label);
-                                layout.removeMember(varForm);
-                                layout.removeMember(buttons2);
-                                layout.removeMember(fpanelWrapper);
-
-                                layout.addMember(waitLabel);
-                                layout.reflow();
-                            }
-                        });
-                        final IButton cancel2 = new IButton("Cancel");
-                        cancel2.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-                        cancel2.addClickHandler(new ClickHandler() {
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                SubmitWindow.this.window.hide();
-                                SubmitWindow.this.destroy();
-                            }
-                        });
-
-                        buttons2.setMembers(reset, submit2, cancel2);
-
-                        fpanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-                            public void onSubmitComplete(SubmitCompleteEvent event) {
-                                String res = event.getResults();
-                                boolean failure = false;
-                                try {
-                                    JSONValue val = controller.parseJSON(res);
-                                    if (val.isObject() != null && val.isObject().containsKey("id")) {
-                                        int id = (int) val.isObject().get("id").isNumber().doubleValue();
-                                        SubmitWindow.this.destroy();
-                                        LogModel.getInstance().logMessage(
-                                                "Successfully submitted job " + fileName + ": " + id);
-                                        controller.getExecutionController().getJobsController().addSubmittingJob(id, fileName);
-                                    } else {
-                                        failure = true;
-                                    }
-                                } catch (JSONException e) {
-                                    failure = true;
-                                }
-
-                                if (failure) {
-                                    String msg = JSONUtils.getJsonErrorMessage(res);
-                                    layout.removeMember(waitLabel);
-
-                                    label
-                                            .setContents("<span style='color:red; font-weight:bold'>Job submission failed:</span><br>" +
-                                                "<span style=''>" + msg + "</span>");
-
-                                    layout.addMember(label);
-                                    layout.addMember(formWrapper);
-                                    layout.addMember(editForm);
-                                    layout.addMember(buttons);
-                                    layout.reflow();
-                                    LogModel.getInstance().logImportantMessage("Failed to submit job: " + msg);
-                                }
-                            }
-                        });
-
-                        layout.removeMember(waitLabel);
-                        layout.addMember(label);
-                        layout.addMember(varForm);
-                        layout.addMember(fpanelWrapper);
-                        layout.addMember(buttons2);
-                        layout.setMargin(10);
-                        layout.reflow();
-
-                    } else {
-                        isError = true;
+                        variablesActualForm.setWidget(hiddenPane);
+                        fpanelWra = new Layout();
+                        fpanelWra.addMember(variablesActualForm);
                     }
                 } catch (JSONException t) {
-                    isError = true;
+                    GWT.log("JSON parse ERROR");
                 }
 
-                /* 
-                 * submission failure 
-                 */
-                if (isError) {
-                    String msg = JSONUtils.getJsonErrorMessage(res);
-                    layout.removeMember(waitLabel);
-
-                    label
-                            .setContents("<span style='color:red; font-weight:bold'>Job submission failed:</span><br>" +
-                                "<span style=''>" + msg + "</span>");
-
-                    layout.addMember(label);
-                    layout.addMember(formWrapper);
-                    layout.addMember(editForm);
-                    layout.addMember(buttons);
-                    layout.reflow();
-                    LogModel.getInstance().logImportantMessage("Failed to submit job: " + msg);
-                }
+                rootPage.removeMember(loadingPanel);
+                initVarsPart(variablesVisualForm, fpanelWra);
+                rootPage.addMember(startAtLayout);
+                rootPage.addMember(submitCancelButtons);
+                rootPage.reflow();
             }
-        });
+        };
+    }
+
+    private void resetAllHandlers() {
+        if (changedMinuteHR != null) {
+            changedMinuteHR.removeHandler();
+        }
+        changedMinuteHR = dateChooser.getTimeItem().getMinuteItem()
+                .addChangedHandler(newCHForMinuteField());
+
+        if (changedHourHR != null) {
+            changedHourHR.removeHandler();
+        }
+        changedHourHR = dateChooser.getTimeItem().getHourItem()
+                .addChangedHandler(newCHForHourField());
+
+        if (todayClickHR != null) {
+            todayClickHR.removeHandler();
+        }
+        todayClickHR = dateChooser.getTodayButton()
+                .addClickHandler(newCHForTodayButton());
+
+        if (gridClickHR != null) {
+            gridClickHR.removeHandler();
+        }
+        gridClickHR = dateChooser.addClickHandler(newCHDateGrid());
+    }
+
+    private ClickHandler newCHForTodayButton() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                updateScheduledTimeForToday();
+                resetAllHandlers();
+            }
+        };
+    }
+
+    private ChangedHandler newCHForMinuteField() {
+        return new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent changedEvent) {
+                updateScheduledTimeAt();
+                resetAllHandlers();
+            }
+        };
+    }
+
+    private ChangedHandler newCHForHourField() {
+        return new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent changedEvent) {
+                updateScheduledTimeAt();
+                resetAllHandlers();
+            }
+        };
+    }
+
+    private ClickHandler newCHDateGrid() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                startAtRB.setText("At " + dateChooser.getData().toString());
+                resetAllHandlers();
+            }
+        };
+    }
+
+    private void build() {
+        initRootPage(); // ------------ root page of the window
+        initSelectWfPart(); // -------- Select workflow Panel
+        initVarsPart(); // ------------ Fill workflow variables Panel
+        initSubmitAtPart(); // -------- Submit at given time Panel
+        initButtonsPart(); // --------- Close and Submit buttons
+
+        this.window = new Window();
+        this.window.setTitle("Submit a new job");
+        this.window.setShowMinimizeButton(false);
+        this.window.setIsModal(true);
+        this.window.setShowModalMask(true);
+        this.window.addItem(rootPage);
+        this.window.setWidth(this.width);
+        this.window.setHeight(this.height);
+        this.window.centerInPage();
+        this.window.setCanDragResize(true);
     }
 
     /**

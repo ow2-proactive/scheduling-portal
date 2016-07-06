@@ -36,9 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -54,6 +52,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.google.gwt.core.client.GWT;
 import org.apache.commons.io.IOUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
@@ -62,6 +61,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -105,6 +105,7 @@ public class SubmitEditServlet extends HttpServlet {
 
         String sessionId = null;
         String job = null;
+        String startAt = null;
         HashMap<String, String> varMap = new HashMap<String, String>();
         File editedJob = null;
         File jobDesc = null;
@@ -123,6 +124,8 @@ public class SubmitEditServlet extends HttpServlet {
             } else if (key.startsWith("var_")) {
                 String name = key.substring(4);
                 varMap.put(name, val);
+            } else if (key.toUpperCase().equals("START_AT")) {
+                startAt = val;
             }
         }
 
@@ -177,6 +180,34 @@ public class SubmitEditServlet extends HttpServlet {
                     }
                 }
 
+
+
+                if (startAt != null && !startAt.isEmpty()) {
+
+                    NodeList allVariables = doc.getElementsByTagName("variables");
+
+                    // create the new GI element to insert
+                    Element gi = doc.createElement("genericInformation");
+                    Element startAtEl = doc.createElement("info");
+                    startAtEl.setAttribute("name", "START_AT");
+                    startAtEl.setAttribute("value", startAt);
+                    gi.appendChild(startAtEl);
+
+                    // it will be inserted right before nextNode
+                    Node nextNode = null;
+                    if (allVariables.getLength() > 0) {
+                        nextNode = allVariables.item(0);
+                        // consequence of not having a insertAfter() method
+                        nextNode.getParentNode().insertBefore(gi, nextNode.getNextSibling());
+                    }
+                    else {
+                        nextNode = doc.getElementsByTagName("taskFlow").item(0);
+                        // consequence of not having a insertAfter() method
+                        nextNode.getParentNode().insertBefore(gi, nextNode);
+                    }
+
+                }
+
                 // write the document to a string
                 try {
                     Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -199,6 +230,8 @@ public class SubmitEditServlet extends HttpServlet {
 
             // submission at last....
             try {
+                GWT.log("Edited job:");
+                GWT.log(editedJob.toString());
                 String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
                 if (responseS == null || responseS.length() == 0) {
                     response.getWriter().write("Job submission returned without a value!");

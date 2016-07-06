@@ -65,10 +65,10 @@ import org.w3c.dom.Document;
  * . one file, name ignored, must be a valid XML job descriptor
  * . one form field named 'sessionId' used to connect to the server
  * . one optional form field named 'edit'. if edit == "1",
- *   the servlet does not submit the job, but simply writes the following string as application/json response:
- *   { "jobEdit" : "<DESC_64>" }
- *   where <DESC_64> is a base64 encoded version of the job sent as parameter.
- *   This will allow client to edit the descriptor, as javascript runtimes are not allow to open local files.
+ * the servlet does not submit the job, but simply writes the following string as application/json response:
+ * { "jobEdit" : "<DESC_64>" }
+ * where <DESC_64> is a base64 encoded version of the job sent as parameter.
+ * This will allow client to edit the descriptor, as javascript runtimes are not allow to open local files.
  */
 @SuppressWarnings("serial")
 public class UploadServlet extends HttpServlet {
@@ -99,31 +99,17 @@ public class UploadServlet extends HttpServlet {
             Iterator<?> i = fileItems.iterator();
 
             String sessionId = null;
-            boolean edit = false;
-
-            /*
-             * * edit=0, simply submit the job descriptor * edit=1, open the descriptor and return
-             * it as a string
-             */
 
             while (i.hasNext()) {
                 FileItem fi = (FileItem) i.next();
-
                 if (fi.isFormField()) {
                     if (fi.getFieldName().equals("sessionId")) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("edit")) {
-                        if (fi.getString().equals("1")) {
-                            edit = true;
-                        } else {
-                            edit = false;
-                        }
                     }
                 } else {
                     job = File.createTempFile("job_upload", ".xml");
                     fi.write(job);
                 }
-
                 fi.delete();
             }
 
@@ -135,35 +121,15 @@ public class UploadServlet extends HttpServlet {
                     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                     Document doc = docBuilder.parse(job);
-
-                    if (edit) {
-                        // don't go on with edition if there are no variables
-                        if (doc.getElementsByTagName("variables").getLength() < 1 ||
-                            doc.getElementsByTagName("variable").getLength() < 1) {
-                            response.getWriter()
-                                    .write("This job descriptor contains no variable definition.<br>"
-                                        + "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
-                            return;
-                        }
-                    }
                 } catch (Throwable e) {
                     response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
                     return;
                 }
             }
 
-            if (edit && !isJar) {
-                String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
-                response.getWriter().write(
-                        "{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
-            } else {
-                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, job);
-                if (responseS == null || responseS.length() == 0) {
-                    response.getWriter().write("Job submission returned without a value!");
-                } else {
-                    response.getWriter().write(responseS);
-                }
-            }
+            String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
+            response.getWriter().write(
+                    "{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
 
         } catch (Exception e) {
             try {
@@ -175,7 +141,6 @@ public class UploadServlet extends HttpServlet {
             if (job != null)
                 job.delete();
         }
-
     }
 
     private boolean isJarFile(File job) {
@@ -188,5 +153,4 @@ public class UploadServlet extends HttpServlet {
         }
         return isJar;
     }
-
 }
