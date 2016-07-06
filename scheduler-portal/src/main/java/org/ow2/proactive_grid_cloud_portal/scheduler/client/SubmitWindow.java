@@ -41,8 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.*;
@@ -52,13 +50,8 @@ import com.smartgwt.client.widgets.DateChooser;
 import com.smartgwt.client.widgets.form.fields.*;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import com.smartgwt.client.widgets.grid.DateGrid;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
-import org.ow2.proactive_grid_cloud_portal.scheduler.server.UploadServlet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -93,6 +86,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
 public class SubmitWindow {
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
+    private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
+    private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
 
     private Window window;
 
@@ -109,7 +104,7 @@ public class SubmitWindow {
     private FileUpload fileUpload; // ------------------- FileUpload button
 
     // -------------------------------------------------- Variables Part
-    private VLayout varsLayout; // ---------------------- Variables Panel
+    private VLayout varsLayout; // --------------------- Variables Panel
     private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
     private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
     private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
@@ -123,9 +118,9 @@ public class SubmitWindow {
     private RadioButton startAtRB; // ------------------- at scheduled time radio button
     private DateChooser dateChooser; // ----------------- DateChooser
 
-    private HLayout submitCancelButtons; // -------------------------- Cancel and Submit buttons
+    private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
 
-    private VLayout loadingPanel; // --------------------- Loading Panel when uploading
+    private VLayout loadingPanel; // -------------------- Loading Panel when uploading
 
 
     private static final int width = 420;
@@ -204,7 +199,7 @@ public class SubmitWindow {
         final FormPanel importFromFileformPanel = new FormPanel();
         importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
-        importFromFileformPanel.setAction(GWT.getModuleBaseURL() + "uploader");
+        importFromFileformPanel.setAction(URL_UPLOAD_FILE);
         importFromFileformPanel.add(formContent);
         importFromFileformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
         importFromFileformPanel.setHeight("30px");
@@ -334,35 +329,7 @@ public class SubmitWindow {
 
         final IButton submitButton = new IButton("Submit");
         submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        submitButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                for (int i = 0; i < fields.length; i++) {
-                    String val = "";
-                    if (fields[i].getValue() != null) {
-                        val = fields[i].getValue().toString();
-                    }
-                    _fields[i].setValue(val);
-                }
-                DateTimeFormat dateTimeFormat =
-                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
-                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
-                startAtParameter.setValue(iso8601DateStr);
-                hiddenPane.add(startAtParameter);
-                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-                    @Override
-                    public void onSubmitComplete(SubmitCompleteEvent event) {
-                        GWT.log("Job submitted to the scheduler");
-                        GWT.log(event.getResults());
-                    }
-                });
-                variablesActualForm.submit();
-                displayLoadingMessage();
-                SubmitWindow.this.window.removeMember(rootPage);
-                SubmitWindow.this.window.hide();
-                SubmitWindow.this.destroy();
-            }
-        });
+        submitButton.addClickHandler(clickHandlerForSubmitButton());
 
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
@@ -393,6 +360,38 @@ public class SubmitWindow {
         rootPage.removeMember(submitCancelButtons);
         rootPage.addMember(loadingPanel);
         rootPage.reflow();
+    }
+
+    private ClickHandler clickHandlerForSubmitButton() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < fields.length; i++) {
+                    String val = "";
+                    if (fields[i].getValue() != null) {
+                        val = fields[i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
+                DateTimeFormat dateTimeFormat =
+                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                startAtParameter.setValue(iso8601DateStr);
+                hiddenPane.add(startAtParameter);
+                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(SubmitCompleteEvent event) {
+                        GWT.log("Job submitted to the scheduler");
+                        GWT.log(event.getResults());
+                    }
+                });
+                variablesActualForm.submit();
+                displayLoadingMessage();
+                SubmitWindow.this.window.removeMember(rootPage);
+                SubmitWindow.this.window.hide();
+                SubmitWindow.this.destroy();
+            }
+        };
     }
 
     private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadButton(final FormPanel toSubmit) {
@@ -450,7 +449,7 @@ public class SubmitWindow {
                         // actual form used to POST
                         variablesActualForm = new FormPanel();
                         variablesActualForm.setMethod(FormPanel.METHOD_POST);
-                        variablesActualForm.setAction(GWT.getModuleBaseURL() + "submitedit");
+                        variablesActualForm.setAction(URL_SUBMIT_XML);
                         hiddenPane.add(new Hidden("job", job));
                         hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
                         variablesActualForm.setWidget(hiddenPane);
@@ -474,20 +473,17 @@ public class SubmitWindow {
         if (changedMinuteHR != null) {
             changedMinuteHR.removeHandler();
         }
-        changedMinuteHR = dateChooser.getTimeItem().getMinuteItem()
-                .addChangedHandler(newCHForMinuteField());
+        changedMinuteHR = dateChooser.getTimeItem().getMinuteItem().addChangedHandler(newCHForMinuteField());
 
         if (changedHourHR != null) {
             changedHourHR.removeHandler();
         }
-        changedHourHR = dateChooser.getTimeItem().getHourItem()
-                .addChangedHandler(newCHForHourField());
+        changedHourHR = dateChooser.getTimeItem().getHourItem().addChangedHandler(newCHForHourField());
 
         if (todayClickHR != null) {
             todayClickHR.removeHandler();
         }
-        todayClickHR = dateChooser.getTodayButton()
-                .addClickHandler(newCHForTodayButton());
+        todayClickHR = dateChooser.getTodayButton().addClickHandler(newCHForTodayButton());
 
         if (gridClickHR != null) {
             gridClickHR.removeHandler();
