@@ -41,8 +41,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.*;
+import com.google.gwt.jsonp.client.JsonpRequestBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
@@ -55,10 +62,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.xml.client.Document;
@@ -85,6 +88,10 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class SubmitWindow {
 
+    private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
+    private static final String CATALOG_SELECT_WF = "Select a Workflow";
+    private static final String URL_CATALOG = "http://localhost:8080/workflow-catalog";
+    private static final String URL_CATALOG_BUCKETS = URL_CATALOG + "/buckets";
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
     private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
@@ -101,7 +108,12 @@ public class SubmitWindow {
     private VLayout rootPage; // ------------------------ the main layout of the window
 
     private VLayout selectWfLayout; // ----------------- Select Workflow Panel
+    private VLayout fromFilePanel; // ------------------- The panel to select wf from disk
     private FileUpload fileUpload; // ------------------- FileUpload button
+    private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
+    private Button sendFromFileButton; // --------------- Send the file to servlet from disk
+    private HorizontalPanel fromCatalogPanel; // ---------------- The panel to select wf from catalog
+    private Button sendFromCatalogButton; // ------------ Send the file to servlet from catalog
 
     // -------------------------------------------------- Variables Part
     private VLayout varsLayout; // --------------------- Variables Panel
@@ -121,6 +133,10 @@ public class SubmitWindow {
     private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
 
     private VLayout loadingPanel; // -------------------- Loading Panel when uploading
+
+    // ----- Catalog temp maps
+    private HashMap<String, Integer> catalogBucketsMap;
+    private HashMap<String, Integer> catalogWorkflowsMap;
 
 
     private static final int width = 420;
@@ -165,58 +181,54 @@ public class SubmitWindow {
         selectWfLayout.setIsGroup(true);
         selectWfLayout.setHeight("130px");
 
+        // put the buttons into a single panel for easy spacing later on
+        selectWorkflowButtonsPanel = new VerticalPanel();
+        selectWorkflowButtonsPanel.setSpacing(5);
+        selectWorkflowButtonsPanel.setHeight("50px");
+
         final RadioButton importFromFileRadioButton = new RadioButton("selectWfRadioGroup", "Import xml file");
         final RadioButton importFromCatalogRadioButton = new RadioButton("selectWfRadioGroup", "From catalog");
         importFromFileRadioButton.setValue(true);
         importFromCatalogRadioButton.setValue(false);
-        importFromCatalogRadioButton.setEnabled(false);
+
+        importFromFileRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                GWT.log("Select from disk");
+                selectWorkflowButtonsPanel.clear();
+                initSelectWorkflowFromFilePanel();
+                selectWorkflowButtonsPanel.add(fromFilePanel);
+                selectWorkflowButtonsPanel.add(sendFromFileButton);
+            }
+        });
+
+        importFromCatalogRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                GWT.log("Select from catalog");
+                selectWorkflowButtonsPanel.clear();
+                initSelectWorkflowFromCatalogPanel();
+                selectWorkflowButtonsPanel.add(fromCatalogPanel);
+                selectWorkflowButtonsPanel.add(sendFromCatalogButton);
+            }
+        });
+
         final VerticalPanel selectWfRadioGroupPanel = new VerticalPanel();
         selectWfRadioGroupPanel.add(importFromFileRadioButton);
         selectWfRadioGroupPanel.add(importFromCatalogRadioButton);
         selectWfRadioGroupPanel.setSpacing(5);
         selectWfRadioGroupPanel.setHeight("50px");
 
+        // init both panels (select from disk or from catalog)
+        initSelectWorkflowFromFilePanel();
+        initSelectWorkflowFromCatalogPanel();
 
-        // TODO implement contextual zone for fetching from the catalog
-        // contextual zone
-        // - open file button
-        // or
-        // - dropdown list from bucket which workflow
-        final VLayout fromFilePanel = new VLayout();
-        fromFilePanel.setHeight("30px");
-        fileUpload = new FileUpload();
-        fileUpload.setName("job");
-
-        VerticalPanel formContent = new VerticalPanel();
-        formContent.setHeight("30px");
-
-        Hidden hiddenField = new Hidden();
-        hiddenField.setName("sessionId");
-        hiddenField.setValue(LoginModel.getInstance().getSessionId());
-        formContent.add(hiddenField);
-        formContent.add(fileUpload);
-
-        final FormPanel importFromFileformPanel = new FormPanel();
-        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
-        importFromFileformPanel.setAction(URL_UPLOAD_FILE);
-        importFromFileformPanel.add(formContent);
-        importFromFileformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
-        importFromFileformPanel.setHeight("30px");
-        fromFilePanel.addMember(importFromFileformPanel);
-
-        final Button uploadButton = new Button("Upload file");
-        uploadButton.addClickHandler(clickHandlerForUploadButton(importFromFileformPanel));
-
-        // put the buttons into a single panel for easy spacing
-        final VerticalPanel fromFileButtonsPanel = new VerticalPanel();
-        fromFileButtonsPanel.setSpacing(5);
-        fromFileButtonsPanel.setHeight("50px");
-        fromFileButtonsPanel.add(fromFilePanel);
-        fromFileButtonsPanel.add(uploadButton);
+        // by default we select from disk
+        selectWorkflowButtonsPanel.add(fromFilePanel);
+        selectWorkflowButtonsPanel.add(sendFromFileButton);
 
         selectWfLayout.addMember(selectWfRadioGroupPanel);
-        selectWfLayout.addMember(fromFileButtonsPanel);
+        selectWfLayout.addMember(selectWorkflowButtonsPanel);
 
         rootPage.addMember(selectWfLayout);
     }
@@ -360,6 +372,162 @@ public class SubmitWindow {
         rootPage.removeMember(submitCancelButtons);
         rootPage.addMember(loadingPanel);
         rootPage.reflow();
+    }
+
+    private void initSelectWorkflowFromFilePanel() {
+        fromFilePanel = new VLayout();
+        fromFilePanel.setHeight("30px");
+        fileUpload = new FileUpload();
+        fileUpload.setName("job");
+
+        VerticalPanel formContent = new VerticalPanel();
+        formContent.setHeight("30px");
+
+        Hidden hiddenField = new Hidden();
+        hiddenField.setName("sessionId");
+        hiddenField.setValue(LoginModel.getInstance().getSessionId());
+        formContent.add(hiddenField);
+        formContent.add(fileUpload);
+
+        final FormPanel importFromFileformPanel = new FormPanel();
+        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
+        importFromFileformPanel.setAction(URL_UPLOAD_FILE);
+        importFromFileformPanel.add(formContent);
+        importFromFileformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
+        importFromFileformPanel.setHeight("30px");
+        fromFilePanel.addMember(importFromFileformPanel);
+
+        sendFromFileButton = new Button("Upload file");
+        sendFromFileButton.addClickHandler(clickHandlerForUploadButton(importFromFileformPanel));
+
+    }
+
+    private void initSelectWorkflowFromCatalogPanel() {
+        fromCatalogPanel = new HorizontalPanel();
+        fromCatalogPanel.setHeight("30px");
+        fromCatalogPanel.setWidth("100%");
+        fromCatalogPanel.setSpacing(2);
+        final ListBox bucketsListBox = new ListBox();
+        final ListBox workflowsListBox = new ListBox();
+
+        bucketsListBox.setEnabled(false);
+        bucketsListBox.addItem(CATALOG_SELECT_BUCKET);
+
+        workflowsListBox.setEnabled(false);
+        workflowsListBox.addItem(CATALOG_SELECT_WF);
+
+        bucketsListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                String selectedBucket = bucketsListBox.getSelectedValue();
+                if (CATALOG_SELECT_BUCKET.compareTo(selectedBucket) != 0) {
+                    GWT.log("Selection d'un bucket -> chargement de ses workflows");
+                    String workflowUrl = URL_CATALOG_BUCKETS + "/" + catalogBucketsMap.get(selectedBucket) + "/workflows";
+                    GWT.log("Fetching " + workflowUrl);
+                    RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
+                    req.setCallback(new RequestCallback() {
+                        @Override
+                        public void onResponseReceived(Request request, Response response) {
+                            JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
+                            GWT.log(jsonObjectResponse.toString());
+                            JSONArray workflows = jsonObjectResponse.get("_embedded").isObject().get("workflowMetadataList").isArray();
+                            int workflowsSize = workflows.size();
+                            GWT.log("Wow ! " + workflowsSize + " workflows !");
+                            catalogWorkflowsMap = new HashMap<>(workflowsSize);
+                            workflowsListBox.setEnabled(false);
+                            workflowsListBox.clear();
+                            workflowsListBox.addItem(CATALOG_SELECT_WF);
+                            for (int i = 0; i < workflowsSize; i++) {
+                                JSONObject workflow = workflows.get(i).isObject();
+                                String workflowName = workflow.get("name").isString().stringValue();
+                                String workflowId = workflow.get("id").isNumber().toString();
+                                String dropdownListItemLabel = workflowName + " (" + workflowId + ")";
+                                workflowsListBox.addItem(dropdownListItemLabel);
+                                GWT.log("Added " + dropdownListItemLabel + " to the workflow dropdown list");
+                                catalogWorkflowsMap.put(dropdownListItemLabel, Integer.parseInt(workflowId));
+                            }
+                            workflowsListBox.setEnabled(true);
+                        }
+
+                        @Override
+                        public void onError(Request request, Throwable exception) {
+                            GWT.log("OOPS:" + request.toString());
+                        }
+                    });
+                    try {
+                        req.send();
+                    } catch (RequestException e) {
+                        e.printStackTrace();
+                        GWT.log("OOPS :-( error on fetching workflow from Catalog");
+                    }
+                }
+            }
+        });
+
+
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, URL_CATALOG + "/buckets");
+        req.setCallback(new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
+                GWT.log(jsonObjectResponse.toString());
+                JSONArray buckets = jsonObjectResponse.get("_embedded").isObject().get("bucketMetadataList").isArray();
+                int bucketSize = buckets.size();
+                GWT.log("Wow ! " + bucketSize + " buckets !");
+                catalogBucketsMap = new HashMap<>(bucketSize);
+                for (int i = 0; i < bucketSize; i++) {
+                    JSONObject bucket = buckets.get(i).isObject();
+                    String bucketName = bucket.get("name").isString().stringValue();
+                    String bucketId = bucket.get("id").isNumber().toString();
+                    String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
+                    bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
+                    GWT.log("Added " + dropdownListItemLabel + " (id=" + Integer.parseInt(bucketId) +") to the bucket dropdown list");
+                    catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
+                }
+                bucketsListBox.setEnabled(true);
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                GWT.log("OOPS:" + request.toString());
+            }
+        });
+
+        try {
+            req.send();
+        } catch (RequestException e) {
+            e.printStackTrace();
+            GWT.log("OOPS :-( error on fetching buckets from Catalog");
+        }
+
+
+        fromCatalogPanel.add(bucketsListBox);
+        fromCatalogPanel.add(workflowsListBox);
+
+        bucketsListBox.setWidth("130px");
+        workflowsListBox.setWidth("230px");
+
+        VerticalPanel formContent = new VerticalPanel();
+        formContent.setHeight("30px");
+        formContent.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
+
+        final FormPanel importFromCatalogformPanel = new FormPanel();
+        importFromCatalogformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importFromCatalogformPanel.setMethod(FormPanel.METHOD_POST);
+        importFromCatalogformPanel.setAction(URL_UPLOAD_FILE);
+        importFromCatalogformPanel.add(formContent);
+        importFromCatalogformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
+        importFromCatalogformPanel.setHeight("30px");
+        fromCatalogPanel.add(importFromCatalogformPanel);
+
+        sendFromCatalogButton = new Button("Upload file");
+        sendFromCatalogButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                GWT.log("Send par catalog !");
+            }
+        });
     }
 
     private ClickHandler clickHandlerForSubmitButton() {
