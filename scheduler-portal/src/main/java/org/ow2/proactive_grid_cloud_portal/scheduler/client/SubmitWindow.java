@@ -41,15 +41,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.*;
-import com.google.gwt.jsonp.client.JsonpRequestBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
@@ -112,7 +109,9 @@ public class SubmitWindow {
     private FileUpload fileUpload; // ------------------- FileUpload button
     private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
     private Button sendFromFileButton; // --------------- Send the file to servlet from disk
-    private HorizontalPanel fromCatalogPanel; // ---------------- The panel to select wf from catalog
+    private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf from catalog
+    private ListBox bucketsListBox; // ------------------ Buckets dropdown list
+    private ListBox workflowsListBox; // ---------------- Workflows dropdown list
     private Button sendFromCatalogButton; // ------------ Send the file to servlet from catalog
 
     // -------------------------------------------------- Variables Part
@@ -195,6 +194,7 @@ public class SubmitWindow {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 GWT.log("Select from disk");
+                varsLayout.removeMembers(varsLayout.getMembers());
                 selectWorkflowButtonsPanel.clear();
                 initSelectWorkflowFromFilePanel();
                 selectWorkflowButtonsPanel.add(fromFilePanel);
@@ -206,6 +206,7 @@ public class SubmitWindow {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 GWT.log("Select from catalog");
+                varsLayout.removeMembers(varsLayout.getMembers());
                 selectWorkflowButtonsPanel.clear();
                 initSelectWorkflowFromCatalogPanel();
                 selectWorkflowButtonsPanel.add(fromCatalogPanel);
@@ -377,6 +378,7 @@ public class SubmitWindow {
     private void initSelectWorkflowFromFilePanel() {
         fromFilePanel = new VLayout();
         fromFilePanel.setHeight("30px");
+
         fileUpload = new FileUpload();
         fileUpload.setName("job");
 
@@ -399,7 +401,7 @@ public class SubmitWindow {
         fromFilePanel.addMember(importFromFileformPanel);
 
         sendFromFileButton = new Button("Upload file");
-        sendFromFileButton.addClickHandler(clickHandlerForUploadButton(importFromFileformPanel));
+        sendFromFileButton.addClickHandler(clickHandlerForUploadFromFileButton(importFromFileformPanel));
 
     }
 
@@ -408,8 +410,8 @@ public class SubmitWindow {
         fromCatalogPanel.setHeight("30px");
         fromCatalogPanel.setWidth("100%");
         fromCatalogPanel.setSpacing(2);
-        final ListBox bucketsListBox = new ListBox();
-        final ListBox workflowsListBox = new ListBox();
+        bucketsListBox = new ListBox();
+        workflowsListBox = new ListBox();
 
         bucketsListBox.setEnabled(false);
         bucketsListBox.addItem(CATALOG_SELECT_BUCKET);
@@ -508,7 +510,7 @@ public class SubmitWindow {
         bucketsListBox.setWidth("130px");
         workflowsListBox.setWidth("230px");
 
-        VerticalPanel formContent = new VerticalPanel();
+        final VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
         formContent.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
 
@@ -525,7 +527,22 @@ public class SubmitWindow {
         sendFromCatalogButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                GWT.log("Send par catalog !");
+
+                // filter only valid items
+                if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
+                    GWT.log("Send par catalog !");
+                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
+                    String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
+                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
+                    String selectedWorkflowId = String.valueOf(catalogWorkflowsMap.get(selectedWorkflowLabel));
+                    formContent.add(new Hidden("bucketId", selectedBucketId));
+                    formContent.add(new Hidden("workflowId", selectedWorkflowId));
+                    displayLoadingMessage();
+                    importFromCatalogformPanel.submit();
+                    GWT.log("soumission:");
+                    GWT.log(selectedBucketLabel + "~~~~~> " + selectedBucketId);
+                    GWT.log(selectedWorkflowLabel + "~~~~~> " + selectedWorkflowId);
+                }
             }
         });
     }
@@ -541,11 +558,13 @@ public class SubmitWindow {
                     }
                     _fields[i].setValue(val);
                 }
-                DateTimeFormat dateTimeFormat =
-                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
-                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
-                startAtParameter.setValue(iso8601DateStr);
-                hiddenPane.add(startAtParameter);
+                if (startAtRB.getValue()) {
+                    DateTimeFormat dateTimeFormat =
+                            DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                    startAtParameter.setValue(iso8601DateStr);
+                    hiddenPane.add(startAtParameter);
+                }
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -562,7 +581,23 @@ public class SubmitWindow {
         };
     }
 
-    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadButton(final FormPanel toSubmit) {
+    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromFileButton(final FormPanel toSubmit) {
+        return new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                String fileName = fileUpload.getFilename();
+                if ("".compareTo(fileName) != 0) {
+                    displayLoadingMessage();
+                    toSubmit.submit();
+                }
+
+            }
+        };
+    }
+
+    // TODO implementer la servlet qui recupere le payload xml depuis le catalog
+    // puis qui la forward a SubmitEditServlet
+    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromCatalogButton(final FormPanel toSubmit) {
         return new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
