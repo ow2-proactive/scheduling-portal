@@ -424,18 +424,15 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (CATALOG_SELECT_BUCKET.compareTo(selectedBucket) != 0) {
-                    GWT.log("Selection d'un bucket -> chargement de ses workflows");
                     String workflowUrl = URL_CATALOG_BUCKETS + "/" + catalogBucketsMap.get(selectedBucket) + "/workflows";
-                    GWT.log("Fetching " + workflowUrl);
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
                             JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                            GWT.log(jsonObjectResponse.toString());
-                            JSONArray workflows = jsonObjectResponse.get("_embedded").isObject().get("workflowMetadataList").isArray();
+                            JSONArray workflows = jsonObjectResponse.get("_embedded")
+                                    .isObject().get("workflowMetadataList").isArray();
                             int workflowsSize = workflows.size();
-                            GWT.log("Wow ! " + workflowsSize + " workflows !");
                             catalogWorkflowsMap = new HashMap<>(workflowsSize);
                             workflowsListBox.setEnabled(false);
                             workflowsListBox.clear();
@@ -446,7 +443,6 @@ public class SubmitWindow {
                                 String workflowId = workflow.get("id").isNumber().toString();
                                 String dropdownListItemLabel = workflowName + " (" + workflowId + ")";
                                 workflowsListBox.addItem(dropdownListItemLabel);
-                                GWT.log("Added " + dropdownListItemLabel + " to the workflow dropdown list");
                                 catalogWorkflowsMap.put(dropdownListItemLabel, Integer.parseInt(workflowId));
                             }
                             workflowsListBox.setEnabled(true);
@@ -460,8 +456,9 @@ public class SubmitWindow {
                     try {
                         req.send();
                     } catch (RequestException e) {
+                        GWT.log("Error occured when fetching workflows from Catalog");
                         e.printStackTrace();
-                        GWT.log("OOPS :-( error on fetching workflow from Catalog");
+
                     }
                 }
             }
@@ -499,8 +496,8 @@ public class SubmitWindow {
         try {
             req.send();
         } catch (RequestException e) {
+            GWT.log("Error occured when fetching buckets from Catalog");
             e.printStackTrace();
-            GWT.log("OOPS :-( error on fetching buckets from Catalog");
         }
 
 
@@ -530,7 +527,6 @@ public class SubmitWindow {
 
                 // filter only valid items
                 if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    GWT.log("Send par catalog !");
                     String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
                     String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
@@ -539,9 +535,6 @@ public class SubmitWindow {
                     formContent.add(new Hidden("workflowId", selectedWorkflowId));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
-                    GWT.log("soumission:");
-                    GWT.log(selectedBucketLabel + "~~~~~> " + selectedBucketId);
-                    GWT.log(selectedWorkflowLabel + "~~~~~> " + selectedWorkflowId);
                 }
             }
         });
@@ -569,7 +562,6 @@ public class SubmitWindow {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
                         GWT.log("Job submitted to the scheduler");
-                        GWT.log(event.getResults());
                     }
                 });
                 variablesActualForm.submit();
