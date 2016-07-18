@@ -93,6 +93,11 @@ public class SubmitWindow {
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
     private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
 
+    private static final String METHOD_INSTRUCTION = "Select a method";
+    private static final String METHOD_FROM_FILE = "import from file";
+    private static final String METHOD_FROM_CATALOG = "import from Catalog";
+
+
     private Window window;
 
     private SchedulerController controller;
@@ -105,6 +110,7 @@ public class SubmitWindow {
     private VLayout rootPage; // ------------------------ the main layout of the window
 
     private VLayout selectWfLayout; // ----------------- Select Workflow Panel
+    private ListBox wfMethodsListBox; // ------------- Methods to select a workflow
     private VLayout fromFilePanel; // ------------------- The panel to select wf from disk
     private FileUpload fileUpload; // ------------------- FileUpload button
     private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
@@ -181,26 +187,59 @@ public class SubmitWindow {
         selectWfLayout.setIsGroup(true);
         selectWfLayout.setHeight("130px");
 
-        // put the buttons into a single panel for easy spacing later on
+        // This panel changes depending on the selected method of getting a workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
         selectWorkflowButtonsPanel.setSpacing(5);
         selectWorkflowButtonsPanel.setHeight("50px");
 
-        final RadioButton importFromFileRadioButton = new RadioButton("selectWfRadioGroup", "Import xml file");
-        final RadioButton importFromCatalogRadioButton = new RadioButton("selectWfRadioGroup", "From catalog");
-        importFromFileRadioButton.setValue(true);
-        importFromCatalogRadioButton.setValue(false);
+        final VerticalPanel getWfMethodsPanel = new VerticalPanel();
+        getWfMethodsPanel.setSpacing(10);
+        getWfMethodsPanel.setHeight("30px");
+        wfMethodsListBox = new ListBox();
+        wfMethodsListBox.addItem(METHOD_INSTRUCTION);
+        wfMethodsListBox.addItem(METHOD_FROM_FILE);
+        wfMethodsListBox.addItem(METHOD_FROM_CATALOG);
+        getWfMethodsPanel.add(wfMethodsListBox);
 
-        importFromFileRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        wfMethodsListBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+            public void onChange(ChangeEvent event) {
+                String selectedMethod = wfMethodsListBox.getSelectedValue();
+                if (METHOD_FROM_FILE.compareTo(selectedMethod) == 0) {
+                    clearPanel();
+                    initSelectWorkflowFromFilePanel();
+                    selectWorkflowButtonsPanel.add(fromFilePanel);
+                    selectWorkflowButtonsPanel.add(sendFromFileButton);
+                    rootPage.removeMember(startAtLayout);
+                    rootPage.removeMember(submitCancelButtons);
+                    initFooter();
+                }
+                else if (METHOD_FROM_CATALOG.compareTo(selectedMethod) == 0) {
+                    clearPanel();
+                    initSelectWorkflowFromCatalogPanel();
+                    selectWorkflowButtonsPanel.add(fromCatalogPanel);
+                    selectWorkflowButtonsPanel.add(sendFromCatalogButton);
+                    rootPage.removeMember(startAtLayout);
+                    rootPage.removeMember(submitCancelButtons);
+                    initFooter();
+                }
+                else {
+                    // default case: METHOD_INSTRUCTION
+                    varsLayout.removeMembers(varsLayout.getMembers());
+                    selectWorkflowButtonsPanel.clear();
+                    rootPage.removeMember(startAtLayout);
+                    rootPage.removeMember(submitCancelButtons);
+                    initFooter();
+                }
+            }
+
+            private void clearPanel() {
                 varsLayout.removeMembers(varsLayout.getMembers());
                 selectWorkflowButtonsPanel.clear();
                 initSelectWorkflowFromFilePanel();
-                selectWorkflowButtonsPanel.add(fromFilePanel);
-                selectWorkflowButtonsPanel.add(sendFromFileButton);
-                rootPage.removeMember(startAtLayout);
-                rootPage.removeMember(submitCancelButtons);
+            }
+
+            private void initFooter() {
                 initSubmitAtPart();
                 rootPage.addMember(submitCancelButtons);
                 startNowRB.setValue(true);
@@ -208,40 +247,12 @@ public class SubmitWindow {
                 setEnabledStartAtPart(false);
             }
         });
-
-        importFromCatalogRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                varsLayout.removeMembers(varsLayout.getMembers());
-                selectWorkflowButtonsPanel.clear();
-                initSelectWorkflowFromCatalogPanel();
-                selectWorkflowButtonsPanel.add(fromCatalogPanel);
-                selectWorkflowButtonsPanel.add(sendFromCatalogButton);
-                rootPage.removeMember(startAtLayout);
-                rootPage.removeMember(submitCancelButtons);
-                initSubmitAtPart();
-                rootPage.addMember(submitCancelButtons);
-                startNowRB.setValue(true);
-                startAtRB.setValue(false);
-                setEnabledStartAtPart(false);
-            }
-        });
-
-        final VerticalPanel selectWfRadioGroupPanel = new VerticalPanel();
-        selectWfRadioGroupPanel.add(importFromFileRadioButton);
-        selectWfRadioGroupPanel.add(importFromCatalogRadioButton);
-        selectWfRadioGroupPanel.setSpacing(5);
-        selectWfRadioGroupPanel.setHeight("50px");
 
         // init both panels (select from disk or from catalog)
         initSelectWorkflowFromFilePanel();
         initSelectWorkflowFromCatalogPanel();
 
-        // by default we select from disk
-        selectWorkflowButtonsPanel.add(fromFilePanel);
-        selectWorkflowButtonsPanel.add(sendFromFileButton);
-
-        selectWfLayout.addMember(selectWfRadioGroupPanel);
+        selectWfLayout.addMember(getWfMethodsPanel);
         selectWfLayout.addMember(selectWorkflowButtonsPanel);
 
         rootPage.addMember(selectWfLayout);
