@@ -544,7 +544,7 @@ public class SubmitWindow {
         importFromCatalogformPanel.setHeight("30px");
         fromCatalogPanel.add(importFromCatalogformPanel);
 
-        sendFromCatalogButton = new Button("Upload file");
+        sendFromCatalogButton = new Button("Import workflow");
         sendFromCatalogButton.addClickHandler(
                 clickHandlerForUploadFromCatalogButton(formContent, importFromCatalogformPanel));
     }
