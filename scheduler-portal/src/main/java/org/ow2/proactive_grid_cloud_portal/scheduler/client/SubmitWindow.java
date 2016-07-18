@@ -130,6 +130,7 @@ public class SubmitWindow {
     private DateChooser dateChooser; // ----------------- DateChooser
 
     private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
+    private IButton submitButton;
 
     private VLayout loadingPanel; // -------------------- Loading Panel when uploading
 
@@ -193,24 +194,36 @@ public class SubmitWindow {
         importFromFileRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                GWT.log("Select from disk");
                 varsLayout.removeMembers(varsLayout.getMembers());
                 selectWorkflowButtonsPanel.clear();
                 initSelectWorkflowFromFilePanel();
                 selectWorkflowButtonsPanel.add(fromFilePanel);
                 selectWorkflowButtonsPanel.add(sendFromFileButton);
+                rootPage.removeMember(startAtLayout);
+                rootPage.removeMember(submitCancelButtons);
+                initSubmitAtPart();
+                rootPage.addMember(submitCancelButtons);
+                startNowRB.setValue(true);
+                startAtRB.setValue(false);
+                setEnabledStartAtPart(false);
             }
         });
 
         importFromCatalogRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                GWT.log("Select from catalog");
                 varsLayout.removeMembers(varsLayout.getMembers());
                 selectWorkflowButtonsPanel.clear();
                 initSelectWorkflowFromCatalogPanel();
                 selectWorkflowButtonsPanel.add(fromCatalogPanel);
                 selectWorkflowButtonsPanel.add(sendFromCatalogButton);
+                rootPage.removeMember(startAtLayout);
+                rootPage.removeMember(submitCancelButtons);
+                initSubmitAtPart();
+                rootPage.addMember(submitCancelButtons);
+                startNowRB.setValue(true);
+                startAtRB.setValue(false);
+                setEnabledStartAtPart(false);
             }
         });
 
@@ -340,11 +353,14 @@ public class SubmitWindow {
         submitCancelButtons.setWidth100();
         submitCancelButtons.setAlign(Alignment.RIGHT);
 
-        final IButton submitButton = new IButton("Submit");
+        submitButton = new IButton("Submit");
         submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        submitButton.setShowDisabledIcon(false);
+        submitButton.setTooltip("A workflow must be selected first");
         submitButton.addClickHandler(clickHandlerForSubmitButton());
 
         final IButton cancelButton = new IButton("Cancel");
+        cancelButton.setShowDisabledIcon(false);
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
@@ -470,10 +486,8 @@ public class SubmitWindow {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                GWT.log(jsonObjectResponse.toString());
                 JSONArray buckets = jsonObjectResponse.get("_embedded").isObject().get("bucketMetadataList").isArray();
                 int bucketSize = buckets.size();
-                GWT.log("Wow ! " + bucketSize + " buckets !");
                 catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
@@ -481,7 +495,6 @@ public class SubmitWindow {
                     String bucketId = bucket.get("id").isNumber().toString();
                     String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
                     bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
-                    GWT.log("Added " + dropdownListItemLabel + " (id=" + Integer.parseInt(bucketId) +") to the bucket dropdown list");
                     catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
                 }
                 bucketsListBox.setEnabled(true);
@@ -489,7 +502,7 @@ public class SubmitWindow {
 
             @Override
             public void onError(Request request, Throwable exception) {
-                GWT.log("OOPS:" + request.toString());
+                GWT.log("Error occured when fetching buckets from Catalog");
             }
         });
 
@@ -521,23 +534,8 @@ public class SubmitWindow {
         fromCatalogPanel.add(importFromCatalogformPanel);
 
         sendFromCatalogButton = new Button("Upload file");
-        sendFromCatalogButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-
-                // filter only valid items
-                if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
-                    String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    String selectedWorkflowId = String.valueOf(catalogWorkflowsMap.get(selectedWorkflowLabel));
-                    formContent.add(new Hidden("bucketId", selectedBucketId));
-                    formContent.add(new Hidden("workflowId", selectedWorkflowId));
-                    displayLoadingMessage();
-                    importFromCatalogformPanel.submit();
-                }
-            }
-        });
+        sendFromCatalogButton.addClickHandler(
+                clickHandlerForUploadFromCatalogButton(formContent, importFromCatalogformPanel));
     }
 
     private ClickHandler clickHandlerForSubmitButton() {
@@ -581,20 +579,29 @@ public class SubmitWindow {
                 if ("".compareTo(fileName) != 0) {
                     displayLoadingMessage();
                     toSubmit.submit();
+
                 }
 
             }
         };
     }
 
-    // TODO implementer la servlet qui recupere le payload xml depuis le catalog
-    // puis qui la forward a SubmitEditServlet
-    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromCatalogButton(final FormPanel toSubmit) {
+    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromCatalogButton(
+            final VerticalPanel formContent, final FormPanel importFromCatalogformPanel) {
         return new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                displayLoadingMessage();
-                toSubmit.submit();
+                // filter only valid items
+                if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
+                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
+                    String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
+                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
+                    String selectedWorkflowId = String.valueOf(catalogWorkflowsMap.get(selectedWorkflowLabel));
+                    formContent.add(new Hidden("bucketId", selectedBucketId));
+                    formContent.add(new Hidden("workflowId", selectedWorkflowId));
+                    displayLoadingMessage();
+                    importFromCatalogformPanel.submit();
+                }
             }
         };
     }
@@ -654,7 +661,7 @@ public class SubmitWindow {
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
                 }
-
+                setEnabledStartAtPart(true);
                 rootPage.removeMember(loadingPanel);
                 initVarsPart(variablesVisualForm, fpanelWra);
                 rootPage.addMember(startAtLayout);
@@ -726,12 +733,26 @@ public class SubmitWindow {
         };
     }
 
+    private void setEnabledStartAtPart(boolean state) {
+        startNowRB.setEnabled(state);
+        startAtRB.setEnabled(state);
+        submitButton.setDisabled(!state);
+        if (!state) {
+            submitButton.setTooltip("A workflow must be selected first");
+        }
+        else {
+            submitButton.setTooltip("");
+        }
+    }
+
     private void build() {
         initRootPage(); // ------------ root page of the window
         initSelectWfPart(); // -------- Select workflow Panel
         initVarsPart(); // ------------ Fill workflow variables Panel
         initSubmitAtPart(); // -------- Submit at given time Panel
         initButtonsPart(); // --------- Close and Submit buttons
+
+        setEnabledStartAtPart(false);
 
         this.window = new Window();
         this.window.setTitle("Submit a new job");
