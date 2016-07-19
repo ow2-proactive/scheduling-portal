@@ -210,8 +210,6 @@ public class SubmitWindow {
                     initSelectWorkflowFromFilePanel();
                     selectWorkflowButtonsPanel.add(fromFilePanel);
                     selectWorkflowButtonsPanel.add(sendFromFileButton);
-                    rootPage.removeMember(startAtLayout);
-                    rootPage.removeMember(submitCancelButtons);
                     initFooter();
                 }
                 else if (METHOD_FROM_CATALOG.compareTo(selectedMethod) == 0) {
@@ -219,16 +217,12 @@ public class SubmitWindow {
                     initSelectWorkflowFromCatalogPanel();
                     selectWorkflowButtonsPanel.add(fromCatalogPanel);
                     selectWorkflowButtonsPanel.add(sendFromCatalogButton);
-                    rootPage.removeMember(startAtLayout);
-                    rootPage.removeMember(submitCancelButtons);
                     initFooter();
                 }
                 else {
                     // default case: METHOD_INSTRUCTION
                     varsLayout.removeMembers(varsLayout.getMembers());
                     selectWorkflowButtonsPanel.clear();
-                    rootPage.removeMember(startAtLayout);
-                    rootPage.removeMember(submitCancelButtons);
                     initFooter();
                 }
             }
@@ -240,6 +234,8 @@ public class SubmitWindow {
             }
 
             private void initFooter() {
+                rootPage.removeMember(startAtLayout);
+                rootPage.removeMember(submitCancelButtons);
                 initSubmitAtPart();
                 rootPage.addMember(submitCancelButtons);
                 startNowRB.setValue(true);
