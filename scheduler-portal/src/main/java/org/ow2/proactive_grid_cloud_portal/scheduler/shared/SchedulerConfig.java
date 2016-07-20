@@ -106,7 +106,7 @@ public class SchedulerConfig extends Config {
     public static final String MOTD_URL = "sched.motd.url";
     private static final String DEFAULT_MOTD_URL = "";
 
-    /**  **/
+    /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
 
     private static SchedulerConfig instance = null;
@@ -263,5 +263,16 @@ public class SchedulerConfig extends Config {
      */
     public int getLivelogsRefreshTime() {
         return Integer.parseInt(properties.get(LIVELOGS_REFRESH_TIME));
+    }
+
+    /**
+     * @return the catalog url or an empty string if none has been defined
+     */
+    public String getCatalogUrl() {
+        String catalogUrl = properties.get(CATALOG_URL);
+        if (catalogUrl == null) {
+            catalogUrl = "";
+        }
+        return catalogUrl;
     }
 }

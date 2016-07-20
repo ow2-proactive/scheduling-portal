@@ -88,8 +88,7 @@ public class SubmitWindow {
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
-    private static final String URL_CATALOG = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
-    private static final String URL_CATALOG_BUCKETS = URL_CATALOG + "/buckets";
+    private static final String URL_CATALOG_BUCKETS = "/buckets";
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
     private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
@@ -173,6 +172,21 @@ public class SubmitWindow {
      */
     public void destroy() {
         this.window.destroy();
+    }
+
+    /**
+     * @return the configured Catalog url, if none has been specified, the default one is used instead
+     */
+    private String getCatalogUrl() {
+        String catalogUrl = SchedulerConfig.get().getCatalogUrl();
+        if ("".compareTo(catalogUrl) == 0) {
+            catalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
+            GWT.log("Pas d'url configurée pour le Catalog, on va utiliser celle normalement disponible dans le web container");
+        }
+        else {
+            GWT.log("On utilise l'url configurée pour le Catalog");
+        }
+        return catalogUrl;
     }
 
     private void initRootPage() {
@@ -448,7 +462,8 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (CATALOG_SELECT_BUCKET.compareTo(selectedBucket) != 0) {
-                    String workflowUrl = URL_CATALOG_BUCKETS + "/" + catalogBucketsMap.get(selectedBucket) + "/workflows";
+                    String workflowUrl = getCatalogUrl() + URL_CATALOG_BUCKETS + "/" +
+                            catalogBucketsMap.get(selectedBucket) + "/workflows";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
                         @Override
@@ -489,7 +504,7 @@ public class SubmitWindow {
         });
 
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, URL_CATALOG + "/buckets");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, getCatalogUrl() + "/buckets");
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
