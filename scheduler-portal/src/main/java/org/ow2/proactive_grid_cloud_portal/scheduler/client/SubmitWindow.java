@@ -76,6 +76,7 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -87,7 +88,7 @@ public class SubmitWindow {
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
-    private static final String URL_CATALOG = GWT.getHostPageBaseURL() + "workflow-catalog";
+    private static final String URL_CATALOG = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
     private static final String URL_CATALOG_BUCKETS = URL_CATALOG + "/buckets";
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
