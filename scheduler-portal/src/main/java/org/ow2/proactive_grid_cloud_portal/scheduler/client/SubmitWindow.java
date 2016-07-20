@@ -87,7 +87,7 @@ public class SubmitWindow {
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
-    private static final String URL_CATALOG = "http://localhost:8080/workflow-catalog";
+    private static final String URL_CATALOG = GWT.getHostPageBaseURL() + "workflow-catalog";
     private static final String URL_CATALOG_BUCKETS = URL_CATALOG + "/buckets";
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
