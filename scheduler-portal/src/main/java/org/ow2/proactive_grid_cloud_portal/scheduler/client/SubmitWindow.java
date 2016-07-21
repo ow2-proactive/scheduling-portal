@@ -179,14 +179,17 @@ public class SubmitWindow {
      */
     private String getCatalogUrl() {
         String catalogUrl = SchedulerConfig.get().getCatalogUrl();
-        if ("".compareTo(catalogUrl) == 0) {
-            catalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
-            GWT.log("Pas d'url configurée pour le Catalog, on va utiliser celle normalement disponible dans le web container");
+        if (catalogUrl == null) {
+            catalogUrl = buildCatalogUrl();
         }
-        else {
-            GWT.log("On utilise l'url configurée pour le Catalog");
+        else if (catalogUrl.isEmpty()) {
+            catalogUrl = buildCatalogUrl();
         }
         return catalogUrl;
+    }
+
+    private String buildCatalogUrl() {
+        return GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
     }
 
     private void initRootPage() {
@@ -461,7 +464,7 @@ public class SubmitWindow {
             @Override
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
-                if (CATALOG_SELECT_BUCKET.compareTo(selectedBucket) != 0) {
+                if (CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                     String workflowUrl = getCatalogUrl() + URL_CATALOG_BUCKETS + "/" +
                             catalogBucketsMap.get(selectedBucket) + "/workflows";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);

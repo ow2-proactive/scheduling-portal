@@ -266,13 +266,9 @@ public class SchedulerConfig extends Config {
     }
 
     /**
-     * @return the catalog url or an empty string if none has been defined
+     * @return the catalog url or null if none has been defined
      */
     public String getCatalogUrl() {
-        String catalogUrl = properties.get(CATALOG_URL);
-        if (catalogUrl == null) {
-            catalogUrl = "";
-        }
-        return catalogUrl;
+        return properties.get(CATALOG_URL);
     }
 }
