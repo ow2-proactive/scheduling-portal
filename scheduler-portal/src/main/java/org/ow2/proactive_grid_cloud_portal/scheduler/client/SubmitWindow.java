@@ -88,15 +88,14 @@ public class SubmitWindow {
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
-    private static final String URL_CATALOG_BUCKETS = "/buckets";
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
     private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
-
     private static final String METHOD_INSTRUCTION = "Select a method";
     private static final String METHOD_FROM_FILE = "import from file";
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
-
+    private static final int width = 420;
+    private static final int height = 500;
 
     private Window window;
 
@@ -144,9 +143,8 @@ public class SubmitWindow {
     private HashMap<String, Integer> catalogBucketsMap;
     private HashMap<String, Integer> catalogWorkflowsMap;
 
+    private String CATALOG_URL = null;
 
-    private static final int width = 420;
-    private static final int height = 500;
 
     /**
      * Default constructor
@@ -175,21 +173,21 @@ public class SubmitWindow {
     }
 
     /**
-     * @return the configured Catalog url, if none has been specified, the default one is used instead
+     * Builds the catalog URL. If none is configured in the settings file, sets the URL to the bundled Catalog
+     *
      */
-    private String getCatalogUrl() {
-        String catalogUrl = SchedulerConfig.get().getCatalogUrl();
-        if (catalogUrl == null) {
-            catalogUrl = buildCatalogUrl();
+    private void buildCatalogUrl() {
+        String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
+        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
+        if (catalogUrlFromConfig == null) {
+            CATALOG_URL = defaultCatalogUrl;
         }
-        else if (catalogUrl.isEmpty()) {
-            catalogUrl = buildCatalogUrl();
+        else if (catalogUrlFromConfig.isEmpty()) {
+            CATALOG_URL = defaultCatalogUrl;
         }
-        return catalogUrl;
-    }
-
-    private String buildCatalogUrl() {
-        return GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
+        else {
+            CATALOG_URL = catalogUrlFromConfig;
+        }
     }
 
     private void initRootPage() {
@@ -464,8 +462,8 @@ public class SubmitWindow {
             @Override
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
-                if (CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = getCatalogUrl() + URL_CATALOG_BUCKETS + "/" +
+                if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
+                    String workflowUrl = CATALOG_URL + "/buckets/" +
                             catalogBucketsMap.get(selectedBucket) + "/workflows";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
@@ -507,7 +505,7 @@ public class SubmitWindow {
         });
 
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, getCatalogUrl() + "/buckets");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets");
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -772,6 +770,9 @@ public class SubmitWindow {
     }
 
     private void build() {
+
+        buildCatalogUrl();
+
         initRootPage(); // ------------ root page of the window
         initSelectWfPart(); // -------- Select workflow Panel
         initVarsPart(); // ------------ Fill workflow variables Panel
