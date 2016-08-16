@@ -506,7 +506,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         ToolStripButton notificationPortalLinkButton = getNotificationPortalLinkButton();
         notificationPortalLinkButton.setIcon(Images.instance.notification_30().getSafeUri().asString());
         notificationPortalLinkButton.setIconSize(25);
-        cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+        notificationPortalLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
