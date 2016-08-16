@@ -63,6 +63,9 @@ public interface Images extends ClientBundle {
     @Source("images/studio_30.png")
     ImageResource studio_30();
 
+    @Source("images/notification_30.png")
+    ImageResource notification_30();
+
     @Source("images/logout_30.png")
     ImageResource logout_30();
 

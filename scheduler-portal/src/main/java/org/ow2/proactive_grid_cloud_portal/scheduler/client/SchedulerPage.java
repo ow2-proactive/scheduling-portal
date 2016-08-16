@@ -498,10 +498,15 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         studioLinkButton.setIconSize(25);
         studioLinkButton.setBorder(GREY_BUTTON_BORDER);
 
-	ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
-	cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
-	cloudAutomationLinkButton.setIconSize(25);
-	cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+        ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
+        cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
+        cloudAutomationLinkButton.setIconSize(25);
+        cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+
+        ToolStripButton notificationPortalLinkButton = getNotificationPortalLinkButton();
+        notificationPortalLinkButton.setIcon(Images.instance.notification_30().getSafeUri().asString());
+        notificationPortalLinkButton.setIconSize(25);
+        cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
@@ -513,8 +518,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
-	tools.addSpacer(12);
-	tools.addButton(cloudAutomationLinkButton);      
+        tools.addSpacer(12);
+        tools.addButton(cloudAutomationLinkButton);
+        tools.addSpacer(12);
+        tools.addButton(notificationPortalLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
@@ -561,6 +568,18 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 	    });
 
         return cloudAutomationButton;
+    }
+
+    private ToolStripButton getNotificationPortalLinkButton() {
+        ToolStripButton notificationPortalButton = new ToolStripButton("Notifications");
+
+        notificationPortalButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open("/notification-service", "", "");
+            }
+        });
+
+        return notificationPortalButton;
     }
 
     /*
