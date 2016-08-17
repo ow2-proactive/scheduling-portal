@@ -42,11 +42,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
@@ -99,8 +99,6 @@ public class RMPage implements LogListener {
 
     private static final int EXPAND_COLLAPSE_SECTION_LABEL_WIDTH = 80;
 
-    private static final String GREY_BUTTON_BORDER = "1px solid #858585";
-
     private RMController controller = null;
     /** parent of all widgets held by this page */
     private Canvas rootLayout = null;
@@ -140,6 +138,8 @@ public class RMPage implements LogListener {
     private int logoStripHeight = 40;
     private String logoStripBackgroundColor = "#fafafa";
     private String logoStripBorder = "0px";
+
+    private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
 
     RMPage(RMController controller) {
         this.controller = controller;
@@ -400,24 +400,6 @@ public class RMPage implements LogListener {
             }
         });
 
-        ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
-        logoutButton.setIconSize(25);
-        logoutButton.setIconOrientation("right");
-        logoutButton.setTooltip("Logout");
-        logoutButton.setBorder(GREY_BUTTON_BORDER);
-        logoutButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value) {
-                            RMPage.this.controller.logout();
-                        }
-                    }
-                });
-            }
-        });
-
         errorButton = new ToolStripButton("<strong>Error</strong>",
             Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
@@ -430,19 +412,11 @@ public class RMPage implements LogListener {
         });
         errorButton.hide();
 
-        ToolStripButton studioLinkButton = getStudioLinkButton();
-        studioLinkButton.setIcon(Images.instance.studio_30().getSafeUri().asString());
-        studioLinkButton.setIconSize(25);
-        studioLinkButton.setBorder(GREY_BUTTON_BORDER);
-        ToolStripButton schedulerLinkButton = getSchedulerLinkButton();
-        schedulerLinkButton.setIcon(Images.instance.scheduler_30().getSafeUri().asString());
-        schedulerLinkButton.setIconSize(25);
-        schedulerLinkButton.setBorder(GREY_BUTTON_BORDER);
-	ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
-         cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
-	 cloudAutomationLinkButton.setIconSize(25);
-	 cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
-
+        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
+        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
+        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -453,8 +427,10 @@ public class RMPage implements LogListener {
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
-	tools.addSpacer(12);
+	    tools.addSpacer(12);
         tools.addButton(cloudAutomationLinkButton);
+        tools.addSpacer(12);
+        tools.addButton(notificationPortalLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
@@ -462,42 +438,6 @@ public class RMPage implements LogListener {
         tools.addSpacer(10);
 
         return tools;
-    }
-
-    private ToolStripButton getSchedulerLinkButton() {
-        ToolStripButton schedulerButton = new ToolStripButton("Scheduling & Orchestration");
-
-        schedulerButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/scheduler", "", "");
-            }
-        });
-
-        return schedulerButton;
-    }
-
-    private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("Workflow Studio");
-
-        studioButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/studio", "", "");
-            }
-        });
-
-        return studioButton;
-    }
-
-    private ToolStripButton getCloudAutomationLinkButton() {
-        ToolStripButton cloudAutomationButton = new ToolStripButton("Cloud Automation");
-
-	cloudAutomationButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/cloud-automation", "", "");
-            }
-        });
-
-        return cloudAutomationButton;
     }
 
     private Canvas buildTopPane() {

@@ -42,6 +42,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -95,8 +96,6 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  */
 public class SchedulerPage implements SchedulerStatusListener, LogListener, ExecutionDisplayModeListener {
 
-    private static final String GREY_BUTTON_BORDER = "1px solid #858585";
-
     static SchedulerPage inst;
 
     protected TabSet leftTabSet;
@@ -140,6 +139,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private int logoStripHeight = 40;
     private String logoStripBackgroundColor = "#fafafa";
     private String logoStripBorder = "0px";
+
+    private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
 
     /**
      * Default constructor
@@ -458,24 +459,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         else
             login = "";
 
-        ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
-        logoutButton.setIconSize(25);
-        logoutButton.setIconOrientation("right");
-        logoutButton.setTooltip("Logout");
-        logoutButton.setBorder(GREY_BUTTON_BORDER);
-        logoutButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value) {
-                            SchedulerPage.this.controller.logout();
-                        }
-                    }
-                });
-            }
-        });
-
         errorButton = new ToolStripButton("<strong>Network error</strong>",
             Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
@@ -488,20 +471,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
-        ToolStripButton resourceManagerLinkButton = getResourceManagerLinkButton();
-        resourceManagerLinkButton.setIcon(Images.instance.rm_30().getSafeUri().asString());
-        resourceManagerLinkButton.setIconSize(25);
-        resourceManagerLinkButton.setBorder(GREY_BUTTON_BORDER);
-
-        ToolStripButton studioLinkButton = getStudioLinkButton();
-        studioLinkButton.setIcon(Images.instance.studio_30().getSafeUri().asString());
-        studioLinkButton.setIconSize(25);
-        studioLinkButton.setBorder(GREY_BUTTON_BORDER);
-
-	ToolStripButton cloudAutomationLinkButton = getCloudAutomationLinkButton();
-	cloudAutomationLinkButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
-	cloudAutomationLinkButton.setIconSize(25);
-	cloudAutomationLinkButton.setBorder(GREY_BUTTON_BORDER);
+        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
+        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
+        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
+        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
@@ -513,8 +487,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
-	tools.addSpacer(12);
-	tools.addButton(cloudAutomationLinkButton);      
+        tools.addSpacer(12);
+        tools.addButton(cloudAutomationLinkButton);
+        tools.addSpacer(12);
+        tools.addButton(notificationPortalLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
@@ -525,42 +501,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.statusChanged(SchedulerStatus.KILLED);
 
         return tools;
-    }
-
-    private ToolStripButton getResourceManagerLinkButton() {
-        ToolStripButton resourceManagerButton = new ToolStripButton("Resource Manager");
-
-        resourceManagerButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/rm", "", "");
-            }
-        });
-
-        return resourceManagerButton;
-    }
-
-    private ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("Workflow Studio");
-
-        studioButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/studio", "", "");
-            }
-        });
-
-        return studioButton;
-    }
-
-    private ToolStripButton getCloudAutomationLinkButton() {
-        ToolStripButton cloudAutomationButton = new ToolStripButton("Cloud Automation");
-
-        cloudAutomationButton.addClickHandler(new ClickHandler() {
-		public void onClick(ClickEvent event) {
-		    Window.open("/cloud-automation", "", "");
-		}
-	    });
-
-        return cloudAutomationButton;
     }
 
     /*
