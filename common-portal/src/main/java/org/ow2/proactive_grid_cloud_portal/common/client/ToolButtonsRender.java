@@ -34,6 +34,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
@@ -45,77 +46,33 @@ public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
 
     public ToolStripButton getSchedulerLinkButton() {
-        ToolStripButton schedulerButton = new ToolStripButton("Scheduling & Orchestration");
-        schedulerButton.setIcon(Images.instance.scheduler_30().getSafeUri().asString());
-        setBorderAndIconSize(schedulerButton);
-
-        schedulerButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/scheduler", "", "");
-            }
-        });
-        return schedulerButton;
+        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler");
     }
 
     public ToolStripButton getStudioLinkButton() {
-        ToolStripButton studioButton = new ToolStripButton("Workflow Studio");
-        studioButton.setIcon(Images.instance.studio_30().getSafeUri().asString());
-        setBorderAndIconSize(studioButton);
+        ImageResource imageResource = Images.instance.studio_30();
+        String title = "Workflow Studio";
+        String url = "/studio";
 
-        studioButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/studio", "", "");
-            }
-        });
-        return studioButton;
+        return getToolStripButton(imageResource, title, url);
     }
 
     public ToolStripButton getResourceManagerLinkButton() {
-        ToolStripButton resourceManagerButton = new ToolStripButton("Resource Manager");
-        resourceManagerButton.setIcon(Images.instance.rm_30().getSafeUri().asString());
-        setBorderAndIconSize(resourceManagerButton);
-
-        resourceManagerButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/rm", "", "");
-            }
-        });
-
-        return resourceManagerButton;
+        return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm");
     }
 
     public ToolStripButton getCloudAutomationLinkButton() {
-        ToolStripButton cloudAutomationButton = new ToolStripButton("Cloud Automation");
-        cloudAutomationButton.setIcon(Images.instance.pca_30().getSafeUri().asString());
-        setBorderAndIconSize(cloudAutomationButton);
-
-        cloudAutomationButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/cloud-automation", "", "");
-            }
-        });
-
-        return cloudAutomationButton;
+        return getToolStripButton(Images.instance.pca_30(), "Cloud Automation", "/cloud-automation");
     }
 
     public ToolStripButton getNotificationPortalLinkButton() {
-        ToolStripButton notificationPortalButton = new ToolStripButton("Notifications");
-        notificationPortalButton.setIcon(Images.instance.notification_30().getSafeUri().asString());
-        setBorderAndIconSize(notificationPortalButton);
-
-        notificationPortalButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open("/notification-service", "", "");
-            }
-        });
-
-        return notificationPortalButton;
+        return getToolStripButton(Images.instance.notification_30(), "Notifications",
+                "/notification-service");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller){
-        ToolStripButton logoutButton = new ToolStripButton("Logout" + login);
-        logoutButton.setIcon(Images.instance.logout_30().getSafeUri().asString());
-        setBorderAndIconSize(logoutButton);
+        ToolStripButton logoutButton = getSimpleToolStripButton(
+                Images.instance.logout_30(), "Logout" + login);
         logoutButton.setIconOrientation("right");
         logoutButton.setTooltip("Logout");
 
@@ -133,8 +90,22 @@ public class ToolButtonsRender {
         return logoutButton;
     }
 
-    private void setBorderAndIconSize(ToolStripButton toolStripButton){
+    private ToolStripButton getToolStripButton(ImageResource imageResource, String title, final String url) {
+        ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
+
+        toolStripButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                Window.open(url, "", "");
+            }
+        });
+        return toolStripButton;
+    }
+
+    private ToolStripButton getSimpleToolStripButton(ImageResource imageResource, String title) {
+        ToolStripButton toolStripButton = new ToolStripButton(title);
+        toolStripButton.setIcon(imageResource.getSafeUri().asString());
         toolStripButton.setIconSize(25);
         toolStripButton.setBorder(GREY_BUTTON_BORDER);
+        return toolStripButton;
     }
 }
