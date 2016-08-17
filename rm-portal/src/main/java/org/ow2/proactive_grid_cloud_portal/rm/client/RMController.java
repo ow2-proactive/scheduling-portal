@@ -273,11 +273,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             loginModel.getSessionId() + ")");
     }
 
-    /** 
-     * Perform server logout,
-     * updates the page accordingly
-     */
-    void logout() {
+
+    @Override
+    public void logout() {
         LoginModel loginModel = LoginModel.getInstance();
         if (!loginModel.isLoggedIn())
             return;

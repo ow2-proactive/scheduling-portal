@@ -78,7 +78,11 @@ public abstract class Controller {
      */
     public abstract String getLogo350Url();
 
-    
+    /**
+     * Perform server logout,
+     * updates the page accordingly
+     */
+    public abstract void logout();
 
     /**
      * Parse a JSON string
