@@ -67,7 +67,7 @@ public class ToolButtonsRender {
 
     public ToolStripButton getNotificationPortalLinkButton() {
         return getToolStripButton(Images.instance.notification_30(), "Notifications",
-                "/notification-service");
+                "/notification-portal");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller){
