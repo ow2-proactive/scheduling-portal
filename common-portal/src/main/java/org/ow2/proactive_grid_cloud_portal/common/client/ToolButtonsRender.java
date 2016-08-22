@@ -66,7 +66,7 @@ public class ToolButtonsRender {
     }
 
     public ToolStripButton getNotificationPortalLinkButton() {
-        return getToolStripButton(Images.instance.notification_30(), "Notifications",
+        return getToolStripButtonWithoutBorder(Images.instance.notification_30(), "",
                 "/notification-portal");
     }
 
@@ -75,6 +75,7 @@ public class ToolButtonsRender {
                 Images.instance.logout_30(), "Logout" + login);
         logoutButton.setIconOrientation("right");
         logoutButton.setTooltip("Logout");
+        logoutButton.setBorder(GREY_BUTTON_BORDER);
 
         logoutButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -91,6 +92,14 @@ public class ToolButtonsRender {
     }
 
     private ToolStripButton getToolStripButton(ImageResource imageResource, String title, final String url) {
+        ToolStripButton toolStripButton = getToolStripButtonWithoutBorder(imageResource, title, url);
+
+        toolStripButton.setBorder(GREY_BUTTON_BORDER);
+        return toolStripButton;
+    }
+
+    private ToolStripButton getToolStripButtonWithoutBorder(ImageResource imageResource, String title,
+            final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
 
         toolStripButton.addClickHandler(new ClickHandler() {
@@ -105,7 +114,6 @@ public class ToolButtonsRender {
         ToolStripButton toolStripButton = new ToolStripButton(title);
         toolStripButton.setIcon(imageResource.getSafeUri().asString());
         toolStripButton.setIconSize(25);
-        toolStripButton.setBorder(GREY_BUTTON_BORDER);
         return toolStripButton;
     }
 }

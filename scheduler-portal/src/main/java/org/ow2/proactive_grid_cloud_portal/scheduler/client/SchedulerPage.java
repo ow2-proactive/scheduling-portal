@@ -491,7 +491,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(cloudAutomationLinkButton);
         tools.addSpacer(12);
         tools.addButton(notificationPortalLinkButton);
-        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);
