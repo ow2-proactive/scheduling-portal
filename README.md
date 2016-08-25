@@ -1,6 +1,6 @@
 # ProActive Workflows & Scheduling
 
-[![Build Status](http://jenkins.activeeon.com/job/scheduling-portal/badge/icon)](http://jenkins.activeeon.com/job/scheduling-portal/)
+[![Build Status](http://jenkins.activeeon.com/buildStatus/icon?job=scheduling-portal)](http://jenkins.activeeon.com/job/scheduling-portal/)
 
 
 ## Description
