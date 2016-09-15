@@ -466,6 +466,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         });
     }
 
+    @Override
+    public boolean markAsFinishedAndResume(final String sessionId, final Integer jobId, final String taskName) throws RestServerException,
+            ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.markAsFinishedAndResume(sessionId, jobId.toString(), taskName);
+            }
+        });
+    }
+
     /*
      * (non-Javadoc)
      *

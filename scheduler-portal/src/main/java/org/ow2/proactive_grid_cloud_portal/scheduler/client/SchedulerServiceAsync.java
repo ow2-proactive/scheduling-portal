@@ -128,6 +128,15 @@ public interface SchedulerServiceAsync {
     void preemptTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
     /**
+     * Mark a task a finished and resume job
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of the task to preempt
+     * @param cb
+     */
+    void markAsFinishedAndResume(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
+
+    /**
      * Restart a task within a given job
      * @param sessionId current session
      * @param jobId id of a job

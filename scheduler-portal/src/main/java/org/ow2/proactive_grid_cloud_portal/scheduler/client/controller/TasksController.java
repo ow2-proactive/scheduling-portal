@@ -39,6 +39,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -255,6 +257,34 @@ public class TasksController {
             public void onSuccess(Boolean result) {
                 LogModel.getInstance()
                         .logMessage("Successfully preempted task " + taskName + " in job " + jobId);
+            }
+        });
+    }
+
+    /**
+     * Mark in-error task as finished and resume job
+     * @param taskName task name
+     */
+    public void markAsFinishedAndResume(final String taskName) {
+        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
+        Job selectedJob = executionsModel.getSelectedJob();
+        final Integer jobId = selectedJob.getId();
+
+        String sessionId = LoginModel.getInstance().getSessionId();
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+
+        scheduler.markAsFinishedAndResume(sessionId, jobId, taskName, 
+                new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to finish task: " + msg);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                LogModel.getInstance()
+                        .logMessage("Successfully finished task " + taskName + " and resumed job " + jobId);
             }
         });
     }

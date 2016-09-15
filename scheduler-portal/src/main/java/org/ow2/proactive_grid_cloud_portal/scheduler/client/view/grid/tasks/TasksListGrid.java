@@ -406,6 +406,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 controller.killTask(taskName);
             }
         });
+        MenuItem markAsFinishedAndResume = new MenuItem("Mark as finished and Resume");
+        markAsFinishedAndResume.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+            @Override
+            public void onClick(MenuItemClickEvent event) {
+                controller.markAsFinishedAndResume(taskName);
+            }
+        });
 
         TaskStatus status = TaskStatus.from(taskStatusName);
 
@@ -413,10 +420,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         boolean enablePreempt = false;
         boolean enableRestartRunningTask = false;
         boolean enableRestartInErrorTask = false;
+        boolean enableMarkAsFinishedAndResume = false;
 
         switch (status) {
-            case ABORTED:
             case FAILED:
+            case ABORTED:
             case FAULTY:
             case FINISHED:
             case NOT_RESTARTED:
@@ -431,26 +439,30 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 enablePreempt = false;
                 enableRestartInErrorTask = false;
                 enableRestartRunningTask = false;
+                enableMarkAsFinishedAndResume = false;
                 break;
             case RUNNING:
                 enableKill = true;
                 enablePreempt = true;
                 enableRestartInErrorTask = false;
-                enableRestartRunningTask = true;;
+                enableRestartRunningTask = true;
+                enableMarkAsFinishedAndResume = false;
                 break;
             case IN_ERROR:
                 enableKill = false;
                 enablePreempt = false;
                 enableRestartInErrorTask = true;
                 enableRestartRunningTask = false;
+                enableMarkAsFinishedAndResume = true;
         }
 
         kill.setEnabled(enableKill);
         preempt.setEnabled(enablePreempt);
         restartInErrorTask.setEnabled(enableRestartInErrorTask);
         restartRunningTask.setEnabled(enableRestartRunningTask);
+        markAsFinishedAndResume.setEnabled(enableMarkAsFinishedAndResume);
 
-        menu.setItems(restartInErrorTask, restartRunningTask, preempt, kill);
+        menu.setItems(restartInErrorTask, restartRunningTask, preempt, kill, markAsFinishedAndResume);
     }
 
     @Override

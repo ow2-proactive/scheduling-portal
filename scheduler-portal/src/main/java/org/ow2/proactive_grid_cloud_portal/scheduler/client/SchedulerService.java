@@ -139,6 +139,18 @@ public interface SchedulerService extends RemoteService {
             ServiceException;
 
     /**
+     * Mark a task as finished and resume job
+     * @param sessionId current session
+     * @param jobId id of a job
+     * @param taskName name of a task to mark as finished within that job
+     * @return true on success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean markAsFinishedAndResume(String sessionId, Integer jobId, String taskName) throws RestServerException,
+            ServiceException;
+
+    /**
      * Restart a task.
      * @param sessionId current session
      * @param jobId id of a job
