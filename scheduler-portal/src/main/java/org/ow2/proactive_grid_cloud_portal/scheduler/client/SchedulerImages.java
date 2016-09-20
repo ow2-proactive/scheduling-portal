@@ -120,4 +120,7 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/usage_16.png")
     ImageResource usage_16();
 
+    @Source("images/calendar.png")
+    ImageResource calendar();
+
 }
