@@ -384,6 +384,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         ToolStripButton submitButton = new ToolStripButton("Submit job");
         submitButton.setIcon(SchedulerImages.instance.job_submit_16().getSafeUri().asString());
+        submitButton.setIconSize(20);
         submitButton.setTooltip("Submit a new job");
         submitButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -471,6 +472,18 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
+
+        ToolStripButton calendarButton = new ToolStripButton("Calendar");
+        calendarButton.setIcon(SchedulerImages.instance.calendar().getSafeUri().asString());
+        calendarButton.setIconSize(20);
+        calendarButton.setTooltip("See planned workflows in your favorite Calendar");
+        calendarButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                CalendarInfoWindow w = new CalendarInfoWindow();
+                w.show();
+            }
+        });
+
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
@@ -482,6 +495,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(submitButton);
+        tools.addSeparator();
+        tools.addButton(calendarButton);
         tools.addButton(errorButton);
         tools.addFill();
         tools.addButton(studioLinkButton);
