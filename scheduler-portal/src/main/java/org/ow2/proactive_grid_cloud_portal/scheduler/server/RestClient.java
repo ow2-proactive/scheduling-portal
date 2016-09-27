@@ -207,6 +207,20 @@ public interface RestClient {
                                             String taskName);
 
     /**
+     * Mark as finished and resume
+     * @param sessionId
+     * @param jobId
+     * @param taskName
+     * @return
+     */
+    @PUT
+    @Path("jobs/{jobid}/tasks/{taskname}/finishInErrorTask")
+    InputStream markAsFinishedAndResume(@HeaderParam("sessionid")
+                                            String sessionId, @PathParam("jobid")
+                                            String jobId, @PathParam("taskname")
+                                            String taskName);
+
+    /**
      * Restart a running task.
      * @param sessionId
      * @param jobId
