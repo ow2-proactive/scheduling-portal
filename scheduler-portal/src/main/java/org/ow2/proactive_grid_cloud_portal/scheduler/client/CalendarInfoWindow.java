@@ -56,6 +56,11 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
+/**
+ * 
+ * @author ActiveEon team
+ *
+ */
 public class CalendarInfoWindow {
 
     private final Window window = new Window();
@@ -189,15 +194,20 @@ public class CalendarInfoWindow {
 
             @Override
             public void onResponseReceived(Request request, Response response) {
-                pane.clear();
-                root.clear();
-                window.clear();
 
                 if (200 == response.getStatusCode()) {
                     text.setContents(buildText(response.getText()));
                 } else {
                     text.setContents("Error : status code " + response.getStatusCode());
                 }
+
+                refreshWindow(text);
+            }
+
+            private void refreshWindow(HTMLPane text) {
+                pane.clear();
+                root.clear();
+                window.clear();
 
                 pane.addMember(img);
                 pane.addMember(text);
@@ -211,19 +221,8 @@ public class CalendarInfoWindow {
 
             @Override
             public void onError(Request request, Throwable exception) {
-                pane.clear();
-                root.clear();
-                window.clear();
-
                 text.setContents("Exception : " + exception.getMessage());
-                pane.addMember(img);
-                pane.addMember(text);
-
-                root.addMember(pane);
-                root.addMember(buttons);
-
-                window.addItem(root);
-                window.show();
+                refreshWindow(text);
             }
 
         });
@@ -239,8 +238,10 @@ public class CalendarInfoWindow {
 
     private String buildText(String responseText) {
 
+        // default url content
         final StringBuilder sb = new StringBuilder(CALENDAR_CONTEXT);
 
+        // user has a private url
         if (responseText != null && !responseText.equals("")) {
             final String host = com.google.gwt.user.client.Window.Location.getHostName();
             final String user = LoginModel.getInstance().getLogin();
@@ -255,7 +256,7 @@ public class CalendarInfoWindow {
             buttons.addMember(deleteBt);
             buttons.removeMember(createBt);
 
-        } else {
+        } else { // use doesn't have a private url
             sb.append(
                     "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar): <br><b>Create</b> if needed.</font>");
 
@@ -264,6 +265,7 @@ public class CalendarInfoWindow {
             buttons.removeMember(deleteBt);
         }
 
+        // user guide link
         sb.append("<br><br><br><font size=\"3\"><a target='_blank' href='http://doc.activeeon.com/" +
             getDocumentVersion() +
             "/user/ProActiveUserGuide.html#_calendar_service'>See calendar Documentation and Installation</a></font> ");
