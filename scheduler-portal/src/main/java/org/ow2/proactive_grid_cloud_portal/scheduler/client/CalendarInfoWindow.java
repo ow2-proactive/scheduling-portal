@@ -83,11 +83,30 @@ public class CalendarInfoWindow {
 
     private final HTMLPane text = new HTMLPane();
 
+    private CalendarInfoContentBuilder contentBuilder;
+
     /**
      * Default constructor
      */
     public CalendarInfoWindow() {
+        contentBuilder = new CalendarInfoContentBuilder(getDocumentVersion());
         this.build();
+    }
+
+    /**
+     * Default constructor
+     */
+    public CalendarInfoWindow(String documentVersion) {
+        contentBuilder = new CalendarInfoContentBuilder(documentVersion);
+        this.build();
+    }
+
+    /**
+     * 
+     * @return document version
+     */
+    private String getDocumentVersion() {
+        return Config.get().getVersion().contains("SNAPSHOT") ? "latest" : Config.get().getVersion();
     }
 
     private void build() {
@@ -173,15 +192,6 @@ public class CalendarInfoWindow {
         this.window.destroy();
     }
 
-    private final static String CALENDAR_CONTEXT = "<h1>ProActive Scheduling & Orchestration: integration with Calendars </h1>" +
-        "<font size=\"3\">Secured Calendar URL with authentication (Apple Calendaar, Thunderbird): <br><br><i>" +
-        "http://" + com.google.gwt.user.client.Window.Location.getHostName() + ":5232/" +
-        LoginModel.getInstance().getLogin() + "/calendar.ics/</i></font><br><br>";
-
-    private String getDocumentVersion() {
-        return Config.get().getVersion().contains("SNAPSHOT") ? "latest" : Config.get().getVersion();
-    }
-
     private void loadWindowsContent(RequestBuilder.Method method) {
 
         String host = com.google.gwt.user.client.Window.Location.getHostName();
@@ -196,7 +206,7 @@ public class CalendarInfoWindow {
             public void onResponseReceived(Request request, Response response) {
 
                 if (200 == response.getStatusCode()) {
-                    text.setContents(buildText(response.getText()));
+                    text.setContents(contentBuilder.buildContentString(response.getText()));
                 } else {
                     text.setContents("Error : status code " + response.getStatusCode());
                 }
@@ -229,48 +239,77 @@ public class CalendarInfoWindow {
 
         try {
             rb.send();
-
         } catch (RequestException e) {
             com.google.gwt.user.client.Window.alert("error = " + e.getMessage());
         }
 
     }
 
-    private String buildText(String responseText) {
+    /**
+     * Inner class building popup window text content
+     * 
+     * @author ActiveEon team
+     *
+     */
+    public class CalendarInfoContentBuilder {
 
-        // default url content
-        final StringBuilder sb = new StringBuilder(CALENDAR_CONTEXT);
+        // default url text
+        private final String DEFAULT_URL_TEXT = "<h1>ProActive Scheduling & Orchestration: integration with Calendars </h1>" +
+            "<font size=\"3\">Secured Calendar URL with authentication (Apple Calendaar, Thunderbird): <br><br><i>" +
+            "http://" + com.google.gwt.user.client.Window.Location.getHostName() + ":5232/" +
+            LoginModel.getInstance().getLogin() + "/calendar.ics/</i></font><br><br>";
 
-        // user has a private url
-        if (responseText != null && !responseText.equals("")) {
-            final String host = com.google.gwt.user.client.Window.Location.getHostName();
-            final String user = LoginModel.getInstance().getLogin();
-            String privateUrl = "http://" + host + ":5232/" + user + "/" + responseText;
+        // private url text if user has a private url
+        private final String PRIVATE_URL_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar):<br><br><i>@privateUrl@</i><br><br>Do not share this URL. <b>Regenerate</b> or <b>Delete</b> it if URL is compromised.</font>";
 
-            sb.append(
-                    "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar):<br><br><i>" +
-                        privateUrl +
-                        "</i><br><br>Do not share this URL. <b>Regenerate</b> or <b>Delete</b> it if URL is compromised.</font>");
+        // default url text if user doesn't have a private url
+        private final String DEFAULT_PRIVATE_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar): <br><b>Create</b> if needed.</font>";
 
-            buttons.addMember(regenerateBt);
-            buttons.addMember(deleteBt);
-            buttons.removeMember(createBt);
+        // user guide link text
+        private final String USER_GUIDE_LINK_TEXT = "<br><br><br><font size=\"3\"><a target='_blank' href='http://doc.activeeon.com/@documentVersion@/user/ProActiveUserGuide.html#_calendar_service'>See calendar Documentation and Installation</a></font> ";
 
-        } else { // use doesn't have a private url
-            sb.append(
-                    "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar): <br><b>Create</b> if needed.</font>");
+        private String documentVersion;
 
-            buttons.addMember(createBt);
-            buttons.removeMember(regenerateBt);
-            buttons.removeMember(deleteBt);
+        public CalendarInfoContentBuilder(String documentVersion) {
+            this.documentVersion = documentVersion;
         }
 
-        // user guide link
-        sb.append("<br><br><br><font size=\"3\"><a target='_blank' href='http://doc.activeeon.com/" +
-            getDocumentVersion() +
-            "/user/ProActiveUserGuide.html#_calendar_service'>See calendar Documentation and Installation</a></font> ");
+        /**
+         * method building content string
+         * 
+         * @param icsName response text retrieved from calendar service
+         * @return content text string
+         */
+        public String buildContentString(String icsName) {
+            // default url content
+            final StringBuilder sb = new StringBuilder(DEFAULT_URL_TEXT);
 
-        return sb.toString();
+            // user has a private url
+            if (icsName != null && !icsName.equals("")) {
+                final String host = com.google.gwt.user.client.Window.Location.getHostName();
+                final String user = LoginModel.getInstance().getLogin();
+                final String privateUrl = "http://" + host + ":5232/" + user + "/" + icsName;
+
+                sb.append(PRIVATE_URL_TEXT.replace("@privateUrl@", privateUrl));
+
+                buttons.addMember(regenerateBt);
+                buttons.addMember(deleteBt);
+                buttons.removeMember(createBt);
+
+            } else { // use doesn't have a private url
+                sb.append(DEFAULT_PRIVATE_TEXT);
+
+                buttons.addMember(createBt);
+                buttons.removeMember(regenerateBt);
+                buttons.removeMember(deleteBt);
+            }
+
+            // user guide link
+            sb.append(USER_GUIDE_LINK_TEXT.replace("@documentVersion@", documentVersion));
+
+            return sb.toString();
+        }
+
     }
 
 }
