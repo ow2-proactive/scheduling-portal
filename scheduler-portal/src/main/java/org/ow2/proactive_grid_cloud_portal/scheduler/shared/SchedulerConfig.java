@@ -36,7 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
 
-import com.google.gwt.core.client.GWT;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 
@@ -48,8 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 public class SchedulerConfig extends Config {
 
     /**
-     * Path to the user-defined Scheduler property file, relative
-     * to the webapp file path
+     * Path to the user-defined Scheduler property file, relative to the webapp file path
      */
     public static final String CONFIG_PATH = "scheduler.conf";
 
@@ -77,17 +75,17 @@ public class SchedulerConfig extends Config {
     /** job page size */
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
     private static final String DEFAULT_JOBS_PAGE_SIZE = "50";
-    
+
     /** task page size */
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
     private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
-    
+
     /** the number max of tag suggestions that should be displayed for autocompletion. */
     public static final String TAG_SUGGESTIONS_SIZE = "sched.tags.suggestions.size";
     private static final String DEFAULT_TAG_SUGGESTIONS_SIZE = "20";
-    
+
     /** the delay applied before refreshing the tag suggestions for a running job. */
-    public static final String  TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
+    public static final String TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
     private static final String DEFAULT_TAG_SUGGESTIONS_DELAY = "30000";
 
     /** release version string */
@@ -108,6 +106,10 @@ public class SchedulerConfig extends Config {
 
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
+
+    /** Calendar Server port */
+    public static final String CS_SERVER_PORT = "cs.server.port";
+    private static final String DEFAULT_CS_SERVER_PORT = "4242";
 
     private static SchedulerConfig instance = null;
 
@@ -133,6 +135,7 @@ public class SchedulerConfig extends Config {
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
+        properties.put(CS_SERVER_PORT, DEFAULT_CS_SERVER_PORT);
     }
 
     @Override
@@ -157,7 +160,8 @@ public class SchedulerConfig extends Config {
      */
     public String getWindowsLocationUrl() {
         String urlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
-        urlFromCurrentLocation = urlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(), "");
+        urlFromCurrentLocation = urlFromCurrentLocation
+                .replace(com.google.gwt.user.client.Window.Location.getPath(), "");
         return urlFromCurrentLocation;
     }
 
@@ -184,7 +188,7 @@ public class SchedulerConfig extends Config {
             String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
             String host = com.google.gwt.user.client.Window.Location.getHost();
             String noVncUrlFromCurrentLocation = protocol + "://" + host + ":5900/rest/novnc";
-            noVncUrlFromCurrentLocation.replace(":","\\:");
+            noVncUrlFromCurrentLocation.replace(":", "\\:");
             return noVncUrlFromCurrentLocation;
         }
         return noVncUrl;
@@ -198,7 +202,7 @@ public class SchedulerConfig extends Config {
         if (noVncPageUrl == null) {
             String noVncPageUrlFromCurrentLocation = getWindowsLocationUrl();
             noVncPageUrlFromCurrentLocation += "/rest/novnc.html";
-            noVncPageUrlFromCurrentLocation.replace(":","\\:");
+            noVncPageUrlFromCurrentLocation.replace(":", "\\:");
             return noVncPageUrlFromCurrentLocation;
         }
         return noVncPageUrl;
@@ -235,26 +239,26 @@ public class SchedulerConfig extends Config {
      * @return number of jobs per page
      */
     public int getPageSize(PaginatedItemType itemType) {
-    	if(itemType == PaginatedItemType.JOB){
-    		return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
-    	}
-    	if(itemType == PaginatedItemType.TASK){
-    		return Integer.parseInt(properties.get(TASKS_PAGE_SIZE));
-    	}
-    	return 0;
+        if (itemType == PaginatedItemType.JOB) {
+            return Integer.parseInt(properties.get(JOBS_PAGE_SIZE));
+        }
+        if (itemType == PaginatedItemType.TASK) {
+            return Integer.parseInt(properties.get(TASKS_PAGE_SIZE));
+        }
+        return 0;
     }
 
     /**
      * @return the number of tag suggestions that should be displayed for autocompletion.
      */
-    public int getTagSuggestionSize(){
+    public int getTagSuggestionSize() {
         return Integer.parseInt(this.properties.get(TAG_SUGGESTIONS_SIZE));
     }
-    
+
     /**
      * @return the delay applied before refreshing the tag suggestions for a running job.
      */
-    public long getTagSuggestionDelay(){
+    public long getTagSuggestionDelay() {
         return Long.parseLong(this.properties.get(TAG_SUGGESTIONS_DELAY));
     }
 
@@ -270,5 +274,12 @@ public class SchedulerConfig extends Config {
      */
     public String getCatalogUrl() {
         return properties.get(CATALOG_URL);
+    }
+
+    /**
+     * @return calendar server port
+     */
+    public String getCalendarServerPort() {
+        return properties.get(CS_SERVER_PORT);
     }
 }
