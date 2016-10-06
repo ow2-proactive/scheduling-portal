@@ -137,6 +137,7 @@ public class CalendarInfoWindow {
         window.setCanDragReposition(false);
 
         ok.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        ok.setID("csok");
         ok.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 CalendarInfoWindow.this.hide();
@@ -146,6 +147,7 @@ public class CalendarInfoWindow {
         buttons.addMember(ok);
 
         regenerateBt.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        regenerateBt.setID("csregenerateBt");
         regenerateBt.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 loadWindowsContent(RequestBuilder.PUT);
@@ -153,6 +155,7 @@ public class CalendarInfoWindow {
         });
 
         deleteBt.setIcon(Images.instance.clear_16().getSafeUri().asString());
+        deleteBt.setID("csdeleteBt");
         deleteBt.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 loadWindowsContent(RequestBuilder.DELETE);
@@ -160,6 +163,7 @@ public class CalendarInfoWindow {
         });
 
         createBt.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        createBt.setID("cscreateBt");
         createBt.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 loadWindowsContent(RequestBuilder.POST);
