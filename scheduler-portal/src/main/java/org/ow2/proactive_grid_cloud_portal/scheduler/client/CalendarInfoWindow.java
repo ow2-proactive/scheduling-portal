@@ -203,9 +203,9 @@ public class CalendarInfoWindow {
         StringBuilder requestUrl = new StringBuilder();
 
         if ("http".equals(SchedulerConfig.get().getCalendarServerProtocol())) {
-            requestUrl.append("http://" + host + ":" + SchedulerConfig.get().getCalendarServerPort());
+            requestUrl.append("http://" + host + ":" + SchedulerConfig.get().getCalendarServerHttpPort());
         } else {
-            requestUrl.append("https://" + host);
+            requestUrl.append("https://" + host + ":" + SchedulerConfig.get().getCalendarServerHttpsPort());
         }
 
         requestUrl.append("/calendar-service/private-urls/" + user + "/");

@@ -108,11 +108,15 @@ public class SchedulerConfig extends Config {
     public static final String CATALOG_URL = "sched.catalog.url";
 
     /** Calendar Server port */
-    public static final String CS_SERVER_PORT = "cs.server.port";
-    private static final String DEFAULT_CS_SERVER_PORT = "4242";
+    public static final String CS_SERVER_HTTP_PORT = "pa.calendar.http.port";
+    private static final String DEFAULT_CS_SERVER_HTTP_PORT = "4242";
 
     /** Calendar Server port */
-    public static final String CS_SERVER_PROTOCOL = "cs.server.protocol";
+    public static final String CS_SERVER_HTTPS_PORT = "pa.calendar.https.port";
+    private static final String DEFAULT_CS_SERVER_HTTPS_PORT = "443";
+
+    /** Calendar Server port */
+    public static final String CS_SERVER_PROTOCOL = "pa.calendar.protocol";
     private static final String DEFAULT_CS_SERVER_PROTOCOL = "https";
 
     private static SchedulerConfig instance = null;
@@ -139,7 +143,8 @@ public class SchedulerConfig extends Config {
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
-        properties.put(CS_SERVER_PORT, DEFAULT_CS_SERVER_PORT);
+        properties.put(CS_SERVER_HTTP_PORT, DEFAULT_CS_SERVER_HTTP_PORT);
+        properties.put(CS_SERVER_HTTPS_PORT, DEFAULT_CS_SERVER_HTTPS_PORT);
         properties.put(CS_SERVER_PROTOCOL, DEFAULT_CS_SERVER_PROTOCOL);
     }
 
@@ -284,8 +289,15 @@ public class SchedulerConfig extends Config {
     /**
      * @return calendar server port
      */
-    public String getCalendarServerPort() {
-        return properties.get(CS_SERVER_PORT);
+    public String getCalendarServerHttpPort() {
+        return properties.get(CS_SERVER_HTTP_PORT);
+    }
+
+    /**
+     * @return calendar server port
+     */
+    public String getCalendarServerHttpsPort() {
+        return properties.get(CS_SERVER_HTTPS_PORT);
     }
 
     /**
