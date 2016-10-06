@@ -200,10 +200,17 @@ public class CalendarInfoWindow {
 
         String host = com.google.gwt.user.client.Window.Location.getHostName();
         String user = LoginModel.getInstance().getLogin();
-        String requestUrl = "http://" + host + ":" + SchedulerConfig.get().getCalendarServerPort() +
-            "/calendar-service/private-urls/" + user + "/";
+        StringBuilder requestUrl = new StringBuilder();
 
-        RequestBuilder rb = new RequestBuilder(method, requestUrl);
+        if ("http".equals(SchedulerConfig.get().getCalendarServerProtocol())) {
+            requestUrl.append("http://" + host + ":" + SchedulerConfig.get().getCalendarServerPort());
+        } else {
+            requestUrl.append("https://" + host);
+        }
+
+        requestUrl.append("/calendar-service/private-urls/" + user + "/");
+
+        RequestBuilder rb = new RequestBuilder(method, requestUrl.toString());
         rb.setCallback(new RequestCallback() {
 
             @Override
