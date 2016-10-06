@@ -111,6 +111,10 @@ public class SchedulerConfig extends Config {
     public static final String CS_SERVER_PORT = "cs.server.port";
     private static final String DEFAULT_CS_SERVER_PORT = "4242";
 
+    /** Calendar Server port */
+    public static final String CS_SERVER_PROTOCOL = "cs.server.protocol";
+    private static final String DEFAULT_CS_SERVER_PROTOCOL = "https";
+
     private static SchedulerConfig instance = null;
 
     /**
@@ -136,6 +140,7 @@ public class SchedulerConfig extends Config {
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
         properties.put(CS_SERVER_PORT, DEFAULT_CS_SERVER_PORT);
+        properties.put(CS_SERVER_PROTOCOL, DEFAULT_CS_SERVER_PROTOCOL);
     }
 
     @Override
@@ -281,5 +286,12 @@ public class SchedulerConfig extends Config {
      */
     public String getCalendarServerPort() {
         return properties.get(CS_SERVER_PORT);
+    }
+
+    /**
+     * @return calendar server port
+     */
+    public String getCalendarServerProtocol() {
+        return properties.get(CS_SERVER_PROTOCOL);
     }
 }
