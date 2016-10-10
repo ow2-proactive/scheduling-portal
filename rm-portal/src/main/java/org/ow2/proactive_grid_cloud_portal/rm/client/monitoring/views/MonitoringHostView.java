@@ -210,7 +210,8 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents(JSONUtils.getJsonErrorMessage(caught));
+        status.setContents("Please check if JMX monitoring was disabled<br>"+
+                "Error: "+ JSONUtils.getJsonErrorMessage(caught));
     }
 
     @Override
