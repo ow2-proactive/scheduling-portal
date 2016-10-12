@@ -111,7 +111,7 @@ public class CalendarInfoWindow {
 
     private void build() {
         pane.setWidth100();
-        pane.setHeight(350);
+        pane.setHeight(340);
         pane.setBackgroundColor("#ffffff");
 
         buttons.setAlign(Alignment.RIGHT);
@@ -132,7 +132,7 @@ public class CalendarInfoWindow {
         window.setIsModal(true);
         window.setShowModalMask(true);
         window.setWidth(729);
-        window.setHeight(425);
+        window.setHeight(415);
         window.centerInPage();
         window.setCanDragReposition(false);
 
@@ -265,13 +265,14 @@ public class CalendarInfoWindow {
     public class CalendarInfoContentBuilder {
 
         // default url text
-        private final String DEFAULT_URL_TEXT = "<h1>ProActive Scheduling & Orchestration: integration with Calendars </h1>" +
-            "<font size=\"3\">Secured Calendar URL with authentication (Apple Calendaar, Thunderbird): <br><br><i>" +
+        private final String DEFAULT_TITLE_TEXT = "<h1>ProActive Scheduling & Orchestration: integration with Calendars </h1>";
+
+        private final String DEFAULT_URL_TEXT = "<font size=\"3\">Secured Calendar URL with authentication (Apple Calendaar, Thunderbird): <br><br><i>" +
             "http://" + com.google.gwt.user.client.Window.Location.getHostName() + ":5232/" +
             LoginModel.getInstance().getLogin() + "/calendar.ics/</i></font><br><br>";
 
         // private url text if user has a private url
-        private final String PRIVATE_URL_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar):<br><br><i>@privateUrl@</i><br><br>Do not share this URL. <b>Regenerate</b> or <b>Delete</b> it if URL is compromised.</font>";
+        private final String PRIVATE_URL_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Apple Calendaar, Thunderbird, Outlook, Google Calendar):<br><br><i>@privateUrl@</i><br><br>Do not share this URL. <b>Regenerate</b> or <b>Delete</b> it if URL is compromised.</font>";
 
         // default url text if user doesn't have a private url
         private final String DEFAULT_PRIVATE_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar): <br><b>Create</b> if needed.</font>";
@@ -280,6 +281,8 @@ public class CalendarInfoWindow {
         private final String USER_GUIDE_LINK_TEXT = "<br><br><br><font size=\"3\"><a target='_blank' href='http://doc.activeeon.com/@documentVersion@/user/ProActiveUserGuide.html#_calendar_service'>See calendar Documentation and Installation</a></font> ";
 
         private String documentVersion;
+
+        private final String NOT_AVAILABLE = "Oops, Calendar Service is not available. Please contact the administrator to activate Calendar Service.";
 
         public CalendarInfoContentBuilder(String documentVersion) {
             this.documentVersion = documentVersion;
@@ -292,22 +295,31 @@ public class CalendarInfoWindow {
          * @return content text string
          */
         public String buildContentString(String icsName) {
-            // default url content
-            final StringBuilder sb = new StringBuilder(DEFAULT_URL_TEXT);
+            // default content
+            final StringBuilder sb = new StringBuilder(DEFAULT_TITLE_TEXT);
 
-            // user has a private url
             if (icsName != null && !icsName.equals("")) {
-                final String host = com.google.gwt.user.client.Window.Location.getHostName();
-                final String user = LoginModel.getInstance().getLogin();
-                final String privateUrl = "http://" + host + ":5232/" + user + "/" + icsName;
+                // calendar service is not available
+                if (!icsName.matches("^private-.*.ics.*")) {
+                    sb.append(NOT_AVAILABLE);
 
-                sb.append(PRIVATE_URL_TEXT.replace("@privateUrl@", privateUrl));
+                    buttons.addMember(createBt);
+                    buttons.removeMember(regenerateBt);
+                    buttons.removeMember(deleteBt);
+                } else { // user has a private url
+                    final String host = com.google.gwt.user.client.Window.Location.getHostName();
+                    final String user = LoginModel.getInstance().getLogin();
+                    final String privateUrl = "http://" + host + ":5232/" + user + "/" + icsName;
 
-                buttons.addMember(regenerateBt);
-                buttons.addMember(deleteBt);
-                buttons.removeMember(createBt);
+                    sb.append(PRIVATE_URL_TEXT.replace("@privateUrl@", privateUrl));
+
+                    buttons.addMember(regenerateBt);
+                    buttons.addMember(deleteBt);
+                    buttons.removeMember(createBt);
+                }
 
             } else { // use doesn't have a private url
+                sb.append(DEFAULT_URL_TEXT);
                 sb.append(DEFAULT_PRIVATE_TEXT);
 
                 buttons.addMember(createBt);
