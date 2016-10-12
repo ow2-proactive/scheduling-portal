@@ -303,7 +303,7 @@ public class CalendarInfoWindow {
                 if (!icsName.matches("^private-.*.ics.*")) {
                     sb.append(NOT_AVAILABLE);
 
-                    buttons.addMember(createBt);
+                    buttons.removeMember(createBt);
                     buttons.removeMember(regenerateBt);
                     buttons.removeMember(deleteBt);
                 } else { // user has a private url
