@@ -192,7 +192,11 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents(JSONUtils.getJsonErrorMessage(caught));
+        String errorMessage = JSONUtils.getJsonErrorMessage(caught);
+        if(errorMessage.contains("HTTP 500")){
+            errorMessage = "Monitoring is not available on this node source";
+        }
+        status.setContents(errorMessage);
     }
 
     @Override
