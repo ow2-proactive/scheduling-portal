@@ -180,8 +180,8 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents("Please check if JMX node monitoring was disabled<br>"+
-                "Error: "+ JSONUtils.getJsonErrorMessage(caught));
+        status.setContents("Monitoring is unavailable on this node. Maybe node was started with --disableMonitoring option.<br>"+
+                "Error message: "+ JSONUtils.getJsonErrorMessage(caught));
     }
 
     @Override
