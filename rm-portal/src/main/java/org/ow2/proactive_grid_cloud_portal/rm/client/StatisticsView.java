@@ -36,10 +36,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.Map;
-
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
-
 import com.smartgwt.client.types.GroupStartOpen;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.widgets.Canvas;
@@ -47,6 +43,9 @@ import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+
+import java.util.Map;
 
 
 /**
@@ -79,7 +78,7 @@ public class StatisticsView implements NodesListener {
                 String base = super.getCellCSSText(record, rowNum, colNum);
                 if (colNum == 2) {
                     String num = record.getAttribute("count");
-                    if (Integer.parseInt(num) == 0) {
+                    if (num.contentEquals("0")) {
                         return "color:gray;" + base;
                     }
                 }
@@ -117,7 +116,7 @@ public class StatisticsView implements NodesListener {
 
     public void nodesUpdated(Map<String, NodeSource> nodes) {
 
-        ListGridRecord[] r = new ListGridRecord[11];
+        ListGridRecord[] r = new ListGridRecord[12];
 
         ListGridRecord r1 = new ListGridRecord();
         r1.setAttribute("status", "Deploying");
@@ -181,21 +180,34 @@ public class StatisticsView implements NodesListener {
         r9.setAttribute("count", controller.getModel().getNumNodes());
         r[8] = r9;
 
+        ListGridRecord aliveLimit = new ListGridRecord();
+        aliveLimit.setAttribute("status", "Node Limit");
+        aliveLimit.setAttribute("type", "Node");
+        if (isAliveNodesLimited()) {
+            aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
+        } else {
+            aliveLimit.setAttribute("count", "None");
+        }
+        r[9] = aliveLimit;
+
         ListGridRecord r10 = new ListGridRecord();
         r10.setAttribute("status", "Physical");
         r10.setAttribute("type", "Host");
         r10.setAttribute("icon", RMImages.instance.host_16().getSafeUri().asString());
         r10.setAttribute("count", controller.getModel().getNumPhysicalHosts());
-        r[9] = r10;
+        r[10] = r10;
 
         ListGridRecord r11 = new ListGridRecord();
         r11.setAttribute("status", "Virtual");
         r11.setAttribute("type", "Host");
         r11.setAttribute("icon", RMImages.instance.host_virtual_16().getSafeUri().asString());
         r11.setAttribute("count", controller.getModel().getNumVirtualHosts());
-        r[10] = r11;
+        r[11] = r11;
 
         this.grid.setData(r);
     }
 
+    private boolean isAliveNodesLimited() {
+        return controller.getModel().getMaxNumberOfNodes() > -1;
+    }
 }

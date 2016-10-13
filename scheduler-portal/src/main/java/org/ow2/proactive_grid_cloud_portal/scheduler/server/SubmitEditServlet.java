@@ -36,9 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -54,6 +52,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.google.gwt.core.client.GWT;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
@@ -62,6 +62,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -75,15 +76,12 @@ import org.xml.sax.SAXException;
  * . 'sessionId' : used to submit the job
  * . 'job' : contains the XML job descriptor as a string
  * . 'var_<variable>' : where <variable> is the name of a variable
- *   definition in the XML descriptor. This parameter can be used for each
- *   variable
+ * definition in the XML descriptor. This parameter can be used for each
+ * variable
  * <p>
- * If you do not wish to edit variables, simply use {@link UploadServlet} 
- * 
- * 
- * 
- * @author mschnoor
+ * If you do not wish to edit variables, simply use {@link UploadServlet}
  *
+ * @author mschnoor
  */
 @SuppressWarnings("serial")
 public class SubmitEditServlet extends HttpServlet {
@@ -105,6 +103,7 @@ public class SubmitEditServlet extends HttpServlet {
 
         String sessionId = null;
         String job = null;
+        String startAt = null;
         HashMap<String, String> varMap = new HashMap<String, String>();
         File editedJob = null;
         File jobDesc = null;
@@ -123,8 +122,15 @@ public class SubmitEditServlet extends HttpServlet {
             } else if (key.startsWith("var_")) {
                 String name = key.substring(4);
                 varMap.put(name, val);
+            } else if (key.toUpperCase().equals("START_AT")) {
+                startAt = val;
             }
         }
+
+        LOGGER.info("sessionId=" + sessionId);
+        LOGGER.info("startAt=" + startAt);
+        LOGGER.info("varMap=" + varMap);
+        LOGGER.info("job=" + job);
 
         try {
             if (job == null) {
@@ -177,6 +183,32 @@ public class SubmitEditServlet extends HttpServlet {
                     }
                 }
 
+
+                if (startAt != null && !startAt.isEmpty()) {
+                    NodeList gis = doc.getElementsByTagName("genericInformation");
+                    Node gi = null;
+
+                    if (gis.getLength() > 0) {
+                        // get the existing GI
+                        gi = gis.item(0);
+                    } else {
+                        // create the new GI element to insert
+                        gi = doc.createElement("genericInformation");
+                    }
+
+                    Element startAtEl = doc.createElement("info");
+                    startAtEl.setAttribute("name", "START_AT");
+                    startAtEl.setAttribute("value", startAt);
+                    gi.appendChild(startAtEl);
+
+                    // it will be inserted right before taskFlow
+                    Node nextNode = doc.getElementsByTagName("taskFlow").item(0);
+                    // consequence of not having a insertAfter() method
+                    nextNode.getParentNode().insertBefore(gi, nextNode);
+
+
+                }
+
                 // write the document to a string
                 try {
                     Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -199,6 +231,8 @@ public class SubmitEditServlet extends HttpServlet {
 
             // submission at last....
             try {
+                LOGGER.info("editedJob that will be sent:");
+                LOGGER.info(FileUtils.readFileToString(editedJob));
                 String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
                 if (responseS == null || responseS.length() == 0) {
                     response.getWriter().write("Job submission returned without a value!");

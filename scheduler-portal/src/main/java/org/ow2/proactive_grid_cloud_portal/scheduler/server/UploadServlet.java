@@ -49,12 +49,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import com.google.gwt.user.server.Base64Utils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 
@@ -65,13 +72,16 @@ import org.w3c.dom.Document;
  * . one file, name ignored, must be a valid XML job descriptor
  * . one form field named 'sessionId' used to connect to the server
  * . one optional form field named 'edit'. if edit == "1",
- *   the servlet does not submit the job, but simply writes the following string as application/json response:
- *   { "jobEdit" : "<DESC_64>" }
- *   where <DESC_64> is a base64 encoded version of the job sent as parameter.
- *   This will allow client to edit the descriptor, as javascript runtimes are not allow to open local files.
+ * the servlet does not submit the job, but simply writes the following string as application/json response:
+ * { "jobEdit" : "<DESC_64>" }
+ * where <DESC_64> is a base64 encoded version of the job sent as parameter.
+ * This will allow client to edit the descriptor, as javascript runtimes are not allow to open local files.
  */
 @SuppressWarnings("serial")
 public class UploadServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UploadServlet.class);
+    private static final String URL_CATALOG = "http://localhost:8080/workflow-catalog";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -99,70 +109,36 @@ public class UploadServlet extends HttpServlet {
             Iterator<?> i = fileItems.iterator();
 
             String sessionId = null;
-            boolean edit = false;
-
-            /*
-             * * edit=0, simply submit the job descriptor * edit=1, open the descriptor and return
-             * it as a string
-             */
+            String bucketId = null;
+            String workflowId = null;
 
             while (i.hasNext()) {
                 FileItem fi = (FileItem) i.next();
-
                 if (fi.isFormField()) {
                     if (fi.getFieldName().equals("sessionId")) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("edit")) {
-                        if (fi.getString().equals("1")) {
-                            edit = true;
-                        } else {
-                            edit = false;
-                        }
+                    } else if (fi.getFieldName().equals("bucketId")) {
+                        bucketId = fi.getString();
+                    } else if (fi.getFieldName().equals("workflowId")) {
+                        workflowId = fi.getString();
                     }
                 } else {
                     job = File.createTempFile("job_upload", ".xml");
                     fi.write(job);
                 }
-
                 fi.delete();
             }
 
-            boolean isJar = isJarFile(job);
+            LOGGER.warn("sessionId=" + sessionId);
+            LOGGER.warn("bucketId=" + bucketId);
+            LOGGER.warn("workflowId=" + workflowId);
+            LOGGER.warn("job=" + job);
 
-            if (!isJar) {
-                // this _loosely_ checks that the file we got is an XML file 
-                try {
-                    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                    Document doc = docBuilder.parse(job);
-
-                    if (edit) {
-                        // don't go on with edition if there are no variables
-                        if (doc.getElementsByTagName("variables").getLength() < 1 ||
-                            doc.getElementsByTagName("variable").getLength() < 1) {
-                            response.getWriter()
-                                    .write("This job descriptor contains no variable definition.<br>"
-                                        + "Uncheck <strong>Edit variables</strong> or submit another descriptor.");
-                            return;
-                        }
-                    }
-                } catch (Throwable e) {
-                    response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
-                    return;
-                }
+            if (bucketId != null && workflowId != null) {
+                fetchFromCatalogAndWriteResponse(bucketId, workflowId, response);
             }
-
-            if (edit && !isJar) {
-                String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
-                response.getWriter().write(
-                        "{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
-            } else {
-                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, job);
-                if (responseS == null || responseS.length() == 0) {
-                    response.getWriter().write("Job submission returned without a value!");
-                } else {
-                    response.getWriter().write(responseS);
-                }
+            else {
+                writeResponse(job, response);
             }
 
         } catch (Exception e) {
@@ -175,7 +151,64 @@ public class UploadServlet extends HttpServlet {
             if (job != null)
                 job.delete();
         }
+    }
 
+    private void fetchFromCatalogAndWriteResponse(String bucketId, String workflowId, HttpServletResponse response) {
+        String url = URL_CATALOG + "/buckets/" + bucketId + "/workflows/" + workflowId + "?alt=xml";
+        LOGGER.info("Sending request to catalog: " + url);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpget = new HttpGet(url);
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = httpclient.execute(httpget);
+            HttpEntity responseBody = httpResponse.getEntity();
+            File job = File.createTempFile("job_upload", ".xml");
+            FileUtils.copyInputStreamToFile(responseBody.getContent(), job);
+            LOGGER.info(job.toString());
+            writeResponse(job, response);
+        } catch (Exception e) {
+            LOGGER.error("Error when sending the request to catalog", e);
+        } finally {
+            try {
+                if (httpResponse != null) {
+                    httpResponse.close();
+                }
+
+            } catch (IOException e) {
+                LOGGER.error("Error when closing the response", e);
+            }
+        }
+    }
+
+    private void writeResponse(File job, HttpServletResponse response) {
+        try {
+            boolean isJar = isJarFile(job);
+
+            if (!isJar) {
+                // this _loosely_ checks that the file we got is an XML file
+                try {
+                    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                    Document doc = docBuilder.parse(job);
+                } catch (Throwable e) {
+                    response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
+                    return;
+                }
+            }
+            String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
+            response.getWriter().write("{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
+        } catch (IOException e) {
+            LOGGER.error("Error when reading the job content", e);
+            String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
+            try {
+                response.getWriter().write(msg);
+            } catch (IOException ignored) {
+                // to get the error back client-side
+            }
+        } finally {
+            if (job != null)
+                job.delete();
+        }
     }
 
     private boolean isJarFile(File job) {
@@ -188,5 +221,4 @@ public class UploadServlet extends HttpServlet {
         }
         return isJar;
     }
-
 }
