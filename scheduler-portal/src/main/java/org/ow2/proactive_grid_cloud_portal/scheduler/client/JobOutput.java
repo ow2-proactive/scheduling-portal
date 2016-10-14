@@ -208,14 +208,16 @@ public class JobOutput {
     private String[] lineByLine(String lines) {
         return lines.split(PLATFORM_INDEPENDENT_LINE_BREAK);
     }
-    
-    
+
+
     private String formatLine(String str) {
-        if (str.matches("\\[.*\\].*")) {
-            str = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
-            return "<nobr><span style='color:gray;'>" + str +"</nobr><br>";
+        if (str.isEmpty()) {
+            return "";
         }
-        return "";
+        else {
+            String safeString = SafeHtmlUtils.htmlEscape(str);
+            return "<nobr>" + safeString +"</nobr><br>";
+        }
     }
 
 
