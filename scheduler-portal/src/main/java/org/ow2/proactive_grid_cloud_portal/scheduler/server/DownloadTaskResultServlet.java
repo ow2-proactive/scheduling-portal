@@ -36,18 +36,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
-import org.ow2.proactive_grid_cloud_portal.common.server.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
@@ -88,8 +87,11 @@ public class DownloadTaskResultServlet extends HttpServlet {
             response.setHeader("Location", "job" + jobId + "_" + taskId + ".result");
 
             out = response.getOutputStream();
-
-            is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
+            if (media.equals("text/plain")) {
+                is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
+            } else {
+                is = ((SchedulerServiceImpl) Service.get()).getTaskSerializedResult(sessionId, jobId, taskId);
+            }
 
             int buf;
             while ((buf = is.read()) != -1) {

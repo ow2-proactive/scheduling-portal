@@ -36,25 +36,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.InputStream;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.io.InputStream;
 
 
 /**
@@ -658,7 +646,7 @@ public interface RestClient {
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task belongs
      * @param taskId the id of the task to which the result is asked
-     * @return the result the result of the task
+     * @return the result of the task
      */
     @GET
     @GZIP
@@ -668,6 +656,23 @@ public interface RestClient {
                                            String sessionId, @PathParam("jobid")
                                            String jobId, @PathParam("taskid")
                                            String taskId);
+
+    /**
+     * Gets the serialized result of a task.
+     *
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId     the id of the job to which the task belongs
+     * @param taskId    the id of the task to which the result is asked
+     * @return the serialized result of the task
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/tasks/{taskid}/result/serializedvalue")
+    @Produces("*/*")
+    InputStream taskSerializedResult(@HeaderParam("sessionid")
+                                             String sessionId, @PathParam("jobid")
+                                             String jobId, @PathParam("taskid")
+                                             String taskId);
 
     /**
      * returns statistics about the scheduler
