@@ -210,7 +210,9 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
     @Override
     public void onFailure(Throwable caught) {
         close();
-        status.setContents(JSONUtils.getJsonErrorMessage(caught));
+        status.setContents("Monitoring is unavailable on this host. <br>" +
+                "Either monitoring was disabled with the disableMonitoring option or an error occurred. <br>" +
+                "More information are available inside the node logs.");
     }
 
     @Override
