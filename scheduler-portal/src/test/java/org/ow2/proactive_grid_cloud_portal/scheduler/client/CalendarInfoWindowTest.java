@@ -22,7 +22,7 @@ public class CalendarInfoWindowTest {
     private String withPrivateUrlPattern = ".*ProActive Scheduling & Orchestration.*" + ics +
         ".*Regenerate.*Delete.*See calendar Documentation and Installation.*";
 
-    private String withoutDefaultUrlPattern = ".*([^calendar.ics]).*$";
+    private String withoutDefaultUrlPattern = "^(?!.*calendar.ics).*";
 
     private String withoutPrivateUrlPattern = ".*ProActive Scheduling & Orchestration.*Create.*See calendar Documentation and Installation.*";
 
@@ -64,7 +64,11 @@ public class CalendarInfoWindowTest {
 
         String content = builder.buildContentString(notIcs);
 
+        System.out.println(content);
+
         assertTrue(content.matches(serviceNotAvailablePattern));
+
+        assertTrue(content.matches(withoutDefaultUrlPattern));
     }
 
 }

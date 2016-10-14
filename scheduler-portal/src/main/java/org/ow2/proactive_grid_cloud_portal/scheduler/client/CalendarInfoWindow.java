@@ -267,15 +267,11 @@ public class CalendarInfoWindow {
         // default url text
         private final String DEFAULT_TITLE_TEXT = "<h1>ProActive Scheduling & Orchestration: integration with Calendars </h1>";
 
-        private final String DEFAULT_URL_TEXT = "<font size=\"3\">Secured Calendar URL with authentication (Apple Calendaar, Thunderbird): <br><br><i>" +
-            "http://" + com.google.gwt.user.client.Window.Location.getHostName() + ":5232/" +
-            LoginModel.getInstance().getLogin() + "/calendar.ics/</i></font><br><br>";
-
         // private url text if user has a private url
-        private final String PRIVATE_URL_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Apple Calendaar, Thunderbird, Outlook, Google Calendar):<br><br><i>@privateUrl@</i><br><br>Do not share this URL. <b>Regenerate</b> or <b>Delete</b> it if URL is compromised.</font>";
+        private final String PRIVATE_URL_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Apple Calendar, Thunderbird, Outlook, Google Calendar):<br><br><i>@privateUrl@</i><br><br><b>Do not share this URL</b>. <br><b>Regenerate</b> or <b>Delete</b> if the URL is compromised.</font>";
 
         // default url text if user doesn't have a private url
-        private final String DEFAULT_PRIVATE_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Outlook, Google Calendar): <br><b>Create</b> if needed.</font>";
+        private final String DEFAULT_PRIVATE_TEXT = "<font size=\"3\"> Private Calendar URL without authentication (Apple Calendar, Thunderbird, Outlook, Google Calendar): <br><br><b>Create</b> if needed.</font>";
 
         // user guide link text
         private final String USER_GUIDE_LINK_TEXT = "<br><br><br><font size=\"3\"><a target='_blank' href='http://doc.activeeon.com/@documentVersion@/user/ProActiveUserGuide.html#_calendar_service'>See calendar Documentation and Installation</a></font> ";
@@ -319,7 +315,6 @@ public class CalendarInfoWindow {
                 }
 
             } else { // use doesn't have a private url
-                sb.append(DEFAULT_URL_TEXT);
                 sb.append(DEFAULT_PRIVATE_TEXT);
 
                 buttons.addMember(createBt);
