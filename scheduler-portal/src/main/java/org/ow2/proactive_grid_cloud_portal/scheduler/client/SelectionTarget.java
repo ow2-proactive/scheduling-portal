@@ -2,8 +2,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 public enum SelectionTarget {
 
-    TASK_TARGET("Selected tasks", "No task selected"),
-    JOB_TARGET("Selected job", "No job selected");
+    TASK_TARGET("Selected tasks", "Please select a task from the Tasks tab on the left panel"),
+    JOB_TARGET("Selected job", "Please select a job from the Executions list on the top panel");
     
     public final String label;
     

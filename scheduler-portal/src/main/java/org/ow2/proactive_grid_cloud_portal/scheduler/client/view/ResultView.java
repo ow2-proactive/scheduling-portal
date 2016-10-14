@@ -36,8 +36,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import com.google.gwt.core.client.GWT;
+import com.smartgwt.client.types.FormMethod;
+import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.HiddenItem;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VLayout;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.DownloadOption;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
@@ -48,19 +57,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultCon
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
-import com.google.gwt.core.client.GWT;
-import com.smartgwt.client.types.FormMethod;
-import com.smartgwt.client.widgets.IButton;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
@@ -82,7 +78,7 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
 
     protected final String visuDesactivatedMessage = "Remote visualization is disabled. Please toggle streaming in output view for a job in order to enable the remote visualization.";
 
-    protected final String noTaskSelectedMessage = "No task selected.";
+    protected final String noTaskSelectedMessage = "Please select a task from the Tasks tab on the left panel.";
 
     protected Layout root = null;
 
@@ -91,9 +87,9 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
 
     protected Layout formPane = null;
     protected Label taskSelectedLabel = null;
-    protected RadioGroupItem downloadTypeRadio;
     protected DynamicForm downloadForm;
-    protected IButton cmdDownload;
+    protected IButton textDownload;
+    protected IButton binaryDownload;
 
     protected ResultController controller = null;
 
@@ -150,23 +146,12 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
 
     protected void buildTaskPreviewPane() {
         Label taskPreviewLabelTitle = new Label(
-                "<span style='text-align:center;color:#003168'><b>Task Preview</b></span>");
+                "<span style='text-align:center;color:#003168'><b>Task Result</b></span>");
         taskPreviewLabelTitle.setHeight(20);
 
         this.taskSelectedLabel = new Label(this.noTaskSelectedMessage);
         this.taskSelectedLabel.setHeight(20);
         this.taskSelectedLabel.setLeft(20);
-
-        this.downloadTypeRadio = new RadioGroupItem("type");
-        this.downloadTypeRadio.setShowTitle(false);
-        this.downloadTypeRadio.setValueMap(DownloadOption.OPT_TEXT.label, DownloadOption.OPT_BIN.label);
-        this.downloadTypeRadio.setValue(DownloadOption.OPT_TEXT.label);
-        this.downloadTypeRadio.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                downloadTypeChangedHandler();
-            }
-        });
 
         final HiddenItem sess = new HiddenItem(SESSION_ID_FIELD_NAME);
         sess.setValue(LoginModel.getInstance().getSessionId());
@@ -179,32 +164,36 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         this.downloadForm.setWidth100();
         this.downloadForm.setMethod(FormMethod.POST);
         this.downloadForm.setTarget("_blank");
-        this.downloadForm.setFields(this.downloadTypeRadio, sess, job, media, task);
+        this.downloadForm.setFields(sess, job, media, task);
         this.downloadForm.setAction(GWT.getModuleBaseURL() + "downloader");
 
-        this.cmdDownload = new IButton("Download");
-        this.cmdDownload.setLeft(20);
-        cmdDownload.addClickHandler(new ClickHandler() {
+        this.textDownload = new IButton("View as text");
+        this.textDownload.setLeft(20);
+        this.textDownload.setWidth(200);
+        textDownload.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.doDownload(downloadForm);
+                controller.doDownload(downloadForm, "text/plain");
+            }
+        });
+        this.binaryDownload = new IButton("Save as binary file");
+        this.binaryDownload.setLeft(20);
+        this.binaryDownload.setWidth(200);
+
+        binaryDownload.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                controller.doDownload(downloadForm, "application/octet-stream");
             }
         });
         formPane = new VLayout();
         formPane.setMembersMargin(10);
         formPane.setWidth100();
-        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, cmdDownload);
-    }
-
-
-    protected void downloadTypeChangedHandler() {
-        String val = this.downloadTypeRadio.getValueAsString();
-        this.controller.changeDownloadType(val);
+        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, textDownload, this.binaryDownload);
     }
 
 
     protected void goToNoSelectedTaskState() {
-        this.cmdDownload.setDisabled(true);
-        this.downloadTypeRadio.setDisabled(true);
+        this.textDownload.setDisabled(true);
+        this.binaryDownload.setDisabled(true);
         this.taskSelectedLabel.setContents(this.noTaskSelectedMessage);
     }
 
@@ -214,8 +203,8 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         if (task == null) {
             this.goToNoSelectedTaskState();
         } else {
-            this.cmdDownload.setDisabled(false);
-            this.downloadTypeRadio.setDisabled(false);
+            this.textDownload.setDisabled(false);
+            this.binaryDownload.setDisabled(false);
             String label = "Task " + task.getName() + " (id: " + Long.toString(
                     task.getId()) + ") from job " + task.getJobName() + " (id: " + Long.toString(
                     task.getJobId()) + ")";

@@ -35,8 +35,6 @@
 
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
@@ -48,12 +46,14 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsMode
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
 
+import java.util.List;
+
 public class TaskInfoView extends InfoView<Task> implements TaskSelectedListener, TasksUpdatedListener, ExecutionDisplayModeListener{
 
     protected SchedulerController controller;
 
     public TaskInfoView(SchedulerController controller, TaskDetailColumnsFactory factory) {
-        super(factory, "No task selected");
+        super(factory, "Please select a task from the Tasks tab on the left panel");
         this.controller = controller;
         ExecutionsModel executionsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         TasksModel tasksCentricModel = executionsModel.getTasksModel();
