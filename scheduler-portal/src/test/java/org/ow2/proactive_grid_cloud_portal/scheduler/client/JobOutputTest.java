@@ -53,7 +53,8 @@ public class JobOutputTest {
 
         List<String> taskOutput = jobOutput.getLines(aTask);
 
-        assertEquals("<nobr>[...] output</nobr><br>", taskOutput.get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output</nobr><br>",
+                taskOutput.get(0));
     }
 
     @Test
@@ -66,8 +67,10 @@ public class JobOutputTest {
 
         List<List<String>> allTaskOutput = new ArrayList<List<String>>(jobOutput.getLines());
 
-        assertEquals("<nobr>[...] output_first</nobr><br>", allTaskOutput.get(0).get(0));
-        assertEquals("<nobr>[...] output_second</nobr><br>", allTaskOutput.get(1).get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output_first</nobr><br>",
+                allTaskOutput.get(0).get(0));
+        assertEquals("<nobr><span style='color:gray;'>[...]</span> output_second</nobr><br>",
+                allTaskOutput.get(1).get(0));
     }
 
     // PORTAL-348

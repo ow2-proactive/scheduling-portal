@@ -211,12 +211,20 @@ public class JobOutput {
 
 
     private String formatLine(String str) {
-        if (str.isEmpty()) {
+        if (str.trim().isEmpty()) {
             return "";
         }
         else {
-            String safeString = SafeHtmlUtils.htmlEscape(str);
-            return "<nobr>" + safeString +"</nobr><br>";
+            String safeString;
+            // Timestamp is colored when the default pattern is in use
+            if (str.matches("\\[.*\\].*")) {
+                safeString = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
+                return "<nobr><span style='color:gray;'>" + safeString +"</nobr><br>";
+            }
+            else {
+                safeString = SafeHtmlUtils.htmlEscape(str);
+                return "<nobr>" + safeString +"</nobr><br>";
+            }
         }
     }
 

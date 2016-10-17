@@ -88,7 +88,9 @@ public class SchedulerModelImplTest {
         String firstLine = jobOutput.getLines(task).get(0);
         String secondLine = jobOutput.getLines(task).get(1);
 
+        assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
         assertTrue(firstLine.contains("first"));
+        assertTrue(secondLine.contains(STYLE_FOR_TASK_NAME));
         assertTrue(secondLine.contains("second"));
     }
 
@@ -104,7 +106,9 @@ public class SchedulerModelImplTest {
         String firstLine = jobOutput.getLines(task).get(0);
         String secondLine = jobOutput.getLines(task).get(1);
 
+        assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
         assertTrue(firstLine.contains("first"));
+        assertTrue(secondLine.contains(STYLE_FOR_TASK_NAME));
         assertTrue(secondLine.contains("second"));
     }
 
@@ -121,8 +125,10 @@ public class SchedulerModelImplTest {
         Collection<List<String>> jobOutput = outputModel.getCurrentOutput().getLines();
 
         List<String> output = jobOutput.iterator().next();
-        
+
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(0).contains("first"));
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(1).contains("second"));
     }
 
@@ -140,7 +146,9 @@ public class SchedulerModelImplTest {
 
         List<String> output = jobOutput.iterator().next();
 
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(0).contains("first"));
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(1).contains("second"));
     }
 
