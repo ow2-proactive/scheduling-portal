@@ -1,14 +1,12 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.DownloadOption;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.layout.Layout;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ResultModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ResultView;
-
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.layout.Layout;
 
 public class ResultController {
 
@@ -28,20 +26,9 @@ public class ResultController {
         this.view = new ResultView(this);
         return this.view.build();
     }
-    
-    
-    
-    public void changeDownloadType(String value){
-        if(value.equals(DownloadOption.OPT_TEXT.label)){
-            this.model.setDownloadOption(DownloadOption.OPT_TEXT);
-        }
-        else{
-            this.model.setDownloadOption(DownloadOption.OPT_BIN);
-        }
-    }
-    
-    
-    public void doDownload(DynamicForm form){
+
+
+    public void doDownload(DynamicForm form, String contentType) {
         Task task = this.parentController.getSelectedTask();
         if(task != null){
             String taskId = task.getName();
@@ -50,8 +37,7 @@ public class ResultController {
             String jobId = Long.toString(task.getJobId());
             form.getField(ResultView.JOB_ID_FIELD_NAME).setValue(jobId);
 
-            DownloadOption dlOption = this.model.getDownloadOption();
-            form.getField(ResultView.MEDIA_FIELD_NAME).setValue(dlOption.formDownload);
+            form.getField(ResultView.MEDIA_FIELD_NAME).setValue(contentType);
 
             form.submitForm();
         }
