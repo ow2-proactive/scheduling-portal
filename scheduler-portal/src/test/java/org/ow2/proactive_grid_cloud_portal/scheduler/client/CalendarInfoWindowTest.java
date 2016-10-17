@@ -39,8 +39,6 @@ public class CalendarInfoWindowTest {
 
         String content = builder.buildContentString(ics);
 
-        System.out.println(content);
-
         assertTrue(content.matches(withPrivateUrlPattern));
 
         assertTrue(content.matches(withoutDefaultUrlPattern));
@@ -52,8 +50,6 @@ public class CalendarInfoWindowTest {
 
         String content = builder.buildContentString(icsName);
 
-        System.out.println(content);
-
         assertTrue(content.matches(withoutPrivateUrlPattern));
 
         assertTrue(content.matches(withoutDefaultUrlPattern));
@@ -63,8 +59,6 @@ public class CalendarInfoWindowTest {
     public void testTextBuildWhenCalendarServiceNotAvailable() {
 
         String content = builder.buildContentString(notIcs);
-
-        System.out.println(content);
 
         assertTrue(content.matches(serviceNotAvailablePattern));
 
