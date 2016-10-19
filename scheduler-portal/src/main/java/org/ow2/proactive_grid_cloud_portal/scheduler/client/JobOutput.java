@@ -208,14 +208,24 @@ public class JobOutput {
     private String[] lineByLine(String lines) {
         return lines.split(PLATFORM_INDEPENDENT_LINE_BREAK);
     }
-    
-    
+
+
     private String formatLine(String str) {
-        if (str.matches("\\[.*\\].*")) {
-            str = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
-            return "<nobr><span style='color:gray;'>" + str +"</nobr><br>";
+        if (str.trim().isEmpty()) {
+            return "";
         }
-        return "";
+        else {
+            String safeString;
+            // Timestamp is colored when the default pattern is in use
+            if (str.matches("\\[.*\\].*")) {
+                safeString = SafeHtmlUtils.htmlEscape(str).replaceFirst("]", "]</span>");
+                return "<nobr><span style='color:gray;'>" + safeString +"</nobr><br>";
+            }
+            else {
+                safeString = SafeHtmlUtils.htmlEscape(str);
+                return "<nobr>" + safeString +"</nobr><br>";
+            }
+        }
     }
 
 
