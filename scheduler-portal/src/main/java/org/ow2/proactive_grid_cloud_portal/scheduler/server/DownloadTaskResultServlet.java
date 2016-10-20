@@ -36,6 +36,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.slf4j.Logger;
@@ -72,22 +73,39 @@ public class DownloadTaskResultServlet extends HttpServlet {
     private void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String jobId = request.getParameter("jobId");
         String taskId = request.getParameter("taskId");
-        String media = request.getParameter("media");
+        String destination = request.getParameter("destination");
         String sessionId = request.getParameter("sessionId");
 
         InputStream is = null;
         ServletOutputStream out = null;
         try {
 
-            response.setContentType(media);
-            if (!media.equals("text/plain")) {
-                response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
-                    "_result");
+            JSONObject json = new JSONObject(((SchedulerServiceImpl) Service.get()).getTaskResultMetadata(sessionId, jobId, taskId));
+            String contentType;
+            if (destination.equals("file")) {
+                contentType = "application/octet-stream";
+            } else if (json.has("contentType")) {
+                contentType = json.get("contentType").toString();
+            } else {
+                contentType = "text/plain";
+            }
+            response.setContentType(contentType);
+
+            if (destination.equals("file")) {
+                if (json.has("fileName")) {
+                    response.setHeader("Content-disposition", "attachment; filename=" + json.get("fileName").toString());
+                } else if (json.has("fileExtension")) {
+                    response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
+                            "_result" + json.get("fileExtension").toString());
+                } else {
+                    response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
+                            "_result");
+                }
             }
             response.setHeader("Location", "job" + jobId + "_" + taskId + ".result");
 
             out = response.getOutputStream();
-            if (media.equals("text/plain")) {
+            if (contentType.startsWith("text/")) {
                 is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
             } else {
                 is = ((SchedulerServiceImpl) Service.get()).getTaskSerializedResult(sessionId, jobId, taskId);

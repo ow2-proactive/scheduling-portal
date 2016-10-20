@@ -28,7 +28,7 @@ public class ResultController {
     }
 
 
-    public void doDownload(DynamicForm form, String contentType) {
+    public void doDownload(DynamicForm form, String contentType, String target) {
         Task task = this.parentController.getSelectedTask();
         if(task != null){
             String taskId = task.getName();
@@ -37,7 +37,9 @@ public class ResultController {
             String jobId = Long.toString(task.getJobId());
             form.getField(ResultView.JOB_ID_FIELD_NAME).setValue(jobId);
 
-            form.getField(ResultView.MEDIA_FIELD_NAME).setValue(contentType);
+            form.getField(ResultView.DESTINATION_FIELD_NAME).setValue(contentType);
+
+            form.setTarget(target);
 
             form.submitForm();
         }

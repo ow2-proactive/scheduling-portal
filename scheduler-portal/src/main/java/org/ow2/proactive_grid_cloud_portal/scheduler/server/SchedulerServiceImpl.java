@@ -217,7 +217,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /**
      * Getter of the result of a task.
      *
-     * @param sessionId the session id of the user which is looged in
+     * @param sessionId the session id of the user which is logged in
      * @param jobId     the id of the job the task belongs to
      * @param taskId    the id of the task
      * @return the result
@@ -252,6 +252,26 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             rethrowRestServerException(e);
             return null;
         }
+    }
+
+    /**
+     * Getter of the result metadata of a task.
+     *
+     * @param sessionId the session id of the user which is looged in
+     * @param jobId     the id of the job the task belongs to
+     * @param taskId    the id of the task
+     * @return the result metadata
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String getTaskResultMetadata(final String sessionId, final String jobId, final String taskId)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.taskResultMetadata(sessionId, jobId, taskId);
+            }
+        });
     }
 
     /*
