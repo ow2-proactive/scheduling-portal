@@ -37,6 +37,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.ow2.proactive.web.WebProperties;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.slf4j.Logger;
@@ -84,19 +85,19 @@ public class DownloadTaskResultServlet extends HttpServlet {
             String contentType;
             if (destination.equals("file")) {
                 contentType = "application/octet-stream";
-            } else if (json.has("contentType")) {
-                contentType = json.get("contentType").toString();
+            } else if (json.has(WebProperties.METADATA_CONTENT_TYPE)) {
+                contentType = json.get(WebProperties.METADATA_CONTENT_TYPE).toString();
             } else {
                 contentType = "text/plain";
             }
             response.setContentType(contentType);
 
             if (destination.equals("file")) {
-                if (json.has("fileName")) {
-                    response.setHeader("Content-disposition", "attachment; filename=" + json.get("fileName").toString());
-                } else if (json.has("fileExtension")) {
+                if (json.has(WebProperties.METADATA_FILE_NAME)) {
+                    response.setHeader("Content-disposition", "attachment; filename=" + json.get(WebProperties.METADATA_FILE_NAME).toString());
+                } else if (json.has(WebProperties.METADATA_FILE_EXTENSION)) {
                     response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
-                            "_result" + json.get("fileExtension").toString());
+                            "_result" + json.get(WebProperties.METADATA_FILE_EXTENSION).toString());
                 } else {
                     response.setHeader("Content-disposition", "attachment; filename=job" + jobId + "_" + taskId +
                             "_result");
