@@ -88,10 +88,10 @@ public class SchedulerModelImplTest {
         String firstLine = jobOutput.getLines(task).get(0);
         String secondLine = jobOutput.getLines(task).get(1);
 
-        assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
-        assertTrue(secondLine.contains("second"));
+        assertTrue(firstLine.contains("first"));
         assertTrue(secondLine.contains(STYLE_FOR_TASK_NAME));
+        assertTrue(secondLine.contains("second"));
     }
 
     // PORTAL-244 PORTAL-243
@@ -106,10 +106,10 @@ public class SchedulerModelImplTest {
         String firstLine = jobOutput.getLines(task).get(0);
         String secondLine = jobOutput.getLines(task).get(1);
 
-        assertTrue(firstLine.contains("first"));
         assertTrue(firstLine.contains(STYLE_FOR_TASK_NAME));
-        assertTrue(secondLine.contains("second"));
+        assertTrue(firstLine.contains("first"));
         assertTrue(secondLine.contains(STYLE_FOR_TASK_NAME));
+        assertTrue(secondLine.contains("second"));
     }
 
     // PORTAL-244 PORTAL-243
@@ -125,11 +125,11 @@ public class SchedulerModelImplTest {
         Collection<List<String>> jobOutput = outputModel.getCurrentOutput().getLines();
 
         List<String> output = jobOutput.iterator().next();
-        
+
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(0).contains("first"));
         assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(1).contains("second"));
-        assertTrue(output.get(1).contains(STYLE_FOR_TASK_NAME));
     }
 
     // PORTAL-244 PORTAL-243
@@ -146,10 +146,10 @@ public class SchedulerModelImplTest {
 
         List<String> output = jobOutput.iterator().next();
 
+        assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(0).contains("first"));
         assertTrue(output.get(0).contains(STYLE_FOR_TASK_NAME));
         assertTrue(output.get(1).contains("second"));
-        assertTrue(output.get(1).contains(STYLE_FOR_TASK_NAME));
     }
 
     @Test
@@ -165,7 +165,9 @@ public class SchedulerModelImplTest {
 
         List<String> output = jobOutput.iterator().next();
 
-        assertTrue(output.isEmpty());
+        assertTrue(output.size() == 2);
+        assertTrue(output.get(0).contains("first"));
+        assertTrue(output.get(1).contains("second"));
     }
 
     private void addJob(int jobId) {

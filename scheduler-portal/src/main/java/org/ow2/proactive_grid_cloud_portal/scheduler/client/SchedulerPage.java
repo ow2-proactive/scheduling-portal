@@ -476,7 +476,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         ToolStripButton calendarButton = new ToolStripButton("Calendar");
         calendarButton.setIcon(SchedulerImages.instance.calendar().getSafeUri().asString());
         calendarButton.setIconSize(20);
-        calendarButton.setTooltip("See planned workflows in your favorite Calendar");
+        calendarButton.setTooltip(
+                "Import Workflows scheduled at a given date & time in your favorite Calendar, Re-schedule Jobs, and Add Periodicity.");
         calendarButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 CalendarInfoWindow w = new CalendarInfoWindow();
