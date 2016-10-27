@@ -70,7 +70,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricMo
 public class ResultView implements TaskSelectedListener, JobOutputListener {
 
     public static final String TASK_ID_FIELD_NAME = "taskId";
-    public static final String MEDIA_FIELD_NAME = "media";
+    public static final String DESTINATION_FIELD_NAME = "destination";
     public static final String JOB_ID_FIELD_NAME = "jobId";
     public static final String SESSION_ID_FIELD_NAME = "sessionId";
 
@@ -88,8 +88,8 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
     protected Layout formPane = null;
     protected Label taskSelectedLabel = null;
     protected DynamicForm downloadForm;
-    protected IButton textDownload;
-    protected IButton binaryDownload;
+    protected IButton openInBrowser;
+    protected IButton saveAsFile;
 
     protected ResultController controller = null;
 
@@ -157,43 +157,42 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         sess.setValue(LoginModel.getInstance().getSessionId());
 
         final HiddenItem job = new HiddenItem(JOB_ID_FIELD_NAME);
-        final HiddenItem media = new HiddenItem(MEDIA_FIELD_NAME);
+        final HiddenItem destination = new HiddenItem(DESTINATION_FIELD_NAME);
         final HiddenItem task = new HiddenItem(TASK_ID_FIELD_NAME);
 
         this.downloadForm = new DynamicForm();
         this.downloadForm.setWidth100();
         this.downloadForm.setMethod(FormMethod.POST);
-        this.downloadForm.setTarget("_blank");
-        this.downloadForm.setFields(sess, job, media, task);
+        this.downloadForm.setFields(sess, job, destination, task);
         this.downloadForm.setAction(GWT.getModuleBaseURL() + "downloader");
 
-        this.textDownload = new IButton("View as text");
-        this.textDownload.setLeft(20);
-        this.textDownload.setWidth(200);
-        textDownload.addClickHandler(new ClickHandler() {
+        this.openInBrowser = new IButton("Open in browser");
+        this.openInBrowser.setLeft(20);
+        this.openInBrowser.setWidth(200);
+        openInBrowser.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.doDownload(downloadForm, "text/plain");
+                controller.doDownload(downloadForm, "browser", "_blank");
             }
         });
-        this.binaryDownload = new IButton("Save as binary file");
-        this.binaryDownload.setLeft(20);
-        this.binaryDownload.setWidth(200);
+        this.saveAsFile = new IButton("Save as file");
+        this.saveAsFile.setLeft(20);
+        this.saveAsFile.setWidth(200);
 
-        binaryDownload.addClickHandler(new ClickHandler() {
+        saveAsFile.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                controller.doDownload(downloadForm, "application/octet-stream");
+                controller.doDownload(downloadForm, "file", "_top");
             }
         });
         formPane = new VLayout();
         formPane.setMembersMargin(10);
         formPane.setWidth100();
-        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, textDownload, this.binaryDownload);
+        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, openInBrowser, this.saveAsFile);
     }
 
 
     protected void goToNoSelectedTaskState() {
-        this.textDownload.setDisabled(true);
-        this.binaryDownload.setDisabled(true);
+        this.openInBrowser.setDisabled(true);
+        this.saveAsFile.setDisabled(true);
         this.taskSelectedLabel.setContents(this.noTaskSelectedMessage);
     }
 
@@ -203,8 +202,8 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         if (task == null) {
             this.goToNoSelectedTaskState();
         } else {
-            this.textDownload.setDisabled(false);
-            this.binaryDownload.setDisabled(false);
+            this.openInBrowser.setDisabled(false);
+            this.saveAsFile.setDisabled(false);
             String label = "Task " + task.getName() + " (id: " + Long.toString(
                     task.getId()) + ") from job " + task.getJobName() + " (id: " + Long.toString(
                     task.getJobId()) + ")";

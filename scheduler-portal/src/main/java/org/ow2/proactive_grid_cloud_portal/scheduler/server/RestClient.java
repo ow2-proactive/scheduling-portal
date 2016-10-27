@@ -658,6 +658,22 @@ public interface RestClient {
                                            String taskId);
 
     /**
+     * Gets the result of a task.
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job to which the task belongs
+     * @param taskId the id of the task to which the result is asked
+     * @return the result of the task
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/tasks/{taskid}/result/metadata")
+    @Produces("application/json")
+    InputStream taskResultMetadata(@HeaderParam("sessionid")
+                                           String sessionId, @PathParam("jobid")
+                                           String jobId, @PathParam("taskid")
+                                           String taskId);
+
+    /**
      * Gets the serialized result of a task.
      *
      * @param sessionId the session id of the user which is logged in
