@@ -50,6 +50,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
@@ -57,6 +58,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultCon
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
+import java.util.List;
 
 
 /**
@@ -67,7 +69,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricMo
  *
  * @author mschnoor
  */
-public class ResultView implements TaskSelectedListener, JobOutputListener {
+public class ResultView implements TaskSelectedListener, TasksUpdatedListener, JobOutputListener {
 
     public static final String TASK_ID_FIELD_NAME = "taskId";
     public static final String DESTINATION_FIELD_NAME = "destination";
@@ -91,6 +93,8 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
     protected IButton openInBrowser;
     protected IButton saveAsFile;
 
+    protected Task selectedTask = null;
+
     protected ResultController controller = null;
 
     public ResultView(ResultController controller) {
@@ -98,10 +102,12 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         SchedulerModelImpl schedulerModel = (SchedulerModelImpl) controller.getParentController().getModel();
 
         schedulerModel.getTasksModel().addTaskSelectedListener(this);
+        schedulerModel.getTasksModel().addTasksUpdatedListener(this);
 
         ExecutionsModel executionsModel = schedulerModel.getExecutionsModel();
         TasksCentricModel tasksCentricModel = executionsModel.getTasksModel();
         tasksCentricModel.addTaskSelectedListener(this);
+        tasksCentricModel.addTasksUpdatedListener(this);
 
         schedulerModel.getOutputModel().addJobOutputListener(this);
     }
@@ -194,6 +200,7 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         this.openInBrowser.setDisabled(true);
         this.saveAsFile.setDisabled(true);
         this.taskSelectedLabel.setContents(this.noTaskSelectedMessage);
+        this.selectedTask = null;
     }
 
 
@@ -202,12 +209,46 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
         if (task == null) {
             this.goToNoSelectedTaskState();
         } else {
-            this.openInBrowser.setDisabled(false);
-            this.saveAsFile.setDisabled(false);
             String label = "Task " + task.getName() + " (id: " + Long.toString(
                     task.getId()) + ") from job " + task.getJobName() + " (id: " + Long.toString(
                     task.getJobId()) + ")";
             this.taskSelectedLabel.setContents(label);
+            this.selectedTask = task;
+            decideButtonsStatus(task);
+        }
+    }
+
+    private void decideButtonsStatus(Task task) {
+        switch (task.getStatus()) {
+            case FAULTY:
+            case IN_ERROR:
+            case NOT_RESTARTED:
+            case NOT_STARTED:
+            case FAILED:
+            case WAITING_ON_FAILURE:
+            case WAITING_ON_ERROR:
+                // allow to see the error
+                this.openInBrowser.setDisabled(false);
+                this.saveAsFile.setDisabled(true);
+                break;
+            case RUNNING:
+                // if at least one failed execution attempt has been made, it should be possible to view the error
+                if (task.getMaxNumberOfExec() - task.getNumberOfExecLeft() > 0) {
+                    this.openInBrowser.setDisabled(false);
+                    this.saveAsFile.setDisabled(true);
+                } else {
+                    this.openInBrowser.setDisabled(true);
+                    this.saveAsFile.setDisabled(true);
+                }
+                break;
+            case FINISHED:
+                this.openInBrowser.setDisabled(false);
+                this.saveAsFile.setDisabled(false);
+                break;
+            default:
+                this.openInBrowser.setDisabled(true);
+                this.saveAsFile.setDisabled(true);
+                break;
         }
     }
 
@@ -235,4 +276,25 @@ public class ResultView implements TaskSelectedListener, JobOutputListener {
     public void liveEnabled(boolean newValue) {
     }
 
+    @Override
+    public void tasksUpdating() {
+
+    }
+
+    @Override
+    public void tasksUpdated(List<Task> tasks, long totalTasks) {
+        if (selectedTask != null) {
+            for (Task task : tasks) {
+                if (task.getId().equals(selectedTask.getId())) {
+                    selectedTask = task;
+                }
+            }
+            decideButtonsStatus(selectedTask);
+        }
+    }
+
+    @Override
+    public void tasksUpdatedFailure(String message) {
+
+    }
 }
