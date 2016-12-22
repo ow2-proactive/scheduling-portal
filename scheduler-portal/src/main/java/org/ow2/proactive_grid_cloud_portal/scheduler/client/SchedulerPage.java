@@ -365,7 +365,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             Images.instance.icon_manual().getSafeUri().asString());
         documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
-                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "latest"
+                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev"
                         : Config.get().getVersion();
                 Window.open("http://doc.activeeon.com/" + docVersion, "", "");
             }
