@@ -1,39 +1,34 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
+
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.COLUMNS_TO_ALIGN;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCont
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel.RemoteHint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.Record;
@@ -75,10 +71,6 @@ import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
 /**
  * A grid that shows tasks
@@ -104,8 +96,8 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     protected final boolean usedWithTaskCentricView;
 
-    public TasksListGrid(TasksController controller, TasksColumnsFactory factory,
-            String datasourceNamePrefix, boolean usedWithTaskCentricView) {
+    public TasksListGrid(TasksController controller, TasksColumnsFactory factory, String datasourceNamePrefix,
+            boolean usedWithTaskCentricView) {
         super(factory, datasourceNamePrefix);
         this.usedWithTaskCentricView = usedWithTaskCentricView;
         this.controller = controller;
@@ -162,7 +154,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
     }
 
-
     @Override
     public void remoteHintRead(RemoteHint hint) {
         for (ListGridRecord rec : this.getRecords()) {
@@ -170,11 +161,9 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
     }
 
-
     protected TaskRecord updateTaskRecord(Task task) {
         return new TaskRecord(task);
     }
-
 
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
@@ -198,7 +187,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         applyCurrentLocalFilter();
     }
 
-
     @Override
     public void tasksUpdating() {
     }
@@ -215,18 +203,14 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
         if (fieldName.equals(STATUS_ATTR.getName())) {
             String st = record.getAttribute(STATUS_ATTR.getName());
-            if (st.equals(TaskStatus.PENDING.toString()) ||
-                    st.equals(TaskStatus.SUBMITTED.toString())) {
+            if (st.equals(TaskStatus.PENDING.toString()) || st.equals(TaskStatus.SUBMITTED.toString())) {
                 return "color:#1a8bba;" + base;
             } else if (st.equals(TaskStatus.RUNNING.toString())) {
                 return "color:#176925;font-weight:bold;" + base;
-            } else if (st.equals(TaskStatus.ABORTED.toString()) ||
-                    st.equals(TaskStatus.FAILED.toString())) {
+            } else if (st.equals(TaskStatus.ABORTED.toString()) || st.equals(TaskStatus.FAILED.toString())) {
                 return "color:#d37a11;font-weight:bold;" + base;
-            } else if (st.equals(TaskStatus.FAULTY.toString()) ||
-                    st.equals(TaskStatus.NOT_STARTED.toString()) ||
-                    st.equals(TaskStatus.NOT_RESTARTED.toString()) ||
-                    st.equals(TaskStatus.IN_ERROR.toString())) {
+            } else if (st.equals(TaskStatus.FAULTY.toString()) || st.equals(TaskStatus.NOT_STARTED.toString()) ||
+                       st.equals(TaskStatus.NOT_RESTARTED.toString()) || st.equals(TaskStatus.IN_ERROR.toString())) {
                 return "color:#c50000;font-weight:bold;" + base;
             } else {
                 return base;
@@ -261,10 +245,15 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
     }
 
-
     private void loadRemoteHint(final RemoteHint hint, final ListGridRecord rec) {
         String taskId = rec.getAttributeAsString(TasksColumnsFactory.ID_ATTR.getName());
-        String jobId = this.controller.getModel().getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
+        String jobId = this.controller.getModel()
+                                      .getParentModel()
+                                      .getExecutionsModel()
+                                      .getJobsModel()
+                                      .getSelectedJob()
+                                      .getId()
+                                      .toString();
         final String taskName = rec.getAttributeAsString(NAME_ATTR.getName());
         if (taskId.equals(hint.taskId) && jobId.equals(hint.jobId)) {
             ImgButton button = visuButtons.get(taskId);
@@ -281,7 +270,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
     }
 
-
     private void showRemoteVisuChoices(final RemoteHint hint, final String taskName) {
         final Window window = new Window();
 
@@ -293,7 +281,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         window.setAutoCenter(true);
 
         final Label label = new Label("Remote visualization can be performed using your web browser " +
-                "if it supports Websocket and Canvas or using VNC client application.");
+                                      "if it supports Websocket and Canvas or using VNC client application.");
         label.setWidth(300);
 
         final IButton cancelButton = new IButton("Cancel");
@@ -360,21 +348,18 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     }
 
     private native boolean isWebSocketSupported() /*-{
-        return "WebSocket" in $wnd;
-    }-*/;
+                                                  return "WebSocket" in $wnd;
+                                                  }-*/;
 
     private native boolean isCanvasSupported() /*-{
-        var elem = document.createElement('canvas');
-        return !!(elem.getContext && elem.getContext('2d'));
-    }-*/;
-
+                                               var elem = document.createElement('canvas');
+                                               return !!(elem.getContext && elem.getContext('2d'));
+                                               }-*/;
 
     @Override
     protected void buildCellContextualMenu(Menu menu) {
-        final String taskName = this.getSelectedRecord().getAttributeAsString(
-                NAME_ATTR.getName());
-        final String taskStatusName = this.getSelectedRecord().getAttributeAsString(
-                STATUS_ATTR.getName());
+        final String taskName = this.getSelectedRecord().getAttributeAsString(NAME_ATTR.getName());
+        final String taskStatusName = this.getSelectedRecord().getAttributeAsString(STATUS_ATTR.getName());
 
         MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
         restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {

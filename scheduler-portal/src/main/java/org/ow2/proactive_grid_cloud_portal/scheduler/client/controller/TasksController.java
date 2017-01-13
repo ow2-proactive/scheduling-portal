@@ -1,40 +1,28 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2011 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
@@ -124,8 +112,7 @@ public class TasksController {
                     String msg = JSONUtils.getJsonErrorMessage(caught);
 
                     model.taskUpdateError(msg);
-                    LogModel.getInstance()
-                            .logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
+                    LogModel.getInstance().logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
                 }
 
                 public void onSuccess(String result) {
@@ -152,8 +139,7 @@ public class TasksController {
             if (tagFilter.isEmpty()) {
                 this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
             } else {
-                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit,
-                        callback);
+                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
             }
         }
     }
@@ -163,8 +149,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
-                .getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -178,8 +163,7 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance()
-                        .logMessage("Successfully killed task " + taskName + " in job " + jobId);
+                LogModel.getInstance().logMessage("Successfully killed task " + taskName + " in job " + jobId);
             }
         });
     }
@@ -201,11 +185,15 @@ public class TasksController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
         if (restartType == RestartType.IN_ERROR_TASK) {
-            scheduler.restartInErrorTask(sessionId, jobId, taskName,
-                    callbackHandlerForRestartTask(taskName, jobId, true));
+            scheduler.restartInErrorTask(sessionId,
+                                         jobId,
+                                         taskName,
+                                         callbackHandlerForRestartTask(taskName, jobId, true));
         } else if (restartType == RestartType.RUNNING_TASK) {
-            scheduler.restartRunningTask(sessionId, jobId, taskName,
-                    callbackHandlerForRestartTask(taskName, jobId, false));
+            scheduler.restartRunningTask(sessionId,
+                                         jobId,
+                                         taskName,
+                                         callbackHandlerForRestartTask(taskName, jobId, false));
         }
     }
 
@@ -230,8 +218,8 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage(
-                        "Successfully restarted " + context + "task " + taskName + " in job " + jobId);
+                LogModel.getInstance()
+                        .logMessage("Successfully restarted " + context + "task " + taskName + " in job " + jobId);
                 getParentController().getTasksController().updateTasks(false);
             }
         };
@@ -242,8 +230,7 @@ public class TasksController {
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
-                .getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -255,8 +242,7 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance()
-                        .logMessage("Successfully preempted task " + taskName + " in job " + jobId);
+                LogModel.getInstance().logMessage("Successfully preempted task " + taskName + " in job " + jobId);
             }
         });
     }
@@ -273,8 +259,7 @@ public class TasksController {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-        scheduler.markAsFinishedAndResume(sessionId, jobId, taskName, 
-                new AsyncCallback<Boolean>() {
+        scheduler.markAsFinishedAndResume(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -298,8 +283,11 @@ public class TasksController {
     }
 
     public String computeNoVncPageUrl(String taskName) {
-        String jobId = String
-                .valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
+        String jobId = String.valueOf(model.getParentModel()
+                                           .getExecutionsModel()
+                                           .getJobsModel()
+                                           .getSelectedJob()
+                                           .getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }
@@ -326,7 +314,8 @@ public class TasksController {
 
     private enum RestartType {
 
-        IN_ERROR_TASK, RUNNING_TASK
+        IN_ERROR_TASK,
+        RUNNING_TASK
 
     }
 

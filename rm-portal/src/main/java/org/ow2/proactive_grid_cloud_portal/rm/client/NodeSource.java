@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -54,13 +43,16 @@ public class NodeSource {
 
     /** nodes are grouped per host, each nodesource can hold nodes on different hosts */
     private Map<String, Host> hosts;
+
     /** currently _deploying_ nodes are not yet on any host */
     private Map<String, Node> deploying;
 
     /** Unique name of the nodesource */
     private String sourceName;
+
     /** describes the infrastructure and policy used */
     private String sourceDescription;
+
     /** login of the user that created the NS */
     private String nodeSourceAdmin;
 
@@ -74,20 +66,20 @@ public class NodeSource {
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
-        this.sourceName =t. sourceName;
+        this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.hosts = new HashMap<String, Host>();
-        for (String hostid: t.hosts.keySet()) {
+        for (String hostid : t.hosts.keySet()) {
             Host h = t.hosts.get(hostid);
             this.hosts.put(hostid, new Host(h));
         }
         this.deploying = new HashMap<String, Node>();
-        for (String nodeid: t.deploying.keySet()) {
-        	Node n = t.deploying.get(nodeid);
-        	this.deploying.put(nodeid, new Node(n));
+        for (String nodeid : t.deploying.keySet()) {
+            Node n = t.deploying.get(nodeid);
+            this.deploying.put(nodeid, new Node(n));
         }
     }
-    
+
     public Map<String, Host> getHosts() {
         return hosts;
     }
@@ -112,10 +104,13 @@ public class NodeSource {
 
         /** all nodes deployed on this host for one specific nodesource*/
         private Map<String, Node> nodes;
+
         /** name of the host ; not unique ! */
         private String hostName;
+
         /** parent nodesource name */
         private String sourceName;
+
         /** true if one of the contained nodes contains 'VIRT' in its URL */
         private boolean virtual = false;
 
@@ -124,15 +119,15 @@ public class NodeSource {
             this.nodes = new HashMap<String, Node>();
             this.sourceName = sourceName;
         }
-        
+
         Host(Host t) {
             this.hostName = t.hostName;
             this.sourceName = t.sourceName;
             this.virtual = t.virtual;
             this.nodes = new HashMap<String, Node>();
-            for (String nodeid: t.nodes.keySet()) {
-            	Node clone = new Node(t.nodes.get(nodeid));
-            	this.nodes.put(nodeid, clone);
+            for (String nodeid : t.nodes.keySet()) {
+                Node clone = new Node(t.nodes.get(nodeid));
+                this.nodes.put(nodeid, clone);
             }
         }
 
@@ -168,35 +163,46 @@ public class NodeSource {
 
             /** deployed node URL */
             private String nodeUrl;
+
             /** current state of the node */
             private NodeState nodeState;
+
             /** multiline String describing the node */
             private String nodeInfo;
+
             /** timestamp */
             private long timeStamp;
+
             /** time when the node changed to this nodeState*/
             private String timeStampFormatted;
+
             /** user that created the node */
             private String nodeProvider;
+
             /** user currently using the node */
             private String nodeOwner;
+
             /** name of the source containing this node */
             private String sourceName;
+
             /** name of the host containing this node */
             private String hostName;
+
             /** name of the JVM running this node */
             private String vmName;
+
             /** toString() of the remote RMNode */
             private String description;
+
             /** default node JMX url */
             private String defaultJMXUrl;
+
             /** proactive node JMX url */
             private String proactiveJMXUrl;
 
-            Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp,
-                    String timeStampFormatted, String nodeProvider, String nodeOwner, String sourceName,
-                    String hostName, String vmName, String description, String defaultJMXUrl,
-                    String proactiveJMXUrl) {
+            Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
+                    String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
+                    String description, String defaultJMXUrl, String proactiveJMXUrl) {
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
                 this.nodeInfo = nodeInfo;
@@ -227,7 +233,7 @@ public class NodeSource {
                 this.defaultJMXUrl = t.defaultJMXUrl;
                 this.proactiveJMXUrl = t.proactiveJMXUrl;
             }
-            
+
             public String getNodeUrl() {
                 return nodeUrl;
             }

@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -91,17 +80,25 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     /* displays nodes as a compact grid */
     private FlowPanel flow;
+
     boolean _borderSwitch;
+
     boolean _doNotScroll;
+
     private static Layout globalHover = null;
 
-    /* unique names of the nodesources/hosts/nodes currently held by the FlowLayout 
-     * helps figuring out the position of each element since FlowLayout doesnt allow it */
+    /*
+     * unique names of the nodesources/hosts/nodes currently held by the FlowLayout
+     * helps figuring out the position of each element since FlowLayout doesnt allow it
+     */
     private LinkedList<String> curTiles = null;
+
     /* nodes as they were last time #nodesUpdated was called */
     private Map<String, NodeSource> oldNodes = null;
+
     /* currently selected tile */
     private NodeTile curSelTile = null;
+
     /*
      * if view only my nodes is available (to see only nodes currently used by
      * the user logged)
@@ -152,10 +149,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private void changeSelection(String name) {
         int id = this.curTiles.indexOf(name);
-        
+
         if (id < 0)
             return;
-		
+
         NodeTile nt = (NodeTile) this.flow.getWidget(id);
 
         if (this.curSelTile != null) {
@@ -197,16 +194,18 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         return username != null ? username.equals(n.getNodeOwner()) : false;
     }
 
-    /* create a copy of the original map containing only resources
-     * used by the current user  */
+    /*
+     * create a copy of the original map containing only resources
+     * used by the current user
+     */
     private Map<String, NodeSource> filterMyNodes(Map<String, NodeSource> origNodes) {
-		
+
         String username = LoginModel.getInstance().getLogin();
 
         Map<String, NodeSource> myNodesNsMap = new HashMap<String, NodeSource>();
         for (String nsid : origNodes.keySet()) {
             NodeSource origNs = origNodes.get(nsid);
-            NodeSource myNodesNs = null ;
+            NodeSource myNodesNs = null;
             if (!usedBy(origNs, username)) {
                 continue;
             } else {
@@ -217,7 +216,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             // at this point, at least one node of this ns is being used
 
             Iterator<String> hostsIt = myNodesNs.getHosts().keySet().iterator();
-            while (hostsIt.hasNext()){
+            while (hostsIt.hasNext()) {
                 String hostid = hostsIt.next();
                 Host host = myNodesNs.getHosts().get(hostid);
                 if (!usedBy(host, username)) {
@@ -243,7 +242,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void nodesUpdated(Map<String, NodeSource> nodes) {
-    	/* show only nodes used by the logged user */
+        /* show only nodes used by the logged user */
         if (onlyMyNodes) {
             nodes = filterMyNodes(nodes);
         }
@@ -359,8 +358,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 }
             }
 
-            /* now remove the difference between the nodes from this method call,
-             * and the ones from the previous call */
+            /*
+             * now remove the difference between the nodes from this method call,
+             * and the ones from the previous call
+             */
             for (Entry<String, NodeSource> oldNs : this.oldNodes.entrySet()) {
                 /* Keep NS */
                 NodeSource newNs = nodes.get(oldNs.getKey());
@@ -429,11 +430,15 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private class NodeTile extends Image {
         private Node node;
+
         private Host host;
+
         private NodeSource nodesource;
 
         private Layout hover;
+
         private Label hoverLabel;
+
         private boolean dirty = true;
 
         @Override
@@ -452,8 +457,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     menu.setShowShadow(true);
                     menu.setShadowDepth(10);
 
-                    MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16()
-                            .getSafeUri().asString());
+                    MenuItem removeItem = new MenuItem("Remove",
+                                                       RMImages.instance.node_remove_16().getSafeUri().asString());
                     removeItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
                         @Override
                         public void onClick(MenuItemClickEvent event) {
@@ -461,8 +466,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     });
 
-                    MenuItem lockItem = new MenuItem("Lock", RMImages.instance.node_locked_16().getSafeUri()
-                            .asString());
+                    MenuItem lockItem = new MenuItem("Lock",
+                                                     RMImages.instance.node_locked_16().getSafeUri().asString());
                     lockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
                         @Override
                         public void onClick(MenuItemClickEvent event) {
@@ -470,8 +475,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     });
 
-                    MenuItem unlockItem = new MenuItem("Unlock", RMImages.instance.node_free_16()
-                            .getSafeUri().asString());
+                    MenuItem unlockItem = new MenuItem("Unlock",
+                                                       RMImages.instance.node_free_16().getSafeUri().asString());
                     unlockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
                         @Override
                         public void onClick(MenuItemClickEvent event) {
@@ -527,8 +532,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         } else if (host != null) {
                             hoverLabel.setContents("<strong>Host</strong><br>" + host.getHostName());
                         } else if (nodesource != null) {
-                            hoverLabel.setContents("<strong>NodeSource</strong><br>" +
-                                nodesource.getSourceName());
+                            hoverLabel.setContents("<strong>NodeSource</strong><br>" + nodesource.getSourceName());
                         }
                         hover.moveTo(event.getClientX() - 155, event.getClientY() - 65);
                         hover.show();
@@ -568,7 +572,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
         public NodeTile(Host host) {
             super(host.isVirtual() ? RMImages.instance.host_virtual_16().getSafeUri().asString()
-                    : RMImages.instance.host_16().getSafeUri().asString());
+                                   : RMImages.instance.host_16().getSafeUri().asString());
             this.host = host;
             init();
         }
@@ -610,8 +614,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             // highlight every node following this one in the flow layout,
             // until we hit one from another host/ns
             if (host != null || nodesource != null) {
-                int id = CompactView.this.curTiles.indexOf((host == null) ? nodesource.getSourceName() : host
-                        .getId());
+                int id = CompactView.this.curTiles.indexOf((host == null) ? nodesource.getSourceName() : host.getId());
 
                 while (true) {
                     id++;

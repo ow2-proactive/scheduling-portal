@@ -1,43 +1,34 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2011 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import com.smartgwt.client.data.SortSpecifier;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -56,22 +47,20 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricNa
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksCentricView;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.widgets.layout.Layout;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TasksCentricController extends TasksController {
 
     private boolean isHeaderClickHandler = false;
+
     private TasksCentricSortChangedHandler tasksCentricSortChangedHandler;
 
     public TasksCentricController(SchedulerController parentController) {
         super(parentController);
         tasksCentricSortChangedHandler = new TasksCentricSortChangedHandler(this);
     }
-
 
     @Override
     public Layout buildView() {
@@ -83,10 +72,9 @@ public class TasksCentricController extends TasksController {
         return this.view.build();
     }
 
-
-    public void tasksStateRevision(boolean forceRefresh){
+    public void tasksStateRevision(boolean forceRefresh) {
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
-        if(navigationModel.getTaskAutoRefreshOption() || forceRefresh){
+        if (navigationModel.getTaskAutoRefreshOption() || forceRefresh) {
             this.updateTasks(false);
             if (!isHeaderClickHandler) {
                 this.view.addSortChangedHandler(tasksCentricSortChangedHandler);
@@ -95,12 +83,11 @@ public class TasksCentricController extends TasksController {
         }
     }
 
-
     /**
      * Updates the current task list depending the current job selection in the model 
      */
     public void updateTasks(boolean showUpdating) {
-        if(showUpdating){
+        if (showUpdating) {
             this.model.notifyTasksChanging(false);
         }
 
@@ -109,7 +96,7 @@ public class TasksCentricController extends TasksController {
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();
         long fromDate = navigationModel.getFromDate();
-        long toDate  = navigationModel.getToDate();
+        long toDate = navigationModel.getToDate();
 
         PaginationModel paginationModel = navigationModel.getPaginationModel();
         int offset = paginationModel.getOffset();
@@ -123,15 +110,33 @@ public class TasksCentricController extends TasksController {
         boolean running = executionsModel.isFetchRunningExecutions();
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
-        if (tagFilter.isEmpty()){
-            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly, pending, 
-                    running, finished, offset, limit, getSortParameters(), callback);
-        } else{
-            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate, myTasksOnly, pending, 
-                    running, finished, offset, limit, getSortParameters(), callback);
+        if (tagFilter.isEmpty()) {
+            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId,
+                                                              fromDate,
+                                                              toDate,
+                                                              myTasksOnly,
+                                                              pending,
+                                                              running,
+                                                              finished,
+                                                              offset,
+                                                              limit,
+                                                              getSortParameters(),
+                                                              callback);
+        } else {
+            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId,
+                                                                   tagFilter,
+                                                                   fromDate,
+                                                                   toDate,
+                                                                   myTasksOnly,
+                                                                   pending,
+                                                                   running,
+                                                                   finished,
+                                                                   offset,
+                                                                   limit,
+                                                                   getSortParameters(),
+                                                                   callback);
         }
     }
-
 
     private SortSpecifierRestContainer getSortParameters() {
         SortSpecifierRestContainer sortParameters = null;
@@ -145,12 +150,10 @@ public class TasksCentricController extends TasksController {
         return sortParameters;
     }
 
-
-    public TasksPaginationController getPaginationController(){
+    public TasksPaginationController getPaginationController() {
         return this.taskNavigationController.getPaginationController();
     }
 
-    
     /**
      * Select another task.
      *
@@ -158,14 +161,13 @@ public class TasksCentricController extends TasksController {
      */
     public void selectTask(final Task task) {
         super.selectTask(task);
-        if(task != null){
+        if (task != null) {
             final String jobId = Long.toString(task.getJobId());
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
             AsyncCallback<String> callback = new TasksCentricAsyncSelector((TasksCentricModel) model, jobId);
             scheduler.getJobInfoDetails(sessionId, jobId, callback);
-        }
-        else{
+        } else {
             ((TasksCentricModel) model).setTaskSelectedJob(null);
         }
     }
@@ -181,6 +183,7 @@ public class TasksCentricController extends TasksController {
         public static class SortSpecifierRestItem implements Serializable {
 
             protected String field;
+
             protected String order;
 
             SortSpecifierRestItem(String field, String order) {
@@ -217,7 +220,7 @@ public class TasksCentricController extends TasksController {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             int paddedSize = sortParameters.size() - 1;
-            for (int i = 0 ; i < sortParameters.size(); i++) {
+            for (int i = 0; i < sortParameters.size(); i++) {
                 sb.append(sortParameters.get(i).toString());
                 if (i < paddedSize) {
                     sb.append(";");

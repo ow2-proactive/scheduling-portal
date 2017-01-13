@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -65,36 +54,59 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private boolean logged = false;
+
     private String login = null;
+
     private String sessionId = null;
+
     private HashMap<String, NodeSource> nodes = null;
+
     private Node selectedNode = null;
+
     private Host selectedHost = null;
+
     private NodeSource selectedNodeSource = null;
+
     private HashMap<String, PluginDescriptor> infrastructures = null;
+
     private HashMap<String, PluginDescriptor> policies = null;
+
     private Map<String, StatHistory> statistics = null;
+
     private Map<String, Range> requestedStatHistoryRange = null;
 
     private ArrayList<LogListener> logListeners;
+
     private ArrayList<NodesListener> nodesListeners;
+
     private ArrayList<NodeSelectedListener> nodeSelectedListeners;
+
     private ArrayList<StatsListener> statsListeners;
 
     private int numDeploying = 0;
+
     private int numLost = 0;
+
     private int numConfiguring = 0;
+
     private int numFree = 0;
+
     private int numLocked = 0;
+
     private int numBusy = 0;
+
     private int numDown = 0;
+
     private int numToBeRemoved = 0;
 
     private int maxNumBusy = 0;
+
     private int maxNumFree = 0;
+
     private int maxNumDown = 0;
 
     private int numPhysicalHosts = 0;
+
     private int numVirtualHosts = 0;
 
     private long maxNumberOfNodes = -1;
@@ -113,8 +125,6 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.statsListeners = new ArrayList<StatsListener>();
         this.statistics = new HashMap<String, StatHistory>();
     }
-
-    
 
     @Override
     public Map<String, NodeSource> getNodes() {
@@ -298,12 +308,10 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.requestedStatHistoryRange.put(source, r);
     }
 
-
     private String getLogStamp() {
         String date = DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG).format(new Date());
         return "<span style='color:gray'>" + date + "</span> ";
     }
-
 
     @Override
     public void addNodesListener(NodesListener listener) {

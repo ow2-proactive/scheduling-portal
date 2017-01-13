@@ -1,40 +1,34 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.HTMLPane;
@@ -45,10 +39,6 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 
 /**
@@ -72,11 +62,11 @@ public class AddNodeWindow {
         pane.setBackgroundColor("#ffffff");
 
         String str = "<h3>Connect a node to the Resource Manager using the following way</h3><ul>" +
-                "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
-                "/node.jar'>Download</a> the node's JAR file</li>" +
-                "<li>Create credential file (Portal->Create Credentials) </li>"+
-                "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -f <CREDENTIAL_FILE> -r " +
-                RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
+                     "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
+                     "/node.jar'>Download</a> the node's JAR file</li>" +
+                     "<li>Create credential file (Portal->Create Credentials) </li>" +
+                     "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -f <CREDENTIAL_FILE> -r " +
+                     RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
 
         HTMLPane text = new HTMLPane();
         text.setContents(str);
