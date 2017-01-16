@@ -1,43 +1,34 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 
 import com.smartgwt.client.widgets.layout.Layout;
+
 
 /**
  * The controller for the item pagination logic.
@@ -51,14 +42,11 @@ public abstract class PaginationController {
      */
     protected PaginationModel model;
 
-
-
     /**
      * Builds a controller for the pagination logic.
      */
-    public PaginationController(){
+    public PaginationController() {
     }
-
 
     /**
      * Fetch the next item list page
@@ -67,7 +55,6 @@ public abstract class PaginationController {
         model.setPage(model.getPage() + 1);
         this.fetch(false);
     }
-
 
     /**
      * Fetch the previous item list page
@@ -80,11 +67,10 @@ public abstract class PaginationController {
         this.fetch(false);
     }
 
-
     /**
      * Fetch the first item list page.
      */
-    public void firstPage(){
+    public void firstPage() {
         model.setPage(0);
         this.fetch(false);
     }
@@ -92,23 +78,22 @@ public abstract class PaginationController {
     /**
      * Fetch the last item list page.
      */
-    public void lastPage(){
+    public void lastPage() {
         this.model.setPage(this.model.getMaxPage());
         this.fetch(false);
     }
-
 
     /**
      * Fetch the page with the given number.
      * @param pageNumber the number of the page to be displayed.
      */
-    public void goToPage(int pageNumber){
-        if(pageNumber < 0){
+    public void goToPage(int pageNumber) {
+        if (pageNumber < 0) {
             pageNumber = 0;
         }
 
         int maxPage = this.model.getMaxPage();
-        if(pageNumber > maxPage){
+        if (pageNumber > maxPage) {
             pageNumber = maxPage;
         }
 
@@ -116,31 +101,26 @@ public abstract class PaginationController {
         this.fetch(false);
     }
 
-
     /**
      * Computes the number of the last page of items.
      * @param nbItem total number of items without pagination.
      */
-    public void computeMaxPage(long nbItem){
+    public void computeMaxPage(long nbItem) {
         this.model.setTotalItems(nbItem);
     }
-
 
     /**
      * Fetch the items for the current page.
      */
     public abstract void fetch(boolean silentFetch);
 
-
     public abstract Layout buildView();
-
-
 
     /**
      * Gets the text that displays the pagination status.
      * @return the text that displays the pagination status.
      */
-    public String getPaginationRangeLabel(){
+    public String getPaginationRangeLabel() {
         int page = this.model.getPage();
         int size = this.model.getPageSize();
 
@@ -149,37 +129,33 @@ public abstract class PaginationController {
         long range = index + size;
 
         index++;
-        if(index < 0){
+        if (index < 0) {
             index = 0;
         }
-        if(index > total){
+        if (index > total) {
             index = total;
         }
 
-        if(range < total){
+        if (range < total) {
             return index + " - " + range;
-        }
-        else{
+        } else {
             return index + " - " + total;
         }
     }
 
-
-    public String getNumberPageText(){
-        if(this.model.getTotalItems() > 0){
+    public String getNumberPageText() {
+        if (this.model.getTotalItems() > 0) {
             return "" + (this.model.getPage() + 1);
-        }
-        else{
+        } else {
             return "0";
         }
     }
-
 
     /**
      * Returns true if there is item before the current list of items, false otherwise.
      * @return true if there is item before the current list of items, false otherwise.
      */
-    public boolean hasPrevious(){
+    public boolean hasPrevious() {
         return (this.model.getPage() > 0);
     }
 
@@ -187,10 +163,9 @@ public abstract class PaginationController {
      * Returns true if there is item after the current list of items, false otherwise.
      * @return true if there is item after the current list of items, false otherwise.
      */
-    public boolean hasNext(){
+    public boolean hasNext() {
         return this.model.getTotalItems() > (this.model.getOffset() + this.model.getPageSize());
     }
-
 
     /**
      * Gets the pagination model.
@@ -204,20 +179,19 @@ public abstract class PaginationController {
      * Get the numero of the last page. 
      * @return the numero of the last page.
      */
-    public String getMaxPageNumberLabel(){
+    public String getMaxPageNumberLabel() {
         return "" + (this.model.getMaxPage() + 1);
     }
 
     /**
      * Reset the pagination, no items are displayed in the paginated list.
      */
-    public void resetPagination(){
+    public void resetPagination() {
         this.model.setPage(-1);
         this.model.setTotalItems(0);
     }
 
-
-    public void refresh(){
+    public void refresh() {
         this.fetch(true);
     }
 }

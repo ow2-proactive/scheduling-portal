@@ -1,51 +1,32 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import com.google.gwt.core.client.GWT;
-import com.smartgwt.client.types.FormMethod;
-import com.smartgwt.client.widgets.IButton;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
+import java.util.List;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobOutputListener;
@@ -58,7 +39,16 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultCon
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
-import java.util.List;
+import com.google.gwt.core.client.GWT;
+import com.smartgwt.client.types.FormMethod;
+import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.HiddenItem;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
@@ -72,8 +62,11 @@ import java.util.List;
 public class ResultView implements TaskSelectedListener, TasksUpdatedListener, JobOutputListener {
 
     public static final String TASK_ID_FIELD_NAME = "taskId";
+
     public static final String DESTINATION_FIELD_NAME = "destination";
+
     public static final String JOB_ID_FIELD_NAME = "jobId";
+
     public static final String SESSION_ID_FIELD_NAME = "sessionId";
 
     protected final String visuActivatedMessage = "Remote visualization is enabled.";
@@ -85,12 +78,17 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
     protected Layout root = null;
 
     protected Label visuLabelValue = null;
+
     protected Layout visuPane = null;
 
     protected Layout formPane = null;
+
     protected Label taskSelectedLabel = null;
+
     protected DynamicForm downloadForm;
+
     protected IButton openInBrowser;
+
     protected IButton saveAsFile;
 
     protected Task selectedTask = null;
@@ -132,10 +130,8 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         return this.root;
     }
 
-
     protected void buildRemoteVisuPane() {
-        Label visuLabelTitle = new Label(
-                "<span style='text-align:center;color:#003168'><b>Remote Visualization</b></span>");
+        Label visuLabelTitle = new Label("<span style='text-align:center;color:#003168'><b>Remote Visualization</b></span>");
         visuLabelTitle.setHeight(30);
 
         this.visuLabelValue = new Label(this.visuDesactivatedMessage);
@@ -149,10 +145,8 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         visuPane.setMembers(visuLabelTitle, this.visuLabelValue);
     }
 
-
     protected void buildTaskPreviewPane() {
-        Label taskPreviewLabelTitle = new Label(
-                "<span style='text-align:center;color:#003168'><b>Task Result</b></span>");
+        Label taskPreviewLabelTitle = new Label("<span style='text-align:center;color:#003168'><b>Task Result</b></span>");
         taskPreviewLabelTitle.setHeight(20);
 
         this.taskSelectedLabel = new Label(this.noTaskSelectedMessage);
@@ -192,9 +186,12 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         formPane = new VLayout();
         formPane.setMembersMargin(10);
         formPane.setWidth100();
-        formPane.setMembers(taskPreviewLabelTitle, this.taskSelectedLabel, this.downloadForm, openInBrowser, this.saveAsFile);
+        formPane.setMembers(taskPreviewLabelTitle,
+                            this.taskSelectedLabel,
+                            this.downloadForm,
+                            openInBrowser,
+                            this.saveAsFile);
     }
-
 
     protected void goToNoSelectedTaskState() {
         this.openInBrowser.setDisabled(true);
@@ -203,15 +200,13 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         this.selectedTask = null;
     }
 
-
     @Override
     public void taskSelected(Task task) {
         if (task == null) {
             this.goToNoSelectedTaskState();
         } else {
-            String label = "Task " + task.getName() + " (id: " + Long.toString(
-                    task.getId()) + ") from job " + task.getJobName() + " (id: " + Long.toString(
-                    task.getJobId()) + ")";
+            String label = "Task " + task.getName() + " (id: " + Long.toString(task.getId()) + ") from job " +
+                           task.getJobName() + " (id: " + Long.toString(task.getJobId()) + ")";
             this.taskSelectedLabel.setContents(label);
             this.selectedTask = task;
             decideButtonsStatus(task);
@@ -257,7 +252,6 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         this.goToNoSelectedTaskState();
     }
 
-
     @Override
     public void liveToggled(boolean newValue) {
         if (newValue) {
@@ -266,7 +260,6 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
             this.visuLabelValue.setContents(this.visuDesactivatedMessage);
         }
     }
-
 
     @Override
     public void jobOutputUpdated(JobOutput output, SelectionTarget target) {

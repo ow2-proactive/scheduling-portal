@@ -1,39 +1,39 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
+
+import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -46,22 +46,14 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavigationController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 
-import java.util.List;
 
 /**
  * View for the tasks navigation bar.
  * @author The activeeon team
  *
  */
-public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionListener, JobSelectedListener{
+public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionListener, JobSelectedListener {
 
     /**
      * Test field to specify the tag filter.
@@ -73,32 +65,31 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      */
     private CheckboxItem autoRefreshOption;
 
-
     /**
      * The main controller of the application.
      */
     //private SchedulerController schedulerController;
-
 
     /**
      * Controller for the navigation logic.
      */
     protected TasksNavigationController controller;
 
-
-
-
     /**
      * Build the view for the tasks navigation.
      * @param controller the main controller.
      */
-    public TasksNavigationView(TasksNavigationController controller){
+    public TasksNavigationView(TasksNavigationController controller) {
         this.controller = controller;
         this.controller.getModel().addTagSuggestionListener(this);
-        this.controller.getModel().getParentModel().getParentModel().getExecutionsModel().getJobsModel().addJobSelectedListener(this);
+        this.controller.getModel()
+                       .getParentModel()
+                       .getParentModel()
+                       .getExecutionsModel()
+                       .getJobsModel()
+                       .addJobSelectedListener(this);
         this.controller.getModel().getParentModel().addTasksUpdatedListener(this);
     }
-
 
     /**
      * Builds the view content.
@@ -112,7 +103,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.tagSearchTextBox.addKeyDownHandler(new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     changeTagFilterHandler();
                 }
             }
@@ -155,8 +146,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         return navTools;
     }
 
-
-
     @Override
     public void tasksUpdating() {
         this.tagSearchTextBox.setEnabled(false);
@@ -172,25 +161,18 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.tagSearchTextBox.setEnabled(false);
     }
 
-
-
     @Override
-    public void tagSuggestionListUpdated(){
+    public void tagSuggestionListUpdated() {
         this.tagSearchTextBox.showSuggestionList();
     }
-
 
     /**
      * Handler when the tag in the textbox changed.
      */
-    protected void changeTagFilterHandler(){
+    protected void changeTagFilterHandler() {
         String tag = tagSearchTextBox.getText();
         this.controller.setTaskTagFilter(tag);
     }
-
-
-
-
 
     @Override
     public void jobSelected(Job job) {
@@ -198,7 +180,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.tagSearchTextBox.setText("");
         this.controller.resetNavigation();
     }
-
 
     @Override
     public void jobUnselected() {
@@ -208,7 +189,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
     }
 
-
     /**
      * Gets the tasks pagination controller.
      * @return the tasks pagination controller.
@@ -216,8 +196,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public TasksPaginationController getTaskPaginationController() {
         return controller.getPaginationController();
     }
-
-
 
     @Override
     public void selectedJobUpdated(Job job) {

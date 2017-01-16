@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -44,6 +33,7 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -54,8 +44,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface SchedulerServiceAsync {
 
     public static final int LOG_ALL = 1;
+
     public static final int LOG_STDOUT = 2;
+
     public static final int LOG_STDERR = 3;
+
     public static final int LOG_FULL = 4;
 
     /**
@@ -164,8 +157,7 @@ public interface SchedulerServiceAsync {
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
     Request getTasks(String sessionId, String jobId, int offset, int limit, AsyncCallback<String> callback);
-    
-    
+
     /**
      * Method used for making an asynchronous call to the server for returning a list of 
      * tasks that correspond to a job and filtered by a given tag.
@@ -174,20 +166,17 @@ public interface SchedulerServiceAsync {
      * @param tag the tag used to filter the tasks.
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
-    Request getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit, AsyncCallback<String> callback);
-
+    Request getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit,
+            AsyncCallback<String> callback);
 
     Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
-                           boolean running, boolean finished, int offset, int limit,
-                           TasksCentricController.SortSpecifierRestContainer sortParameters,
-                           AsyncCallback<String> callback);
+            boolean running, boolean finished, int offset, int limit,
+            TasksCentricController.SortSpecifierRestContainer sortParameters, AsyncCallback<String> callback);
 
+    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks,
+            boolean pending, boolean running, boolean finished, int offset, int limit,
+            TasksCentricController.SortSpecifierRestContainer sortParameters, AsyncCallback<String> callback);
 
-    Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks, boolean pending,
-                                boolean running, boolean finished, int offset, int limit,
-                                TasksCentricController.SortSpecifierRestContainer sortParameters,
-                                AsyncCallback<String> callback);
-    
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
      * @param sessionId a valid session id
@@ -196,8 +185,7 @@ public interface SchedulerServiceAsync {
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
     Request getJobTaskTagsPrefix(String sessionId, String jobId, String prefix, AsyncCallback<String> callback);
-    
-    
+
     /**
      * Gets the properties needed by the client. When loading properties we can only
      * change properties value on the server side. For changing properties on the client
@@ -215,7 +203,7 @@ public interface SchedulerServiceAsync {
      * @param callback the result returned.
      */
     void getJobInfo(String sessionId, String jobId, AsyncCallback<String> callback);
-    
+
     /**
      * Gets the job info details by making an asynchronous call to the server. 
      * @param sessionId the session id of the user which is logged in
@@ -223,7 +211,6 @@ public interface SchedulerServiceAsync {
      * @param callback the result returned.
      */
     void getJobInfoDetails(String sessionId, String jobId, AsyncCallback<String> callback);
-    
 
     /**
      * Sets the priority of a job.
@@ -232,8 +219,7 @@ public interface SchedulerServiceAsync {
      * @param priorityName the name of the new priority
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
-    void setPriorityByName(String sessionId, List<Integer> list, String priorityName,
-            AsyncCallback<Void> callback);
+    void setPriorityByName(String sessionId, List<Integer> list, String priorityName, AsyncCallback<Void> callback);
 
     /**
      * Pauses the Scheduler.
@@ -332,8 +318,8 @@ public interface SchedulerServiceAsync {
      * @param finished fetch finished jobs 
      * @param callback
      */
-    void revisionAndjobsinfo(String sessionId, int index, int range, boolean myJobs, boolean pending,
-            boolean running, boolean finished, AsyncCallback<String> callback);
+    void revisionAndjobsinfo(String sessionId, int index, int range, boolean myJobs, boolean pending, boolean running,
+            boolean finished, AsyncCallback<String> callback);
 
     void schedulerStateRevision(String sessionId, AsyncCallback<Long> callback);
 
@@ -394,7 +380,8 @@ public interface SchedulerServiceAsync {
      */
     Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
 
-    void getUsage(String sessionId, String user, Date startDate, Date endDate, AsyncCallback<List<JobUsage>> asyncCallback);
+    void getUsage(String sessionId, String user, Date startDate, Date endDate,
+            AsyncCallback<List<JobUsage>> asyncCallback);
 
     void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
 

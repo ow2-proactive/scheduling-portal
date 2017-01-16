@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -47,10 +36,10 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
@@ -118,21 +107,25 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /** periodically updates the local state */
     private Timer updater = null;
+
     /** periodically fetches runtime stats */
     private Timer statsUpdater = null;
 
     /** remote gwt service */
     private RMServiceAsync rm = null;
+
     /** stores client data */
     private RMModelImpl model = null;
 
     /** shown when not logged in */
     private LoginPage loginPage = null;
+
     /** shown when logged in */
     private RMPage rmPage = null;
 
     /** result of the latest call to {@link RMServiceAsync#getStatHistory(String, String, AsyncCallback)} */
     private Request statHistReq = null;
+
     /** system.currenttimemillis of last StatHistory call */
     private long lastStatHistReq = 0;
 
@@ -270,9 +263,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
-            loginModel.getSessionId() + ")");
+                                          loginModel.getSessionId() + ")");
     }
-
 
     @Override
     public void logout() {
@@ -308,8 +300,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             public void run() {
 
                 if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
-                    teardown("Duplicate session detected!<br>"
-                        + "Another tab or window in this browser is accessing this page.");
+                    teardown("Duplicate session detected!<br>" +
+                             "Another tab or window in this browser is accessing this page.");
                 }
                 fetchRMMonitoring();
 
@@ -324,8 +316,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
         };
         this.statsUpdater.scheduleRepeating(RMConfig.get().getStatisticsRefreshTime());
-        }
-
+    }
 
     private void fetchNodesLimit() {
         this.rm.getState(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
@@ -343,7 +334,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onFailure(Throwable caught) {
-                LogModel.getInstance().logMessage("Failed to access node limit through rmState: " + caught.getMessage());
+                LogModel.getInstance()
+                        .logMessage("Failed to access node limit through rmState: " + caught.getMessage());
             }
         });
     }
@@ -353,8 +345,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount",
-                "AvailableNodesCount", "AverageActivity" };
+        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
+                                          "AverageActivity" };
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
@@ -376,88 +368,93 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (dt > updateFreq * 1000 || changedRange) {
             this.lastStatHistReq = now;
 
-            this.statHistReq = rm.getStatHistory(LoginModel.getInstance().getSessionId(), range, new AsyncCallback<String>() {
-                @Override
-                public void onSuccess(String result) {
+            this.statHistReq = rm.getStatHistory(LoginModel.getInstance().getSessionId(),
+                                                 range,
+                                                 new AsyncCallback<String>() {
+                                                     @Override
+                                                     public void onSuccess(String result) {
 
-                    JSONValue val = RMController.this.parseJSON(result);
-                    JSONObject obj = val.isObject();
+                                                         JSONValue val = RMController.this.parseJSON(result);
+                                                         JSONObject obj = val.isObject();
 
-                    HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
-                    for (String source : obj.keySet()) {
-                        JSONArray arr = obj.get(source).isArray();
+                                                         HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
+                                                         for (String source : obj.keySet()) {
+                                                             JSONArray arr = obj.get(source).isArray();
 
-                        ArrayList<Double> values = new ArrayList<Double>();
-                        for (int i = 0; i < arr.size(); i++) {
-                            JSONValue dval = arr.get(i);
-                            if (dval.isNumber() != null) {
-                                values.add(dval.isNumber().doubleValue());
-                            } else if (i < arr.size() - 1) {
-                                values.add(Double.NaN);
-                            }
+                                                             ArrayList<Double> values = new ArrayList<Double>();
+                                                             for (int i = 0; i < arr.size(); i++) {
+                                                                 JSONValue dval = arr.get(i);
+                                                                 if (dval.isNumber() != null) {
+                                                                     values.add(dval.isNumber().doubleValue());
+                                                                 } else if (i < arr.size() - 1) {
+                                                                     values.add(Double.NaN);
+                                                                 }
 
-                        }
-                        StatHistory st = new StatHistory(source, values, model
-                                .getRequestedStatHistoryRange(source));
-                        stats.put(source, st);
-                    }
-                    model.setStatHistory(stats);
-                    LogModel.getInstance().logMessage("Updated Statistics History in " + (System.currentTimeMillis() - now) +
-                        "ms");
-                }
+                                                             }
+                                                             StatHistory st = new StatHistory(source,
+                                                                                              values,
+                                                                                              model.getRequestedStatHistoryRange(source));
+                                                             stats.put(source, st);
+                                                         }
+                                                         model.setStatHistory(stats);
+                                                         LogModel.getInstance()
+                                                                 .logMessage("Updated Statistics History in " +
+                                                                             (System.currentTimeMillis() - now) + "ms");
+                                                     }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    if (JSONUtils.getJsonErrorCode(caught) == 401) {
-                        teardown("You have been disconnected from the server.");
-                    } else {
-                        error("Failed to fetch Statistics History: " + JSONUtils.getJsonErrorMessage(caught));
-                    }
-                }
-            });
+                                                     @Override
+                                                     public void onFailure(Throwable caught) {
+                                                         if (JSONUtils.getJsonErrorCode(caught) == 401) {
+                                                             teardown("You have been disconnected from the server.");
+                                                         } else {
+                                                             error("Failed to fetch Statistics History: " +
+                                                                   JSONUtils.getJsonErrorMessage(caught));
+                                                         }
+                                                     }
+                                                 });
         }
 
         /*
-         * max nodes from RRD on RM 
+         * max nodes from RRD on RM
          * not used right now, uncomment if needed
          * 
-        List<String> attrs = new ArrayList<String>();
-        attrs.add("MaxFreeNodes");
-        attrs.add("MaxBusyNodes");
-        attrs.add("MaxDownNodes");
-        // attrs.add("MaxTotalNodes"); // for some reason there is no Max Total Nodes...
-
-        rm.getMBeanInfo(model.getSessionId(),
-        		"ProActiveResourceManager:name=RuntimeData", attrs,
-        		new AsyncCallback<String>() {
-
-        			@Override
-        			public void onFailure(Throwable caught) {
-        				error("Failed to get MBean Info: "
-        						+ getJsonErrorMessage(caught));
-
-        			}
-
-        			@Override
-        			public void onSuccess(String result) {
-        				JSONArray arr = JSONParser.parseStrict(result)
-        						.isArray();
-        				for (int i = 0; i < arr.size(); i++) {
-        					String name = arr.get(i).isObject().get("name")
-        							.isString().stringValue();
-        					int value = (int) arr.get(i).isObject()
-        							.get("value").isNumber().doubleValue();
-        					if (name.equals("MaxFreeNodes")) {
-        						model.setMaxNumFree(value);
-        					} else if (name.equals("MaxBusyNodes")) {
-        						model.setMaxNumBusy(value);
-        					} else if (name.equals("MaxDownNodes")) {
-        						model.setMaxNumDown(value);
-        					}
-        				}
-
-        			}
-        		});
+         * List<String> attrs = new ArrayList<String>();
+         * attrs.add("MaxFreeNodes");
+         * attrs.add("MaxBusyNodes");
+         * attrs.add("MaxDownNodes");
+         * // attrs.add("MaxTotalNodes"); // for some reason there is no Max Total Nodes...
+         * 
+         * rm.getMBeanInfo(model.getSessionId(),
+         * "ProActiveResourceManager:name=RuntimeData", attrs,
+         * new AsyncCallback<String>() {
+         * 
+         * @Override
+         * public void onFailure(Throwable caught) {
+         * error("Failed to get MBean Info: "
+         * + getJsonErrorMessage(caught));
+         * 
+         * }
+         * 
+         * @Override
+         * public void onSuccess(String result) {
+         * JSONArray arr = JSONParser.parseStrict(result)
+         * .isArray();
+         * for (int i = 0; i < arr.size(); i++) {
+         * String name = arr.get(i).isObject().get("name")
+         * .isString().stringValue();
+         * int value = (int) arr.get(i).isObject()
+         * .get("value").isNumber().doubleValue();
+         * if (name.equals("MaxFreeNodes")) {
+         * model.setMaxNumFree(value);
+         * } else if (name.equals("MaxBusyNodes")) {
+         * model.setMaxNumBusy(value);
+         * } else if (name.equals("MaxDownNodes")) {
+         * model.setMaxNumDown(value);
+         * }
+         * }
+         * 
+         * }
+         * });
          */
     }
 
@@ -484,7 +481,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchRMMonitoring() {
         final long t = System.currentTimeMillis();
-        
+
         rm.getMonitoring(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (!LoginModel.getInstance().isLoggedIn())
@@ -493,7 +490,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 HashMap<String, NodeSource> nodes = parseRMMonitoring(result);
                 model.setNodes(nodes);
                 LogModel.getInstance().logMessage("Fetched " + nodes.size() + " node sources in " +
-                    (System.currentTimeMillis() - t) + "ms");
+                                                  (System.currentTimeMillis() - t) + "ms");
             }
 
             public void onFailure(Throwable caught) {
@@ -578,8 +575,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     proactiveJMXUrl = paJmx.stringValue();
                 }
 
-                Node n = new Node(nodeUrl, nodeState, nodeInfo, timeStamp, timeStampFormatted, nodeProvider,
-                    nodeOwner, nss, hostName, vmName, description, defaultJMXUrl, proactiveJMXUrl);
+                Node n = new Node(nodeUrl,
+                                  nodeState,
+                                  nodeInfo,
+                                  timeStamp,
+                                  timeStampFormatted,
+                                  nodeProvider,
+                                  nodeOwner,
+                                  nss,
+                                  hostName,
+                                  vmName,
+                                  description,
+                                  defaultJMXUrl,
+                                  proactiveJMXUrl);
 
                 // deploying node
                 if (hostName == null || hostName.length() == 0) {
@@ -630,8 +638,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 System.out.println(nodes.get(i).toString());
                 t.printStackTrace();
 
-                LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() + " for input: " +
-                    nodes.get(i).toString());
+                LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
+                                                          " for input: " + nodes.get(i).toString());
             }
         }
 
@@ -778,7 +786,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
-                        JSONUtils.getJsonErrorMessage(caught));
+                                                           JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -797,7 +805,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
-                        JSONUtils.getJsonErrorMessage(caught));
+                                                           JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -820,7 +828,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             _msg = "Node " + model.getSelectedNode().getNodeUrl();
         } else if (model.getSelectedHost() != null) {
             _msg = "1 Node from Host " + model.getSelectedHost().getHostName() + " (ns: " +
-                model.getSelectedHost().getSourceName() + ")";
+                   model.getSelectedHost().getSourceName() + ")";
             _numNodes = model.getSelectedHost().getNodes().size();
         } else if (model.getSelectedNodeSource() != null) {
             _msg = "NodeSource " + model.getSelectedNodeSource().getSourceName();
@@ -851,27 +859,32 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (model.getSelectedNode() != null) {
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
-                    rm
-                            .removeNode(LoginModel.getInstance().getSessionId(), model.getSelectedNode().getNodeUrl(), force,
-                                    callback);
+                    rm.removeNode(LoginModel.getInstance().getSessionId(),
+                                  model.getSelectedNode().getNodeUrl(),
+                                  force,
+                                  callback);
                 }
             });
         } else if (model.getSelectedHost() != null) {
             final Host h = model.getSelectedHost();
-            confirmRemoveNode("Confirm removal of <strong>" + numNodes + " node" +
-                ((numNodes > 1) ? "s" : "") + "</strong> on <strong>host " + h.getHostName() + "</strong>",
-                    new NodeRemovalCallback() {
-                        public void run(boolean force) {
-                            for (Node n : h.getNodes().values()) {
-                                rm.removeNode(LoginModel.getInstance().getSessionId(), n.getNodeUrl(), force, callback);
-                            }
-                        }
-                    });
+            confirmRemoveNode("Confirm removal of <strong>" + numNodes + " node" + ((numNodes > 1) ? "s" : "") +
+                              "</strong> on <strong>host " + h.getHostName() + "</strong>", new NodeRemovalCallback() {
+                                  public void run(boolean force) {
+                                      for (Node n : h.getNodes().values()) {
+                                          rm.removeNode(LoginModel.getInstance().getSessionId(),
+                                                        n.getNodeUrl(),
+                                                        force,
+                                                        callback);
+                                      }
+                                  }
+                              });
         } else if (model.getSelectedNodeSource() != null) {
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
-                    rm.removeNodesource(LoginModel.getInstance().getSessionId(), model.getSelectedNodeSource().getSourceName(),
-                            force, callback);
+                    rm.removeNodesource(LoginModel.getInstance().getSessionId(),
+                                        model.getSelectedNodeSource().getSourceName(),
+                                        force,
+                                        callback);
                 }
             });
         }
@@ -1050,40 +1063,45 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         error(e.getMessage());
     }
 
-
     private String parseScriptResult(String json) {
         StringBuilder scriptResultStr = new StringBuilder();
         JSONObject scriptResult = this.parseJSON(json).isObject();
 
         JSONObject exception = scriptResult.get("exception").isObject();
-        while (exception!=null && exception.get("cause")!= null && 
-                exception.get("cause").isObject()!=null) {
+        while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
             exception = exception.get("cause").isObject();
         }
 
-        if (exception!=null && exception.get("message").isString()!=null) {
+        if (exception != null && exception.get("message").isString() != null) {
             scriptResultStr.append(exception.get("message").isString().stringValue());
         }
 
         JSONString output = scriptResult.get("output").isString();
-        if (output!=null) {
+        if (output != null) {
             scriptResultStr.append(output.stringValue());
         }
 
         return scriptResultStr.toString();
     }
 
-    public void executeScript(final String script, final String engine, final String nodeUrl, final Callback<String, String> syncCallBack) {
-        rm.executeNodeScript(LoginModel.getInstance().getSessionId(), script, engine, nodeUrl, new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-                LogModel.getInstance().logImportantMessage("Failed to execute a script " + script + " on " + nodeUrl +" : " +
-                        JSONUtils.getJsonErrorMessage(caught));
-                syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
-            }
+    public void executeScript(final String script, final String engine, final String nodeUrl,
+            final Callback<String, String> syncCallBack) {
+        rm.executeNodeScript(LoginModel.getInstance().getSessionId(),
+                             script,
+                             engine,
+                             nodeUrl,
+                             new AsyncCallback<String>() {
+                                 public void onFailure(Throwable caught) {
+                                     LogModel.getInstance()
+                                             .logImportantMessage("Failed to execute a script " + script + " on " +
+                                                                  nodeUrl + " : " +
+                                                                  JSONUtils.getJsonErrorMessage(caught));
+                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                                 }
 
-            public void onSuccess(String result) {
-                syncCallBack.onSuccess(parseScriptResult(result));
-            }
-        });
+                                 public void onSuccess(String result) {
+                                     syncCallBack.onSuccess(parseScriptResult(result));
+                                 }
+                             });
     }
 }

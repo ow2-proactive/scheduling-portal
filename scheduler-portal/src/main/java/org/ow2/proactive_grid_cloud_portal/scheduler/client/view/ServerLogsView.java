@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
@@ -55,11 +44,11 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  *
  */
-public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, ServerLogsController> implements ServerLogsListener{
+public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, ServerLogsController>
+        implements ServerLogsListener {
 
     /** contains the layout */
     private Layout root = null;
-    
 
     /**
      * Default constructor
@@ -69,9 +58,9 @@ public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, S
         super(controller);
         this.refreshButtonLabel = "Fetch logs";
         this.refreshButtonTooltip = "Request fetching the Output for this job";
-        this.noOutputMessage = "No logs available<br><br>"
-                + "Click <strong>Fetch logs</strong> to retrieve logs for tasks<br>";
-        
+        this.noOutputMessage = "No logs available<br><br>" +
+                               "Click <strong>Fetch logs</strong> to retrieve logs for tasks<br>";
+
         controller.getModel().addServerlogsListener(this);
     }
 
@@ -101,40 +90,35 @@ public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, S
         fill.setWidth100();
 
         buttons.setMembers(form, fill, refreshButton);
-        
+
         VLayout textlayout = this.buildOutputPane();
 
         this.root.addMember(buttons);
         this.root.addMember(textlayout);
-        
+
         this.goToNoTargetState();
 
         return this.root;
     }
 
-   
-    
     @Override
-    public void selectedJobUpdated(Job job) {   
+    public void selectedJobUpdated(Job job) {
         this.controller.refreshOutput();
     }
-    
 
     @Override
     public void logsUpdated(String logs, String jobId) {
-        if(jobId == null){
+        if (jobId == null) {
             this.goToNoTargetState();
-        }
-        else{
+        } else {
             this.goToTargetSelectedState();
-            if(logs == null){
+            if (logs == null) {
                 this.goToUnavailableOutputState();
-            }
-            else{
+            } else {
                 this.showContent(logs);
             }
         }
-        
+
     }
-    
+
 }

@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
@@ -78,14 +67,21 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     protected final int MAX_ROWS_NUMBER = 100;
 
     protected RMController controller;
+
     protected String jmxServerUrl;
+
     protected String mbeanName;
+
     protected String[] attrs;
 
     protected CoreChart loadChart;
+
     protected DataTable loadTable;
+
     protected Options loadOpts;
+
     protected AbsolutePanel chartContainer;
+
     protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
     protected Runnable onFinish;
@@ -102,8 +98,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadAxis.setSlantedText(false);
         loadOpts.setLegend(LegendPosition.NONE);
         loadOpts.setHAxisOptions(loadAxis);
-        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
-                "#000000");
+        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
         loadAxis.setMinValue(0);
 
         loadTable = DataTable.create();
@@ -140,7 +135,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
         final LoginModel loginModel = LoginModel.getInstance();
-        
+
         AsyncCallback callback = new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (onFinish != null) {
@@ -150,7 +145,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                     return;
 
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
-                        (System.currentTimeMillis() - t) + "ms");
+                                                  (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
                     processResult(result);
@@ -173,7 +168,12 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             rm.getNodeMBeanInfo(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
         } else {
             try {
-                rm.getNodeMBeanHistory(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+                rm.getNodeMBeanHistory(loginModel.getSessionId(),
+                                       jmxServerUrl,
+                                       mbeanName,
+                                       Arrays.asList(attrs),
+                                       String.valueOf(timeRange.getChar()),
+                                       callback);
             } catch (Exception e) {
                 LogModel.getInstance().logCriticalMessage(e.getMessage());
             }
@@ -181,9 +181,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     protected int getJsonInternalSize(JSONObject json) {
-        for (String key: json.keySet()) {
+        for (String key : json.keySet()) {
             JSONArray values = json.get(key).isArray();
-            if (values!=null) {
+            if (values != null) {
                 return values.size();
             }
         }
@@ -196,7 +196,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         double[] res = new double[json.keySet().size()];
 
         int counter = 0;
-        for (String key: json.keySet()) {
+        for (String key : json.keySet()) {
             JSONArray values = json.get(key).isArray();
             double numValue = 0;
 
@@ -232,7 +232,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         long size = getJsonInternalSize(json);
         long step = dur / size;
 
-        for (int i=0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
 
             double[] slice = getJsonSlice(json, i);
             long t = now - dur + step * i;
@@ -243,7 +243,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             loadTable.setValue(i, 0, timeStamp);
 
             for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
-                loadTable.setValue(i, sliceIndex+1, formatValue(slice[sliceIndex]));
+                loadTable.setValue(i, sliceIndex + 1, formatValue(slice[sliceIndex]));
             }
         }
 

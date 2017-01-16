@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
@@ -54,60 +43,75 @@ public class RMConfig extends Config {
 
     /** URL of the REST service */
     public static final String REST_URL = "rm.rest.url";
+
     private static final String d_REST_URL = "http://localhost:8080/rest";
+
     public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
     public static final String RM_URL = "rm.url";
+
     private static final String d_RM_URL = "pnp://localhost:64738";
 
     /** refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "rm.client.refresh.time";
+
     private static final String d_CLIENT_REFRESH_TIME = "3000";
 
     /** release version string */
     public static final String VERSION = "rm.version";
+
     private static final String d_VERSION = "0.0";
 
     /** REST version string */
     public static final String REST_VERSION = "rm.rest.version";
+
     private static final String d_REST_VERSION = "0.0";
 
     /** RM version string */
     public static final String RM_VERSION = "rm.server.version";
+
     private static final String d_RM_VERSION = "0.0";
 
     /** stat history refresh rate in millis */
     public static final String STATISTICS_REFRESH_TIME = "rm.client.stats.time";
+
     private static final String d_STATISTICS_REFRESH_TIME = "5000";
 
     /** message of the day */
     public static final String MOTD_URL = "rm.motd.url";
+
     private static final String d_MOTD_URL = "";
 
     /** the protocol for jmx nodes communication (default or proactive) */
     public static final String MONITORING_PROTOCOL = "rm.monitoring.protocol";
+
     public static final String MONITORING_PROTOCOL_DEFAULT = "default";
 
     /** refresh period in milliseconds */
     public static final String MONITORING_PERIOD = "rm.monitoring.period";
+
     public static final String MONITORING_PERIOD_DEFAULT = "10000";
 
     /** hostname used to form the jmx url to monitor the node sources in the RM */
     public static final String RM_JMX_HOSTNAME = "rm.jmx.hostname";
+
     public static final String RM_JMX_HOSTNAME_DEFAULT = "localhost";
-    
+
     /** port used to form the jmx url to monitor the node sources in the RM */
     public static final String RM_JMX_PORT = "rm.jmx.port";
+
     public static final String RM_JMX_PORT_DEFAULT = "5822";
-    
+
     /** servername used to form the jmx url to monitor the node sources in the RM */
     public static final String RM_JMX_SERVER_NAME = "rm.jmx.servername";
+
     public static final String RM_JMX_SERVER_NAME_DEFAULT = "JMXRMAgent";
-    
+
     /** prefix used to form the jmx url to monitor the node sources in the RM */
     public static final String RM_JMX_PREFIX = "rm.jmx.prefix";
+
     public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
-    
+
     private static RMConfig instance = null;
 
     /**
@@ -204,28 +208,28 @@ public class RMConfig extends Config {
     public int getMonitoringPeriod() {
         return Integer.parseInt(properties.get(MONITORING_PERIOD));
     }
-    
+
     /**
      * @return hostname used to form the jmx url to monitor the node sources in the RM
      */
     public String getRMJmxHostname() {
         return properties.get(RM_JMX_HOSTNAME);
     }
-    
+
     /**
      * @return port used to form the jmx url to monitor the node sources in the RM
      */
     public int getRMJmxPort() {
         return Integer.parseInt(properties.get(RM_JMX_PORT));
     }
-    
+
     /**
      * @return server name used to form the jmx url to monitor the node sources in the RM
      */
     public String getRMJmxServerName() {
         return properties.get(RM_JMX_SERVER_NAME);
     }
-    
+
     /**
      * @return prefix used to form the jmx url to monitor the node sources in the RM
      */
@@ -237,4 +241,3 @@ public class RMConfig extends Config {
         return properties.get(RM_URL);
     }
 }
-

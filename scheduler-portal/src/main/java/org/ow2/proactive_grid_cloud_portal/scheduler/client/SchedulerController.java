@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -112,49 +101,41 @@ public class SchedulerController extends Controller implements UncaughtException
     /** writable view of the model */
     private SchedulerModelImpl model = null;
 
-    
-
     /** login page when not logged in, or null */
     private LoginPage loginView = null;
+
     /** main page when logged in, or null */
     private SchedulerPage schedulerView = null;
 
-    
-    
     /** periodically updates the local job view */
     private Timer schedulerTimerUpdate = null;
-    
- // incremented each time #fetchJobs is called
-    private int timerUpdate = 0;
 
-    
+    // incremented each time #fetchJobs is called
+    private int timerUpdate = 0;
 
     /** frequency of user info fetch */
     private int userFetchTick = active_tick;
+
     /** frequency of stats info fetch */
     private int statsFetchTick = active_tick;
 
     /** do not fetch visualization info when false */
     private boolean visuFetchEnabled = false;
 
-    
-
     private static final int active_tick = 3;
+
     private static final int lazy_tick = 20;
 
     private Timer autoLoginTimer;
 
-
     protected TasksController tasksController;
 
-
     protected ExecutionsController executionController;
-    
+
     protected OutputController outputController;
-    
+
     protected ServerLogsController serverLogsController;
 
-    
     protected ResultController resultController;
 
     /**
@@ -165,7 +146,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public SchedulerController(SchedulerServiceAsync scheduler) {
         this.scheduler = scheduler;
         this.model = new SchedulerModelImpl();
-        
+
         init();
     }
 
@@ -242,9 +223,6 @@ public class SchedulerController extends Controller implements UncaughtException
         return this.model;
     }
 
-
-
-
     public SchedulerServiceAsync getScheduler() {
         return scheduler;
     }
@@ -283,7 +261,7 @@ public class SchedulerController extends Controller implements UncaughtException
         this.schedulerView = new SchedulerPage(this);
 
         this.executionController.getJobsController().fetchJobs(true);
-        
+
         this.startTimer();
 
         String lstr = "";
@@ -305,7 +283,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
-                loginModel.getSessionId() + ")");
+                                          loginModel.getSessionId() + ")");
     }
 
     /**
@@ -337,38 +315,32 @@ public class SchedulerController extends Controller implements UncaughtException
         teardown(null);
         tryToLoginIfLoggedInRm();
     }
-    
-    
-    
-    public Layout buildTaskView(){
+
+    public Layout buildTaskView() {
         this.tasksController = new TasksController(this);
         return this.tasksController.buildView();
     }
-    
-    
-    public SectionStackSection buildExecutionsView(){
+
+    public SectionStackSection buildExecutionsView() {
         this.executionController = new ExecutionsController(this);
         return this.executionController.buildView();
     }
-    
-   
-    public Layout buildOutputView(){
+
+    public Layout buildOutputView() {
         this.outputController = new OutputController(this);
         return this.outputController.buildView();
     }
-    
-    
-    public Layout buildServerLogsView(){
+
+    public Layout buildServerLogsView() {
         this.serverLogsController = new ServerLogsController(this);
         return this.serverLogsController.buildView();
     }
-    
-    
-    public Layout buildPreviewView(){
+
+    public Layout buildPreviewView() {
         this.resultController = new ResultController(this);
         return this.resultController.buildView();
     }
-    
+
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
     }
@@ -387,7 +359,7 @@ public class SchedulerController extends Controller implements UncaughtException
                     public void onSuccess(String result) {
                         model.setJobHtml(jobId, result);
                         LogModel.getInstance().logMessage("Fetched html for job " + jobId + " in " +
-                                (System.currentTimeMillis() - t) + " ms");
+                                                          (System.currentTimeMillis() - t) + " ms");
                     }
 
                     public void onFailure(Throwable caught) {
@@ -405,33 +377,35 @@ public class SchedulerController extends Controller implements UncaughtException
                             model.setJobImagePath(jobId, curPath);
                         } else {
                             final long t = System.currentTimeMillis();
-                            scheduler.getJobImage(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
-                                public void onSuccess(String result) {
-                                    model.setJobImagePath(jobId, result);
-                                    LogModel.getInstance().logMessage("Fetched image for job " + jobId + " in " +
-                                            (System.currentTimeMillis() - t) + " ms");
-                                }
+                            scheduler.getJobImage(LoginModel.getInstance().getSessionId(),
+                                                  jobId,
+                                                  new AsyncCallback<String>() {
+                                                      public void onSuccess(String result) {
+                                                          model.setJobImagePath(jobId, result);
+                                                          LogModel.getInstance()
+                                                                  .logMessage("Fetched image for job " + jobId +
+                                                                              " in " +
+                                                                              (System.currentTimeMillis() - t) + " ms");
+                                                      }
 
-                                public void onFailure(Throwable caught) {
-                                    String msg = "Failed to fetch image for job " + jobId;
-                                    String json = JSONUtils.getJsonErrorMessage(caught);
-                                    if (json != null)
-                                        msg += " : " + json;
+                                                      public void onFailure(Throwable caught) {
+                                                          String msg = "Failed to fetch image for job " + jobId;
+                                                          String json = JSONUtils.getJsonErrorMessage(caught);
+                                                          if (json != null)
+                                                              msg += " : " + json;
 
-                                    LogModel.getInstance().logImportantMessage(msg);
-                                    model.visuUnavailable(jobId);
-                                }
-                            });
+                                                          LogModel.getInstance().logImportantMessage(msg);
+                                                          model.visuUnavailable(jobId);
+                                                      }
+                                                  });
                         }
                     }
                 });
             }
 
-
         }
     }
 
-    
     /**
      * Attempt to start the scheduler, might fail depending the server state/rights
      */
@@ -534,16 +508,14 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-
     public OutputController getOutputController() {
         return outputController;
     }
 
-    public void restartTimer(){
+    public void restartTimer() {
         this.stopTimer();
         this.startTimer();
     }
-    
 
     /**
      * Starts the Timer that will periodically fetch the current scheduler state
@@ -559,8 +531,8 @@ public class SchedulerController extends Controller implements UncaughtException
             public void run() {
 
                 if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
-                    teardown("Duplicate session detected!<br>"
-                            + "Another tab or window in this browser is accessing this page.");
+                    teardown("Duplicate session detected!<br>" +
+                             "Another tab or window in this browser is accessing this page.");
                 }
 
                 SchedulerController.this.updateSchedulerStatus();
@@ -584,7 +556,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
                             long t = (System.currentTimeMillis() - t1);
                             LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + users.size() +
-                                    " users in " + t + " ms</span>");
+                                                              " users in " + t + " ms</span>");
                         }
 
                         public void onFailure(Throwable caught) {
@@ -614,83 +586,84 @@ public class SchedulerController extends Controller implements UncaughtException
                             if (json == null)
                                 error("Expected JSON Object: " + result);
 
-                            stats.put("JobSubmittingPeriod", json.get("JobSubmittingPeriod").isString()
-                                    .stringValue());
-                            stats.put("FormattedJobSubmittingPeriod", json
-                                    .get("FormattedJobSubmittingPeriod").isString().stringValue());
-                            stats.put("MeanJobPendingTime", json.get("MeanJobPendingTime").isString()
-                                    .stringValue());
-                            stats.put("ConnectedUsersCount", json.get("ConnectedUsersCount").isString()
-                                    .stringValue());
-                            stats.put("FinishedTasksCount", json.get("FinishedTasksCount").isString()
-                                    .stringValue());
-                            stats.put("RunningJobsCount", json.get("RunningJobsCount").isString()
-                                    .stringValue());
-                            stats.put("RunningTasksCount", json.get("RunningTasksCount").isString()
-                                    .stringValue());
-                            stats.put("FormattedMeanJobPendingTime", json.get("FormattedMeanJobPendingTime")
-                                    .isString().stringValue());
-                            stats.put("MeanJobExecutionTime", json.get("MeanJobExecutionTime").isString()
-                                    .stringValue());
-                            stats.put("PendingTasksCount", json.get("PendingTasksCount").isString()
-                                    .stringValue());
-                            stats.put("FinishedJobsCount", json.get("FinishedJobsCount").isString()
-                                    .stringValue());
+                            stats.put("JobSubmittingPeriod", json.get("JobSubmittingPeriod").isString().stringValue());
+                            stats.put("FormattedJobSubmittingPeriod",
+                                      json.get("FormattedJobSubmittingPeriod").isString().stringValue());
+                            stats.put("MeanJobPendingTime", json.get("MeanJobPendingTime").isString().stringValue());
+                            stats.put("ConnectedUsersCount", json.get("ConnectedUsersCount").isString().stringValue());
+                            stats.put("FinishedTasksCount", json.get("FinishedTasksCount").isString().stringValue());
+                            stats.put("RunningJobsCount", json.get("RunningJobsCount").isString().stringValue());
+                            stats.put("RunningTasksCount", json.get("RunningTasksCount").isString().stringValue());
+                            stats.put("FormattedMeanJobPendingTime",
+                                      json.get("FormattedMeanJobPendingTime").isString().stringValue());
+                            stats.put("MeanJobExecutionTime",
+                                      json.get("MeanJobExecutionTime").isString().stringValue());
+                            stats.put("PendingTasksCount", json.get("PendingTasksCount").isString().stringValue());
+                            stats.put("FinishedJobsCount", json.get("FinishedJobsCount").isString().stringValue());
                             stats.put("TotalTasksCount", json.get("TotalTasksCount").isString().stringValue());
                             stats.put("FormattedMeanJobExecutionTime",
-                                    json.get("FormattedMeanJobExecutionTime").isString().stringValue());
+                                      json.get("FormattedMeanJobExecutionTime").isString().stringValue());
                             stats.put("TotalJobsCount", json.get("TotalJobsCount").isString().stringValue());
-                            stats.put("PendingJobsCount", json.get("PendingJobsCount").isString()
-                                    .stringValue());
+                            stats.put("PendingJobsCount", json.get("PendingJobsCount").isString().stringValue());
 
                             model.setSchedulerStatistics(stats);
 
                             long t = (System.currentTimeMillis() - t1);
                             LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched sched stats: " +
-                                    result.length() + " chars in " + t + " ms</span>");
+                                                              result.length() + " chars in " + t + " ms</span>");
                         }
                     });
 
                     final long t2 = System.currentTimeMillis();
 
-                    scheduler.getStatisticsOnMyAccount(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
-                        public void onFailure(Throwable caught) {
-                            if (!LoginModel.getInstance().isLoggedIn())
-                                return;
-                            error("Failed to fetch account stats:<br>" + JSONUtils.getJsonErrorMessage(caught));
-                        }
+                    scheduler.getStatisticsOnMyAccount(LoginModel.getInstance().getSessionId(),
+                                                       new AsyncCallback<String>() {
+                                                           public void onFailure(Throwable caught) {
+                                                               if (!LoginModel.getInstance().isLoggedIn())
+                                                                   return;
+                                                               error("Failed to fetch account stats:<br>" +
+                                                                     JSONUtils.getJsonErrorMessage(caught));
+                                                           }
 
-                        public void onSuccess(String result) {
-                            HashMap<String, String> stats = new HashMap<String, String>();
+                                                           public void onSuccess(String result) {
+                                                               HashMap<String, String> stats = new HashMap<String, String>();
 
-                            JSONObject json = parseJSON(result).isObject();
-                            if (json == null)
-                                error("Expected JSON Object: " + result);
+                                                               JSONObject json = parseJSON(result).isObject();
+                                                               if (json == null)
+                                                                   error("Expected JSON Object: " + result);
 
-                            stats.put("TotalTaskCount", json.get("TotalTaskCount").isString().stringValue());
-                            stats.put("TotalJobDuration", json.get("TotalJobDuration").isString()
-                                    .stringValue());
-                            stats.put("TotalJobCount", json.get("TotalJobCount").isString().stringValue());
-                            stats.put("TotalTaskDuration", json.get("TotalTaskDuration").isString()
-                                    .stringValue());
+                                                               stats.put("TotalTaskCount",
+                                                                         json.get("TotalTaskCount")
+                                                                             .isString()
+                                                                             .stringValue());
+                                                               stats.put("TotalJobDuration",
+                                                                         json.get("TotalJobDuration")
+                                                                             .isString()
+                                                                             .stringValue());
+                                                               stats.put("TotalJobCount",
+                                                                         json.get("TotalJobCount")
+                                                                             .isString()
+                                                                             .stringValue());
+                                                               stats.put("TotalTaskDuration",
+                                                                         json.get("TotalTaskDuration")
+                                                                             .isString()
+                                                                             .stringValue());
 
-                            model.setAccountStatistics(stats);
+                                                               model.setAccountStatistics(stats);
 
-                            long t = (System.currentTimeMillis() - t2);
-                            LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched account stats: " +
-                                    result.length() + " chars in " + t + " ms</span>");
-                        }
-                    });
+                                                               long t = (System.currentTimeMillis() - t2);
+                                                               LogModel.getInstance()
+                                                                       .logMessage("<span style='color:gray;'>Fetched account stats: " +
+                                                                                   result.length() + " chars in " + t +
+                                                                                   " ms</span>");
+                                                           }
+                                                       });
                 }
                 timerUpdate++;
             }
         };
         this.schedulerTimerUpdate.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
     }
-
-    
-
-    
 
     /**
      * Parse the raw JSON array describing the users list, return a Java representation
@@ -743,7 +716,6 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-    
     /**
      * @param b true fetch users info less often
      */
@@ -802,20 +774,26 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public void getUsage(String user, Date startDate, Date endDate) {
-        scheduler.getUsage(LoginModel.getInstance().getSessionId(), user, startDate, endDate, new AsyncCallback<List<JobUsage>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to fetch usage data " + ": " + msg);
-            }
+        scheduler.getUsage(LoginModel.getInstance().getSessionId(),
+                           user,
+                           startDate,
+                           endDate,
+                           new AsyncCallback<List<JobUsage>>() {
+                               @Override
+                               public void onFailure(Throwable caught) {
+                                   String msg = JSONUtils.getJsonErrorMessage(caught);
+                                   LogModel.getInstance()
+                                           .logImportantMessage("Failed to fetch usage data " + ": " + msg);
+                               }
 
-            @Override
-            public void onSuccess(List<JobUsage> jobUsages) {
-                model.setUsage(jobUsages);
-                LogModel.getInstance().logMessage("Successfully fetched usage for " + jobUsages.size()+ " jobs");
+                               @Override
+                               public void onSuccess(List<JobUsage> jobUsages) {
+                                   model.setUsage(jobUsages);
+                                   LogModel.getInstance()
+                                           .logMessage("Successfully fetched usage for " + jobUsages.size() + " jobs");
 
-            }
-        });
+                               }
+                           });
     }
 
     public void getUsersWithJobs() {
@@ -835,33 +813,41 @@ public class SchedulerController extends Controller implements UncaughtException
 
                 long t = (System.currentTimeMillis() - t1);
                 LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + users.size() +
-                        " users with jobs in " + t + " ms</span>");
+                                                  " users with jobs in " + t + " ms</span>");
             }
 
             public void onFailure(Throwable caught) {
                 if (!LoginModel.getInstance().isLoggedIn())
                     return;
 
-                LogModel.getInstance().logMessage("Failed to fetch scheduler users with jobs:<br>" + JSONUtils.getJsonErrorMessage(caught));
+                LogModel.getInstance().logMessage("Failed to fetch scheduler users with jobs:<br>" +
+                                                  JSONUtils.getJsonErrorMessage(caught));
             }
         });
     }
 
     public void putThirdPartyCredential(final String key, String value) {
-        scheduler.putThirdPartyCredential(LoginModel.getInstance().getSessionId(), key, value, new AsyncCallback<Void>() {
+        scheduler.putThirdPartyCredential(LoginModel.getInstance().getSessionId(),
+                                          key,
+                                          value,
+                                          new AsyncCallback<Void>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Error while saving third-party credential: " + msg);
-            }
+                                              @Override
+                                              public void onFailure(Throwable caught) {
+                                                  String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                  LogModel.getInstance().logImportantMessage(
+                                                                                             "Error while saving third-party credential: " +
+                                                                                             msg);
+                                              }
 
-            @Override
-            public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully saved third-party credential for " + key + ".");
-                refreshThirdPartyCredentialsKeys();
-            }
-        });
+                                              @Override
+                                              public void onSuccess(Void result) {
+                                                  LogModel.getInstance().logMessage(
+                                                                                    "Successfully saved third-party credential for " +
+                                                                                    key + ".");
+                                                  refreshThirdPartyCredentialsKeys();
+                                              }
+                                          });
     }
 
     public void refreshThirdPartyCredentialsKeys() {
@@ -895,9 +881,7 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-
-
-    public void resetPendingTasksRequests(){
+    public void resetPendingTasksRequests() {
         this.outputController.cancelCurrentRequests();
         this.tasksController.resetPendingTasksRequests();
     }
@@ -909,30 +893,24 @@ public class SchedulerController extends Controller implements UncaughtException
     public void setTasksController(TasksController tasksController) {
         this.tasksController = tasksController;
     }
-    
-    
 
     public ExecutionsController getExecutionController() {
         return executionController;
     }
-    
-   
-    
-    
-    public Task getSelectedTask(){
-    	ExecutionsModel executionsModel = this.model.getExecutionsModel();
-    	switch(executionsModel.getMode()){
-    	case JOB_CENTRIC:
-    		return this.model.getTasksModel().getSelectedTask();
-    	case TASK_CENTRIC:
-    		return executionsModel.getTasksModel().getSelectedTask();
-    	default:
-    		return null;
-    	}
+
+    public Task getSelectedTask() {
+        ExecutionsModel executionsModel = this.model.getExecutionsModel();
+        switch (executionsModel.getMode()) {
+            case JOB_CENTRIC:
+                return this.model.getTasksModel().getSelectedTask();
+            case TASK_CENTRIC:
+                return executionsModel.getTasksModel().getSelectedTask();
+            default:
+                return null;
+        }
     }
-    
-    
-    public Job getSelectedJob(){
+
+    public Job getSelectedJob() {
         return this.model.getExecutionsModel().getSelectedJob();
     }
 }

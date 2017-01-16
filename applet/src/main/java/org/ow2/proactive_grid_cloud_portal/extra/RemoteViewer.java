@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.extra;
 
@@ -85,11 +74,15 @@ public class RemoteViewer implements ActionListener {
         setLF();
 
         if (args.length < 1) {
-            JOptionPane.showMessageDialog(null, "Application type must be provided as argument",
-                    "Visualization error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                                          "Application type must be provided as argument",
+                                          "Visualization error",
+                                          JOptionPane.ERROR_MESSAGE);
         } else if (args.length < 2) {
-            JOptionPane.showMessageDialog(null, "Application argument must be provided as argument",
-                    "Visualization error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                                          "Application argument must be provided as argument",
+                                          "Visualization error",
+                                          JOptionPane.ERROR_MESSAGE);
         } else {
             String appType = args[0];
             String argument = args[1];
@@ -100,18 +93,25 @@ public class RemoteViewer implements ActionListener {
 
     /** name of the user preferences node */
     private static String PREF_NODE = "org.ow2.proactive_grid_cloud_portal.client.RemoteViewer";
+
     /** preferences node referenced by PREF_NODE */
     private Preferences prefs = null;
+
     /** type of the application to launch */
     private String appType = "";
+
     /** argument for the application to launch */
     private String argument = "";
+
     /** name of the associated app retrieved in the preferences, or "" */
     private String userApp = "";
+
     /** displays this.userApp */
     private JTextField pathField = null;
+
     /** root window */
     private JFrame frame = null;
+
     /** button that triggers visualization */
     private JButton okButton = null;
 
@@ -136,10 +136,8 @@ public class RemoteViewer implements ActionListener {
         header.setMinimumSize(new Dimension(100, 60));
         header.add(new JLabel(new ImageIcon(this.getClass().getResource("header_split.png"))));
         header.add(new JLabel("    "));
-        header
-                .add(new JLabel(
-                    "<html><b><font size=+1>Visualization</font></b><br>"
-                        + "<font size=-1>Connect to a remote host to view<br>the result of a computation.</font></html>"));
+        header.add(new JLabel("<html><b><font size=+1>Visualization</font></b><br>" +
+                              "<font size=-1>Connect to a remote host to view<br>the result of a computation.</font></html>"));
 
         c.gridwidth = 3;
         c.weightx = 1.0;
@@ -196,8 +194,7 @@ public class RemoteViewer implements ActionListener {
         browseButton.addActionListener(this);
         centerPane.add(browseButton, c);
 
-        this.okButton = new JButton("Launch visualization", new ImageIcon(this.getClass().getResource(
-                "visu.png")));
+        this.okButton = new JButton("Launch visualization", new ImageIcon(this.getClass().getResource("visu.png")));
         okButton.setEnabled(!userApp.equals(""));
         okButton.addActionListener(this);
         okButton.setActionCommand("ok");
@@ -273,6 +270,7 @@ public class RemoteViewer implements ActionListener {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
@@ -293,8 +291,10 @@ public class RemoteViewer implements ActionListener {
                 Runtime.getRuntime().exec(new String[] { this.userApp, this.argument });
                 System.exit(0);
             } catch (IOException e1) {
-                JOptionPane.showMessageDialog(null, "<html>Failed to launch application:<br>" +
-                    e1.getMessage() + "</html>", "Visualization error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                                              "<html>Failed to launch application:<br>" + e1.getMessage() + "</html>",
+                                              "Visualization error",
+                                              JOptionPane.ERROR_MESSAGE);
             }
         }
     }

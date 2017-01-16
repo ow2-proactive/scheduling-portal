@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -50,20 +39,35 @@ import com.google.gwt.json.client.JSONObject;
 public class Job implements Serializable, Comparable<Job> {
 
     private int id;
+
     private String name;
+
     private JobStatus status;
+
     private JobPriority priority;
+
     private String user;
+
     private int pendingTasks;
+
     private int runningTasks;
+
     private int finishedTasks;
+
     private int totalTasks;
+
     private int failedTasks;
+
     private int faultyTasks;
+
     private int inErrorTasks;
+
     private long submitTime;
+
     private long startTime;
+
     private long inErrorTime;
+
     private long finishTime;
 
     /**
@@ -89,9 +93,9 @@ public class Job implements Serializable, Comparable<Job> {
      * @param priority the job priority
      * @param user the username of the user that submitted the job
      */
-    public Job(int id, String name, JobStatus status, JobPriority priority, String user, int pending,
-            int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
-            long startTime, long inErrorTime, long finishTime) {
+    public Job(int id, String name, JobStatus status, JobPriority priority, String user, int pending, int running,
+            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
+            long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
         this.setStatus(status);
@@ -279,13 +283,11 @@ public class Job implements Serializable, Comparable<Job> {
      * are equal to those of <code>this</code>
      */
     public boolean isEqual(Job job) {
-        return this.id == job.getId() && this.name.equals(job.getName()) &&
-                this.priority.equals(job.getPriority()) && this.status.equals(job.getStatus()) &&
-                this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
-                runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
-                failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
-                inErrorTasks == job.inErrorTasks && finishTime == job.finishTime &&
-                inErrorTime == job.inErrorTime;
+        return this.id == job.getId() && this.name.equals(job.getName()) && this.priority.equals(job.getPriority()) &&
+               this.status.equals(job.getStatus()) && this.user.equals(job.getUser()) &&
+               pendingTasks == job.pendingTasks && runningTasks == job.runningTasks &&
+               finishedTasks == job.finishedTasks && failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
+               inErrorTasks == job.inErrorTasks && finishTime == job.finishTime && inErrorTime == job.inErrorTime;
     }
 
     public int compareTo(Job job) {
@@ -294,8 +296,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     @Override
     public String toString() {
-        return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "priority=" +
-                priority + "; " + "user=" + user + "]";
+        return "[ id=" + id + "; " + "name=" + name + "; " + "status=" + status + "; " + "priority=" + priority + "; " +
+               "user=" + user + "]";
     }
 
     /**
@@ -306,7 +308,7 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public boolean isExecuted() {
         return this.status == JobStatus.CANCELED || this.status == JobStatus.FINISHED ||
-                this.status == JobStatus.FAILED || this.status == JobStatus.KILLED;
+               this.status == JobStatus.FAILED || this.status == JobStatus.KILLED;
     }
 
     /**
@@ -317,9 +319,8 @@ public class Job implements Serializable, Comparable<Job> {
         JSONObject jsonInfo = jsonJob.get("jobInfo").isObject(); // TODO to update jobInfo
         return parseJSONInfo(jsonInfo);
     }
-    
-    
-    public static Job parseJSONInfo(JSONObject jsonJobInfo){
+
+    public static Job parseJSONInfo(JSONObject jsonJobInfo) {
         String user = jsonJobInfo.get("jobOwner").isString().stringValue();
         String priority = jsonJobInfo.get("priority").isString().stringValue();
         String status = jsonJobInfo.get("status").isString().stringValue();
@@ -334,14 +335,27 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
-        
+
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
         String name = jsonInfoId.get("readableName").isString().stringValue();
         int id = (int) jsonInfoId.get("id").isNumber().doubleValue();
-        
-        return new Job(id, name, JobStatus.valueOf(status), JobPriority.findPriority(priority), user,
-                pending, running, finished, total, failed, faulty, inError, submittedTime, startTime,
-                inErrorTime, finishedTime);
+
+        return new Job(id,
+                       name,
+                       JobStatus.valueOf(status),
+                       JobPriority.findPriority(priority),
+                       user,
+                       pending,
+                       running,
+                       finished,
+                       total,
+                       failed,
+                       faulty,
+                       inError,
+                       submittedTime,
+                       startTime,
+                       inErrorTime,
+                       finishedTime);
     }
 
     /**

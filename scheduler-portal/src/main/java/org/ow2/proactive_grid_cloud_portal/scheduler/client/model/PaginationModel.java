@@ -1,38 +1,28 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
@@ -40,6 +30,7 @@ import java.util.ArrayList;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
 
 /**
  * A model for the pagination of items.
@@ -68,19 +59,15 @@ public class PaginationModel {
      */
     private long totalItems = 0;
 
-
-
     /**
      * Listeners for pagination events.
      */
     protected ArrayList<PaginationListener> paginationListeners;
 
-
-    public PaginationModel(PaginatedItemType itemType){
+    public PaginationModel(PaginatedItemType itemType) {
         this.itemType = itemType;
         this.paginationListeners = new ArrayList<PaginationListener>();
     }
-
 
     /**
      * Gets the current displayed page.
@@ -90,7 +77,6 @@ public class PaginationModel {
         return this.currentPage;
     }
 
-
     /**
      * Change the current page
      * 
@@ -98,11 +84,10 @@ public class PaginationModel {
      */
     public void setPage(int page) {
         this.currentPage = page;
-        for(PaginationListener listener: this.paginationListeners){
+        for (PaginationListener listener : this.paginationListeners) {
             listener.pageChanged();
         }
     }
-
 
     /**
      * Gets the size of a page.
@@ -112,7 +97,6 @@ public class PaginationModel {
         return SchedulerConfig.get().getPageSize(this.itemType);
     }
 
-
     /**
      * Gets the type of items to be paginated (TASK or JOB)
      * @return the type of items to be paginated (TASK or JOB)
@@ -121,21 +105,19 @@ public class PaginationModel {
         return itemType;
     }
 
-
     /**
      * Add a listener for pagination events.
      * @param listener the listener.
      */
-    public void addPaginationListener(PaginationListener listener){
+    public void addPaginationListener(PaginationListener listener) {
         this.paginationListeners.add(listener);
     }
-
 
     /**
      * Gets the offset of the items to be retrieved for the current page.
      * @return the offset of the items to be retrieved for the current page.
      */
-    public int getOffset(){
+    public int getOffset() {
         return (this.currentPage * this.getPageSize());
     }
 
@@ -147,7 +129,6 @@ public class PaginationModel {
         return maxPage;
     }
 
-
     /**
      * Get the total number of items without pagination.
      * @return the total number of items without pagination.
@@ -156,20 +137,19 @@ public class PaginationModel {
         return totalItems;
     }
 
-
     /**
      * Sets the total number of items without pagination.
      * @param totalItems the total number of items without pagination.
      */
-    public void setTotalItems(long totalItems){
+    public void setTotalItems(long totalItems) {
         this.totalItems = totalItems;
         int pageSize = this.getPageSize();
         this.maxPage = ((int) this.totalItems / pageSize) - 1;
-        if(this.totalItems % pageSize != 0){
+        if (this.totalItems % pageSize != 0) {
             this.maxPage++;
         }
 
-        for(PaginationListener listener: this.paginationListeners){
+        for (PaginationListener listener : this.paginationListeners) {
             listener.totalItemChanged();
         }
     }

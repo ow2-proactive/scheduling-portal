@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -60,6 +49,7 @@ public class StatisticsView implements StatisticsListener {
     private Layout root = null;
 
     private DetailViewer statsDetail, accountDetail;
+
     private Label l1, l2;
 
     /**
@@ -84,72 +74,66 @@ public class StatisticsView implements StatisticsListener {
         statsDetail = new DetailViewer();
         statsDetail.setCanSelectText(true);
 
-        DetailViewerField jobSubmittingPeriod =
-                new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
-        DetailViewerField formattedJobSubmittingPeriod =
-                new DetailViewerField("FormattedJobSubmittingPeriod",
-            "Formatted Job Submitting Period");
+        DetailViewerField jobSubmittingPeriod = new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
+        DetailViewerField formattedJobSubmittingPeriod = new DetailViewerField("FormattedJobSubmittingPeriod",
+                                                                               "Formatted Job Submitting Period");
 
-        DetailViewerField meanJobPendingTime =
-                new DetailViewerField("MeanJobPendingTime", "Mean Job Pending Time");
-        DetailViewerField formattedMeanJobPendingTime =
-                new DetailViewerField("FormattedMeanJobPendingTime",
-                "Formatted Mean Job Pending Time");
+        DetailViewerField meanJobPendingTime = new DetailViewerField("MeanJobPendingTime", "Mean Job Pending Time");
+        DetailViewerField formattedMeanJobPendingTime = new DetailViewerField("FormattedMeanJobPendingTime",
+                                                                              "Formatted Mean Job Pending Time");
 
-        DetailViewerField meanJobExecutionTime =
-                new DetailViewerField("MeanJobExecutionTime", "Mean Job Execution Time");
-        DetailViewerField formattedMeanJobExecutionTime =
-                new DetailViewerField("FormattedMeanJobExecutionTime", "Formatted Mean Job Execution Time");
+        DetailViewerField meanJobExecutionTime = new DetailViewerField("MeanJobExecutionTime",
+                                                                       "Mean Job Execution Time");
+        DetailViewerField formattedMeanJobExecutionTime = new DetailViewerField("FormattedMeanJobExecutionTime",
+                                                                                "Formatted Mean Job Execution Time");
 
-        DetailViewerField connectedUsersCount =
-                new DetailViewerField("ConnectedUsersCount", "Users Sessions Count");
+        DetailViewerField connectedUsersCount = new DetailViewerField("ConnectedUsersCount", "Users Sessions Count");
 
-        DetailViewerField pendingJobsCount =
-                new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
-        DetailViewerField runningJobsCount =
-                new DetailViewerField("RunningJobsCount", "Running Jobs Count");
-        DetailViewerField finishedJobsCount =
-                new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
-        DetailViewerField totalJobsCount =
-                new DetailViewerField("TotalJobsCount", "Total Jobs Count");
+        DetailViewerField pendingJobsCount = new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
+        DetailViewerField runningJobsCount = new DetailViewerField("RunningJobsCount", "Running Jobs Count");
+        DetailViewerField finishedJobsCount = new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
+        DetailViewerField totalJobsCount = new DetailViewerField("TotalJobsCount", "Total Jobs Count");
 
-        DetailViewerField pendingTasksCount =
-                new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
-        DetailViewerField runningTasksCount =
-                new DetailViewerField("RunningTasksCount", "Running Tasks Count");
-        DetailViewerField finishedTasksCount =
-                new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
-        DetailViewerField totalTasksCount =
-                new DetailViewerField("TotalTasksCount", "Total Tasks Count");
+        DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
+        DetailViewerField runningTasksCount = new DetailViewerField("RunningTasksCount", "Running Tasks Count");
+        DetailViewerField finishedTasksCount = new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
+        DetailViewerField totalTasksCount = new DetailViewerField("TotalTasksCount", "Total Tasks Count");
 
-        statsDetail.setFields(
-                connectedUsersCount,
-                jobSubmittingPeriod, formattedJobSubmittingPeriod,
-                meanJobPendingTime, formattedMeanJobPendingTime,
-                meanJobExecutionTime, formattedMeanJobExecutionTime,
-                pendingJobsCount, runningJobsCount, finishedJobsCount, totalJobsCount,
-                pendingTasksCount, runningTasksCount, finishedTasksCount, totalTasksCount);
+        statsDetail.setFields(connectedUsersCount,
+                              jobSubmittingPeriod,
+                              formattedJobSubmittingPeriod,
+                              meanJobPendingTime,
+                              formattedMeanJobPendingTime,
+                              meanJobExecutionTime,
+                              formattedMeanJobExecutionTime,
+                              pendingJobsCount,
+                              runningJobsCount,
+                              finishedJobsCount,
+                              totalJobsCount,
+                              pendingTasksCount,
+                              runningTasksCount,
+                              finishedTasksCount,
+                              totalTasksCount);
 
         accountDetail = new DetailViewer();
         accountDetail.setCanSelectText(true);
 
-        DetailViewerField totalJobCount =
-                new DetailViewerField("TotalJobCount", "Total Jobs Count");
-        DetailViewerField totalJobDuration =
-                new DetailViewerField("TotalJobDuration", "Total Jobs Duration");
-        DetailViewerField formattedTotalJobDuration =
-                new DetailViewerField("FormattedTotalJobDuration", "Formatted Total Jobs Duration");
+        DetailViewerField totalJobCount = new DetailViewerField("TotalJobCount", "Total Jobs Count");
+        DetailViewerField totalJobDuration = new DetailViewerField("TotalJobDuration", "Total Jobs Duration");
+        DetailViewerField formattedTotalJobDuration = new DetailViewerField("FormattedTotalJobDuration",
+                                                                            "Formatted Total Jobs Duration");
 
-        DetailViewerField totalTaskCount =
-                new DetailViewerField("TotalTaskCount", "Total Tasks Count");
-        DetailViewerField totalTaskDuration =
-                new DetailViewerField("TotalTaskDuration", "Total Tasks Duration");
-        DetailViewerField formattedTotalTaskDuration =
-                new DetailViewerField("FormattedTotalTaskDuration", "Formatted Total Tasks Duration");
+        DetailViewerField totalTaskCount = new DetailViewerField("TotalTaskCount", "Total Tasks Count");
+        DetailViewerField totalTaskDuration = new DetailViewerField("TotalTaskDuration", "Total Tasks Duration");
+        DetailViewerField formattedTotalTaskDuration = new DetailViewerField("FormattedTotalTaskDuration",
+                                                                             "Formatted Total Tasks Duration");
 
-        accountDetail.setFields(
-                totalJobCount, totalJobDuration, formattedTotalJobDuration,
-                totalTaskCount, totalTaskDuration, formattedTotalTaskDuration);
+        accountDetail.setFields(totalJobCount,
+                                totalJobDuration,
+                                formattedTotalJobDuration,
+                                totalTaskCount,
+                                totalTaskDuration,
+                                formattedTotalTaskDuration);
 
         l1 = new Label("<h3>Scheduler statistics</h3>");
         l1.setHeight(25);
@@ -169,7 +153,10 @@ public class StatisticsView implements StatisticsListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.StatisticsListener#schedulerStatsUpdated(org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatistics)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.StatisticsListener#schedulerStatsUpdated
+     * (org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatistics)
      */
     public void schedulerStatsUpdated(HashMap<String, String> stats) {
         DetailViewerRecord r = new DetailViewerRecord();
@@ -195,7 +182,10 @@ public class StatisticsView implements StatisticsListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.StatisticsListener#accountStatsUpdated(org.ow2.proactive_grid_cloud_portal.shared.AccountStatistics)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.StatisticsListener#accountStatsUpdated(
+     * org.ow2.proactive_grid_cloud_portal.shared.AccountStatistics)
      */
     public void accountStatsUpdated(HashMap<String, String> stats) {
         DetailViewerRecord r = new DetailViewerRecord();

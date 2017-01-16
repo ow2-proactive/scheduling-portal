@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
 
@@ -66,42 +55,52 @@ public class SchedulerConfig extends Config {
 
     /** client refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "sched.client.refresh.time";
+
     private static final String DEFAULT_CLIENT_REFRESH_TIME = "3000";
 
     /** client livelog refresh rate in millis */
     public static final String LIVELOGS_REFRESH_TIME = "sched.client.livelog.refresh.time";
+
     private static final String DEFAULT_LIVELOGS_REFRESH_TIME = "1000";
 
     /** job page size */
     public static final String JOBS_PAGE_SIZE = "sched.jobs.page.size";
+
     private static final String DEFAULT_JOBS_PAGE_SIZE = "50";
 
     /** task page size */
     public static final String TASKS_PAGE_SIZE = "sched.tasks.page.size";
+
     private static final String DEFAULT_TASKS_PAGE_SIZE = "20";
 
     /** the number max of tag suggestions that should be displayed for autocompletion. */
     public static final String TAG_SUGGESTIONS_SIZE = "sched.tags.suggestions.size";
+
     private static final String DEFAULT_TAG_SUGGESTIONS_SIZE = "20";
 
     /** the delay applied before refreshing the tag suggestions for a running job. */
     public static final String TAG_SUGGESTIONS_DELAY = "sched.tags.suggestions.delay";
+
     private static final String DEFAULT_TAG_SUGGESTIONS_DELAY = "30000";
 
     /** release version string */
     public static final String VERSION = "sched.version";
+
     private static final String DEFAULT_VERSION = "0.0";
 
     /** REST version string */
     public static final String REST_VERSION = "sched.rest.version";
+
     private static final String DEFAULT_REST_VERSION = "0.0";
 
     /** Sched version string */
     public static final String SCHED_VERSION = "sched.server.version";
+
     private static final String DEFAULT_SCHED_VERSION = "0.0";
 
     /** message of the day service URL */
     public static final String MOTD_URL = "sched.motd.url";
+
     private static final String DEFAULT_MOTD_URL = "";
 
     /** Workflow Catalog URL **/
@@ -109,14 +108,17 @@ public class SchedulerConfig extends Config {
 
     /** Calendar Server port */
     public static final String CS_SERVER_HTTP_PORT = "pa.calendar.http.port";
+
     private static final String DEFAULT_CS_SERVER_HTTP_PORT = "4242";
 
     /** Calendar Server port */
     public static final String CS_SERVER_HTTPS_PORT = "pa.calendar.https.port";
+
     private static final String DEFAULT_CS_SERVER_HTTPS_PORT = "443";
 
     /** Calendar Server port */
     public static final String CS_SERVER_PROTOCOL = "pa.calendar.protocol";
+
     private static final String DEFAULT_CS_SERVER_PROTOCOL = "https";
 
     private static SchedulerConfig instance = null;
@@ -170,8 +172,8 @@ public class SchedulerConfig extends Config {
      */
     public String getWindowsLocationUrl() {
         String urlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
-        urlFromCurrentLocation = urlFromCurrentLocation
-                .replace(com.google.gwt.user.client.Window.Location.getPath(), "");
+        urlFromCurrentLocation = urlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(),
+                                                                "");
         return urlFromCurrentLocation;
     }
 

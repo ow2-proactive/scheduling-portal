@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -80,19 +69,13 @@ public class SchedulerListeners {
          * Called when the Job selection in the main Scheduler View Grid is canceled
          */
         public void jobUnselected();
-        
-        
+
         /**
          * Called when the selected job has been updated because of jobs revision.
          */
         public void selectedJobUpdated(Job job);
-        
 
     }
-    
-    
-    
-    
 
     public interface JobsUpdatedListener {
 
@@ -120,19 +103,13 @@ public class SchedulerListeners {
         public void jobSubmitted(Job j);
 
     }
-    
-    
-    
-    
-    
 
-    public interface ExecutionDisplayModeListener{
+    public interface ExecutionDisplayModeListener {
         public void modeSwitched(ExecutionListMode mode);
     }
-    
-    
-    public interface TaskSelectedListener{
-    	/**
+
+    public interface TaskSelectedListener {
+        /**
          * Called when a task is selected in the main Scheduler View Grid
          *
          * @param job the selected job
@@ -143,11 +120,9 @@ public class SchedulerListeners {
          * Called when the task selection in the main Scheduler View Grid is canceled
          */
         public void taskUnselected();
-        
+
     }
-    
-    
-    
+
     public interface TasksUpdatedListener {
 
         /**
@@ -190,13 +165,10 @@ public class SchedulerListeners {
          * @param output the output of a job
          */
         public void jobOutputUpdated(JobOutput output, SelectionTarget target);
-        
-        
+
         public void liveToggled(boolean newValue);
-        
-        
+
         public void liveEnabled(boolean newValue);
-        
 
     }
 
@@ -283,45 +255,41 @@ public class SchedulerListeners {
     public interface ThirdPartyCredentialsListener {
         void keysUpdated(Set<String> thirdPartyCredentialsKeys);
     }
-    
-    
+
     /**
      * Listener for tag suggestions events.
      * @author the activeeon team
      *
      */
     public interface TagSuggestionListener {
-    	
+
         /**
          * When the list of tag suggestion has been updated.
          */
         void tagSuggestionListUpdated();
     }
-    
-    
-    
+
     /**
      * Listener for pagination events.
      * @author the activeeon team.
      *
      */
     public interface PaginationListener {
-        
+
         /**
          * when the displayed page changed.
          */
-    	void pageChanged();
-    	
-    	/**
-    	 * when the total number of paginated items changed.
-    	 */
-    	void totalItemChanged();
+        void pageChanged();
+
+        /**
+         * when the total number of paginated items changed.
+         */
+        void totalItemChanged();
     }
-    
-    
+
     public interface ServerLogsListener {
-        
+
         public void logsUpdated(String logs, String jobId);
     }
-    
+
 }

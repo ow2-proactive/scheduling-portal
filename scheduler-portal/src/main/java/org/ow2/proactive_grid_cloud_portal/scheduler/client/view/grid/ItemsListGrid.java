@@ -1,38 +1,28 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
 
 import java.util.Collection;
@@ -60,13 +50,14 @@ import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.menu.Menu;
 
+
 /**
  * A generic list grid that show items for scheduler-portal.
  * @author the activeeon team.
  *
  * @param <I> the type of the item to be shown in the grid.
  */
-public abstract class ItemsListGrid<I> extends ListGrid{
+public abstract class ItemsListGrid<I> extends ListGrid {
 
     /**
      * The prefix part of the name of the datasource associated with the grid.
@@ -96,7 +87,6 @@ public abstract class ItemsListGrid<I> extends ListGrid{
     /** To disable selection listener while fetching data */
     protected boolean fetchingData;
 
-
     public ItemsListGrid() {
     }
 
@@ -113,7 +103,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
 
         public ItemDS(String id) {
             setID(id);
-            DataSourceField [] fields = buildDatasourceFields();
+            DataSourceField[] fields = buildDatasourceFields();
             setFields(fields);
             setClientOnly(true);
         }
@@ -122,7 +112,7 @@ public abstract class ItemsListGrid<I> extends ListGrid{
     /**
      * Builds the grid, and its associated datasource.
      */
-    public void build(){
+    public void build() {
         this.ds = new ItemDS(this.datasourceNamePrefix + LoginModel.getInstance().getSessionId());
 
         this.setDataSource(this.ds);
@@ -136,12 +126,11 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         this.setShowSortNumerals(false);
 
         Collection<ListGridField> fieldsCollection = this.buildListGridField().values();
-        ListGridField [] fields = new ListGridField[fieldsCollection.size()];
+        ListGridField[] fields = new ListGridField[fieldsCollection.size()];
         this.setFields(fieldsCollection.toArray(fields));
 
         this.setWidth100();
         this.setHeight100();
-
 
         // right click on an entry : popup a menu for job-contextual operations
         this.addCellContextClickHandler(new CellContextClickHandler() {
@@ -174,11 +163,11 @@ public abstract class ItemsListGrid<I> extends ListGrid{
      * Builds the fields to be shown in the grid.
      * @return the fields, indexed by their column specification.
      */
-    protected Map<GridColumns, ListGridField> buildListGridField(){
+    protected Map<GridColumns, ListGridField> buildListGridField() {
         HashMap<GridColumns, ListGridField> result = new HashMap<>();
-        for(GridColumns current: this.columnsFactory.getColumns()){
+        for (GridColumns current : this.columnsFactory.getColumns()) {
             ListGridField field = new ListGridField(current.getName(), current.getTitle());
-            if(current.getWidth() > 0){
+            if (current.getWidth() > 0) {
                 field.setWidth(current.getWidth());
             }
             result.put(current, field);
@@ -190,18 +179,17 @@ public abstract class ItemsListGrid<I> extends ListGrid{
      * Build the datasource fields
      * @return
      */
-    protected DataSourceField [] buildDatasourceFields(){
-        GridColumns [] columns = this.columnsFactory.getColumns();
-        DataSourceField [] result = new DataSourceField[columns.length];
-        for(int i = 0; i < columns.length; i++){
-            if(columns[i].isPrimaryKey()){
+    protected DataSourceField[] buildDatasourceFields() {
+        GridColumns[] columns = this.columnsFactory.getColumns();
+        DataSourceField[] result = new DataSourceField[columns.length];
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i].isPrimaryKey()) {
                 result[i] = new DataSourceIntegerField(columns[i].getName());
                 result[i].setPrimaryKey(true);
-            }
-            else{
+            } else {
                 result[i] = new DataSourceTextField(columns[i].getName(), columns[i].getTitle());
                 result[i].setRequired(true);
-            }   
+            }
         }
         return result;
     }
@@ -218,7 +206,6 @@ public abstract class ItemsListGrid<I> extends ListGrid{
      */
     protected abstract void selectionChangedHandler(SelectionEvent event);
 
-
     /**
      * Apply the local filter to the grid.
      * @param filter the filter to be applied.
@@ -227,7 +214,6 @@ public abstract class ItemsListGrid<I> extends ListGrid{
         this.filter = filter;
         applyCurrentLocalFilter();
     }
-
 
     // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
     protected void applyCurrentLocalFilter() {

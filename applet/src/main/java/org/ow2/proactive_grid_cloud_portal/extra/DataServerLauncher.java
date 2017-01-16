@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.extra;
 
@@ -91,16 +80,22 @@ public class DataServerLauncher implements ActionListener {
 
     /** name of the user preferences node */
     private static String PREF_NODE = DataServerLauncher.class.getCanonicalName();
+
     /** name of the property that contains the ProActive Programming path */
     private static String PA_PATH = "pa.path";
+
     /** preferences node referenced by PREF_NODE */
     private Preferences prefs = null;
+
     /** path to the proactive programming installation */
     private File paPath = null;
+
     /** displays this.paPath */
     private JTextField pathField = null;
+
     /** root window */
     private JFrame frame = null;
+
     /** button that triggers visualization */
     private JButton okButton = null;
 
@@ -125,10 +120,8 @@ public class DataServerLauncher implements ActionListener {
         header.setMinimumSize(new Dimension(100, 60));
         header.add(new JLabel(new ImageIcon(this.getClass().getResource("header_split.png"))));
         header.add(new JLabel("    "));
-        header
-                .add(new JLabel(
-                    "<html><b><font size=+1>Data Servers</font></b><br>"
-                        + "<font size=-1>Manage Data Servers to send data<br>and retrieve computation results.</font></html>"));
+        header.add(new JLabel("<html><b><font size=+1>Data Servers</font></b><br>" +
+                              "<font size=-1>Manage Data Servers to send data<br>and retrieve computation results.</font></html>"));
 
         c.gridwidth = 3;
         c.weightx = 1.0;
@@ -138,8 +131,7 @@ public class DataServerLauncher implements ActionListener {
 
         c.gridy = 2;
         c.insets = new Insets(5, 5, 5, 5);
-        centerPane.add(new JLabel(
-            "<html>Select the path to a local<br>ProActive Programming directory.</html>"), c);
+        centerPane.add(new JLabel("<html>Select the path to a local<br>ProActive Programming directory.</html>"), c);
 
         c.gridx = 0;
         c.gridwidth = 1;
@@ -165,8 +157,7 @@ public class DataServerLauncher implements ActionListener {
         browseButton.addActionListener(this);
         centerPane.add(browseButton, c);
 
-        this.okButton = new JButton("Manage Servers",
-            new ImageIcon(this.getClass().getResource("server.png")));
+        this.okButton = new JButton("Manage Servers", new ImageIcon(this.getClass().getResource("server.png")));
         okButton.setEnabled(paPath != null && paPath.exists());
         okButton.addActionListener(this);
         okButton.setActionCommand("ok");
@@ -242,6 +233,7 @@ public class DataServerLauncher implements ActionListener {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
@@ -279,9 +271,8 @@ public class DataServerLauncher implements ActionListener {
 
             try {
                 if (!new File(exec).exists()) {
-                    throw new Exception(
-                        "Could not find DataServer launcher...<br>"
-                            + "Is the provided directory a valid ProActive Programming or Scheduling distribution?");
+                    throw new Exception("Could not find DataServer launcher...<br>" +
+                                        "Is the provided directory a valid ProActive Programming or Scheduling distribution?");
                 }
                 ProcessBuilder pb = new ProcessBuilder(cmdArr);
                 pb.redirectErrorStream(true);
@@ -322,8 +313,10 @@ public class DataServerLauncher implements ActionListener {
                 this.frame.setVisible(false);
 
             } catch (Exception e1) {
-                JOptionPane.showMessageDialog(null, "<html>Failed to launch application:<br>" +
-                    e1.getMessage() + "</html>", "Data Servers error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                                              "<html>Failed to launch application:<br>" + e1.getMessage() + "</html>",
+                                              "Data Servers error",
+                                              JOptionPane.ERROR_MESSAGE);
             }
         }
     }

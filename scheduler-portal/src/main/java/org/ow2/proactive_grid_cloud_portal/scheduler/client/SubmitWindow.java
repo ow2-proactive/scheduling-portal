@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -41,6 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -48,17 +43,6 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.ui.*;
-import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.util.DateUtil;
-import com.smartgwt.client.widgets.DateChooser;
-import com.smartgwt.client.widgets.form.fields.*;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.xml.client.Document;
@@ -67,16 +51,21 @@ import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.DateUtil;
+import com.smartgwt.client.widgets.DateChooser;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -87,14 +76,23 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 public class SubmitWindow {
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
+
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
+
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
+
     private static final String URL_SUBMIT_XML = GWT.getModuleBaseURL() + "submitedit";
+
     private static final String URL_UPLOAD_FILE = GWT.getModuleBaseURL() + "uploader";
+
     private static final String METHOD_INSTRUCTION = "Select a method";
+
     private static final String METHOD_FROM_FILE = "import from file";
+
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
+
     private static final int width = 420;
+
     private static final int height = 500;
 
     private Window window;
@@ -102,49 +100,71 @@ public class SubmitWindow {
     private SchedulerController controller;
 
     private HandlerRegistration todayClickHR = null;
+
     private HandlerRegistration changedHourHR = null;
+
     private HandlerRegistration changedMinuteHR = null;
+
     private HandlerRegistration gridClickHR = null;
 
     private VLayout rootPage; // ------------------------ the main layout of the window
 
     private VLayout selectWfLayout; // ----------------- Select Workflow Panel
+
     private ListBox wfMethodsListBox; // ------------- Methods to select a workflow
+
     private VLayout fromFilePanel; // ------------------- The panel to select wf from disk
+
     private FileUpload fileUpload; // ------------------- FileUpload button
+
     private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
+
     private Button sendFromFileButton; // --------------- Send the file to servlet from disk
+
     private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf from catalog
+
     private ListBox bucketsListBox; // ------------------ Buckets dropdown list
+
     private ListBox workflowsListBox; // ---------------- Workflows dropdown list
+
     private Button sendFromCatalogButton; // ------------ Send the file to servlet from catalog
 
     // -------------------------------------------------- Variables Part
     private VLayout varsLayout; // --------------------- Variables Panel
+
     private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
+
     private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
+
     private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
+
     private Hidden startAtParameter; // ----------------- START_AT value to send along with the job
+
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
     // -------------------------------------------------- Start At Part
     private VLayout startAtLayout; // ------------------ Start At Panel
+
     private VerticalPanel startAtRadioGroupPanel; // ---- Now or Later
+
     private RadioButton startNowRB; // ------------------ As soon as possible radio button
+
     private RadioButton startAtRB; // ------------------- at scheduled time radio button
+
     private DateChooser dateChooser; // ----------------- DateChooser
 
     private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
+
     private IButton submitButton;
 
     private VLayout loadingPanel; // -------------------- Loading Panel when uploading
 
     // ----- Catalog temp maps
     private HashMap<String, Integer> catalogBucketsMap;
+
     private HashMap<String, Integer> catalogWorkflowsMap;
 
     private String CATALOG_URL = null;
-
 
     /**
      * Default constructor
@@ -181,11 +201,9 @@ public class SubmitWindow {
         String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
         if (catalogUrlFromConfig == null) {
             CATALOG_URL = defaultCatalogUrl;
-        }
-        else if (catalogUrlFromConfig.isEmpty()) {
+        } else if (catalogUrlFromConfig.isEmpty()) {
             CATALOG_URL = defaultCatalogUrl;
-        }
-        else {
+        } else {
             CATALOG_URL = catalogUrlFromConfig;
         }
     }
@@ -227,15 +245,13 @@ public class SubmitWindow {
                     selectWorkflowButtonsPanel.add(fromFilePanel);
                     selectWorkflowButtonsPanel.add(sendFromFileButton);
                     initFooter();
-                }
-                else if (METHOD_FROM_CATALOG.compareTo(selectedMethod) == 0) {
+                } else if (METHOD_FROM_CATALOG.compareTo(selectedMethod) == 0) {
                     clearPanel();
                     initSelectWorkflowFromCatalogPanel();
                     selectWorkflowButtonsPanel.add(fromCatalogPanel);
                     selectWorkflowButtonsPanel.add(sendFromCatalogButton);
                     initFooter();
-                }
-                else {
+                } else {
                     // default case: METHOD_INSTRUCTION
                     varsLayout.removeMembers(varsLayout.getMembers());
                     selectWorkflowButtonsPanel.clear();
@@ -322,8 +338,7 @@ public class SubmitWindow {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 startAtLayout.addMember(dateChooser);
-                DateTimeFormat dateTimeFormat =
-                        DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                 String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                 startAtParameter.setValue(iso8601DateStr);
                 updateScheduledTimeForToday();
@@ -463,15 +478,17 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" +
-                            catalogBucketsMap.get(selectedBucket) + "/workflows";
+                    String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
+                                         "/workflows";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
                             JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
                             JSONArray workflows = jsonObjectResponse.get("_embedded")
-                                    .isObject().get("workflowMetadataList").isArray();
+                                                                    .isObject()
+                                                                    .get("workflowMetadataList")
+                                                                    .isArray();
                             int workflowsSize = workflows.size();
                             catalogWorkflowsMap = new HashMap<>(workflowsSize);
                             workflowsListBox.setEnabled(false);
@@ -503,7 +520,6 @@ public class SubmitWindow {
                 }
             }
         });
-
 
         RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets");
         req.setCallback(new RequestCallback() {
@@ -537,7 +553,6 @@ public class SubmitWindow {
             e.printStackTrace();
         }
 
-
         fromCatalogPanel.add(bucketsListBox);
         fromCatalogPanel.add(workflowsListBox);
 
@@ -558,8 +573,8 @@ public class SubmitWindow {
         fromCatalogPanel.add(importFromCatalogformPanel);
 
         sendFromCatalogButton = new Button("Import workflow");
-        sendFromCatalogButton.addClickHandler(
-                clickHandlerForUploadFromCatalogButton(formContent, importFromCatalogformPanel));
+        sendFromCatalogButton.addClickHandler(clickHandlerForUploadFromCatalogButton(formContent,
+                                                                                     importFromCatalogformPanel));
     }
 
     private ClickHandler clickHandlerForSubmitButton() {
@@ -574,8 +589,7 @@ public class SubmitWindow {
                     _fields[i].setValue(val);
                 }
                 if (startAtRB.getValue()) {
-                    DateTimeFormat dateTimeFormat =
-                            DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
                     hiddenPane.add(startAtParameter);
@@ -650,8 +664,7 @@ public class SubmitWindow {
 
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
-                        String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils
-                                .fromBase64(val));
+                        String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         final Map<String, String> variables = readVars(job);
 
                         // presentation form
@@ -763,8 +776,7 @@ public class SubmitWindow {
         submitButton.setDisabled(!state);
         if (!state) {
             submitButton.setTooltip("A workflow must be selected first");
-        }
-        else {
+        } else {
             submitButton.setTooltip("");
         }
     }

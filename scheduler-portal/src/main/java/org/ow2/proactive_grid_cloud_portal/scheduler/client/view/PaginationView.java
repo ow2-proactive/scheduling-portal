@@ -1,38 +1,28 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
@@ -51,10 +41,10 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
-public class PaginationView implements PaginationListener{
+
+public class PaginationView implements PaginationListener {
 
     protected PaginationController paginationController;
-
 
     /**
      * Task page number
@@ -65,16 +55,17 @@ public class PaginationView implements PaginationListener{
      * Task previous page button
      */
     protected ToolStripButton pagePreviousButton = null;
+
     /**
      * Task next page button
      */
     protected ToolStripButton pageNextButton = null;
 
-
     /**
      * Task first page button
      */
     protected ToolStripButton pageFirstButton = null;
+
     /**
      * Task last page button
      */
@@ -91,7 +82,6 @@ public class PaginationView implements PaginationListener{
     protected TextBox txtPageNumber = null;
 
     protected String itemTypeName;
-
 
     /**
      * Builds the view content.
@@ -116,7 +106,6 @@ public class PaginationView implements PaginationListener{
             }
         });
 
-
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navNextPaginationButton");
@@ -125,7 +114,6 @@ public class PaginationView implements PaginationListener{
                 paginationController.nextPage();
             }
         });
-
 
         this.pageLastButton = new ToolStripButton("Last >>");
         this.pageLastButton.disable();
@@ -141,7 +129,6 @@ public class PaginationView implements PaginationListener{
         this.offsetRangeLabel.setAlign(Alignment.CENTER);
         this.offsetRangeLabel.setWidth100();
         this.offsetRangeLabel.setPadding(0);
-
 
         Label pageLabel = new Label("Page");
         pageLabel.setWidth100();
@@ -162,12 +149,11 @@ public class PaginationView implements PaginationListener{
         this.txtPageNumber.addKeyDownHandler(new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     changePageNumberHandler();
                 }
             }
         });
-
 
         HLayout labelLayout = new HLayout();
         labelLayout.addStyleName("labelPaginationLayout");
@@ -193,22 +179,20 @@ public class PaginationView implements PaginationListener{
         return paginationLayout;
     }
 
-    protected void changePageNumberHandler(){
+    protected void changePageNumberHandler() {
         String text = this.txtPageNumber.getText();
-        try{
+        try {
             int pageNumber = Integer.parseInt(text) - 1;
             this.paginationController.goToPage(pageNumber);
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
 
         }
     }
 
-
     /**
      * Disable all the buttons for the pagination.
      */
-    protected void disableAllControls(){
+    protected void disableAllControls() {
         this.pageFirstButton.disable();
         this.pagePreviousButton.disable();
         this.pageNextButton.disable();
@@ -216,31 +200,29 @@ public class PaginationView implements PaginationListener{
         this.txtPageNumber.setEnabled(false);
     }
 
-
     /**
      * Enables the pagination button according to the navigation status.
      */
-    protected void enablePaginationControls(){
-        if (this.paginationController.hasPrevious()){
+    protected void enablePaginationControls() {
+        if (this.paginationController.hasPrevious()) {
             this.pageFirstButton.enable();
             this.pagePreviousButton.enable();
         }
 
-        if (this.paginationController.hasNext()){
+        if (this.paginationController.hasNext()) {
             this.pageNextButton.enable();
             this.pageLastButton.enable();
         }
         this.txtPageNumber.setEnabled(true);
     }
 
-
     @Override
     public void pageChanged() {
         this.disableAllControls();
-        this.offsetRangeLabel.setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " +
+                                          this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
-
 
     @Override
     public void totalItemChanged() {
@@ -248,11 +230,11 @@ public class PaginationView implements PaginationListener{
         this.enablePaginationControls();
     }
 
-
-    protected void itemsUpdated(long totalItems){
+    protected void itemsUpdated(long totalItems) {
         this.disableAllControls();
         this.paginationController.computeMaxPage(totalItems);
-        this.offsetRangeLabel.setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " +
+                                          this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
 }

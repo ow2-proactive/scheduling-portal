@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -82,11 +71,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     /** tree view */
     private TreeGrid treeGrid = null;
+
     /** tree data */
     private Tree tree = null;
 
     /** parameter for {@link #nodesUpdated(Map)} last time it was called */
     private Map<String, NodeSource> oldNodes = null;
+
     /** treenodes currently held by {@link #tree} */
     private HashMap<String, TreeNode> curNodes = null;
 
@@ -191,8 +182,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 menu.setShowShadow(true);
                 menu.setShadowDepth(10);
 
-                MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri()
-                        .asString());
+                MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
                 expandItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -200,8 +190,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem collapseItem = new MenuItem("Collapse all", Images.instance.close_16().getSafeUri()
-                        .asString());
+                MenuItem collapseItem = new MenuItem("Collapse all",
+                                                     Images.instance.close_16().getSafeUri().asString());
                 collapseItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -209,8 +199,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri()
-                        .asString());
+                MenuItem removeItem = new MenuItem("Remove",
+                                                   RMImages.instance.node_remove_16().getSafeUri().asString());
                 removeItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -218,8 +208,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem lockItem = new MenuItem("Lock", RMImages.instance.node_locked_16().getSafeUri()
-                        .asString());
+                MenuItem lockItem = new MenuItem("Lock", RMImages.instance.node_locked_16().getSafeUri().asString());
                 lockItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -227,8 +216,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem unlockItem = new MenuItem("Unlock", RMImages.instance.node_free_16().getSafeUri()
-                        .asString());
+                MenuItem unlockItem = new MenuItem("Unlock", RMImages.instance.node_free_16().getSafeUri().asString());
                 unlockItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -247,17 +235,21 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodesListener#nodesUpdated(java.util.Map)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodesListener#nodesUpdated(java.util.
+     * Map)
      */
     public void nodesUpdated(Map<String, NodeSource> nodes) {
 
-        /* Add to _this.tree_ the nodes contained in _nodes_ but not present
+        /*
+         * Add to _this.tree_ the nodes contained in _nodes_ but not present
          * in _oldNodes_
          */
         for (NodeSource ns : nodes.values()) {
             String nsName = ns.getSourceName();
-            TNS nsTreeNode = new TNS(nsName + " <span style='color:#777;'>" + ns.getSourceDescription() +
-                ", Owner: " + ns.getNodeSourceAdmin() + "</span>", ns);
+            TNS nsTreeNode = new TNS(nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
+                                     ns.getNodeSourceAdmin() + "</span>", ns);
             nsTreeNode.setAttribute("nodeId", nsName);
             nsTreeNode.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
 
@@ -324,7 +316,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             }
         }
 
-        /* Remove from _this.tree_ the nodes contained in _curNodes_ but not in _nodes_
+        /*
+         * Remove from _this.tree_ the nodes contained in _curNodes_ but not in _nodes_
          */
         for (Entry<String, NodeSource> oldNs : this.oldNodes.entrySet()) {
             /* Keep NodeSource */

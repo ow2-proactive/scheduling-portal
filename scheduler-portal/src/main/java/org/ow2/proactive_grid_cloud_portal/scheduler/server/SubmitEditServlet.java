@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
@@ -52,13 +41,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.google.gwt.core.client.GWT;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -66,6 +53,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.google.gwt.core.client.GWT;
 
 
 /**
@@ -183,7 +172,6 @@ public class SubmitEditServlet extends HttpServlet {
                     }
                 }
 
-
                 if (startAt != null && !startAt.isEmpty()) {
                     NodeList gis = doc.getElementsByTagName("genericInformation");
                     Node gi = null;
@@ -206,7 +194,6 @@ public class SubmitEditServlet extends HttpServlet {
                     // consequence of not having a insertAfter() method
                     nextNode.getParentNode().insertBefore(gi, nextNode);
 
-
                 }
 
                 // write the document to a string
@@ -219,8 +206,7 @@ public class SubmitEditServlet extends HttpServlet {
                     DOMSource source = new DOMSource(doc);
                     transformer.transform(source, result);
                 } catch (Exception e1) {
-                    response.getWriter().write(
-                            "Error while writing the job descriptor's DOM: " + e1.getMessage());
+                    response.getWriter().write("Error while writing the job descriptor's DOM: " + e1.getMessage());
                 }
 
             } catch (ParserConfigurationException e1) {

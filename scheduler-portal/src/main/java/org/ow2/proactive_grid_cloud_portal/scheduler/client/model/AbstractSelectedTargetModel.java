@@ -1,34 +1,57 @@
+/*
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
+ *
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
+ *
+ * This library is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation: version 3 of
+ * the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * If needed, contact us to obtain a release under GPL Version 2 or 3
+ * or a different license than the AGPL.
+ */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SelectionTarget;
 
+
 public abstract class AbstractSelectedTargetModel {
 
     protected SelectionTarget selectionTarget = SelectionTarget.JOB_TARGET;
-    
-    protected SchedulerModelImpl parentModel; 
-    
-    public AbstractSelectedTargetModel(SchedulerModelImpl parentModel){
+
+    protected SchedulerModelImpl parentModel;
+
+    public AbstractSelectedTargetModel(SchedulerModelImpl parentModel) {
         this.parentModel = parentModel;
     }
-    
-    
+
     public SelectionTarget getSelectionTarget() {
         return selectionTarget;
     }
-    
-    
+
     public boolean setSelectionTarget(SelectionTarget selectionTarget) {
-        if(this.selectionTarget != selectionTarget){
+        if (this.selectionTarget != selectionTarget) {
             this.selectionTarget = selectionTarget;
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
-    
+
     public SchedulerModelImpl getParentModel() {
         return parentModel;
     }

@@ -1,7 +1,27 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url "http://repository.activeeon.com/content/groups/proactive/"
+        }
+    }
+
+    dependencies {
+        classpath "com.diffplug.gradle.spotless:spotless:2.4.0"
+        classpath "org.ow2.proactive:coding-rules:1.0.0"
+        delete "gradle/ext"
+        ant.unjar src: configurations.classpath.find { it.name.startsWith("coding-rules") }, dest: 'gradle/ext'
+    }
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'jetty'
     apply plugin: 'maven'
+
+    apply from: "$rootDir/gradle/ext/coding-format.gradle"
 
     group = 'org.ow2.proactive_grid_cloud_portal'
     version = schedulingPortalVersion
@@ -34,7 +54,7 @@ subprojects {
     dependencies {
         providedCompile 'com.google.gwt:gwt-user:2.7.0'
         providedCompile 'com.google.gwt:gwt-dev:2.7.0'
-		providedCompile 'com.google.gwt:gwt-codeserver:2.7.0'
+        providedCompile 'com.google.gwt:gwt-codeserver:2.7.0'
         // needed on the server side because we use GWT-RPC
         compile 'com.smartgwt:smartgwt:5.1d-2015-05-23'
         providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'

@@ -10,6 +10,7 @@ scheduler-portal/src/main/webapp/portal/
 /lib/
 /.settings/
 /classes/
+gradle/ext/
 
 # eclipse
 *.project
