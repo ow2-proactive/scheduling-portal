@@ -166,10 +166,15 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             @Override
             public void onNodeContextClick(NodeContextClickEvent event) {
 
+                String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
+                String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+
                 final TreeNode n = event.getNode();
                 if (n instanceof TNode) {
                     TNode tn = (TNode) n;
                     TreeView.this.controller.selectNode(tn.rmNode);
+                    lockItemImageResource = tn.rmNode.getIconLocked();
+                    unlockItemImageResource = tn.rmNode.getIconUnlocked();
                 } else if (n instanceof TNS) {
                     TNS tn = (TNS) n;
                     TreeView.this.controller.selectNodeSource(tn.rmNS);
@@ -208,7 +213,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem lockItem = new MenuItem("Lock", RMImages.instance.node_locked_16().getSafeUri().asString());
+                MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
                 lockItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -216,7 +221,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                MenuItem unlockItem = new MenuItem("Unlock", RMImages.instance.node_free_16().getSafeUri().asString());
+                MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
                 unlockItem.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(MenuItemClickEvent event) {
@@ -270,9 +275,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 if (oldNode == null) {
                     this.tree.add(nodeTreeNode, this.curNodes.get(nsName));
                     this.curNodes.put(nodeUrl, nodeTreeNode);
-                    nodeTreeNode.setIcon(n.getNodeState().getIcon());
+                    nodeTreeNode.setIcon(n.getIcon());
                 } else {
-                    this.curNodes.get(nodeUrl).setIcon(n.getNodeState().getIcon());
+                    this.curNodes.get(nodeUrl).setIcon(n.getIcon());
                 }
             }
 
@@ -305,12 +310,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                         this.tree.add(nodeTreeNode, this.curNodes.get(h.getId()));
                         this.curNodes.put(nodeUrl, nodeTreeNode);
                         nodeTreeNode.setAttribute("nodeState", n.getNodeState().toString());
-                        nodeTreeNode.setIcon(n.getNodeState().getIcon());
+                        nodeTreeNode.setIcon(n.getIcon());
                     } else {
                         TNode curTreeNode = (TNode) curNodes.get(nodeUrl);
                         curTreeNode.setAttribute("nodeState", n.getNodeState().toString());
                         curTreeNode.rmNode = n;
-                        curTreeNode.setIcon(n.getNodeState().getIcon());
+                        curTreeNode.setIcon(n.getIcon());
                     }
                 }
             }

@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Arrays;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -71,8 +70,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
     public void init(Node node) {
 
-        if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE ||
-            node.getNodeState() == NodeState.LOCKED) {
+        if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE) {
             // good
         } else {
             // cannot monitor the node

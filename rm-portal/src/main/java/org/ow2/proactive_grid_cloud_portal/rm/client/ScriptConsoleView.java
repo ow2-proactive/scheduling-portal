@@ -26,11 +26,14 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
 
 import com.google.codemirror2_gwt.client.CodeMirrorConfig;
 import com.google.codemirror2_gwt.client.CodeMirrorWrapper;
@@ -56,7 +59,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 /**
  * Allows to execute a script on a node and see its output.
  */
-public class ScriptConsoleView implements NodeSelectedListener {
+public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
 
     private Label label;
 
@@ -71,6 +74,10 @@ public class ScriptConsoleView implements NodeSelectedListener {
     private TextArea scriptArea;
 
     private String nodeUrl;
+
+    private String nodeSourceName;
+
+    private String nodeHostName;
 
     private Label loadingLabel;
 
@@ -87,7 +94,9 @@ public class ScriptConsoleView implements NodeSelectedListener {
 
     ScriptConsoleView(RMController controller) {
         this.controller = controller;
-        controller.getEventDispatcher().addNodeSelectedListener(this);
+        RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
+        eventDispatcher.addNodesListener(this);
+        eventDispatcher.addNodeSelectedListener(this);
     }
 
     Canvas build() {
@@ -236,25 +245,37 @@ public class ScriptConsoleView implements NodeSelectedListener {
         this.label.show();
         this.nodeCanvas.hide();
         this.nodeUrl = null;
+        this.nodeSourceName = null;
+        this.nodeHostName = null;
     }
 
     public void nodeSelected(Node node) {
-        this.nodeLabel.setIcon(node.getNodeState().getIcon());
+        this.nodeLabel.setIcon(node.getIcon());
 
         this.label.hide();
 
         this.nodeUrl = node.getNodeUrl();
+        this.nodeSourceName = node.getSourceName();
+        this.nodeHostName = node.getHostName();
         this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
         this.nodeCanvas.show();
     }
 
     public void nodeSourceSelected(NodeSource ns) {
+        this.nodeUrl = null;
         this.nodeCanvas.hide();
         this.label.show();
     }
 
     public void hostSelected(Host h) {
+        this.nodeUrl = null;
         this.nodeCanvas.hide();
         this.label.show();
     }
+
+    @Override
+    public void nodesUpdated(Map<String, NodeSource> nodes) {
+        NodeLabel.update(nodes, nodeLabel, nodeSourceName, nodeHostName, nodeUrl);
+    }
+
 }

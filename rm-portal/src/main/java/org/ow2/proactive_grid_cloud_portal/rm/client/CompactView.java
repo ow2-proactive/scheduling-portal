@@ -107,8 +107,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     CompactView(RMController controller) {
         this.controller = controller;
-        controller.getEventDispatcher().addNodesListener(this);
-        controller.getEventDispatcher().addNodeSelectedListener(this);
+        RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
+        eventDispatcher.addNodesListener(this);
+        eventDispatcher.addNodeSelectedListener(this);
         this.oldNodes = new HashMap<String, NodeSource>();
     }
 
@@ -314,7 +315,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         flow.insert(nodeTile, i);
                         this.curTiles.add(i, nodeUrl);
                     } else {
-                        if (!oldNode.getNodeState().equals(n.getNodeState())) {
+                        if (!oldNode.getNodeState().equals(n.getNodeState()) || oldNode.isLocked() != n.isLocked()) {
                             int i = this.curTiles.indexOf(nodeUrl);
                             NodeTile nt = ((NodeTile) this.flow.getWidget(i));
                             nt.refresh(n);
@@ -348,7 +349,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                         /* update old node status */
                         else {
-                            if (!oldNode.getNodeState().equals(n.getNodeState())) {
+                            if (!oldNode.getNodeState().equals(n.getNodeState()) ||
+                                oldNode.isLocked() != n.isLocked()) {
                                 int i = this.curTiles.indexOf(nodeUrl);
                                 NodeTile nt = ((NodeTile) this.flow.getWidget(i));
                                 nt.refresh(n);
@@ -429,6 +431,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     private class NodeTile extends Image {
+
         private Node node;
 
         private Host host;
@@ -445,8 +448,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         public void onBrowserEvent(Event event) {
             switch (DOM.eventGetType(event)) {
                 case Event.ONCONTEXTMENU:
+
+                    String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
+                    String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+
                     if (node != null) {
                         controller.selectNode(node);
+                        lockItemImageResource = node.getIconLocked();
+                        unlockItemImageResource = node.getIconUnlocked();
                     } else if (host != null) {
                         controller.selectHost(host);
                     } else if (nodesource != null) {
@@ -466,8 +475,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     });
 
-                    MenuItem lockItem = new MenuItem("Lock",
-                                                     RMImages.instance.node_locked_16().getSafeUri().asString());
+                    MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
                     lockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
                         @Override
                         public void onClick(MenuItemClickEvent event) {
@@ -475,14 +483,23 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     });
 
-                    MenuItem unlockItem = new MenuItem("Unlock",
-                                                       RMImages.instance.node_free_16().getSafeUri().asString());
+                    MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
                     unlockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
                         @Override
                         public void onClick(MenuItemClickEvent event) {
                             controller.unlockNodes();
                         }
                     });
+
+                    if (node != null) {
+                        if (node.isLocked()) {
+                            lockItem.setEnabled(false);
+                            unlockItem.setEnabled(true);
+                        } else {
+                            lockItem.setEnabled(true);
+                            unlockItem.setEnabled(false);
+                        }
+                    }
 
                     menu.setItems(lockItem, unlockItem, removeItem);
                     menu.moveTo(event.getClientX(), event.getClientY());
@@ -565,7 +582,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
         public NodeTile(Node node) {
-            super(node.getNodeState().getIcon());
+            super(node.getIcon());
             this.node = node;
             init();
         }
@@ -585,7 +602,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
         public void refresh(Node n) {
             this.node = n;
-            this.setUrl(n.getNodeState().getIcon());
+            this.setUrl(n.getIcon());
             this.setHoverNodeLabel();
         }
 

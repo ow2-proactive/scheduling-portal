@@ -50,6 +50,8 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -532,10 +534,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         int numLost = 0;
         int numConfiguring = 0;
         int numFree = 0;
-        int numLocked = 0;
         int numBusy = 0;
         int numDown = 0;
         int numToBeRemoved = 0;
+
+        int numLocked = 0;
 
         JSONArray nodes = obj.get("nodesEvents").isArray();
         for (int i = 0; i < nodes.size(); i++) {
@@ -551,28 +554,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
                 long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
                 String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
-                String nodeOwner = "";
-                JSONString nodeOwnerStr = nodeObj.get("nodeOwner").isString();
-                if (nodeOwnerStr != null)
-                    nodeOwner = nodeOwnerStr.stringValue();
-                String vmName = "";
-                JSONString vmStr = nodeObj.get("vmname").isString();
-                if (vmStr != null)
-                    vmName = vmStr.stringValue();
-                String description = "";
-                JSONString descStr = nodeObj.get("nodeInfo").isString();
-                if (descStr != null)
-                    description = descStr.stringValue();
 
-                String defaultJMXUrl = "";
-                JSONString jmxStr = nodeObj.get("defaultJMXUrl").isString();
-                if (jmxStr != null) {
-                    defaultJMXUrl = jmxStr.stringValue();
-                }
-                String proactiveJMXUrl = "";
-                JSONString paJmx = nodeObj.get("proactiveJMXUrl").isString();
-                if (paJmx != null) {
-                    proactiveJMXUrl = paJmx.stringValue();
+                String nodeOwner = getJsonStringNullable(nodeObj, "nodeOwner");
+                String vmName = getJsonStringNullable(nodeObj, "vmname");
+                String description = getJsonStringNullable(nodeObj, "nodeInfo");
+                String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
+                String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
+
+                boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
+                long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
+                String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
+
+                if (isLocked) {
+                    numLocked++;
                 }
 
                 Node n = new Node(nodeUrl,
@@ -587,7 +581,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                   vmName,
                                   description,
                                   defaultJMXUrl,
-                                  proactiveJMXUrl);
+                                  proactiveJMXUrl,
+                                  isLocked,
+                                  lockTime,
+                                  nodeLocker);
 
                 // deploying node
                 if (hostName == null || hostName.length() == 0) {
@@ -623,9 +620,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     case FREE:
                         numFree++;
                         break;
-                    case LOCKED:
-                        numLocked++;
-                        break;
                     case LOST:
                         numLost++;
                         break;
@@ -648,9 +642,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         model.setNumDeploying(numDeploying);
         model.setNumDown(numDown);
         model.setNumFree(numFree);
-        model.setNumLocked(numLocked);
         model.setNumLost(numLost);
         model.setNumToBeRemoved(numToBeRemoved);
+
+        model.setNumLocked(numLocked);
 
         int numPhysical = 0;
         int numVirtual = 0;
@@ -668,6 +663,40 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         model.setNumVirtualHosts(numVirtual);
 
         return ns;
+    }
+
+    private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
+        return getJsonStringNullable(jsonObject, attributeName, "");
+    }
+
+    private boolean getJsonBooleanNullable(JSONObject jsonObject, String attributeName, boolean defaultValue) {
+        JSONBoolean result = jsonObject.get(attributeName).isBoolean();
+
+        if (result == null) {
+            return defaultValue;
+        }
+
+        return result.booleanValue();
+    }
+
+    private long getJsonLongNullable(JSONObject jsonObject, String attributeName, long defaultValue) {
+        JSONNumber result = jsonObject.get(attributeName).isNumber();
+
+        if (result == null) {
+            return defaultValue;
+        }
+
+        return Long.parseLong(result.toString());
+    }
+
+    private String getJsonStringNullable(JSONObject jsonObject, String attributeName, String defaultValue) {
+        JSONString result = jsonObject.get(attributeName).isString();
+
+        if (result == null) {
+            return defaultValue;
+        }
+
+        return result.stringValue();
     }
 
     /**

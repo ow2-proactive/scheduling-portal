@@ -35,9 +35,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 /**
  * Stores and provides public access to all the data stored locally by the client
  * 
- * 
  * @author mschnoor
- *
  */
 public abstract class RMModel implements Model {
 

@@ -240,7 +240,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("description", "<pre>" + node.getDescription() + "</pre>");
 
         this.nodeDetails.setData(new DetailViewerRecord[] { dv });
-        this.nodeLabel.setIcon(node.getNodeState().getIcon());
+        this.nodeLabel.setIcon(node.getIcon());
 
         this.label.hide();
         this.nsCanvas.hide();

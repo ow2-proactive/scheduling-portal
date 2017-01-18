@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -85,8 +84,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 
         // selecting the node that will be used as an entry point to the host
         for (Node n : host.getNodes().values()) {
-            if (n.getNodeState() == NodeState.BUSY || n.getNodeState() == NodeState.FREE ||
-                n.getNodeState() == NodeState.LOCKED) {
+            if (n.getNodeState() == NodeState.BUSY || n.getNodeState() == NodeState.FREE) {
                 node = n;
                 break;
             }
