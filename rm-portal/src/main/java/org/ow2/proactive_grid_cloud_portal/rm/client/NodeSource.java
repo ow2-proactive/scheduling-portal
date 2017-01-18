@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
@@ -67,13 +68,17 @@ public class NodeSource {
         this.sourceDescription = t.sourceDescription;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
-        this.hosts = new HashMap<String, Host>();
-        for (String hostid : t.hosts.keySet()) {
+
+        Set<String> hostKeys = t.hosts.keySet();
+        this.hosts = new HashMap<String, Host>(hostKeys.size());
+        for (String hostid : hostKeys) {
             Host h = t.hosts.get(hostid);
             this.hosts.put(hostid, new Host(h));
         }
-        this.deploying = new HashMap<String, Node>();
-        for (String nodeid : t.deploying.keySet()) {
+
+        Set<String> deployingKeys = t.deploying.keySet();
+        this.deploying = new HashMap<String, Node>(deployingKeys.size());
+        for (String nodeid : deployingKeys) {
             Node n = t.deploying.get(nodeid);
             this.deploying.put(nodeid, new Node(n));
         }
@@ -123,8 +128,10 @@ public class NodeSource {
             this.hostName = t.hostName;
             this.sourceName = t.sourceName;
             this.virtual = t.virtual;
-            this.nodes = new HashMap<String, Node>();
-            for (String nodeid : t.nodes.keySet()) {
+
+            Set<String> nodeKeys = t.nodes.keySet();
+            this.nodes = new HashMap<String, Node>(nodeKeys.size());
+            for (String nodeid : nodeKeys) {
                 Node clone = new Node(t.nodes.get(nodeid));
                 this.nodes.put(nodeid, clone);
             }
