@@ -137,48 +137,47 @@ public class StatisticsView implements NodesListener {
         r[3] = r4;
 
         ListGridRecord r5 = new ListGridRecord();
-        r5.setAttribute("status", "Locked");
+        r5.setAttribute("status", "Busy");
         r5.setAttribute("type", "Node");
-        r5.setAttribute("icon", RMImages.instance.node_locked_16().getSafeUri().asString());
-        r5.setAttribute("count", controller.getModel().getNumLocked());
+        r5.setAttribute("icon", RMImages.instance.node_busy_16().getSafeUri().asString());
+        r5.setAttribute("count", controller.getModel().getNumBusy());
         r[4] = r5;
 
         ListGridRecord r6 = new ListGridRecord();
-        r6.setAttribute("status", "Busy");
+        r6.setAttribute("status", "To be released");
         r6.setAttribute("type", "Node");
-        r6.setAttribute("icon", RMImages.instance.node_busy_16().getSafeUri().asString());
-        r6.setAttribute("count", controller.getModel().getNumBusy());
+        r6.setAttribute("icon", RMImages.instance.node_torelease_16().getSafeUri().asString());
+        r6.setAttribute("count", controller.getModel().getNumToBeRemoved());
         r[5] = r6;
 
         ListGridRecord r7 = new ListGridRecord();
-        r7.setAttribute("status", "To be released");
+        r7.setAttribute("status", "Down");
         r7.setAttribute("type", "Node");
-        r7.setAttribute("icon", RMImages.instance.node_torelease_16().getSafeUri().asString());
-        r7.setAttribute("count", controller.getModel().getNumToBeRemoved());
+        r7.setAttribute("icon", RMImages.instance.node_down_16().getSafeUri().asString());
+        r7.setAttribute("count", controller.getModel().getNumDown());
         r[6] = r7;
 
         ListGridRecord r8 = new ListGridRecord();
-        r8.setAttribute("status", "Down");
+        r8.setAttribute("status", "Total");
         r8.setAttribute("type", "Node");
-        r8.setAttribute("icon", RMImages.instance.node_down_16().getSafeUri().asString());
-        r8.setAttribute("count", controller.getModel().getNumDown());
+        r8.setAttribute("count", controller.getModel().getNumNodes());
         r[7] = r8;
 
-        ListGridRecord r9 = new ListGridRecord();
-        r9.setAttribute("status", "Total");
-        r9.setAttribute("type", "Node");
-        r9.setAttribute("count", controller.getModel().getNumNodes());
-        r[8] = r9;
-
         ListGridRecord aliveLimit = new ListGridRecord();
-        aliveLimit.setAttribute("status", "Node Limit");
+        aliveLimit.setAttribute("status", "Node limit");
         aliveLimit.setAttribute("type", "Node");
         if (isAliveNodesLimited()) {
             aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
         } else {
             aliveLimit.setAttribute("count", "None");
         }
-        r[9] = aliveLimit;
+        r[8] = aliveLimit;
+
+        ListGridRecord nodesLocked = new ListGridRecord();
+        nodesLocked.setAttribute("status", "Nodes locked");
+        nodesLocked.setAttribute("type", "Node");
+        nodesLocked.setAttribute("count", controller.getModel().getNumLocked());
+        r[9] = nodesLocked;
 
         ListGridRecord r10 = new ListGridRecord();
         r10.setAttribute("status", "Physical");

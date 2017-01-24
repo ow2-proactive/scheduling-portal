@@ -27,17 +27,17 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+
+import com.google.gwt.resources.client.ImageResource;
 
 
 /**
  * Hierarchically store Nodes data as received from the REST api
- * <p>
  *
- * 
  * @author mschnoor
- *
  */
 public class NodeSource {
 
@@ -68,13 +68,17 @@ public class NodeSource {
         this.sourceDescription = t.sourceDescription;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
-        this.hosts = new HashMap<String, Host>();
-        for (String hostid : t.hosts.keySet()) {
+
+        Set<String> hostKeys = t.hosts.keySet();
+        this.hosts = new HashMap<String, Host>(hostKeys.size());
+        for (String hostid : hostKeys) {
             Host h = t.hosts.get(hostid);
             this.hosts.put(hostid, new Host(h));
         }
-        this.deploying = new HashMap<String, Node>();
-        for (String nodeid : t.deploying.keySet()) {
+
+        Set<String> deployingKeys = t.deploying.keySet();
+        this.deploying = new HashMap<String, Node>(deployingKeys.size());
+        for (String nodeid : deployingKeys) {
             Node n = t.deploying.get(nodeid);
             this.deploying.put(nodeid, new Node(n));
         }
@@ -124,8 +128,10 @@ public class NodeSource {
             this.hostName = t.hostName;
             this.sourceName = t.sourceName;
             this.virtual = t.virtual;
-            this.nodes = new HashMap<String, Node>();
-            for (String nodeid : t.nodes.keySet()) {
+
+            Set<String> nodeKeys = t.nodes.keySet();
+            this.nodes = new HashMap<String, Node>(nodeKeys.size());
+            for (String nodeid : nodeKeys) {
                 Node clone = new Node(t.nodes.get(nodeid));
                 this.nodes.put(nodeid, clone);
             }
@@ -200,9 +206,17 @@ public class NodeSource {
             /** proactive node JMX url */
             private String proactiveJMXUrl;
 
+            private boolean isLocked = false;
+
+            private long lockTime = -1;
+
+            private String nodeLocker = null;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
-                    String description, String defaultJMXUrl, String proactiveJMXUrl) {
+                    String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
+                    String nodeLocker) {
+
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
                 this.nodeInfo = nodeInfo;
@@ -216,6 +230,13 @@ public class NodeSource {
                 this.description = description;
                 this.defaultJMXUrl = defaultJMXUrl;
                 this.proactiveJMXUrl = proactiveJMXUrl;
+
+                this.isLocked = isLocked;
+
+                if (this.isLocked) {
+                    this.lockTime = lockTime;
+                    this.nodeLocker = nodeLocker;
+                }
             }
 
             Node(Node t) {
@@ -232,6 +253,13 @@ public class NodeSource {
                 this.description = t.description;
                 this.defaultJMXUrl = t.defaultJMXUrl;
                 this.proactiveJMXUrl = t.proactiveJMXUrl;
+
+                this.isLocked = t.isLocked;
+
+                if (this.isLocked) {
+                    this.lockTime = t.lockTime;
+                    this.nodeLocker = t.nodeLocker;
+                }
             }
 
             public String getNodeUrl() {
@@ -285,6 +313,80 @@ public class NodeSource {
             public String getProactiveJMXUrl() {
                 return proactiveJMXUrl;
             }
+
+            public boolean isLocked() {
+                return isLocked;
+            }
+
+            public long getLockTime() {
+                return lockTime;
+            }
+
+            public String getNodeLocker() {
+                return nodeLocker;
+            }
+
+            public String getIcon() {
+                return getIcon(null);
+            }
+
+            public String getIconLocked() {
+                return getIcon(true);
+            }
+
+            public String getIconUnlocked() {
+                return getIcon(false);
+            }
+
+            /**
+             * @param version if not {@code null} and {@code true}, returns a locked version of the icon whatever the
+             *                real lock of the node is. if not {@code null} and {@code false}, returns a non locked
+             *                version of the icon whatever the real lock of the node is. If {@code null}, returns an
+             *                icon that is locked or not based on the real status of the node.
+             * @return icon name corresponding to the state and lock status of the node.
+             */
+            private String getIcon(Boolean version) {
+                RMImages instance = RMImages.instance;
+                switch (nodeState) {
+                    case BUSY:
+                        return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
+                    case CONFIGURING:
+                        return getIcon(instance.node_configuring_16(), instance.node_configuring_16_locked(), version);
+                    case DEPLOYING:
+                        return getIcon(instance.node_deploying_16(), instance.node_deploying_16_locked(), version);
+                    case DOWN:
+                        return getIcon(instance.node_down_16(), instance.node_down_16_locked(), version);
+                    case FREE:
+                        return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
+                    case LOST:
+                        return getIcon(instance.node_lost_16(), instance.node_lost_16_locked(), version);
+                    case TO_BE_REMOVED:
+                        return getIcon(instance.node_torelease_16(), instance.node_torelease_16_locked(), version);
+                }
+
+                return "";
+            }
+
+            private String getIcon(ImageResource icon, ImageResource lockedIcon, Boolean lockedVersion) {
+                if (lockedVersion != null) {
+                    if (lockedVersion) {
+                        return getSafeUriString(lockedIcon);
+                    } else {
+                        return getSafeUriString(icon);
+                    }
+                }
+
+                if (isLocked) {
+                    return getSafeUriString(lockedIcon);
+                } else {
+                    return getSafeUriString(icon);
+                }
+            }
+
+            private String getSafeUriString(ImageResource imageResource) {
+                return imageResource.getSafeUri().asString();
+            }
+
         }
     }
 }

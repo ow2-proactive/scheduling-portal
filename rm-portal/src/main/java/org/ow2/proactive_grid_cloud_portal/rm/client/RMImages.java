@@ -49,35 +49,56 @@ public interface RMImages extends ClientBundle {
     @Source("images/nodesource_16.png")
     ImageResource nodesource_16();
 
-    @Source("images/node_locked_16.png")
-    ImageResource node_locked_16();
-
     @Source("images/node_remove_16.png")
     ImageResource node_remove_16();
 
     @Source("images/node_add_16.png")
     ImageResource node_add_16();
 
+    @Source("images/node_add_16_locked.png")
+    ImageResource node_add_16_locked();
+
     @Source("images/node_configuring_16.png")
     ImageResource node_configuring_16();
+
+    @Source("images/node_configuring_16_locked.png")
+    ImageResource node_configuring_16_locked();
 
     @Source("images/node_lost_16.png")
     ImageResource node_lost_16();
 
+    @Source("images/node_lost_16_locked.png")
+    ImageResource node_lost_16_locked();
+
     @Source("images/node_free_16.png")
     ImageResource node_free_16();
+
+    @Source("images/node_free_16_locked.png")
+    ImageResource node_free_16_locked();
 
     @Source("images/node_down_16.png")
     ImageResource node_down_16();
 
+    @Source("images/node_down_16_locked.png")
+    ImageResource node_down_16_locked();
+
     @Source("images/node_deploying_16.png")
     ImageResource node_deploying_16();
+
+    @Source("images/node_deploying_16_locked.png")
+    ImageResource node_deploying_16_locked();
 
     @Source("images/node_busy_16.png")
     ImageResource node_busy_16();
 
+    @Source("images/node_busy_16_locked.png")
+    ImageResource node_busy_16_locked();
+
     @Source("images/node_torelease_16.png")
     ImageResource node_torelease_16();
+
+    @Source("images/node_torelease_16_locked.png")
+    ImageResource node_torelease_16_locked();
 
     @Source("images/open_16.png")
     ImageResource open_16();

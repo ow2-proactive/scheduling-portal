@@ -25,9 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.*;
+
+import java.util.Map;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringHostView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringNodeView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
@@ -44,7 +49,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Displays a monitoring information about the currently selected node or host
  *
  */
-public class MonitoringView implements NodeSelectedListener {
+public class MonitoringView implements NodesListener, NodeSelectedListener {
 
     private Label label = null;
 
@@ -68,9 +73,14 @@ public class MonitoringView implements NodeSelectedListener {
 
     private RMController controller;
 
+    private Node selectedNode;
+
     MonitoringView(RMController controller) {
         this.controller = controller;
-        controller.getEventDispatcher().addNodeSelectedListener(this);
+
+        RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
+        eventDispatcher.addNodesListener(this);
+        eventDispatcher.addNodeSelectedListener(this);
     }
 
     Canvas build() {
@@ -134,6 +144,7 @@ public class MonitoringView implements NodeSelectedListener {
      * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeUnselected()
      */
     public void nodeUnselected() {
+        this.selectedNode = null;
         this.label.setContents("No node selected");
         this.label.setAlign(Alignment.CENTER);
         this.label.show();
@@ -153,8 +164,8 @@ public class MonitoringView implements NodeSelectedListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
      */
     public void nodeSelected(Node node) {
-
-        this.nodeLabel.setIcon(node.getNodeState().getIcon());
+        this.selectedNode = node;
+        this.nodeLabel.setIcon(node.getIcon());
 
         this.label.hide();
         this.hostCanvas.hide();
@@ -175,7 +186,7 @@ public class MonitoringView implements NodeSelectedListener {
      * nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
-        //nodeUnselected();
+        this.selectedNode = null;
         this.label.hide();
         this.nodeCanvas.hide();
         this.hostCanvas.hide();
@@ -196,6 +207,7 @@ public class MonitoringView implements NodeSelectedListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
      */
     public void hostSelected(Host h) {
+        this.selectedNode = null;
         this.label.hide();
         this.nodeCanvas.hide();
         this.sourceCanvas.hide();
@@ -207,4 +219,10 @@ public class MonitoringView implements NodeSelectedListener {
         this.hostMonitoring.init(h);
         this.hostCanvas.show();
     }
+
+    @Override
+    public void nodesUpdated(Map<String, NodeSource> nodes) {
+        NodeLabel.update(nodes, nodeLabel, selectedNode);
+    }
+
 }

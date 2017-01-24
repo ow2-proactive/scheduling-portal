@@ -49,7 +49,6 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  * This privileged view of the model should only be used directly by the Controller
  * 
  * @author mschnoor
- *
  */
 public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
@@ -89,9 +88,9 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private int numConfiguring = 0;
 
-    private int numFree = 0;
-
     private int numLocked = 0;
+
+    private int numFree = 0;
 
     private int numBusy = 0;
 
@@ -395,8 +394,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     @Override
     public int getNumNodes() {
-        //return numDeploying + numLocked + numLost + numConfiguring + numFree + numBusy + numDown;
-        return numLocked + numFree + numBusy + numDown;
+        return numFree + numBusy + numDown;
     }
 
     void setNumDeploying(int numDeploying) {
