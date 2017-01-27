@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
@@ -104,10 +93,15 @@ public class LoginPage {
 
     // some ui fields kept global for convenience
     private HLayout authSelLayout = null;
+
     private Label optsLabel = null;
+
     private Runnable switchPlainCredForm = null;
+
     private Label motdLabel = null;
+
     private Canvas motdMargin = null;
+
     private HLayout motdCanvas = null;
 
     /** true before the page is rendered for the first time,
@@ -164,8 +158,7 @@ public class LoginPage {
         authSelLayout.addMember(authTypeSelectForm);
         authSelLayout.setVisible(false);
 
-        optsLabel = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>"
-            + "more options</nobr>");
+        optsLabel = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>" + "more options</nobr>");
         optsLabel.setHeight(30);
         optsLabel.setIcon(Images.instance.expand_16().getSafeUri().asString());
         optsLabel.setAlign(Alignment.RIGHT);
@@ -177,7 +170,7 @@ public class LoginPage {
         credLayout.hide();
 
         Label label = new Label("<nobr style='color:#003168;font-size:1.2em;'><strong>" +
-            Config.get().getApplicationName() + "</strong> login</nobr>");
+                                Config.get().getApplicationName() + "</strong> login</nobr>");
         label.setHeight(30);
         label.setValign(VerticalAlignment.TOP);
 
@@ -229,12 +222,11 @@ public class LoginPage {
                     } else if (response.getStatusCode() == 0) {
                         return;
                     } else {
-                        content = "Failed to get MOTD (" + response.getStatusCode() + " " +
-                            response.getStatusText() + ")";
+                        content = "Failed to get MOTD (" + response.getStatusCode() + " " + response.getStatusText() +
+                                  ")";
                     }
-                    motdLabel
-                            .setContents("<div style='color:#003168;font-size: 1.2em;border-left:5px solid #ccc;padding-left:5px'>" +
-                                content + "</div>");
+                    motdLabel.setContents("<div style='color:#003168;font-size: 1.2em;border-left:5px solid #ccc;padding-left:5px'>" +
+                                          content + "</div>");
                     motdCanvas.setVisible(true);
                     motdMargin.setVisible(true);
 
@@ -323,12 +315,14 @@ public class LoginPage {
      */
     private Layout getPlainAuth() {
 
-        /* smartGWT forms don't allow simple multipart file upload,
+        /*
+         * smartGWT forms don't allow simple multipart file upload,
          * so we use a smartGWT form for login/password/checkbox,
          * a pure GWT form for file upload, and upon submission,
          * put the fields from the first form as hidden fields of the
          * pure GWT form. It's a bit convoluted but like this we get
-         * the pretty widgets and the nice features		 */
+         * the pretty widgets and the nice features
+         */
 
         TextItem loginField = new TextItem("login", "User");
         loginField.setRequired(true);
@@ -415,8 +409,8 @@ public class LoginPage {
                     authSelLayout.setVisible(true);
                     form.showItem("useSSH");
                     optsLabel.setIcon(Images.instance.close_16().getSafeUri().asString());
-                    optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;"
-                        + "cursor:pointer'>less options</nobr>");
+                    optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;" +
+                                          "cursor:pointer'>less options</nobr>");
                 } else {
                     authTypeSelectForm.setValue("Mode", "Basic");
                     switchPlainCredForm.run();
@@ -426,8 +420,8 @@ public class LoginPage {
                     moreField.setValue(false);
                     formPanel.reset();
                     optsLabel.setIcon(Images.instance.expand_16().getSafeUri().asString());
-                    optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;"
-                        + "cursor:pointer'>more options</nobr>");
+                    optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;" +
+                                          "cursor:pointer'>more options</nobr>");
                 }
             }
         };
@@ -612,8 +606,8 @@ public class LoginPage {
                 }
             }
         });
-        Label createCred = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>"
-            + "Create credentials</nobr>");
+        Label createCred = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>" +
+                                     "Create credentials</nobr>");
         createCred.setHeight(20);
         createCred.setAlign(Alignment.CENTER);
         createCred.setIcon(Images.instance.key_16().getSafeUri().asString());

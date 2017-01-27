@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -89,6 +78,7 @@ import com.smartgwt.client.widgets.layout.VStack;
 public class NSCreationWindow {
 
     private RMController controller;
+
     private Window window;
 
     private SelectItem infraSelect, policySelect;
@@ -130,9 +120,8 @@ public class NSCreationWindow {
 
         infraLayout.addMember(infraForm);
 
-        final Label label = new Label(
-            "A Node Source is a combination of an Infrastructure, which defines how resources"
-                + " will be acquired, and a Policy, that dictates when resources can be acquired.");
+        final Label label = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
+                                      " will be acquired, and a Policy, that dictates when resources can be acquired.");
         label.setHeight(40);
 
         final HashMap<String, List<FormItem>> allForms = new HashMap<String, List<FormItem>>();
@@ -160,8 +149,7 @@ public class NSCreationWindow {
 
                 LinkedHashMap<String, String> values = new LinkedHashMap<String, String>();
                 for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
-                    String shortName = inf.getPluginName()
-                            .substring(inf.getPluginName().lastIndexOf('.') + 1);
+                    String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
                     List<Field> configurableFields = inf.getConfigurableFields();
@@ -174,13 +162,16 @@ public class NSCreationWindow {
                             infra = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
                             if (f.isCredential()) {
                                 PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
-                                        .getSafeUri().asString()), new FormItemClickHandler() {
-                                    @Override
-                                    public void onFormItemClick(FormItemIconClickEvent event) {
-                                        CredentialsWindow win = new CredentialsWindow();
-                                        win.show();
-                                    }
-                                });
+                                                                                           .getSafeUri()
+                                                                                           .asString()),
+                                                                 new FormItemClickHandler() {
+                                                                     @Override
+                                                                     public void onFormItemClick(
+                                                                             FormItemIconClickEvent event) {
+                                                                         CredentialsWindow win = new CredentialsWindow();
+                                                                         win.show();
+                                                                     }
+                                                                 });
                                 cred.setPrompt("Create a Credential file");
                                 cred.setWidth(16);
                                 cred.setHeight(16);
@@ -204,8 +195,7 @@ public class NSCreationWindow {
                 values.clear();
                 tmpAll.add(policySelect);
                 for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                    String shortName = inf.getPluginName()
-                            .substring(inf.getPluginName().lastIndexOf('.') + 1);
+                    String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
                     List<Field> configurableFields = inf.getConfigurableFields();
@@ -218,13 +208,16 @@ public class NSCreationWindow {
                             pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
                             if (f.isCredential()) {
                                 PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
-                                        .getSafeUri().asString()), new FormItemClickHandler() {
-                                    @Override
-                                    public void onFormItemClick(FormItemIconClickEvent event) {
-                                        CredentialsWindow win = new CredentialsWindow();
-                                        win.show();
-                                    }
-                                });
+                                                                                           .getSafeUri()
+                                                                                           .asString()),
+                                                                 new FormItemClickHandler() {
+                                                                     @Override
+                                                                     public void onFormItemClick(
+                                                                             FormItemIconClickEvent event) {
+                                                                         CredentialsWindow win = new CredentialsWindow();
+                                                                         win.show();
+                                                                     }
+                                                                 });
                                 cred.setPrompt("Create a Credential file");
                                 cred.setWidth(16);
                                 cred.setHeight(16);
@@ -353,18 +346,20 @@ public class NSCreationWindow {
                 infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 infraForm.setCanSubmit(true);
 
-                /* this smartGWT form looks nice but cannot do callbacks ;
+                /*
+                 * this smartGWT form looks nice but cannot do callbacks ;
                  * we register a native JS function to the document, send it to
                  * the servlet so that it writes it back when returning
                  * when the browser reads the return value and interprets it as JS,
-                 * the callback is called */
+                 * the callback is called
+                 */
                 infraForm.setValue("nsCallback", JSUtil.register(new JSUtil.JSCallback() {
                     public void execute(JavaScriptObject obj) {
                         JSONObject js = new JSONObject(obj);
                         if (js.containsKey("result") && js.get("result").isBoolean().booleanValue()) {
                             window.hide();
-                            LogModel.getInstance().logMessage(
-                                    "Successfully created nodesource: " + nameItem.getValueAsString());
+                            LogModel.getInstance()
+                                    .logMessage("Successfully created nodesource: " + nameItem.getValueAsString());
                         } else {
                             String msg;
                             if (js.get("errorMessage").isString() != null) {
@@ -372,12 +367,10 @@ public class NSCreationWindow {
                             } else {
                                 msg = js.toString();
                             }
-                            label.setContents("<span style='color:red'>Failed to create Node Source :<br>" +
-                                msg + "</span>");
-                            LogModel.getInstance()
-                                    .logImportantMessage(
-                                            "Failed to create nodesource " + nameItem.getValueAsString() +
-                                                ": " + msg);
+                            label.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg +
+                                              "</span>");
+                            LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
+                                                                       nameItem.getValueAsString() + ": " + msg);
                             layout.scrollToTop();
                         }
                         infraLabel.hide();

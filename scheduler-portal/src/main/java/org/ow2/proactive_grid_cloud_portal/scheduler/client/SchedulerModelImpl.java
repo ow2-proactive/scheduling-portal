@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -69,39 +58,52 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  */
 public class SchedulerModelImpl extends SchedulerModel implements SchedulerEventDispatcher {
 
-    
     private SchedulerStatus schedulerStatus = SchedulerStatus.STARTED;
-    
+
     private List<SchedulerUser> users = null;
+
     private List<SchedulerUser> usersWithJobs = null;
+
     private HashMap<String, String> schedulerStats = null;
+
     private HashMap<String, String> accountStats = null;
+
     private Map<String, String> imagePath = null;
+
     private Map<String, JobVisuMap> visuMap = null;
+
     private Map<String, String> htmlMap = null;
+
     private Map<String, StatHistory> statistics = null;
+
     private Map<String, Range> requestedStatRange = null;
+
     private List<JobUsage> usage = null;
 
     private ArrayList<SchedulerStatusListener> schedulerStateListeners = null;
-    
-    private ArrayList<UsersListener> usersListeners = null;
-    private ArrayList<UsersListener> usersWithJobsListeners = null;
-    private ArrayList<StatisticsListener> statisticsListeners = null;
-    private ArrayList<VisualizationListener> visuListeners = null;
-    private ArrayList<StatsListener> statsListeners = null;
-    private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
-    private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
 
+    private ArrayList<UsersListener> usersListeners = null;
+
+    private ArrayList<UsersListener> usersWithJobsListeners = null;
+
+    private ArrayList<StatisticsListener> statisticsListeners = null;
+
+    private ArrayList<VisualizationListener> visuListeners = null;
+
+    private ArrayList<StatsListener> statsListeners = null;
+
+    private ArrayList<SchedulerListeners.UsageListener> usageListeners = null;
+
+    private SchedulerListeners.ThirdPartyCredentialsListener thirdPartyCredentialsListener;
 
     private ExecutionsModel executionsModel;
 
     private TasksModel tasksModel;
-    
+
     private OutputModel outputModel;
-    
+
     private ServerLogsModel serverLogsModel;
-    
+
     private ResultModel resultModel;
 
     SchedulerModelImpl() {
@@ -118,7 +120,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.htmlMap = new HashMap<String, String>();
         this.requestedStatRange = new HashMap<String, Range>();
     }
-
 
     @Override
     public SchedulerStatus getSchedulerStatus() {
@@ -138,7 +139,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
             listener.statusChanged(this.schedulerStatus);
         }
     }
-
 
     @Override
     public String getJobImagePath(String jobId) {
@@ -261,9 +261,6 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         }
     }
 
-
-
-
     public void setThirdPartyCredentialsKeys(Set<String> thirdPartyCredentialsKeys) {
         thirdPartyCredentialsListener.keysUpdated(thirdPartyCredentialsKeys);
     }
@@ -286,26 +283,27 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         return r;
     }
 
-
     private String getLogStamp() {
         String date = DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG).format(new Date());
         return "<span style='color:gray'>" + date + "</span> ";
     }
 
-    
-
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addSchedulerStateListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.SchedulerStateListener)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addSchedulerStateListener(org.ow2.
+     * proactive_grid_cloud_portal.client.Listeners.SchedulerStateListener)
      */
     public void addSchedulerStatusListener(SchedulerStatusListener listener) {
         this.schedulerStateListeners.add(listener);
     }
-    
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addUsersListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.UsersListener)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addUsersListener(org.ow2.
+     * proactive_grid_cloud_portal.client.Listeners.UsersListener)
      */
     public void addUsersListener(UsersListener listener) {
         this.usersListeners.add(listener);
@@ -313,7 +311,10 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addUsersWithJobsListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.UsersListener)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addUsersWithJobsListener(org.ow2.
+     * proactive_grid_cloud_portal.client.Listeners.UsersListener)
      */
     public void addUsersWithJobsListener(UsersListener listener) {
         this.usersWithJobsListeners.add(listener);
@@ -321,16 +322,21 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addStatisticsListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.StatisticsListener)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addStatisticsListener(org.ow2.
+     * proactive_grid_cloud_portal.client.Listeners.StatisticsListener)
      */
     public void addStatisticsListener(StatisticsListener listener) {
         this.statisticsListeners.add(listener);
     }
 
-
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addVisualizationListener(org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.EventDispatcher#addVisualizationListener(org.ow2.
+     * proactive_grid_cloud_portal.client.Listeners.VisualizationListener)
      */
     public void addVisualizationListener(VisualizationListener listener) {
         this.visuListeners.add(listener);
@@ -352,56 +358,44 @@ public class SchedulerModelImpl extends SchedulerModel implements SchedulerEvent
         this.thirdPartyCredentialsListener = thirdPartyCredentialsListener;
     }
 
-
     public TasksModel getTasksModel() {
         return tasksModel;
     }
-
 
     public void setTasksModel(TasksModel tasksModel) {
         this.tasksModel = tasksModel;
     }
 
-
     public ExecutionsModel getExecutionsModel() {
         return executionsModel;
     }
-
 
     public void setExecutionsModel(ExecutionsModel executionsModel) {
         this.executionsModel = executionsModel;
     }
 
-
     public OutputModel getOutputModel() {
         return outputModel;
     }
-
 
     public void setOutputModel(OutputModel outputModel) {
         this.outputModel = outputModel;
     }
 
-
     public ServerLogsModel getServerLogsModel() {
         return serverLogsModel;
     }
-
 
     public void setServerLogsModel(ServerLogsModel serverLogsModel) {
         this.serverLogsModel = serverLogsModel;
     }
 
-
     public ResultModel getResultModel() {
         return resultModel;
     }
 
-
     public void setResultModel(ResultModel resultModel) {
         this.resultModel = resultModel;
     }
-    
-    
-    
+
 }

@@ -1,36 +1,27 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -86,17 +77,22 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.VLayout;
 
+
 public class UsageView implements SchedulerListeners.UsageListener {
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
     private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+
     // The RelativeDate#START_OF_MONTH has not the behavior expected
     private static final RelativeDate START_OF_MONTH = new RelativeDate("+1m[-1m]");
 
     private static final RelativeDate DEFAULT_START_DATE = START_OF_MONTH;
+
     private static final RelativeDate DEFAULT_END_DATE = RelativeDate.NOW;
 
     private static final String BLUE = "#3a668d";
+
     private static final String GREEN = "#35a849";
 
     private static final int CHART_HEIGHT = 100;
@@ -104,15 +100,23 @@ public class UsageView implements SchedulerListeners.UsageListener {
     private SchedulerController controller;
 
     private ListGrid detailsGrid;
+
     private DataTable counterData;
+
     private ColumnChart counterChart;
 
     private Options counterChartOptions;
+
     private DataTable durationData;
+
     private ColumnChart durationChart;
+
     private Options durationChartOptions;
+
     private DynamicForm datesForm;
+
     private SelectItem userSelect;
+
     /** In case data are received before charts are displayed, save them */
     private ChartData currentChartData;
 
@@ -189,8 +193,9 @@ public class UsageView implements SchedulerListeners.UsageListener {
                     userSelect.enable();
                 }
 
-                if (userSelect.getValue() != null && userSelect.getValue().equals(LoginModel.getInstance().getLogin())
-                        && !formatted.contains(LoginModel.getInstance().getLogin())) {
+                if (userSelect.getValue() != null &&
+                    userSelect.getValue().equals(LoginModel.getInstance().getLogin()) &&
+                    !formatted.contains(LoginModel.getInstance().getLogin())) {
                     // remove default value (user login) as he has not yet submitted jobs
                     userSelect.clearValue();
                 }
@@ -294,7 +299,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         });
         jobField.setGroupTitleRenderer(new GroupTitleRenderer() {
             @Override
-            public String getGroupTitle(Object groupValue, GroupNode groupNode, ListGridField field, String fieldName, ListGrid grid) {
+            public String getGroupTitle(Object groupValue, GroupNode groupNode, ListGridField field, String fieldName,
+                    ListGrid grid) {
                 return groupValue + " - " + groupNode.getGroupMembers()[0].getAttribute("jobName");
             }
         });
@@ -535,12 +541,11 @@ public class UsageView implements SchedulerListeners.UsageListener {
     }
 
     private void clearDetailsGrid() {
-        detailsGrid.setData(new ListGridRecord[]{});
+        detailsGrid.setData(new ListGridRecord[] {});
     }
 
     private void clearCharts() {
-        if (counterData != null && counterChart != null
-                && durationChart != null && durationData != null) { // offline mode, charts not displayed
+        if (counterData != null && counterChart != null && durationChart != null && durationData != null) { // offline mode, charts not displayed
             counterData.removeRows(0, counterData.getNumberOfRows());
             counterChart.draw(counterData, counterChartOptions);
 
@@ -551,8 +556,11 @@ public class UsageView implements SchedulerListeners.UsageListener {
 
     private class ChartData {
         private final int taskCounter;
+
         private final int jobCounter;
+
         private final long jobTotalDuration;
+
         private final long taskTotalDuration;
 
         public ChartData(int taskCounter, int jobCounter, long jobTotalDuration, long taskTotalDuration) {

@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
@@ -47,6 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
@@ -100,43 +90,58 @@ public class RMPage implements LogListener {
     private static final int EXPAND_COLLAPSE_SECTION_LABEL_WIDTH = 80;
 
     private RMController controller = null;
+
     /** parent of all widgets held by this page */
     private Canvas rootLayout = null;
 
     /** displays all logs received from the event dispatcher */
     private LogWindow logWindow = null;
+
     /** about this app */
     private AboutWindow aboutWindow = null;
+
     /** client settings */
     private SettingsWindow settingsWindow = null;
+
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
+
     /** create node sources */
     private NSCreationWindow nsWindow = null;
+
     /** node launcher window */
     private AddNodeWindow addNodeWindow = null;
 
     /** top pane : textual list of nodes */
     private TreeView treeView = null;
+
     /** bot left pane : selected node info */
     private InfoView infoView = null;
+
     /** bot left pane : selected node monitoring */
     private MonitoringView monitoringView = null;
+
     /** bot right pane : graphical list of nodes */
     private CompactView compactView = null;
+
     /** bot left pane : node count */
     private StatisticsView statsView = null;
+
     private ScriptConsoleView scriptConsoleView = null;
+
     /** bot right : graphs */
     private RMStatsView rmStatsView = null;
 
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
+
     private long lastCriticalMessage = 0;
 
     // Logo strip properties
     private int logoStripHeight = 40;
+
     private String logoStripBackgroundColor = "#fafafa";
+
     private String logoStripBorder = "0px";
 
     private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
@@ -310,16 +315,14 @@ public class RMPage implements LogListener {
         tools.setBackgroundColor("#fafafa");
         tools.setBorder("0px");
 
-        MenuItem settingsMenuItem = new MenuItem("Settings",
-            Images.instance.settings_16().getSafeUri().asString());
+        MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 RMPage.this.settingsWindow.show();
             }
         });
 
-        MenuItem credMenuItem = new MenuItem("Create credentials",
-            Images.instance.key_16().getSafeUri().asString());
+        MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
         credMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 RMPage.this.credentialsWindow.show();
@@ -349,8 +352,7 @@ public class RMPage implements LogListener {
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
-        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(),
-                logoutMenuItem);
+        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
@@ -362,11 +364,10 @@ public class RMPage implements LogListener {
         });
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
-            Images.instance.icon_manual().getSafeUri().asString());
+                                                      Images.instance.icon_manual().getSafeUri().asString());
         documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
-                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "latest"
-                        : Config.get().getVersion();
+                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
                 Window.open("http://doc.activeeon.com/" + docVersion, "", "");
             }
         });
@@ -401,7 +402,7 @@ public class RMPage implements LogListener {
         });
 
         errorButton = new ToolStripButton("<strong>Error</strong>",
-            Images.instance.net_error_16().getSafeUri().asString());
+                                          Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
         errorButton.addClickHandler(new ClickHandler() {
             @Override
@@ -427,7 +428,7 @@ public class RMPage implements LogListener {
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
-	    tools.addSpacer(12);
+        tools.addSpacer(12);
         tools.addButton(cloudAutomationLinkButton);
         tools.addSpacer(12);
         tools.addButton(notificationPortalLinkButton);

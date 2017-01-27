@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -47,6 +36,7 @@ import javax.ws.rs.QueryParam;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -123,8 +113,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean killTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    boolean killTask(String sessionId, Integer jobId, String taskName) throws RestServerException, ServiceException;
 
     /**
      * Preempt a task
@@ -135,8 +124,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean preemptTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    boolean preemptTask(String sessionId, Integer jobId, String taskName) throws RestServerException, ServiceException;
 
     /**
      * Mark a task as finished and resume job
@@ -147,8 +135,8 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean markAsFinishedAndResume(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    boolean markAsFinishedAndResume(String sessionId, Integer jobId, String taskName)
+            throws RestServerException, ServiceException;
 
     /**
      * Restart a task.
@@ -159,8 +147,8 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean restartRunningTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    boolean restartRunningTask(String sessionId, Integer jobId, String taskName)
+            throws RestServerException, ServiceException;
 
     /**
      * Restart a task paused on error.
@@ -171,8 +159,8 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    boolean restartInErrorTask(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    boolean restartInErrorTask(String sessionId, Integer jobId, String taskName)
+            throws RestServerException, ServiceException;
 
     /**
      * Gets the list of tasks that correspond to a job.
@@ -183,7 +171,7 @@ public interface SchedulerService extends RemoteService {
      * @return the list of tasks as raw json
      */
     String getTasks(String sessionId, String jobId, int offset, int limit) throws RestServerException, ServiceException;
-    
+
     /**
      * Gets the list of tasks that correspond to a job and filtered by a given tag.
      * @param sessionId the session if of the user that asks for the tasks
@@ -195,20 +183,19 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException 
      * @throws ServiceException 
      */
-    String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit) throws RestServerException, ServiceException;
-
+    String getTasksByTag(String sessionId, String jobId, String tag, int offset, int limit)
+            throws RestServerException, ServiceException;
 
     String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
-                          boolean running, boolean finished, int offset, int limit,
-                          TasksCentricController.SortSpecifierRestContainer sortParameters)
+            boolean running, boolean finished, int offset, int limit,
+            TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException;
 
-
-    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate,
-                               boolean myTasks, boolean pending, boolean running, boolean finished,
-                               int offset, int limit, TasksCentricController.SortSpecifierRestContainer sortParameters)
+    String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks,
+            boolean pending, boolean running, boolean finished, int offset, int limit,
+            TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException;
-    
+
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
      * @param sessionId a valid session id
@@ -216,8 +203,8 @@ public interface SchedulerService extends RemoteService {
      * @param prefix the prefix used to filter tags
      * @return a list tags
      */
-    String getJobTaskTagsPrefix(String sessionId, String jobId, String prefix) throws RestServerException, ServiceException;
-    
+    String getJobTaskTagsPrefix(String sessionId, String jobId, String prefix)
+            throws RestServerException, ServiceException;
 
     /**
      * Gets the properties needed by the client. When loading properties we can only
@@ -238,7 +225,7 @@ public interface SchedulerService extends RemoteService {
      *
      */
     String getJobInfo(String sessionId, String jobId) throws RestServerException, ServiceException;
-    
+
     /**
      * Gets the job info details.
      * @param sessionId the session id of the user which is logged in.
@@ -249,7 +236,6 @@ public interface SchedulerService extends RemoteService {
      *
      */
     String getJobInfoDetails(String sessionId, String jobId) throws RestServerException, ServiceException;
-    
 
     /**
      * Changes the priority for a job.
@@ -338,8 +324,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
-            ServiceException;
+    String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException, ServiceException;
 
     /**
      * Gets the number of bytes available in the job output stream for the given job id,
@@ -357,8 +342,7 @@ public interface SchedulerService extends RemoteService {
      * @param jobId id of the job for which live logs should be cleaned
      * @throws RestServerException
      */
-    boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException,
-            ServiceException;
+    boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException, ServiceException;
 
     String getStatistics(String sessionId) throws RestServerException, ServiceException;
 
@@ -392,11 +376,9 @@ public interface SchedulerService extends RemoteService {
      */
     String revisionAndjobsinfo(@HeaderParam("sessionid")
 
-    String sessionId, @QueryParam("index")
-    int index, @QueryParam("limit")
-    int limit, @QueryParam("myjobs")
-    boolean myJobs, boolean pending, boolean running, boolean finished) throws RestServerException,
-            ServiceException;
+    String sessionId, @QueryParam("index") int index, @QueryParam("limit") int limit,
+            @QueryParam("myjobs") boolean myJobs, boolean pending, boolean running, boolean finished)
+            throws RestServerException, ServiceException;
 
     /**
      * Image representing the job as designed in the WF studio when applicable
@@ -405,9 +387,8 @@ public interface SchedulerService extends RemoteService {
      * @return path of the image on the server
      * @throws ServiceException
      */
-    String getJobImage(@HeaderParam("sessionid")
-    String sessionId, String jobId) throws RestServerException, ServiceException;
-
+    String getJobImage(@HeaderParam("sessionid") String sessionId, String jobId)
+            throws RestServerException, ServiceException;
 
     /**
      * Html representing the job as designed in the WF studio when applicable
@@ -416,8 +397,8 @@ public interface SchedulerService extends RemoteService {
      * @return path of the image on the server
      * @throws ServiceException
      */
-    String getJobHtml(@HeaderParam("sessionid")
-                      String sessionId, String jobId) throws RestServerException, ServiceException;
+    String getJobHtml(@HeaderParam("sessionid") String sessionId, String jobId)
+            throws RestServerException, ServiceException;
 
     /**
      * Returns the Scheduler status as a JSON String
@@ -425,8 +406,7 @@ public interface SchedulerService extends RemoteService {
      * @return the current scheduler status
      * @throws RestServerException
      */
-    String getSchedulerStatus(@HeaderParam("sessionid")
-    String sessionId) throws RestServerException;
+    String getSchedulerStatus(@HeaderParam("sessionid") String sessionId) throws RestServerException;
 
     /**
      * returns the list of users currently connected to the scheduler
@@ -435,8 +415,7 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String getSchedulerUsers(@HeaderParam("sessionid")
-    String sessionId) throws RestServerException, ServiceException;
+    String getSchedulerUsers(@HeaderParam("sessionid") String sessionId) throws RestServerException, ServiceException;
 
     /**
      * returns the list of users having jobs in the scheduler
@@ -445,8 +424,8 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String getSchedulerUsersWithJobs(@HeaderParam("sessionid")
-    String sessionId) throws RestServerException, ServiceException;
+    String getSchedulerUsersWithJobs(@HeaderParam("sessionid") String sessionId)
+            throws RestServerException, ServiceException;
 
     /**
      * @return version string of the REST api
@@ -463,8 +442,8 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String getTaskServerLogs(String sessionId, Integer jobId, String taskName) throws RestServerException,
-            ServiceException;
+    String getTaskServerLogs(String sessionId, Integer jobId, String taskName)
+            throws RestServerException, ServiceException;
 
     /**
      * Get server logs for a given job
@@ -477,7 +456,8 @@ public interface SchedulerService extends RemoteService {
      */
     String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException;
 
-    List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate) throws RestServerException, ServiceException;
+    List<JobUsage> getUsage(String sessionId, String user, Date startDate, Date endDate)
+            throws RestServerException, ServiceException;
 
     void putThirdPartyCredential(String sessionId, String key, String value) throws RestServerException;
 

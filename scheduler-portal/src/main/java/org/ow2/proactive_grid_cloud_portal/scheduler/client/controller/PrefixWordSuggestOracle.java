@@ -1,38 +1,28 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.Collection;
@@ -90,7 +80,6 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
      */
     protected String lastRequest = "";
 
-
     /**
      * Builds a tag suggestions controller from the main scheduler model and scheduler service.
      * @param model the main scheduler model.
@@ -101,7 +90,6 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         this.scheduler = Scheduler.getSchedulerService();
         this.schedulerModel.getExecutionsModel().getJobsModel().addJobSelectedListener(this);
     }
-
 
     /**
      * A tag suggestion
@@ -119,8 +107,6 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
          * The string that replace the current text if the suggestion is selected. 
          */
         private String replacementString;
-
-
 
         /**
          * Builds a tag suggestion from a displayed string and a replacement string.
@@ -149,63 +135,67 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
         }
     }
 
-
     /**
      * Computes if the set of tag suggestions in local need to be refreshed by a new request to the server,
      * according to the current prefix query.
      * @param query the prefix query
      * @return true if the set of tag suggestions need to refreshed, false otherwise.
      */
-    protected boolean needToRefresh(String query){
-        if(query.length() < 2){
+    protected boolean needToRefresh(String query) {
+        if (query.length() < 2) {
             return false;
         }
 
-        if(this.lastRequest.isEmpty() || !query.startsWith(lastRequest)){
+        if (this.lastRequest.isEmpty() || !query.startsWith(lastRequest)) {
             return true;
         }
 
         JobStatus status = this.schedulerModel.getExecutionsModel().getJobsModel().getSelectedJob().getStatus();
-        boolean finishedJob = (status == JobStatus.FINISHED || 
-                status == JobStatus.FAILED || 
-                status == JobStatus.KILLED || 
-                status == JobStatus.CANCELED);
+        boolean finishedJob = (status == JobStatus.FINISHED || status == JobStatus.FAILED ||
+                               status == JobStatus.KILLED || status == JobStatus.CANCELED);
         long requestAge = new Date().getTime() - this.lastRequestTime;
         return (!finishedJob && requestAge > SchedulerConfig.get().getTagSuggestionDelay());
     }
-
 
     /**
      * Refresh the set of tag suggestions in local by a request to server, with the given prefix query.
      * @param query the prefix query.
      */
-    protected void refresh(final String query){
+    protected void refresh(final String query) {
         this.lastRequestTime = new Date().getTime();
         this.lastRequest = query;
 
-        final String jobId = this.schedulerModel.getExecutionsModel().getJobsModel().getSelectedJob().getId().toString();
+        final String jobId = this.schedulerModel.getExecutionsModel()
+                                                .getJobsModel()
+                                                .getSelectedJob()
+                                                .getId()
+                                                .toString();
 
-        this.scheduler.getJobTaskTagsPrefix(LoginModel.getInstance().getSessionId(), jobId, query, new AsyncCallback<String>() {
+        this.scheduler.getJobTaskTagsPrefix(LoginModel.getInstance().getSessionId(),
+                                            jobId,
+                                            query,
+                                            new AsyncCallback<String>() {
 
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                public void onFailure(Throwable caught) {
+                                                    String msg = JSONUtils.getJsonErrorMessage(caught);
 
-                LogModel.getInstance().logImportantMessage("Failed to update tags for job " +
-                        jobId + " and prefix tag " + query + ": " + msg);
-            }
+                                                    LogModel.getInstance()
+                                                            .logImportantMessage("Failed to update tags for job " +
+                                                                                 jobId + " and prefix tag " + query +
+                                                                                 ": " + msg);
+                                                }
 
-            public void onSuccess(String result) {
-                try {
-                    List<String> tags = SchedulerJSONUtils.getTagsFromJson(result);
-                    model.setTagSuggestions(tags);
-                } catch (JSONException e) {
-                    LogModel.getInstance().logCriticalMessage(e.getMessage());
-                }
-            }
-        });
+                                                public void onSuccess(String result) {
+                                                    try {
+                                                        List<String> tags = SchedulerJSONUtils.getTagsFromJson(result);
+                                                        model.setTagSuggestions(tags);
+                                                    } catch (JSONException e) {
+                                                        LogModel.getInstance().logCriticalMessage(e.getMessage());
+                                                    }
+                                                }
+                                            });
 
     }
-
 
     /**
      * Provides in the given callback, a set of tag suggestions.
@@ -216,41 +206,36 @@ public class PrefixWordSuggestOracle extends SuggestOracle implements JobSelecte
     public void requestSuggestions(Request request, Callback callback) {
         Response response = new Response();
 
-        if(this.schedulerModel.getExecutionsModel().getJobsModel().getSelectedJob() != null){
+        if (this.schedulerModel.getExecutionsModel().getJobsModel().getSelectedJob() != null) {
             String query = request.getQuery();
-            if(this.needToRefresh(query)){
+            if (this.needToRefresh(query)) {
                 this.refresh(query);
             }
 
-            Collection<TagSuggestion> results = this.model.getAvailableTags(query);	
+            Collection<TagSuggestion> results = this.model.getAvailableTags(query);
             response.setSuggestions(results);
         }
         callback.onSuggestionsReady(request, response);
     }
-
-
 
     @Override
     public void jobSelected(Job job) {
         this.resetTagSuggestions();
     }
 
-
     @Override
     public void jobUnselected() {
         this.resetTagSuggestions();
     }
 
-
-    public void resetTagSuggestions(){
+    public void resetTagSuggestions() {
         this.lastRequest = "";
         this.lastRequestTime = -1;
         this.model.clearTagSuggestions();
     }
 
-
     @Override
-    public void selectedJobUpdated(Job job) {   
+    public void selectedJobUpdated(Job job) {
     }
 
 }

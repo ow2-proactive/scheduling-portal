@@ -82,7 +82,7 @@ Follow these steps:
 
   3. Edit the configuration file of each application to specify the URL
     of the REST server that the application will connect to.
-	  - For the Scheduler, the file is /webapps/scheduler/scheduler.conf,
+      - For the Scheduler, the file is /webapps/scheduler/scheduler.conf,
         and the configuration key "sched.rest.url".
       - For the RM, the file is /webapps/rm/rm.conf, and the configuration
         key "rm.rest.url".

@@ -1,44 +1,38 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
+
+import static org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.*;
+
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringHostView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringNodeView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringSourceView;
@@ -55,28 +49,38 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Displays a monitoring information about the currently selected node or host
  *
  */
-public class MonitoringView implements NodeSelectedListener {
+public class MonitoringView implements NodesListener, NodeSelectedListener {
 
     private Label label = null;
 
     private MonitoringNodeView nodeMonitoring = null;
+
     private MonitoringHostView hostMonitoring = null;
+
     private MonitoringSourceView sourceMonitoring = null;
-    
+
     private VLayout nodeCanvas = null;
+
     private Label nodeLabel = null;
 
     private Layout hostCanvas = null;
+
     private Label hostLabel = null;
 
     private Layout sourceCanvas = null;
+
     private Label sourceLabel = null;
-    
+
     private RMController controller;
+
+    private Node selectedNode;
 
     MonitoringView(RMController controller) {
         this.controller = controller;
-        controller.getEventDispatcher().addNodeSelectedListener(this);
+
+        RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
+        eventDispatcher.addNodesListener(this);
+        eventDispatcher.addNodeSelectedListener(this);
     }
 
     Canvas build() {
@@ -101,7 +105,6 @@ public class MonitoringView implements NodeSelectedListener {
         this.nodeCanvas.addMember(nodeMonitoring);
         this.nodeCanvas.hide();
 
-        
         this.sourceMonitoring = new MonitoringSourceView(controller);
         this.sourceMonitoring.setOverflow(Overflow.AUTO);
         this.sourceMonitoring.setWidth100();
@@ -115,8 +118,7 @@ public class MonitoringView implements NodeSelectedListener {
         this.sourceCanvas.addMember(sourceLabel);
         this.sourceCanvas.addMember(sourceMonitoring);
         this.sourceCanvas.hide();
-        
-        
+
         this.hostMonitoring = new MonitoringHostView(controller);
         this.hostMonitoring.setOverflow(Overflow.AUTO);
         this.hostMonitoring.setWidth100();
@@ -137,9 +139,12 @@ public class MonitoringView implements NodeSelectedListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeUnselected()
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeUnselected()
      */
     public void nodeUnselected() {
+        this.selectedNode = null;
         this.label.setContents("No node selected");
         this.label.setAlign(Alignment.CENTER);
         this.label.show();
@@ -153,11 +158,14 @@ public class MonitoringView implements NodeSelectedListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSelected(org
+     * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
      */
     public void nodeSelected(Node node) {
-
-        this.nodeLabel.setIcon(node.getNodeState().getIcon());
+        this.selectedNode = node;
+        this.nodeLabel.setIcon(node.getIcon());
 
         this.label.hide();
         this.hostCanvas.hide();
@@ -173,10 +181,12 @@ public class MonitoringView implements NodeSelectedListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#
+     * nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
-        //nodeUnselected();
+        this.selectedNode = null;
         this.label.hide();
         this.nodeCanvas.hide();
         this.hostCanvas.hide();
@@ -191,9 +201,13 @@ public class MonitoringView implements NodeSelectedListener {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#hostSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodeSelectedListener#hostSelected(org
+     * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
      */
     public void hostSelected(Host h) {
+        this.selectedNode = null;
         this.label.hide();
         this.nodeCanvas.hide();
         this.sourceCanvas.hide();
@@ -205,4 +219,10 @@ public class MonitoringView implements NodeSelectedListener {
         this.hostMonitoring.init(h);
         this.hostCanvas.show();
     }
+
+    @Override
+    public void nodesUpdated(Map<String, NodeSource> nodes) {
+        NodeLabel.update(nodes, nodeLabel, selectedNode);
+    }
+
 }

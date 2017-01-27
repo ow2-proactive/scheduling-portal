@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
@@ -57,8 +46,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public abstract class MBeansChart extends MBeanChart {
 
-    public MBeansChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs,
-            String title) {
+    public MBeansChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
         super(controller, jmxServerUrl, mbean, attrs, title);
     }
 
@@ -70,7 +58,7 @@ public abstract class MBeansChart extends MBeanChart {
         final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
         final LoginModel loginModel = LoginModel.getInstance();
-        
+
         AsyncCallback<String> callback = new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (onFinish != null) {
@@ -80,7 +68,7 @@ public abstract class MBeansChart extends MBeanChart {
                     return;
 
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
-                        (System.currentTimeMillis() - t) + "ms");
+                                                  (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
                     processResult(result);
@@ -103,7 +91,12 @@ public abstract class MBeansChart extends MBeanChart {
             rm.getNodeMBeansInfo(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), callback);
         } else {
             try {
-                rm.getNodeMBeansHistory(loginModel.getSessionId(), jmxServerUrl, mbeanName, Arrays.asList(attrs), String.valueOf(timeRange.getChar()), callback);
+                rm.getNodeMBeansHistory(loginModel.getSessionId(),
+                                        jmxServerUrl,
+                                        mbeanName,
+                                        Arrays.asList(attrs),
+                                        String.valueOf(timeRange.getChar()),
+                                        callback);
             } catch (Exception e) {
                 LogModel.getInstance().logCriticalMessage(e.getMessage());
             }
@@ -115,7 +108,7 @@ public abstract class MBeansChart extends MBeanChart {
         // assuming the response structure is the following
         // {mbean1:{theonlyattr:[values]}, mbean2:{theonlyattr:[values]}, ...}
 
-        for (String mbean: json.keySet()) {
+        for (String mbean : json.keySet()) {
             JSONObject attrObject = json.get(mbean).isObject();
             if (attrObject != null) {
                 return super.getJsonInternalSize(attrObject);
@@ -133,12 +126,12 @@ public abstract class MBeansChart extends MBeanChart {
         double[] res = new double[json.keySet().size()];
 
         int counter = 0;
-        for (String mbean: json.keySet()) {
+        for (String mbean : json.keySet()) {
             JSONObject attrObject = json.get(mbean).isObject();
 
             double numValue = 0;
             if (attrObject != null) {
-                for (String attr: attrObject.keySet()) {
+                for (String attr : attrObject.keySet()) {
                     JSONArray values = attrObject.get(attr).isArray();
 
                     if (values != null) {

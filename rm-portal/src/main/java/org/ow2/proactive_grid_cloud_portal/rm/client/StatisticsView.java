@@ -1,40 +1,33 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
+
+import java.util.Map;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
 import com.smartgwt.client.types.GroupStartOpen;
 import com.smartgwt.client.types.ListGridFieldType;
@@ -43,9 +36,6 @@ import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
-
-import java.util.Map;
 
 
 /**
@@ -147,48 +137,47 @@ public class StatisticsView implements NodesListener {
         r[3] = r4;
 
         ListGridRecord r5 = new ListGridRecord();
-        r5.setAttribute("status", "Locked");
+        r5.setAttribute("status", "Busy");
         r5.setAttribute("type", "Node");
-        r5.setAttribute("icon", RMImages.instance.node_locked_16().getSafeUri().asString());
-        r5.setAttribute("count", controller.getModel().getNumLocked());
+        r5.setAttribute("icon", RMImages.instance.node_busy_16().getSafeUri().asString());
+        r5.setAttribute("count", controller.getModel().getNumBusy());
         r[4] = r5;
 
         ListGridRecord r6 = new ListGridRecord();
-        r6.setAttribute("status", "Busy");
+        r6.setAttribute("status", "To be released");
         r6.setAttribute("type", "Node");
-        r6.setAttribute("icon", RMImages.instance.node_busy_16().getSafeUri().asString());
-        r6.setAttribute("count", controller.getModel().getNumBusy());
+        r6.setAttribute("icon", RMImages.instance.node_torelease_16().getSafeUri().asString());
+        r6.setAttribute("count", controller.getModel().getNumToBeRemoved());
         r[5] = r6;
 
         ListGridRecord r7 = new ListGridRecord();
-        r7.setAttribute("status", "To be released");
+        r7.setAttribute("status", "Down");
         r7.setAttribute("type", "Node");
-        r7.setAttribute("icon", RMImages.instance.node_torelease_16().getSafeUri().asString());
-        r7.setAttribute("count", controller.getModel().getNumToBeRemoved());
+        r7.setAttribute("icon", RMImages.instance.node_down_16().getSafeUri().asString());
+        r7.setAttribute("count", controller.getModel().getNumDown());
         r[6] = r7;
 
         ListGridRecord r8 = new ListGridRecord();
-        r8.setAttribute("status", "Down");
+        r8.setAttribute("status", "Total");
         r8.setAttribute("type", "Node");
-        r8.setAttribute("icon", RMImages.instance.node_down_16().getSafeUri().asString());
-        r8.setAttribute("count", controller.getModel().getNumDown());
+        r8.setAttribute("count", controller.getModel().getNumNodes());
         r[7] = r8;
 
-        ListGridRecord r9 = new ListGridRecord();
-        r9.setAttribute("status", "Total");
-        r9.setAttribute("type", "Node");
-        r9.setAttribute("count", controller.getModel().getNumNodes());
-        r[8] = r9;
-
         ListGridRecord aliveLimit = new ListGridRecord();
-        aliveLimit.setAttribute("status", "Node Limit");
+        aliveLimit.setAttribute("status", "Node limit");
         aliveLimit.setAttribute("type", "Node");
         if (isAliveNodesLimited()) {
             aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
         } else {
             aliveLimit.setAttribute("count", "None");
         }
-        r[9] = aliveLimit;
+        r[8] = aliveLimit;
+
+        ListGridRecord nodesLocked = new ListGridRecord();
+        nodesLocked.setAttribute("status", "Nodes locked");
+        nodesLocked.setAttribute("type", "Node");
+        nodesLocked.setAttribute("count", controller.getModel().getNumLocked());
+        r[9] = nodesLocked;
 
         ListGridRecord r10 = new ListGridRecord();
         r10.setAttribute("status", "Physical");

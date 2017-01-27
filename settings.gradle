@@ -2,4 +2,3 @@ include 'common-portal'
 include 'rm-portal'
 include 'scheduler-portal'
 include 'applet'
-

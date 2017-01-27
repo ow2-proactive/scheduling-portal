@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
@@ -67,23 +56,21 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputController> implements JobOutputListener {
 
-    
     /** whether fetch live logs */
     private CheckboxItem liveCheck = null;
-    
+
     /** stdout, stderr or both */
     private SelectItem outSelect = null;
-    
 
     public OutputView(OutputController controller) {
         super(controller);
-        
+
         this.controller.getModel().addJobOutputListener(this);
-        
-        this.noOutputMessage = "No output available<br><br>"
-                + "Click <strong>Fetch output</strong> to retrieve logs for finished tasks<br>"
-                + "Use <strong>Streaming</strong> to auto-fetch logs for running tasks.";
-        
+
+        this.noOutputMessage = "No output available<br><br>" +
+                               "Click <strong>Fetch output</strong> to retrieve logs for finished tasks<br>" +
+                               "Use <strong>Streaming</strong> to auto-fetch logs for running tasks.";
+
         this.refreshButtonLabel = "Fetch output";
         this.refreshButtonTooltip = "Request fetching the Output for this job";
     }
@@ -106,7 +93,7 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         this.liveCheck.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
                 liveLogCheckChanged();
-            }    
+            }
         });
 
         this.buildTargetSelect();
@@ -118,7 +105,7 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         this.outSelect.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
-                outModeChangedHandler();     
+                outModeChangedHandler();
             }
         });
 
@@ -138,7 +125,7 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         buttons.setMembers(form, fill, refreshButton);
 
         VLayout textLayout = this.buildOutputPane();
-                
+
         root.addMember(buttons);
         root.addMember(textLayout);
 
@@ -147,31 +134,25 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         return root;
     }
 
-    
-
     /**
      * Updates the output view to display the given output after update.
      */
     public void jobOutputUpdated(JobOutput output, SelectionTarget target) {
-        if(output == null){
+        if (output == null) {
             this.goToNoTargetState();
-        }
-        else{
+        } else {
             Collection<List<String>> lines = this.controller.getLinesToDisplay(output);
-            if(output.isLive() && target == SelectionTarget.JOB_TARGET){
-                if(lines.isEmpty()){
+            if (output.isLive() && target == SelectionTarget.JOB_TARGET) {
+                if (lines.isEmpty()) {
                     this.goToLoadingState();
-                }
-                else{
+                } else {
                     this.update(lines);
                 }
-            }
-            else{
+            } else {
                 this.goToTargetSelectedState(output);
                 if (lines.isEmpty()) {
                     this.goToUnavailableOutputState();
-                } 
-                else {
+                } else {
                     this.update(lines);
                 }
             }
@@ -188,13 +169,13 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         // alternate bgcolors for each entry
         boolean even = false;
         for (List<String> outputLines : lines) {
-            if(!outputLines.isEmpty()){
+            if (!outputLines.isEmpty()) {
                 builder.append("<div");
-                if(even){
+                if (even) {
                     builder.append("style ='background-color:#FAFAFA; border-bottom: 1px solid #EDEDED; border-top: 1px solid #EDEDED;'");
                 }
                 builder.append(">");
-                for(String outputLine: outputLines){
+                for (String outputLine : outputLines) {
                     builder.append("<nobr>");
                     builder.append(outputLine);
                     builder.append("</nobr>");
@@ -206,49 +187,44 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.showContent(builder.toString());
     }
-    
+
     /**
      * show fetch button, target selection dropdown list and output mode dropdown list.
      */
-    protected void showRefreshControls(){
+    protected void showRefreshControls() {
         this.targetSelect.show();
         this.outSelect.show();
         this.refreshButton.show();
     }
-    
-    
+
     /**
      * Called when the user check or uncheck the livelog option.
      */
-    protected void liveLogCheckChanged(){
+    protected void liveLogCheckChanged() {
         this.controller.toggleLive(liveCheck.getValueAsBoolean());
     }
-    
-    
 
     /**
      * Update the view to show no job or task selected. 
      */
-    protected void goToNoTargetState(){
+    protected void goToNoTargetState() {
         super.goToNoTargetState();
         this.outSelect.disable();
         this.liveCheck.setValue(false);
         this.liveCheck.disable();
     }
-    
-    
+
     /**
      * Update view to show the control when a job or task has been selected.
      * @param output
      */
-    protected void goToTargetSelectedState(JobOutput output){
+    protected void goToTargetSelectedState(JobOutput output) {
         super.goToTargetSelectedState();
-        
+
         this.outSelect.enable();
         this.outSelect.setValue(output.getOutputMode().label);
     }
-    
-    
+
     /**
      * Called when the current selected job has been updated.
      */
@@ -256,62 +232,54 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
     public void selectedJobUpdated(Job job) {
         this.controller.checkLiveEnabled(job);
     }
-    
-    
-    
-    
-    
+
     /**
      * Called when the output mode has been changed by the user interaction.
      */
-    protected void outModeChangedHandler(){
+    protected void outModeChangedHandler() {
         String outMode = this.outSelect.getValueAsString();
-        if(outMode.equals(OutputMode.LOG_OUT_ERR.label)){
+        if (outMode.equals(OutputMode.LOG_OUT_ERR.label)) {
             this.controller.changeOutputMode(OutputMode.LOG_OUT_ERR);
             return;
         }
-        if(outMode.equals(OutputMode.LOG_OUT.label)){
+        if (outMode.equals(OutputMode.LOG_OUT.label)) {
             this.controller.changeOutputMode(OutputMode.LOG_OUT);
             return;
         }
-        if(outMode.equals(OutputMode.LOG_ERR.label)){
+        if (outMode.equals(OutputMode.LOG_ERR.label)) {
             this.controller.changeOutputMode(OutputMode.LOG_ERR);
             return;
         }
-        if(outMode.equals(OutputMode.LOG_FULL.label)){
+        if (outMode.equals(OutputMode.LOG_FULL.label)) {
             this.controller.changeOutputMode(OutputMode.LOG_FULL);
             return;
         }
     }
-    
-   
 
     /**
      * Called when the live option has been toggled.
      */
     @Override
     public void liveToggled(boolean newValue) {
-        if(newValue){
+        if (newValue) {
             this.outSelect.hide();
             this.refreshButton.hide();
-        }
-        else{
+        } else {
             this.outSelect.show();
             this.refreshButton.show();
         }
         this.liveCheck.setValue(newValue);
     }
 
-    
     /**
      * Called when the live option has been enabled or disabled.
      */
     @Override
     public void liveEnabled(boolean newValue) {
         this.liveCheck.setDisabled(!newValue);
-        if(!newValue){
+        if (!newValue) {
             liveToggled(false);
         }
     }
-    
+
 }

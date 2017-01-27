@@ -1,39 +1,35 @@
 /*
- *  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (C) 1997-2014 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- *  * $$PROACTIVE_INITIAL_DEV$$
  */
-
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
+
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -46,6 +42,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
+
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
@@ -65,12 +62,6 @@ import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
 import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
-
 
 /**
  * A list grid that shows jobs.
@@ -79,9 +70,10 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
  */
 public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListener {
 
-    private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] {
-            new SortSpecifier(STATE_ATTR.getName(), SortDirection.ASCENDING),
-            new SortSpecifier(ID_ATTR.getName(), SortDirection.DESCENDING) };
+    private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] { new SortSpecifier(STATE_ATTR.getName(),
+                                                                                                SortDirection.ASCENDING),
+                                                                              new SortSpecifier(ID_ATTR.getName(),
+                                                                                                SortDirection.DESCENDING) };
 
     /**
      * The controller for the jobs grid.
@@ -238,11 +230,11 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 String progressUrl = SchedulerImages.instance.progressbar().getSafeUri().asString();
 
                 String style = "display:block; " + //
-                        "border: 1px solid #acbac7; " + //
-                        "background-image:url(" + progressUrl + ");" + //
-                        "background-position:" + bx + "px 0px;" + //
-                        "background-repeat: no-repeat;" + //
-                        "background-color:#a7cef6";
+                               "border: 1px solid #acbac7; " + //
+                               "background-image:url(" + progressUrl + ");" + //
+                               "background-position:" + bx + "px 0px;" + //
+                               "background-repeat: no-repeat;" + //
+                               "background-color:#a7cef6";
 
                 Job job = JobRecord.getJob(record);
                 String progressCounters = job.getFinishedTasks() + " / " + job.getTotalTasks();
@@ -285,9 +277,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                 String status = record.getAttribute(fieldName);
                 if (status.equals(JobStatus.PENDING.toString())) {
                     return 0;
-                } else if (status.equals(JobStatus.RUNNING.toString()) ||
-                        status.equals(JobStatus.STALLED.toString()) ||
-                        status.equals(JobStatus.PAUSED.toString())) {
+                } else if (status.equals(JobStatus.RUNNING.toString()) || status.equals(JobStatus.STALLED.toString()) ||
+                           status.equals(JobStatus.PAUSED.toString())) {
                     return 1;
                 } else {
                     return 2;
@@ -338,7 +329,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
 
         MenuItem pauseItem = new MenuItem("Pause",
-                SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
+                                          SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
         pauseItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.pauseJobs(ids);
@@ -347,7 +338,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         pauseItem.setEnabled(selRunning);
 
         MenuItem restartInErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
-                SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+                                                       SchedulerImages.instance.scheduler_resume_16()
+                                                                               .getSafeUri()
+                                                                               .asString());
         restartInErrorTaskItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.restartAllInErrorTasks(ids);
@@ -356,7 +349,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         restartInErrorTaskItem.setEnabled(selInError);
 
         MenuItem resumeItem = new MenuItem("Resume All Paused Tasks",
-                SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+                                           SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         resumeItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.resumeJobs(ids);
@@ -365,7 +358,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         resumeItem.setEnabled(selPause);
 
         MenuItem resumeAndRestartItemTask = new MenuItem("Resume All Paused Tasks  & Restart All In-Error Tasks",
-                SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+                                                         SchedulerImages.instance.scheduler_resume_16()
+                                                                                 .getSafeUri()
+                                                                                 .asString());
         resumeAndRestartItemTask.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.resumeJobs(ids);
@@ -391,16 +386,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         priorityItem.setSubmenu(priorityMenu);
 
-        MenuItem removeItem = new MenuItem("Remove",
-                SchedulerImages.instance.job_kill_16().getSafeUri().asString());
+        MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
         removeItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.removeJob(ids);
             }
         });
 
-        MenuItem killItem = new MenuItem("Kill",
-                SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
+        MenuItem killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(new ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
                 controller.killJob(ids);
@@ -410,9 +403,13 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         killItem.setEnabled(selPauseOrRunning);
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(
-                pauseItem, restartInErrorTaskItem, resumeItem,
-                resumeAndRestartItemTask, priorityItem, removeItem, killItem);
+        menu.setItems(pauseItem,
+                      restartInErrorTaskItem,
+                      resumeItem,
+                      resumeAndRestartItemTask,
+                      priorityItem,
+                      removeItem,
+                      killItem);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {

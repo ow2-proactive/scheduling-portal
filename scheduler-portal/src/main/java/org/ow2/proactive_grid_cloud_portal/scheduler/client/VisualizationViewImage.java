@@ -1,38 +1,27 @@
 /*
- * ################################################################
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * ProActive Parallel Suite(TM): The Java(TM) library for
- *    Parallel, Distributed, Multi-Core Computing for
- *    Enterprise Grids & Clouds
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
  *
- * Copyright (C) 1997-2015 INRIA/University of
- *                 Nice-Sophia Antipolis/ActiveEon
- * Contact: proactive@ow2.org or contact@activeeon.com
- *
- * This library is free software; you can redistribute it and/or
+ * This library is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License
- * as published by the Free Software Foundation; version 3 of
+ * as published by the Free Software Foundation: version 3 of
  * the License.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Affero General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
- *
- *  Initial developer(s):               The ProActive Team
- *                        http://proactive.inria.fr/team_members.htm
- *  Contributor(s):
- *
- * ################################################################
- * $$PROACTIVE_INITIAL_DEV$$
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
@@ -85,17 +74,22 @@ public class VisualizationViewImage implements VisualizationView {
 
     /** image shown to the user */
     private Img img;
+
     /** used to preload the image above */
     private Image imgLoader;
+
     /** relative path fragment for the image url */
     private String imgPath;
 
     /** contains the raphael overlay */
     private WidgetCanvas overPane;
+
     /** overlay to add graphical stuff on the image */
     private Raphael overlay;
+
     /** coordinates of the tasks on the image */
     private JobVisuMap map;
+
     /** boxes currently displayed on the raphael canvas */
     private HashMap<String, Box> boxes;
 
@@ -111,25 +105,39 @@ public class VisualizationViewImage implements VisualizationView {
     private class Box {
 
         private Rect failedRect;
+
         private Rect runningRect;
 
         private Raphael.Image failedImg;
+
         private Raphael.Image runningImg;
+
         private Raphael.Image finishedImg;
 
         private Raphael.Text running;
+
         private Raphael.Text finished;
+
         private Raphael.Text failed;
 
         private static final int xoff = 11;
+
         private static final int yoff = -13;
+
         private static final int icow = 14;
+
         private static final int icow2 = 24;
+
         private static final int icod = (icow2 - icow);
+
         private static final int bheight = 20;
+
         private static final int toff = 8;
+
         private static final int yRunningOff = 26;
+
         private static final int yFailedOff = 2;
+
         private static final int yFinishedOff = 52;
 
         private int x, y, w, h;
@@ -161,14 +169,11 @@ public class VisualizationViewImage implements VisualizationView {
             String finishedImgUrl = SchedulerImages.instance.finished_14().getSafeUri().asString();
             String failedImgUrl = SchedulerImages.instance.cancel_14().getSafeUri().asString();
 
-            this.runningImg = overlay.new Image(runningImgUrl, x + w - icow2 - 4, y + yRunningOff, icow2,
-                    icow2);
+            this.runningImg = overlay.new Image(runningImgUrl, x + w - icow2 - 4, y + yRunningOff, icow2, icow2);
             this.runningImg.hide();
-            this.finishedImg = overlay.new Image(finishedImgUrl, x + w - icow - 4 - icod, y + yFinishedOff,
-                    icow, icow);
+            this.finishedImg = overlay.new Image(finishedImgUrl, x + w - icow - 4 - icod, y + yFinishedOff, icow, icow);
             this.finishedImg.hide();
-            this.failedImg = overlay.new Image(failedImgUrl, x + w - icow - 4 - icod, y + yFailedOff, icow,
-                    icow);
+            this.failedImg = overlay.new Image(failedImgUrl, x + w - icow - 4 - icod, y + yFailedOff, icow, icow);
             this.failedImg.hide();
         }
 
@@ -264,7 +269,10 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#imageUpdated(java.lang.String, java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#imageUpdated(java.
+     * lang.String, java.lang.String)
      */
     public void imageUpdated(String jobId, String path) {
         JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
@@ -283,7 +291,10 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#mapUpdated(java.lang.String, org.ow2.proactive_grid_cloud_portal.shared.JobVisuMap)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#mapUpdated(java.
+     * lang.String, org.ow2.proactive_grid_cloud_portal.shared.JobVisuMap)
      */
     public void mapUpdated(String jobId, JobVisuMap map) {
         JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
@@ -299,7 +310,7 @@ public class VisualizationViewImage implements VisualizationView {
             this.map = null;
 
             if (this.img != null) {
-                List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks(); 
+                List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks();
                 this.tasksUpdated(tasks, tasks.size());
             }
         }
@@ -308,7 +319,9 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see com.google.gwt.event.dom.client.LoadHandler#onLoad(com.google.gwt.event.dom.client.LoadEvent)
+     * 
+     * @see
+     * com.google.gwt.event.dom.client.LoadHandler#onLoad(com.google.gwt.event.dom.client.LoadEvent)
      */
     public void onLoad(LoadEvent event) {
         // if the image is not visible, it will return a size of 0 in IE9
@@ -396,7 +409,8 @@ public class VisualizationViewImage implements VisualizationView {
 
         root.addChild(navIcon);
 
-        /* pops up a menu that contains a navigation view of the view
+        /*
+         * pops up a menu that contains a navigation view of the view
          */
         navIcon.addClickHandler(new ClickHandler() {
 
@@ -479,7 +493,7 @@ public class VisualizationViewImage implements VisualizationView {
             }
         });
 
-        List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks(); 
+        List<Task> tasks = ((SchedulerModelImpl) controller.getModel()).getTasksModel().getTasks();
         this.tasksUpdated(tasks, tasks.size());
     }
 
@@ -498,7 +512,10 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.proactive_grid_cloud_portal.client.Job)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobSelected(org.ow2.
+     * proactive_grid_cloud_portal.client.Job)
      */
     public void jobSelected(Job job) {
         if (this.img != null) {
@@ -524,6 +541,7 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.JobSelectedListener#jobUnselected()
      */
     public void jobUnselected() {
@@ -549,26 +567,32 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#visualizationUnavailable(java.lang.String)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.VisualizationListener#
+     * visualizationUnavailable(java.lang.String)
      */
     public void visualizationUnavailable(String jobId) {
-        this.message
-                .setContents("Visualization is not available<br><br>"
-                    + "To use visualization you need to create your job using the <strong>Workflow Studio</strong>, and <br>"
-                    + "submit it directly from the editor");
+        this.message.setContents("Visualization is not available<br><br>" +
+                                 "To use visualization you need to create your job using the <strong>Workflow Studio</strong>, and <br>" +
+                                 "submit it directly from the editor");
         this.message.setIcon(null);
     }
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(boolean)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdating(
+     * boolean)
      */
     public void tasksUpdating() {
     }
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(java.util.List)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdated(java.
+     * util.List)
      */
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
 
@@ -619,11 +643,12 @@ public class VisualizationViewImage implements VisualizationView {
                 case RUNNING:
                     ft.get(name).running++;
                     break;
-                /* skipped tasks are somewhat finished but
+                /*
+                 * skipped tasks are somewhat finished but
                  * we don't want them appearing as such on the screen
-                case SKIPPED:
-                ft.get(name).finished++;
-                break;
+                 * case SKIPPED:
+                 * ft.get(name).finished++;
+                 * break;
                  */
                 case SUBMITTED:
                     break;
@@ -650,7 +675,10 @@ public class VisualizationViewImage implements VisualizationView {
 
     /*
      * (non-Javadoc)
-     * @see org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure(java.lang.String)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.client.Listeners.TasksUpdatedListener#tasksUpdatedFailure
+     * (java.lang.String)
      */
     public void tasksUpdatedFailure(String message) {
     }
@@ -670,7 +698,7 @@ public class VisualizationViewImage implements VisualizationView {
 
         this.root.addMember(message);
     }
-    
+
     @Override
     public void selectedJobUpdated(Job job) {
     }
