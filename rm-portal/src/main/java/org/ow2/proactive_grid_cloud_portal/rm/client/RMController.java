@@ -318,6 +318,36 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
         };
         this.statsUpdater.scheduleRepeating(RMConfig.get().getStatisticsRefreshTime());
+
+        scheduleRequestMaxNumberOfNodesIn(0);
+        }
+
+    private void scheduleRequestMaxNumberOfNodesIn(int milliseconds) {
+        new Timer() {
+
+            @Override
+            public void run() {
+                fetchNodesLimit();
+            }
+        }.schedule(milliseconds);
+    }
+
+    private void fetchNodesLimit() {
+        this.rm.getState(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                // Parse json response to extract the current node limit
+                LogModel.getInstance().logMessage("getState response:"+result);
+                JSONObject rmState = JSONParser.parseStrict(result).isObject();
+                JSONValue maxNumberOfNodes = rmState.get("maxNumberOfNodes");
+                if(maxNumberOfNodes != null && maxNumberOfNodes.isNumber() != null){
+                    model.setMaxNumberOfNodes(Long.parseLong(maxNumberOfNodes.isNumber().toString()));
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logMessage("Failed to access node limit through rmState: "+caught.getMessage());
+            }
+        });
     }
 
     private void fetchNodesLimit() {

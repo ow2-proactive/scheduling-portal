@@ -179,6 +179,16 @@ public class StatisticsView implements NodesListener {
         nodesLocked.setAttribute("count", controller.getModel().getNumLocked());
         r[9] = nodesLocked;
 
+        ListGridRecord aliveLimit = new ListGridRecord();
+        if (isAliveNodesLimited()) {
+            aliveLimit.setAttribute("status", "Alive nodes limit");
+        } else {
+            aliveLimit.setAttribute("status", "Alive nodes unlimited");
+        }
+        aliveLimit.setAttribute("type", "Node");
+        aliveLimit.setAttribute("count", controller.getModel().getMaxNumberOfNodes());
+        r[9] = aliveLimit;
+
         ListGridRecord r10 = new ListGridRecord();
         r10.setAttribute("status", "Physical");
         r10.setAttribute("type", "Host");
