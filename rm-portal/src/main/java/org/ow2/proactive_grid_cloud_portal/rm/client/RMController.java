@@ -797,9 +797,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             for (Node n : model.getSelectedHost().getNodes().values()) {
                 urls.add(n.getNodeUrl());
             }
-        } else if (model.getSelectedNodeSource() != null) {
-            for (Host h : model.getSelectedNodeSource().getHosts().values()) {
-                for (Node n : h.getNodes().values()) {
+        } else {
+            NodeSource selectedNodeSource = model.getSelectedNodeSource();
+
+            if (selectedNodeSource != null) {
+                for (Host h : selectedNodeSource.getHosts().values()) {
+                    for (Node n : h.getNodes().values()) {
+                        urls.add(n.getNodeUrl());
+                    }
+                }
+
+                for (Node n : selectedNodeSource.getDeploying().values()) {
                     urls.add(n.getNodeUrl());
                 }
             }
