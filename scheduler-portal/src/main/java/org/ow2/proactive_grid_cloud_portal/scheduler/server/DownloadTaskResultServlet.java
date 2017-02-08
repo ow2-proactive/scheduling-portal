@@ -101,7 +101,7 @@ public class DownloadTaskResultServlet extends HttpServlet {
             response.setHeader("Location", "job" + jobId + "_" + taskId + ".result");
 
             out = response.getOutputStream();
-            if (contentType.startsWith("text/")) {
+            if (contentType.equals("text/plain")) {
                 is = ((SchedulerServiceImpl) Service.get()).getTaskResult(sessionId, jobId, taskId);
             } else {
                 is = ((SchedulerServiceImpl) Service.get()).getTaskSerializedResult(sessionId, jobId, taskId);
