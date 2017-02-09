@@ -105,4 +105,8 @@ public interface RMImages extends ClientBundle {
 
     @Source("images/refresh.png")
     ImageResource refresh();
+
+    @Source("images/padlock.png")
+    ImageResource padlock();
+
 }
