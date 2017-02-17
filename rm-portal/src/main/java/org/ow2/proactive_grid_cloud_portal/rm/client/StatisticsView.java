@@ -176,6 +176,7 @@ public class StatisticsView implements NodesListener {
         ListGridRecord nodesLocked = new ListGridRecord();
         nodesLocked.setAttribute("status", "Nodes locked");
         nodesLocked.setAttribute("type", "Node");
+        nodesLocked.setAttribute("icon", RMImages.instance.padlock().getSafeUri().asString());
         nodesLocked.setAttribute("count", controller.getModel().getNumLocked());
         r[9] = nodesLocked;
 
