@@ -26,10 +26,12 @@ subprojects {
     group = 'org.ow2.proactive_grid_cloud_portal'
     version = schedulingPortalVersion
 
-    sourceCompatibility = 1.7
+    sourceCompatibility = 1.8
 
     repositories {
-        if (project.hasProperty('local')) mavenLocal()
+        if (project.hasProperty('local')) {
+           mavenLocal()
+        }
         jcenter()
         maven { url 'http://repository.activeeon.com/content/groups/proactive/' }
         maven { url 'http://repository.sonatype.org/content/groups/forge/' }
@@ -52,9 +54,9 @@ subprojects {
     }
 
     dependencies {
-        providedCompile 'com.google.gwt:gwt-user:2.7.0'
-        providedCompile 'com.google.gwt:gwt-dev:2.7.0'
-        providedCompile 'com.google.gwt:gwt-codeserver:2.7.0'
+        providedCompile 'com.google.gwt:gwt-user:2.8.0'
+        providedCompile 'com.google.gwt:gwt-dev:2.8.0'
+        providedCompile 'com.google.gwt:gwt-codeserver:2.8.0'
         // needed on the server side because we use GWT-RPC
         compile 'com.smartgwt:smartgwt:5.1d-2015-05-23'
         providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
@@ -67,12 +69,18 @@ subprojects {
         compile 'commons-fileupload:commons-fileupload:1.2'
         compile 'org.apache.httpcomponents:httpclient:4.3.6'
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
-        compile "org.ow2.proactive:common-http:${schedulingPortalVersion}"
+        compile("org.ow2.proactive:common-http:${schedulingPortalVersion}") {
+            transitive = false
+        }
+        compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
+        compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
+        compile 'com.google.guava:guava:21.0'
+        compile 'com.google.guava:guava-gwt:21.0'
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.17.Final'
         compile 'org.apache.httpcomponents:httpmime:4.3.6'
 
-        runtime 'com.google.gwt:gwt-servlet:2.7.0'
+        runtime 'com.google.gwt:gwt-servlet:2.8.0'
 
         testCompile 'junit:junit:4.12'
         testCompile 'org.mockito:mockito-core:1.10.19'
@@ -151,11 +159,15 @@ project(':scheduler-portal') {
 configure([project(':scheduler-portal'), project(':rm-portal')]) {
     apply plugin: 'war'
     task compileGwt(dependsOn: classes, type: JavaExec) {
+        standardOutput = System.out
+        errorOutput = System.err
+
         inputs.source sourceSets.main.java.srcDirs
         inputs.dir sourceSets.main.output.resourcesDir
         outputs.dir "$buildDir/portal"
 
         logging.captureStandardOutput LogLevel.INFO
+        logging.captureStandardError LogLevel.INFO
 
         main = 'com.google.gwt.dev.Compiler'
         classpath {
@@ -167,7 +179,7 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
         }
         args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize() - "-portal"}",
                 '-war', "$buildDir/portal",
-                '-logLevel', 'INFO',
+                '-logLevel', 'ALL',
                 '-localWorkers', '2',
         ]
         systemProperties = ['gwt.persistentunitcachedir': buildDir]
