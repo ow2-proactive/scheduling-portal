@@ -10,6 +10,9 @@
 	<inherits name="com.smartgwt.tools.SmartGwtTools"/>
 	<inherits name="com.google.gwt.visualization.Visualization"/>
 	<inherits name="org.apache.commons.collections4.Collections4"/>
+	<inherits name="com.google.common.base.Base"/>
+	<inherits name="org.ow2.proactive.scheduling.api.graphql.common.Common"/>
+	<inherits name="org.ow2.proactive.scheduling.api.graphql.beans.input.Input"/>
 
 	<entry-point class='org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerPortal' />
 	
