@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+
 public enum OutputMode implements IsSerializable {
 
     LOG_OUT_ERR("Out & Err (1024 lines)"),
