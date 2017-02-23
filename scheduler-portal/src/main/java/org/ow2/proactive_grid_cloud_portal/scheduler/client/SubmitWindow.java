@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -39,12 +40,28 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.json.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -60,7 +77,10 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.BlurbItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.TimeItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -91,9 +111,9 @@ public class SubmitWindow {
 
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
 
-    private static final int width = 420;
+    private static final int width = 600;
 
-    private static final int height = 500;
+    private static final int height = 520;
 
     private Window window;
 
@@ -157,7 +177,11 @@ public class SubmitWindow {
 
     private IButton submitButton;
 
-    private VLayout loadingPanel; // -------------------- Loading Panel when uploading
+    private VLayout messagePanel; // -------------------- Loading Panel when uploading
+
+    private Label waitLabel;
+
+    private Label errorLabel;
 
     // ----- Catalog temp maps
     private HashMap<String, Integer> catalogBucketsMap;
@@ -267,8 +291,10 @@ public class SubmitWindow {
 
             private void initFooter() {
                 rootPage.removeMember(startAtLayout);
+                rootPage.removeMember(messagePanel);
                 rootPage.removeMember(submitCancelButtons);
                 initSubmitAtPart();
+                rootPage.addMember(messagePanel);
                 rootPage.addMember(submitCancelButtons);
                 startNowRB.setValue(true);
                 startAtRB.setValue(false);
@@ -383,6 +409,13 @@ public class SubmitWindow {
         startAtRB.setText("At " + newDate.toString());
     }
 
+    private void initMessagesPart() {
+        messagePanel = new VLayout();
+        messagePanel.setIsGroup(true);
+        messagePanel.setGroupTitle("Messages");
+        rootPage.addMember(messagePanel);
+    }
+
     private void initButtonsPart() {
         submitCancelButtons = new HLayout();
         submitCancelButtons.setMargin(10);
@@ -411,21 +444,44 @@ public class SubmitWindow {
         rootPage.addMember(submitCancelButtons);
     }
 
+    private void clearMessagePanel() {
+        if (messagePanel.contains(waitLabel)) {
+            messagePanel.removeMember(waitLabel);
+        }
+        if (messagePanel.contains(errorLabel)) {
+            messagePanel.removeMember(errorLabel);
+        }
+    }
+
     private void displayLoadingMessage() {
 
-        loadingPanel = new VLayout();
+        clearMessagePanel();
 
-        final Label waitLabel = new Label("Please wait...");
+        waitLabel = new Label("Please wait...");
         waitLabel.setHeight(30);
         waitLabel.setIcon("loading.gif");
         waitLabel.setWidth100();
+        waitLabel.setMargin(10);
         waitLabel.setAlign(Alignment.CENTER);
 
-        loadingPanel.addMember(waitLabel);
-        rootPage.removeMember(varsLayout);
-        rootPage.removeMember(startAtLayout);
-        rootPage.removeMember(submitCancelButtons);
-        rootPage.addMember(loadingPanel);
+        messagePanel.addMember(waitLabel);
+
+        rootPage.reflow();
+    }
+
+    private void displayErrorMessage(String message) {
+
+        clearMessagePanel();
+
+        errorLabel = new Label(message);
+        errorLabel.setHeight(30);
+        errorLabel.setWidth100();
+        errorLabel.setMargin(10);
+        errorLabel.setAlign(Alignment.CENTER);
+        errorLabel.setStyleName("errorMessage");
+
+        messagePanel.addMember(errorLabel);
+
         rootPage.reflow();
     }
 
@@ -581,10 +637,10 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (int i = 0; i < fields.length; i++) {
+                for (int i = 0; i < _fields.length; i++) {
                     String val = "";
-                    if (fields[i].getValue() != null) {
-                        val = fields[i].getValue().toString();
+                    if (fields[2 * i].getValue() != null) {
+                        val = fields[2 * i].getValue().toString();
                     }
                     _fields[i].setValue(val);
                 }
@@ -597,14 +653,33 @@ public class SubmitWindow {
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
-                        GWT.log("Job submitted to the scheduler");
+                        if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
+
+                            GWT.log("Job submitted to the scheduler");
+                            SubmitWindow.this.window.removeMember(rootPage);
+                            SubmitWindow.this.window.hide();
+                            SubmitWindow.this.destroy();
+                        } else {
+                            String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
+                            JSONValue json = controller.parseJSON(jsonError);
+                            JSONObject obj = json.isObject();
+                            if (obj != null && obj.containsKey("errorMessage")) {
+                                String errorMessage = obj.get("errorMessage").toString();
+                                if (errorMessage.contains("JobValidationException")) {
+                                    errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                                }
+                                displayErrorMessage(errorMessage);
+
+                            } else {
+                                displayErrorMessage(jsonError);
+                            }
+
+                        }
                     }
                 });
                 variablesActualForm.submit();
                 displayLoadingMessage();
-                SubmitWindow.this.window.removeMember(rootPage);
-                SubmitWindow.this.window.hide();
-                SubmitWindow.this.destroy();
+
             }
         };
     }
@@ -665,23 +740,39 @@ public class SubmitWindow {
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
                         String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
-                        final Map<String, String> variables = readVars(job);
+                        final Map<String, JobVariable> variables = readVars(job);
 
                         // presentation form
                         variablesVisualForm = new DynamicForm();
-                        fields = new FormItem[variables.size()];
+                        variablesVisualForm.setNumCols(3);
+                        variablesVisualForm.setColWidths("25%", "50%", "25%");
+                        fields = new FormItem[variables.size() * 2];
                         _fields = new Hidden[variables.size()];
                         int i = 0;
+                        int j = 0;
                         hiddenPane = new VerticalPanel();
-                        for (Entry<String, String> var : variables.entrySet()) {
+                        for (Entry<String, JobVariable> var : variables.entrySet()) {
                             TextItem t = new TextItem(var.getKey(), var.getKey());
-                            t.setValue(var.getValue());
-                            t.setWidth(240);
+                            t.setValue(var.getValue().getValue());
+                            t.setWidth("100%");
+                            t.setStartRow(true);
+                            t.setEndRow(false);
+                            String model = var.getValue().getModel();
 
-                            _fields[i] = new Hidden("var_" + var.getKey());
-                            hiddenPane.add(_fields[i]);
-                            fields[i] = t;
-                            i++;
+                            _fields[j] = new Hidden("var_" + var.getKey());
+                            hiddenPane.add(_fields[j]);
+                            j++;
+                            fields[i++] = t;
+                            BlurbItem modelLabel = null;
+                            if (model != null) {
+                                modelLabel = new BlurbItem();
+                                modelLabel.setDefaultValue(model);
+                            } else {
+                                modelLabel = new BlurbItem();
+                            }
+                            modelLabel.setStartRow(false);
+                            modelLabel.setEndRow(true);
+                            fields[i++] = modelLabel;
                         }
                         variablesVisualForm.setFields(fields);
 
@@ -698,14 +789,24 @@ public class SubmitWindow {
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
                 }
+                removeBottomMembers();
+
                 setEnabledStartAtPart(true);
-                rootPage.removeMember(loadingPanel);
                 initVarsPart(variablesVisualForm, fpanelWra);
                 rootPage.addMember(startAtLayout);
+                clearMessagePanel();
+                rootPage.addMember(messagePanel);
                 rootPage.addMember(submitCancelButtons);
                 rootPage.reflow();
             }
         };
+    }
+
+    private void removeBottomMembers() {
+        rootPage.removeMember(varsLayout);
+        rootPage.removeMember(startAtLayout);
+        rootPage.removeMember(messagePanel);
+        rootPage.removeMember(submitCancelButtons);
     }
 
     private void resetAllHandlers() {
@@ -789,6 +890,7 @@ public class SubmitWindow {
         initSelectWfPart(); // -------- Select workflow Panel
         initVarsPart(); // ------------ Fill workflow variables Panel
         initSubmitAtPart(); // -------- Submit at given time Panel
+        initMessagesPart(); // --------- loading and error messages
         initButtonsPart(); // --------- Close and Submit buttons
 
         setEnabledStartAtPart(false);
@@ -809,12 +911,12 @@ public class SubmitWindow {
      * @param jobDescriptor an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
      */
-    private Map<String, String> readVars(String jobDescriptor) {
+    private Map<String, JobVariable> readVars(String jobDescriptor) {
         /* this will fail if someday the XML schema gets another <variable> tag elsewhere */
 
         Document dom = XMLParser.parse(jobDescriptor);
         NodeList variables = dom.getElementsByTagName("variable");
-        Map<String, String> ret = new HashMap<String, String>();
+        Map<String, JobVariable> ret = new HashMap<>();
 
         if (variables.getLength() > 0) {
             for (int i = 0; i < variables.getLength(); i++) {
@@ -826,6 +928,7 @@ public class SubmitWindow {
                         if (attrs != null && n.hasAttributes()) {
                             String name = null;
                             String value = null;
+                            String model = null;
                             for (int j = 0; j < attrs.getLength(); j++) {
                                 Node attr = attrs.item(j);
                                 if (attr.getNodeName().equals("name")) {
@@ -833,6 +936,9 @@ public class SubmitWindow {
                                 }
                                 if (attr.getNodeName().equals("value")) {
                                     value = attr.getNodeValue();
+                                }
+                                if (attr.getNodeName().equals("model")) {
+                                    model = attr.getNodeValue();
                                 }
                             }
                             if (name != null && value != null) {
@@ -842,7 +948,7 @@ public class SubmitWindow {
                                     continue;
                                 }
 
-                                ret.put(name, value);
+                                ret.put(name, new JobVariable(name, value, model));
                             }
                         }
                     } catch (JavaScriptException t) {
@@ -852,5 +958,32 @@ public class SubmitWindow {
             }
         }
         return ret;
+    }
+
+    class JobVariable {
+        private String name;
+
+        private String value;
+
+        private String model;
+
+        public JobVariable(String name, String value, String model) {
+            this.name = name;
+            this.value = value;
+            this.model = model;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
     }
 }
