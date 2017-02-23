@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -54,8 +56,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.gwt.core.client.GWT;
-
 
 /**
  * Custom job submission servlet
@@ -76,6 +76,8 @@ import com.google.gwt.core.client.GWT;
 public class SubmitEditServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubmitEditServlet.class);
+
+    public static final String ERROR = "SubmitEditServletError:";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -123,11 +125,11 @@ public class SubmitEditServlet extends HttpServlet {
 
         try {
             if (job == null) {
-                response.getWriter().write("Parameter 'job' is null");
+                response.getWriter().write(ERROR + "Parameter 'job' is null");
                 return;
             }
             if (sessionId == null) {
-                response.getWriter().write("Parameter 'sessionId' is null");
+                response.getWriter().write(ERROR + "Parameter 'sessionId' is null");
                 return;
             }
 
@@ -206,13 +208,14 @@ public class SubmitEditServlet extends HttpServlet {
                     DOMSource source = new DOMSource(doc);
                     transformer.transform(source, result);
                 } catch (Exception e1) {
-                    response.getWriter().write("Error while writing the job descriptor's DOM: " + e1.getMessage());
+                    response.getWriter()
+                            .write(ERROR + "Error while writing the job descriptor's DOM: " + e1.getMessage());
                 }
 
             } catch (ParserConfigurationException e1) {
-                response.getWriter().write("Error initializing DOM parser " + e1.getMessage());
+                response.getWriter().write(ERROR + "Error initializing DOM parser " + e1.getMessage());
             } catch (SAXException e1) {
-                response.getWriter().write("Error parsing job descriptor: " + e1.getMessage());
+                response.getWriter().write(ERROR + "Error parsing job descriptor: " + e1.getMessage());
             }
 
             // submission at last....
@@ -221,16 +224,16 @@ public class SubmitEditServlet extends HttpServlet {
                 LOGGER.info(FileUtils.readFileToString(editedJob));
                 String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
                 if (responseS == null || responseS.length() == 0) {
-                    response.getWriter().write("Job submission returned without a value!");
+                    response.getWriter().write(ERROR + "Job submission returned without a value!");
                 } else {
                     response.getWriter().write(responseS);
                 }
             } catch (RestServerException e1) {
                 String msg = e1.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-                response.getWriter().print(msg);
+                response.getWriter().print(ERROR + msg);
             } catch (ServiceException e2) {
                 String msg = e2.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-                response.getWriter().print(msg);
+                response.getWriter().print(ERROR + msg);
             }
 
         } catch (IOException e1) {

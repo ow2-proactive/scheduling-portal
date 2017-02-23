@@ -122,3 +122,7 @@
 .executionView .itemViewNav {
 	left: 5px !important;
 }
+
+.errorMessage {
+	color: red;
+}

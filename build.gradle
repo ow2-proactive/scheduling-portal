@@ -169,6 +169,10 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
         logging.captureStandardOutput LogLevel.INFO
         logging.captureStandardError LogLevel.INFO
 
+        // uncomment the following lines to see compiler output
+        standardOutput = System.out
+        errorOutput = System.err
+
         main = 'com.google.gwt.dev.Compiler'
         classpath {
             [sourceSets.main.java.srcDirs,           // Java source
