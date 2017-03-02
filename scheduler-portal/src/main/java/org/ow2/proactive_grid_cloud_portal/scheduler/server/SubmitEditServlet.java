@@ -142,15 +142,16 @@ public class SubmitEditServlet extends HttpServlet {
                 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(jobDesc);
 
-                Node vars = doc.getElementsByTagName("variables").item(0);
+                NodeList variables = doc.getElementsByTagName("variable");
 
                 /* edit the job variables using XML DOM */
-                if (vars != null) {
-                    NodeList varChildren = vars.getChildNodes();
-                    for (int i = 0; i < varChildren.getLength(); i++) {
-                        Node var = varChildren.item(i);
+                if (variables != null) {
+                    for (int i = 0; i < variables.getLength(); i++) {
+                        Node var = variables.item(i);
                         if (var != null) {
                             if (var.getAttributes() != null) {
+
+                                String taskName = getTaskName(var);
 
                                 String name = null;
                                 Node nodeVal = null;
@@ -164,8 +165,12 @@ public class SubmitEditServlet extends HttpServlet {
                                         nodeVal = attr;
                                     }
                                 }
-
-                                String match = varMap.get(name);
+                                String match;
+                                if (taskName != null) {
+                                    match = varMap.get(taskName + ":" + name);
+                                } else {
+                                    match = varMap.get(name);
+                                }
                                 if (match != null && nodeVal != null) {
                                     nodeVal.setNodeValue(match);
                                 }
@@ -244,6 +249,18 @@ public class SubmitEditServlet extends HttpServlet {
             if (editedJob != null)
                 editedJob.delete();
         }
+    }
+
+    private String getTaskName(Node node) {
+        if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
+            Node grandparentNode = node.getParentNode().getParentNode();
+            if (grandparentNode.getNodeName().equals("task")) {
+                return grandparentNode.getAttributes().getNamedItem("name").getNodeValue();
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
 }
