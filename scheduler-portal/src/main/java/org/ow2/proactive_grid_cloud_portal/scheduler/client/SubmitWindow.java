@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -916,7 +917,7 @@ public class SubmitWindow {
 
         Document dom = XMLParser.parse(jobDescriptor);
         NodeList variables = dom.getElementsByTagName("variable");
-        Map<String, JobVariable> ret = new HashMap<>();
+        Map<String, JobVariable> ret = new LinkedHashMap<>();
 
         if (variables.getLength() > 0) {
             for (int i = 0; i < variables.getLength(); i++) {
@@ -924,6 +925,7 @@ public class SubmitWindow {
 
                 if (n != null) {
                     NamedNodeMap attrs = n.getAttributes();
+                    String taskName = getTaskName(n);
                     try {
                         if (attrs != null && n.hasAttributes()) {
                             String name = null;
@@ -948,7 +950,11 @@ public class SubmitWindow {
                                     continue;
                                 }
 
-                                ret.put(name, new JobVariable(name, value, model));
+                                if (taskName != null) {
+                                    ret.put(taskName + ":" + name, new JobVariable(name, value, model));
+                                } else {
+                                    ret.put(name, new JobVariable(name, value, model));
+                                }
                             }
                         }
                     } catch (JavaScriptException t) {
@@ -958,6 +964,18 @@ public class SubmitWindow {
             }
         }
         return ret;
+    }
+
+    private String getTaskName(Node node) {
+        if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
+            Node grandparentNode = node.getParentNode().getParentNode();
+            if (grandparentNode.getNodeName().equals("task")) {
+                return grandparentNode.getAttributes().getNamedItem("name").getNodeValue();
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     class JobVariable {
