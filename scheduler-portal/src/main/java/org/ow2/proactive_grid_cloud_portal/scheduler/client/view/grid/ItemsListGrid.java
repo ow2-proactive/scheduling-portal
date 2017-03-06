@@ -189,7 +189,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
             } else {
                 result[i] = new DataSourceTextField(columns[i].getName(), columns[i].getTitle());
                 result[i].setRequired(true);
-                result[i].setHidden(columns[i].isHidden());
+                result[i].setDetail(columns[i].isHidden());
             }
         }
         return result;
