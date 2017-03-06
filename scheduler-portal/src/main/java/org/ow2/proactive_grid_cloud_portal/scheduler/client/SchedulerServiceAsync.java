@@ -33,6 +33,7 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -194,7 +195,7 @@ public interface SchedulerServiceAsync {
      *
      * @param propertyList list of properties
      */
-    void getProperties(AsyncCallback<Map<String, String>> propertyList);
+    void getProperties(AsyncCallback<SharedProperties> propertyList);
 
     /**
      * Gets the job details by making an asynchronous call to the server. 

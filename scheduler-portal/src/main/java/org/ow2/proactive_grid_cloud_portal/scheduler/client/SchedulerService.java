@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.HeaderParam;
@@ -36,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -213,7 +213,7 @@ public interface SchedulerService extends RemoteService {
      * them on his side.
      * @return the list of properties
      */
-    Map<String, String> getProperties();
+    SharedProperties getProperties();
 
     /**
      * Gets the job details.

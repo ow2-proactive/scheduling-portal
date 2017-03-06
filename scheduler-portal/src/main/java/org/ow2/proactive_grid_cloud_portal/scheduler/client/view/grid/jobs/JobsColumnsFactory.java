@@ -25,10 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
+import java.util.List;
+
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig.JSONColumn;
 
 import com.smartgwt.client.data.Record;
 
@@ -62,9 +66,30 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                                 USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
                                                                                 DURATION_ATTR };
 
+    private static GridColumns[] EXTRA_COLUMNS;
+
+    private static GridColumns[] ALL_COLUMNS;
+
+    private static final String GENERIC_INFORMATION_MATCHER = "generic-information-";
+
+    static {
+        List<JSONColumn> extraColumns = PortalConfig.get().getExtraColumns();
+
+        EXTRA_COLUMNS = new GridColumns[extraColumns.size()];
+        for (int i = 0; i < extraColumns.size(); i++) {
+            EXTRA_COLUMNS[i] = new GridColumns(extraColumns.get(i).getName(),
+                                               extraColumns.get(i).getTitle(),
+                                               extraColumns.get(i).isHidden());
+        }
+
+        ALL_COLUMNS = new GridColumns[COLUMNS.length + EXTRA_COLUMNS.length];
+        System.arraycopy(COLUMNS, 0, ALL_COLUMNS, 0, COLUMNS.length);
+        System.arraycopy(EXTRA_COLUMNS, 0, ALL_COLUMNS, COLUMNS.length, EXTRA_COLUMNS.length);
+    }
+
     @Override
     public GridColumns[] getColumns() {
-        return COLUMNS;
+        return ALL_COLUMNS;
     }
 
     protected void buildCommonRecordAttributes(Job item, Record record) {
@@ -87,6 +112,15 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         }
 
         record.setAttribute(DURATION_ATTR.getName(), duration);
+
+        for (GridColumns extraColumn : EXTRA_COLUMNS) {
+            String columnName = extraColumn.getName();
+            if (columnName.startsWith(GENERIC_INFORMATION_MATCHER)) {
+                String key = columnName.replace(GENERIC_INFORMATION_MATCHER, "");
+                record.setAttribute(columnName, item.getGenericInformation().get(key));
+            }
+
+        }
     }
 
     private Object buildIssuesAttr(Job item) {

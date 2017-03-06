@@ -26,7 +26,10 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 
 
@@ -70,6 +73,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private long finishTime;
 
+    private Map<String, String> genericInformation;
+
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
@@ -92,10 +97,22 @@ public class Job implements Serializable, Comparable<Job> {
      * @param status the job status
      * @param priority the job priority
      * @param user the username of the user that submitted the job
+     * @param genericInformation the job generic information
+     * @param pending number of pending tasks
+     * @param running number of running tasks
+     * @param finished number of finished tasks
+     * @param total total number of tasks
+     * @param failed number of failed tasks
+     * @param faulty number of faulty tasks
+     * @param inError number of in error tasks
+     * @param submitTime submission time
+     * @param startTime start time
+     * @param inErrorTime in error time
+     * @param finishTime finish time
      */
-    public Job(int id, String name, JobStatus status, JobPriority priority, String user, int pending, int running,
-            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime) {
+    public Job(int id, String name, JobStatus status, JobPriority priority, String user,
+            Map<String, String> genericInformation, int pending, int running, int finished, int total, int failed,
+            int faulty, int inError, long submitTime, long startTime, long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
         this.setStatus(status);
@@ -114,6 +131,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.startTime = startTime;
         this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
+        this.genericInformation = genericInformation;
     }
 
     /**
@@ -335,6 +353,17 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
+        Map<String, String> genericInformation = new HashMap<>();
+        if (jsonJobInfo.get("genericInformation") != null) {
+            JSONArray genericInformationArray = jsonJobInfo.get("genericInformation").isArray();
+            if (genericInformationArray != null) {
+                for (int i = 0; i < genericInformationArray.size(); i++) {
+                    JSONObject genericInformationObject = genericInformationArray.get(i).isObject();
+                    genericInformation.put(genericInformationObject.get("key").isString().stringValue(),
+                                           genericInformationObject.get("value").isString().stringValue());
+                }
+            }
+        }
 
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
         String name = jsonInfoId.get("readableName").isString().stringValue();
@@ -345,6 +374,7 @@ public class Job implements Serializable, Comparable<Job> {
                        JobStatus.valueOf(status),
                        JobPriority.findPriority(priority),
                        user,
+                       genericInformation,
                        pending,
                        running,
                        finished,
@@ -418,6 +448,10 @@ public class Job implements Serializable, Comparable<Job> {
 
     public void setTotalTasks(int total) {
         this.totalTasks = total;
+    }
+
+    public Map<String, String> getGenericInformation() {
+        return genericInformation;
     }
 
 }
