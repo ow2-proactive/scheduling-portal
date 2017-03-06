@@ -58,6 +58,11 @@ public class PortalConfig {
     public static final String CONFIG_PATH = "scheduler-portal.conf";
 
     /**
+     * Extra columns property
+     */
+    private static final String EXTRA_COLUMNS_PROPERTY = "execution-list-extra-columns";
+
+    /**
      * Singleton behaviour
      */
     private static PortalConfig instance = null;
@@ -85,7 +90,7 @@ public class PortalConfig {
     public List<JSONColumn> getExtraColumns() {
 
         if (extraColumns == null) {
-            String extraColumnsJson = properties.get("execution-list-extra-columns");
+            String extraColumnsJson = properties.get(EXTRA_COLUMNS_PROPERTY);
             List<JSONColumn> list = new ArrayList<>();
             if (extraColumnsJson != null) {
                 JSONArray extraColumnsArray = null;
@@ -101,50 +106,9 @@ public class PortalConfig {
 
                         if (extraColumnProperties != null) {
                             JSONColumn column = new JSONColumn();
-                            JSONString title = extraColumnProperties.get("title").isString();
-                            if (title != null)
-                                column.setTitle(title.stringValue());
-                            else
-                                LOGGER.log(Level.SEVERE, "Could not read the title of column number " + i);
-
-                            if (title != null)
-                                column.setTitle(title.stringValue());
-                            else
-                                LOGGER.log(Level.SEVERE, "Could not read the field \"title\" of column number " + i);
-
-                            JSONObject information = extraColumnProperties.get("information").isObject();
-                            if (information != null) {
-                                JSONString typeJson = information.get("type").isString();
-                                String type = new String();
-                                if (typeJson != null)
-                                    type = typeJson.stringValue();
-                                else {
-                                    LOGGER.log(Level.SEVERE,
-                                               "Could not read the field \"information\"->\"type\" of column number " +
-                                                             i);
-                                }
-
-                                JSONString keyJson = information.get("key").isString();
-                                String key = new String();
-                                if (keyJson != null)
-                                    key = keyJson.stringValue();
-                                else {
-                                    LOGGER.log(Level.SEVERE,
-                                               "Could not read the field \"information\"->\"key\" of column number " +
-                                                             i);
-                                }
-                                column.setName(type + "-" + key);
-                            } else {
-                                LOGGER.log(Level.SEVERE,
-                                           "Could not read the field \"information\" of column number " + i);
-                            }
-
-                            JSONBoolean hidden = extraColumnProperties.get("hidden-default").isBoolean();
-                            if (hidden != null)
-                                column.setHidden(hidden.booleanValue());
-                            else
-                                LOGGER.log(Level.SEVERE,
-                                           "Could not read the field \"hidden-default\" of column number " + i);
+                            column.setTitle(getTitle(extraColumnProperties, i));
+                            column.setName(getName(extraColumnProperties, i));
+                            column.setHidden(getHiddenDefault(extraColumnProperties, i));
                             list.add(column);
                         }
                     }
@@ -153,6 +117,62 @@ public class PortalConfig {
             extraColumns = list;
         }
         return extraColumns;
+    }
+
+    private String getTitle(JSONObject extraColumnProperties, int columnIndex) {
+        JSONString title = extraColumnProperties.get("title").isString();
+        if (title != null)
+            return title.stringValue();
+        else {
+            LOGGER.log(Level.SEVERE, "Could not read the field \"title\" of column number " + columnIndex);
+            return new String();
+        }
+    }
+
+    private String getName(JSONObject extraColumnProperties, int columnIndex) {
+
+        JSONObject information = extraColumnProperties.get("information").isObject();
+        if (information != null) {
+            String type = getType(information, columnIndex);
+            String key = getKey(information, columnIndex);
+            return type + "-" + key;
+        } else {
+            LOGGER.log(Level.SEVERE, "Could not read the field \"information\" of column number " + columnIndex);
+            return new String();
+        }
+    }
+
+    private String getType(JSONObject information, int columnIndex) {
+        JSONString typeJson = information.get("type").isString();
+        if (typeJson != null)
+            return typeJson.stringValue();
+        else {
+            LOGGER.log(Level.SEVERE,
+                       "Could not read the field \"information\"->\"type\" of column number " + columnIndex);
+            return new String();
+        }
+    }
+
+    private String getKey(JSONObject information, int columnIndex) {
+        JSONString keyJson = information.get("key").isString();
+        if (keyJson != null)
+            return keyJson.stringValue();
+        else {
+            LOGGER.log(Level.SEVERE,
+                       "Could not read the field \"information\"->\"key\" of column number " + columnIndex);
+            return new String();
+        }
+    }
+
+    private boolean getHiddenDefault(JSONObject extraColumnProperties, int columnIndex) {
+
+        JSONBoolean hidden = extraColumnProperties.get("hidden-default").isBoolean();
+        if (hidden != null)
+            return hidden.booleanValue();
+        else {
+            LOGGER.log(Level.SEVERE, "Could not read the field \"hidden-default\" of column number " + columnIndex);
+            return false;
+        }
     }
 
     /**

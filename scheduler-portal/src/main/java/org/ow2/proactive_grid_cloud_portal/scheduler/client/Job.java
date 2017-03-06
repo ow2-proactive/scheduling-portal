@@ -31,6 +31,7 @@ import java.util.Map;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -353,17 +354,7 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
-        Map<String, String> genericInformation = new HashMap<>();
-        if (jsonJobInfo.get("genericInformation") != null) {
-            JSONArray genericInformationArray = jsonJobInfo.get("genericInformation").isArray();
-            if (genericInformationArray != null) {
-                for (int i = 0; i < genericInformationArray.size(); i++) {
-                    JSONObject genericInformationObject = genericInformationArray.get(i).isObject();
-                    genericInformation.put(genericInformationObject.get("key").isString().stringValue(),
-                                           genericInformationObject.get("value").isString().stringValue());
-                }
-            }
-        }
+        Map<String, String> genericInformation = extractGenericInformation(jsonJobInfo.get("genericInformation"));
 
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
         String name = jsonInfoId.get("readableName").isString().stringValue();
@@ -386,6 +377,21 @@ public class Job implements Serializable, Comparable<Job> {
                        startTime,
                        inErrorTime,
                        finishedTime);
+    }
+
+    private static Map<String, String> extractGenericInformation(JSONValue jsonGenericInformation) {
+        Map<String, String> genericInformation = new HashMap<>();
+        if (jsonGenericInformation != null) {
+            JSONArray genericInformationArray = jsonGenericInformation.isArray();
+            if (genericInformationArray != null) {
+                for (int i = 0; i < genericInformationArray.size(); i++) {
+                    JSONObject genericInformationObject = genericInformationArray.get(i).isObject();
+                    genericInformation.put(genericInformationObject.get("key").isString().stringValue(),
+                                           genericInformationObject.get("value").isString().stringValue());
+                }
+            }
+        }
+        return genericInformation;
     }
 
     /**
