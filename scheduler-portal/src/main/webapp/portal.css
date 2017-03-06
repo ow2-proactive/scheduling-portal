@@ -126,3 +126,8 @@
 .errorMessage {
 	color: red;
 }
+
+.infoMessage {
+	color: green;
+}
+
