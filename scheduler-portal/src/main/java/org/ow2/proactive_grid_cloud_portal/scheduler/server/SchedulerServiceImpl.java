@@ -34,7 +34,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +74,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 
 /**
@@ -116,9 +117,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        final HashMap<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
+        final Map<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
         SchedulerConfig.get().load(props);
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
+
+        final Map<String, String> portalProperties = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerPortalDisplayConfig.CONFIG_PATH));
+        SchedulerPortalDisplayConfig.get().load(portalProperties);
     }
 
     /**
@@ -602,8 +606,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getProperties()
      */
     @Override
-    public Map<String, String> getProperties() {
-        return SchedulerConfig.get().getProperties();
+    public SharedProperties getProperties() {
+        return new SharedProperties(SchedulerConfig.get().getProperties(),
+                                    SchedulerPortalDisplayConfig.get().getProperties());
     }
 
     /*
