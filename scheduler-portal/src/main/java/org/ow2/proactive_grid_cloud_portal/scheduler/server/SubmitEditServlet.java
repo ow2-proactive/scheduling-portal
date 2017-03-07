@@ -95,6 +95,7 @@ public class SubmitEditServlet extends HttpServlet {
         String sessionId = null;
         String job = null;
         String startAt = null;
+        boolean validate = false;
         HashMap<String, String> varMap = new HashMap<String, String>();
         File editedJob = null;
         File jobDesc = null;
@@ -115,6 +116,8 @@ public class SubmitEditServlet extends HttpServlet {
                 varMap.put(name, val);
             } else if (key.toUpperCase().equals("START_AT")) {
                 startAt = val;
+            } else if (key.equals("validate")) {
+                validate = Boolean.parseBoolean(val);
             }
         }
 
@@ -227,11 +230,18 @@ public class SubmitEditServlet extends HttpServlet {
             try {
                 LOGGER.info("editedJob that will be sent:");
                 LOGGER.info(FileUtils.readFileToString(editedJob));
-                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
-                if (responseS == null || responseS.length() == 0) {
+
+                String responseFromService = null;
+
+                if (validate) {
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).validateXMLFile(sessionId, editedJob);
+                } else {
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
+                }
+                if (responseFromService == null || responseFromService.length() == 0) {
                     response.getWriter().write(ERROR + "Job submission returned without a value!");
                 } else {
-                    response.getWriter().write(responseS);
+                    response.getWriter().write(responseFromService);
                 }
             } catch (RestServerException e1) {
                 String msg = e1.getMessage().replace("<", "&lt;").replace(">", "&gt;");
