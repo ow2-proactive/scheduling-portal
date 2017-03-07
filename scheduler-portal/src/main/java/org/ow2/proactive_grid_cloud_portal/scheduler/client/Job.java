@@ -26,9 +26,11 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -74,12 +76,13 @@ public class Job implements Serializable, Comparable<Job> {
 
     private long finishTime;
 
-    private Map<String, String> genericInformation;
+    private final ImmutableMap<String, String> genericInformation;
 
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
     public Job() {
+        this.genericInformation = ImmutableMap.of();
     }
 
     /**
@@ -88,6 +91,7 @@ public class Job implements Serializable, Comparable<Job> {
      * @param id Job id
      */
     public Job(int id) {
+        this();
         this.id = id;
     }
 
@@ -132,7 +136,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.startTime = startTime;
         this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
-        this.genericInformation = genericInformation;
+        this.genericInformation = ImmutableMap.copyOf(genericInformation);
     }
 
     /**
@@ -380,18 +384,23 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     private static Map<String, String> extractGenericInformation(JSONValue jsonGenericInformation) {
-        Map<String, String> genericInformation = new HashMap<>();
         if (jsonGenericInformation != null) {
             JSONArray genericInformationArray = jsonGenericInformation.isArray();
             if (genericInformationArray != null) {
+                Map<String, String> genericInformation = new HashMap<>(genericInformationArray.size());
                 for (int i = 0; i < genericInformationArray.size(); i++) {
                     JSONObject genericInformationObject = genericInformationArray.get(i).isObject();
-                    genericInformation.put(genericInformationObject.get("key").isString().stringValue(),
-                                           genericInformationObject.get("value").isString().stringValue());
+                    genericInformation.put(getJsonStringValue(genericInformationObject, "key"),
+                                           getJsonStringValue(genericInformationObject, "value"));
                 }
+                return genericInformation;
             }
         }
-        return genericInformation;
+        return Collections.emptyMap();
+    }
+
+    private static String getJsonStringValue(JSONObject jsonObject, String key) {
+        return jsonObject.get(key).isString().stringValue();
     }
 
     /**

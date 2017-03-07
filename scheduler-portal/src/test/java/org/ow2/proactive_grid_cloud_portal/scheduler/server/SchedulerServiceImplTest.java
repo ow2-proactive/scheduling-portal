@@ -38,8 +38,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.junit.Test;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 
 
 public class SchedulerServiceImplTest {
@@ -52,7 +52,7 @@ public class SchedulerServiceImplTest {
         // mock servlet context
         ServletContext servletContext = mock(ServletContext.class);
         when(servletContext.getRealPath("scheduler.conf")).thenReturn(resourceAsFilePath("/scheduler.conf"));
-        when(servletContext.getRealPath("scheduler-portal.conf")).thenReturn(resourceAsFilePath("/scheduler-portal.conf"));
+        when(servletContext.getRealPath("scheduler-portal-display.conf")).thenReturn(resourceAsFilePath("/scheduler-portal-display.conf"));
 
         service.init(mockServletContext(servletContext));
     }
@@ -61,8 +61,8 @@ public class SchedulerServiceImplTest {
     public void testLoadingFromConfigurationFile() throws Exception {
         setUp();
         assertEquals("test", SchedulerConfig.get().getRestUrl());
-        assertEquals("[{ \"title\": \"start at\", \"information\": { \"type\": \"generic-information\", \"key\": \"START_AT\"}, \"hidden-default\": false }]",
-                     PortalConfig.get().getProperties().get("execution-list-extra-columns"));
+        assertEquals("[{ \"title\": \"start at\", \"information\": { \"type\": \"generic-information\", \"key\": \"START_AT\"}, \"hide\": false }]",
+                     SchedulerPortalDisplayConfig.get().getProperties().get("execution-list-extra-columns"));
     }
 
     @Test

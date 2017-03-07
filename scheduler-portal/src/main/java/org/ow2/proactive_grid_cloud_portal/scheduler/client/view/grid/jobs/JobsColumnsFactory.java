@@ -29,10 +29,11 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.util.JobColumnsUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig.JSONColumn;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig.JSONColumn;
 
 import com.smartgwt.client.data.Record;
 
@@ -70,16 +71,15 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     private static GridColumns[] ALL_COLUMNS;
 
-    private static final String GENERIC_INFORMATION_MATCHER = "generic-information-";
-
     static {
-        List<JSONColumn> extraColumns = PortalConfig.get().getExtraColumns();
+        List<JSONColumn> extraColumns = SchedulerPortalDisplayConfig.get().getExtraColumns();
 
         EXTRA_COLUMNS = new GridColumns[extraColumns.size()];
         for (int i = 0; i < extraColumns.size(); i++) {
-            EXTRA_COLUMNS[i] = new GridColumns(extraColumns.get(i).getName(),
-                                               extraColumns.get(i).getTitle(),
-                                               extraColumns.get(i).isHidden());
+            JSONColumn columnConfiguration = extraColumns.get(i);
+            EXTRA_COLUMNS[i] = new GridColumns(columnConfiguration.getName(),
+                                               columnConfiguration.getTitle(),
+                                               columnConfiguration.isHidden());
         }
 
         ALL_COLUMNS = new GridColumns[COLUMNS.length + EXTRA_COLUMNS.length];
@@ -115,11 +115,10 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
         for (GridColumns extraColumn : EXTRA_COLUMNS) {
             String columnName = extraColumn.getName();
-            if (columnName.startsWith(GENERIC_INFORMATION_MATCHER)) {
-                String key = columnName.replace(GENERIC_INFORMATION_MATCHER, "");
+            String key = JobColumnsUtil.getGenericInformationKey(columnName);
+            if (key != null) {
                 record.setAttribute(columnName, item.getGenericInformation().get(key));
             }
-
         }
     }
 

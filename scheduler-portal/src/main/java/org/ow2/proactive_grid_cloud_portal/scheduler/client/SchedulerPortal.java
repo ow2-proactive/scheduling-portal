@@ -27,8 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PortalConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -51,7 +51,7 @@ public class SchedulerPortal implements EntryPoint {
 
             public void onSuccess(SharedProperties result) {
                 SchedulerConfig.get().load(result.getProperties());
-                PortalConfig.get().load(result.getPortalProperties());
+                SchedulerPortalDisplayConfig.get().load(result.getPortalProperties());
                 Settings.load();
                 Scheduler.setSchedulerService(rpcService);
                 SchedulerController c = new SchedulerController(rpcService);
