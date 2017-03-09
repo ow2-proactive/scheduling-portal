@@ -48,9 +48,11 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -62,7 +64,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -155,6 +156,8 @@ public class SubmitWindow {
 
     private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
 
+    private Hidden validate = new Hidden("validate", "true");
+
     private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
 
     private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
@@ -178,6 +181,8 @@ public class SubmitWindow {
 
     private IButton submitButton;
 
+    private IButton checkButton;
+
     private VLayout messagePanel; // -------------------- Loading Panel when uploading
 
     private Label waitLabel;
@@ -190,6 +195,10 @@ public class SubmitWindow {
     private HashMap<String, Integer> catalogWorkflowsMap;
 
     private String CATALOG_URL = null;
+
+    private Map<String, JobVariable> variables;
+
+    private String job;
 
     /**
      * Default constructor
@@ -313,22 +322,64 @@ public class SubmitWindow {
         rootPage.addMember(selectWfLayout);
     }
 
-    private void initVarsPart(Widget varsContent, Widget hiddenContent) {
-        varsLayout = new VLayout();
-        varsLayout.setIsGroup(true);
-        varsLayout.setGroupTitle("2. Fill workflow variables");
-        varsLayout.setWidth100();
-        varsLayout.setHeight("100px");
-        varsLayout.setMaxHeight(100);
-        varsLayout.setPadding(5);
-        varsLayout.setOverflow(Overflow.AUTO);
-        varsLayout.addMember(varsContent);
-        varsLayout.addMember(hiddenContent);
+    private void fillVarsPart() {
+
+        DynamicForm variablesVisualForm = initVariablesVisualForm();
+
+        Layout hiddenVarsLayout = initVariablesActualForm();
+
+        initVarsLayout();
+        varsLayout.addMember(variablesVisualForm);
+        varsLayout.addMember(hiddenVarsLayout);
         rootPage.addMember(varsLayout);
         rootPage.reflow();
     }
 
-    private void initVarsPart() {
+    private DynamicForm initVariablesVisualForm() {
+        // presentation form
+        DynamicForm variablesVisualForm;
+        variablesVisualForm = new DynamicForm();
+        variablesVisualForm.setNumCols(3);
+        variablesVisualForm.setColWidths("25%", "50%", "25%");
+        fields = new FormItem[variables.size() * 2];
+        int i = 0;
+
+        for (Entry<String, JobVariable> var : variables.entrySet()) {
+            TextItem variableItem = createVariableItem(var);
+            fields[i++] = variableItem;
+            String model = var.getValue().getModel();
+            BlurbItem modelItem = createModelItem(model);
+            fields[i++] = modelItem;
+        }
+        variablesVisualForm.setFields(fields);
+        return variablesVisualForm;
+    }
+
+    private Layout initVariablesActualForm() {
+        // actual form used to POST
+        variablesActualForm = new FormPanel();
+        variablesActualForm.setMethod(FormPanel.METHOD_POST);
+        variablesActualForm.setAction(URL_SUBMIT_XML);
+        hiddenPane = new VerticalPanel();
+        _fields = new Hidden[variables.size()];
+
+        int i = 0;
+        for (Entry<String, JobVariable> var : variables.entrySet()) {
+            _fields[i] = new Hidden("var_" + var.getKey());
+            hiddenPane.add(_fields[i]);
+            i++;
+        }
+
+        hiddenPane.add(new Hidden("job", job));
+        hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
+        hiddenPane.add(validate);
+        variablesActualForm.setWidget(hiddenPane);
+        Layout fpanelWra = new Layout();
+        fpanelWra.addMember(variablesActualForm);
+        return fpanelWra;
+    }
+
+    private void initVarsLayout() {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle("2. Fill workflow variables");
@@ -337,6 +388,32 @@ public class SubmitWindow {
         varsLayout.setMaxHeight(100);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
+    }
+
+    private BlurbItem createModelItem(String model) {
+        BlurbItem modelLabel = null;
+        if (model != null) {
+            modelLabel = new BlurbItem();
+            modelLabel.setDefaultValue(model);
+        } else {
+            modelLabel = new BlurbItem();
+        }
+        modelLabel.setStartRow(false);
+        modelLabel.setEndRow(true);
+        return modelLabel;
+    }
+
+    private TextItem createVariableItem(Entry<String, JobVariable> var) {
+        TextItem t = new TextItem(var.getKey(), var.getKey());
+        t.setValue(var.getValue().getValue());
+        t.setWidth("100%");
+        t.setStartRow(true);
+        t.setEndRow(false);
+        return t;
+    }
+
+    private void initVarsPart() {
+        initVarsLayout();
         rootPage.addMember(varsLayout);
         rootPage.reflow();
     }
@@ -431,6 +508,12 @@ public class SubmitWindow {
         submitButton.setTooltip("A workflow must be selected first");
         submitButton.addClickHandler(clickHandlerForSubmitButton());
 
+        checkButton = new IButton("Check");
+        checkButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        checkButton.setShowDisabledIcon(false);
+        checkButton.setTooltip("Validate current workflow and variables");
+        checkButton.addClickHandler(clickHandlerForCheckButton());
+
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setShowDisabledIcon(false);
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
@@ -441,7 +524,7 @@ public class SubmitWindow {
                 SubmitWindow.this.destroy();
             }
         });
-        submitCancelButtons.setMembers(cancelButton, submitButton);
+        submitCancelButtons.setMembers(cancelButton, checkButton, submitButton);
         rootPage.addMember(submitCancelButtons);
     }
 
@@ -466,6 +549,21 @@ public class SubmitWindow {
         waitLabel.setAlign(Alignment.CENTER);
 
         messagePanel.addMember(waitLabel);
+
+        rootPage.reflow();
+    }
+
+    private void displayInfoMessage(String message) {
+        clearMessagePanel();
+
+        errorLabel = new Label(message);
+        errorLabel.setHeight(30);
+        errorLabel.setWidth100();
+        errorLabel.setMargin(10);
+        errorLabel.setAlign(Alignment.CENTER);
+        errorLabel.setStyleName("infoMessage");
+
+        messagePanel.addMember(errorLabel);
 
         rootPage.reflow();
     }
@@ -634,6 +732,85 @@ public class SubmitWindow {
                                                                                      importFromCatalogformPanel));
     }
 
+    private ClickHandler clickHandlerForCheckButton() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < _fields.length; i++) {
+                    String val = "";
+                    if (fields[2 * i].getValue() != null) {
+                        val = fields[2 * i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
+                if (startAtRB.getValue()) {
+                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                    startAtParameter.setValue(iso8601DateStr);
+                    hiddenPane.add(startAtParameter);
+                }
+                enableValidation(true);
+                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(SubmitCompleteEvent event) {
+                        String result = event.getResults();
+                        if (result == null) {
+                            GWT.log("Unexpected empty result");
+                            displayErrorMessage("Unexpected empty result");
+                            return;
+                        }
+
+                        if (result.startsWith(SubmitEditServlet.ERROR)) {
+                            displayErrorMessage(result.substring(SubmitEditServlet.ERROR.length()));
+                            return;
+                        }
+
+                        JSONValue json = controller.parseJSON(result);
+                        JSONObject obj = json.isObject();
+                        if (obj != null) {
+                            if (obj.containsKey("valid")) {
+                                if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                    if (obj.containsKey("updatedVariables")) {
+                                        updateVariables(obj.get("updatedVariables"));
+                                        redrawVariables();
+                                    }
+                                    GWT.log("Job validated");
+                                    displayInfoMessage("Job is valid");
+                                } else if (obj.containsKey("errorMessage")) {
+                                    String errorMessage = obj.get("errorMessage").toString();
+                                    if (errorMessage.contains("JobValidationException")) {
+                                        errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                                    }
+                                    displayErrorMessage(errorMessage);
+                                }
+                            }
+                        }
+                    }
+                });
+                variablesActualForm.submit();
+                displayLoadingMessage();
+
+            }
+        };
+    }
+
+    private void updateVariables(JSONValue updatedVariablesJsonValue) {
+        JSONObject obj = updatedVariablesJsonValue.isObject();
+        if (obj != null) {
+            for (String varName : obj.keySet()) {
+                JobVariable variable = variables.get(varName);
+                if (variable != null) {
+                    JSONValue variableJsonValue = obj.get(varName);
+                    JSONString variableJsonString = variableJsonValue.isString();
+                    if (variableJsonString != null) {
+                        variable.setValue(variableJsonString.stringValue());
+                    }
+
+                }
+            }
+        }
+    }
+
     private ClickHandler clickHandlerForSubmitButton() {
         return new ClickHandler() {
             @Override
@@ -645,6 +822,7 @@ public class SubmitWindow {
                     }
                     _fields[i].setValue(val);
                 }
+                enableValidation(false);
                 if (startAtRB.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
@@ -730,9 +908,6 @@ public class SubmitWindow {
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
-                DynamicForm variablesVisualForm = null;
-                Layout fpanelWra = null;
-                variablesActualForm = null;
 
                 try {
                     JSONValue js = JSONParser.parseStrict(res);
@@ -740,67 +915,31 @@ public class SubmitWindow {
 
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
-                        String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
-                        final Map<String, JobVariable> variables = readVars(job);
-
-                        // presentation form
-                        variablesVisualForm = new DynamicForm();
-                        variablesVisualForm.setNumCols(3);
-                        variablesVisualForm.setColWidths("25%", "50%", "25%");
-                        fields = new FormItem[variables.size() * 2];
-                        _fields = new Hidden[variables.size()];
-                        int i = 0;
-                        int j = 0;
-                        hiddenPane = new VerticalPanel();
-                        for (Entry<String, JobVariable> var : variables.entrySet()) {
-                            TextItem t = new TextItem(var.getKey(), var.getKey());
-                            t.setValue(var.getValue().getValue());
-                            t.setWidth("100%");
-                            t.setStartRow(true);
-                            t.setEndRow(false);
-                            String model = var.getValue().getModel();
-
-                            _fields[j] = new Hidden("var_" + var.getKey());
-                            hiddenPane.add(_fields[j]);
-                            j++;
-                            fields[i++] = t;
-                            BlurbItem modelLabel = null;
-                            if (model != null) {
-                                modelLabel = new BlurbItem();
-                                modelLabel.setDefaultValue(model);
-                            } else {
-                                modelLabel = new BlurbItem();
-                            }
-                            modelLabel.setStartRow(false);
-                            modelLabel.setEndRow(true);
-                            fields[i++] = modelLabel;
-                        }
-                        variablesVisualForm.setFields(fields);
-
-                        // actual form used to POST
-                        variablesActualForm = new FormPanel();
-                        variablesActualForm.setMethod(FormPanel.METHOD_POST);
-                        variablesActualForm.setAction(URL_SUBMIT_XML);
-                        hiddenPane.add(new Hidden("job", job));
-                        hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
-                        variablesActualForm.setWidget(hiddenPane);
-                        fpanelWra = new Layout();
-                        fpanelWra.addMember(variablesActualForm);
+                        job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
+                        variables = readVars(job);
+                    } else {
+                        GWT.log("JSON parse ERROR");
+                        return;
                     }
+
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
+                    return;
                 }
-                removeBottomMembers();
-
-                setEnabledStartAtPart(true);
-                initVarsPart(variablesVisualForm, fpanelWra);
-                rootPage.addMember(startAtLayout);
-                clearMessagePanel();
-                rootPage.addMember(messagePanel);
-                rootPage.addMember(submitCancelButtons);
-                rootPage.reflow();
+                redrawVariables();
             }
         };
+    }
+
+    private void redrawVariables() {
+        removeBottomMembers();
+        setEnabledStartAtPart(true);
+        fillVarsPart();
+        rootPage.addMember(startAtLayout);
+        clearMessagePanel();
+        rootPage.addMember(messagePanel);
+        rootPage.addMember(submitCancelButtons);
+        rootPage.reflow();
     }
 
     private void removeBottomMembers() {
@@ -808,6 +947,10 @@ public class SubmitWindow {
         rootPage.removeMember(startAtLayout);
         rootPage.removeMember(messagePanel);
         rootPage.removeMember(submitCancelButtons);
+    }
+
+    private void enableValidation(boolean enable) {
+        validate.setValue(Boolean.toString(enable));
     }
 
     private void resetAllHandlers() {
@@ -876,6 +1019,7 @@ public class SubmitWindow {
         startNowRB.setEnabled(state);
         startAtRB.setEnabled(state);
         submitButton.setDisabled(!state);
+        checkButton.setDisabled(!state);
         if (!state) {
             submitButton.setTooltip("A workflow must be selected first");
         } else {
@@ -993,6 +1137,10 @@ public class SubmitWindow {
 
         public String getName() {
             return name;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
         }
 
         public String getValue() {

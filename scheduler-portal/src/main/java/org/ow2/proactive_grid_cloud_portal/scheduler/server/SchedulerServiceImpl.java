@@ -168,6 +168,49 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    /**
+     * Validate a XML file to the REST part by using an HTTP client.
+     *
+     * @param sessionId the id of the client which submits the job
+     * @param file      the XML file that is submitted
+     * @return an error message upon failure, "id=<jobId>" upon success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String validateXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/validate");
+        method.addHeader("sessionId", sessionId);
+
+        boolean isJar = isJarFile(file);
+
+        try {
+            String name = isJar ? "jar" : "file";
+            String mime = isJar ? "application/java-archive" : "application/xml";
+            String charset = "ISO-8859-1";
+
+            MultipartEntity entity = new MultipartEntity();
+            entity.addPart("file", new FileBody(file, name, mime, charset));
+            method.setEntity(entity);
+
+            HttpResponse execute = httpClient.execute(method);
+            InputStream is = execute.getEntity().getContent();
+            String ret = convertToString(is);
+
+            if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
+                return ret;
+            } else {
+                throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException("Failed to read response: " + e.getMessage());
+        } finally {
+            method.releaseConnection();
+            if (file != null) {
+                file.delete();
+            }
+        }
+    }
+
     private boolean isJarFile(File file) {
         try {
             new JarFile(file);
