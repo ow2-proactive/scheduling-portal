@@ -29,9 +29,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
@@ -385,22 +385,17 @@ public class Job implements Serializable, Comparable<Job> {
 
     private static Map<String, String> extractGenericInformation(JSONValue jsonGenericInformation) {
         if (jsonGenericInformation != null) {
-            JSONArray genericInformationArray = jsonGenericInformation.isArray();
-            if (genericInformationArray != null) {
-                Map<String, String> genericInformation = new HashMap<>(genericInformationArray.size());
-                for (int i = 0; i < genericInformationArray.size(); i++) {
-                    JSONObject genericInformationObject = genericInformationArray.get(i).isObject();
-                    genericInformation.put(getJsonStringValue(genericInformationObject, "key"),
-                                           getJsonStringValue(genericInformationObject, "value"));
+            JSONObject genericInformationObject = jsonGenericInformation.isObject();
+            if (genericInformationObject != null) {
+                Set<String> genericInformationKeySet = genericInformationObject.keySet();
+                Map<String, String> genericInformation = new HashMap<>(genericInformationKeySet.size());
+                for (String key : genericInformationKeySet) {
+                    genericInformation.put(key, genericInformationObject.get(key).isString().stringValue());
                 }
                 return genericInformation;
             }
         }
         return Collections.emptyMap();
-    }
-
-    private static String getJsonStringValue(JSONObject jsonObject, String key) {
-        return jsonObject.get(key).isString().stringValue();
     }
 
     /**

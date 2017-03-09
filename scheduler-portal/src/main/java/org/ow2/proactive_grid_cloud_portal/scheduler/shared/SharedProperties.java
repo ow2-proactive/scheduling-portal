@@ -37,9 +37,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class SharedProperties implements IsSerializable {
 
-    private final Map<String, String> properties;
+    private Map<String, String> properties;
 
-    private final Map<String, String> portalProperties;
+    private Map<String, String> portalProperties;
 
     public SharedProperties() {
         super();
