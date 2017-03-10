@@ -130,9 +130,17 @@ public class InfoView<T> {
         return root;
     }
 
+    /**
+     * Display specific members of the view. This method is meant to be overridden by inheriting classes
+     * @param object
+     */
     protected void displayExtraMembers(T object) {
     }
 
+    /**
+     * Hide specific members of the view. This method is meant to be overridden by inheriting classes
+     * @param object
+     */
     protected void hideExtraMembers() {
     }
 }
