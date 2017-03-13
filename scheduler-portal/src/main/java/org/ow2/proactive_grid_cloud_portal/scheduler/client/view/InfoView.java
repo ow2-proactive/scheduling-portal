@@ -122,7 +122,6 @@ public class InfoView<T> {
         /* widget that will be returned as the root layout */
         Layout root = new Layout();
         root.setWidth100();
-        root.setHeight100();
 
         root.addMember(label);
         root.addMember(details);

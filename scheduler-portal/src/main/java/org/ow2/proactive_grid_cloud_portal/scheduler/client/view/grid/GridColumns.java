@@ -76,7 +76,7 @@ public class GridColumns {
     }
 
     public GridColumns(String name, String title, boolean hidden) {
-        this(name, title, 80, true, false, hidden);
+        this(name, title, 120, true, false, hidden);
     }
 
     public String getName() {
