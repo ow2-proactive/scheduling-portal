@@ -328,6 +328,7 @@ public class JobsController {
                         JobPriority.NORMAL,
                         LoginModel.getInstance().getLogin(),
                         new HashMap<>(),
+                        new HashMap<>(),
                         0,
                         0,
                         0,
