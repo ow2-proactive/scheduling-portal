@@ -78,11 +78,14 @@ public class Job implements Serializable, Comparable<Job> {
 
     private final ImmutableMap<String, String> genericInformation;
 
+    private final ImmutableMap<String, String> variables;
+
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
     public Job() {
         this.genericInformation = ImmutableMap.of();
+        this.variables = ImmutableMap.of();
     }
 
     /**
@@ -116,8 +119,9 @@ public class Job implements Serializable, Comparable<Job> {
      * @param finishTime finish time
      */
     public Job(int id, String name, JobStatus status, JobPriority priority, String user,
-            Map<String, String> genericInformation, int pending, int running, int finished, int total, int failed,
-            int faulty, int inError, long submitTime, long startTime, long inErrorTime, long finishTime) {
+            Map<String, String> genericInformation, Map<String, String> variables, int pending, int running,
+            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
+            long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
         this.setStatus(status);
@@ -137,6 +141,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
+        this.variables = ImmutableMap.copyOf(variables);
     }
 
     /**
@@ -358,7 +363,8 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
-        Map<String, String> genericInformation = extractGenericInformation(jsonJobInfo.get("genericInformation"));
+        Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
+        Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
 
         JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
         String name = jsonInfoId.get("readableName").isString().stringValue();
@@ -370,6 +376,7 @@ public class Job implements Serializable, Comparable<Job> {
                        JobPriority.findPriority(priority),
                        user,
                        genericInformation,
+                       variables,
                        pending,
                        running,
                        finished,
@@ -383,16 +390,16 @@ public class Job implements Serializable, Comparable<Job> {
                        finishedTime);
     }
 
-    private static Map<String, String> extractGenericInformation(JSONValue jsonGenericInformation) {
-        if (jsonGenericInformation != null) {
-            JSONObject genericInformationObject = jsonGenericInformation.isObject();
-            if (genericInformationObject != null) {
-                Set<String> genericInformationKeySet = genericInformationObject.keySet();
-                Map<String, String> genericInformation = new HashMap<>(genericInformationKeySet.size());
-                for (String key : genericInformationKeySet) {
-                    genericInformation.put(key, genericInformationObject.get(key).isString().stringValue());
+    private static Map<String, String> extractMap(JSONValue mapValue) {
+        if (mapValue != null) {
+            JSONObject mapObject = mapValue.isObject();
+            if (mapObject != null) {
+                Set<String> keySet = mapObject.keySet();
+                Map<String, String> resultMap = new HashMap<>(keySet.size());
+                for (String key : keySet) {
+                    resultMap.put(key, mapObject.get(key).isString().stringValue());
                 }
-                return genericInformation;
+                return resultMap;
             }
         }
         return Collections.emptyMap();
@@ -462,6 +469,10 @@ public class Job implements Serializable, Comparable<Job> {
 
     public Map<String, String> getGenericInformation() {
         return genericInformation;
+    }
+
+    public Map<String, String> getVariables() {
+        return variables;
     }
 
 }
