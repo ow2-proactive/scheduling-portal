@@ -58,7 +58,7 @@ public class JobInfoView extends InfoView<Job>
     /** Generic information label text */
     private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic Information";
 
-    /** Generic information label text */
+    /** Variables label text */
     private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
 
     /** Generic information grid */
