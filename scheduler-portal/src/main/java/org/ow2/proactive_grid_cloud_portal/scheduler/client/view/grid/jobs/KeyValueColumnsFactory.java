@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.util.JobColumnsUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
@@ -36,7 +37,7 @@ import com.smartgwt.client.data.Record;
 /**
  * A factory that give columns and records for jobs.
  */
-public class GenericInformationColumnsFactory implements ColumnsFactory<Map.Entry<String, String>> {
+public class KeyValueColumnsFactory implements ColumnsFactory<Map.Entry<String, String>> {
 
     public static final GridColumns KEY_ATTR = new GridColumns("key", "Key", 120, true, true);
 
@@ -52,7 +53,10 @@ public class GenericInformationColumnsFactory implements ColumnsFactory<Map.Entr
     @Override
     public void buildRecord(Map.Entry<String, String> item, Record record) {
         record.setAttribute(KEY_ATTR.getName(), item.getKey());
-        record.setAttribute(VALUE_ATTR.getName(), item.getValue());
+        if (JobColumnsUtil.START_AT.equals(item.getKey()))
+            record.setAttribute(VALUE_ATTR.getName(), JobColumnsUtil.getFormattedDateString(item.getValue()));
+        else
+            record.setAttribute(VALUE_ATTR.getName(), item.getValue());
     }
 
 }

@@ -117,7 +117,11 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
             String columnName = extraColumn.getName();
             String key = JobColumnsUtil.getGenericInformationKey(columnName);
             if (key != null) {
-                record.setAttribute(columnName, item.getGenericInformation().get(key));
+                String value = item.getGenericInformation().get(key);
+                if (JobColumnsUtil.START_AT.equals(key)) {
+                    value = JobColumnsUtil.getFormattedDateString(value);
+                }
+                record.setAttribute(columnName, value);
             }
         }
     }

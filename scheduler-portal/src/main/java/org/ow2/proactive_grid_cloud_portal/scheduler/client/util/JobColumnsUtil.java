@@ -25,9 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.util;
 
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -50,9 +52,24 @@ public class JobColumnsUtil {
     private static final String GENERIC_INFORMATION_TYPE = "generic-information";
 
     /**
+     * Input date format
+     */
+    private static final String DATE_FORMAT_OUTPUT = "yyyy-MM-dd HH:mm:ss";
+
+    /**
+     * Output date format
+     */
+    private static final String DATE_FORMAT_INPUT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
+
+    /**
      * Logger
      */
     private static final Logger LOGGER = Logger.getLogger(JobColumnsUtil.class.getName());
+
+    /**
+     * START_AT key
+     */
+    public static final String START_AT = "START_AT";
 
     /**
      * Get the generic information key from the column name
@@ -159,6 +176,21 @@ public class JobColumnsUtil {
         else {
             LOGGER.log(Level.SEVERE, "Could not read the field \"hide\" of column number " + columnIndex);
             return false;
+        }
+    }
+
+    /**
+     * Format date String from time zone format to custom format
+     * @param timeZoneDate date to format
+     * @return the date with custom format
+     */
+    public static String getFormattedDateString(String timeZoneDate) {
+        try {
+            Date date = DateTimeFormat.getFormat(DATE_FORMAT_INPUT).parse(timeZoneDate);
+            return DateTimeFormat.getFormat(DATE_FORMAT_OUTPUT).format(date);
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "Error in date format " + timeZoneDate);
+            return timeZoneDate;
         }
     }
 

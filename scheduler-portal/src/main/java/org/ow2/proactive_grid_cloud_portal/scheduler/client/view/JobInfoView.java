@@ -26,8 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
@@ -39,13 +37,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.GenericInformationColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.grid.ListGrid;
-import com.smartgwt.client.widgets.grid.ListGridField;
-import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -62,17 +55,17 @@ public class JobInfoView extends InfoView<Job>
 
     protected SchedulerController controller;
 
-    /** generic information table */
-    private ListGrid genericInformationGrid = null;
-
-    /** Generic information column factory */
-    private GenericInformationColumnsFactory genericInformationColumnsFactory;
-
     /** Generic information label text */
-    private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic information";
+    private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic Information";
 
-    /** Generic information label */
-    private Label genericInformationLabel = null;
+    /** Variables label text */
+    private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
+
+    /** Generic information grid */
+    private KeyValueGrid genericInformationGrid;
+
+    /** Variables grid */
+    private KeyValueGrid variablesGrid;
 
     /**
      * @param controller the Controller that created this View
@@ -80,7 +73,6 @@ public class JobInfoView extends InfoView<Job>
     public JobInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
         super(factory, "No job selected");
         this.controller = controller;
-        this.genericInformationColumnsFactory = new GenericInformationColumnsFactory();
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
@@ -143,30 +135,20 @@ public class JobInfoView extends InfoView<Job>
     @Override
     protected Layout getLayout() {
 
-        Layout root = new VStack();
+        VStack root = new VStack();
         root.setWidth100();
-        root.setHeight100();
 
-        this.genericInformationLabel = new Label(GENERIC_INFORMATION_LABEL_TEXT);
-        this.genericInformationLabel.setHeight("10%");
-        this.genericInformationLabel.hide();
-
-        this.genericInformationGrid = new ListGrid();
+        this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
         this.genericInformationGrid.setWidth100();
-
-        GridColumns[] columns = this.genericInformationColumnsFactory.getColumns();
-        ListGridField[] fields = new ListGridField[columns.length];
-        for (int i = 0; i < columns.length; i++) {
-            GridColumns column = columns[i];
-            fields[i] = new ListGridField(column.getName(), column.getTitle());
-        }
-
-        this.genericInformationGrid.setFields(fields);
         this.genericInformationGrid.hide();
 
+        this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        this.variablesGrid.setWidth100();
+        this.variablesGrid.hide();
+
         root.addMember(super.getLayout());
-        root.addMember(genericInformationLabel);
         root.addMember(genericInformationGrid);
+        root.addMember(variablesGrid);
         return root;
     }
 
@@ -178,20 +160,11 @@ public class JobInfoView extends InfoView<Job>
      */
     @Override
     protected void displayExtraMembers(Job job) {
-        Set<Map.Entry<String, String>> genericInformationSet = job.getGenericInformation().entrySet();
-        ListGridRecord[] records = new ListGridRecord[genericInformationSet.size()];
+        genericInformationGrid.buildEntries(job.getGenericInformation());
+        variablesGrid.buildEntries(job.getVariables());
 
-        int index = 0;
-        for (Map.Entry<String, String> genericInformationEntry : genericInformationSet) {
-            ListGridRecord record = new ListGridRecord();
-            this.genericInformationColumnsFactory.buildRecord(genericInformationEntry, record);
-            records[index] = record;
-            index++;
-        }
-
-        this.genericInformationGrid.setData(records);
         this.genericInformationGrid.show();
-        this.genericInformationLabel.show();
+        this.variablesGrid.show();
     }
 
     /*
@@ -202,7 +175,7 @@ public class JobInfoView extends InfoView<Job>
     @Override
     protected void hideExtraMembers() {
         this.genericInformationGrid.hide();
-        this.genericInformationLabel.hide();
+        this.variablesGrid.hide();
     }
 
 }
