@@ -1192,6 +1192,28 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    private Map<String, Object> executeGraphQLQuery(String sessionId, String query, String variables)
+            throws ServiceException, RestServerException {
+
+        if (sessionId == null || query == null)
+            return null;
+
+        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool)
+                                                           .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                                                           .build();
+        ResteasyWebTarget target = client.target(SchedulerConfig.get().getSchedulingApiUrl());
+
+        GraphQLClient graphQLClientProxy = target.proxy(GraphQLClient.class);
+
+        try {
+            Map<String, Object> queryResult = graphQLClientProxy.graphqlQuery(sessionId, query, variables);
+
+            return queryResult;
+        } catch (WebApplicationException e) {
+            throw new RestServerException(e);
+        }
+    }
+
     private boolean executeFunction(Function<RestClient, InputStream> function)
             throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
