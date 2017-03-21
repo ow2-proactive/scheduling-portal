@@ -100,6 +100,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private ExecutorService threadPool;
 
+    /**
+     * GraphQL Client
+     */
+    private SchedulingApiClientGwt graphQLClient;
+
     @Override
     public void init() {
         loadProperties();
@@ -113,6 +118,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                             .build();
 
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+        graphQLClient = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(), httpClient, threadPool);
     }
 
     /**
@@ -1200,10 +1207,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         if (sessionId == null || query == null)
             return null;
 
-        SchedulingApiClientGwt client = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(),
-                                                                   httpClient,
-                                                                   threadPool);
-        return client.execute(sessionId, query);
+        return graphQLClient.execute(sessionId, query);
     }
 
     private boolean executeFunction(Function<RestClient, InputStream> function)
