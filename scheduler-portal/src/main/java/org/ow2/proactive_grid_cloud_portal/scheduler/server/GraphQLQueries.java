@@ -25,15 +25,28 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.ow2.proactive.scheduling.api.graphql.beans.input.GenericInformation;
-import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
-import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 
 
 /**
+ * Queries provider: create a query as for example
+ * 
+ * 
+ *
+ *   public Query revisionAndjobsinfo() {
+ *      try {
+ *          Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement()
+ *                                                        .excludeRemovedTime()
+ *                                                        .excludeVariables();
+ *          Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
+ *          return queryBuilder.build();
+ *
+ *       } catch (Exception e) {
+ *          LOGGER.log(Level.SEVERE, e.getMessage());
+ *          return null;
+ *       }
+ *   }
+ * 
  * @author ActiveEon Team
  * @since Mar 8, 2017
  */
@@ -51,22 +64,6 @@ public class GraphQLQueries {
             client = new GraphQLQueries();
         }
         return client;
-    }
-
-    public String revisionAndjobsinfo(boolean myJobs, boolean pending, boolean running, boolean finished) {
-        try {
-            GenericInformation ge = new GenericInformation.Builder().build();
-            Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement()
-                                                         .excludeRemovedTime()
-                                                         .excludeVariables()
-                                                         .genericInformation(ge);
-            Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
-            return queryBuilder.build().getQuery();
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
-        }
-        return null;
     }
 
 }

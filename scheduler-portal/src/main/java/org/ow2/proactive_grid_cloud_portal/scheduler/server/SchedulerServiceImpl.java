@@ -62,6 +62,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -1192,26 +1194,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
-    private Map<String, Object> executeGraphQLQuery(String sessionId, String query, String variables)
+    private Map<String, Object> executeGraphQLQuery(String sessionId, Query query)
             throws ServiceException, RestServerException {
 
         if (sessionId == null || query == null)
             return null;
 
-        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool)
-                                                           .httpEngine(new ApacheHttpClient4Engine(httpClient))
-                                                           .build();
-        ResteasyWebTarget target = client.target(SchedulerConfig.get().getSchedulingApiUrl());
-
-        GraphQLClient graphQLClientProxy = target.proxy(GraphQLClient.class);
-
-        try {
-            Map<String, Object> queryResult = graphQLClientProxy.graphqlQuery(sessionId, query, variables);
-
-            return queryResult;
-        } catch (WebApplicationException e) {
-            throw new RestServerException(e);
-        }
+        SchedulingApiClientGwt client = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(),
+                                                                   httpClient,
+                                                                   threadPool);
+        return client.execute(sessionId, query);
     }
 
     private boolean executeFunction(Function<RestClient, InputStream> function)
