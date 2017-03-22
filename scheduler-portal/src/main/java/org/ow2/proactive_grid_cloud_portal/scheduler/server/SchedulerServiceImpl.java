@@ -1201,6 +1201,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    /**
+     * Execute a graphQL query. The queries should be built using the GraphQLQueries class
+     * @param sessionId
+     * @param query
+     * @return
+     * @throws ServiceException
+     * @throws RestServerException
+     */
     private Map<String, Object> executeGraphQLQuery(String sessionId, Query query)
             throws ServiceException, RestServerException {
 

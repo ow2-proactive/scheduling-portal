@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author ActiveEon Team
  * @since Mar 8, 2017
  */
-public class GraphQLQueries {
+public final class GraphQLQueries {
 
     private static GraphQLQueries client;
 
@@ -58,6 +58,8 @@ public class GraphQLQueries {
      * Logger
      */
     private static final Logger LOGGER = Logger.getLogger(GraphQLQueries.class.getName());
+    
+    private GraphQLQueries(){}
 
     public static GraphQLQueries get() {
         if (client == null) {
