@@ -198,6 +198,13 @@ public interface SchedulerServiceAsync {
     void getProperties(AsyncCallback<SharedProperties> propertyList);
 
     /**
+     * Get the display properties read by the scheduler
+     * @param sessionId the session id of the user which is logged in
+     * @param asyncCallback
+     */
+    void getSchedulerPortalDisplayProperties(String sessionId, AsyncCallback<Map<String, String>> asyncCallback);
+
+    /**
      * Gets the job details by making an asynchronous call to the server. 
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job for which the request is done.

@@ -41,6 +41,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -85,6 +87,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
  */
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
+
+    private static Logger LOGGER = Logger.getLogger(SchedulerServiceImpl.class.getName());
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
@@ -661,6 +665,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     public SharedProperties getProperties() {
         return new SharedProperties(SchedulerConfig.get().getProperties(),
                                     SchedulerPortalDisplayConfig.get().getProperties());
+    }
+
+    @Override
+    public Map<String, String> getSchedulerPortalDisplayProperties(final String sessionId) {
+        RestClient restClientProxy = getRestClientProxy();
+        return restClientProxy.getSchedulerPortalDisplayProperties(sessionId)
+                              .entrySet()
+                              .stream()
+                              .collect(Collectors.toMap(entry -> (String) entry.getKey(),
+                                                        entry -> (String) entry.getValue()));
     }
 
     /*
