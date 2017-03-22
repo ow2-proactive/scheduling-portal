@@ -62,6 +62,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -98,6 +100,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private ExecutorService threadPool;
 
+    /**
+     * GraphQL Client
+     */
+    private SchedulingApiClientGwt graphQLClient;
+
     @Override
     public void init() {
         loadProperties();
@@ -111,6 +118,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                             .build();
 
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+        graphQLClient = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(), httpClient, threadPool);
     }
 
     /**
@@ -1190,6 +1199,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (WebApplicationException e) {
             rethrowRestServerException(e);
         }
+    }
+
+    /**
+     * Execute a graphQL query. The queries should be built using the GraphQLQueries class
+     * @param sessionId
+     * @param query
+     * @return
+     * @throws ServiceException
+     * @throws RestServerException
+     */
+    private Map<String, Object> executeGraphQLQuery(String sessionId, Query query)
+            throws ServiceException, RestServerException {
+
+        if (sessionId == null || query == null)
+            return null;
+
+        return graphQLClient.execute(sessionId, query);
     }
 
     private boolean executeFunction(Function<RestClient, InputStream> function)
