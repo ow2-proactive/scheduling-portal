@@ -58,8 +58,9 @@ public final class GraphQLQueries {
      * Logger
      */
     private static final Logger LOGGER = Logger.getLogger(GraphQLQueries.class.getName());
-    
-    private GraphQLQueries(){}
+
+    private GraphQLQueries() {
+    }
 
     public static GraphQLQueries get() {
         if (client == null) {
