@@ -25,9 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.HeaderParam;
@@ -215,6 +215,12 @@ public interface SchedulerService extends RemoteService {
      * @return the list of properties
      */
     SharedProperties getProperties();
+
+    /**
+     * Get the display properties read by the scheduler
+     * @return the list of properties
+     */
+    Map<String, String> getSchedulerPortalDisplayProperties(String sessionId);
 
     /**
      * Gets the job details.

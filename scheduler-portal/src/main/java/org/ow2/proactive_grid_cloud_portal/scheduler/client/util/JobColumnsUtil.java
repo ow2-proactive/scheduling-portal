@@ -191,6 +191,8 @@ public class JobColumnsUtil {
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Error in date format " + timeZoneDate);
             return timeZoneDate;
+        } catch (Exception e) {
+            return timeZoneDate;
         }
     }
 
