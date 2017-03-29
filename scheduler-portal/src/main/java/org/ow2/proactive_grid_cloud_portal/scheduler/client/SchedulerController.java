@@ -29,7 +29,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
@@ -46,6 +49,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLog
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.json.client.JSONArray;
@@ -81,6 +85,8 @@ public class SchedulerController extends Controller implements UncaughtException
     static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
+
+    private static final Logger LOGGER = Logger.getLogger(SchedulerController.class.getName());
 
     @Override
     public String getLoginSettingKey() {
@@ -229,21 +235,38 @@ public class SchedulerController extends Controller implements UncaughtException
 
     @Override
     public void login(final String sessionId, final String login) {
-        stopTryingLoginIfLoggerInRm();
-        scheduler.getVersion(new AsyncCallback<String>() {
-            public void onSuccess(String result) {
-                JSONObject obj = JSONParser.parseStrict(result).isObject();
-                String schedVer = obj.get("scheduler").isString().stringValue();
-                String restVer = obj.get("rest").isString().stringValue();
-                Config.get().set(SchedulerConfig.SCHED_VERSION, schedVer);
-                Config.get().set(SchedulerConfig.REST_VERSION, restVer);
 
-                __login(sessionId, login);
+        //Get portal display properties from scheduler
+        scheduler.getSchedulerPortalDisplayProperties(sessionId, new AsyncCallback<Map<String, String>>() {
+
+            public void onSuccess(Map<String, String> result) {
+                SchedulerPortalDisplayConfig.get().load(result);
+                login();
             }
 
             public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                SC.warn("Unable to get the client display properties:<br>" + caught.getMessage());
+                login();
+            }
+
+            private void login() {
+                stopTryingLoginIfLoggerInRm();
+                scheduler.getVersion(new AsyncCallback<String>() {
+                    public void onSuccess(String result) {
+                        JSONObject obj = JSONParser.parseStrict(result).isObject();
+                        String schedVer = obj.get("scheduler").isString().stringValue();
+                        String restVer = obj.get("rest").isString().stringValue();
+                        Config.get().set(SchedulerConfig.SCHED_VERSION, schedVer);
+                        Config.get().set(SchedulerConfig.REST_VERSION, restVer);
+
+                        __login(sessionId, login);
+                    }
+
+                    public void onFailure(Throwable caught) {
+                        String msg = JSONUtils.getJsonErrorMessage(caught);
+                        LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                    }
+                });
             }
         });
 

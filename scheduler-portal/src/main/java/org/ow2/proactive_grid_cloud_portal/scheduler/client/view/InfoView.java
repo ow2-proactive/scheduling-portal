@@ -65,11 +65,6 @@ public class InfoView<T> {
      * @return the Widget to display, ready to be added in a container
      */
     public Layout build() {
-        /* widget that has been returned as the root layout */
-        Layout root = new Layout();
-        root.setWidth100();
-        root.setHeight100();
-
         this.label = new Label(this.emptyMessage);
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
@@ -101,14 +96,12 @@ public class InfoView<T> {
 
         this.details.setFields(fields);
 
-        root.addMember(label);
-        root.addMember(details);
-
-        return root;
+        return getLayout();
     }
 
     public void hideDetails() {
         this.details.hide();
+        hideExtraMembers();
         this.label.show();
         this.displayedItem = null;
     }
@@ -117,10 +110,36 @@ public class InfoView<T> {
         DetailViewerRecord[] records = new DetailViewerRecord[1];
         records[0] = new DetailViewerRecord();
         this.factory.buildRecord(this.displayedItem, records[0]);
-
         this.details.setData(records);
+
+        displayExtraMembers(this.displayedItem);
 
         this.label.hide();
         this.details.show();
+    }
+
+    protected Layout getLayout() {
+        /* widget that will be returned as the root layout */
+        Layout root = new Layout();
+        root.setWidth100();
+
+        root.addMember(label);
+        root.addMember(details);
+
+        return root;
+    }
+
+    /**
+     * Display specific members of the view. This method is meant to be overridden by inheriting classes
+     * @param object
+     */
+    protected void displayExtraMembers(T object) {
+    }
+
+    /**
+     * Hide specific members of the view. This method is meant to be overridden by inheriting classes
+     * @param object
+     */
+    protected void hideExtraMembers() {
     }
 }

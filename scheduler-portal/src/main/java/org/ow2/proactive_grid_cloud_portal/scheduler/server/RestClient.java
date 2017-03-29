@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -725,5 +726,10 @@ public interface RestClient {
     @Path("/credentials/")
     @Produces("application/json")
     InputStream thirdPartyCredentialsKeySet(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @Path("configuration/portal")
+    @Produces("application/json")
+    Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
 
 }

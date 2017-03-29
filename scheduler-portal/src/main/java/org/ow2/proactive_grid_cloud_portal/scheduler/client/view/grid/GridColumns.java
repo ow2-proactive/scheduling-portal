@@ -57,12 +57,26 @@ public class GridColumns {
      */
     protected final boolean isPrimaryKey;
 
-    public GridColumns(String name, String title, int width, boolean hasData, boolean isPrimaryKey) {
+    /**
+     * True if the column is hidden by default.
+     */
+    protected final boolean hidden;
+
+    public GridColumns(String name, String title, int width, boolean hasData, boolean isPrimaryKey, boolean hidden) {
         this.name = name;
         this.title = title;
         this.width = width;
         this.hasData = hasData;
         this.isPrimaryKey = isPrimaryKey;
+        this.hidden = hidden;
+    }
+
+    public GridColumns(String name, String title, int width, boolean hasData, boolean isPrimaryKey) {
+        this(name, title, width, hasData, isPrimaryKey, false);
+    }
+
+    public GridColumns(String name, String title, boolean hidden) {
+        this(name, title, 120, true, false, hidden);
     }
 
     public String getName() {
@@ -83,6 +97,10 @@ public class GridColumns {
 
     public boolean isPrimaryKey() {
         return isPrimaryKey;
+    }
+
+    public boolean isHidden() {
+        return hidden;
     }
 
 }

@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -326,6 +327,8 @@ public class JobsController {
                         JobStatus.PENDING,
                         JobPriority.NORMAL,
                         LoginModel.getInstance().getLogin(),
+                        new HashMap<>(),
+                        new HashMap<>(),
                         0,
                         0,
                         0,

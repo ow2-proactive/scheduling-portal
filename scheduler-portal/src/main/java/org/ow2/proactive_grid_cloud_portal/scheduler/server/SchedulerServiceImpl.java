@@ -34,7 +34,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -63,6 +64,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -75,6 +78,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 
 /**
@@ -82,6 +87,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
  */
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
+
+    private static Logger LOGGER = Logger.getLogger(SchedulerServiceImpl.class.getName());
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
@@ -97,6 +104,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private ExecutorService threadPool;
 
+    /**
+     * GraphQL Client
+     */
+    private SchedulingApiClientGwt graphQLClient;
+
     @Override
     public void init() {
         loadProperties();
@@ -110,15 +122,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                             .build();
 
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+        graphQLClient = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(), httpClient, threadPool);
     }
 
     /**
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        final HashMap<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
+        final Map<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
         SchedulerConfig.get().load(props);
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
+
+        final Map<String, String> portalProperties = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerPortalDisplayConfig.CONFIG_PATH));
+        SchedulerPortalDisplayConfig.get().load(portalProperties);
     }
 
     /**
@@ -645,8 +662,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getProperties()
      */
     @Override
-    public Map<String, String> getProperties() {
-        return SchedulerConfig.get().getProperties();
+    public SharedProperties getProperties() {
+        return new SharedProperties(SchedulerConfig.get().getProperties(),
+                                    SchedulerPortalDisplayConfig.get().getProperties());
+    }
+
+    @Override
+    public Map<String, String> getSchedulerPortalDisplayProperties(final String sessionId) {
+        RestClient restClientProxy = getRestClientProxy();
+        return restClientProxy.getSchedulerPortalDisplayProperties(sessionId)
+                              .entrySet()
+                              .stream()
+                              .collect(Collectors.toMap(entry -> (String) entry.getKey(),
+                                                        entry -> (String) entry.getValue()));
     }
 
     /*
@@ -1185,6 +1213,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } catch (WebApplicationException e) {
             rethrowRestServerException(e);
         }
+    }
+
+    /**
+     * Execute a graphQL query. The queries should be built using the GraphQLQueries class
+     * @param sessionId
+     * @param query
+     * @return
+     * @throws ServiceException
+     * @throws RestServerException
+     */
+    private Map<String, Object> executeGraphQLQuery(String sessionId, Query query)
+            throws ServiceException, RestServerException {
+
+        if (sessionId == null || query == null)
+            return null;
+
+        return graphQLClient.execute(sessionId, query);
     }
 
     private boolean executeFunction(Function<RestClient, InputStream> function)

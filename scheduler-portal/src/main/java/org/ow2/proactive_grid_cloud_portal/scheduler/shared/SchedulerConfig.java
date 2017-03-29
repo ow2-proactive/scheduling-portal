@@ -123,6 +123,11 @@ public class SchedulerConfig extends Config {
 
     private static SchedulerConfig instance = null;
 
+    /** URL of the scheduler graphql API */
+    private static final String DEFAULT_SCHEDULING_API_URL = "http://localhost:8080/scheduling-api";
+
+    public static final String SCHEDULING_API_URL = "pa.scheduling.api";
+
     /**
      * @return current static config instance, cannot be null
      */
@@ -148,6 +153,7 @@ public class SchedulerConfig extends Config {
         properties.put(CS_SERVER_HTTP_PORT, DEFAULT_CS_SERVER_HTTP_PORT);
         properties.put(CS_SERVER_HTTPS_PORT, DEFAULT_CS_SERVER_HTTPS_PORT);
         properties.put(CS_SERVER_PROTOCOL, DEFAULT_CS_SERVER_PROTOCOL);
+        properties.put(SCHEDULING_API_URL, DEFAULT_SCHEDULING_API_URL);
     }
 
     @Override
@@ -307,5 +313,12 @@ public class SchedulerConfig extends Config {
      */
     public String getCalendarServerProtocol() {
         return properties.get(CS_SERVER_PROTOCOL);
+    }
+
+    /**
+     * @return Scheduling API URL
+     */
+    public String getSchedulingApiUrl() {
+        return properties.get(SCHEDULING_API_URL);
     }
 }
