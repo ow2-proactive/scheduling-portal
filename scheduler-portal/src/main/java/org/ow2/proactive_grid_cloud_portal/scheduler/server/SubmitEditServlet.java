@@ -145,21 +145,19 @@ public class SubmitEditServlet extends HttpServlet {
                 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(jobDesc);
 
-                NodeList variables = doc.getElementsByTagName("variable");
+                NodeList variablesNodeList = doc.getElementsByTagName("variable");
 
                 /* edit the job variables using XML DOM */
-                if (variables != null) {
-                    for (int i = 0; i < variables.getLength(); i++) {
-                        Node var = variables.item(i);
-                        if (var != null) {
-                            if (var.getAttributes() != null) {
-
-                                String taskName = getTaskName(var);
+                if (variablesNodeList != null) {
+                    for (int i = 0; i < variablesNodeList.getLength(); i++) {
+                        Node variableNode = variablesNodeList.item(i);
+                        if (variableNode != null && !isTaskVariableElement(variableNode)) {
+                            if (variableNode.getAttributes() != null) {
 
                                 String name = null;
                                 Node nodeVal = null;
-                                for (int j = 0; j < var.getAttributes().getLength(); j++) {
-                                    Node attr = var.getAttributes().item(j);
+                                for (int j = 0; j < variableNode.getAttributes().getLength(); j++) {
+                                    Node attr = variableNode.getAttributes().item(j);
 
                                     if (attr.getNodeName().equals("name")) {
                                         name = attr.getNodeValue();
@@ -168,12 +166,8 @@ public class SubmitEditServlet extends HttpServlet {
                                         nodeVal = attr;
                                     }
                                 }
-                                String match;
-                                if (taskName != null) {
-                                    match = varMap.get(taskName + ":" + name);
-                                } else {
-                                    match = varMap.get(name);
-                                }
+                                String match = varMap.get(name);
+
                                 if (match != null && nodeVal != null) {
                                     nodeVal.setNodeValue(match);
                                 }
@@ -261,16 +255,14 @@ public class SubmitEditServlet extends HttpServlet {
         }
     }
 
-    private String getTaskName(Node node) {
+    private boolean isTaskVariableElement(Node node) {
         if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
             Node grandparentNode = node.getParentNode().getParentNode();
             if (grandparentNode.getNodeName().equals("task")) {
-                return grandparentNode.getAttributes().getNamedItem("name").getNodeValue();
-            } else {
-                return null;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
 }

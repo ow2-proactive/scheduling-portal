@@ -1065,13 +1065,12 @@ public class SubmitWindow {
 
         if (variables.getLength() > 0) {
             for (int i = 0; i < variables.getLength(); i++) {
-                Node n = variables.item(i);
+                Node variableNode = variables.item(i);
 
-                if (n != null) {
-                    NamedNodeMap attrs = n.getAttributes();
-                    String taskName = getTaskName(n);
+                if (variableNode != null && !isTaskVariableElement(variableNode)) {
+                    NamedNodeMap attrs = variableNode.getAttributes();
                     try {
-                        if (attrs != null && n.hasAttributes()) {
+                        if (attrs != null && variableNode.hasAttributes()) {
                             String name = null;
                             String value = null;
                             String model = null;
@@ -1094,11 +1093,7 @@ public class SubmitWindow {
                                     continue;
                                 }
 
-                                if (taskName != null) {
-                                    ret.put(taskName + ":" + name, new JobVariable(name, value, model));
-                                } else {
-                                    ret.put(name, new JobVariable(name, value, model));
-                                }
+                                ret.put(name, new JobVariable(name, value, model));
                             }
                         }
                     } catch (JavaScriptException t) {
@@ -1110,16 +1105,14 @@ public class SubmitWindow {
         return ret;
     }
 
-    private String getTaskName(Node node) {
+    private boolean isTaskVariableElement(Node node) {
         if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
             Node grandparentNode = node.getParentNode().getParentNode();
             if (grandparentNode.getNodeName().equals("task")) {
-                return grandparentNode.getAttributes().getNamedItem("name").getNodeValue();
-            } else {
-                return null;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     class JobVariable {
