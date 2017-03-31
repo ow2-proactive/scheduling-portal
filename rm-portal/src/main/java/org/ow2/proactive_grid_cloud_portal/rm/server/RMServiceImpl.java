@@ -45,6 +45,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -155,16 +156,7 @@ public class RMServiceImpl extends Service implements RMService {
 
             HttpResponse response = httpClient.execute(httpPost);
             String responseAsString = convertToString(response.getEntity().getContent());
-            switch (response.getStatusLine().getStatusCode()) {
-                case 200:
-                    break;
-                default:
-                    if (responseAsString.trim().length() == 0) {
-                        responseAsString = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
-                                           "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
-                    }
-                    throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
-            }
+            responseAsString = handleResponseStatus(response, responseAsString);
             return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
@@ -173,6 +165,35 @@ public class RMServiceImpl extends Service implements RMService {
             if (cred != null) {
                 cred.delete();
             }
+        }
+    }
+
+    private String handleResponseStatus(HttpResponse response, String responseAsString) throws RestServerException {
+        switch (response.getStatusLine().getStatusCode()) {
+            case 200:
+                break;
+            default:
+                if (responseAsString.trim().length() == 0) {
+                    responseAsString = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
+                                       "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
+                }
+                throw new RestServerException(response.getStatusLine().getStatusCode(), responseAsString);
+        }
+        return responseAsString;
+    }
+
+    @Override
+    public String getLoginFromSessionId(String sessionId) throws RestServerException, ServiceException {
+        HttpGet method = new HttpGet(RMConfig.get().getRestUrl() + "/rm/logins/sessionid/" + sessionId);
+        try {
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
+            handleResponseStatus(response, responseAsString);
+            return responseAsString;
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            method.releaseConnection();
         }
     }
 

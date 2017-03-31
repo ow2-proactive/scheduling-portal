@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
@@ -306,7 +305,7 @@ public class SchedulerController extends Controller implements UncaughtException
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
-                                          loginModel.getSessionId() + ")");
+                                          loginModel.getSessionId() + ", login=" + loginModel.getLogin() + ")");
     }
 
     /**
