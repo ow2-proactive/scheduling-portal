@@ -115,8 +115,9 @@ public class LoginServlet extends HttpServlet {
                 fi.delete();
             }
 
-            String responseS = Service.get().login(user, pass, cred, sshKey);
-            String s = "{ \"sessionId\" : \"" + responseS + "\" }";
+            String sessionId = Service.get().login(user, pass, cred, sshKey);
+            String userName = Service.get().getLoginFromSessionId(sessionId);
+            String s = "{ \"sessionId\" : \"" + sessionId + "\" , \"username\" : \"" + userName + "\" }";
             response.getWriter().write(SafeHtmlUtils.htmlEscape(s));
         } catch (Throwable t) {
             try {
