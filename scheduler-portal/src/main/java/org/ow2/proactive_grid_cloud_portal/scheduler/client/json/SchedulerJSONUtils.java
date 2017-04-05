@@ -160,8 +160,16 @@ public class SchedulerJSONUtils extends JSONUtils {
             throws JSONException {
         paginationModel.setCurrentEndCursor(getProperty(jsonPageInfo, "endCursor").isString().stringValue());
         paginationModel.setCurrentStartCursor(getProperty(jsonPageInfo, "startCursor").isString().stringValue());
-        paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
-        paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+
+        if (paginationModel.getEndCursor() != null)
+            paginationModel.setHasNextPage(true);
+        else
+            paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
+
+        if (paginationModel.getStartCursor() != null)
+            paginationModel.setHasPreviousPage(true);
+        else
+            paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
     }
 
     private static Map<Integer, Job> getJobsFromJson(JSONValue value, JobsPaginationModel paginationModel)

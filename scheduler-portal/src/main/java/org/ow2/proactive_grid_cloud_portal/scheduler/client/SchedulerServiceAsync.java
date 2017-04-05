@@ -326,7 +326,7 @@ public interface SchedulerServiceAsync {
      * @param finished fetch finished jobs 
      * @param callback
      */
-    void revisionAndjobsinfo(String sessionId, String startCursor, String endCursor, int pageSize, boolean last,
+    void revisionAndjobsinfo(String sessionId, String startCursor, String endCursor, int pageSize, boolean first,
             String user, boolean pending, boolean running, boolean finished, AsyncCallback<String> callback);
 
     void schedulerStateRevision(String sessionId, AsyncCallback<Long> callback);

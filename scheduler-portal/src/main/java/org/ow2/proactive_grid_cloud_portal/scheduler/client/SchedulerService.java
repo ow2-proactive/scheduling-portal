@@ -382,7 +382,7 @@ public interface SchedulerService extends RemoteService {
      */
 
     String revisionAndjobsinfo(@HeaderParam("sessionid") String sessionId, String startCursor, String endCursor,
-            int pageSize, boolean last, String user, boolean pending, boolean running, boolean finished)
+            int pageSize, boolean first, String user, boolean pending, boolean running, boolean finished)
             throws RestServerException, ServiceException;
 
     /**

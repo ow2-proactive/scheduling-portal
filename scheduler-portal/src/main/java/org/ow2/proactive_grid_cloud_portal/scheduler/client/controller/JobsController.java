@@ -364,7 +364,7 @@ public class JobsController {
         String startCursor = paginationController.getModel().getStartCursor();
         String endCursor = paginationController.getModel().getEndCursor();
         int pageSize = SchedulerConfig.get().getPageSize(PaginatedItemType.JOB);
-        boolean last = paginationController.getModel().isLast();
+        boolean first = paginationController.getModel().isFirst();
 
         ExecutionsModel executionModel = this.parentController.getModel();
         String user = null;
@@ -380,7 +380,7 @@ public class JobsController {
                                       startCursor,
                                       endCursor,
                                       pageSize,
-                                      last,
+                                      first,
                                       user,
                                       fetchPending,
                                       fetchRunning,

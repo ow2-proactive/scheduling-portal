@@ -1027,7 +1027,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String revisionAndjobsinfo(final String sessionId, final String startCursor, final String endCursor,
-            int pageSize, boolean last, final String user, final boolean pending, final boolean running,
+            int pageSize, boolean first, final String user, final boolean pending, final boolean running,
             final boolean finished) throws RestServerException, ServiceException {
         Query query = GraphQLQueries.get().getRevisionAndjobsInfoQuery(user,
                                                                        pending,
@@ -1036,7 +1036,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                        startCursor,
                                                                        endCursor,
                                                                        pageSize,
-                                                                       last);
+                                                                       first);
         String response = executeGraphQLQuery(sessionId, query);
         LOGGER.log(Level.SEVERE, response);
         return response;

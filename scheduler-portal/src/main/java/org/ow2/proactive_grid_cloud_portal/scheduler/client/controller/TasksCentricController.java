@@ -68,8 +68,7 @@ public class TasksCentricController extends TasksController {
     }
 
     public void tasksStateRevision(boolean forceRefresh) {
-        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model
-                .getTasksNavigationModel();
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         if (navigationModel.getTaskAutoRefreshOption() || forceRefresh) {
             this.updateTasks(false);
             if (!isHeaderClickHandler) {
@@ -89,8 +88,7 @@ public class TasksCentricController extends TasksController {
 
         AsyncCallback<String> callback = new TasksAsyncUpdater(model);
 
-        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model
-                .getTasksNavigationModel();
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();
         long fromDate = navigationModel.getFromDate();
         long toDate = navigationModel.getToDate();
@@ -108,11 +106,30 @@ public class TasksCentricController extends TasksController {
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
         if (tagFilter.isEmpty()) {
-            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly,
-                    pending, running, finished, offset, limit, getSortParameters(), callback);
+            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId,
+                                                              fromDate,
+                                                              toDate,
+                                                              myTasksOnly,
+                                                              pending,
+                                                              running,
+                                                              finished,
+                                                              offset,
+                                                              limit,
+                                                              getSortParameters(),
+                                                              callback);
         } else {
-            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate,
-                    myTasksOnly, pending, running, finished, offset, limit, getSortParameters(), callback);
+            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId,
+                                                                   tagFilter,
+                                                                   fromDate,
+                                                                   toDate,
+                                                                   myTasksOnly,
+                                                                   pending,
+                                                                   running,
+                                                                   finished,
+                                                                   offset,
+                                                                   limit,
+                                                                   getSortParameters(),
+                                                                   callback);
         }
     }
 

@@ -60,32 +60,37 @@ public final class GraphQLQueries {
         return client;
     }
 
-    private JobInput getJobInputWithStatus(JobStatus status) {
-        JobInput input = new JobInput.Builder().status(status.name().toUpperCase()).build();
-        return input;
+    private JobInput getJobInputWithStatus(JobStatus status, String user) {
+        JobInput.Builder input = new JobInput.Builder().status(status.name().toUpperCase());
+        if (user != null)
+            input.owner(user);
+        return input.build();
     }
 
     public Query getRevisionAndjobsInfoQuery(final String user, final boolean pending, final boolean running,
-            final boolean finished, String startCursor, String endCursor, int pageSize, boolean last) {
+            final boolean finished, String startCursor, String endCursor, int pageSize, boolean first) {
         try {
             Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement().excludeRemovedTime();
+
             if (startCursor != null)
                 jobsBuilder.after(startCursor);
             if (endCursor != null)
                 jobsBuilder.before(endCursor);
 
-            if (last)
-                jobsBuilder.last(pageSize);
-            else
+            if (first)
                 jobsBuilder.first(pageSize);
+            else
+                jobsBuilder.last(pageSize);
 
             List<JobInput> input = new ArrayList<>();
+            jobsBuilder.input(input);
+
             if (pending)
-                input.add(getJobInputWithStatus(JobStatus.PENDING));
+                input.add(getJobInputWithStatus(JobStatus.PENDING, user));
             if (running)
-                input.add(getJobInputWithStatus(JobStatus.RUNNING));
+                input.add(getJobInputWithStatus(JobStatus.RUNNING, user));
             if (finished)
-                input.add(getJobInputWithStatus(JobStatus.FINISHED));
+                input.add(getJobInputWithStatus(JobStatus.FINISHED, user));
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
             return queryBuilder.build();

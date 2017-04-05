@@ -43,8 +43,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
-public class TasksPaginationView extends PaginationView<TasksPaginationController>
-        implements TasksUpdatedListener {
+public class TasksPaginationView extends PaginationView<TasksPaginationController> implements TasksUpdatedListener {
 
     /**
      * Task page number
@@ -161,8 +160,8 @@ public class TasksPaginationView extends PaginationView<TasksPaginationControlle
     @Override
     public void pageChanged() {
         this.disableAllControls();
-        this.offsetRangeLabel
-                .setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " +
+                                          this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
 
@@ -175,8 +174,8 @@ public class TasksPaginationView extends PaginationView<TasksPaginationControlle
     protected void itemsUpdated(long totalItems) {
         this.disableAllControls();
         this.paginationController.computeMaxPage(totalItems);
-        this.offsetRangeLabel
-                .setContents(this.itemTypeName + " " + this.paginationController.getPaginationRangeLabel());
+        this.offsetRangeLabel.setContents(this.itemTypeName + " " +
+                                          this.paginationController.getPaginationRangeLabel());
         this.txtPageNumber.setText(this.paginationController.getNumberPageText());
     }
 

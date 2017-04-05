@@ -68,7 +68,7 @@ public class JobsPaginationModel extends PaginationModel {
     /**
      * If the first or last objects are to be fetched
      */
-    private boolean last;
+    private boolean first;
 
     /**
      * Constructor
@@ -136,12 +136,12 @@ public class JobsPaginationModel extends PaginationModel {
         this.hasNextPage = hasNextPage;
     }
 
-    public boolean isLast() {
-        return last;
+    public boolean isFirst() {
+        return first;
     }
 
-    public void setLast(boolean last) {
-        this.last = last;
+    public void setFirst(boolean first) {
+        this.first = first;
     }
 
     /**

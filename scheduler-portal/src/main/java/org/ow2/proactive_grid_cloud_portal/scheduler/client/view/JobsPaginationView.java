@@ -36,8 +36,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
-public class JobsPaginationView extends PaginationView<JobsPaginationController>
-        implements JobsUpdatedListener {
+public class JobsPaginationView extends PaginationView<JobsPaginationController> implements JobsUpdatedListener {
 
     public JobsPaginationView(JobsController controller) {
         super(controller.getPaginationController());
@@ -62,24 +61,25 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
 
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
-        paginationLayout.addMember(this.pageNextButton);
         paginationLayout.addMember(this.pageLastButton);
+        paginationLayout.addMember(this.pageNextButton);
 
         return paginationLayout;
     }
 
     @Override
     public void pageChanged() {
-        this.disableAllControls();
+        itemsUpdated();
     }
 
     @Override
     public void totalItemChanged() {
-        this.enablePaginationControls();
+        itemsUpdated();
     }
 
     protected void itemsUpdated() {
         this.disableAllControls();
+        this.enablePaginationControls();
     }
 
     @Override
