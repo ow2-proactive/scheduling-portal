@@ -26,13 +26,16 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPaginationModel;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
@@ -46,6 +49,8 @@ import com.google.gwt.json.client.JSONValue;
  *
  */
 public class SchedulerJSONUtils extends JSONUtils {
+
+    private static Logger LOGGER = Logger.getLogger(SchedulerJSONUtils.class.getName());
 
     /**
      * Parse a paginated list of tasks
@@ -61,12 +66,14 @@ public class SchedulerJSONUtils extends JSONUtils {
     /**
      * Parse a paginated list of jobs
      * @param jsonString the JSON as a string representing the paginated list of tasks.
+     * @param paginationController 
      * @return An object wrapping the list of tasks and the total number of tasks without pagination.
      * @throws JSONException if it fails to parse the JSON.
      */
-    public static JSONPaginatedJobs parseJSONPaginatedJobs(String jsonString) throws JSONException {
+    public static Map<Integer, Job> parseJSONJobs(String jsonString, JobsPaginationModel paginationModel)
+            throws JSONException {
         JSONValue val = parseJSON(jsonString);
-        return getJobsFromJson(val);
+        return getJobsFromJson(val, paginationModel);
     }
 
     protected static JSONObject getObject(JSONValue value) throws JSONException {
@@ -149,29 +156,32 @@ public class SchedulerJSONUtils extends JSONUtils {
         return tags;
     }
 
-    public static JSONPaginatedJobs getJobsFromJson(JSONValue value) throws JSONException {
-        JSONPaginatedJobs resultJobs = new JSONPaginatedJobs();
-        Map<Integer, Job> jobs = resultJobs.getJobs();
+    private static void setPageInfoFromJson(JSONObject jsonPageInfo, JobsPaginationModel paginationModel)
+            throws JSONException {
+        paginationModel.setCurrentEndCursor(getProperty(jsonPageInfo, "endCursor").isString().stringValue());
+        paginationModel.setCurrentStartCursor(getProperty(jsonPageInfo, "startCursor").isString().stringValue());
+        paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
+        paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+    }
 
-        JSONObject jsonInfo = getObject(value);
-        JSONObject jsonMap = getObject(getProperty(jsonInfo, "map"));
+    private static Map<Integer, Job> getJobsFromJson(JSONValue value, JobsPaginationModel paginationModel)
+            throws JSONException {
+        Map<Integer, Job> jobs = new HashMap<>();
 
-        String key = jsonMap.keySet().iterator().next();
-        resultJobs.setRevision(Long.parseLong(key));
+        JSONObject jsonMain = getObject(value);
+        JSONObject jsonData = getObject(getProperty(jsonMain, "data"));
+        JSONObject jsonJobs = getObject(getProperty(jsonData, "jobs"));
+        JSONObject jsonPageInfo = getObject(getProperty(jsonJobs, "pageInfo"));
+        setPageInfoFromJson(jsonPageInfo, paginationModel);
+        JSONArray jsonEdges = getArray(getProperty(jsonJobs, "edges"));
 
-        JSONArray jsonArr = getArray(getProperty(jsonMap, key));
-
-        for (int i = 0; i < jsonArr.size(); i++) {
-            JSONObject jsonJob = jsonArr.get(i).isObject();
+        for (int i = 0; i < jsonEdges.size(); i++) {
+            JSONObject jsonJob = jsonEdges.get(i).isObject();
             Job j = Job.parseJson(jsonJob);
             jobs.put(j.getId(), j);
         }
 
-        long total = getSize(jsonInfo);
-
-        resultJobs.setTotal(total);
-
-        return resultJobs;
+        return jobs;
     }
 
     public static Job getJobInfoFromJson(String jsonString) throws JSONException {

@@ -29,13 +29,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.P
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.grid.events.HeaderClickEvent;
-import com.smartgwt.client.widgets.grid.events.HeaderClickHandler;
 import com.smartgwt.client.widgets.grid.events.SortChangedHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -87,7 +84,7 @@ public abstract class AbstractGridItemsView implements PaginationListener {
 
     protected abstract Layout buildPagination();
 
-    protected Layout buildPagination(PaginationController paginationController) {
+    protected Layout buildPagination(PaginationController<?> paginationController) {
         Layout result = paginationController.buildView();
         paginationController.getModel().addPaginationListener(this);
         return result;

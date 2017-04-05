@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -81,14 +82,15 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
-
-    private static Logger LOGGER = Logger.getLogger(SchedulerServiceImpl.class.getName());
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
@@ -108,6 +110,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * GraphQL Client
      */
     private SchedulingApiClientGwt graphQLClient;
+
+    /**
+     * JSON Mapper
+     */
+    private final static ObjectMapper JSON_MAPPER = new ObjectMapper();
+
+    /**
+     * LOGGER
+     */
+    private final static Logger LOGGER = Logger.getLogger(SchedulerServiceImpl.class.getName());
 
     @Override
     public void init() {
@@ -588,8 +600,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *
      * @see
      * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasksByTag(java.
-     * lang.
-     * String, java.lang.String, java.lang.String)
+     * lang. String, java.lang.String, java.lang.String)
      */
     @Override
     public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset,
@@ -931,10 +942,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#
-     * getStatisticsOnMyAccount
-     * (java.lang.String)
+     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#
+     * getStatisticsOnMyAccount (java.lang.String)
      */
     @Override
     public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException {
@@ -1017,15 +1026,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * (java.lang.String, int, int, boolean, boolean, boolean, boolean)
      */
     @Override
-    public String revisionAndjobsinfo(final String sessionId, final int index, final int limit,
-            final boolean myJobsOnly, final boolean pending, final boolean running, final boolean finished)
-            throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.revisionAndjobsinfo(sessionId, index, limit, myJobsOnly, pending, running, finished);
-            }
-        });
+    public String revisionAndjobsinfo(final String sessionId, final String startCursor, final String endCursor,
+            int pageSize, boolean last, final String user, final boolean pending, final boolean running,
+            final boolean finished) throws RestServerException, ServiceException {
+        Query query = GraphQLQueries.get().getRevisionAndjobsInfoQuery(user,
+                                                                       pending,
+                                                                       running,
+                                                                       finished,
+                                                                       startCursor,
+                                                                       endCursor,
+                                                                       pageSize,
+                                                                       last);
+        String response = executeGraphQLQuery(sessionId, query);
+        LOGGER.log(Level.SEVERE, response);
+        return response;
     }
 
     /*
@@ -1223,13 +1237,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @throws ServiceException
      * @throws RestServerException
      */
-    private Map<String, Object> executeGraphQLQuery(String sessionId, Query query)
-            throws ServiceException, RestServerException {
+    private String executeGraphQLQuery(String sessionId, Query query) throws ServiceException, RestServerException {
 
         if (sessionId == null || query == null)
             return null;
 
-        return graphQLClient.execute(sessionId, query);
+        Map<String, Object> result = graphQLClient.execute(sessionId, query);
+        try {
+            String data = JSON_MAPPER.writeValueAsString(result);
+            return data;
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            return "{\"error\": \"Cannot process JSON\"}";
+        }
+
     }
 
     private boolean executeFunction(Function<RestClient, InputStream> function)

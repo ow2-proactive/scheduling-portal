@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksPaginationView;
 
 import com.smartgwt.client.widgets.layout.Layout;
@@ -35,15 +36,15 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author activeeon team.
  *
  */
-public class TasksPaginationController extends PaginationController {
+public class TasksPaginationController extends PaginationController<TasksPaginationModel> {
 
     protected TasksController itemsController;
 
     protected TasksPaginationView view;
 
     public TasksPaginationController(TasksController itemsController) {
+        super(itemsController.getModel().getTasksNavigationModel().getPaginationModel());
         this.itemsController = itemsController;
-        this.model = this.itemsController.getModel().getTasksNavigationModel().getPaginationModel();
     }
 
     @Override
@@ -55,6 +56,106 @@ public class TasksPaginationController extends PaginationController {
     public Layout buildView() {
         this.view = new TasksPaginationView(itemsController);
         return this.view.build();
+    }
+
+    /**
+     * Fetch the next item list page
+     */
+    public void nextPage() {
+        model.setPage(model.getPage() + 1);
+        this.fetch(false);
+    }
+
+    @Override
+    public void previousPage() {
+        int curPage = model.getPage();
+        if (curPage == 0)
+            return;
+        model.setPage(curPage - 1);
+        this.fetch(false);
+    }
+
+    @Override
+    public void firstPage() {
+        model.setPage(0);
+        this.fetch(false);
+    }
+
+    public void lastPage() {
+        this.model.setPage(this.model.getMaxPage());
+        this.fetch(false);
+    }
+
+    public void goToPage(int pageNumber) {
+        if (pageNumber < 0) {
+            pageNumber = 0;
+        }
+
+        int maxPage = this.model.getMaxPage();
+        if (pageNumber > maxPage) {
+            pageNumber = maxPage;
+        }
+
+        this.model.setPage(pageNumber);
+        this.fetch(false);
+    }
+
+    public void computeMaxPage(long nbItem) {
+        this.model.setTotalItems(nbItem);
+    }
+
+    /**
+     * Gets the text that displays the pagination status.
+     * @return the text that displays the pagination status.
+     */
+    public String getPaginationRangeLabel() {
+        int page = this.model.getPage();
+        int size = this.model.getPageSize();
+
+        long index = page * size;
+        long total = this.model.getTotalItems();
+        long range = index + size;
+
+        index++;
+        if (index < 0) {
+            index = 0;
+        }
+        if (index > total) {
+            index = total;
+        }
+
+        if (range < total) {
+            return index + " - " + range;
+        } else {
+            return index + " - " + total;
+        }
+    }
+
+    public String getNumberPageText() {
+        if (this.model.getTotalItems() > 0) {
+            return "" + (this.model.getPage() + 1);
+        } else {
+            return "0";
+        }
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return (this.model.getPage() > 0);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return this.model.getTotalItems() > (this.model.getOffset() + this.model.getPageSize());
+    }
+
+    public String getMaxPageNumberLabel() {
+        return "" + (this.model.getMaxPage() + 1);
+    }
+
+    public void resetPagination() {
+        this.model.setPage(-1);
+        this.model.setTotalItems(0);
     }
 
 }

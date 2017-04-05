@@ -30,32 +30,70 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
+
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
-public class JobsPaginationView extends PaginationView implements JobsUpdatedListener {
+public class JobsPaginationView extends PaginationView<JobsPaginationController>
+        implements JobsUpdatedListener {
 
     public JobsPaginationView(JobsController controller) {
-        this.itemTypeName = "Jobs";
-        this.paginationController = controller.getPaginationController();
+        super(controller.getPaginationController());
         this.paginationController.getModel().addPaginationListener(this);
         controller.getModel().addJobsUpdatedListener(this);
     }
 
+    /**
+     * Builds the view content.
+     * @return a layout containing the view content.
+     */
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
-        itemsUpdated(totalJobs);
+    public Layout buildLayout() {
+
+        ToolStrip paginationLayout = new ToolStrip();
+        paginationLayout.addStyleName("itemPaginationBar");
+        paginationLayout.setHeight(30);
+        paginationLayout.setWidth100();
+        paginationLayout.setBackgroundImage("");
+        paginationLayout.setBackgroundColor("#fafafa");
+        paginationLayout.setBorder("0px");
+
+        paginationLayout.addMember(this.pageFirstButton);
+        paginationLayout.addMember(this.pagePreviousButton);
+        paginationLayout.addMember(this.pageNextButton);
+        paginationLayout.addMember(this.pageLastButton);
+
+        return paginationLayout;
+    }
+
+    @Override
+    public void pageChanged() {
+        this.disableAllControls();
+    }
+
+    @Override
+    public void totalItemChanged() {
+        this.enablePaginationControls();
+    }
+
+    protected void itemsUpdated() {
+        this.disableAllControls();
+    }
+
+    @Override
+    public void jobsUpdated(Map<Integer, Job> jobs) {
+        itemsUpdated();
     }
 
     @Override
     public void jobsUpdating() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void jobSubmitted(Job j) {
-        // TODO Auto-generated method stub
-
     }
 
 }

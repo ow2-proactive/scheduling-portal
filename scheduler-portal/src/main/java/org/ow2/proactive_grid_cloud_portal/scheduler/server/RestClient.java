@@ -631,30 +631,6 @@ public interface RestClient {
     String schedulerStateRevision(@HeaderParam("sessionid") String sessionId);
 
     /**
-     * Returns a map containing one entry with the revision id as key and the
-     * list of UserJobInfo as value.
-     * each jobs is described using
-     *   - its id
-     *   - its owner
-     *   - the JobInfo class
-     * @param sessionId a valid session id
-     * @param myJobs only my jobs when true, all jobs when false
-     * @param pending fetch pending jobs
-     * @param running fetch running jobs
-     * @param finished fetch finished jobs
-     * @return a map containing one entry with the revision id as key and the 
-     * list of UserJobInfo as value.
-     */
-    @GET
-    @GZIP
-    @Path("revisionjobsinfo")
-    @Produces({ "application/json", "application/xml" })
-    InputStream revisionAndjobsinfo(@HeaderParam("sessionid") String sessionId, @QueryParam("index") int index,
-            @QueryParam("limit") int limit, @QueryParam("myjobs") boolean myJobs,
-            @QueryParam("pending") boolean pending, @QueryParam("running") boolean running,
-            @QueryParam("finished") boolean finished);
-
-    /**
      * Returns an html visualization corresponding of a jobid
      * @param sessionId a valid session id
      * @param jobId the job id

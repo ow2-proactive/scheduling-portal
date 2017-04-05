@@ -29,21 +29,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksCentricView;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -73,7 +68,8 @@ public class TasksCentricController extends TasksController {
     }
 
     public void tasksStateRevision(boolean forceRefresh) {
-        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model
+                .getTasksNavigationModel();
         if (navigationModel.getTaskAutoRefreshOption() || forceRefresh) {
             this.updateTasks(false);
             if (!isHeaderClickHandler) {
@@ -93,12 +89,13 @@ public class TasksCentricController extends TasksController {
 
         AsyncCallback<String> callback = new TasksAsyncUpdater(model);
 
-        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
+        TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model
+                .getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();
         long fromDate = navigationModel.getFromDate();
         long toDate = navigationModel.getToDate();
 
-        PaginationModel paginationModel = navigationModel.getPaginationModel();
+        TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
         int offset = paginationModel.getOffset();
         int limit = paginationModel.getPageSize();
         String sessionId = LoginModel.getInstance().getSessionId();
@@ -111,30 +108,11 @@ public class TasksCentricController extends TasksController {
         boolean finished = executionsModel.isFetchFinishedExecutions();
 
         if (tagFilter.isEmpty()) {
-            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId,
-                                                              fromDate,
-                                                              toDate,
-                                                              myTasksOnly,
-                                                              pending,
-                                                              running,
-                                                              finished,
-                                                              offset,
-                                                              limit,
-                                                              getSortParameters(),
-                                                              callback);
+            this.taskUpdateRequest = scheduler.getTaskCentric(sessionId, fromDate, toDate, myTasksOnly,
+                    pending, running, finished, offset, limit, getSortParameters(), callback);
         } else {
-            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId,
-                                                                   tagFilter,
-                                                                   fromDate,
-                                                                   toDate,
-                                                                   myTasksOnly,
-                                                                   pending,
-                                                                   running,
-                                                                   finished,
-                                                                   offset,
-                                                                   limit,
-                                                                   getSortParameters(),
-                                                                   callback);
+            this.taskUpdateRequest = scheduler.getTaskCentricByTag(sessionId, tagFilter, fromDate, toDate,
+                    myTasksOnly, pending, running, finished, offset, limit, getSortParameters(), callback);
         }
     }
 

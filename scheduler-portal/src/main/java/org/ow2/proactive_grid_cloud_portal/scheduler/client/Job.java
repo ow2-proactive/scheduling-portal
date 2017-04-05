@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.json.client.JSONObject;
@@ -79,6 +80,8 @@ public class Job implements Serializable, Comparable<Job> {
     private final ImmutableMap<String, String> genericInformation;
 
     private final ImmutableMap<String, String> variables;
+
+    private final static Logger LOGGER = Logger.getLogger(Job.class.getName());
 
     /**
      * The constructor that has no arguments required by the Serializable interface
@@ -344,12 +347,13 @@ public class Job implements Serializable, Comparable<Job> {
      * @return a POJO equivalent
      */
     public static Job parseJson(JSONObject jsonJob) {
-        JSONObject jsonInfo = jsonJob.get("jobInfo").isObject(); // TODO to update jobInfo
+        JSONObject jsonInfo = jsonJob.get("node").isObject(); // TODO to update jobInfo
         return parseJSONInfo(jsonInfo);
     }
 
     public static Job parseJSONInfo(JSONObject jsonJobInfo) {
-        String user = jsonJobInfo.get("jobOwner").isString().stringValue();
+
+        String user = jsonJobInfo.get("owner").isString().stringValue();
         String priority = jsonJobInfo.get("priority").isString().stringValue();
         String status = jsonJobInfo.get("status").isString().stringValue();
         int pending = (int) jsonJobInfo.get("numberOfPendingTasks").isNumber().doubleValue();
@@ -366,9 +370,8 @@ public class Job implements Serializable, Comparable<Job> {
         Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
         Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
 
-        JSONObject jsonInfoId = jsonJobInfo.get("jobId").isObject();
-        String name = jsonInfoId.get("readableName").isString().stringValue();
-        int id = (int) jsonInfoId.get("id").isNumber().doubleValue();
+        String name = jsonJobInfo.get("name").isString().stringValue();
+        int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
         return new Job(id,
                        name,

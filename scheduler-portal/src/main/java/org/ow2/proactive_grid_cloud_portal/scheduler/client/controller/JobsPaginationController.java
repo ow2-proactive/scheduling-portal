@@ -25,9 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsPaginationView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -37,26 +36,70 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author the activeeon team.
  *
  */
-public class JobsPaginationController extends PaginationController {
+public class JobsPaginationController extends PaginationController<JobsPaginationModel> {
 
-    protected JobsController itemsController;
+    private JobsController itemsController;
 
-    protected JobsPaginationView view;
+    private JobsPaginationView view;
 
     public JobsPaginationController(JobsController jobsController) {
+        super(new JobsPaginationModel());
         this.itemsController = jobsController;
-        this.model = new PaginationModel(PaginatedItemType.JOB);
         jobsController.getModel().setPaginationModel(this.model);
     }
 
-    @Override
     public void fetch(boolean silentFetch) {
         this.itemsController.fetchJobs(silentFetch);
     }
 
-    @Override
     public Layout buildView() {
         this.view = new JobsPaginationView(itemsController);
         return this.view.build();
+    }
+
+    @Override
+    public void firstPage() {
+        model.setStartCursor(null);
+        model.setEndCursor(null);
+        model.setLast(false);
+        this.fetch(false);
+    }
+
+    @Override
+    public void lastPage() {
+        model.setStartCursor(null);
+        model.setEndCursor(null);
+        model.setLast(true);
+        this.fetch(false);
+    }
+
+    @Override
+    public void nextPage() {
+        model.setStartCursor(model.getCurrentEndCursor());
+        model.setEndCursor(null);
+        model.setLast(false);
+        this.fetch(false);
+    }
+
+    @Override
+    public void previousPage() {
+        model.setStartCursor(null);
+        model.setEndCursor(model.getCurrentStartCursor());
+        model.setLast(true);
+        this.fetch(false);
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return model.hasPreviousPage();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return model.hasNextPage();
+    }
+
+    public JobsPaginationModel getModel() {
+        return model;
     }
 }

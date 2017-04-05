@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -42,9 +40,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
@@ -112,7 +110,8 @@ public class TasksController {
                     String msg = JSONUtils.getJsonErrorMessage(caught);
 
                     model.taskUpdateError(msg);
-                    LogModel.getInstance().logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
+                    LogModel.getInstance()
+                            .logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
                 }
 
                 public void onSuccess(String result) {
@@ -130,7 +129,7 @@ public class TasksController {
             TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
             String tagFilter = navigationModel.getCurrentTagFilter();
 
-            PaginationModel paginationModel = navigationModel.getPaginationModel();
+            TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
             int limit = paginationModel.getPageSize();
             String sessionId = LoginModel.getInstance().getSessionId();
@@ -139,7 +138,8 @@ public class TasksController {
             if (tagFilter.isEmpty()) {
                 this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
             } else {
-                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
+                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit,
+                        callback);
             }
         }
     }
@@ -149,7 +149,8 @@ public class TasksController {
      * @param taskName task name
      */
     public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
+                .getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -163,7 +164,8 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully killed task " + taskName + " in job " + jobId);
+                LogModel.getInstance()
+                        .logMessage("Successfully killed task " + taskName + " in job " + jobId);
             }
         });
     }
@@ -185,15 +187,11 @@ public class TasksController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
         if (restartType == RestartType.IN_ERROR_TASK) {
-            scheduler.restartInErrorTask(sessionId,
-                                         jobId,
-                                         taskName,
-                                         callbackHandlerForRestartTask(taskName, jobId, true));
+            scheduler.restartInErrorTask(sessionId, jobId, taskName,
+                    callbackHandlerForRestartTask(taskName, jobId, true));
         } else if (restartType == RestartType.RUNNING_TASK) {
-            scheduler.restartRunningTask(sessionId,
-                                         jobId,
-                                         taskName,
-                                         callbackHandlerForRestartTask(taskName, jobId, false));
+            scheduler.restartRunningTask(sessionId, jobId, taskName,
+                    callbackHandlerForRestartTask(taskName, jobId, false));
         }
     }
 
@@ -218,8 +216,8 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance()
-                        .logMessage("Successfully restarted " + context + "task " + taskName + " in job " + jobId);
+                LogModel.getInstance().logMessage(
+                        "Successfully restarted " + context + "task " + taskName + " in job " + jobId);
                 getParentController().getTasksController().updateTasks(false);
             }
         };
@@ -230,7 +228,8 @@ public class TasksController {
      * @param taskName task name
      */
     public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob()
+                .getId();
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -242,7 +241,8 @@ public class TasksController {
 
             @Override
             public void onSuccess(Boolean result) {
-                LogModel.getInstance().logMessage("Successfully preempted task " + taskName + " in job " + jobId);
+                LogModel.getInstance()
+                        .logMessage("Successfully preempted task " + taskName + " in job " + jobId);
             }
         });
     }
@@ -283,11 +283,8 @@ public class TasksController {
     }
 
     public String computeNoVncPageUrl(String taskName) {
-        String jobId = String.valueOf(model.getParentModel()
-                                           .getExecutionsModel()
-                                           .getJobsModel()
-                                           .getSelectedJob()
-                                           .getId());
+        String jobId = String
+                .valueOf(model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId());
         String sessionId = LoginModel.getInstance().getSessionId();
         return NoVncUtils.createNoVncPageUrl(sessionId, jobId, taskName);
     }
@@ -314,8 +311,7 @@ public class TasksController {
 
     private enum RestartType {
 
-        IN_ERROR_TASK,
-        RUNNING_TASK
+        IN_ERROR_TASK, RUNNING_TASK
 
     }
 

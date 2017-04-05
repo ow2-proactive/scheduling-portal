@@ -28,8 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 import java.util.ArrayList;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -38,71 +36,16 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
  *
  */
 public class PaginationModel {
-
-    /**
-     * The current displayed page.
-     */
-    private int currentPage = 0;
-
-    /**
-     * The type of item to be paginated.
-     */
-    private PaginatedItemType itemType;
-
-    /**
-     * The number of the last page.
-     */
-    private int maxPage = 0;
-
-    /**
-     * The total number of items to be displayed without pagination.
-     */
-    private long totalItems = 0;
-
     /**
      * Listeners for pagination events.
      */
-    protected ArrayList<PaginationListener> paginationListeners;
+    protected final ArrayList<PaginationListener> paginationListeners;
 
-    public PaginationModel(PaginatedItemType itemType) {
-        this.itemType = itemType;
+    /**
+     * Constructor
+     */
+    public PaginationModel() {
         this.paginationListeners = new ArrayList<PaginationListener>();
-    }
-
-    /**
-     * Gets the current displayed page.
-     * @return the current displayed page.
-     */
-    public int getPage() {
-        return this.currentPage;
-    }
-
-    /**
-     * Change the current page
-     * 
-     * @param page new page number
-     */
-    public void setPage(int page) {
-        this.currentPage = page;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
-    }
-
-    /**
-     * Gets the size of a page.
-     * @return the size of a page.
-     */
-    public int getPageSize() {
-        return SchedulerConfig.get().getPageSize(this.itemType);
-    }
-
-    /**
-     * Gets the type of items to be paginated (TASK or JOB)
-     * @return the type of items to be paginated (TASK or JOB)
-     */
-    public PaginatedItemType getItemType() {
-        return itemType;
     }
 
     /**
@@ -111,46 +54,5 @@ public class PaginationModel {
      */
     public void addPaginationListener(PaginationListener listener) {
         this.paginationListeners.add(listener);
-    }
-
-    /**
-     * Gets the offset of the items to be retrieved for the current page.
-     * @return the offset of the items to be retrieved for the current page.
-     */
-    public int getOffset() {
-        return (this.currentPage * this.getPageSize());
-    }
-
-    /**
-     * Gets the number of the last page.
-     * @return the number of the last page.
-     */
-    public int getMaxPage() {
-        return maxPage;
-    }
-
-    /**
-     * Get the total number of items without pagination.
-     * @return the total number of items without pagination.
-     */
-    public long getTotalItems() {
-        return totalItems;
-    }
-
-    /**
-     * Sets the total number of items without pagination.
-     * @param totalItems the total number of items without pagination.
-     */
-    public void setTotalItems(long totalItems) {
-        this.totalItems = totalItems;
-        int pageSize = this.getPageSize();
-        this.maxPage = ((int) this.totalItems / pageSize) - 1;
-        if (this.totalItems % pageSize != 0) {
-            this.maxPage++;
-        }
-
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.totalItemChanged();
-        }
     }
 }

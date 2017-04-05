@@ -25,28 +25,19 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 
 
 /**
- * Queries provider: create a query as for example
- * 
- * 
- *
- *   public Query revisionAndjobsinfo() {
- *      try {
- *          Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement()
- *                                                        .excludeRemovedTime()
- *                                                        .excludeVariables();
- *          Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
- *          return queryBuilder.build();
- *
- *       } catch (Exception e) {
- *          LOGGER.log(Level.SEVERE, e.getMessage());
- *          return null;
- *       }
- *   }
- * 
+ * Queries provider
  * @author ActiveEon Team
  * @since Mar 8, 2017
  */
@@ -67,6 +58,41 @@ public final class GraphQLQueries {
             client = new GraphQLQueries();
         }
         return client;
+    }
+
+    private JobInput getJobInputWithStatus(JobStatus status) {
+        JobInput input = new JobInput.Builder().status(status.name().toUpperCase()).build();
+        return input;
+    }
+
+    public Query getRevisionAndjobsInfoQuery(final String user, final boolean pending, final boolean running,
+            final boolean finished, String startCursor, String endCursor, int pageSize, boolean last) {
+        try {
+            Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement().excludeRemovedTime();
+            if (startCursor != null)
+                jobsBuilder.after(startCursor);
+            if (endCursor != null)
+                jobsBuilder.before(endCursor);
+
+            if (last)
+                jobsBuilder.last(pageSize);
+            else
+                jobsBuilder.first(pageSize);
+
+            List<JobInput> input = new ArrayList<>();
+            if (pending)
+                input.add(getJobInputWithStatus(JobStatus.PENDING));
+            if (running)
+                input.add(getJobInputWithStatus(JobStatus.RUNNING));
+            if (finished)
+                input.add(getJobInputWithStatus(JobStatus.FINISHED));
+
+            Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
+            return queryBuilder.build();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            return null;
+        }
     }
 
 }

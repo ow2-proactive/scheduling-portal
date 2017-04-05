@@ -114,13 +114,8 @@ public class ExecutionsController {
     }
 
     protected void fetchFirstPage() {
-        switch (this.model.getMode()) {
-            case JOB_CENTRIC:
-                this.jobsController.getPaginationController().firstPage();
-                break;
-            case TASK_CENTRIC:
-                this.tasksController.getPaginationController().firstPage();
-                break;
+        if (this.model.getMode() == ExecutionListMode.TASK_CENTRIC) {
+            this.tasksController.getPaginationController().firstPage();
         }
     }
 

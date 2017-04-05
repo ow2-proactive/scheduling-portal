@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -38,11 +40,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedJobs;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -75,6 +78,8 @@ public class JobsController {
      * The view controlled by this controller.
      */
     protected JobsView view;
+
+    private static Logger LOGGER = Logger.getLogger(JobsController.class.getName());
 
     /**
      * Builds a jobs controller from a parent scheduler controller.
@@ -356,20 +361,27 @@ public class JobsController {
 
         final long t1 = System.currentTimeMillis();
 
-        int offset = paginationController.getModel().getOffset();
-        int limit = paginationController.getModel().getPageSize();
+        String startCursor = paginationController.getModel().getStartCursor();
+        String endCursor = paginationController.getModel().getEndCursor();
+        int pageSize = SchedulerConfig.get().getPageSize(PaginatedItemType.JOB);
+        boolean last = paginationController.getModel().isLast();
 
         ExecutionsModel executionModel = this.parentController.getModel();
-        boolean fetchMyJobs = executionModel.isFetchMyExecutionsOnly();
+        String user = null;
+        if (executionModel.isFetchMyExecutionsOnly())
+            user = LoginModel.getInstance().getLogin();
+
         boolean fetchPending = executionModel.isFetchPendingExecutions();
         boolean fetchRunning = executionModel.isFetchRunningExecutions();
         boolean fetchFinished = executionModel.isFetchFinishedExecutions();
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.revisionAndjobsinfo(LoginModel.getInstance().getSessionId(),
-                                      offset,
-                                      limit,
-                                      fetchMyJobs,
+                                      startCursor,
+                                      endCursor,
+                                      pageSize,
+                                      last,
+                                      user,
                                       fetchPending,
                                       fetchRunning,
                                       fetchFinished,
@@ -399,13 +411,11 @@ public class JobsController {
                                           }
 
                                           public void onSuccess(String result) {
-                                              JSONPaginatedJobs resultJobs;
+                                              Map<Integer, Job> jobs;
                                               try {
-                                                  resultJobs = SchedulerJSONUtils.parseJSONPaginatedJobs(result);
-                                                  Map<Integer, Job> jobs = resultJobs.getJobs();
-                                                  long revision = resultJobs.getRevision();
-                                                  long totalJobs = resultJobs.getTotal();
-                                                  model.setJobs(jobs, revision, totalJobs);
+                                                  jobs = SchedulerJSONUtils.parseJSONJobs(result,
+                                                                                          paginationController.getModel());
+                                                  model.setJobs(jobs);
 
                                                   int jn = jobs.size();
                                                   if (jn > 0) {
@@ -416,6 +426,7 @@ public class JobsController {
                                                   }
                                               } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
                                                   LogModel.getInstance().logCriticalMessage(e.getMessage());
+                                                  LOGGER.log(Level.SEVERE, e.getMessage());
                                               }
                                           }
                                       });
@@ -441,9 +452,7 @@ public class JobsController {
             }
 
             public void onSuccess(Long result) {
-                if (result > model.getJobsRevision()) {
-                    fetchJobs(false);
-                }
+                fetchJobs(false);
             }
         });
     }

@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
@@ -53,6 +55,8 @@ public class SettingsController {
     public SettingsController(SchedulerController mainController) {
         this.mainController = mainController;
     }
+
+    private static final Logger LOGGER = Logger.getLogger(SettingsController.class.getName());
 
     /**
      * Apply new settings.

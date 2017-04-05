@@ -69,8 +69,8 @@ public class TasksCentricView extends FilteringGridItemView implements TasksUpda
 
     @Override
     protected Layout buildPagination() {
-        PaginationController paginationController = this.controller.getTaskNavigationController()
-                                                                   .getPaginationController();
+        PaginationController<?> paginationController = this.controller.getTaskNavigationController()
+                                                                      .getPaginationController();
         return this.buildPagination(paginationController);
     }
 

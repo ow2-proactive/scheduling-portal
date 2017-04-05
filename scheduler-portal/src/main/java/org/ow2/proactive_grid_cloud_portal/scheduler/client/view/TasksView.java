@@ -70,8 +70,8 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
 
     protected Layout buildPagination() {
-        PaginationController paginationController = this.controller.getTaskNavigationController()
-                                                                   .getPaginationController();
+        PaginationController<?> paginationController = this.controller.getTaskNavigationController()
+                                                                      .getPaginationController();
         return buildPagination(paginationController);
     }
 

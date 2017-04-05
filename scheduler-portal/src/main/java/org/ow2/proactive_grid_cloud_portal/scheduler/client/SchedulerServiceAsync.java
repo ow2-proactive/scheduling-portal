@@ -318,16 +318,16 @@ public interface SchedulerServiceAsync {
     /**
      * A set of jobs representing the current scheduler state
      * @param sessionId id of the current session
-     * @param index offset
-     * @param range max size of the result set
+     * @param startCursor start cursor
+     * @param endCursor end cursor
      * @param myJobs true to fetch only the jobs of the user making the request
      * @param pending fetch pending jobs
      * @param running fetch running jobs
      * @param finished fetch finished jobs 
      * @param callback
      */
-    void revisionAndjobsinfo(String sessionId, int index, int range, boolean myJobs, boolean pending, boolean running,
-            boolean finished, AsyncCallback<String> callback);
+    void revisionAndjobsinfo(String sessionId, String startCursor, String endCursor, int pageSize, boolean last,
+            String user, boolean pending, boolean running, boolean finished, AsyncCallback<String> callback);
 
     void schedulerStateRevision(String sessionId, AsyncCallback<Long> callback);
 

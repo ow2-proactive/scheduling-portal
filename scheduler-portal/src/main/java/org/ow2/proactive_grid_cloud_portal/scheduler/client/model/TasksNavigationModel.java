@@ -64,7 +64,7 @@ public class TasksNavigationModel {
     /**
      * Model for the pagination of the tasks.
      */
-    private PaginationModel paginationModel;
+    private TasksPaginationModel paginationModel;
 
     /**
      * Listeners about the tags suggestions.
@@ -83,7 +83,7 @@ public class TasksNavigationModel {
         this.parentModel.setTasksNavigationModel(this);
 
         this.availableTags = new PatriciaTrie<String>();
-        this.paginationModel = new PaginationModel(PaginatedItemType.TASK);
+        this.paginationModel = new TasksPaginationModel(PaginatedItemType.TASK);
 
         this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();
@@ -131,7 +131,7 @@ public class TasksNavigationModel {
         }
     }
 
-    public PaginationModel getPaginationModel() {
+    public TasksPaginationModel getPaginationModel() {
         return paginationModel;
     }
 
