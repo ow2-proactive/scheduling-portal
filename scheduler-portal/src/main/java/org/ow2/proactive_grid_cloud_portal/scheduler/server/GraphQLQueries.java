@@ -85,12 +85,25 @@ public final class GraphQLQueries {
             List<JobInput> input = new ArrayList<>();
             jobsBuilder.input(input);
 
-            if (pending)
-                input.add(getJobInputWithStatus(JobStatus.PENDING, user));
-            if (running)
-                input.add(getJobInputWithStatus(JobStatus.RUNNING, user));
-            if (finished)
-                input.add(getJobInputWithStatus(JobStatus.FINISHED, user));
+            for (JobStatus status : JobStatus.values()) {
+                boolean fetch;
+                switch (status) {
+                    case PENDING:
+                        fetch = pending;
+                        break;
+                    case RUNNING:
+                        fetch = running;
+                        break;
+                    case FINISHED:
+                        fetch = finished;
+                        break;
+                    default:
+                        fetch = true;
+                }
+
+                if (fetch)
+                    input.add(getJobInputWithStatus(status, user));
+            }
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
             return queryBuilder.build();
