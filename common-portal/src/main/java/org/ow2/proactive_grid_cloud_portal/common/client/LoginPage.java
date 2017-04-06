@@ -484,7 +484,11 @@ public class LoginPage {
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        controller.login(sess, form.getValueAsString("login"));
+                        String userName = null;
+                        if (obj.containsKey("username")) {
+                            userName = obj.isObject().get("username").isString().stringValue();
+                        }
+                        controller.login(sess, userName);
                     } else {
                         fail = true;
                     }
@@ -580,21 +584,30 @@ public class LoginPage {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String res = event.getResults();
                 boolean fail = false;
+                String internalErrorMessage = null;
                 try {
                     JSONValue val = controller.parseJSON(res);
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        controller.login(sess, null);
+                        String userName = null;
+                        if (obj.containsKey("username")) {
+                            userName = obj.isObject().get("username").isString().stringValue();
+                        }
+                        controller.login(sess, userName);
                     } else {
                         fail = true;
                     }
                 } catch (Throwable t) {
                     fail = true;
+                    internalErrorMessage = t.getMessage();
                 }
 
                 if (fail) {
                     String err = JSONUtils.getJsonErrorMessage(res);
+                    if (err == null) {
+                        err = internalErrorMessage;
+                    }
                     errorLabel.setContents("<span style='color:red;'>Could not login: " + err + "</span>");
                     errorLabel.animateShow(AnimationEffect.FLY);
 

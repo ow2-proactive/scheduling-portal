@@ -52,6 +52,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -441,17 +442,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
             HttpResponse response = httpClient.execute(method);
             String responseAsString = convertToString(response.getEntity().getContent());
-            switch (response.getStatusLine().getStatusCode()) {
-                case 200:
-                    break;
-                default:
-                    String message = responseAsString;
-                    if (message.trim().length() == 0) {
-                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
-                                  "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
-                    }
-                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
-            }
+            handleResponseStatus(response, responseAsString);
             return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
@@ -460,6 +451,35 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             if (cred != null) {
                 cred.delete();
             }
+        }
+    }
+
+    private void handleResponseStatus(HttpResponse response, String responseAsString) throws RestServerException {
+        switch (response.getStatusLine().getStatusCode()) {
+            case 200:
+                break;
+            default:
+                String message = responseAsString;
+                if (message.trim().length() == 0) {
+                    message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
+                              "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
+                }
+                throw new RestServerException(response.getStatusLine().getStatusCode(), message);
+        }
+    }
+
+    @Override
+    public String getLoginFromSessionId(String sessionId) throws RestServerException, ServiceException {
+        HttpGet method = new HttpGet(SchedulerConfig.get().getRestUrl() + "/scheduler/logins/sessionid/" + sessionId);
+        try {
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
+            handleResponseStatus(response, responseAsString);
+            return responseAsString;
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            method.releaseConnection();
         }
     }
 

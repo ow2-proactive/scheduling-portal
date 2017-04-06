@@ -81,6 +81,15 @@ public abstract class Service extends RemoteServiceServlet {
             throws RestServerException, ServiceException;
 
     /**
+     * Get the connected user associated with a session id
+     * @param sessionId
+     * @return user name
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public abstract String getLoginFromSessionId(String sessionId) throws RestServerException, ServiceException;
+
+    /**
      * Create a Credentials file with the provided authentication parameters
      * 
      * @param login username
