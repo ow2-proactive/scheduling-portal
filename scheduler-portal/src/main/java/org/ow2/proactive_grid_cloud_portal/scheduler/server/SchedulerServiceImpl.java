@@ -80,8 +80,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -146,9 +144,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         final Map<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
         SchedulerConfig.get().load(props);
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
-
-        final Map<String, String> portalProperties = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerPortalDisplayConfig.CONFIG_PATH));
-        SchedulerPortalDisplayConfig.get().load(portalProperties);
     }
 
     /**
@@ -693,9 +688,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getProperties()
      */
     @Override
-    public SharedProperties getProperties() {
-        return new SharedProperties(SchedulerConfig.get().getProperties(),
-                                    SchedulerPortalDisplayConfig.get().getProperties());
+    public Map<String, String> getProperties() {
+        return SchedulerConfig.get().getProperties();
     }
 
     @Override
