@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -40,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPagination
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 
@@ -49,8 +49,6 @@ import com.google.gwt.json.client.JSONValue;
  *
  */
 public class SchedulerJSONUtils extends JSONUtils {
-
-    private static Logger LOGGER = Logger.getLogger(SchedulerJSONUtils.class.getName());
 
     /**
      * Parse a paginated list of tasks
@@ -98,6 +96,17 @@ public class SchedulerJSONUtils extends JSONUtils {
             throw new JSONException("Expected JSON Array: " + value.toString());
         }
         return arr;
+    }
+
+    protected static String getString(JSONValue value) throws JSONException {
+        if (value.isNull() != null) {
+            return null;
+        }
+        JSONString string = value.isString();
+        if (string == null) {
+            throw new JSONException("Expected JSON String: " + value.toString());
+        }
+        return string.toString();
     }
 
     protected static long getSize(JSONObject obj) throws JSONException {
@@ -158,8 +167,8 @@ public class SchedulerJSONUtils extends JSONUtils {
 
     private static void setPageInfoFromJson(JSONObject jsonPageInfo, JobsPaginationModel paginationModel)
             throws JSONException {
-        paginationModel.setCurrentEndCursor(getProperty(jsonPageInfo, "endCursor").isString().stringValue());
-        paginationModel.setCurrentStartCursor(getProperty(jsonPageInfo, "startCursor").isString().stringValue());
+        paginationModel.setCurrentEndCursor(getString(getProperty(jsonPageInfo, "endCursor")));
+        paginationModel.setCurrentStartCursor(getString(getProperty(jsonPageInfo, "startCursor")));
 
         //If an end cursor was defined then there was a next page
         if (paginationModel.getEndCursor() != null)
