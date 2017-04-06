@@ -1058,7 +1058,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                        pageSize,
                                                                        first);
         String response = executeGraphQLQuery(sessionId, query);
-        LOGGER.log(Level.SEVERE, response);
         return response;
     }
 
