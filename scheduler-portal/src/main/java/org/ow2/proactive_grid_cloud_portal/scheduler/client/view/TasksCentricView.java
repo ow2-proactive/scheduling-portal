@@ -37,7 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import com.smartgwt.client.widgets.layout.Layout;
 
 
-public class TasksCentricView extends FilteringGridItemView implements TasksUpdatedListener {
+public class TasksCentricView extends FilteringGridItemView<Task> implements TasksUpdatedListener {
 
     protected TasksController controller;
 

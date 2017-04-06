@@ -82,17 +82,15 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setCurrentStartCursor(String currentStartCursor) {
         this.currentStartCursor = currentStartCursor;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
     }
 
     public String getStartCursor() {
         return startCursor;
     }
 
-    public void setStartCursor(String startCursor) {
+    public void setStartAndEndCursor(String startCursor, String endCursor) {
         this.startCursor = startCursor;
+        this.endCursor = endCursor;
         for (PaginationListener listener : this.paginationListeners) {
             listener.pageChanged();
         }
@@ -104,20 +102,10 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setCurrentEndCursor(String currentEndCursor) {
         this.currentEndCursor = currentEndCursor;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
     }
 
     public String getEndCursor() {
         return endCursor;
-    }
-
-    public void setEndCursor(String endCursor) {
-        this.endCursor = endCursor;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
     }
 
     public boolean hasPreviousPage() {

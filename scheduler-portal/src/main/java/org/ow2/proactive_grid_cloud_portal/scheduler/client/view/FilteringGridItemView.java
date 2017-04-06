@@ -45,7 +45,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
-public abstract class FilteringGridItemView extends AbstractGridItemsView {
+public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> {
 
     /** jobs filtering */
     protected Layout filterPane = null;

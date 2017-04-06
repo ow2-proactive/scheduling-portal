@@ -161,11 +161,13 @@ public class SchedulerJSONUtils extends JSONUtils {
         paginationModel.setCurrentEndCursor(getProperty(jsonPageInfo, "endCursor").isString().stringValue());
         paginationModel.setCurrentStartCursor(getProperty(jsonPageInfo, "startCursor").isString().stringValue());
 
+        //If an end cursor was defined then there was a next page
         if (paginationModel.getEndCursor() != null)
             paginationModel.setHasNextPage(true);
         else
             paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
 
+        //If a start cursor was defined then there was a previous page
         if (paginationModel.getStartCursor() != null)
             paginationModel.setHasPreviousPage(true);
         else

@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.json.client.JSONObject;
@@ -80,8 +79,6 @@ public class Job implements Serializable, Comparable<Job> {
     private final ImmutableMap<String, String> genericInformation;
 
     private final ImmutableMap<String, String> variables;
-
-    private final static Logger LOGGER = Logger.getLogger(Job.class.getName());
 
     /**
      * The constructor that has no arguments required by the Serializable interface

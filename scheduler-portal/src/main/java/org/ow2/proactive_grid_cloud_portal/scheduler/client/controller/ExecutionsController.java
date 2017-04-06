@@ -114,6 +114,9 @@ public class ExecutionsController {
     }
 
     protected void fetchFirstPage() {
+        if (this.model.getMode() == ExecutionListMode.JOB_CENTRIC) {
+            this.jobsController.getPaginationController().firstPage();
+        }
         if (this.model.getMode() == ExecutionListMode.TASK_CENTRIC) {
             this.tasksController.getPaginationController().firstPage();
         }

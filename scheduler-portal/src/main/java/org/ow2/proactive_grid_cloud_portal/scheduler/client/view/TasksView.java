@@ -43,7 +43,7 @@ import com.smartgwt.client.widgets.layout.Layout;
  *
  * @author mschnoor
  */
-public class TasksView extends AbstractGridItemsView implements TasksUpdatedListener {
+public class TasksView extends AbstractGridItemsView<Task> implements TasksUpdatedListener {
 
     protected TasksController controller;
 

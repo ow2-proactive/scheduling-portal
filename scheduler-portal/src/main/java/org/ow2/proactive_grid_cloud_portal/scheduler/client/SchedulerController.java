@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
@@ -85,8 +83,6 @@ public class SchedulerController extends Controller implements UncaughtException
     static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
-
-    private static final Logger LOGGER = Logger.getLogger(SchedulerController.class.getName());
 
     @Override
     public String getLoginSettingKey() {

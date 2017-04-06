@@ -38,12 +38,12 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
-public abstract class AbstractGridItemsView implements PaginationListener {
+public abstract class AbstractGridItemsView<T> implements PaginationListener {
 
     /**
      * the Grid widget displayed in the view
      */
-    protected ItemsListGrid itemsGrid = null;
+    protected ItemsListGrid<T> itemsGrid = null;
 
     /**
      * shown when loading

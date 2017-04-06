@@ -60,7 +60,7 @@ public class TasksController {
 
     protected TasksModel model;
 
-    protected AbstractGridItemsView view;
+    protected AbstractGridItemsView<Task> view;
 
     protected SchedulerController parentController;
 

@@ -25,11 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;

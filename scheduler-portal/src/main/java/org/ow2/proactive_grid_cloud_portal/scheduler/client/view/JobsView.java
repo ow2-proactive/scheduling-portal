@@ -39,7 +39,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 /**
  * Contains the ListGrid that displays jobs
  */
-public class JobsView extends FilteringGridItemView implements JobsUpdatedListener {
+public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedListener {
 
     private JobsController controller = null;
 
