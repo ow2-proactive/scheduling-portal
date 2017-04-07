@@ -344,7 +344,7 @@ public class Job implements Serializable, Comparable<Job> {
      * @return a POJO equivalent
      */
     public static Job parseJson(JSONObject jsonJob) {
-        JSONObject jsonInfo = jsonJob.get("node").isObject(); // TODO to update jobInfo
+        JSONObject jsonInfo = jsonJob.get("node").isObject();
         return parseJSONInfo(jsonInfo);
     }
 

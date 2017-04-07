@@ -368,8 +368,9 @@ public class JobsController {
 
         ExecutionsModel executionModel = this.parentController.getModel();
         String user = null;
-        if (executionModel.isFetchMyExecutionsOnly())
+        if (executionModel.isFetchMyExecutionsOnly()) {
             user = LoginModel.getInstance().getLogin();
+        }
 
         boolean fetchPending = executionModel.isFetchPendingExecutions();
         boolean fetchRunning = executionModel.isFetchRunningExecutions();

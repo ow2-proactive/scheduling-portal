@@ -109,26 +109,19 @@ public class TasksPaginationController extends PaginationController<TasksPaginat
      * @return the text that displays the pagination status.
      */
     public String getPaginationRangeLabel() {
+        //The index of the current displayed page
         int page = this.model.getPage();
+        //The size of a page
         int size = this.model.getPageSize();
-
-        long index = page * size;
+        //The total number of jobs
         long total = this.model.getTotalItems();
-        long range = index + size;
 
-        index++;
-        if (index < 0) {
-            index = 0;
-        }
-        if (index > total) {
-            index = total;
-        }
+        //The index of the first job of the current page; cannot be below 0 or over the max number of jobs
+        long firstJobIndex = Math.min(Math.max(page * size + 1, 0), total);
+        //The index of the last job of the current page; cannot be more than the max number of jobs
+        long lastJobIndex = Math.min((page + 1) * size, total);
 
-        if (range < total) {
-            return index + " - " + range;
-        } else {
-            return index + " - " + total;
-        }
+        return firstJobIndex + " - " + lastJobIndex;
     }
 
     public String getNumberPageText() {
