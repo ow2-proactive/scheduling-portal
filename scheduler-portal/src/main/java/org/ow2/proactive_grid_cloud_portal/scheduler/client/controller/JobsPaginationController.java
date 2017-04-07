@@ -59,29 +59,25 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void firstPage() {
-        model.setStartAndEndCursor(null, null);
-        model.setFirst(false);
+        model.setFetchData(null, null, false);
         this.fetch(false);
     }
 
     @Override
     public void lastPage() {
-        model.setStartAndEndCursor(null, null);
-        model.setFirst(true);
+        model.setFetchData(null, null, true);
         this.fetch(false);
     }
 
     @Override
     public void nextPage() {
-        model.setStartAndEndCursor(null, model.getCurrentStartCursor());
-        model.setFirst(false);
+        model.setFetchData(null, model.getCurrentStartCursor(), false);
         this.fetch(false);
     }
 
     @Override
     public void previousPage() {
-        model.setStartAndEndCursor(model.getCurrentEndCursor(), null);
-        model.setFirst(true);
+        model.setFetchData(model.getCurrentEndCursor(), null, true);
         this.fetch(false);
     }
 

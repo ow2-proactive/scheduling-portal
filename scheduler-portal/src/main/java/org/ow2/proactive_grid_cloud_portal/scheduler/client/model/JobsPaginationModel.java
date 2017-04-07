@@ -88,9 +88,16 @@ public class JobsPaginationModel extends PaginationModel {
         return startCursor;
     }
 
-    public void setStartAndEndCursor(String startCursor, String endCursor) {
+    /**
+     * Set start, end cursors and first status for jobs fetch request
+     * @param startCursor start cursor
+     * @param endCursor end cursor
+     * @param first first or last items
+     */
+    public void setFetchData(String startCursor, String endCursor, boolean first) {
         this.startCursor = startCursor;
         this.endCursor = endCursor;
+        this.first = first;
         for (PaginationListener listener : this.paginationListeners) {
             listener.pageChanged();
         }
@@ -126,10 +133,6 @@ public class JobsPaginationModel extends PaginationModel {
 
     public boolean isFirst() {
         return first;
-    }
-
-    public void setFirst(boolean first) {
-        this.first = first;
     }
 
     /**
