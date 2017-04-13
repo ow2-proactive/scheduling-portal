@@ -31,6 +31,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Paginatio
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 
@@ -131,5 +132,16 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
             this.pageNextButton.enable();
             this.pageLastButton.enable();
         }
+    }
+
+    protected ToolStrip getToolStripPaginationLayout() {
+        ToolStrip paginationLayout = new ToolStrip();
+        paginationLayout.addStyleName("itemPaginationBar");
+        paginationLayout.setHeight(30);
+        paginationLayout.setWidth100();
+        paginationLayout.setBackgroundImage("");
+        paginationLayout.setBackgroundColor("#fafafa");
+        paginationLayout.setBorder("0px");
+        return paginationLayout;
     }
 }

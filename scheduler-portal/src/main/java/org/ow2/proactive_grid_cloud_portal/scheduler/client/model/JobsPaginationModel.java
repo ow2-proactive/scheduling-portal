@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 
 
 /**
@@ -74,6 +75,7 @@ public class JobsPaginationModel extends PaginationModel {
      * Constructor
      */
     public JobsPaginationModel() {
+        super(PaginatedItemType.JOB);
     }
 
     public String getCurrentStartCursor() {
@@ -133,13 +135,5 @@ public class JobsPaginationModel extends PaginationModel {
 
     public boolean isFirst() {
         return first;
-    }
-
-    /**
-     * Add a listener for pagination events.
-     * @param listener the listener.
-     */
-    public void addPaginationListener(PaginationListener listener) {
-        this.paginationListeners.add(listener);
     }
 }

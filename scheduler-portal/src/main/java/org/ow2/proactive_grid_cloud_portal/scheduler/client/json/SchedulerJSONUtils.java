@@ -74,7 +74,7 @@ public class SchedulerJSONUtils extends JSONUtils {
         return getJobsFromJson(val, paginationModel);
     }
 
-    protected static JSONObject getObject(JSONValue value) throws JSONException {
+    private static JSONObject getObject(JSONValue value) throws JSONException {
         JSONObject jsonObject = value.isObject();
         if (jsonObject == null) {
             throw new JSONException("Expected JSON Object: " + value.toString());
@@ -82,15 +82,16 @@ public class SchedulerJSONUtils extends JSONUtils {
         return jsonObject;
     }
 
-    protected static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
+    private static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
         JSONValue jsonValue = obj.get(propertyName);
         if (jsonValue == null) {
-            throw new JSONException("Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
+            throw new JSONException(
+                "Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
         }
         return jsonValue;
     }
 
-    protected static JSONArray getArray(JSONValue value) throws JSONException {
+    private static JSONArray getArray(JSONValue value) throws JSONException {
         JSONArray arr = value.isArray();
         if (arr == null) {
             throw new JSONException("Expected JSON Array: " + value.toString());
@@ -98,7 +99,7 @@ public class SchedulerJSONUtils extends JSONUtils {
         return arr;
     }
 
-    protected static String getString(JSONValue value) throws JSONException {
+    private static String getString(JSONValue value) throws JSONException {
         if (value.isNull() != null) {
             return null;
         }
@@ -106,19 +107,24 @@ public class SchedulerJSONUtils extends JSONUtils {
         if (string == null) {
             throw new JSONException("Expected JSON String: " + value.toString());
         }
-        return string.toString();
+        return string.stringValue();
     }
 
-    protected static long getSize(JSONObject obj) throws JSONException {
-        JSONValue jsonTotalValue = obj.get("size");
-        if (jsonTotalValue == null) {
-            throw new JSONException("Expected JSON Object with attribute total: " + obj.toString());
+    private static long getSize(JSONObject obj) throws JSONException {
+        return getLongValue(obj, "size");
+    }
+
+    private static long getLongValue(JSONObject obj, String fieldName) throws JSONException {
+        JSONValue jsonLongValue = obj.get(fieldName);
+        if (jsonLongValue == null) {
+            throw new JSONException(
+                "Expected JSON Object with attribute " + fieldName + ": " + obj.toString());
         }
-        JSONNumber jsonTotal = jsonTotalValue.isNumber();
-        if (jsonTotal == null) {
-            throw new JSONException("Expected JSON number: " + jsonTotalValue.toString());
+        JSONNumber jsonLong = jsonLongValue.isNumber();
+        if (jsonLong == null) {
+            throw new JSONException("Expected JSON number: " + jsonLongValue.toString());
         }
-        return (long) jsonTotal.doubleValue();
+        return (long) jsonLong.doubleValue();
     }
 
     /**
@@ -165,22 +171,32 @@ public class SchedulerJSONUtils extends JSONUtils {
         return tags;
     }
 
-    private static void setPageInfoFromJson(JSONObject jsonPageInfo, JobsPaginationModel paginationModel)
-            throws JSONException {
+    private static void setPageInfoFromJson(JSONObject jsonPageInfo, JobsPaginationModel paginationModel,
+            long totalItems) throws JSONException {
         paginationModel.setCurrentEndCursor(getString(getProperty(jsonPageInfo, "endCursor")));
         paginationModel.setCurrentStartCursor(getString(getProperty(jsonPageInfo, "startCursor")));
 
+        boolean endCursor = (paginationModel.getEndCursor() != null);
+        boolean startCursor = (paginationModel.getStartCursor() != null);
+
         //If an end cursor was defined then there was a next page
-        if (paginationModel.getEndCursor() != null)
+        if (endCursor)
             paginationModel.setHasNextPage(true);
         else
-            paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
+            paginationModel
+                    .setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
 
         //If a start cursor was defined then there was a previous page
-        if (paginationModel.getStartCursor() != null)
+        if (startCursor)
             paginationModel.setHasPreviousPage(true);
         else
-            paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+            paginationModel.setHasPreviousPage(
+                    getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+
+        //The number of jobs is updated only when there are no start or end cursor otherwise the number is not correct
+        if (!startCursor && !endCursor) {
+            paginationModel.setTotalItems(totalItems);
+        }
     }
 
     private static Map<Integer, Job> getJobsFromJson(JSONValue value, JobsPaginationModel paginationModel)
@@ -188,10 +204,17 @@ public class SchedulerJSONUtils extends JSONUtils {
         Map<Integer, Job> jobs = new HashMap<>();
 
         JSONObject jsonMain = getObject(value);
+
+        JSONValue jsonError = jsonMain.get("errors");
+        if (jsonError != null) {
+            throw new JSONException(jsonError.toString());
+        }
+
         JSONObject jsonData = getObject(getProperty(jsonMain, "data"));
         JSONObject jsonJobs = getObject(getProperty(jsonData, "jobs"));
+        long totalItems = getLongValue(jsonJobs, "totalCount");
         JSONObject jsonPageInfo = getObject(getProperty(jsonJobs, "pageInfo"));
-        setPageInfoFromJson(jsonPageInfo, paginationModel);
+        setPageInfoFromJson(jsonPageInfo, paginationModel, totalItems);
         JSONArray jsonEdges = getArray(getProperty(jsonJobs, "edges"));
 
         for (int i = 0; i < jsonEdges.size(); i++) {

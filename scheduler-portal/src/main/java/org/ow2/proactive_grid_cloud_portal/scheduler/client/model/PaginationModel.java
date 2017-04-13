@@ -26,8 +26,11 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -36,15 +39,27 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.P
  *
  */
 public class PaginationModel {
+
+    /**
+     * The total number of items to be displayed without pagination.
+     */
+    protected long totalItems = 0;
+
     /**
      * Listeners for pagination events.
      */
     protected final ArrayList<PaginationListener> paginationListeners;
 
     /**
+     * The type of item to be paginated.
+     */
+    protected PaginatedItemType itemType;
+
+    /**
      * Constructor
      */
-    public PaginationModel() {
+    public PaginationModel(PaginatedItemType itemType) {
+        this.itemType = itemType;
         this.paginationListeners = new ArrayList<PaginationListener>();
     }
 
@@ -54,5 +69,44 @@ public class PaginationModel {
      */
     public void addPaginationListener(PaginationListener listener) {
         this.paginationListeners.add(listener);
+    }
+
+    /**
+     * Get the total number of items without pagination.
+     * @return the total number of items without pagination.
+     */
+    public long getTotalItems() {
+        return totalItems;
+    }
+
+    /**
+     * Apply an action on all listeners
+     */
+    protected void doActionOnListeners(Consumer<PaginationListener> listenerAction) {
+        this.paginationListeners.stream().forEach(listenerAction);
+    }
+
+    /**
+     * Sets the total number of items without pagination.
+     * @param totalItems the total number of items without pagination.
+     */
+    public void setTotalItems(long totalItems) {
+        this.totalItems = totalItems;
+    }
+
+    /**
+     * Gets the size of a page.
+     * @return the size of a page.
+     */
+    public int getPageSize() {
+        return SchedulerConfig.get().getPageSize(this.itemType);
+    }
+
+    /**
+     * Gets the type of items to be paginated (TASK or JOB)
+     * @return the type of items to be paginated (TASK or JOB)
+     */
+    public PaginatedItemType getItemType() {
+        return itemType;
     }
 }

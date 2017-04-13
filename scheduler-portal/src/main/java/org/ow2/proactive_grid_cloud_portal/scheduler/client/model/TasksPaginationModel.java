@@ -25,9 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
 /**
@@ -43,22 +41,12 @@ public class TasksPaginationModel extends PaginationModel {
     private int currentPage = 0;
 
     /**
-     * The type of item to be paginated.
-     */
-    private PaginatedItemType itemType;
-
-    /**
      * The number of the last page.
      */
     private int maxPage = 0;
 
-    /**
-     * The total number of items to be displayed without pagination.
-     */
-    private long totalItems = 0;
-
-    public TasksPaginationModel(PaginatedItemType itemType) {
-        this.itemType = itemType;
+    public TasksPaginationModel() {
+        super(PaginatedItemType.TASK);
     }
 
     /**
@@ -76,33 +64,7 @@ public class TasksPaginationModel extends PaginationModel {
      */
     public void setPage(int page) {
         this.currentPage = page;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
-    }
-
-    /**
-     * Gets the size of a page.
-     * @return the size of a page.
-     */
-    public int getPageSize() {
-        return SchedulerConfig.get().getPageSize(this.itemType);
-    }
-
-    /**
-     * Gets the type of items to be paginated (TASK or JOB)
-     * @return the type of items to be paginated (TASK or JOB)
-     */
-    public PaginatedItemType getItemType() {
-        return itemType;
-    }
-
-    /**
-     * Add a listener for pagination events.
-     * @param listener the listener.
-     */
-    public void addPaginationListener(PaginationListener listener) {
-        this.paginationListeners.add(listener);
+        doActionOnListeners(listener -> listener.pageChanged());
     }
 
     /**
@@ -122,14 +84,6 @@ public class TasksPaginationModel extends PaginationModel {
     }
 
     /**
-     * Get the total number of items without pagination.
-     * @return the total number of items without pagination.
-     */
-    public long getTotalItems() {
-        return totalItems;
-    }
-
-    /**
      * Sets the total number of items without pagination.
      * @param totalItems the total number of items without pagination.
      */
@@ -140,9 +94,6 @@ public class TasksPaginationModel extends PaginationModel {
         if (this.totalItems % pageSize != 0) {
             this.maxPage++;
         }
-
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.totalItemChanged();
-        }
+        doActionOnListeners(listener -> listener.totalItemChanged());
     }
 }

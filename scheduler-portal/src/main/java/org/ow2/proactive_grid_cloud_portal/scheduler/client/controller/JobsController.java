@@ -44,8 +44,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUt
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -363,7 +361,7 @@ public class JobsController {
 
         String startCursor = paginationController.getModel().getStartCursor();
         String endCursor = paginationController.getModel().getEndCursor();
-        int pageSize = SchedulerConfig.get().getPageSize(PaginatedItemType.JOB);
+        int pageSize = paginationController.getModel().getPageSize();
         boolean first = paginationController.getModel().isFirst();
 
         ExecutionsModel executionModel = this.parentController.getModel();

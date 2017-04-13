@@ -32,16 +32,30 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 
 public class JobsPaginationView extends PaginationView<JobsPaginationController> implements JobsUpdatedListener {
 
+    /**
+     * Label that indicates the max number of jobs
+     */
+    private Label jobsTotalLabel = null;
+
+    private static String JOBS_TOTAL_TEXT = "Total number of jobs: ";
+
     public JobsPaginationView(JobsController controller) {
         super(controller.getPaginationController());
         this.paginationController.getModel().addPaginationListener(this);
         controller.getModel().addJobsUpdatedListener(this);
+    }
+
+    private void setTotalJobsLabel() {
+        jobsTotalLabel.setContents(JOBS_TOTAL_TEXT + paginationController.getModel().getTotalItems());
     }
 
     /**
@@ -51,16 +65,22 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
     @Override
     public Layout buildLayout() {
 
-        ToolStrip paginationLayout = new ToolStrip();
-        paginationLayout.addStyleName("itemPaginationBar");
-        paginationLayout.setHeight(30);
-        paginationLayout.setWidth100();
-        paginationLayout.setBackgroundImage("");
-        paginationLayout.setBackgroundColor("#fafafa");
-        paginationLayout.setBorder("0px");
+        this.jobsTotalLabel = new Label();
+        setTotalJobsLabel();
+        this.jobsTotalLabel.setAlign(Alignment.CENTER);
+        this.jobsTotalLabel.setWidth100();
+        this.jobsTotalLabel.setMinWidth(40);
+        this.jobsTotalLabel.setMargin(4);
+
+        HLayout labelLayout = new HLayout();
+        labelLayout.addStyleName("labelPaginationLayout");
+        labelLayout.addMember(this.jobsTotalLabel);
+
+        ToolStrip paginationLayout = getToolStripPaginationLayout();
 
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
+        paginationLayout.addMember(labelLayout);
         paginationLayout.addMember(this.pageLastButton);
         paginationLayout.addMember(this.pageNextButton);
 
@@ -74,10 +94,12 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
 
     @Override
     public void totalItemChanged() {
+        setTotalJobsLabel();
         itemsUpdated();
     }
 
     protected void itemsUpdated() {
+        setTotalJobsLabel();
         this.disableAllControls();
         this.enablePaginationControls();
     }

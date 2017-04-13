@@ -35,7 +35,6 @@ import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TasksUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PrefixWordSuggestOracle.TagSuggestion;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
@@ -83,7 +82,7 @@ public class TasksNavigationModel {
         this.parentModel.setTasksNavigationModel(this);
 
         this.availableTags = new PatriciaTrie<String>();
-        this.paginationModel = new TasksPaginationModel(PaginatedItemType.TASK);
+        this.paginationModel = new TasksPaginationModel();
 
         this.tagSuggestionListeners = new ArrayList<TagSuggestionListener>();
         this.tasksUpdatedListeners = new ArrayList<TasksUpdatedListener>();

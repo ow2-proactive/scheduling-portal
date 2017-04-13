@@ -106,20 +106,14 @@ public class TasksPaginationView extends PaginationView<TasksPaginationControlle
             }
         });
 
+        ToolStrip paginationLayout = getToolStripPaginationLayout();
+
         HLayout labelLayout = new HLayout();
         labelLayout.addStyleName("labelPaginationLayout");
         labelLayout.addMember(pageLabel);
         labelLayout.addMember(this.txtPageNumber);
         labelLayout.addMember(this.pageMaxLabel);
         labelLayout.addMember(this.offsetRangeLabel);
-
-        ToolStrip paginationLayout = new ToolStrip();
-        paginationLayout.addStyleName("itemPaginationBar");
-        paginationLayout.setHeight(30);
-        paginationLayout.setWidth100();
-        paginationLayout.setBackgroundImage("");
-        paginationLayout.setBackgroundColor("#fafafa");
-        paginationLayout.setBorder("0px");
 
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
