@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.util;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +53,11 @@ public class JobColumnsUtil {
     private static final String GENERIC_INFORMATION_TYPE = "generic-information";
 
     /**
+     * Variable type
+     */
+    private static final String VARIABLE_TYPE = "variable";
+
+    /**
      * Input date format
      */
     private static final String DATE_FORMAT_OUTPUT = "yyyy-MM-dd HH:mm:ss";
@@ -72,14 +78,38 @@ public class JobColumnsUtil {
     public static final String START_AT = "START_AT";
 
     /**
-     * Get the generic information key from the column name
+     * Get the value associated to one of the possible columns definition
      * @param columnName the name of the column
-     * @return the generic informaton key
+     * @param genericInformationMap the map of all generic information
+     * @param variablesMap the map of all variables
+     * @return the value if exists
      */
-    public static String getGenericInformationKey(String columnName) {
-        String startType = GENERIC_INFORMATION_TYPE + FIELDS_SEPARATOR;
-        if (columnName.startsWith(startType))
-            return columnName.replace(startType, "");
+    public static String getColumnValue(String columnName, final Map<String, String> genericInformationMap,
+            final Map<String, String> variablesMap) {
+        String value = getColumnValue(columnName, GENERIC_INFORMATION_TYPE, genericInformationMap);
+        if (value != null)
+            return value;
+
+        value = getColumnValue(columnName, VARIABLE_TYPE, variablesMap);
+
+        return value;
+    }
+
+    /**
+     * Get the column value from the column name
+     * @param columnName the name of the column
+     * @return the column key
+     */
+    private static String getColumnValue(String columnName, String startType, final Map<String, String> allItemsMap) {
+        startType += FIELDS_SEPARATOR;
+        if (columnName.startsWith(startType)) {
+            String key = columnName.replace(startType, "");
+            String value = allItemsMap.get(key);
+            if (value != null && START_AT.equals(key)) {
+                value = JobColumnsUtil.getFormattedDateString(value);
+            }
+            return value;
+        }
         return null;
     }
 

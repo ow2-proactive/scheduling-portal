@@ -115,12 +115,9 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
         for (GridColumns extraColumn : EXTRA_COLUMNS) {
             String columnName = extraColumn.getName();
-            String key = JobColumnsUtil.getGenericInformationKey(columnName);
-            if (key != null) {
-                String value = item.getGenericInformation().get(key);
-                if (JobColumnsUtil.START_AT.equals(key)) {
-                    value = JobColumnsUtil.getFormattedDateString(value);
-                }
+            //Fetch value associated to a column
+            String value = JobColumnsUtil.getColumnValue(columnName, item.getGenericInformation(), item.getVariables());
+            if (value != null) {
                 record.setAttribute(columnName, value);
             }
         }
