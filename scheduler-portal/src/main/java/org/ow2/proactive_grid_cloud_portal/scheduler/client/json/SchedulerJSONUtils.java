@@ -85,8 +85,7 @@ public class SchedulerJSONUtils extends JSONUtils {
     private static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
         JSONValue jsonValue = obj.get(propertyName);
         if (jsonValue == null) {
-            throw new JSONException(
-                "Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
+            throw new JSONException("Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
         }
         return jsonValue;
     }
@@ -117,8 +116,7 @@ public class SchedulerJSONUtils extends JSONUtils {
     private static long getLongValue(JSONObject obj, String fieldName) throws JSONException {
         JSONValue jsonLongValue = obj.get(fieldName);
         if (jsonLongValue == null) {
-            throw new JSONException(
-                "Expected JSON Object with attribute " + fieldName + ": " + obj.toString());
+            throw new JSONException("Expected JSON Object with attribute " + fieldName + ": " + obj.toString());
         }
         JSONNumber jsonLong = jsonLongValue.isNumber();
         if (jsonLong == null) {
@@ -183,15 +181,13 @@ public class SchedulerJSONUtils extends JSONUtils {
         if (endCursor)
             paginationModel.setHasNextPage(true);
         else
-            paginationModel
-                    .setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
+            paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
 
         //If a start cursor was defined then there was a previous page
         if (startCursor)
             paginationModel.setHasPreviousPage(true);
         else
-            paginationModel.setHasPreviousPage(
-                    getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+            paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
 
         //The number of jobs is updated only when there are no start or end cursor otherwise the number is not correct
         if (!startCursor && !endCursor) {
