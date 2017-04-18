@@ -85,8 +85,6 @@ public class SchedulerController extends Controller implements UncaughtException
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
 
-    private static final Logger LOGGER = Logger.getLogger(SchedulerController.class.getName());
-
     @Override
     public String getLoginSettingKey() {
         return LOGIN_SETTING;

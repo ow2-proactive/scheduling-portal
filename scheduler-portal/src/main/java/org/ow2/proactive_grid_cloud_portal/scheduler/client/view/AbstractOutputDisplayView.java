@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.AbstractSelectedTargetController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.AbstractSelectedTargetModel;
 

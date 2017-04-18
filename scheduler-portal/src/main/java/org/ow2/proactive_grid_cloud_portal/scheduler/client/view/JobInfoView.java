@@ -94,7 +94,7 @@ public class JobInfoView extends InfoView<Job>
     }
 
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
+    public void jobsUpdated(Map<Integer, Job> jobs) {
         if (this.displayedItem == null)
             return;
 

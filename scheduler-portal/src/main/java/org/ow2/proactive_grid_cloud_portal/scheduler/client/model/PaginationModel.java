@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
@@ -40,53 +41,57 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 public class PaginationModel {
 
     /**
-     * The current displayed page.
-     */
-    private int currentPage = 0;
-
-    /**
-     * The type of item to be paginated.
-     */
-    private PaginatedItemType itemType;
-
-    /**
-     * The number of the last page.
-     */
-    private int maxPage = 0;
-
-    /**
      * The total number of items to be displayed without pagination.
      */
-    private long totalItems = 0;
+    protected long totalItems = 0;
 
     /**
      * Listeners for pagination events.
      */
-    protected ArrayList<PaginationListener> paginationListeners;
+    protected final ArrayList<PaginationListener> paginationListeners;
 
+    /**
+     * The type of item to be paginated.
+     */
+    protected PaginatedItemType itemType;
+
+    /**
+     * Constructor
+     */
     public PaginationModel(PaginatedItemType itemType) {
         this.itemType = itemType;
         this.paginationListeners = new ArrayList<PaginationListener>();
     }
 
     /**
-     * Gets the current displayed page.
-     * @return the current displayed page.
+     * Add a listener for pagination events.
+     * @param listener the listener.
      */
-    public int getPage() {
-        return this.currentPage;
+    public void addPaginationListener(PaginationListener listener) {
+        this.paginationListeners.add(listener);
     }
 
     /**
-     * Change the current page
-     * 
-     * @param page new page number
+     * Get the total number of items without pagination.
+     * @return the total number of items without pagination.
      */
-    public void setPage(int page) {
-        this.currentPage = page;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
+    public long getTotalItems() {
+        return totalItems;
+    }
+
+    /**
+     * Apply an action on all listeners
+     */
+    protected void doActionOnListeners(Consumer<PaginationListener> listenerAction) {
+        this.paginationListeners.stream().forEach(listenerAction);
+    }
+
+    /**
+     * Sets the total number of items without pagination.
+     * @param totalItems the total number of items without pagination.
+     */
+    public void setTotalItems(long totalItems) {
+        this.totalItems = totalItems;
     }
 
     /**
@@ -103,54 +108,5 @@ public class PaginationModel {
      */
     public PaginatedItemType getItemType() {
         return itemType;
-    }
-
-    /**
-     * Add a listener for pagination events.
-     * @param listener the listener.
-     */
-    public void addPaginationListener(PaginationListener listener) {
-        this.paginationListeners.add(listener);
-    }
-
-    /**
-     * Gets the offset of the items to be retrieved for the current page.
-     * @return the offset of the items to be retrieved for the current page.
-     */
-    public int getOffset() {
-        return (this.currentPage * this.getPageSize());
-    }
-
-    /**
-     * Gets the number of the last page.
-     * @return the number of the last page.
-     */
-    public int getMaxPage() {
-        return maxPage;
-    }
-
-    /**
-     * Get the total number of items without pagination.
-     * @return the total number of items without pagination.
-     */
-    public long getTotalItems() {
-        return totalItems;
-    }
-
-    /**
-     * Sets the total number of items without pagination.
-     * @param totalItems the total number of items without pagination.
-     */
-    public void setTotalItems(long totalItems) {
-        this.totalItems = totalItems;
-        int pageSize = this.getPageSize();
-        this.maxPage = ((int) this.totalItems / pageSize) - 1;
-        if (this.totalItems % pageSize != 0) {
-            this.maxPage++;
-        }
-
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.totalItemChanged();
-        }
     }
 }

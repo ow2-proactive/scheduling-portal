@@ -43,7 +43,7 @@ import com.smartgwt.client.widgets.layout.Layout;
  *
  * @author mschnoor
  */
-public class TasksView extends AbstractGridItemsView implements TasksUpdatedListener {
+public class TasksView extends AbstractGridItemsView<Task> implements TasksUpdatedListener {
 
     protected TasksController controller;
 
@@ -70,8 +70,8 @@ public class TasksView extends AbstractGridItemsView implements TasksUpdatedList
     }
 
     protected Layout buildPagination() {
-        PaginationController paginationController = this.controller.getTaskNavigationController()
-                                                                   .getPaginationController();
+        PaginationController<?> paginationController = this.controller.getTaskNavigationController()
+                                                                      .getPaginationController();
         return buildPagination(paginationController);
     }
 

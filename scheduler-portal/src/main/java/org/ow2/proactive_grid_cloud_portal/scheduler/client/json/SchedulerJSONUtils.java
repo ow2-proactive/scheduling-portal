@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,10 +34,12 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPaginationModel;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 
@@ -61,15 +64,17 @@ public class SchedulerJSONUtils extends JSONUtils {
     /**
      * Parse a paginated list of jobs
      * @param jsonString the JSON as a string representing the paginated list of tasks.
+     * @param paginationController 
      * @return An object wrapping the list of tasks and the total number of tasks without pagination.
      * @throws JSONException if it fails to parse the JSON.
      */
-    public static JSONPaginatedJobs parseJSONPaginatedJobs(String jsonString) throws JSONException {
+    public static Map<Integer, Job> parseJSONJobs(String jsonString, JobsPaginationModel paginationModel)
+            throws JSONException {
         JSONValue val = parseJSON(jsonString);
-        return getJobsFromJson(val);
+        return getJobsFromJson(val, paginationModel);
     }
 
-    protected static JSONObject getObject(JSONValue value) throws JSONException {
+    private static JSONObject getObject(JSONValue value) throws JSONException {
         JSONObject jsonObject = value.isObject();
         if (jsonObject == null) {
             throw new JSONException("Expected JSON Object: " + value.toString());
@@ -77,15 +82,16 @@ public class SchedulerJSONUtils extends JSONUtils {
         return jsonObject;
     }
 
-    protected static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
+    private static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
         JSONValue jsonValue = obj.get(propertyName);
         if (jsonValue == null) {
-            throw new JSONException("Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
+            throw new JSONException(
+                "Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
         }
         return jsonValue;
     }
 
-    protected static JSONArray getArray(JSONValue value) throws JSONException {
+    private static JSONArray getArray(JSONValue value) throws JSONException {
         JSONArray arr = value.isArray();
         if (arr == null) {
             throw new JSONException("Expected JSON Array: " + value.toString());
@@ -93,16 +99,32 @@ public class SchedulerJSONUtils extends JSONUtils {
         return arr;
     }
 
-    protected static long getSize(JSONObject obj) throws JSONException {
-        JSONValue jsonTotalValue = obj.get("size");
-        if (jsonTotalValue == null) {
-            throw new JSONException("Expected JSON Object with attribute total: " + obj.toString());
+    private static String getString(JSONValue value) throws JSONException {
+        if (value.isNull() != null) {
+            return null;
         }
-        JSONNumber jsonTotal = jsonTotalValue.isNumber();
-        if (jsonTotal == null) {
-            throw new JSONException("Expected JSON number: " + jsonTotalValue.toString());
+        JSONString string = value.isString();
+        if (string == null) {
+            throw new JSONException("Expected JSON String: " + value.toString());
         }
-        return (long) jsonTotal.doubleValue();
+        return string.stringValue();
+    }
+
+    private static long getSize(JSONObject obj) throws JSONException {
+        return getLongValue(obj, "size");
+    }
+
+    private static long getLongValue(JSONObject obj, String fieldName) throws JSONException {
+        JSONValue jsonLongValue = obj.get(fieldName);
+        if (jsonLongValue == null) {
+            throw new JSONException(
+                "Expected JSON Object with attribute " + fieldName + ": " + obj.toString());
+        }
+        JSONNumber jsonLong = jsonLongValue.isNumber();
+        if (jsonLong == null) {
+            throw new JSONException("Expected JSON number: " + jsonLongValue.toString());
+        }
+        return (long) jsonLong.doubleValue();
     }
 
     /**
@@ -149,29 +171,59 @@ public class SchedulerJSONUtils extends JSONUtils {
         return tags;
     }
 
-    public static JSONPaginatedJobs getJobsFromJson(JSONValue value) throws JSONException {
-        JSONPaginatedJobs resultJobs = new JSONPaginatedJobs();
-        Map<Integer, Job> jobs = resultJobs.getJobs();
+    private static void setPageInfoFromJson(JSONObject jsonPageInfo, JobsPaginationModel paginationModel,
+            long totalItems) throws JSONException {
+        paginationModel.setCurrentEndCursor(getString(getProperty(jsonPageInfo, "endCursor")));
+        paginationModel.setCurrentStartCursor(getString(getProperty(jsonPageInfo, "startCursor")));
 
-        JSONObject jsonInfo = getObject(value);
-        JSONObject jsonMap = getObject(getProperty(jsonInfo, "map"));
+        boolean endCursor = (paginationModel.getEndCursor() != null);
+        boolean startCursor = (paginationModel.getStartCursor() != null);
 
-        String key = jsonMap.keySet().iterator().next();
-        resultJobs.setRevision(Long.parseLong(key));
+        //If an end cursor was defined then there was a next page
+        if (endCursor)
+            paginationModel.setHasNextPage(true);
+        else
+            paginationModel
+                    .setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
 
-        JSONArray jsonArr = getArray(getProperty(jsonMap, key));
+        //If a start cursor was defined then there was a previous page
+        if (startCursor)
+            paginationModel.setHasPreviousPage(true);
+        else
+            paginationModel.setHasPreviousPage(
+                    getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
 
-        for (int i = 0; i < jsonArr.size(); i++) {
-            JSONObject jsonJob = jsonArr.get(i).isObject();
+        //The number of jobs is updated only when there are no start or end cursor otherwise the number is not correct
+        if (!startCursor && !endCursor) {
+            paginationModel.setTotalItems(totalItems);
+        }
+    }
+
+    private static Map<Integer, Job> getJobsFromJson(JSONValue value, JobsPaginationModel paginationModel)
+            throws JSONException {
+        Map<Integer, Job> jobs = new HashMap<>();
+
+        JSONObject jsonMain = getObject(value);
+
+        JSONValue jsonError = jsonMain.get("errors");
+        if (jsonError != null) {
+            throw new JSONException(jsonError.toString());
+        }
+
+        JSONObject jsonData = getObject(getProperty(jsonMain, "data"));
+        JSONObject jsonJobs = getObject(getProperty(jsonData, "jobs"));
+        long totalItems = getLongValue(jsonJobs, "totalCount");
+        JSONObject jsonPageInfo = getObject(getProperty(jsonJobs, "pageInfo"));
+        setPageInfoFromJson(jsonPageInfo, paginationModel, totalItems);
+        JSONArray jsonEdges = getArray(getProperty(jsonJobs, "edges"));
+
+        for (int i = 0; i < jsonEdges.size(); i++) {
+            JSONObject jsonJob = jsonEdges.get(i).isObject();
             Job j = Job.parseJson(jsonJob);
             jobs.put(j.getId(), j);
         }
 
-        long total = getSize(jsonInfo);
-
-        resultJobs.setTotal(total);
-
-        return resultJobs;
+        return jobs;
     }
 
     public static Job getJobInfoFromJson(String jsonString) throws JSONException {

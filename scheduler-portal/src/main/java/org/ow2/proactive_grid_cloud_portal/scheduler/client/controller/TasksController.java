@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -42,9 +40,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
@@ -62,7 +60,7 @@ public class TasksController {
 
     protected TasksModel model;
 
-    protected AbstractGridItemsView view;
+    protected AbstractGridItemsView<Task> view;
 
     protected SchedulerController parentController;
 
@@ -130,7 +128,7 @@ public class TasksController {
             TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
             String tagFilter = navigationModel.getCurrentTagFilter();
 
-            PaginationModel paginationModel = navigationModel.getPaginationModel();
+            TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
             int limit = paginationModel.getPageSize();
             String sessionId = LoginModel.getInstance().getSessionId();
