@@ -123,14 +123,14 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
                             loadingLabel.hide();
                             outputLabel.show();
                             outputLabel.setContents("<h3>Output:</h3>");
-                            outputText.setContents("<pre>" + result + "</pre>"));
+                            outputText.setContents("<pre>" + result + "</pre>");
                         }
 
                         @Override
                         public void onFailure(String reason) {
                             loadingLabel.hide();
                             outputLabel.hide();
-                            outputText.setContents("<pre>" + reason + "</pre>"));
+                            outputText.setContents("<pre>" + reason + "</pre>");
                         }
                     });
                 }
