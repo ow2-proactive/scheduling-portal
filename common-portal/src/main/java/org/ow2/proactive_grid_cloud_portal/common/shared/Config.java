@@ -29,8 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ow2.proactive.web.WebProperties;
-
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DefaultDateTimeFormatInfo;
 
@@ -53,9 +51,9 @@ public abstract class Config {
 
     private static Config instance = null;
 
-    public static final String HTTPS_ALLOW_ANY_CERTIFICATE = WebProperties.WEB_HTTPS_ALLOW_ANY_CERTIFICATE;
+    public static final String HTTPS_ALLOW_ANY_CERTIFICATE = "web.https.allow_any_certificate";
 
-    public static final String HTTPS_ALLOW_ANY_HOSTNAME = WebProperties.WEB_HTTPS_ALLOW_ANY_HOSTNAME;
+    public static final String HTTPS_ALLOW_ANY_HOSTNAME = "web.https.allow_any_hostname";
 
     protected Config() {
         this.properties = new HashMap<String, String>();
