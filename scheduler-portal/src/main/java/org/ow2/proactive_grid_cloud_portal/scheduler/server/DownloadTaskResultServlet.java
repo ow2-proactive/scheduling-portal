@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.ow2.proactive.web.WebProperties;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.slf4j.Logger;
@@ -50,6 +49,12 @@ import org.slf4j.LoggerFactory;
 public class DownloadTaskResultServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadTaskResultServlet.class);
+
+    public static final String METADATA_CONTENT_TYPE = "content.type";
+
+    public static final String METADATA_FILE_NAME = "file.name";
+
+    public static final String METADATA_FILE_EXTENSION = "file.extension";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -77,22 +82,21 @@ public class DownloadTaskResultServlet extends HttpServlet {
             String contentType;
             if (destination.equals("file")) {
                 contentType = "application/octet-stream";
-            } else if (json.has(WebProperties.METADATA_CONTENT_TYPE)) {
-                contentType = json.get(WebProperties.METADATA_CONTENT_TYPE).toString();
+            } else if (json.has(METADATA_CONTENT_TYPE)) {
+                contentType = json.get(METADATA_CONTENT_TYPE).toString();
             } else {
                 contentType = "text/plain";
             }
             response.setContentType(contentType);
 
             if (destination.equals("file")) {
-                if (json.has(WebProperties.METADATA_FILE_NAME)) {
+                if (json.has(METADATA_FILE_NAME)) {
                     response.setHeader("Content-disposition",
-                                       "attachment; filename=" + json.get(WebProperties.METADATA_FILE_NAME).toString());
-                } else if (json.has(WebProperties.METADATA_FILE_EXTENSION)) {
+                                       "attachment; filename=" + json.get(METADATA_FILE_NAME).toString());
+                } else if (json.has(METADATA_FILE_EXTENSION)) {
                     response.setHeader("Content-disposition",
                                        "attachment; filename=job" + jobId + "_" + taskId + "_result" +
-                                                              json.get(WebProperties.METADATA_FILE_EXTENSION)
-                                                                  .toString());
+                                                              json.get(METADATA_FILE_EXTENSION).toString());
                 } else {
                     response.setHeader("Content-disposition",
                                        "attachment; filename=job" + jobId + "_" + taskId + "_result");

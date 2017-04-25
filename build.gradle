@@ -69,9 +69,7 @@ subprojects {
         compile 'commons-fileupload:commons-fileupload:1.2'
         compile 'org.apache.httpcomponents:httpclient:4.3.6'
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
-        compile("org.ow2.proactive:common-http:${schedulingPortalVersion}") {
-            transitive = false
-        }
+        compile("org.ow2.proactive:common-http:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-client-gwt:${schedulingPortalVersion}")
