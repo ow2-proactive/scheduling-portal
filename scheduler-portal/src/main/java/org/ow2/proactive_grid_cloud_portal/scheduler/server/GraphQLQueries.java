@@ -92,48 +92,8 @@ public final class GraphQLQueries {
             else
                 jobsBuilder.last(pageSize);
 
-            List<JobInput> input = new ArrayList<>();
+            List<JobInput> input = getJobInputs(user, pending, running, finished, filterModel);
             jobsBuilder.input(input);
-
-            for (JobStatus status : JobStatus.values()) {
-                boolean fetch;
-                switch (status) {
-                    case PENDING:
-                        fetch = pending;
-                        break;
-                    case RUNNING:
-                        fetch = running;
-                        break;
-                    case FINISHED:
-                        fetch = finished;
-                        break;
-                    default:
-                        fetch = true;
-                }
-
-                if (fetch) {
-                    if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
-                        for (Constraint constraint : filterModel.getConstraints()) {
-                            input.add(getJobInputWithStatus(status,
-                                                            user,
-                                                            constraint.getFilteringString(Field.ID),
-                                                            constraint.getFilteringString(Field.PRIORITY),
-                                                            constraint.getFilteringString(Field.NAME)));
-                        }
-                    } else {
-                        String id = null;
-                        String priority = null;
-                        String name = null;
-
-                        for (Constraint contraint : filterModel.getConstraints()) {
-                            id = getValue(id, contraint.getFilteringString(Field.ID));
-                            priority = getValue(priority, contraint.getFilteringString(Field.PRIORITY));
-                            name = getValue(name, contraint.getFilteringString(Field.NAME));
-                        }
-                        input.add(getJobInputWithStatus(status, user, id, priority, name));
-                    }
-                }
-            }
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
             return queryBuilder.build();
@@ -141,6 +101,61 @@ public final class GraphQLQueries {
             LOGGER.log(Level.SEVERE, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get the list of filters for graphql query
+     * @param user the name of the user
+     * @param pending get pending jobs
+     * @param running get running jobs
+     * @param finished get finished jobs
+     * @param filterModel object containing filter contraints
+     * @return the list of filtering input
+     */
+    private List<JobInput> getJobInputs(final String user, final boolean pending, final boolean running,
+            final boolean finished, FilterModel filterModel) {
+        List<JobInput> input = new ArrayList<>();
+
+        for (JobStatus status : JobStatus.values()) {
+            boolean fetch;
+            switch (status) {
+                case PENDING:
+                    fetch = pending;
+                    break;
+                case RUNNING:
+                    fetch = running;
+                    break;
+                case FINISHED:
+                    fetch = finished;
+                    break;
+                default:
+                    fetch = true;
+            }
+
+            if (fetch) {
+                if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
+                    for (Constraint constraint : filterModel.getConstraints()) {
+                        input.add(getJobInputWithStatus(status,
+                                                        user,
+                                                        constraint.getFilteringString(Field.ID),
+                                                        constraint.getFilteringString(Field.PRIORITY),
+                                                        constraint.getFilteringString(Field.NAME)));
+                    }
+                } else {
+                    String id = null;
+                    String priority = null;
+                    String name = null;
+
+                    for (Constraint contraint : filterModel.getConstraints()) {
+                        id = getValue(id, contraint.getFilteringString(Field.ID));
+                        priority = getValue(priority, contraint.getFilteringString(Field.PRIORITY));
+                        name = getValue(name, contraint.getFilteringString(Field.NAME));
+                    }
+                    input.add(getJobInputWithStatus(status, user, id, priority, name));
+                }
+            }
+        }
+        return input;
     }
 
     private String getValue(String oldValue, String newValue) {
