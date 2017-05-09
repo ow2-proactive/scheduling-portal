@@ -32,6 +32,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
 /**
@@ -72,6 +73,11 @@ public class JobsModel {
     private JobsPaginationModel paginationModel;
 
     /**
+     * The filters
+     */
+    private FilterModel filterModel;
+
+    /**
      * Builds a jobs model from the scheduler parent model.
      * @param parentModel the scheduler parent model.
      */
@@ -79,6 +85,7 @@ public class JobsModel {
         this.parentModel = parentModel;
         this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
         this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
+        filterModel = new FilterModel();
     }
 
     /**
@@ -93,6 +100,14 @@ public class JobsModel {
      */
     public void emptyJobs() {
         setJobs(null);
+    }
+
+    public FilterModel getFilterModel() {
+        return filterModel;
+    }
+
+    public void setFilterModel(FilterModel filterModel) {
+        this.filterModel = filterModel;
     }
 
     /**

@@ -80,6 +80,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1042,7 +1043,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String revisionAndjobsinfo(final String sessionId, final String startCursor, final String endCursor,
             int pageSize, boolean first, final String user, final boolean pending, final boolean running,
-            final boolean finished) throws RestServerException, ServiceException {
+            final boolean finished, FilterModel filterModel) throws RestServerException, ServiceException {
         Query query = GraphQLQueries.get().getRevisionAndjobsInfoQuery(user,
                                                                        pending,
                                                                        running,
@@ -1050,7 +1051,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                        startCursor,
                                                                        endCursor,
                                                                        pageSize,
-                                                                       first);
+                                                                       first,
+                                                                       filterModel);
         String response = executeGraphQLQuery(sessionId, query);
         return response;
     }

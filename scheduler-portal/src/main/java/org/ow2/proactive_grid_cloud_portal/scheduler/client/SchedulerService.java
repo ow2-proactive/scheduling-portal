@@ -35,6 +35,7 @@ import javax.ws.rs.HeaderParam;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -381,8 +382,8 @@ public interface SchedulerService extends RemoteService {
      */
 
     String revisionAndjobsinfo(@HeaderParam("sessionid") String sessionId, String startCursor, String endCursor,
-            int pageSize, boolean first, String user, boolean pending, boolean running, boolean finished)
-            throws RestServerException, ServiceException;
+            int pageSize, boolean first, String user, boolean pending, boolean running, boolean finished,
+            FilterModel filterModel) throws RestServerException, ServiceException;
 
     /**
      * Image representing the job as designed in the WF studio when applicable
