@@ -32,7 +32,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
+import com.google.gwt.user.client.ui.Widget;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -42,6 +45,11 @@ import com.smartgwt.client.widgets.layout.Layout;
 public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedListener {
 
     private JobsController controller = null;
+
+    /**
+     * ui panel used to edit filters
+     */
+    protected FilterView filterView = null;
 
     /**
      * @param controller Controller used to create this view
@@ -89,6 +97,32 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
     public void totalItemChanged() {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    protected void clearAction() {
+        filterView.clearCriteria();
+        controller.getModel().setFilterModel(new FilterModel());
+        controller.fetchJobs(true);
+    }
+
+    @Override
+    protected void applyAction() {
+        controller.getModel().setFilterModel(filterView.getFilterModel());
+        controller.fetchJobs(true);
+    }
+
+    @Override
+    protected Widget getBuiltFilterPane() {
+        filterView = new FilterView();
+        return filterView;
+    }
+
+    @Override
+    protected Label getLabel() {
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br>");
+        label.setHeight(20);
+        return label;
     }
 
 }

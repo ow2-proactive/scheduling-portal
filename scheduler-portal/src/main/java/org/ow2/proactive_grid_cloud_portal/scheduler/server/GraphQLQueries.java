@@ -34,6 +34,9 @@ import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Constraint;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
 /**
@@ -60,15 +63,22 @@ public final class GraphQLQueries {
         return client;
     }
 
-    private JobInput getJobInputWithStatus(JobStatus status, String user) {
+    private JobInput getJobInputWithStatus(JobStatus status, String user, String id, String priority, String name) {
         JobInput.Builder input = new JobInput.Builder().status(status.name().toUpperCase());
         if (user != null)
             input.owner(user);
+        if (id != null)
+            input.id(id);
+        if (priority != null)
+            input.priority(priority);
+        if (name != null)
+            input.jobName(name);
         return input.build();
     }
 
     public Query getRevisionAndjobsInfoQuery(final String user, final boolean pending, final boolean running,
-            final boolean finished, String startCursor, String endCursor, int pageSize, boolean first) {
+            final boolean finished, String startCursor, String endCursor, int pageSize, boolean first,
+            FilterModel filterModel) {
         try {
             Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement().excludeRemovedTime();
 
@@ -82,28 +92,8 @@ public final class GraphQLQueries {
             else
                 jobsBuilder.last(pageSize);
 
-            List<JobInput> input = new ArrayList<>();
+            List<JobInput> input = getJobInputs(user, pending, running, finished, filterModel);
             jobsBuilder.input(input);
-
-            for (JobStatus status : JobStatus.values()) {
-                boolean fetch;
-                switch (status) {
-                    case PENDING:
-                        fetch = pending;
-                        break;
-                    case RUNNING:
-                        fetch = running;
-                        break;
-                    case FINISHED:
-                        fetch = finished;
-                        break;
-                    default:
-                        fetch = true;
-                }
-
-                if (fetch)
-                    input.add(getJobInputWithStatus(status, user));
-            }
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
             return queryBuilder.build();
@@ -111,6 +101,69 @@ public final class GraphQLQueries {
             LOGGER.log(Level.SEVERE, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get the list of filters for graphql query
+     * @param user the name of the user
+     * @param pending get pending jobs
+     * @param running get running jobs
+     * @param finished get finished jobs
+     * @param filterModel object containing filter contraints
+     * @return the list of filtering input
+     */
+    private List<JobInput> getJobInputs(final String user, final boolean pending, final boolean running,
+            final boolean finished, FilterModel filterModel) {
+        List<JobInput> input = new ArrayList<>();
+
+        for (JobStatus status : JobStatus.values()) {
+            boolean fetch;
+            switch (status) {
+                case PENDING:
+                    fetch = pending;
+                    break;
+                case RUNNING:
+                    fetch = running;
+                    break;
+                case FINISHED:
+                    fetch = finished;
+                    break;
+                default:
+                    fetch = true;
+            }
+
+            if (fetch) {
+                if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
+                    for (Constraint constraint : filterModel.getConstraints()) {
+                        input.add(getJobInputWithStatus(status,
+                                                        user,
+                                                        constraint.getFilteringString(Field.ID),
+                                                        constraint.getFilteringString(Field.PRIORITY),
+                                                        constraint.getFilteringString(Field.NAME)));
+                    }
+                } else {
+                    String id = null;
+                    String priority = null;
+                    String name = null;
+
+                    for (Constraint contraint : filterModel.getConstraints()) {
+                        id = getValue(id, contraint.getFilteringString(Field.ID));
+                        priority = getValue(priority, contraint.getFilteringString(Field.PRIORITY));
+                        name = getValue(name, contraint.getFilteringString(Field.NAME));
+                    }
+                    input.add(getJobInputWithStatus(status, user, id, priority, name));
+                }
+            }
+        }
+        return input;
+    }
+
+    private String getValue(String oldValue, String newValue) {
+        if (oldValue == null)
+            return newValue;
+        if (newValue == null)
+            return oldValue;
+        return oldValue + newValue;
     }
 
 }

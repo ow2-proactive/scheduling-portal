@@ -34,12 +34,21 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCont
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksCentricColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksListGrid;
 
+import com.google.gwt.user.client.ui.Widget;
+import com.smartgwt.client.types.TopOperatorAppearance;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.form.FilterBuilder;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
 public class TasksCentricView extends FilteringGridItemView<Task> implements TasksUpdatedListener {
 
     protected TasksController controller;
+
+    /**
+     * ui panel used to edit filters
+     */
+    private FilterBuilder filterBuilder = null;
 
     public TasksCentricView(TasksController controller) {
         this.controller = controller;
@@ -88,5 +97,34 @@ public class TasksCentricView extends FilteringGridItemView<Task> implements Tas
 
     @Override
     public void totalItemChanged() {
+    }
+
+    @Override
+    protected void clearAction() {
+        filterBuilder.clearCriteria();
+        itemsGrid.applyFilter(filterBuilder.getCriteria());
+    }
+
+    @Override
+    protected void applyAction() {
+        itemsGrid.applyFilter(filterBuilder.getCriteria());
+    }
+
+    @Override
+    protected Widget getBuiltFilterPane() {
+        filterBuilder = new FilterBuilder();
+        filterBuilder.setDataSource(this.itemsGrid.getDataSource());
+        filterBuilder.setTopOperatorAppearance(TopOperatorAppearance.RADIO);
+        return filterBuilder;
+    }
+
+    @Override
+    protected Label getLabel() {
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>" +
+                                "Filters apply only to the current page.<br>" +
+                                "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> " +
+                                "controls to view more results.");
+        label.setHeight(55);
+        return label;
     }
 }

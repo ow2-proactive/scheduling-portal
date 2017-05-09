@@ -27,9 +27,9 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
 
+import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.types.TopOperatorAppearance;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Img;
@@ -39,10 +39,10 @@ import com.smartgwt.client.widgets.events.MouseOutEvent;
 import com.smartgwt.client.widgets.events.MouseOutHandler;
 import com.smartgwt.client.widgets.events.MouseOverEvent;
 import com.smartgwt.client.widgets.events.MouseOverHandler;
-import com.smartgwt.client.widgets.form.FilterBuilder;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.layout.VStack;
 
 
 public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> {
@@ -55,47 +55,33 @@ public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> 
     protected Img filterButtonLabel = null;
 
     /**
-     * ui panel used to edit filters
-     */
-    protected FilterBuilder filterBuilder = null;
-
-    /**
      * Construct and return the pane used to filter the job's datasource
      *
      * @return a widget for filtering the grid
      */
     public Layout buildFilterPane() {
-        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br><br>" +
-                                "Filters apply only to the current page.<br>" +
-                                "Use The <strong>&lt;Previous</strong> and <strong>Next&gt;</strong> " +
-                                "controls to view more results.");
-        label.setHeight(55);
+        Label label = getLabel();
 
-        this.filterPane = new VLayout();
+        this.filterPane = new VStack();
         this.filterPane.setBackgroundColor("#fafafa");
         this.filterPane.addMember(label);
 
         Layout gridFilterPane = new VLayout();
         gridFilterPane.setWidth100();
-        gridFilterPane.setHeight100();
-
-        filterBuilder = new FilterBuilder();
-        filterBuilder.setDataSource(this.itemsGrid.getDataSource());
-        filterBuilder.setTopOperatorAppearance(TopOperatorAppearance.RADIO);
+        gridFilterPane.setHeight(90);
 
         IButton ok = new IButton("Apply");
         ok.setHeight(20);
         ok.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
             public void onClick(ClickEvent event) {
-                itemsGrid.applyFilter(filterBuilder.getCriteria());
+                applyAction();
             }
         });
         IButton clear = new IButton("Clear");
         clear.setHeight(20);
         clear.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
             public void onClick(ClickEvent event) {
-                filterBuilder.clearCriteria();
-                itemsGrid.applyFilter(filterBuilder.getCriteria());
+                clearAction();
             }
         });
 
@@ -107,7 +93,7 @@ public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> 
         buttons.setMembersMargin(5);
         buttons.setMembers(clear, ok);
 
-        gridFilterPane.addMember(filterBuilder);
+        gridFilterPane.addMember(getBuiltFilterPane());
         gridFilterPane.addMember(buttons);
 
         this.filterPane.setPadding(5);
@@ -119,6 +105,14 @@ public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> 
 
         return this.filterPane;
     }
+
+    protected abstract Widget getBuiltFilterPane();
+
+    protected abstract void clearAction();
+
+    protected abstract void applyAction();
+
+    protected abstract Label getLabel();
 
     protected void toggleFilterPane() {
         if (!filterPane.isVisible()) {

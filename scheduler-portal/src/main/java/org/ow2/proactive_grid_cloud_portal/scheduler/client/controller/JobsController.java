@@ -384,6 +384,7 @@ public class JobsController {
                                       fetchPending,
                                       fetchRunning,
                                       fetchFinished,
+                                      model.getFilterModel(),
                                       new AsyncCallback<String>() {
 
                                           public void onFailure(Throwable caught) {

@@ -33,6 +33,7 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -326,7 +327,8 @@ public interface SchedulerServiceAsync {
      * @param callback
      */
     void revisionAndjobsinfo(String sessionId, String startCursor, String endCursor, int pageSize, boolean first,
-            String user, boolean pending, boolean running, boolean finished, AsyncCallback<String> callback);
+            String user, boolean pending, boolean running, boolean finished, FilterModel filterModel,
+            AsyncCallback<String> callback);
 
     void schedulerStateRevision(String sessionId, AsyncCallback<Long> callback);
 
