@@ -72,25 +72,4 @@ public class Constraint implements IsSerializable {
     public void setValue(String value) {
         this.value = value;
     }
-
-    public String getFilteringString(Field field) {
-        if (field != targetField) {
-            return null;
-        }
-
-        switch (action) {
-            //case CONTAINS:
-            //    return "*" + value + "*";
-            case EQUALS:
-                return value;
-            //case GREATER_THAN_OR_EQUAL_TO:
-            //    return null;
-            //case LESS_THAN_OR_EQUAL_TO:
-            //    return null;
-            //case STARTS_WITH:
-            //    return value + "*";
-            default:
-                return null;
-        }
-    }
 }

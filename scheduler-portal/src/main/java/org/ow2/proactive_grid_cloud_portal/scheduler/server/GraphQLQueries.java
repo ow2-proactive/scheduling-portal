@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +36,6 @@ import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Constraint;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
@@ -63,19 +63,6 @@ public final class GraphQLQueries {
         return client;
     }
 
-    private JobInput getJobInputWithStatus(JobStatus status, String user, String id, String priority, String name) {
-        JobInput.Builder input = new JobInput.Builder().status(status.name().toUpperCase());
-        if (user != null)
-            input.owner(user);
-        if (id != null)
-            input.id(id);
-        if (priority != null)
-            input.priority(priority);
-        if (name != null)
-            input.jobName(name);
-        return input.build();
-    }
-
     public Query getRevisionAndjobsInfoQuery(final String user, final boolean pending, final boolean running,
             final boolean finished, String startCursor, String endCursor, int pageSize, boolean first,
             FilterModel filterModel) {
@@ -96,6 +83,7 @@ public final class GraphQLQueries {
             jobsBuilder.input(input);
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
+            LOGGER.log(Level.SEVERE, queryBuilder.build().getQuery());
             return queryBuilder.build();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
@@ -135,27 +123,79 @@ public final class GraphQLQueries {
             if (fetch) {
                 if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
                     for (Constraint constraint : filterModel.getConstraints()) {
-                        input.add(getJobInputWithStatus(status,
-                                                        user,
-                                                        constraint.getFilteringString(Field.ID),
-                                                        constraint.getFilteringString(Field.PRIORITY),
-                                                        constraint.getFilteringString(Field.NAME)));
+                        input.add(getJobInput(status, user, Collections.singletonList(constraint)));
                     }
                 } else {
                     String id = null;
                     String priority = null;
                     String name = null;
 
-                    for (Constraint contraint : filterModel.getConstraints()) {
-                        id = getValue(id, contraint.getFilteringString(Field.ID));
-                        priority = getValue(priority, contraint.getFilteringString(Field.PRIORITY));
-                        name = getValue(name, contraint.getFilteringString(Field.NAME));
-                    }
-                    input.add(getJobInputWithStatus(status, user, id, priority, name));
+                    input.add(getJobInput(status, user, filterModel.getConstraints()));
                 }
             }
         }
         return input;
+    }
+
+    private JobInput getJobInput(JobStatus status, String user, List<Constraint> constraints) {
+        JobInput.Builder input = new JobInput.Builder();
+        input.status(status.name().toUpperCase());
+        if (user != null)
+            input.owner(user);
+
+        String id = null;
+        String priority = null;
+        String name = null;
+        for (Constraint constraint : constraints) {
+            String value = constraint.getValue();
+            switch (constraint.getTargetField()) {
+                case ID: {
+                    switch (constraint.getAction()) {
+                        case EQUALS:
+                            id = getValue(id, value);
+                            break;
+                        case GREATER_THAN_OR_EQUAL_TO:
+                            input.greaterThanId(value);
+                            break;
+                        case LESS_THAN_OR_EQUAL_TO:
+                            input.lowerThanId(value);
+                            break;
+                        default:
+                            ;
+                    }
+                }
+                    break;
+                case PRIORITY: {
+                    priority = getValue(priority, value.toUpperCase());
+                }
+                    break;
+                case NAME: {
+                    switch (constraint.getAction()) {
+                        case EQUALS:
+                            name = getValue(name, value);
+                            break;
+                        case CONTAINS:
+                            name = getValue(name, "*" + value + "*");
+                            break;
+                        case STARTS_WITH:
+                            name = getValue(name, value + "*");
+                            break;
+                        default:
+                            ;
+                    }
+                }
+                    break;
+            }
+        }
+
+        if (id != null)
+            input.id(id);
+        if (priority != null)
+            input.priority(priority);
+        if (name != null)
+            input.jobName(name);
+
+        return input.build();
     }
 
     private String getValue(String oldValue, String newValue) {

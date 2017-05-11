@@ -31,6 +31,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.google.gwt.dom.client.Style.VerticalAlign;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -142,7 +144,7 @@ public class FilterView extends VStack {
         }
     }
 
-    private class RowFilter extends HStack implements ClickHandler {
+    private class RowFilter extends HStack implements ClickHandler, ChangeHandler {
 
         private ListBox fieldsList;
 
@@ -171,6 +173,31 @@ public class FilterView extends VStack {
             }
         }
 
+        @Override
+        public void onChange(ChangeEvent event) {
+            setActionsAccordingToSelectedField();
+        }
+
+        private void setActionsAccordingToSelectedField() {
+            Field field = Field.get(fieldsList.getSelectedValue());
+            actionList.clear();
+            actionList.addItem(Action.EQUALS.getName());
+            switch (field) {
+                case ID: {
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+                    break;
+                }
+                case NAME: {
+                    actionList.addItem(Action.CONTAINS.getName());
+                    actionList.addItem(Action.STARTS_WITH.getName());
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         private void enableRemoveButton(boolean value) {
             removeButton.setEnabled(value);
             buttonImage.getElement().getStyle().setOpacity(value ? 1 : 0.5);
@@ -187,6 +214,7 @@ public class FilterView extends VStack {
             removeButton.getElement().appendChild(buttonImage.getElement());
 
             fieldsList = new ListBox();
+            fieldsList.addChangeHandler(this);
             fieldsList.setPixelSize(100, 20);
             for (Field field : Field.values()) {
                 fieldsList.addItem(field.getName());
@@ -194,9 +222,7 @@ public class FilterView extends VStack {
 
             actionList = new ListBox();
             actionList.setPixelSize(140, 20);
-            for (Action action : Action.values()) {
-                actionList.addItem(action.getName());
-            }
+            setActionsAccordingToSelectedField();
 
             textBox = new TextBox();
             textBox.setPixelSize(140, 12);
