@@ -83,7 +83,6 @@ public final class GraphQLQueries {
             jobsBuilder.input(input);
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
-            LOGGER.log(Level.SEVERE, queryBuilder.build().getQuery());
             return queryBuilder.build();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
