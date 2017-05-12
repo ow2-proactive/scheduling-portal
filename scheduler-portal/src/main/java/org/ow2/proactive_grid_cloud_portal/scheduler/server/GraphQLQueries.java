@@ -125,10 +125,6 @@ public final class GraphQLQueries {
                         input.add(getJobInput(status, user, Collections.singletonList(constraint)));
                     }
                 } else {
-                    String id = null;
-                    String priority = null;
-                    String name = null;
-
                     input.add(getJobInput(status, user, filterModel.getConstraints()));
                 }
             }
@@ -154,13 +150,13 @@ public final class GraphQLQueries {
                             id = getValue(id, value);
                             break;
                         case GREATER_THAN_OR_EQUAL_TO:
-                            input.greaterThanId(value);
+                            input.afterId(value);
                             break;
                         case LESS_THAN_OR_EQUAL_TO:
-                            input.lowerThanId(value);
+                            input.beforeId(value);
                             break;
                         default:
-                            ;
+                            break;
                     }
                 }
                     break;
@@ -180,7 +176,7 @@ public final class GraphQLQueries {
                             name = getValue(name, value + "*");
                             break;
                         default:
-                            ;
+                            break;
                     }
                 }
                     break;
