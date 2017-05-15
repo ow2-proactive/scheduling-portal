@@ -188,6 +188,7 @@ public class FilterView extends VStack {
                     actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
                     break;
                 }
+                case USER:
                 case NAME: {
                     actionList.addItem(Action.CONTAINS.getName());
                     actionList.addItem(Action.STARTS_WITH.getName());
