@@ -35,6 +35,7 @@ import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Action;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Constraint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
@@ -135,12 +136,12 @@ public final class GraphQLQueries {
     private JobInput getJobInput(JobStatus status, String user, List<Constraint> constraints) {
         JobInput.Builder input = new JobInput.Builder();
         input.status(status.name().toUpperCase());
-        if (user != null)
-            input.owner(user);
 
         String id = null;
         String priority = null;
         String name = null;
+        String statusString = null;
+
         for (Constraint constraint : constraints) {
             String value = constraint.getValue();
             switch (constraint.getTargetField()) {
@@ -158,37 +159,37 @@ public final class GraphQLQueries {
                         default:
                             break;
                     }
-                }
                     break;
+                }
+                case STATE: {
+                    statusString = getValue(statusString, value.toUpperCase());
+                    break;
+                }
                 case PRIORITY: {
                     priority = getValue(priority, value.toUpperCase());
-                }
                     break;
+                }
+                case USER: {
+                    user = getFilteringString(constraint.getAction(), user, value);
+                    break;
+                }
                 case NAME: {
-                    switch (constraint.getAction()) {
-                        case EQUALS:
-                            name = getValue(name, value);
-                            break;
-                        case CONTAINS:
-                            name = getValue(name, "*" + value + "*");
-                            break;
-                        case STARTS_WITH:
-                            name = getValue(name, value + "*");
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                    name = getFilteringString(constraint.getAction(), name, value);
                     break;
+                }
             }
         }
 
+        if (user != null)
+            input.owner(user);
         if (id != null)
             input.id(id);
         if (priority != null)
             input.priority(priority);
         if (name != null)
             input.jobName(name);
+        if (statusString != null)
+            input.status(statusString);
 
         return input.build();
     }
@@ -198,7 +199,27 @@ public final class GraphQLQueries {
             return newValue;
         if (newValue == null)
             return oldValue;
+        if (oldValue.equals(newValue))
+            return oldValue;
         return oldValue + newValue;
+    }
+
+    private String getFilteringString(Action action, String oldValue, String newValue) {
+        String filteringString = oldValue;
+        switch (action) {
+            case EQUALS:
+                filteringString = getValue(filteringString, newValue);
+                break;
+            case CONTAINS:
+                filteringString = getValue(filteringString, "*" + newValue + "*");
+                break;
+            case STARTS_WITH:
+                filteringString = getValue(filteringString, newValue + "*");
+                break;
+            default:
+                break;
+        }
+        return filteringString;
     }
 
 }

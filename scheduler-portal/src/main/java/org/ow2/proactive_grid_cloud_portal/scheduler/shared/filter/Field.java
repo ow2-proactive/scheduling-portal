@@ -35,7 +35,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum Field implements IsSerializable {
     ID("id"),
     PRIORITY("priority"),
-    NAME("name");
+    NAME("name"),
+    USER("user"),
+    STATE("state");
 
     private String name;
 
