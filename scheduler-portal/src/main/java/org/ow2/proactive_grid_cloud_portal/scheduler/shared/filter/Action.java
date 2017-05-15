@@ -33,12 +33,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @since May 9, 2017
  */
 public enum Action implements IsSerializable {
-    EQUALS("Equals");
-    // First only the equals action is treated
-    //CONTAINS("Contains"),
-    //STARTS_WITH("Starts with"),
-    //LESS_THAN_OR_EQUAL_TO("Less than or equal to"),
-    //GREATER_THAN_OR_EQUAL_TO("Greater than or equal to");
+    EQUALS("Equals"),
+    CONTAINS("Contains"),
+    STARTS_WITH("Starts with"),
+    LESS_THAN_OR_EQUAL_TO("Less than or equal to"),
+    GREATER_THAN_OR_EQUAL_TO("Greater than or equal to");
 
     private String name;
 
