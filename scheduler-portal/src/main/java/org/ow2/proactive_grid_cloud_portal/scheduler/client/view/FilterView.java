@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Action;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field;
@@ -41,7 +43,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.widgets.layout.HStack;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -73,7 +77,7 @@ public class FilterView extends VStack {
         FilterModel model = new FilterModel();
         int widgetCount = filterPanel.getMembersLength();
 
-        if (widgetCount == 1 && ((RowFilter) filterPanel.getMember(0)).textBox.getText().isEmpty()) {
+        if (widgetCount == 1 && ((RowFilter) filterPanel.getMember(0)).getValue().isEmpty()) {
             return model;
         }
 
@@ -82,7 +86,7 @@ public class FilterView extends VStack {
             RowFilter row = (RowFilter) filterPanel.getMember(i);
             Field field = Field.get(row.fieldsList.getSelectedValue());
             Action action = Action.get(row.actionList.getSelectedValue());
-            String value = row.textBox.getText();
+            String value = row.getValue();
             model.addConstraint(field, action, value);
         }
 
@@ -154,6 +158,12 @@ public class FilterView extends VStack {
 
         private TextBox textBox;
 
+        private ListBox priorityList;
+
+        private ListBox stateList;
+
+        private SimplePanel valuePanel;
+
         private Image buttonImage;
 
         public RowFilter() {
@@ -163,7 +173,8 @@ public class FilterView extends VStack {
             addMember(removeButton);
             addMember(fieldsList);
             addMember(actionList);
-            addMember(textBox);
+            valuePanel.setWidget(textBox);
+            addMember(valuePanel);
         }
 
         @Override
@@ -178,6 +189,15 @@ public class FilterView extends VStack {
             setActionsAccordingToSelectedField();
         }
 
+        public String getValue() {
+            Widget valueWidget = valuePanel.getWidget();
+            if (valueWidget == priorityList)
+                return priorityList.getSelectedValue();
+            if (valueWidget == stateList)
+                return stateList.getSelectedValue();
+            return textBox.getText();
+        }
+
         private void setActionsAccordingToSelectedField() {
             Field field = Field.get(fieldsList.getSelectedValue());
             actionList.clear();
@@ -186,12 +206,22 @@ public class FilterView extends VStack {
                 case ID: {
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
                     actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+                    valuePanel.setWidget(textBox);
                     break;
                 }
                 case USER:
                 case NAME: {
                     actionList.addItem(Action.CONTAINS.getName());
                     actionList.addItem(Action.STARTS_WITH.getName());
+                    valuePanel.setWidget(textBox);
+                    break;
+                }
+                case PRIORITY: {
+                    valuePanel.setWidget(priorityList);
+                    break;
+                }
+                case STATE: {
+                    valuePanel.setWidget(stateList);
                     break;
                 }
                 default:
@@ -223,10 +253,26 @@ public class FilterView extends VStack {
 
             actionList = new ListBox();
             actionList.setPixelSize(140, 20);
-            setActionsAccordingToSelectedField();
 
             textBox = new TextBox();
             textBox.setPixelSize(140, 12);
+
+            priorityList = new ListBox();
+            priorityList.setPixelSize(140, 20);
+            for (JobPriority priority : JobPriority.values()) {
+                priorityList.addItem(priority.name());
+            }
+
+            stateList = new ListBox();
+            stateList.setPixelSize(140, 20);
+            for (JobStatus status : JobStatus.values()) {
+                stateList.addItem(status.name());
+            }
+
+            valuePanel = new SimplePanel();
+            valuePanel.setPixelSize(150, 25);
+
+            setActionsAccordingToSelectedField();
         }
     }
 }
