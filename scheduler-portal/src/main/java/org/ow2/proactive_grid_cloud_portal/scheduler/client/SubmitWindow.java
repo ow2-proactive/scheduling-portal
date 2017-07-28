@@ -192,8 +192,6 @@ public class SubmitWindow {
     // ----- Catalog temp maps
     private HashMap<String, Integer> catalogBucketsMap;
 
-    private HashMap<String, Integer> catalogWorkflowsMap;
-
     private String CATALOG_URL = null;
 
     private Map<String, JobVariable> variables;
@@ -232,10 +230,8 @@ public class SubmitWindow {
      */
     private void buildCatalogUrl() {
         String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
-        if (catalogUrlFromConfig == null) {
-            CATALOG_URL = defaultCatalogUrl;
-        } else if (catalogUrlFromConfig.isEmpty()) {
+        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "catalog";
+        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
             CATALOG_URL = defaultCatalogUrl;
         } else {
             CATALOG_URL = catalogUrlFromConfig;
@@ -634,28 +630,20 @@ public class SubmitWindow {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                     String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/workflows";
+                                         "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
-                            JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                            JSONArray workflows = jsonObjectResponse.get("_embedded")
-                                                                    .isObject()
-                                                                    .get("workflowMetadataList")
-                                                                    .isArray();
+                            JSONArray workflows = JSONParser.parseStrict(response.getText()).isArray();
                             int workflowsSize = workflows.size();
-                            catalogWorkflowsMap = new HashMap<>(workflowsSize);
                             workflowsListBox.setEnabled(false);
                             workflowsListBox.clear();
                             workflowsListBox.addItem(CATALOG_SELECT_WF);
                             for (int i = 0; i < workflowsSize; i++) {
                                 JSONObject workflow = workflows.get(i).isObject();
                                 String workflowName = workflow.get("name").isString().stringValue();
-                                String workflowId = workflow.get("id").isNumber().toString();
-                                String dropdownListItemLabel = workflowName + " (" + workflowId + ")";
-                                workflowsListBox.addItem(dropdownListItemLabel);
-                                catalogWorkflowsMap.put(dropdownListItemLabel, Integer.parseInt(workflowId));
+                                workflowsListBox.addItem(workflowName);
                             }
                             workflowsListBox.setEnabled(true);
                         }
@@ -676,12 +664,11 @@ public class SubmitWindow {
             }
         });
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                JSONArray buckets = jsonObjectResponse.get("_embedded").isObject().get("bucketMetadataList").isArray();
+                JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
                 catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
@@ -888,9 +875,8 @@ public class SubmitWindow {
                     String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
                     String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    String selectedWorkflowId = String.valueOf(catalogWorkflowsMap.get(selectedWorkflowLabel));
                     formContent.add(new Hidden("bucketId", selectedBucketId));
-                    formContent.add(new Hidden("workflowId", selectedWorkflowId));
+                    formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
                 }
