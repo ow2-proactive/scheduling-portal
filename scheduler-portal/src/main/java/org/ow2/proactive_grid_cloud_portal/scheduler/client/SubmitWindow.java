@@ -634,7 +634,7 @@ public class SubmitWindow {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                     String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/workflows";
+                                         "/workflows/?size=5000";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setCallback(new RequestCallback() {
                         @Override
@@ -676,7 +676,7 @@ public class SubmitWindow {
             }
         });
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets/?size=5000");
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
