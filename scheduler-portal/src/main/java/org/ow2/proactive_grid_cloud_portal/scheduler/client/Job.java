@@ -48,6 +48,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String name;
 
+    private String projectName;
+
     private JobStatus status;
 
     private JobPriority priority;
@@ -102,6 +104,7 @@ public class Job implements Serializable, Comparable<Job> {
      * Creates a new instance of the Job class.
      * @param id the job ID
      * @param name the job name
+     * @param name the project
      * @param status the job status
      * @param priority the job priority
      * @param user the username of the user that submitted the job
@@ -118,12 +121,13 @@ public class Job implements Serializable, Comparable<Job> {
      * @param inErrorTime in error time
      * @param finishTime finish time
      */
-    public Job(int id, String name, JobStatus status, JobPriority priority, String user,
+    public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
             Map<String, String> genericInformation, Map<String, String> variables, int pending, int running,
             int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
             long inErrorTime, long finishTime) {
         this.id = id;
         this.name = name;
+        this.projectName = projectName;
         this.setStatus(status);
         this.setPriority(priority);
         this.setUser(user);
@@ -174,6 +178,22 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Setter of the job projectName.
+     * @param name the project of the job.
+     */
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    /**
+     * Getter for the projectName of the job.
+     * @return the username.
+     */
+    public String getProjectName() {
+        return projectName;
     }
 
     /**
@@ -368,10 +388,12 @@ public class Job implements Serializable, Comparable<Job> {
         Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
 
         String name = jsonJobInfo.get("name").isString().stringValue();
+        String projectName = jsonJobInfo.get("projectName").isString().stringValue();
         int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
         return new Job(id,
                        name,
+                       projectName,
                        JobStatus.valueOf(status),
                        JobPriority.findPriority(priority),
                        user,

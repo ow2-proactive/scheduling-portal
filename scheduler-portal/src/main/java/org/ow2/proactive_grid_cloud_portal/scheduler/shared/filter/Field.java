@@ -37,7 +37,8 @@ public enum Field implements IsSerializable {
     PRIORITY("priority"),
     NAME("name"),
     USER("user"),
-    STATE("state");
+    STATE("state"),
+    PROJECT_NAME("project");
 
     private String name;
 

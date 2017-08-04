@@ -209,6 +209,7 @@ public class FilterView extends VStack {
                     valuePanel.setWidget(textBox);
                     break;
                 }
+                case PROJECT_NAME:
                 case USER:
                 case NAME: {
                     actionList.addItem(Action.CONTAINS.getName());
