@@ -141,6 +141,7 @@ public final class GraphQLQueries {
         String priority = null;
         String name = null;
         String statusString = null;
+        String projectName = null;
 
         for (Constraint constraint : constraints) {
             String value = constraint.getValue();
@@ -177,6 +178,10 @@ public final class GraphQLQueries {
                     name = getFilteringString(constraint.getAction(), name, value);
                     break;
                 }
+                case PROJECT_NAME: {
+                    projectName = getFilteringString(constraint.getAction(), projectName, value);
+                    break;
+                }
             }
         }
 
@@ -190,6 +195,8 @@ public final class GraphQLQueries {
             input.jobName(name);
         if (statusString != null)
             input.status(statusString);
+        if (projectName != null)
+            input.projectName(projectName);
 
         return input.build();
     }
