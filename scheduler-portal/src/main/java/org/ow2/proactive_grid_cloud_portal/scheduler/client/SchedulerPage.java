@@ -47,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.VisibilityMode;
@@ -222,28 +223,47 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             schedKillButton;
 
     private ToolStrip buildLogoStrip() {
-        ToolStrip logoStrip = new ToolStrip();
-
         final Label schedulerLabel = new Label("ProActive Scheduling & Orchestration");
         schedulerLabel.setStyleName("schedulerHeadline");
         schedulerLabel.setHeight100();
         schedulerLabel.setAutoWidth();
 
-        logoStrip.setStyleName("paddingLeftAndRight");
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
+        ToolStrip logoPA = new ToolStrip();
+        logoPA.setHeight(logoStripHeight);
+        logoPA.setWidth("33%");
+        logoPA.setBackgroundImage("");
+        logoPA.setBackgroundColor(logoStripBackgroundColor);
+        logoPA.setMargin(0);
+        logoPA.setBorder(logoStripBorder);
+        logoPA.setAlign(Alignment.LEFT);
+        logoPA.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
+        logoPA.addMember(schedulerLabel);
 
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addMember(schedulerLabel);
-        logoStrip.addFill();
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addFill();
+        ToolStrip logoAzure = new ToolStrip();
+        logoAzure.setHeight(logoStripHeight);
+        logoAzure.setWidth("33%");
+        logoAzure.setBackgroundImage("");
+        logoAzure.setBackgroundColor(logoStripBackgroundColor);
+        logoAzure.setMargin(0);
+        logoAzure.setBorder(logoStripBorder);
+        logoAzure.setAlign(Alignment.CENTER);
+        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        logoAzureImg.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                Window.open("https://azure.microsoft.com/", "", "");
+            }
+        });
+        logoAzure.addMember(logoAzureImg);
 
-        //by click on logo - open home activeeon page in new tab
+        ToolStrip logoAE = new ToolStrip();
+        logoAE.setHeight(logoStripHeight);
+        logoAE.setWidth("33%");
+        logoAE.setBackgroundImage("");
+        logoAE.setBackgroundColor(logoStripBackgroundColor);
+        logoAE.setMargin(0);
+        logoAE.setBorder(logoStripBorder);
+        logoAE.setAlign(Alignment.RIGHT);
         Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(new ClickHandler() {
             @Override
@@ -251,7 +271,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 Window.open("http://activeeon.com/", "", "");
             }
         });
-        logoStrip.addMember(logoImg);
+        logoAE.addMember(logoImg);
+
+        ToolStrip logoStrip = new ToolStrip();
+        logoStrip.setStyleName("paddingLeftAndRight");
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+        logoStrip.addMember(logoPA);
+        logoStrip.addMember(logoAzure);
+        logoStrip.addMember(logoAE);
 
         return logoStrip;
     }
