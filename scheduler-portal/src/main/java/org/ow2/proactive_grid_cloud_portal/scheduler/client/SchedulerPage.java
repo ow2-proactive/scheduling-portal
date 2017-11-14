@@ -239,22 +239,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoPA.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
         logoPA.addMember(schedulerLabel);
 
-        ToolStrip logoAzure = new ToolStrip();
-        logoAzure.setHeight(logoStripHeight);
-        logoAzure.setWidth("33%");
-        logoAzure.setBackgroundImage("");
-        logoAzure.setBackgroundColor(logoStripBackgroundColor);
-        logoAzure.setMargin(0);
-        logoAzure.setBorder(logoStripBorder);
-        logoAzure.setAlign(Alignment.CENTER);
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("33%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.CENTER);
         Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        logoAzureImg.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                Window.open("https://azure.microsoft.com/", "", "");
-            }
-        });
-        logoAzure.addMember(logoAzureImg);
+        additionalLogoCenter.addMember(logoAzureImg);
 
         ToolStrip logoAE = new ToolStrip();
         logoAE.setHeight(logoStripHeight);
@@ -282,7 +276,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoStrip.setBorder(logoStripBorder);
         logoStrip.setMargin(0);
         logoStrip.addMember(logoPA);
-        logoStrip.addMember(logoAzure);
+        logoStrip.addMember(additionalLogoCenter);
         logoStrip.addMember(logoAE);
 
         return logoStrip;
