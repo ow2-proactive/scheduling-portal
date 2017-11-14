@@ -507,17 +507,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
-        ToolStripButton calendarButton = new ToolStripButton("Calendar");
-        calendarButton.setIcon(SchedulerImages.instance.calendar().getSafeUri().asString());
-        calendarButton.setIconSize(20);
-        calendarButton.setTooltip("Import Workflows scheduled at a given date & time in your favorite Calendar, Re-schedule Jobs, and Add Periodicity.");
-        calendarButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                CalendarInfoWindow w = new CalendarInfoWindow();
-                w.show();
-            }
-        });
-
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
@@ -530,7 +519,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addSeparator();
         tools.addButton(submitButton);
         tools.addSeparator();
-        tools.addButton(calendarButton);
         tools.addButton(errorButton);
         tools.addFill();
         tools.addButton(studioLinkButton);
