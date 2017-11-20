@@ -632,6 +632,7 @@ public class SubmitWindow {
                     String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
                                          "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
+                    req.setHeader("sessionID", LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
@@ -665,6 +666,7 @@ public class SubmitWindow {
         });
 
         RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
+        req.setHeader("sessionID", LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
