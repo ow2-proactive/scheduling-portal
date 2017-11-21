@@ -112,4 +112,10 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/calendar.png")
     ImageResource calendar();
 
+    @Source("images/add.png")
+    ImageResource add();
+
+    @Source("images/remove.png")
+    ImageResource remove();
+
 }

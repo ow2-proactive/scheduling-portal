@@ -23,42 +23,49 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
+package org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 
 /**
  * @author ActiveEon Team
- * @since Mar 3, 2017
+ * @since Apr 28, 2017
  */
-public class SharedProperties implements IsSerializable {
+public class FilterModel implements IsSerializable {
 
-    private Map<String, String> properties;
+    private boolean matchAny;
 
-    private Map<String, String> portalProperties;
+    private List<Constraint> constraints;
 
-    public SharedProperties() {
-        super();
-        this.properties = new HashMap<>();
-        this.portalProperties = new HashMap<>();
+    public FilterModel() {
     }
 
-    public SharedProperties(Map<String, String> properties, Map<String, String> portalProperties) {
-        super();
-        this.properties = properties;
-        this.portalProperties = portalProperties;
+    public List<Constraint> getConstraints() {
+        if (constraints == null)
+            constraints = new ArrayList<>();
+        return constraints;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
+    public void setConstraints(List<Constraint> constraints) {
+        this.constraints = constraints;
     }
 
-    public Map<String, String> getPortalProperties() {
-        return portalProperties;
+    public void addConstraint(Field targetField, Action action, String value) {
+        if (constraints == null)
+            constraints = new ArrayList<>();
+        constraints.add(new Constraint(targetField, action, value));
+    }
+
+    public boolean isMatchAny() {
+        return matchAny;
+    }
+
+    public void setMatchAny(boolean matchAny) {
+        this.matchAny = matchAny;
     }
 
 }

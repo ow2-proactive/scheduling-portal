@@ -35,163 +35,65 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author the activeeon team
  *
  */
-public abstract class PaginationController {
+public abstract class PaginationController<T extends PaginationModel> {
 
-    /**
-     * The model for the pagination.
-     */
-    protected PaginationModel model;
+    protected T model;
 
     /**
      * Builds a controller for the pagination logic.
      */
-    public PaginationController() {
+    public PaginationController(T model) {
+        this.model = model;
     }
 
     /**
-     * Fetch the next item list page
+     * Fetch the first items list page
      */
-    public void nextPage() {
-        model.setPage(model.getPage() + 1);
-        this.fetch(false);
-    }
+    public abstract void firstPage();
 
     /**
-     * Fetch the previous item list page
+     * Fetch the last items list page
      */
-    public void previousPage() {
-        int curPage = model.getPage();
-        if (curPage == 0)
-            return;
-        model.setPage(curPage - 1);
-        this.fetch(false);
-    }
+    public abstract void lastPage();
 
     /**
-     * Fetch the first item list page.
+     * Fetch the next items list page
      */
-    public void firstPage() {
-        model.setPage(0);
-        this.fetch(false);
-    }
+    public abstract void nextPage();
 
     /**
-     * Fetch the last item list page.
+     * Fetch the previous items list page
      */
-    public void lastPage() {
-        this.model.setPage(this.model.getMaxPage());
-        this.fetch(false);
-    }
-
-    /**
-     * Fetch the page with the given number.
-     * @param pageNumber the number of the page to be displayed.
-     */
-    public void goToPage(int pageNumber) {
-        if (pageNumber < 0) {
-            pageNumber = 0;
-        }
-
-        int maxPage = this.model.getMaxPage();
-        if (pageNumber > maxPage) {
-            pageNumber = maxPage;
-        }
-
-        this.model.setPage(pageNumber);
-        this.fetch(false);
-    }
-
-    /**
-     * Computes the number of the last page of items.
-     * @param nbItem total number of items without pagination.
-     */
-    public void computeMaxPage(long nbItem) {
-        this.model.setTotalItems(nbItem);
-    }
+    public abstract void previousPage();
 
     /**
      * Fetch the items for the current page.
      */
     public abstract void fetch(boolean silentFetch);
 
-    public abstract Layout buildView();
-
     /**
-     * Gets the text that displays the pagination status.
-     * @return the text that displays the pagination status.
+     * Build the view
+     * @return the built Layout
      */
-    public String getPaginationRangeLabel() {
-        int page = this.model.getPage();
-        int size = this.model.getPageSize();
-
-        long index = page * size;
-        long total = this.model.getTotalItems();
-        long range = index + size;
-
-        index++;
-        if (index < 0) {
-            index = 0;
-        }
-        if (index > total) {
-            index = total;
-        }
-
-        if (range < total) {
-            return index + " - " + range;
-        } else {
-            return index + " - " + total;
-        }
-    }
-
-    public String getNumberPageText() {
-        if (this.model.getTotalItems() > 0) {
-            return "" + (this.model.getPage() + 1);
-        } else {
-            return "0";
-        }
-    }
+    public abstract Layout buildView();
 
     /**
      * Returns true if there is item before the current list of items, false otherwise.
      * @return true if there is item before the current list of items, false otherwise.
      */
-    public boolean hasPrevious() {
-        return (this.model.getPage() > 0);
-    }
+    public abstract boolean hasPrevious();
 
     /**
      * Returns true if there is item after the current list of items, false otherwise.
      * @return true if there is item after the current list of items, false otherwise.
      */
-    public boolean hasNext() {
-        return this.model.getTotalItems() > (this.model.getOffset() + this.model.getPageSize());
-    }
-
-    /**
-     * Gets the pagination model.
-     * @return the pagination model.
-     */
-    public PaginationModel getModel() {
-        return model;
-    }
-
-    /**
-     * Get the numero of the last page. 
-     * @return the numero of the last page.
-     */
-    public String getMaxPageNumberLabel() {
-        return "" + (this.model.getMaxPage() + 1);
-    }
-
-    /**
-     * Reset the pagination, no items are displayed in the paginated list.
-     */
-    public void resetPagination() {
-        this.model.setPage(-1);
-        this.model.setTotalItems(0);
-    }
+    public abstract boolean hasNext();
 
     public void refresh() {
         this.fetch(true);
+    }
+
+    public T getModel() {
+        return model;
     }
 }

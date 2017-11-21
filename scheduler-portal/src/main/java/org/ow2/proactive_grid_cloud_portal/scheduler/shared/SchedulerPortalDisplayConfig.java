@@ -53,11 +53,6 @@ public class SchedulerPortalDisplayConfig {
     private static final Logger LOGGER = Logger.getLogger(SchedulerPortalDisplayConfig.class.getName());
 
     /**
-     * Path to the user-defined portal property file
-     */
-    public static final String CONFIG_PATH = "scheduler-portal-display.conf";
-
-    /**
      * Extra columns property
      */
     private static final String EXTRA_COLUMNS_PROPERTY = "execution-list-extra-columns";

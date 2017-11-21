@@ -31,12 +31,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.QueryParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SharedProperties;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -214,7 +213,7 @@ public interface SchedulerService extends RemoteService {
      * them on his side.
      * @return the list of properties
      */
-    SharedProperties getProperties();
+    Map<String, String> getProperties();
 
     /**
      * Get the display properties read by the scheduler
@@ -371,8 +370,8 @@ public interface SchedulerService extends RemoteService {
      *   - its owner
      *   - the JobInfo class
      * @param sessionId a valid session id
-     * @param index offset
-     * @param limit max size of the result set
+     * @param startCursor start cursor
+     * @param endCursor end cursor
      * @param myJobs fetch only my jobs
      * @param pending fetch pending jobs
      * @param running fetch running jobs
@@ -381,11 +380,10 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String revisionAndjobsinfo(@HeaderParam("sessionid")
 
-    String sessionId, @QueryParam("index") int index, @QueryParam("limit") int limit,
-            @QueryParam("myjobs") boolean myJobs, boolean pending, boolean running, boolean finished)
-            throws RestServerException, ServiceException;
+    String revisionAndjobsinfo(@HeaderParam("sessionid") String sessionId, String startCursor, String endCursor,
+            int pageSize, boolean first, String user, boolean pending, boolean running, boolean finished,
+            FilterModel filterModel) throws RestServerException, ServiceException;
 
     /**
      * Image representing the job as designed in the WF studio when applicable

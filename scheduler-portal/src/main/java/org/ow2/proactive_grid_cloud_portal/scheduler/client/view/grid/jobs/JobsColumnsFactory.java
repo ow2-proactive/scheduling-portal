@@ -57,11 +57,13 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
 
-    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", 200, true, false);
+
+    public static final GridColumns PROJECT_NAME_ATTR = new GridColumns("project", "Project", -1, true, false);
 
     private static final GridColumns[] COLUMNS = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
                                                                      PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR,
-                                                                     NAME_ATTR };
+                                                                     NAME_ATTR, PROJECT_NAME_ATTR };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
@@ -102,6 +104,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
+        record.setAttribute(PROJECT_NAME_ATTR.getName(), item.getProjectName());
 
         if (item.getStatus() != JobStatus.IN_ERROR) {
             if (item.getFinishTime() > 0 && item.getStartTime() > 0) {
@@ -115,12 +118,9 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
         for (GridColumns extraColumn : EXTRA_COLUMNS) {
             String columnName = extraColumn.getName();
-            String key = JobColumnsUtil.getGenericInformationKey(columnName);
-            if (key != null) {
-                String value = item.getGenericInformation().get(key);
-                if (JobColumnsUtil.START_AT.equals(key)) {
-                    value = JobColumnsUtil.getFormattedDateString(value);
-                }
+            //Fetch value associated to a column
+            String value = JobColumnsUtil.getColumnValue(columnName, item.getGenericInformation(), item.getVariables());
+            if (value != null) {
                 record.setAttribute(columnName, value);
             }
         }

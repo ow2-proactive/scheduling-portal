@@ -32,6 +32,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
 /**
@@ -45,11 +46,6 @@ public class JobsModel {
      * The jobs that are fetched from the server.
      */
     private Map<Integer, Job> jobs = null;
-
-    /**
-     * The jobs revision. Jobs are updated only if we fetch a greater revision number.
-     */
-    private long jobsRev = -1;
 
     /**
      * The current selected job.
@@ -74,7 +70,12 @@ public class JobsModel {
     /**
      * The model for the job pagination logic.
      */
-    private PaginationModel paginationModel;
+    private JobsPaginationModel paginationModel;
+
+    /**
+     * The filters
+     */
+    private FilterModel filterModel;
 
     /**
      * Builds a jobs model from the scheduler parent model.
@@ -84,6 +85,7 @@ public class JobsModel {
         this.parentModel = parentModel;
         this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
         this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
+        filterModel = new FilterModel();
     }
 
     /**
@@ -97,7 +99,15 @@ public class JobsModel {
      * Empties the jobs list.
      */
     public void emptyJobs() {
-        setJobs(null, -1, 0);
+        setJobs(null);
+    }
+
+    public FilterModel getFilterModel() {
+        return filterModel;
+    }
+
+    public void setFilterModel(FilterModel filterModel) {
+        this.filterModel = filterModel;
     }
 
     /**
@@ -108,9 +118,8 @@ public class JobsModel {
      * @param jobs a jobset, or null
      * @param rev the revision of this jobset
      */
-    public void setJobs(Map<Integer, Job> jobs, long rev, long totalJobs) {
+    public void setJobs(Map<Integer, Job> jobs) {
         this.jobs = jobs;
-        this.jobsRev = rev;
         boolean empty = false;
 
         if (jobs == null) {
@@ -119,7 +128,7 @@ public class JobsModel {
         }
 
         for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
-            listener.jobsUpdated(this.jobs, totalJobs);
+            listener.jobsUpdated(this.jobs);
             if (empty)
                 listener.jobsUpdating();
         }
@@ -164,7 +173,7 @@ public class JobsModel {
      * Gets the jobs pagination model. 
      * @return the jobs pagination model.
      */
-    public PaginationModel getPaginationModel() {
+    public JobsPaginationModel getPaginationModel() {
         return paginationModel;
     }
 
@@ -172,7 +181,7 @@ public class JobsModel {
      * Sets the jobs pagination model.
      * @param jobsPaginationModel the jobs pagination model.
      */
-    public void setPaginationModel(PaginationModel jobsPaginationModel) {
+    public void setPaginationModel(JobsPaginationModel jobsPaginationModel) {
         this.paginationModel = jobsPaginationModel;
     }
 
@@ -216,13 +225,6 @@ public class JobsModel {
             }
         }
         return null;
-    }
-
-    /**
-     * @return the revision id associated with the currently held JobBag
-     */
-    public long getJobsRevision() {
-        return this.jobsRev;
     }
 
     /**

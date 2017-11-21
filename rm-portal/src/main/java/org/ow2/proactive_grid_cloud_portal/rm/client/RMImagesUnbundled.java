@@ -31,6 +31,8 @@ public class RMImagesUnbundled {
 
     public static final String AE_LOGO = "AE-Logo.png";
 
+    public static final String EXTRA_LOGO_CENTER = "extra-logo-center.png";
+
     public static final String COMPANY_ICON = "company-icon-squared.png";
 
     public static final String PA_ICON = "proactive_32.png";

@@ -23,18 +23,53 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.scheduler.client;
+package org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter;
 
-public class SchedulerImagesUnbundled {
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-    public static final String LOGO_350 = "logo_350.png";
 
-    public static final String PA_ICON = "proactive_32.png";
+/**
+ * @author ActiveEon Team
+ * @since May 9, 2017
+ */
 
-    public static final String EXTRA_LOGO_CENTER = "extra-logo-center.png";
+public class Constraint implements IsSerializable {
+    private Field targetField;
 
-    public static final String AE_LOGO = "AE-Logo.png";
+    private Action action;
 
-    public static final String COMPANY_ICON = "company-icon-squared.png";
+    private String value;
 
+    public Constraint() {
+    }
+
+    public Constraint(Field targetField, Action action, String value) {
+        this.targetField = targetField;
+        this.action = action;
+        this.value = value;
+    }
+
+    public Field getTargetField() {
+        return targetField;
+    }
+
+    public void setTargetField(Field targetField) {
+        this.targetField = targetField;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

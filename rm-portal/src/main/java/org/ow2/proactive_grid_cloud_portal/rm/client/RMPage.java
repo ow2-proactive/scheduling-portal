@@ -273,28 +273,41 @@ public class RMPage implements LogListener {
     }
 
     private ToolStrip buildLogoStrip() {
-        ToolStrip logoStrip = new ToolStrip();
-
         final Label resourcesLabel = new Label("Proactive Resource Manager");
         resourcesLabel.setStyleName("rmHeadline");
         resourcesLabel.setHeight100();
         resourcesLabel.setAutoWidth();
 
-        logoStrip.setStyleName("paddingLeftAndRight");
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
+        ToolStrip logoPA = new ToolStrip();
+        logoPA.setHeight(logoStripHeight);
+        logoPA.setWidth("33%");
+        logoPA.setBackgroundImage("");
+        logoPA.setBackgroundColor(logoStripBackgroundColor);
+        logoPA.setMargin(0);
+        logoPA.setBorder(logoStripBorder);
+        logoPA.setAlign(Alignment.LEFT);
+        logoPA.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
+        logoPA.addMember(resourcesLabel);
 
-        logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addMember(resourcesLabel);
-        logoStrip.addFill();
-        logoStrip.addMember(new Img(RMImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addFill();
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("33%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.CENTER);
+        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        additionalLogoCenter.addMember(logoAzureImg);
 
-        //by click on logo - open home activeeon page in new tab
+        ToolStrip logoAE = new ToolStrip();
+        logoAE.setHeight(logoStripHeight);
+        logoAE.setWidth("33%");
+        logoAE.setBackgroundImage("");
+        logoAE.setBackgroundColor(logoStripBackgroundColor);
+        logoAE.setMargin(0);
+        logoAE.setBorder(logoStripBorder);
+        logoAE.setAlign(Alignment.RIGHT);
         Img logoImg = new Img(RMImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(new ClickHandler() {
             @Override
@@ -302,7 +315,19 @@ public class RMPage implements LogListener {
                 Window.open("http://activeeon.com/", "", "");
             }
         });
-        logoStrip.addMember(logoImg);
+        logoAE.addMember(logoImg);
+
+        ToolStrip logoStrip = new ToolStrip();
+        logoStrip.setStyleName("paddingLeftAndRight");
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+        logoStrip.addMember(logoPA);
+        logoStrip.addMember(additionalLogoCenter);
+        logoStrip.addMember(logoAE);
 
         return logoStrip;
     }
