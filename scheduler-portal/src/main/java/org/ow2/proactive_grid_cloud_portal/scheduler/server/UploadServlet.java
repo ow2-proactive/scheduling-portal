@@ -128,7 +128,7 @@ public class UploadServlet extends HttpServlet {
             LOGGER.warn("job=" + job);
 
             if (bucketId != null && workflowName != null) {
-                fetchFromCatalogAndWriteResponse(bucketId, workflowName, response);
+                fetchFromCatalogAndWriteResponse(bucketId, workflowName, sessionId, response);
             } else {
                 writeResponse(job, response);
             }
@@ -145,7 +145,8 @@ public class UploadServlet extends HttpServlet {
         }
     }
 
-    private void fetchFromCatalogAndWriteResponse(String bucketId, String workflowName, HttpServletResponse response) {
+    private void fetchFromCatalogAndWriteResponse(String bucketId, String workflowName, String sessionId,
+            HttpServletResponse response) {
         String encodedWorkflowName;
         try {
             encodedWorkflowName = URLEncoder.encode(workflowName, "UTF-8");
@@ -156,6 +157,7 @@ public class UploadServlet extends HttpServlet {
         LOGGER.info("Sending request to catalog: " + url);
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(url);
+        httpget.addHeader("sessionID", sessionId);
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpclient.execute(httpget);

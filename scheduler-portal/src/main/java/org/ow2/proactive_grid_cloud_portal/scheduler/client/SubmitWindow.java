@@ -113,6 +113,8 @@ public class SubmitWindow {
 
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
 
+    private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
+
     private static final int width = 600;
 
     private static final int height = 520;
@@ -367,7 +369,7 @@ public class SubmitWindow {
         }
 
         hiddenPane.add(new Hidden("job", job));
-        hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
+        hiddenPane.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
         hiddenPane.add(validate);
         variablesActualForm.setWidget(hiddenPane);
         Layout fpanelWra = new Layout();
@@ -591,7 +593,7 @@ public class SubmitWindow {
         formContent.setHeight("30px");
 
         Hidden hiddenField = new Hidden();
-        hiddenField.setName("sessionId");
+        hiddenField.setName(SESSION_ID_PARAMETER_NAME);
         hiddenField.setValue(LoginModel.getInstance().getSessionId());
         formContent.add(hiddenField);
         formContent.add(fileUpload);
@@ -632,6 +634,7 @@ public class SubmitWindow {
                     String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
                                          "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
+                    req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
@@ -665,6 +668,7 @@ public class SubmitWindow {
         });
 
         RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
+        req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -703,7 +707,7 @@ public class SubmitWindow {
 
         final VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
-        formContent.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
+        formContent.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
 
         final FormPanel importFromCatalogformPanel = new FormPanel();
         importFromCatalogformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
