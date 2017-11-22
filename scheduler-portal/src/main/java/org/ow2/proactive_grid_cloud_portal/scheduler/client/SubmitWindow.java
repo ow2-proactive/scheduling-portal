@@ -460,7 +460,12 @@ public class SubmitWindow {
         startAccordingPlanningRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                displayInfoMessage("execution calendar defined? " + isExecutionCalendarGIDefined(job).toString());
+                if (!isExecutionCalendarGIDefined(job)) {
+                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job");
+                } else {
+                    displayInfoMessage("EXECUTION_CALENDAR defined for this Job");
+                }
+
                 startAtLayout.removeMember(dateChooser);
             }
         });
@@ -497,8 +502,8 @@ public class SubmitWindow {
         startAtRadioGroupPanel = new VerticalPanel();
         startAtRadioGroupPanel.setSpacing(10);
 
-       // startAtRadioGroupPanel.add(startAccordingPlanningRB);
-        addNewRadioButton();
+        startAtRadioGroupPanel.add(startAccordingPlanningRB);
+        //  startAccordingPlanningRB.setVisible(false);
 
         startAtRadioGroupPanel.add(startNowRB);
         startAtRadioGroupPanel.add(startAtRB);
@@ -506,12 +511,6 @@ public class SubmitWindow {
 
         startAtLayout.addMember(startAtRadioGroupPanel);
         rootPage.addMember(startAtLayout);
-    }
-    
-    private void addNewRadioButton () {
-    	if (job!=null && isExecutionCalendarGIDefined(job)) {
-    		 startAtRadioGroupPanel.add(startAccordingPlanningRB);
-    	}
     }
 
     private void updateScheduledTimeAt() {
@@ -906,6 +905,7 @@ public class SubmitWindow {
                 String fileName = fileUpload.getFilename();
                 if ("".compareTo(fileName) != 0) {
                     displayLoadingMessage();
+                    displayInfoMessage(fileName + " selected");
                     toSubmit.submit();
                 } else {
                     displayErrorMessage("Nothing to upload. Please select a file.");
@@ -1169,10 +1169,14 @@ public class SubmitWindow {
                         attribute.getNodeValue().equals("EXECUTION_CALENDARS")) {
                         exists = true;
                     }
-
                     if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
                         exists) {
-                        executionCalendarDefined = true;
+                        if (attribute.getNodeValue() != null) {
+                            executionCalendarDefined = true;
+                        } else {
+                            displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+                        }
+
                     }
                 }
 
