@@ -64,6 +64,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.xml.client.Attr;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -216,8 +217,6 @@ public class SubmitWindow {
     private String CATALOG_URL = null;
 
     private Map<String, JobVariable> variables;
-
-    private Map<String, String> genericInformationList;
 
     private String job;
 
@@ -461,16 +460,7 @@ public class SubmitWindow {
         startAccordingPlanningRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                String text = "";
-                Map<String, String> genericInfo = readExecCalendarGenericInfo(job);
-                displayInfoMessage("HERE" + genericInformationList.toString() + " " +
-                                   isExecutionCalendarGIDefined(job));
-                for (Entry<String, String> entry : genericInformationList.entrySet()) {
-                    text = text + " " + entry.getKey() + " " + entry.getValue();
-                }
-                startAccordingPlanningRB.setText(text);
-
-                //  startAccordingPlanningRB.setText("Planned according to embedded Execution Calendar defintion");
+                displayInfoMessage("execution calendar defined? " + isExecutionCalendarGIDefined(job).toString());
                 startAtLayout.removeMember(dateChooser);
             }
         });
@@ -507,7 +497,8 @@ public class SubmitWindow {
         startAtRadioGroupPanel = new VerticalPanel();
         startAtRadioGroupPanel.setSpacing(10);
 
-        startAtRadioGroupPanel.add(startAccordingPlanningRB);
+       // startAtRadioGroupPanel.add(startAccordingPlanningRB);
+        addNewRadioButton();
 
         startAtRadioGroupPanel.add(startNowRB);
         startAtRadioGroupPanel.add(startAtRB);
@@ -515,6 +506,12 @@ public class SubmitWindow {
 
         startAtLayout.addMember(startAtRadioGroupPanel);
         rootPage.addMember(startAtLayout);
+    }
+    
+    private void addNewRadioButton () {
+    	if (job!=null && isExecutionCalendarGIDefined(job)) {
+    		 startAtRadioGroupPanel.add(startAccordingPlanningRB);
+    	}
     }
 
     private void updateScheduledTimeAt() {
@@ -911,7 +908,7 @@ public class SubmitWindow {
                     displayLoadingMessage();
                     toSubmit.submit();
                 } else {
-                    displayInfoMessage("Nothing to upload");
+                    displayErrorMessage("Nothing to upload. Please select a file.");
                 }
 
             }
@@ -956,7 +953,6 @@ public class SubmitWindow {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         variables = readVars(job);
-                        genericInformationList = readExecCalendarGenericInfo(job);
                     } else {
                         GWT.log("JSON parse ERROR");
                         return;
@@ -1152,71 +1148,38 @@ public class SubmitWindow {
         return ret;
     }
 
-    private String isExecutionCalendarGIDefined(String jobDescriptor) {
+    private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
         Document dom = XMLParser.parse(jobDescriptor);
+        dom.getDocumentElement().normalize();
+
+        Boolean exists = false;
+        Boolean executionCalendarDefined = false;
+
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
-        int numberChildren = genericInfo.getLength();
+        // get the first item
+        Node root = genericInfo.item(0);
+        NodeList list = root.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeName() == "info" && node.hasAttributes()) { // node.getNodeType() == Node.ELEMENT_NODE
+                NamedNodeMap attributes = node.getAttributes();
+                for (int j = 0; j < attributes.getLength(); j++) {
+                    Node attribute = attributes.item(j);
+                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                        attribute.getNodeValue().equals("EXECUTION_CALENDARS")) {
+                        exists = true;
+                    }
 
-        if (genericInfo.getLength() > 0) {
-            Node root = genericInfo.item(0);
-
-        }
-
-        return Integer.toString(numberChildren) + " GI " + genericInfo.item(0).toString();
-    }
-
-    private Map<String, String> readExecCalendarGenericInfo(String jobDescriptor) {
-        Document dom = XMLParser.parse(jobDescriptor);
-        NodeList genericInformation = dom.getElementsByTagName("genericInformation");
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        if (genericInformation.getLength() > 0) {
-            for (int i = 0; i < genericInformation.getLength(); i++) {
-                Node genericInfoNode = genericInformation.item(i);
-
-                if (genericInfoNode != null) {
-                    NamedNodeMap attrs = genericInfoNode.getAttributes();
-                    try {
-                        if (attrs != null && genericInfoNode.hasAttributes()) {
-                            displayInfoMessage(genericInfoNode.getNodeName().toString());
-                            System.out.println(genericInfoNode.getNodeName().toString());
-
-                            String name = null;
-                            String value = null;
-                            String model = null;
-                            for (int j = 0; j < attrs.getLength(); j++) {
-                                Node attr = attrs.item(j);
-                                if (attr.getNodeName().equals("name")) {
-                                    name = attr.getNodeValue();
-                                }
-                                if (attr.getNodeName().equals("value")) {
-                                    value = attr.getNodeValue();
-                                }
-                                if (attr.getNodeName().equals("model")) {
-                                    model = attr.getNodeValue();
-                                }
-                            }
-                            if (name != null && value != null) {
-                                if (!name.matches("[A-Za-z0-9._]+")) {
-                                    // this won't necessarily be a problem at
-                                    // job submission,
-                                    // but it definitely will be here in the
-                                    // client; don't bother
-                                    continue;
-                                }
-
-                                ret.put(name, value);
-                            }
-                        }
-                    } catch (JavaScriptException t) {
-                        // Node.hasAttributes() throws if there are no
-                        // attributes... (GWT 2.1.0)
+                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
+                        exists) {
+                        executionCalendarDefined = true;
                     }
                 }
-            }
 
+            }
         }
-        return ret;
+
+        return executionCalendarDefined;
 
     }
 
