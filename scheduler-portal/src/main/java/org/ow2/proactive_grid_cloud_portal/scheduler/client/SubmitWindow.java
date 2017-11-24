@@ -217,7 +217,7 @@ public class SubmitWindow {
 
     private String job;
 
-    private Boolean isExecCalendarValueNull = true;
+    private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
 
     /**
      * Default constructor
@@ -951,7 +951,6 @@ public class SubmitWindow {
             public void onSubmitComplete(SubmitCompleteEvent event) {
 
                 String fn = fileUpload.getFilename();
-                displayInfoMessage("file name " + fn);
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
@@ -962,7 +961,6 @@ public class SubmitWindow {
 
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
-                        displayInfoMessage(job);
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
                         if (isExecutionCalendarGIDefined(job)) {
@@ -1187,7 +1185,7 @@ public class SubmitWindow {
                         exists = true;
                     }
                     if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (!attribute.getNodeValue().isEmpty() && !attribute.getNodeValue().isEmpty() && exists) {
+                        if (!attribute.getNodeValue().isEmpty() && exists) {
                             executionCalendarDefined = true;
                             if (!attribute.getNodeValue().isEmpty()) {
                                 isExecCalendarValueNull = false;
