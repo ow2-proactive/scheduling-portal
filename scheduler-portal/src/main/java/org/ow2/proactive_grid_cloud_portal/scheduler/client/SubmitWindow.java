@@ -464,7 +464,8 @@ public class SubmitWindow {
         startNowRadioButton = new RadioButton("startAtRadioGroup", "As soon as possible");
         startAtRadioButton = new RadioButton("startAtRadioGroup", "At");
 
-        startAccordingPlanningRadioButton.setVisible(false);
+        startAccordingPlanningRadioButton.setVisible(true);
+
         startNowRadioButton.setValue(true);
         startAtRadioButton.setValue(false);
 
@@ -474,7 +475,9 @@ public class SubmitWindow {
                 if (!isExecutionCalendarGIDefined(job)) {
                     displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
                 } else {
-                    displayErrorMessage("EXECUTION_CALENDAR defined for this Job ");
+                    if (isExecCalendarValueNull) {
+                        displayErrorMessage("EXECUTION_CALENDAR value is not set.");
+                    }
 
                 }
                 startAtLayout.removeMember(dateChooser);
@@ -1176,7 +1179,7 @@ public class SubmitWindow {
         NodeList list = root.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
-            if (node.getNodeName() == "info" && node.hasAttributes()) {
+            if (node.getNodeName().equals("info") && node.hasAttributes()) {
                 NamedNodeMap attributes = node.getAttributes();
                 for (int j = 0; j < attributes.getLength(); j++) {
                     Node attribute = attributes.item(j);
@@ -1185,9 +1188,9 @@ public class SubmitWindow {
                         exists = true;
                     }
                     if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (attribute.getNodeValue() != null && attribute.getNodeValue().toString() != "" && exists) {
+                        if (!attribute.getNodeValue().isEmpty() && attribute.getNodeValue() != "" && exists) {
                             executionCalendarDefined = true;
-                            if (attribute.getNodeValue() != "") {
+                            if (!attribute.getNodeValue().isEmpty()) {
                                 isExecCalendarValueNull = false;
                             } else {
                                 isExecCalendarValueNull = true;
