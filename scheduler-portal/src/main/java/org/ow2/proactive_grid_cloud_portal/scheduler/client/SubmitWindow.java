@@ -185,14 +185,12 @@ public class SubmitWindow {
 
     private VerticalPanel startAtRadioGroupPanel; // ---- Now or Later
 
-    private RadioButton startAccordingPlanningRB; // ------------------ As soon
-    // as
-    // possible radio button
+    private RadioButton startAccordingPlanningRadioButton; // ------------------ According to the defined EXECUTION_CALENDAR Generic Information of the Job
 
-    private RadioButton startNowRB; // ------------------ As soon as possible
+    private RadioButton startNowRadioButton; // ------------------ As soon as possible
     // radio button
 
-    private RadioButton startAtRB; // ------------------- at scheduled time
+    private RadioButton startAtRadioButton; // ------------------- at scheduled time
     // radio button
 
     private DateChooser dateChooser; // ----------------- DateChooser
@@ -219,6 +217,8 @@ public class SubmitWindow {
     private Map<String, JobVariable> variables;
 
     private String job;
+
+    private Boolean isExecCalendarValueNull = true;
 
     /**
      * Default constructor
@@ -327,9 +327,9 @@ public class SubmitWindow {
                 initSubmitAtPart();
                 rootPage.addMember(messagePanel);
                 rootPage.addMember(submitCancelButtons);
-                startAccordingPlanningRB.setValue(true);
-                startNowRB.setValue(false);
-                startAtRB.setValue(false);
+                startAccordingPlanningRadioButton.setValue(false);
+                startNowRadioButton.setValue(false);
+                startAtRadioButton.setValue(false);
                 setEnabledStartAtPart(false);
             }
         });
@@ -441,6 +441,17 @@ public class SubmitWindow {
         rootPage.reflow();
     }
 
+    private void setStartAccordingPlanningRadioButtonState(String job) {
+        if (job != null && isExecutionCalendarGIDefined(job)) {
+            startAccordingPlanningRadioButton.setVisible(true);
+            if (isExecCalendarValueNull) {
+                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+            }
+        } else {
+            startAccordingPlanningRadioButton.setVisible(false);
+        }
+    }
+
     private void initSubmitAtPart() {
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
@@ -448,37 +459,37 @@ public class SubmitWindow {
 
         startAtParameter = new Hidden("START_AT");
 
-        startAccordingPlanningRB = new RadioButton("startAtRadioGroup",
-                                                   "Planned according to embedded Execution Calendar defintion");
-        startNowRB = new RadioButton("startAtRadioGroup", "As soon as possible");
-        startAtRB = new RadioButton("startAtRadioGroup", "At");
+        startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
+                                                            "Planned according to embedded Execution Calendar defintion");
+        startNowRadioButton = new RadioButton("startAtRadioGroup", "As soon as possible");
+        startAtRadioButton = new RadioButton("startAtRadioGroup", "At");
 
-        startAccordingPlanningRB.setValue(false);
-        startNowRB.setValue(true);
-        startAtRB.setValue(false);
+        startAccordingPlanningRadioButton.setVisible(false);
+        startNowRadioButton.setValue(true);
+        startAtRadioButton.setValue(false);
 
-        startAccordingPlanningRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 if (!isExecutionCalendarGIDefined(job)) {
-                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job");
+                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
                 } else {
-                    displayInfoMessage("EXECUTION_CALENDAR defined for this Job");
-                }
+                    displayErrorMessage("EXECUTION_CALENDAR defined for this Job ");
 
+                }
                 startAtLayout.removeMember(dateChooser);
             }
         });
 
-        startNowRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startNowRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                startAtRB.setText("At");
+                startAtRadioButton.setText("At");
                 startAtLayout.removeMember(dateChooser);
             }
         });
 
-        startAtRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startAtRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 startAtLayout.addMember(dateChooser);
@@ -502,11 +513,10 @@ public class SubmitWindow {
         startAtRadioGroupPanel = new VerticalPanel();
         startAtRadioGroupPanel.setSpacing(10);
 
-        startAtRadioGroupPanel.add(startAccordingPlanningRB);
-        //  startAccordingPlanningRB.setVisible(false);
+        startAtRadioGroupPanel.add(startAccordingPlanningRadioButton);
 
-        startAtRadioGroupPanel.add(startNowRB);
-        startAtRadioGroupPanel.add(startAtRB);
+        startAtRadioGroupPanel.add(startNowRadioButton);
+        startAtRadioGroupPanel.add(startAtRadioButton);
         startAtRadioGroupPanel.setHeight("30px");
 
         startAtLayout.addMember(startAtRadioGroupPanel);
@@ -520,7 +530,7 @@ public class SubmitWindow {
         Date newDateTime = DateUtil.createLogicalTime(selectedHour, selectedMinute, 0, 0);
         Date updatedDate = DateUtil.combineLogicalDateAndTime(dateChooser.getData(), newDateTime);
         dateChooser.setData(updatedDate);
-        startAtRB.setText("At " + updatedDate.toString());
+        startAtRadioButton.setText("At " + updatedDate.toString());
     }
 
     private void updateScheduledTimeForToday() {
@@ -528,7 +538,7 @@ public class SubmitWindow {
         dateChooser.setData(newDate);
         dateChooser.getTimeItem().setHours(Integer.parseInt(DateTimeFormat.getFormat("HH").format(newDate)));
         dateChooser.getTimeItem().setMinutes(Integer.parseInt(DateTimeFormat.getFormat("mm").format(newDate)));
-        startAtRB.setText("At " + newDate.toString());
+        startAtRadioButton.setText("At " + newDate.toString());
     }
 
     private void initMessagesPart() {
@@ -778,7 +788,7 @@ public class SubmitWindow {
                     }
                     _fields[i].setValue(val);
                 }
-                if (startAtRB.getValue()) {
+                if (startAtRadioButton.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
@@ -858,7 +868,7 @@ public class SubmitWindow {
                     _fields[i].setValue(val);
                 }
                 enableValidation(false);
-                if (startAtRB.getValue()) {
+                if (startAtRadioButton.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
@@ -905,7 +915,6 @@ public class SubmitWindow {
                 String fileName = fileUpload.getFilename();
                 if ("".compareTo(fileName) != 0) {
                     displayLoadingMessage();
-                    displayInfoMessage(fileName + " selected");
                     toSubmit.submit();
                 } else {
                     displayErrorMessage("Nothing to upload. Please select a file.");
@@ -940,7 +949,7 @@ public class SubmitWindow {
             public void onSubmitComplete(SubmitCompleteEvent event) {
 
                 String fn = fileUpload.getFilename();
-
+                displayInfoMessage("file name " + fn);
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
@@ -951,7 +960,13 @@ public class SubmitWindow {
 
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
+                        displayInfoMessage(job);
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
+                        // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
+                        if (isExecutionCalendarGIDefined(job)) {
+                            setStartAccordingPlanningRadioButtonState(job);
+                        }
+
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
@@ -1045,16 +1060,16 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                startAtRB.setText("At " + dateChooser.getData().toString());
+                startAtRadioButton.setText("At " + dateChooser.getData().toString());
                 resetAllHandlers();
             }
         };
     }
 
     private void setEnabledStartAtPart(boolean state) {
-        startAccordingPlanningRB.setEnabled(state);
-        startNowRB.setEnabled(state);
-        startAtRB.setEnabled(state);
+        setStartAccordingPlanningRadioButtonState(job);
+        startNowRadioButton.setEnabled(state);
+        startAtRadioButton.setEnabled(state);
         submitButton.setDisabled(!state);
         checkButton.setDisabled(!state);
         if (!state) {
@@ -1161,7 +1176,7 @@ public class SubmitWindow {
         NodeList list = root.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
-            if (node.getNodeName() == "info" && node.hasAttributes()) { // node.getNodeType() == Node.ELEMENT_NODE
+            if (node.getNodeName() == "info" && node.hasAttributes()) {
                 NamedNodeMap attributes = node.getAttributes();
                 for (int j = 0; j < attributes.getLength(); j++) {
                     Node attribute = attributes.item(j);
@@ -1169,22 +1184,29 @@ public class SubmitWindow {
                         attribute.getNodeValue().equals("EXECUTION_CALENDARS")) {
                         exists = true;
                     }
-                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
-                        exists) {
-                        if (attribute.getNodeValue() != null) {
+                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                        if (attribute.getNodeValue() != null && attribute.getNodeValue().toString() != "" && exists) {
                             executionCalendarDefined = true;
-                        } else {
-                            displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+                            if (attribute.getNodeValue() != "") {
+                                isExecCalendarValueNull = false;
+                            } else {
+                                isExecCalendarValueNull = true;
+                            }
                         }
-
                     }
                 }
 
             }
         }
-
         return executionCalendarDefined;
 
+    }
+
+    private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(name)) {
+            return true;
+        } else
+            return false;
     }
 
     private boolean isTaskVariableElement(Node node) {
