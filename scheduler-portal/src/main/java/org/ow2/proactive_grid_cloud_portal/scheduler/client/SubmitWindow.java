@@ -64,7 +64,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.xml.client.Attr;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -1188,7 +1187,7 @@ public class SubmitWindow {
                         exists = true;
                     }
                     if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (!attribute.getNodeValue().isEmpty() && attribute.getNodeValue() != "" && exists) {
+                        if (!attribute.getNodeValue().isEmpty() && !attribute.getNodeValue().isEmpty() && exists) {
                             executionCalendarDefined = true;
                             if (!attribute.getNodeValue().isEmpty()) {
                                 isExecCalendarValueNull = false;
