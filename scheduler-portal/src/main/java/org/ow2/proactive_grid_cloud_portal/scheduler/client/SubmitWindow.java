@@ -131,40 +131,53 @@ public class SubmitWindow {
 
     private HandlerRegistration gridClickHR = null;
 
-    private VLayout rootPage; // ------------------------ the main layout of the window
+    private VLayout rootPage; // ------------------------ the main layout of the
+    // window
 
     private VLayout selectWfLayout; // ----------------- Select Workflow Panel
 
-    private ListBox wfMethodsListBox; // ------------- Methods to select a workflow
+    private ListBox wfMethodsListBox; // ------------- Methods to select a
+    // workflow
 
-    private VLayout fromFilePanel; // ------------------- The panel to select wf from disk
+    private VLayout fromFilePanel; // ------------------- The panel to select wf
+    // from disk
 
     private FileUpload fileUpload; // ------------------- FileUpload button
 
-    private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
+    private VerticalPanel selectWorkflowButtonsPanel; // Panel that holds the
+    // strategic items to
+    // get a wf
 
-    private Button sendFromFileButton; // --------------- Send the file to servlet from disk
+    private Button sendFromFileButton; // --------------- Send the file to
+    // servlet from disk
 
-    private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf from catalog
+    private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf
+    // from catalog
 
     private ListBox bucketsListBox; // ------------------ Buckets dropdown list
 
-    private ListBox workflowsListBox; // ---------------- Workflows dropdown list
+    private ListBox workflowsListBox; // ---------------- Workflows dropdown
+    // list
 
-    private Button sendFromCatalogButton; // ------------ Send the file to servlet from catalog
+    private Button sendFromCatalogButton; // ------------ Send the file to
+    // servlet from catalog
 
     // -------------------------------------------------- Variables Part
     private VLayout varsLayout; // --------------------- Variables Panel
 
-    private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
+    private VerticalPanel hiddenPane; // ---------------- Holds the parameters
+    // to submit along with the job
 
     private Hidden validate = new Hidden("validate", "true");
 
-    private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
+    private FormItem[] fields; // ----------------------- (visual) Variables to
+    // submit along with the job
 
-    private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
+    private Hidden[] _fields; // ------------------------ (hidden) Variables to
+    // submit along with the job
 
-    private Hidden startAtParameter; // ----------------- START_AT value to send along with the job
+    private Hidden startAtParameter; // ----------------- START_AT value to send
+    // along with the job
 
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
@@ -173,19 +186,25 @@ public class SubmitWindow {
 
     private VerticalPanel startAtRadioGroupPanel; // ---- Now or Later
 
-    private RadioButton startNowRB; // ------------------ As soon as possible radio button
+    private RadioButton startAccordingPlanningRadioButton; // ------------------ According to the defined EXECUTION_CALENDAR Generic Information of the Job
 
-    private RadioButton startAtRB; // ------------------- at scheduled time radio button
+    private RadioButton startNowRadioButton; // ------------------ As soon as possible
+    // radio button
+
+    private RadioButton startAtRadioButton; // ------------------- at scheduled time
+    // radio button
 
     private DateChooser dateChooser; // ----------------- DateChooser
 
-    private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
+    private HLayout submitCancelButtons; // ---------- -- Cancel and Submit
+    // buttons
 
     private IButton submitButton;
 
     private IButton checkButton;
 
-    private VLayout messagePanel; // -------------------- Loading Panel when uploading
+    private VLayout messagePanel; // -------------------- Loading Panel when
+    // uploading
 
     private Label waitLabel;
 
@@ -200,6 +219,8 @@ public class SubmitWindow {
 
     private String job;
 
+    private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
+
     /**
      * Default constructor
      *
@@ -211,23 +232,25 @@ public class SubmitWindow {
     }
 
     /**
-     * Shows the window created by the constructor,
-     * calling this after destroy will throw an NPE,
-     * you must create a new SubmitWindow for each job submission
+     * Shows the window created by the constructor, calling this after destroy
+     * will throw an NPE, you must create a new SubmitWindow for each job
+     * submission
      */
     public void show() {
         this.window.show();
     }
 
     /**
-     * Destroy the window, you may null the reference after this as it will not be usable again
+     * Destroy the window, you may null the reference after this as it will not
+     * be usable again
      */
     public void destroy() {
         this.window.destroy();
     }
 
     /**
-     * Builds the catalog URL. If none is configured in the settings file, sets the URL to the bundled Catalog
+     * Builds the catalog URL. If none is configured in the settings file, sets
+     * the URL to the bundled Catalog
      *
      */
     private void buildCatalogUrl() {
@@ -253,7 +276,8 @@ public class SubmitWindow {
         selectWfLayout.setIsGroup(true);
         selectWfLayout.setHeight("130px");
 
-        // This panel changes depending on the selected method of getting a workflow
+        // This panel changes depending on the selected method of getting a
+        // workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
         selectWorkflowButtonsPanel.setSpacing(5);
         selectWorkflowButtonsPanel.setHeight("50px");
@@ -304,8 +328,9 @@ public class SubmitWindow {
                 initSubmitAtPart();
                 rootPage.addMember(messagePanel);
                 rootPage.addMember(submitCancelButtons);
-                startNowRB.setValue(true);
-                startAtRB.setValue(false);
+                startAccordingPlanningRadioButton.setValue(false);
+                startNowRadioButton.setValue(false);
+                startAtRadioButton.setValue(false);
                 setEnabledStartAtPart(false);
             }
         });
@@ -349,6 +374,7 @@ public class SubmitWindow {
             BlurbItem modelItem = createModelItem(model);
             fields[i++] = modelItem;
         }
+
         variablesVisualForm.setFields(fields);
         return variablesVisualForm;
     }
@@ -416,6 +442,17 @@ public class SubmitWindow {
         rootPage.reflow();
     }
 
+    private void setStartAccordingPlanningRadioButtonState(String job) {
+        if (job != null && isExecutionCalendarGIDefined(job)) {
+            startAccordingPlanningRadioButton.setVisible(true);
+            if (isExecCalendarValueNull) {
+                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+            }
+        } else {
+            startAccordingPlanningRadioButton.setVisible(false);
+        }
+    }
+
     private void initSubmitAtPart() {
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
@@ -423,20 +460,40 @@ public class SubmitWindow {
 
         startAtParameter = new Hidden("START_AT");
 
-        startNowRB = new RadioButton("startAtRadioGroup", "As soon as possible");
-        startAtRB = new RadioButton("startAtRadioGroup", "At");
-        startNowRB.setValue(true);
-        startAtRB.setValue(false);
+        startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
+                                                            "Planned according to embedded Execution Calendar defintion");
+        startNowRadioButton = new RadioButton("startAtRadioGroup", "As soon as possible");
+        startAtRadioButton = new RadioButton("startAtRadioGroup", "At");
 
-        startNowRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startAccordingPlanningRadioButton.setVisible(true);
+
+        startNowRadioButton.setValue(true);
+        startAtRadioButton.setValue(false);
+
+        startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                startAtRB.setText("At");
+                if (!isExecutionCalendarGIDefined(job)) {
+                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
+                } else {
+                    if (isExecCalendarValueNull) {
+                        displayErrorMessage("EXECUTION_CALENDAR value is not set.");
+                    }
+
+                }
                 startAtLayout.removeMember(dateChooser);
             }
         });
 
-        startAtRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startNowRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                startAtRadioButton.setText("At");
+                startAtLayout.removeMember(dateChooser);
+            }
+        });
+
+        startAtRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 startAtLayout.addMember(dateChooser);
@@ -459,8 +516,11 @@ public class SubmitWindow {
 
         startAtRadioGroupPanel = new VerticalPanel();
         startAtRadioGroupPanel.setSpacing(10);
-        startAtRadioGroupPanel.add(startNowRB);
-        startAtRadioGroupPanel.add(startAtRB);
+
+        startAtRadioGroupPanel.add(startAccordingPlanningRadioButton);
+
+        startAtRadioGroupPanel.add(startNowRadioButton);
+        startAtRadioGroupPanel.add(startAtRadioButton);
         startAtRadioGroupPanel.setHeight("30px");
 
         startAtLayout.addMember(startAtRadioGroupPanel);
@@ -474,7 +534,7 @@ public class SubmitWindow {
         Date newDateTime = DateUtil.createLogicalTime(selectedHour, selectedMinute, 0, 0);
         Date updatedDate = DateUtil.combineLogicalDateAndTime(dateChooser.getData(), newDateTime);
         dateChooser.setData(updatedDate);
-        startAtRB.setText("At " + updatedDate.toString());
+        startAtRadioButton.setText("At " + updatedDate.toString());
     }
 
     private void updateScheduledTimeForToday() {
@@ -482,7 +542,7 @@ public class SubmitWindow {
         dateChooser.setData(newDate);
         dateChooser.getTimeItem().setHours(Integer.parseInt(DateTimeFormat.getFormat("HH").format(newDate)));
         dateChooser.getTimeItem().setMinutes(Integer.parseInt(DateTimeFormat.getFormat("mm").format(newDate)));
-        startAtRB.setText("At " + newDate.toString());
+        startAtRadioButton.setText("At " + newDate.toString());
     }
 
     private void initMessagesPart() {
@@ -734,7 +794,7 @@ public class SubmitWindow {
                     }
                     _fields[i].setValue(val);
                 }
-                if (startAtRB.getValue()) {
+                if (startAtRadioButton.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
@@ -814,7 +874,7 @@ public class SubmitWindow {
                     _fields[i].setValue(val);
                 }
                 enableValidation(false);
-                if (startAtRB.getValue()) {
+                if (startAtRadioButton.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
@@ -862,7 +922,8 @@ public class SubmitWindow {
                 if ("".compareTo(fileName) != 0) {
                     displayLoadingMessage();
                     toSubmit.submit();
-
+                } else {
+                    displayErrorMessage("Nothing to upload. Please select a file.");
                 }
 
             }
@@ -894,7 +955,6 @@ public class SubmitWindow {
             public void onSubmitComplete(SubmitCompleteEvent event) {
 
                 String fn = fileUpload.getFilename();
-
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
@@ -906,6 +966,11 @@ public class SubmitWindow {
                     if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
+                        // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
+                        if (isExecutionCalendarGIDefined(job)) {
+                            setStartAccordingPlanningRadioButtonState(job);
+                        }
+
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
@@ -999,15 +1064,16 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                startAtRB.setText("At " + dateChooser.getData().toString());
+                startAtRadioButton.setText("At " + dateChooser.getData().toString());
                 resetAllHandlers();
             }
         };
     }
 
     private void setEnabledStartAtPart(boolean state) {
-        startNowRB.setEnabled(state);
-        startAtRB.setEnabled(state);
+        setStartAccordingPlanningRadioButtonState(job);
+        startNowRadioButton.setEnabled(state);
+        startAtRadioButton.setEnabled(state);
         submitButton.setDisabled(!state);
         checkButton.setDisabled(!state);
         if (!state) {
@@ -1043,12 +1109,15 @@ public class SubmitWindow {
     }
 
     /**
-     * @param jobDescriptor an XML job descriptor as a string
+     * @param jobDescriptor
+     *            an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
      */
     private Map<String, JobVariable> readVars(String jobDescriptor) {
-        /* this will fail if someday the XML schema gets another <variable> tag elsewhere */
-
+        /*
+         * this will fail if someday the XML schema gets another <variable> tag
+         * elsewhere
+         */
         Document dom = XMLParser.parse(jobDescriptor);
         NodeList variables = dom.getElementsByTagName("variable");
         Map<String, JobVariable> ret = new LinkedHashMap<>();
@@ -1078,8 +1147,10 @@ public class SubmitWindow {
                             }
                             if (name != null && value != null) {
                                 if (!name.matches("[A-Za-z0-9._]+")) {
-                                    // this won't necessarily be a problem at job submission,
-                                    // but it definitely will be here in the client; don't bother
+                                    // this won't necessarily be a problem at
+                                    // job submission,
+                                    // but it definitely will be here in the
+                                    // client; don't bother
                                     continue;
                                 }
 
@@ -1087,12 +1158,59 @@ public class SubmitWindow {
                             }
                         }
                     } catch (JavaScriptException t) {
-                        // Node.hasAttributes() throws if there are no attributes... (GWT 2.1.0)
+                        // Node.hasAttributes() throws if there are no
+                        // attributes... (GWT 2.1.0)
                     }
                 }
             }
         }
         return ret;
+    }
+
+    private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
+        Document dom = XMLParser.parse(jobDescriptor);
+        dom.getDocumentElement().normalize();
+
+        Boolean exists = false;
+        Boolean executionCalendarDefined = false;
+
+        NodeList genericInfo = dom.getElementsByTagName("genericInformation");
+        // get the first item
+        Node root = genericInfo.item(0);
+        NodeList list = root.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                NamedNodeMap attributes = node.getAttributes();
+                for (int j = 0; j < attributes.getLength(); j++) {
+                    Node attribute = attributes.item(j);
+                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                        attribute.getNodeValue().equals("EXECUTION_CALENDARS")) {
+                        exists = true;
+                    }
+                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                        if (!attribute.getNodeValue().isEmpty() && exists) {
+                            executionCalendarDefined = true;
+                            if (!attribute.getNodeValue().isEmpty()) {
+                                isExecCalendarValueNull = false;
+                            } else {
+                                isExecCalendarValueNull = true;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return executionCalendarDefined;
+
+    }
+
+    private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(name)) {
+            return true;
+        } else
+            return false;
     }
 
     private boolean isTaskVariableElement(Node node) {
@@ -1135,4 +1253,5 @@ public class SubmitWindow {
         }
 
     }
+
 }
