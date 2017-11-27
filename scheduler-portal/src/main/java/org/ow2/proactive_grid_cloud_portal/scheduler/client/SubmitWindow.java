@@ -1185,7 +1185,7 @@ public class SubmitWindow {
                 for (int j = 0; j < attributes.getLength(); j++) {
                     Node attribute = attributes.item(j);
                     if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                        attribute.getNodeValue().equals("EXECUTION_CALENDARS")) {
+                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
                         exists = true;
                     }
                     if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
