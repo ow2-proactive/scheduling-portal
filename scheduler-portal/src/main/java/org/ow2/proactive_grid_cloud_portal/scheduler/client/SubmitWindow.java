@@ -967,10 +967,7 @@ public class SubmitWindow {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
-                        if (!job.isEmpty() && isExecutionCalendarGIDefined(job)) {
-                            setStartAccordingPlanningRadioButtonState(job);
-                        }
-
+                        setStartAccordingPlanningRadioButtonState(job);
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
