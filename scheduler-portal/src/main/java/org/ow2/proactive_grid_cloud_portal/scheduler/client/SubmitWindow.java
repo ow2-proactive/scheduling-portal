@@ -967,10 +967,7 @@ public class SubmitWindow {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
-                        if (isExecutionCalendarGIDefined(job)) {
-                            setStartAccordingPlanningRadioButtonState(job);
-                        }
-
+                        setStartAccordingPlanningRadioButtonState(job);
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
@@ -1169,37 +1166,37 @@ public class SubmitWindow {
 
     private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
         Document dom = XMLParser.parse(jobDescriptor);
-        dom.getDocumentElement().normalize();
-
         Boolean exists = false;
         Boolean executionCalendarDefined = false;
-
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
-        // get the first item
-        Node root = genericInfo.item(0);
-        NodeList list = root.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node.getNodeName().equals("info") && node.hasAttributes()) {
-                NamedNodeMap attributes = node.getAttributes();
-                for (int j = 0; j < attributes.getLength(); j++) {
-                    Node attribute = attributes.item(j);
-                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
-                        exists = true;
-                    }
-                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (!attribute.getNodeValue().isEmpty() && exists) {
-                            executionCalendarDefined = true;
-                            if (!attribute.getNodeValue().isEmpty()) {
-                                isExecCalendarValueNull = false;
-                            } else {
-                                isExecCalendarValueNull = true;
+        // check if the job has genericInformation or not
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            // get the first item
+            Node root = genericInfo.item(0);
+            NodeList list = root.getChildNodes();
+            for (int i = 0; i < list.getLength(); i++) {
+                Node node = list.item(i);
+                if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    for (int j = 0; j < attributes.getLength(); j++) {
+                        Node attribute = attributes.item(j);
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+                            exists = true;
+                        }
+                        if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                            if (!attribute.getNodeValue().isEmpty() && exists) {
+                                executionCalendarDefined = true;
+                                if (!attribute.getNodeValue().isEmpty()) {
+                                    isExecCalendarValueNull = false;
+                                } else {
+                                    isExecCalendarValueNull = true;
+                                }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
         return executionCalendarDefined;
