@@ -47,6 +47,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
@@ -74,6 +76,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -193,6 +196,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         Canvas tools = buildTools();
 
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.add(new HTML("<hr color=\"#f47930\" />"));
+
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
         Layout botPane = buildBotPane();
@@ -212,6 +220,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         contentLayout.addMember(buildLogoStrip());
         contentLayout.addMember(tools);
+        contentLayout.addMember(panel);
         contentLayout.addMember(stack);
         this.logWindow = new LogWindow(controller);
 

@@ -445,9 +445,6 @@ public class SubmitWindow {
     private void setStartAccordingPlanningRadioButtonState(String job) {
         if (job != null && isExecutionCalendarGIDefined(job)) {
             startAccordingPlanningRadioButton.setVisible(true);
-            if (isExecCalendarValueNull) {
-                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
-            }
         } else {
             startAccordingPlanningRadioButton.setVisible(false);
         }
@@ -473,14 +470,10 @@ public class SubmitWindow {
         startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                if (!isExecutionCalendarGIDefined(job)) {
-                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
-                } else {
-                    if (isExecCalendarValueNull) {
-                        displayErrorMessage("EXECUTION_CALENDAR value is not set.");
-                    }
-
+                if (isExecCalendarValueNull) {
+                    displayErrorMessage("EXECUTION_CALENDAR value is empty.");
                 }
+
                 startAtLayout.removeMember(dateChooser);
             }
         });
@@ -1185,17 +1178,12 @@ public class SubmitWindow {
                             exists = true;
                         }
                         if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                            if (!attribute.getNodeValue().isEmpty() && exists) {
-                                executionCalendarDefined = true;
-                                if (!attribute.getNodeValue().isEmpty()) {
-                                    isExecCalendarValueNull = false;
-                                } else {
-                                    isExecCalendarValueNull = true;
-                                }
-                            }
+                            executionCalendarDefined = true;
+                            if (!attribute.getNodeValue().isEmpty())
+                                isExecCalendarValueNull = false;
                         }
-                    }
 
+                    }
                 }
             }
         }
