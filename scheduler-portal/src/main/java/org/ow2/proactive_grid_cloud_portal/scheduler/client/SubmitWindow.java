@@ -445,9 +445,12 @@ public class SubmitWindow {
     private void setStartAccordingPlanningRadioButtonState(String job) {
         if (job != null && isExecutionCalendarGIDefined(job)) {
             startAccordingPlanningRadioButton.setVisible(true);
-        } else
+            if (isExecCalendarValueNull) {
+                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+            }
+        } else {
             startAccordingPlanningRadioButton.setVisible(false);
-
+        }
     }
 
     private void initSubmitAtPart() {
@@ -470,6 +473,14 @@ public class SubmitWindow {
         startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                if (!isExecutionCalendarGIDefined(job)) {
+                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
+                } else {
+                    if (isExecCalendarValueNull) {
+                        displayErrorMessage("EXECUTION_CALENDAR value is not set.");
+                    }
+
+                }
                 startAtLayout.removeMember(dateChooser);
             }
         });
@@ -821,7 +832,6 @@ public class SubmitWindow {
                                     if (errorMessage.contains("JobValidationException")) {
                                         errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
                                     }
-                                    //   displayErrorMessage(errorMessage);
                                     displayErrorMessage(obj.toString());
                                 }
                             }
@@ -957,10 +967,8 @@ public class SubmitWindow {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
-                        if (isExecutionCalendarGIDefined(job)) {
-                            startAccordingPlanningRadioButton.setVisible(false);
-                        } else {
-                            startAccordingPlanningRadioButton.setVisible(false);
+                        if (!job.isEmpty() && isExecutionCalendarGIDefined(job)) {
+                            setStartAccordingPlanningRadioButtonState(job);
                         }
 
                         variables = readVars(job);
@@ -1163,33 +1171,34 @@ public class SubmitWindow {
         Document dom = XMLParser.parse(jobDescriptor);
         Boolean exists = false;
         Boolean executionCalendarDefined = false;
-
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
         // get the first item
-        Node root = genericInfo.item(0);
-        NodeList list = root.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node.getNodeName().equals("info") && node.hasAttributes()) {
-                NamedNodeMap attributes = node.getAttributes();
-                for (int j = 0; j < attributes.getLength(); j++) {
-                    Node attribute = attributes.item(j);
-                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
-                        exists = true;
-                    }
-                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (!attribute.getNodeValue().isEmpty()) {
-                            executionCalendarDefined = true;
-                            if (!attribute.getNodeValue().isEmpty()) {
-                                isExecCalendarValueNull = false;
-                            } else {
-                                isExecCalendarValueNull = true;
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            Node root = genericInfo.item(0);
+            NodeList list = root.getChildNodes();
+            for (int i = 0; i < list.getLength(); i++) {
+                Node node = list.item(i);
+                if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    for (int j = 0; j < attributes.getLength(); j++) {
+                        Node attribute = attributes.item(j);
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+                            exists = true;
+                        }
+                        if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                            if (!attribute.getNodeValue().isEmpty() && exists) {
+                                executionCalendarDefined = true;
+                                if (!attribute.getNodeValue().isEmpty()) {
+                                    isExecCalendarValueNull = false;
+                                } else {
+                                    isExecCalendarValueNull = true;
+                                }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
         return executionCalendarDefined;
