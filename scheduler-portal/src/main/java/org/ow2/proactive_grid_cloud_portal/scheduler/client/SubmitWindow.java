@@ -832,7 +832,7 @@ public class SubmitWindow {
                                     if (errorMessage.contains("JobValidationException")) {
                                         errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
                                     }
-                                    displayErrorMessage(obj.toString());
+                                    displayErrorMessage(errorMessage);
                                 }
                             }
                         }
