@@ -38,6 +38,8 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Alignment;
@@ -166,6 +168,10 @@ public class RMPage implements LogListener {
         this.credentialsWindow = new CredentialsWindow();
 
         final Canvas header = buildTools();
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.add(new HTML("<hr color=\"#f47930\" />"));
 
         Canvas topPane = buildTopPane();
         topPane.setWidth100();
@@ -265,6 +271,7 @@ public class RMPage implements LogListener {
 
         rl.addMember(buildLogoStrip());
         rl.addMember(header);
+        rl.addMember(panel);
         rl.addMember(stack);
 
         this.logWindow = new LogWindow(controller);
