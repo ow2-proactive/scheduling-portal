@@ -1172,8 +1172,9 @@ public class SubmitWindow {
         Boolean exists = false;
         Boolean executionCalendarDefined = false;
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
-        // get the first item
+        // check if the job has genericInformation or not
         if (genericInfo != null && genericInfo.getLength() > 0) {
+            // get the first item
             Node root = genericInfo.item(0);
             NodeList list = root.getChildNodes();
             for (int i = 0; i < list.getLength(); i++) {
