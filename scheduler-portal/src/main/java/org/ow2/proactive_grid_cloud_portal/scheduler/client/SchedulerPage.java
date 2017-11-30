@@ -190,8 +190,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.rootLayout = contentLayout;
         contentLayout.setWidth100();
         contentLayout.setHeight100();
-        contentLayout.setBackgroundColor("#fafafMerci de penser à apporter votre chéquier pour la caution, le 1er loyer et nos honoraires. Ces chèques ne seront encaissés que lors de votre entrée dans les lieux.\n" +
-                                         " a");
+        contentLayout.setBackgroundColor("#fafafa");
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
