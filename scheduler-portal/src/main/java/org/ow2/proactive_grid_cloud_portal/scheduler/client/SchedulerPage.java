@@ -190,7 +190,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.rootLayout = contentLayout;
         contentLayout.setWidth100();
         contentLayout.setHeight100();
-        contentLayout.setBackgroundColor("#fafafa");
+        contentLayout.setBackgroundColor("#fafafMerci de penser à apporter votre chéquier pour la caution, le 1er loyer et nos honoraires. Ces chèques ne seront encaissés que lors de votre entrée dans les lieux.\n" +
+                                         " a");
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
@@ -200,10 +201,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HorizontalPanel panel = new HorizontalPanel();
         panel.setWidth("100%");
         panel.setHeight("3px");
-        panel.add(new HTML("<hr color=\"#f47930\" />"));
-        panel.getElement().getStyle().setBackgroundColor("f47930");
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
         panel.getElement().getStyle().setPadding(-1, Unit.PX);
-        //     panel.getElement().getStyle().setBorderWidth(-1, Unit.PX);
 
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
@@ -220,6 +219,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
+
         stack.setSections(executionsSections, detailsSection);
 
         contentLayout.addMember(buildLogoStrip());
