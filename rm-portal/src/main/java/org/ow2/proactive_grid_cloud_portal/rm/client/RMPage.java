@@ -37,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -171,7 +172,8 @@ public class RMPage implements LogListener {
         HorizontalPanel panel = new HorizontalPanel();
         panel.setWidth("100%");
         panel.setHeight("3px");
-        panel.add(new HTML("<hr color=\"#f47930\" />"));
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
 
         Canvas topPane = buildTopPane();
         topPane.setWidth100();
