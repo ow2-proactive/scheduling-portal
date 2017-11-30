@@ -46,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -200,6 +201,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         panel.setWidth("100%");
         panel.setHeight("3px");
         panel.add(new HTML("<hr color=\"#f47930\" />"));
+        panel.getElement().getStyle().setBackgroundColor("f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
+        //     panel.getElement().getStyle().setBorderWidth(-1, Unit.PX);
 
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
