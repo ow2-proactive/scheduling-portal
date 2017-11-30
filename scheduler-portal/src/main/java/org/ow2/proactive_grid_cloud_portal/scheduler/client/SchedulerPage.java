@@ -46,7 +46,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -190,8 +189,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.rootLayout = contentLayout;
         contentLayout.setWidth100();
         contentLayout.setHeight100();
-        contentLayout.setBackgroundColor("#fafafMerci de penser à apporter votre chéquier pour la caution, le 1er loyer et nos honoraires. Ces chèques ne seront encaissés que lors de votre entrée dans les lieux.\n" +
-                                         " a");
+        contentLayout.setBackgroundColor("#fafafa");
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
@@ -201,8 +199,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HorizontalPanel panel = new HorizontalPanel();
         panel.setWidth("100%");
         panel.setHeight("3px");
-        panel.getElement().getStyle().setBackgroundColor("#f47930");
-        panel.getElement().getStyle().setPadding(-1, Unit.PX);
+        panel.add(new HTML("<hr color=\"#f47930\" />"));
 
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
@@ -219,7 +216,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
-
         stack.setSections(executionsSections, detailsSection);
 
         contentLayout.addMember(buildLogoStrip());
