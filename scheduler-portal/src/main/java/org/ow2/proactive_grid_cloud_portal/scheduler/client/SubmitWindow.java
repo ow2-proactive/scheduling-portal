@@ -54,6 +54,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -114,6 +116,8 @@ public class SubmitWindow {
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
+
+    private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
     private static final int width = 600;
 
@@ -809,24 +813,36 @@ public class SubmitWindow {
                             return;
                         }
 
-                        JSONValue json = controller.parseJSON(result);
-                        JSONObject obj = json.isObject();
-                        if (obj != null) {
-                            if (obj.containsKey("valid")) {
-                                if (((JSONBoolean) obj.get("valid")).booleanValue()) {
-                                    if (obj.containsKey("updatedVariables")) {
-                                        updateVariables(obj.get("updatedVariables"));
-                                        redrawVariables();
+                        try {
+                            JSONValue json = JSONParser.parseStrict(result);
+                            JSONObject obj = json.isObject();
+                            if (obj != null) {
+                                if (obj.containsKey("valid")) {
+                                    if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                        if (obj.containsKey("updatedVariables")) {
+                                            updateVariables(obj.get("updatedVariables"));
+                                            redrawVariables();
+                                        }
+                                        GWT.log("Job validated");
+                                        displayInfoMessage("Job is valid");
+                                    } else if (obj.containsKey("errorMessage")) {
+                                        String errorMessage = obj.get("errorMessage").toString();
+                                        if (errorMessage.contains("JobValidationException")) {
+                                            errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                                        }
+                                        displayErrorMessage(errorMessage);
                                     }
-                                    GWT.log("Job validated");
-                                    displayInfoMessage("Job is valid");
-                                } else if (obj.containsKey("errorMessage")) {
-                                    String errorMessage = obj.get("errorMessage").toString();
-                                    if (errorMessage.contains("JobValidationException")) {
-                                        errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
-                                    }
-                                    displayErrorMessage(errorMessage);
                                 }
+                            }
+                        } catch (Throwable t) {
+                            // JSON parsing error workaround to force extract error message
+                            MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
+                            if (errorMessageMatcher != null) {
+                                GWT.log(errorMessageMatcher.getGroup(1));
+                                displayErrorMessage(errorMessageMatcher.getGroup(1));
+                            } else {
+                                GWT.log("JSON parse ERROR");
+                                displayErrorMessage("JSON parse ERROR");
                             }
                         }
                     }
@@ -964,11 +980,13 @@ public class SubmitWindow {
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
+                        displayErrorMessage(res);
                         return;
                     }
 
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
+                    displayErrorMessage(res);
                     return;
                 }
                 redrawVariables();
@@ -1099,8 +1117,7 @@ public class SubmitWindow {
     }
 
     /**
-     * @param jobDescriptor
-     *            an XML job descriptor as a string
+     * @param jobDescriptor an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
      */
     private Map<String, JobVariable> readVars(String jobDescriptor) {
