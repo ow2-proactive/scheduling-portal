@@ -42,6 +42,11 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+
 
 /**
  * NS Creation requires reading one or multiple files from the client,
@@ -149,10 +154,21 @@ public class NSCreationServlet extends HttpServlet {
                                                                                        toArray(policyParams),
                                                                                        toArray(policyFileParams));
 
-            if (jsonResult.equals("true")) {
-                jsonResult = createNonEscapedSimpleJsonPair("result", "true");
-            }
+            JSONValue json = JSONParser.parseStrict(jsonResult);
+            JSONObject obj = json.isObject();
+            if (obj != null) {
+                if (obj.containsKey("valid")) {
+                    if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                        jsonResult = createNonEscapedSimpleJsonPair("result", "true");
+                    } else {
+                        String errorMessage = obj.get("errorMessage").toString();
+                        write(response,
+                              createJavascriptPayload(callbackName,
+                                                      createEscapedSimpleJsonPair("errorMessage", errorMessage)));
 
+                    }
+                }
+            }
             write(response, createJavascriptPayload(callbackName, jsonResult));
         } catch (Throwable t) {
             write(response,
