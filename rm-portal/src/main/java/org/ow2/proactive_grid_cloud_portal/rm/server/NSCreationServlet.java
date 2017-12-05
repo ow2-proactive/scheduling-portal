@@ -38,14 +38,10 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -153,18 +149,17 @@ public class NSCreationServlet extends HttpServlet {
                                                                                        policy,
                                                                                        toArray(policyParams),
                                                                                        toArray(policyFileParams));
-
-            JSONValue json = JSONParser.parseStrict(jsonResult);
-            JSONObject obj = json.isObject();
-            if (obj != null) {
-                if (obj.containsKey("valid")) {
-                    if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+            JSONObject json = new JSONObject(jsonResult);
+            if (json != null) {
+                if (json.has("result")) {
+                    if (json.getBoolean("result")) {
                         jsonResult = createNonEscapedSimpleJsonPair("result", "true");
                     } else {
-                        String errorMessage = obj.get("errorMessage").toString();
+                        String errorMessage = json.get("errorMessage").toString();
                         write(response,
                               createJavascriptPayload(callbackName,
                                                       createEscapedSimpleJsonPair("errorMessage", errorMessage)));
+                        return;
 
                     }
                 }
