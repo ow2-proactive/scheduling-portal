@@ -37,6 +37,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -110,6 +111,9 @@ public class LoginPage {
 
     /** displays error messages when login fails */
     private Label errorLabel = null;
+
+    /** Cookies */
+    private Cookies cookie;
 
     /**
      * Default constructor
@@ -337,6 +341,7 @@ public class LoginPage {
         // in the other form with it
         final DynamicForm form = new DynamicForm();
         form.setFields(loginField, passwordField, moreField);
+
         form.hideItem("useSSH");
 
         // pure GWT form for uploading, will be used to contact the servlet
@@ -433,8 +438,16 @@ public class LoginPage {
         });
 
         String cacheLogin = Settings.get().getSetting(controller.getLoginSettingKey());
-        if (cacheLogin != null) {
-            form.setValue("login", cacheLogin);
+        // check if username cookie variable is set
+        // if not, the login input text is set to the cacheLogin
+        if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
+            form.setValue("login", getCookieUserName());
+        } else {
+            if (cacheLogin != null) {
+                form.setValue("login", cacheLogin);
+            } else {
+                form.setValue("login", "");
+            }
         }
 
         final IButton okButton = new IButton();
@@ -656,5 +669,10 @@ public class LoginPage {
         this.layout.destroy();
         this.layout = null;
         this.controller = null;
+    }
+
+    private String getCookieUserName() {
+        String userName = Cookies.getCookie("username");
+        return userName;
     }
 }
