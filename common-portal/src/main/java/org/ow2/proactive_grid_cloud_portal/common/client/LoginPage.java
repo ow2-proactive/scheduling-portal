@@ -112,9 +112,6 @@ public class LoginPage {
     /** displays error messages when login fails */
     private Label errorLabel = null;
 
-    /** Cookies */
-    private Cookies cookie;
-
     /**
      * Default constructor
      *
