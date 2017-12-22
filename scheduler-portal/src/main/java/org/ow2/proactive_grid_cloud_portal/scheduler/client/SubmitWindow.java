@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -216,9 +215,6 @@ public class SubmitWindow {
     private Label waitLabel;
 
     private Label errorLabel;
-
-    // ----- Catalog temp maps
-    private HashMap<String, Integer> catalogBucketsMap;
 
     private String CATALOG_URL = null;
 
@@ -693,8 +689,7 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/resources?kind=workflow";
+                    String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
@@ -736,14 +731,10 @@ public class SubmitWindow {
             public void onResponseReceived(Request request, Response response) {
                 JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
-                catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get("name").isString().stringValue();
-                    String bucketId = bucket.get("id").isNumber().toString();
-                    String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
-                    bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
-                    catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
+                    bucketsListBox.addItem(bucketName);
                 }
                 bucketsListBox.setEnabled(true);
             }
@@ -954,10 +945,9 @@ public class SubmitWindow {
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 // filter only valid items
                 if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    formContent.add(new Hidden("bucketId", selectedBucketId));
+                    String selectedBucketName = bucketsListBox.getSelectedValue();
+                    formContent.add(new Hidden("bucketName", selectedBucketName));
                     formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
