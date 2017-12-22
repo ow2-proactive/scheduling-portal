@@ -115,9 +115,9 @@ public class SubmitEditServlet extends HttpServlet {
             } else if (key.startsWith("var_")) {
                 String name = key.substring(4);
                 varMap.put(name, val);
-            } else if (key.toUpperCase().equals("START_AT")) {
+            } else if (key.equalsIgnoreCase("START_AT")) {
                 startAt = val;
-            } else if (key.toUpperCase().equals("PLAN")) {
+            } else if (key.equalsIgnoreCase("PLAN")) {
                 plan = Boolean.parseBoolean(val);
             } else if (key.equals("validate")) {
                 validate = Boolean.parseBoolean(val);
