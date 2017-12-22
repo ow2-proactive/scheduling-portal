@@ -96,6 +96,7 @@ public class SubmitEditServlet extends HttpServlet {
         String job = null;
         String startAt = null;
         boolean validate = false;
+        boolean plan = false;
         HashMap<String, String> varMap = new HashMap<String, String>();
         File editedJob = null;
         File jobDesc = null;
@@ -116,6 +117,8 @@ public class SubmitEditServlet extends HttpServlet {
                 varMap.put(name, val);
             } else if (key.toUpperCase().equals("START_AT")) {
                 startAt = val;
+            } else if (key.toUpperCase().equals("PLAN")) {
+                plan = Boolean.parseBoolean(val);
             } else if (key.equals("validate")) {
                 validate = Boolean.parseBoolean(val);
             }
@@ -229,6 +232,8 @@ public class SubmitEditServlet extends HttpServlet {
 
                 if (validate) {
                     responseFromService = ((SchedulerServiceImpl) Service.get()).validateXMLFile(sessionId, editedJob);
+                } else if (plan) {
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).planXMLFile(sessionId, editedJob);
                 } else {
                     responseFromService = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
                 }

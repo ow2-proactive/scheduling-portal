@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,6 +55,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
@@ -84,6 +87,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 
 
 /**
@@ -219,6 +223,43 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String ret = convertToString(is);
 
             if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
+                return ret;
+            } else {
+                throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException("Failed to read response: " + e.getMessage());
+        } finally {
+            method.releaseConnection();
+            if (file != null) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * Submits an XML file to the job-planner REST using an HTTP client.
+     *
+     * @param sessionId the id of the client which submits the job
+     * @param file      the XML file that is submitted
+     * @return an error message upon failure, "id=<jobId>" upon success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String planXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
+        HttpPost method = new HttpPost(SchedulerConfig.get().getJobplannerUrl());
+        method.addHeader("sessionId", sessionId);
+        method.addHeader("Content-type", ContentType.APPLICATION_XML.toString());
+
+        try {
+            StringEntity entity = new StringEntity(Files.toString(file, Charset.forName("ISO-8859-1")),
+                                                   ContentType.APPLICATION_XML);
+            method.setEntity(entity);
+
+            HttpResponse execute = httpClient.execute(method);
+            InputStream is = execute.getEntity().getContent();
+            String ret = convertToString(is);
+            if (execute.getStatusLine().getStatusCode() == Status.CREATED.getStatusCode()) {
                 return ret;
             } else {
                 throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
