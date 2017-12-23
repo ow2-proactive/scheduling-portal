@@ -182,6 +182,9 @@ public class SubmitWindow {
     private Hidden startAtParameter; // ----------------- START_AT value to send
     // along with the job
 
+    private Hidden planParameter; // ----------------- PLAN value to send
+    // along with the job
+
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
     // -------------------------------------------------- Start At Part
@@ -445,6 +448,7 @@ public class SubmitWindow {
     private void setStartAccordingPlanningRadioButtonState(String job) {
         if (job != null && isExecutionCalendarGIDefined(job)) {
             startAccordingPlanningRadioButton.setVisible(true);
+            startAccordingPlanningRadioButton.setValue(true);
         } else {
             startAccordingPlanningRadioButton.setVisible(false);
         }
@@ -456,6 +460,7 @@ public class SubmitWindow {
         startAtLayout.setGroupTitle("3. Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
+        planParameter = new Hidden("PLAN");
 
         startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
                                                             "Planned according to embedded Execution Calendar defintion");
@@ -879,6 +884,9 @@ public class SubmitWindow {
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
                     hiddenPane.add(startAtParameter);
+                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
+                    planParameter.setValue("true");
+                    hiddenPane.add(planParameter);
                 }
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
