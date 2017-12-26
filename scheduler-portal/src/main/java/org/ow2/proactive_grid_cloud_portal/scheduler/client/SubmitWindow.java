@@ -979,12 +979,18 @@ public class SubmitWindow {
                     } else {
                         GWT.log("JSON parse ERROR");
                         displayErrorMessage(res);
+                        //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                        setEnabledStartAtPart(false);
+                        startAccordingPlanningRadioButton.setVisible(false);
                         return;
                     }
 
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
                     displayErrorMessage(res);
+                    //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                    setEnabledStartAtPart(false);
+                    startAccordingPlanningRadioButton.setVisible(false);
                     return;
                 }
                 redrawVariables();
