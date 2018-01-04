@@ -53,12 +53,8 @@ public class ToolButtonsRender {
         return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm");
     }
 
-    public ToolStripButton getCloudAutomationLinkButton() {
-        return getToolStripButton(Images.instance.pca_30(), "Cloud Automation", "/cloud-automation");
-    }
-
-    public ToolStripButton getNotificationPortalLinkButton() {
-        return getToolStripButtonWithoutBorder(Images.instance.notification_30(), "", "/notification-portal");
+    public ToolStripButton getAutomationDashboardLinkButton() {
+        return getToolStripButton(Images.instance.pca_30(), "ProActive Automation Dashboard", "/automation-dashboard");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
