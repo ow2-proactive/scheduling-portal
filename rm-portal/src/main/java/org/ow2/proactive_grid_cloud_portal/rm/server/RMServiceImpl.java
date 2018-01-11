@@ -82,6 +82,8 @@ public class RMServiceImpl extends Service implements RMService {
      */
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
 
+    private static final String CREATE_NODE_SOURCE_WITH_RECOVERABLE_NODES = "true";
+
     /**
      * Thread pool shared by RestEasy client proxies.
      */
@@ -293,7 +295,8 @@ public class RMServiceImpl extends Service implements RMService {
                                                    infrastructureFileParameters,
                                                    policyType,
                                                    policyParameters,
-                                                   policyFileParameters);
+                                                   policyFileParameters,
+                                                   CREATE_NODE_SOURCE_WITH_RECOVERABLE_NODES);
             }
         });
     }

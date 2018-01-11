@@ -75,7 +75,8 @@ public interface RestClient {
             @FormParam("infrastructureParameters") String[] infrastructureParameters,
             @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
             @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
-            @FormParam("policyFileParameters") String[] policyFileParameters);
+            @FormParam("policyFileParameters") String[] policyFileParameters,
+            @FormParam("nodesRecoverable") String nodesRecoverable);
 
     @POST
     @Path("/rm/node/lock")
