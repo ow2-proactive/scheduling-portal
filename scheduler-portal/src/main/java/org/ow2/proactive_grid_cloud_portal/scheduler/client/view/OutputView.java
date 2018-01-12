@@ -68,11 +68,11 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         this.controller.getModel().addJobOutputListener(this);
 
         this.noOutputMessage = "No output available<br><br>" +
-                               "Click <strong>Fetch output</strong> to retrieve logs for finished tasks<br>" +
-                               "Use <strong>Streaming</strong> to auto-fetch logs for running tasks.";
+                               "Click <strong>Finished tasks output</strong> to retrieve logs for finished tasks<br>" +
+                               "Use <strong>Streaming Output</strong> to auto-fetch logs for running tasks.";
 
-        this.refreshButtonLabel = "Fetch output";
-        this.refreshButtonTooltip = "Request fetching the Output for this job";
+        this.refreshButtonLabel = "Finished tasks output";
+        this.refreshButtonTooltip = "Request fetching the logs for finished tasks of the entire Job, or for a selected task";
     }
 
     /**
@@ -87,9 +87,9 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.buildRefreshButton();
 
-        this.liveCheck = new CheckboxItem("liveLogs", "Streaming &nbsp;&nbsp;");
+        this.liveCheck = new CheckboxItem("liveLogs", "Streaming Output &nbsp;&nbsp;");
         this.liveCheck.setHeight(22);
-        this.liveCheck.setTooltip("Stream output to peek in currently running tasks");
+        this.liveCheck.setTooltip("Request fetching logs for running tasks of the entire Job");
         this.liveCheck.addChangedHandler(new ChangedHandler() {
             public void onChanged(ChangedEvent event) {
                 liveLogCheckChanged();
