@@ -54,7 +54,7 @@ public class ToolButtonsRender {
     }
 
     public ToolStripButton getAutomationDashboardLinkButton() {
-        return getToolStripButton(Images.instance.pca_30(), "ProActive Automation Dashboard", "/automation-dashboard");
+        return getToolStripButton(Images.instance.pca_30(), "Automation Dashboard", "/automation-dashboard");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
