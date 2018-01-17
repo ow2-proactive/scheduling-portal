@@ -67,12 +67,12 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.controller.getModel().addJobOutputListener(this);
 
-        this.noOutputMessage = "No output available<br><br>" +
-                               "Click <strong>Finished tasks output</strong> to retrieve logs for finished tasks<br>" +
-                               "Use <strong>Streaming Output</strong> to auto-fetch logs for running tasks.";
+        this.noOutputMessage = "No output available<br><br><br>" +
+        					   "Click <strong>Finished Tasks Output</strong> to retrieve logs for already finished tasks. For all the finished Tasks within the Job, or for the selected Task. The command does work when Job is still in Running state, as well as when Job is Finished. In case of large number of Tasks (over 20), because the Tasks are paginated, when Selected Job is activated, it will add to the display the logs of the current page of Tasks.<br><br>"+
+        					   "Use <strong>Streaming Output</strong> to auto-fetch logs for running tasks of the entire Job. You cannot select a specific Task in the streaming mode. If you activate streaming while some Tasks are already finished, you will get the logs of those Tasks as well.";
 
-        this.refreshButtonLabel = "Finished tasks output";
-        this.refreshButtonTooltip = "Request fetching the logs for finished tasks of the entire Job, or for a selected task";
+        this.refreshButtonLabel = "Finished Tasks Output";
+        this.refreshButtonTooltip = "Request fetching the logs for finished tasks of the entire Job, or for a selected Task";
     }
 
     /**
