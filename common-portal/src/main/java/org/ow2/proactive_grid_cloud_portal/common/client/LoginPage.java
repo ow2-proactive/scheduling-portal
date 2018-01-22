@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
@@ -311,6 +313,12 @@ public class LoginPage {
         this.layout.draw();
     }
 
+    // console log in GWT
+    // wrapper to console.log following this: https://stackoverflow.com/questions/9247424/how-to-print-to-the-console-in-gwt 
+    native void consoleLog(String message) /*-{
+                                           console.log(message);
+                                           }-*/;
+
     /**
      * @return the forms and widgets for plain login/password authentication
      */
@@ -437,13 +445,17 @@ public class LoginPage {
         String cacheLogin = Settings.get().getSetting(controller.getLoginSettingKey());
         // check if username cookie variable is set
         // if not, the login input text is set to the cacheLogin
-        if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
-            form.setValue("login", getCookieUserName());
+        if (getCookieUserName() == null) {
+            form.setValue("login", cacheLogin);
         } else {
-            if (cacheLogin != null) {
-                form.setValue("login", cacheLogin);
+            if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
+                form.setValue("login", getCookieUserName());
             } else {
-                form.setValue("login", "");
+                if (cacheLogin != null) {
+                    form.setValue("login", cacheLogin);
+                } else {
+                    form.setValue("login", "");
+                }
             }
         }
 
