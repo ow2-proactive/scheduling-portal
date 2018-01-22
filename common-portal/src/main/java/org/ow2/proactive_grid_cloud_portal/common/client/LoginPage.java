@@ -313,12 +313,6 @@ public class LoginPage {
         this.layout.draw();
     }
 
-    // console log in GWT
-    // wrapper to console.log following this: https://stackoverflow.com/questions/9247424/how-to-print-to-the-console-in-gwt 
-    native void consoleLog(String message) /*-{
-                                           console.log(message);
-                                           }-*/;
-
     /**
      * @return the forms and widgets for plain login/password authentication
      */
@@ -446,17 +440,11 @@ public class LoginPage {
         // check if username cookie variable is set
         // if not, the login input text is set to the cacheLogin
         if (getCookieUserName() == null) {
-            form.setValue("login", cacheLogin);
-        } else {
-            if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
-                form.setValue("login", getCookieUserName());
-            } else {
-                if (cacheLogin != null) {
-                    form.setValue("login", cacheLogin);
-                } else {
-                    form.setValue("login", "");
-                }
+            if (cacheLogin != null) {
+                form.setValue("login", cacheLogin);
             }
+        } else {
+            form.setValue("login", cacheLogin != null ? cacheLogin : "");
         }
 
         final IButton okButton = new IButton();
