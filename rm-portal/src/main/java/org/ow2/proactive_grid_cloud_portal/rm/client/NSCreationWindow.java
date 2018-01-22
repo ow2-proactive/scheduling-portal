@@ -347,7 +347,7 @@ public class NSCreationWindow {
             public void onClick(ClickEvent event) {
                 infraForm.setValue("infra", infraSelect.getValueAsString());
                 infraForm.setValue("nsName", nameItem.getValueAsString());
-                infraForm.setValue("nsName", nodesRecoverableItem.getValueAsBoolean().toString());
+                infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
                 infraForm.setValue("policy", policySelect.getValueAsString());
                 infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 infraForm.setCanSubmit(true);
