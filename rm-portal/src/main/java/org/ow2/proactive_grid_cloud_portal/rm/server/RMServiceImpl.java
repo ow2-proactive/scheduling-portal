@@ -82,8 +82,6 @@ public class RMServiceImpl extends Service implements RMService {
      */
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 8;
 
-    private static final String CREATE_NODE_SOURCE_WITH_RECOVERABLE_NODES = "true";
-
     /**
      * Thread pool shared by RestEasy client proxies.
      */
@@ -283,7 +281,6 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
             final String[] infrastructureParameters, final String[] infrastructureFileParameters,
-<<<<<<< HEAD
             final String policyType, final String[] policyParameters, final String[] policyFileParameters,
             final String nodesRecoverable) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.createnodeSource(sessionId,
@@ -295,24 +292,6 @@ public class RMServiceImpl extends Service implements RMService {
                                                                                              policyParameters,
                                                                                              policyFileParameters,
                                                                                              nodesRecoverable));
-=======
-            final String policyType, final String[] policyParameters, final String[] policyFileParameters)
-            throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.createnodeSource(sessionId,
-                                                   nodeSourceName,
-                                                   infrastructureType,
-                                                   infrastructureParameters,
-                                                   infrastructureFileParameters,
-                                                   policyType,
-                                                   policyParameters,
-                                                   policyFileParameters,
-                                                   CREATE_NODE_SOURCE_WITH_RECOVERABLE_NODES);
-            }
-        });
->>>>>>> Adapt createNodeSource RM call to API change
     }
 
     /*
