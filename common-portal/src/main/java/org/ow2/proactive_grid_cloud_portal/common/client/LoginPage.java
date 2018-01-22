@@ -37,7 +37,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -317,12 +316,10 @@ public class LoginPage {
     private Layout getPlainAuth() {
 
         /*
-         * smartGWT forms don't allow simple multipart file upload,
-         * so we use a smartGWT form for login/password/checkbox,
-         * a pure GWT form for file upload, and upon submission,
-         * put the fields from the first form as hidden fields of the
-         * pure GWT form. It's a bit convoluted but like this we get
-         * the pretty widgets and the nice features
+         * smartGWT forms don't allow simple multipart file upload, so we use a smartGWT form for
+         * login/password/checkbox, a pure GWT form for file upload, and upon submission, put the
+         * fields from the first form as hidden fields of the pure GWT form. It's a bit convoluted
+         * but like this we get the pretty widgets and the nice features
          */
 
         TextItem loginField = new TextItem("login", "User");
@@ -435,16 +432,8 @@ public class LoginPage {
         });
 
         String cacheLogin = Settings.get().getSetting(controller.getLoginSettingKey());
-        // check if username cookie variable is set
-        // if not, the login input text is set to the cacheLogin
-        if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
-            form.setValue("login", getCookieUserName());
-        } else {
-            if (cacheLogin != null) {
-                form.setValue("login", cacheLogin);
-            } else {
-                form.setValue("login", "");
-            }
+        if (cacheLogin != null) {
+            form.setValue("login", cacheLogin);
         }
 
         final IButton okButton = new IButton();
@@ -668,8 +657,4 @@ public class LoginPage {
         this.controller = null;
     }
 
-    private String getCookieUserName() {
-        String userName = Cookies.getCookie("username");
-        return userName;
-    }
 }
