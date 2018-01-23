@@ -139,11 +139,13 @@ public class NSCreationWindow {
                 policySelect.setWidth(300);
 
                 HiddenItem name = new HiddenItem("nsName");
+                HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
                 HiddenItem callback = new HiddenItem("nsCallback");
                 HiddenItem session = new HiddenItem("sessionId");
 
                 ArrayList<FormItem> tmpAll = new ArrayList<FormItem>();
                 tmpAll.add(name);
+                tmpAll.add(nodesRecoverable);
                 tmpAll.add(callback);
                 tmpAll.add(session);
                 tmpAll.add(infraSelect);
