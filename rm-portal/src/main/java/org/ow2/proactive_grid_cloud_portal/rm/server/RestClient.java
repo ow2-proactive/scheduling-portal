@@ -67,7 +67,7 @@ public interface RestClient {
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @POST
-    @Path("/rm/nodesource/create")
+    @Path("/rm/nodesource/create/recovery")
     @Produces("application/json")
     InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
