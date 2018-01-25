@@ -53,6 +53,11 @@ public class JobsModel {
     private Job selectedJob = null;
 
     /**
+     * The current jobs selected on the grid.
+     */
+    private ArrayList<Integer> selectedJobsIds = null;
+
+    /**
      * Listener for the updates of the jobs list.
      */
     private ArrayList<JobsUpdatedListener> jobsUpdatedListeners = null;
@@ -241,5 +246,13 @@ public class JobsModel {
      */
     public void addJobSelectedListener(JobSelectedListener listener) {
         this.jobSelectedListeners.add(listener);
+    }
+
+    public ArrayList<Integer> getSelectedJobsIds() {
+        return selectedJobsIds;
+    }
+
+    public void setSelectedJobsIds(ArrayList<Integer> selectedJobsIds) {
+        this.selectedJobsIds = selectedJobsIds;
     }
 }

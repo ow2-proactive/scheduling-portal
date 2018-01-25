@@ -57,6 +57,7 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.SortNormalizer;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
@@ -94,6 +95,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         this.setSort(DEFAULT_SORT);
     }
 
+    @Override
     protected void selectionChangedHandler(SelectionEvent event) {
         if (event.getState() && !fetchingData) {
             ListGridRecord record = event.getRecord();
@@ -103,8 +105,18 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     @Override
+    protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
+        ListGridRecord[] selectedRecords = this.getSelectedRecords();
+        ArrayList<Integer> selectedJobsIds = new ArrayList<>();
+        for (ListGridRecord selectedRecord : selectedRecords) {
+            selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
+        }
+        controller.getModel().setSelectedJobsIds(selectedJobsIds);
+    }
+
+    @Override
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        Job selectedJob = this.controller.getModel().getSelectedJob();
+        ArrayList selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
@@ -112,7 +124,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             this.columnsFactory.buildRecord(j, jobRecord);
             data.add(jobRecord);
 
-            if (j.equals(selectedJob)) {
+            if (selectedJobsIds != null && selectedJobsIds.contains(j.getId())) {
                 jobRecord.setAttribute("isSelected", true);
             }
         }
