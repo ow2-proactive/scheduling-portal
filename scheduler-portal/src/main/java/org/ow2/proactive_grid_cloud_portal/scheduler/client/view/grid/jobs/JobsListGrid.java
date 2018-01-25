@@ -32,6 +32,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
@@ -107,7 +108,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     @Override
     protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
         ListGridRecord[] selectedRecords = this.getSelectedRecords();
-        ArrayList<Integer> selectedJobsIds = new ArrayList<>();
+        List<Integer> selectedJobsIds = new ArrayList<>(selectedRecords.length);
         for (ListGridRecord selectedRecord : selectedRecords) {
             selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
         }
@@ -116,7 +117,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     @Override
     public void jobsUpdated(Map<Integer, Job> jobs) {
-        ArrayList selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
+        List<Integer> selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {

@@ -47,7 +47,7 @@ public class TasksModel {
 
     protected Task selectedTask;
 
-    protected ArrayList<String> selectedTasksIds = null;
+    protected List<String> selectedTasksIds = null;
 
     protected ArrayList<TaskSelectedListener> tasksSelectedListeners = null;
 
@@ -217,11 +217,11 @@ public class TasksModel {
         this.tasksNavigationModel = tasksNavigationModel;
     }
 
-    public ArrayList<String> getSelectedTasksIds() {
+    public List<String> getSelectedTasksIds() {
         return selectedTasksIds;
     }
 
-    public void setSelectedTasksIds(ArrayList<String> selectedTasksIds) {
+    public void setSelectedTasksIds(List<String> selectedTasksIds) {
         this.selectedTasksIds = selectedTasksIds;
     }
 }

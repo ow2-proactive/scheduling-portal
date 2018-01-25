@@ -168,7 +168,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
-        ArrayList selectedTasksIds = this.controller.getModel().getSelectedTasksIds();
+        List<String> selectedTasksIds = this.controller.getModel().getSelectedTasksIds();
 
         RecordList data = new RecordList();
         for (Task t : tasks) {
@@ -461,7 +461,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
         ListGridRecord[] selectedRecords = this.getSelectedRecords();
-        ArrayList<String> selectedTasksIds = new ArrayList<>();
+        List<String> selectedTasksIds = new ArrayList<>(selectedRecords.length);
         for (ListGridRecord selectedRecord : selectedRecords) {
             Task task = TaskRecord.getTask(selectedRecord);
             selectedTasksIds.add(task.getJobId() + "_" + task.getId());
