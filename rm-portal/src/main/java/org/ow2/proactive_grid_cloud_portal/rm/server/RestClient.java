@@ -67,7 +67,7 @@ public interface RestClient {
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @POST
-    @Path("/rm/nodesource/create")
+    @Path("/rm/nodesource/create/recovery")
     @Produces("application/json")
     InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
@@ -75,7 +75,8 @@ public interface RestClient {
             @FormParam("infrastructureParameters") String[] infrastructureParameters,
             @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
             @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
-            @FormParam("policyFileParameters") String[] policyFileParameters);
+            @FormParam("policyFileParameters") String[] policyFileParameters,
+            @FormParam("nodesRecoverable") String nodesRecoverable);
 
     @POST
     @Path("/rm/node/lock")
