@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
@@ -437,14 +439,12 @@ public class LoginPage {
         String cacheLogin = Settings.get().getSetting(controller.getLoginSettingKey());
         // check if username cookie variable is set
         // if not, the login input text is set to the cacheLogin
-        if (!getCookieUserName().isEmpty() && getCookieUserName().toLowerCase().trim() != "null") {
-            form.setValue("login", getCookieUserName());
-        } else {
+        if (getCookieUserName() == null) {
             if (cacheLogin != null) {
                 form.setValue("login", cacheLogin);
-            } else {
-                form.setValue("login", "");
             }
+        } else {
+            form.setValue("login", cacheLogin != null ? cacheLogin : "");
         }
 
         final IButton okButton = new IButton();
