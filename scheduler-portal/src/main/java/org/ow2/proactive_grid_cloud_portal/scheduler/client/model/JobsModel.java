@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
@@ -51,6 +52,11 @@ public class JobsModel {
      * The current selected job.
      */
     private Job selectedJob = null;
+
+    /**
+     * The current jobs selected on the grid.
+     */
+    private List<Integer> selectedJobsIds = null;
 
     /**
      * Listener for the updates of the jobs list.
@@ -241,5 +247,13 @@ public class JobsModel {
      */
     public void addJobSelectedListener(JobSelectedListener listener) {
         this.jobSelectedListeners.add(listener);
+    }
+
+    public List<Integer> getSelectedJobsIds() {
+        return selectedJobsIds;
+    }
+
+    public void setSelectedJobsIds(List<Integer> selectedJobsIds) {
+        this.selectedJobsIds = selectedJobsIds;
     }
 }
