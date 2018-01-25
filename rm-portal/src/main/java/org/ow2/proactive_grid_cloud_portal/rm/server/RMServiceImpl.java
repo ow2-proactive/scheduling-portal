@@ -281,21 +281,17 @@ public class RMServiceImpl extends Service implements RMService {
      */
     public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
             final String[] infrastructureParameters, final String[] infrastructureFileParameters,
-            final String policyType, final String[] policyParameters, final String[] policyFileParameters)
-            throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.createnodeSource(sessionId,
-                                                   nodeSourceName,
-                                                   infrastructureType,
-                                                   infrastructureParameters,
-                                                   infrastructureFileParameters,
-                                                   policyType,
-                                                   policyParameters,
-                                                   policyFileParameters);
-            }
-        });
+            final String policyType, final String[] policyParameters, final String[] policyFileParameters,
+            final String nodesRecoverable) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.createnodeSource(sessionId,
+                                                                                             nodeSourceName,
+                                                                                             infrastructureType,
+                                                                                             infrastructureParameters,
+                                                                                             infrastructureFileParameters,
+                                                                                             policyType,
+                                                                                             policyParameters,
+                                                                                             policyFileParameters,
+                                                                                             nodesRecoverable));
     }
 
     /*

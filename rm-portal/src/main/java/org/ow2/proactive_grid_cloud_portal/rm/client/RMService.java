@@ -104,16 +104,18 @@ public interface RMService extends RemoteService {
      * @param nodeSourceName name of the new NS
      * @param infrastructureType infrastructure manager full class name
      * @param infrastructureParameters IM String parameters, null value for files
-     * @param infrastructureFileParamaters file parameters
+     * @param infrastructureFileParameters file parameters
      * @param policyType policy full class name
      * @param policyParameters String parameters, null value for files
      * @param policyFileParameters file parameters
+     * @param nodesRecoverable whether nodes can be recovered after a crash
      * @throws RestServerException 
      * @throws ServiceException
      */
     String createNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
-            String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException;
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException;
 
     /**
      * lock a set of nodes
