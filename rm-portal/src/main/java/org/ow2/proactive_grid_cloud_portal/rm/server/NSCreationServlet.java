@@ -72,6 +72,7 @@ public class NSCreationServlet extends HttpServlet {
         String sessionId = "";
         String callbackName = "";
         String nsName = "";
+        String nodesRecoverable = "";
         String infra = "";
         String policy = "";
 
@@ -102,6 +103,8 @@ public class NSCreationServlet extends HttpServlet {
                         callbackName = fi.getString();
                     } else if (fieldName.equals("nsName")) {
                         nsName = fi.getString();
+                    } else if (fieldName.equals("nodesRecoverable")) {
+                        nodesRecoverable = fi.getString();
                     } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
@@ -148,7 +151,8 @@ public class NSCreationServlet extends HttpServlet {
                                                                                        toArray(infraFileParams),
                                                                                        policy,
                                                                                        toArray(policyParams),
-                                                                                       toArray(policyFileParams));
+                                                                                       toArray(policyFileParams),
+                                                                                       nodesRecoverable);
             JSONObject json = new JSONObject(jsonResult);
             if (json != null) {
                 if (json.has("result")) {

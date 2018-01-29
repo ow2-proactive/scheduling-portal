@@ -42,12 +42,7 @@ import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
-import com.smartgwt.client.widgets.grid.events.CellContextClickEvent;
-import com.smartgwt.client.widgets.grid.events.CellContextClickHandler;
-import com.smartgwt.client.widgets.grid.events.CellOutEvent;
-import com.smartgwt.client.widgets.grid.events.CellOutHandler;
-import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
-import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+import com.smartgwt.client.widgets.grid.events.*;
 import com.smartgwt.client.widgets.menu.Menu;
 
 
@@ -157,6 +152,12 @@ public abstract class ItemsListGrid<I> extends ListGrid {
                 selectionChangedHandler(event);
             }
         });
+
+        this.addSelectionUpdatedHandler(new SelectionUpdatedHandler() {
+            public void onSelectionUpdated(SelectionUpdatedEvent event) {
+                selectionUpdatedHandler(event);
+            }
+        });
     }
 
     /**
@@ -206,6 +207,8 @@ public abstract class ItemsListGrid<I> extends ListGrid {
      * @param event
      */
     protected abstract void selectionChangedHandler(SelectionEvent event);
+
+    protected abstract void selectionUpdatedHandler(SelectionUpdatedEvent event);
 
     /**
      * Apply the local filter to the grid.
