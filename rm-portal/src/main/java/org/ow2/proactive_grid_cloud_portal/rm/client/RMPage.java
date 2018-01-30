@@ -37,7 +37,10 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Alignment;
@@ -166,6 +169,11 @@ public class RMPage implements LogListener {
         this.credentialsWindow = new CredentialsWindow();
 
         final Canvas header = buildTools();
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
 
         Canvas topPane = buildTopPane();
         topPane.setWidth100();
@@ -265,6 +273,7 @@ public class RMPage implements LogListener {
 
         rl.addMember(buildLogoStrip());
         rl.addMember(header);
+        rl.addMember(panel);
         rl.addMember(stack);
 
         this.logWindow = new LogWindow(controller);
@@ -440,8 +449,7 @@ public class RMPage implements LogListener {
 
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
-        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
-        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -454,9 +462,8 @@ public class RMPage implements LogListener {
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
         tools.addSpacer(12);
-        tools.addButton(cloudAutomationLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(notificationPortalLinkButton);
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);

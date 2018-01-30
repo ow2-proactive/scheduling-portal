@@ -46,7 +46,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
@@ -74,6 +77,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -193,6 +197,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         Canvas tools = buildTools();
 
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
+
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
         Layout botPane = buildBotPane();
@@ -208,10 +218,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
+
         stack.setSections(executionsSections, detailsSection);
 
         contentLayout.addMember(buildLogoStrip());
         contentLayout.addMember(tools);
+        contentLayout.addMember(panel);
         contentLayout.addMember(stack);
         this.logWindow = new LogWindow(controller);
 
@@ -503,8 +515,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
-        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
-        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -519,9 +530,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
         tools.addSpacer(12);
-        tools.addButton(cloudAutomationLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(notificationPortalLinkButton);
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);

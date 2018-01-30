@@ -84,6 +84,7 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
     protected void buildRefreshButton() {
         this.refreshButton = new IButton(this.refreshButtonLabel);
         this.refreshButton.setTooltip(this.refreshButtonTooltip);
+        this.refreshButton.setAutoFit(true);
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 refreshButtonHandler();

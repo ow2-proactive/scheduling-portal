@@ -38,6 +38,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,7 @@ public class NSCreationServlet extends HttpServlet {
         String sessionId = "";
         String callbackName = "";
         String nsName = "";
+        String nodesRecoverable = "";
         String infra = "";
         String policy = "";
 
@@ -101,6 +103,8 @@ public class NSCreationServlet extends HttpServlet {
                         callbackName = fi.getString();
                     } else if (fieldName.equals("nsName")) {
                         nsName = fi.getString();
+                    } else if (fieldName.equals("nodesRecoverable")) {
+                        nodesRecoverable = fi.getString();
                     } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
@@ -147,12 +151,23 @@ public class NSCreationServlet extends HttpServlet {
                                                                                        toArray(infraFileParams),
                                                                                        policy,
                                                                                        toArray(policyParams),
-                                                                                       toArray(policyFileParams));
+                                                                                       toArray(policyFileParams),
+                                                                                       nodesRecoverable);
+            JSONObject json = new JSONObject(jsonResult);
+            if (json != null) {
+                if (json.has("result")) {
+                    if (json.getBoolean("result")) {
+                        jsonResult = createNonEscapedSimpleJsonPair("result", "true");
+                    } else {
+                        String errorMessage = json.get("errorMessage").toString();
+                        write(response,
+                              createJavascriptPayload(callbackName,
+                                                      createEscapedSimpleJsonPair("errorMessage", errorMessage)));
+                        return;
 
-            if (jsonResult.equals("true")) {
-                jsonResult = createNonEscapedSimpleJsonPair("result", "true");
+                    }
+                }
             }
-
             write(response, createJavascriptPayload(callbackName, jsonResult));
         } catch (Throwable t) {
             write(response,

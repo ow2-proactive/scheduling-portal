@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,6 +53,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -114,6 +115,8 @@ public class SubmitWindow {
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
+
+    private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
     private static final int width = 600;
 
@@ -179,6 +182,9 @@ public class SubmitWindow {
     private Hidden startAtParameter; // ----------------- START_AT value to send
     // along with the job
 
+    private Hidden planParameter; // ----------------- PLAN value to send
+    // along with the job
+
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
     // -------------------------------------------------- Start At Part
@@ -209,9 +215,6 @@ public class SubmitWindow {
     private Label waitLabel;
 
     private Label errorLabel;
-
-    // ----- Catalog temp maps
-    private HashMap<String, Integer> catalogBucketsMap;
 
     private String CATALOG_URL = null;
 
@@ -445,9 +448,7 @@ public class SubmitWindow {
     private void setStartAccordingPlanningRadioButtonState(String job) {
         if (job != null && isExecutionCalendarGIDefined(job)) {
             startAccordingPlanningRadioButton.setVisible(true);
-            if (isExecCalendarValueNull) {
-                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
-            }
+            startAccordingPlanningRadioButton.setValue(true);
         } else {
             startAccordingPlanningRadioButton.setVisible(false);
         }
@@ -459,6 +460,7 @@ public class SubmitWindow {
         startAtLayout.setGroupTitle("3. Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
+        planParameter = new Hidden("PLAN");
 
         startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
                                                             "Planned according to embedded Execution Calendar defintion");
@@ -473,14 +475,10 @@ public class SubmitWindow {
         startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                if (!isExecutionCalendarGIDefined(job)) {
-                    displayErrorMessage("No EXECUTION_CALENDAR defined for this Job ");
-                } else {
-                    if (isExecCalendarValueNull) {
-                        displayErrorMessage("EXECUTION_CALENDAR value is not set.");
-                    }
-
+                if (isExecCalendarValueNull) {
+                    displayErrorMessage("EXECUTION_CALENDAR value is empty.");
                 }
+
                 startAtLayout.removeMember(dateChooser);
             }
         });
@@ -691,8 +689,7 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/resources?kind=workflow";
+                    String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
@@ -734,14 +731,10 @@ public class SubmitWindow {
             public void onResponseReceived(Request request, Response response) {
                 JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
-                catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get("name").isString().stringValue();
-                    String bucketId = bucket.get("id").isNumber().toString();
-                    String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
-                    bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
-                    catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
+                    bucketsListBox.addItem(bucketName);
                 }
                 bucketsListBox.setEnabled(true);
             }
@@ -816,24 +809,36 @@ public class SubmitWindow {
                             return;
                         }
 
-                        JSONValue json = controller.parseJSON(result);
-                        JSONObject obj = json.isObject();
-                        if (obj != null) {
-                            if (obj.containsKey("valid")) {
-                                if (((JSONBoolean) obj.get("valid")).booleanValue()) {
-                                    if (obj.containsKey("updatedVariables")) {
-                                        updateVariables(obj.get("updatedVariables"));
-                                        redrawVariables();
+                        try {
+                            JSONValue json = JSONParser.parseStrict(result);
+                            JSONObject obj = json.isObject();
+                            if (obj != null) {
+                                if (obj.containsKey("valid")) {
+                                    if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                        if (obj.containsKey("updatedVariables")) {
+                                            updateVariables(obj.get("updatedVariables"));
+                                            redrawVariables();
+                                        }
+                                        GWT.log("Job validated");
+                                        displayInfoMessage("Job is valid");
+                                    } else if (obj.containsKey("errorMessage")) {
+                                        String errorMessage = obj.get("errorMessage").toString();
+                                        if (errorMessage.contains("JobValidationException")) {
+                                            errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                                        }
+                                        displayErrorMessage(errorMessage);
                                     }
-                                    GWT.log("Job validated");
-                                    displayInfoMessage("Job is valid");
-                                } else if (obj.containsKey("errorMessage")) {
-                                    String errorMessage = obj.get("errorMessage").toString();
-                                    if (errorMessage.contains("JobValidationException")) {
-                                        errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
-                                    }
-                                    displayErrorMessage(errorMessage);
                                 }
+                            }
+                        } catch (Throwable t) {
+                            // JSON parsing error workaround to force extract error message
+                            MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
+                            if (errorMessageMatcher != null) {
+                                GWT.log(errorMessageMatcher.getGroup(1));
+                                displayErrorMessage(errorMessageMatcher.getGroup(1));
+                            } else {
+                                GWT.log("JSON parse ERROR");
+                                displayErrorMessage("JSON parse ERROR");
                             }
                         }
                     }
@@ -879,6 +884,9 @@ public class SubmitWindow {
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
                     hiddenPane.add(startAtParameter);
+                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
+                    planParameter.setValue("true");
+                    hiddenPane.add(planParameter);
                 }
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
@@ -937,10 +945,9 @@ public class SubmitWindow {
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 // filter only valid items
                 if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    formContent.add(new Hidden("bucketId", selectedBucketId));
+                    String selectedBucketName = bucketsListBox.getSelectedValue();
+                    formContent.add(new Hidden("bucketName", selectedBucketName));
                     formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
@@ -967,18 +974,23 @@ public class SubmitWindow {
                         String val = obj.get("jobEdit").isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
-                        if (isExecutionCalendarGIDefined(job)) {
-                            setStartAccordingPlanningRadioButtonState(job);
-                        }
-
+                        setStartAccordingPlanningRadioButtonState(job);
                         variables = readVars(job);
                     } else {
                         GWT.log("JSON parse ERROR");
+                        displayErrorMessage(res);
+                        //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                        setEnabledStartAtPart(false);
+                        startAccordingPlanningRadioButton.setVisible(false);
                         return;
                     }
 
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
+                    displayErrorMessage(res);
+                    //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                    setEnabledStartAtPart(false);
+                    startAccordingPlanningRadioButton.setVisible(false);
                     return;
                 }
                 redrawVariables();
@@ -1109,8 +1121,7 @@ public class SubmitWindow {
     }
 
     /**
-     * @param jobDescriptor
-     *            an XML job descriptor as a string
+     * @param jobDescriptor an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
      */
     private Map<String, JobVariable> readVars(String jobDescriptor) {
@@ -1169,37 +1180,32 @@ public class SubmitWindow {
 
     private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
         Document dom = XMLParser.parse(jobDescriptor);
-        dom.getDocumentElement().normalize();
-
         Boolean exists = false;
         Boolean executionCalendarDefined = false;
-
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
-        // get the first item
-        Node root = genericInfo.item(0);
-        NodeList list = root.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node.getNodeName().equals("info") && node.hasAttributes()) {
-                NamedNodeMap attributes = node.getAttributes();
-                for (int j = 0; j < attributes.getLength(); j++) {
-                    Node attribute = attributes.item(j);
-                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
-                        exists = true;
-                    }
-                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        if (!attribute.getNodeValue().isEmpty() && exists) {
-                            executionCalendarDefined = true;
-                            if (!attribute.getNodeValue().isEmpty()) {
-                                isExecCalendarValueNull = false;
-                            } else {
-                                isExecCalendarValueNull = true;
-                            }
+        // check if the job has genericInformation or not
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            // get the first item
+            Node root = genericInfo.item(0);
+            NodeList list = root.getChildNodes();
+            for (int i = 0; i < list.getLength(); i++) {
+                Node node = list.item(i);
+                if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    for (int j = 0; j < attributes.getLength(); j++) {
+                        Node attribute = attributes.item(j);
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+                            exists = true;
                         }
+                        if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                            executionCalendarDefined = true;
+                            if (!attribute.getNodeValue().isEmpty())
+                                isExecCalendarValueNull = false;
+                        }
+
                     }
                 }
-
             }
         }
         return executionCalendarDefined;

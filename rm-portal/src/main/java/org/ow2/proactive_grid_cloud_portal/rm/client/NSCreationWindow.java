@@ -50,6 +50,7 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
@@ -138,11 +139,13 @@ public class NSCreationWindow {
                 policySelect.setWidth(300);
 
                 HiddenItem name = new HiddenItem("nsName");
+                HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
                 HiddenItem callback = new HiddenItem("nsCallback");
                 HiddenItem session = new HiddenItem("sessionId");
 
                 ArrayList<FormItem> tmpAll = new ArrayList<FormItem>();
                 tmpAll.add(name);
+                tmpAll.add(nodesRecoverable);
                 tmpAll.add(callback);
                 tmpAll.add(session);
                 tmpAll.add(infraSelect);
@@ -321,7 +324,11 @@ public class NSCreationWindow {
 
         final TextItem nameItem = new TextItem("nsName", "Name");
         DynamicForm nameForm = new DynamicForm();
-        nameForm.setFields(nameItem);
+
+        CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
+        nodesRecoverableItem.setValue(true);
+        nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
+        nameForm.setFields(nameItem, nodesRecoverableItem);
 
         HLayout buttons = new HLayout();
 
@@ -342,6 +349,7 @@ public class NSCreationWindow {
             public void onClick(ClickEvent event) {
                 infraForm.setValue("infra", infraSelect.getValueAsString());
                 infraForm.setValue("nsName", nameItem.getValueAsString());
+                infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
                 infraForm.setValue("policy", policySelect.getValueAsString());
                 infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
                 infraForm.setCanSubmit(true);

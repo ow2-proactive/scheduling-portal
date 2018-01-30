@@ -117,7 +117,7 @@ project(':rm-portal') {
         compile 'org.jboss.resteasy:resteasy-client:3.0.17.Final'
 
         runtime 'org.slf4j:slf4j-simple:1.7.12'
-
+        compile 'org.codehaus.jettison:jettison:1.2'
         compile project(':common-portal')
     }
     war {
