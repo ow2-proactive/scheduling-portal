@@ -30,6 +30,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tas
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,6 @@ import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
-import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
@@ -65,6 +65,7 @@ import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
@@ -111,7 +112,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     public void build() {
         super.build();
-        this.setSelectionType(SelectionStyle.SINGLE);
         this.setSelectionProperty("isSelected");
         this.sort(TasksColumnsFactory.ID_ATTR.getName(), SortDirection.ASCENDING);
         this.setShowRecordComponents(true);
@@ -168,18 +168,17 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     public void tasksUpdated(List<Task> tasks, long totalTasks) {
         this.visuButtons.clear();
-        Task selectedTask = this.controller.getModel().getSelectedTask();
+        List<String> selectedTasksIds = this.controller.getModel().getSelectedTasksIds();
 
         RecordList data = new RecordList();
-        TaskRecord selectedRecord = null;
         for (Task t : tasks) {
             TaskRecord record = new TaskRecord(t);
             this.columnsFactory.buildRecord(t, record);
             data.add(record);
 
-            if (t.equals(selectedTask)) {
+            String key = t.getJobId() + "_" + t.getId();
+            if (selectedTasksIds != null && selectedTasksIds.contains(key)) {
                 record.setAttribute("isSelected", true);
-                selectedRecord = record;
             }
         }
 
@@ -457,6 +456,17 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             Task task = TaskRecord.getTask(record);
             controller.selectTask(task);
         }
+    }
+
+    @Override
+    protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
+        ListGridRecord[] selectedRecords = this.getSelectedRecords();
+        List<String> selectedTasksIds = new ArrayList<>(selectedRecords.length);
+        for (ListGridRecord selectedRecord : selectedRecords) {
+            Task task = TaskRecord.getTask(selectedRecord);
+            selectedTasksIds.add(task.getJobId() + "_" + task.getId());
+        }
+        controller.getModel().setSelectedTasksIds(selectedTasksIds);
     }
 
 }
