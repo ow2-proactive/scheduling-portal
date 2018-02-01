@@ -113,7 +113,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     public void build() {
         super.build();
         this.setSelectionProperty("isSelected");
-        this.sort(TasksColumnsFactory.ID_ATTR.getName(), SortDirection.ASCENDING);
+        this.sort(TasksCentricColumnsFactory.JOB_ID_ATTR.getName(), SortDirection.DESCENDING);
         this.setShowRecordComponents(true);
         this.setShowRecordComponentsByCell(true);
     }
@@ -359,12 +359,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(NAME_ATTR.getName());
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(STATUS_ATTR.getName());
+        final Integer jobId = (int) TaskRecord.getTask(this.getSelectedRecord()).getJobId();
 
         MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
         restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartInErrorTask(taskName);
+                controller.restartInErrorTask(taskName, jobId);
             }
         });
 
@@ -372,7 +373,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         restartRunningTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartRunningTask(taskName);
+                controller.restartRunningTask(taskName, jobId);
             }
         });
 
@@ -380,21 +381,21 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.preemptTask(taskName);
+                controller.preemptTask(taskName, jobId);
             }
         });
         MenuItem kill = new MenuItem("Kill");
         kill.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.killTask(taskName);
+                controller.killTask(taskName, jobId);
             }
         });
         MenuItem markAsFinishedAndResume = new MenuItem("Mark as finished and Resume");
         markAsFinishedAndResume.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.markAsFinishedAndResume(taskName);
+                controller.markAsFinishedAndResume(taskName, jobId);
             }
         });
 
