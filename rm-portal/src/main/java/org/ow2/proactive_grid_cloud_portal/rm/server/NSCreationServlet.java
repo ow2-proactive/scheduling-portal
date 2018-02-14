@@ -84,6 +84,8 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingInfraParams = false;
         boolean readingPolicyParams = false;
 
+        boolean deployNodeSource = false;
+
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
             factory.setSizeThreshold(4096);
@@ -105,6 +107,8 @@ public class NSCreationServlet extends HttpServlet {
                         nsName = fi.getString();
                     } else if (fieldName.equals("nodesRecoverable")) {
                         nodesRecoverable = fi.getString();
+                    } else if (fieldName.equals("deploy") && fi.getString().equals(Boolean.TRUE.toString())) {
+                        deployNodeSource = true;
                     } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
@@ -144,15 +148,28 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult = ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(sessionId,
-                                                                                       nsName,
-                                                                                       infra,
-                                                                                       toArray(infraParams),
-                                                                                       toArray(infraFileParams),
-                                                                                       policy,
-                                                                                       toArray(policyParams),
-                                                                                       toArray(policyFileParams),
-                                                                                       nodesRecoverable);
+            String jsonResult;
+            if (deployNodeSource) {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(sessionId,
+                                                                                    nsName,
+                                                                                    infra,
+                                                                                    toArray(infraParams),
+                                                                                    toArray(infraFileParams),
+                                                                                    policy,
+                                                                                    toArray(policyParams),
+                                                                                    toArray(policyFileParams),
+                                                                                    nodesRecoverable);
+            } else {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                    nsName,
+                                                                                    infra,
+                                                                                    toArray(infraParams),
+                                                                                    toArray(infraFileParams),
+                                                                                    policy,
+                                                                                    toArray(policyParams),
+                                                                                    toArray(policyFileParams),
+                                                                                    nodesRecoverable);
+            }
             JSONObject json = new JSONObject(jsonResult);
             if (json != null) {
                 if (json.has("result")) {
