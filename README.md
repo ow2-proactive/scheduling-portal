@@ -37,7 +37,7 @@ installed is SCHEDULING_HOME:
   to this folder is STUDIO_HOME, you need to create a symbolic link in
   SCHEDULING_HOME/dist/war/studio that points to STUDIO_HOME/app:
 
-    `$> ln -s SCHEDULING_HOME/dist/war/studio STUDIO_HOME/app`
+    `$> ln -s STUDIO_HOME/app SCHEDULING_HOME/dist/war/studio`
 
   - Scheduler and RM portals: Checkout the project scheduling-portal
   (https://github.com/ow2-proactive/scheduling-portal). Execute 'gradle build'.
