@@ -49,6 +49,9 @@ public interface RMImages extends ClientBundle {
     @Source("images/nodesource_16.png")
     ImageResource nodesource_16();
 
+    @Source("images/nodesource_undeployed_16.png")
+    ImageResource nodesource_undeployed_16();
+
     @Source("images/node_remove_16.png")
     ImageResource node_remove_16();
 

@@ -56,18 +56,23 @@ public class NodeSource {
     /** login of the user that created the NS */
     private String nodeSourceAdmin;
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin) {
+    /** if the node source is not deployed, it has no node */
+    private boolean deployed;
+
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, boolean deployed) {
         this.sourceDescription = sourceDescription;
         this.sourceName = sourceName;
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.hosts = new HashMap<String, Host>();
         this.deploying = new HashMap<String, Node>();
+        this.deployed = deployed;
     }
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
+        this.deployed = t.deployed;
 
         Set<String> hostKeys = t.hosts.keySet();
         this.hosts = new HashMap<String, Host>(hostKeys.size());
@@ -102,6 +107,10 @@ public class NodeSource {
 
     public String getNodeSourceAdmin() {
         return nodeSourceAdmin;
+    }
+
+    public boolean isDeployed() {
+        return deployed;
     }
 
     public static class Host {

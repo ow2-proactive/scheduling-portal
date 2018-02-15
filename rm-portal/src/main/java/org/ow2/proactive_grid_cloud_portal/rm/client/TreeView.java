@@ -168,6 +168,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
                 String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                 String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+                String deployItemImageResource = RMImages.instance.nodesource_16().getSafeUri().asString();
 
                 final TreeNode n = event.getNode();
                 if (n instanceof TNode) {
@@ -229,7 +230,22 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                menu.setItems(expandItem, collapseItem, new MenuItemSeparator(), lockItem, unlockItem, removeItem);
+                MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
+                deployItem.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(MenuItemClickEvent event) {
+                        controller.deployNodeSource();
+                    }
+                });
+
+                menu.setItems(expandItem,
+                              collapseItem,
+                              new MenuItemSeparator(),
+                              lockItem,
+                              unlockItem,
+                              removeItem,
+                              deployItem);
+
                 treeGrid.setContextMenu(menu);
             }
         });

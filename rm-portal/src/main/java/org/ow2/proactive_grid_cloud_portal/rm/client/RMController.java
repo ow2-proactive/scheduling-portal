@@ -527,7 +527,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 sourceDescription = js.stringValue();
             String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
 
-            ns.put(sourceName, new NodeSource(sourceName, sourceDescription, nodeSourceAdmin));
+            ns.put(sourceName,
+                   new NodeSource(sourceName,
+                                  sourceDescription,
+                                  nodeSourceAdmin,
+                                  !sourceDescription.startsWith("Undeployed")));
         }
 
         int numDeploying = 0;
@@ -851,6 +855,30 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 LogModel.getInstance().logMessage("Successfully unlocked " + nodeUrls.size() + " nodes");
             }
         });
+    }
+
+    public void deployNodeSource() {
+        if (model.getSelectedNodeSource() != null) {
+            String nodeSourceName = model.getSelectedNodeSource().getSourceName();
+
+            rm.deployNodeSource(LoginModel.getInstance().getSessionId(),
+                                model.getSelectedNodeSource().getSourceName(),
+                                new AsyncCallback<String>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        LogModel.getInstance()
+                                                .logImportantMessage("Failed to deploy node source " + nodeSourceName +
+                                                                     JSONUtils.getJsonErrorMessage(caught));
+
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        LogModel.getInstance()
+                                                .logMessage("Successfully deployed node source " + nodeSourceName);
+                                    }
+                                });
+        }
     }
 
     /**

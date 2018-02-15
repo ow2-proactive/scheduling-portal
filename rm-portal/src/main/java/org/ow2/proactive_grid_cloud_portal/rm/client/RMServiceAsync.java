@@ -141,8 +141,7 @@ public interface RMServiceAsync {
      * @throws RestServerException
      * @throws ServiceException
      */
-    void deployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback)
-            throws RestServerException, ServiceException;
+    void deployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
 
     /**
      * Lock a set of nodes
