@@ -146,8 +146,7 @@ public class TasksController {
      * Kill a task within a job 
      * @param taskName task name
      */
-    public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+    public void killTask(final String taskName, final Integer jobId) {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -166,18 +165,15 @@ public class TasksController {
         });
     }
 
-    public void restartInErrorTask(final String taskName) {
-        restartTask(taskName, RestartType.IN_ERROR_TASK);
+    public void restartInErrorTask(final String taskName, final Integer jobId) {
+        restartTask(taskName, jobId, RestartType.IN_ERROR_TASK);
     }
 
-    public void restartRunningTask(final String taskName) {
-        restartTask(taskName, RestartType.RUNNING_TASK);
+    public void restartRunningTask(final String taskName, final Integer jobId) {
+        restartTask(taskName, jobId, RestartType.RUNNING_TASK);
     }
 
-    protected void restartTask(String taskName, RestartType restartType) {
-        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
-        Job selectedJob = executionsModel.getSelectedJob();
-        Integer jobId = selectedJob.getId();
+    protected void restartTask(String taskName, Integer jobId, RestartType restartType) {
 
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
@@ -227,8 +223,7 @@ public class TasksController {
      * Preempt a task within a job 
      * @param taskName task name
      */
-    public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+    public void preemptTask(final String taskName, final Integer jobId) {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -249,10 +244,7 @@ public class TasksController {
      * Mark in-error task as finished and resume job
      * @param taskName task name
      */
-    public void markAsFinishedAndResume(final String taskName) {
-        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
-        Job selectedJob = executionsModel.getSelectedJob();
-        final Integer jobId = selectedJob.getId();
+    public void markAsFinishedAndResume(final String taskName, final Integer jobId) {
 
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
