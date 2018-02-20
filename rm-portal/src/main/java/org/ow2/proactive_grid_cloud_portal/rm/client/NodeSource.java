@@ -57,22 +57,22 @@ public class NodeSource {
     private String nodeSourceAdmin;
 
     /** if the node source is not deployed, it has no node */
-    private boolean deployed;
+    private NodeSourceStatus nodeSourceStatus;
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, boolean deployed) {
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus) {
         this.sourceDescription = sourceDescription;
         this.sourceName = sourceName;
         this.nodeSourceAdmin = nodeSourceAdmin;
+        this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.hosts = new HashMap<String, Host>();
         this.deploying = new HashMap<String, Node>();
-        this.deployed = deployed;
     }
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
-        this.deployed = t.deployed;
+        this.nodeSourceStatus = t.nodeSourceStatus;
 
         Set<String> hostKeys = t.hosts.keySet();
         this.hosts = new HashMap<String, Host>(hostKeys.size());
@@ -109,8 +109,16 @@ public class NodeSource {
         return nodeSourceAdmin;
     }
 
-    public boolean isDeployed() {
-        return deployed;
+    public NodeSourceStatus getNodeSourceStatus() {
+        return nodeSourceStatus;
+    }
+
+    public String getIcon() {
+        if (nodeSourceStatus.equals(NodeSourceStatus.NODES_DEPLOYED)) {
+            return RMImages.instance.nodesource_16().getSafeUri().asString();
+        } else {
+            return RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
+        }
     }
 
     public static class Host {

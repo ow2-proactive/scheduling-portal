@@ -301,6 +301,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     int i = curTiles.size();
                     flow.insert(nsTile, i);
                     this.curTiles.add(i, nsName);
+                } else {
+                    /* node source update */
+                    if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                        int i = this.curTiles.indexOf(nsName);
+                        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+                        nt.refresh(ns);
+                    }
                 }
 
                 /* deploying nodes : not in a host yet */
@@ -511,7 +518,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     }
 
                     if (nodesource != null) {
-                        if (nodesource.isDeployed()) {
+                        if (nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_DEPLOYED)) {
                             deployItem.setEnabled(false);
                         } else {
                             deployItem.setEnabled(true);
@@ -617,7 +624,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
         public NodeTile(NodeSource ns) {
-            super(RMImages.instance.nodesource_16().getSafeUri().asString());
+            super(ns.getIcon());
             this.nodesource = ns;
             init();
         }
@@ -626,6 +633,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             this.node = n;
             this.setUrl(n.getIcon());
             this.setHoverNodeLabel();
+        }
+
+        public void refresh(NodeSource ns) {
+            this.nodesource = ns;
+            this.setUrl(ns.getIcon());
         }
 
         private void setHoverNodeLabel() {
