@@ -170,6 +170,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
                 String deployItemImageResource = RMImages.instance.nodesource_16().getSafeUri().asString();
 
+                NodeSource currentSelectedNodeSource = null;
+
                 final TreeNode n = event.getNode();
                 if (n instanceof TNode) {
                     TNode tn = (TNode) n;
@@ -179,6 +181,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 } else if (n instanceof TNS) {
                     TNS tn = (TNS) n;
                     TreeView.this.controller.selectNodeSource(tn.rmNS);
+                    currentSelectedNodeSource = tn.rmNS;
                 } else if (n instanceof THost) {
                     THost tn = (THost) n;
                     TreeView.this.controller.selectHost(tn.rmHost);
@@ -238,6 +241,14 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
+                if (currentSelectedNodeSource != null) {
+                    if (currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_DEPLOYED)) {
+                        deployItem.setEnabled(false);
+                    } else {
+                        deployItem.setEnabled(true);
+                    }
+                }
+
                 menu.setItems(expandItem,
                               collapseItem,
                               new MenuItemSeparator(),
@@ -272,13 +283,21 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             TNS nsTreeNode = new TNS(nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
                                      ns.getNodeSourceAdmin() + "</span>", ns);
             nsTreeNode.setAttribute("nodeId", nsName);
-            nsTreeNode.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+            nsTreeNode.setIcon(ns.getIcon());
 
             /* NodeSources */
             NodeSource oldNs = (oldNodes != null) ? oldNodes.get(nsName) : null;
             if (oldNs == null) {
+                /* new node source */
                 this.tree.add(nsTreeNode, this.tree.getRoot());
                 this.curNodes.put(nsName, nsTreeNode);
+            } else {
+                /* node source update */
+                if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                    TNS curTreeNodeSource = (TNS) curNodes.get(nsName);
+                    curTreeNodeSource.rmNS = ns;
+                    curTreeNodeSource.setIcon(ns.getIcon());
+                }
             }
 
             for (Node n : ns.getDeploying().values()) {

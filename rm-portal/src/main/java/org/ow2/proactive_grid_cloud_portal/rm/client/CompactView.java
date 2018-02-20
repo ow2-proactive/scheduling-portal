@@ -525,11 +525,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     }
 
-                    menu.setItems(lockItem, unlockItem, removeItem);
-
-                    if (nodesource != null) {
-                        menu.addItem(deployItem);
-                    }
+                    menu.setItems(lockItem, unlockItem, removeItem, deployItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
