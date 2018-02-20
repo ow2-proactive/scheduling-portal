@@ -171,6 +171,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 String deployItemImageResource = RMImages.instance.nodesource_16().getSafeUri().asString();
 
                 NodeSource currentSelectedNodeSource = null;
+                Node currentSelectedNode = null;
 
                 final TreeNode n = event.getNode();
                 if (n instanceof TNode) {
@@ -178,6 +179,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     TreeView.this.controller.selectNode(tn.rmNode);
                     lockItemImageResource = tn.rmNode.getIconLocked();
                     unlockItemImageResource = tn.rmNode.getIconUnlocked();
+                    currentSelectedNode = tn.rmNode;
                 } else if (n instanceof TNS) {
                     TNS tn = (TNS) n;
                     TreeView.this.controller.selectNodeSource(tn.rmNS);
@@ -241,6 +243,16 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
+                if (currentSelectedNode != null) {
+                    if (currentSelectedNode.isLocked()) {
+                        lockItem.setEnabled(false);
+                        unlockItem.setEnabled(true);
+                    } else {
+                        lockItem.setEnabled(true);
+                        unlockItem.setEnabled(false);
+                    }
+                }
+
                 if (currentSelectedNodeSource != null) {
                     if (currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_DEPLOYED)) {
                         deployItem.setEnabled(false);
@@ -249,13 +261,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 }
 
-                menu.setItems(expandItem,
+                menu.setItems(deployItem,
+                              expandItem,
                               collapseItem,
                               new MenuItemSeparator(),
                               lockItem,
                               unlockItem,
-                              removeItem,
-                              deployItem);
+                              removeItem);
 
                 treeGrid.setContextMenu(menu);
             }
