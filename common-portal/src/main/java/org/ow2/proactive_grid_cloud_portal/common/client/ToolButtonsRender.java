@@ -41,6 +41,12 @@ public class ToolButtonsRender {
         return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler");
     }
 
+    public ToolStripButton getSchedulerHighlightedLinkButton() {
+        return getToolStripButtonHighlighted(Images.instance.scheduler_30(),
+                                             "Scheduling & Orchestration",
+                                             "/scheduler");
+    }
+
     public ToolStripButton getStudioLinkButton() {
         ImageResource imageResource = Images.instance.studio_30();
         String title = "Workflow Studio";
@@ -51,6 +57,10 @@ public class ToolButtonsRender {
 
     public ToolStripButton getResourceManagerLinkButton() {
         return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm");
+    }
+
+    public ToolStripButton getResourceManagerHighlightedLinkButton() {
+        return getToolStripButtonHighlighted(Images.instance.rm_30(), "Resource Manager", "/rm");
     }
 
     public ToolStripButton getAutomationDashboardLinkButton() {
@@ -86,13 +96,21 @@ public class ToolButtonsRender {
         return toolStripButton;
     }
 
+    private ToolStripButton getToolStripButtonHighlighted(ImageResource imageResource, String title, final String url) {
+        ToolStripButton toolStripButton = getToolStripButtonWithoutBorder(imageResource, title, url);
+
+        toolStripButton.setBorder(GREY_BUTTON_BORDER);
+        toolStripButton.setBackgroundColor("#e6e6e6");
+        return toolStripButton;
+    }
+
     private ToolStripButton getToolStripButtonWithoutBorder(ImageResource imageResource, String title,
             final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
 
         toolStripButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                Window.open(url, "", "");
+                Window.open(url, url, "");
             }
         });
         return toolStripButton;
