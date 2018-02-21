@@ -484,7 +484,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void fetchRMMonitoring() {
         final long t = System.currentTimeMillis();
 
-        rm.getMonitoring(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+        rm.getMonitoring(LoginModel.getInstance().getSessionId(), model.getMaxCounter(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 if (!LoginModel.getInstance().isLoggedIn())
                     return;
@@ -519,6 +519,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         int numDeployedNodeSources = 0;
         int numUndeployedNodeSources = 0;
 
+
+        model.setMaxCounter(Long.valueOf(obj.get("latestCounter").isNumber().toString()));
         JSONArray nodesources = obj.get("nodeSource").isArray();
         for (int i = 0; i < nodesources.size(); i++) {
             JSONObject nsObj = nodesources.get(i).isObject();

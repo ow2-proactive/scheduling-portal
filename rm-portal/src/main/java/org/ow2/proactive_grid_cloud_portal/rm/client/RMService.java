@@ -79,7 +79,7 @@ public interface RMService extends RemoteService {
      * @throws RestServerException 
      * @throws ServiceException
      */
-    String getMonitoring(String sessionId) throws RestServerException, ServiceException;
+    String getMonitoring(String sessionId, Long counter) throws RestServerException, ServiceException;
 
     /**
      * List of all supported Infrastructure Managers, and their parameters

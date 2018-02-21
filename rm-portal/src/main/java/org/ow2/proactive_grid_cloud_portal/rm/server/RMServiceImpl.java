@@ -216,11 +216,11 @@ public class RMServiceImpl extends Service implements RMService {
      * 
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getMonitoring(java.lang.String)
      */
-    public String getMonitoring(final String sessionId) throws RestServerException, ServiceException {
+    public String getMonitoring(final String sessionId, Long counter) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                return restClient.monitoring(sessionId);
+                return restClient.monitoring(sessionId, counter.toString());
             }
         });
     }

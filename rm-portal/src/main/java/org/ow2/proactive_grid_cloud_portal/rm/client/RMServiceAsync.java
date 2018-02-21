@@ -76,7 +76,7 @@ public interface RMServiceAsync {
      * 		named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
      */
-    void getMonitoring(String sessionId, AsyncCallback<String> callback);
+    void getMonitoring(String sessionId, Long counter, AsyncCallback<String> callback);
 
     /**
      * List of all supported Infrastructure Managers, and their parameters

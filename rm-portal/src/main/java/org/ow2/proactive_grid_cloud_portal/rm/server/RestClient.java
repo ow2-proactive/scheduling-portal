@@ -60,7 +60,7 @@ public interface RestClient {
     @GZIP
     @Path("/rm/monitoring")
     @Produces("application/json")
-    InputStream monitoring(@HeaderParam("sessionid") String sessionId);
+    InputStream monitoring(@HeaderParam("sessionid") String sessionId, @HeaderParam("latestCounter") @DefaultValue("0") String counter);
 
     @GET
     @GZIP
