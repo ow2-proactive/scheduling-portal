@@ -253,18 +253,17 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 }
 
-                if (currentSelectedNodeSource != null) {
-                    if (currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_DEPLOYED)) {
-                        deployItem.setEnabled(false);
-                    } else {
-                        deployItem.setEnabled(true);
-                    }
+                if (currentSelectedNodeSource != null &&
+                    currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+                    deployItem.setEnabled(true);
+                } else {
+                    deployItem.setEnabled(false);
                 }
 
-                menu.setItems(deployItem,
-                              expandItem,
+                menu.setItems(expandItem,
                               collapseItem,
                               new MenuItemSeparator(),
+                              deployItem,
                               lockItem,
                               unlockItem,
                               removeItem);

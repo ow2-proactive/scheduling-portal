@@ -517,12 +517,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     }
 
-                    if (nodesource != null) {
-                        if (nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_DEPLOYED)) {
-                            deployItem.setEnabled(false);
-                        } else {
-                            deployItem.setEnabled(true);
-                        }
+                    if (nodesource != null &&
+                        nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+                        deployItem.setEnabled(true);
+                    } else {
+                        deployItem.setEnabled(false);
                     }
 
                     menu.setItems(deployItem, lockItem, unlockItem, removeItem);

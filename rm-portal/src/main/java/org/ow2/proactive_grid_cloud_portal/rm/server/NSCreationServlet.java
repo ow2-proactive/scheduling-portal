@@ -107,8 +107,10 @@ public class NSCreationServlet extends HttpServlet {
                         nsName = fi.getString();
                     } else if (fieldName.equals("nodesRecoverable")) {
                         nodesRecoverable = fi.getString();
-                    } else if (fieldName.equals("deploy") && fi.getString().equals(Boolean.TRUE.toString())) {
-                        deployNodeSource = true;
+                    } else if (fieldName.equals("deploy")) {
+                        if (fi.getString().equals(Boolean.TRUE.toString())) {
+                            deployNodeSource = true;
+                        }
                     } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
