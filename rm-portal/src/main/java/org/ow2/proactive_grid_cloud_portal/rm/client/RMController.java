@@ -28,7 +28,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -493,7 +496,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             this.statHistReq.cancel();
         fetchStatHistory();
     }
-
+    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
     /**
      * Perform the server call to fetch current nodes states,
      * store it on the model, notify listeners
@@ -503,8 +506,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         rm.getMonitoring(LoginModel.getInstance().getSessionId(), model.getMaxCounter(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                if (!LoginModel.getInstance().isLoggedIn())
+                if (!LoginModel.getInstance().isLoggedIn()) {
                     return;
+                }
 
                 updateModelBasedOnResponse(result);
 
@@ -522,29 +526,22 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
-    private NodeSource parseNodeSource(JSONObject nsObj) {
-        String sourceName = nsObj.get("sourceName").isString().stringValue();
-        String sourceDescription = getJsonStringNullable(nsObj, "nodeOwner");
-        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
-        String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
-
-        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
-    }
-
     private void updateModelBasedOnResponse(String json) {
-        HashMap<String, NodeSource> nodeSources = new HashMap<String, NodeSource>();
-
-        if(model.getNodeSources() == null){
-            model.setNodes(new HashMap<>());
+        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
+        for (NodeSource nodeSource : model.getNodeSources().values()) {
+            NodeSource newNodeSource = new NodeSource(nodeSource);
+            newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
         }
 
         JSONObject obj = this.parseJSON(json).isObject();
 
-        model.setMaxCounter(Long.valueOf(obj.get("latestCounter").isNumber().toString()));
+        final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
+        logger.log(Level.SEVERE, "latest counter " + latestCounter);
+        model.setMaxCounter(latestCounter);
 
-        addNewNodeSources(obj);
+        addNewNodeSources(newNodeSources, obj);
 
-        removeNodeSources(obj);
+        removeNodeSources(newNodeSources, obj);
 
         JSONArray jsNodes = obj.get("nodesEvents").isArray();
         for (int i = 0; i < jsNodes.size(); i++) {
@@ -552,12 +549,18 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 JSONObject jsNode = jsNodes.get(i).isObject();
 
                 final Node node = parseNode(jsNode);
-                System.out.println("recieved " + node.getNodeUrl());
-                final NodeSource nodeSource = nodeSources.get(node.getSourceName());
+
+                final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
+                if(nodeSource == null){
+                    logger.log(Level.SEVERE, "nodeSource == null");
+                } else {
+                    logger.log(Level.SEVERE, "nodeSource name is " + nodeSource.getSourceName());
+                }
 
                 if (nodeSource != null) {
+                    logger.log(Level.SEVERE, "nodeSource != null");
                     if (!node.isRemoved()) {
-
+                        logger.log(Level.SEVERE, "!node.isRemoved()");
                         // deploying node
                         if (node.isDeployingNode()) {
 
@@ -578,6 +581,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                             }
                         }
                     } else {
+                        logger.log(Level.SEVERE, "Going to remove node " + node.getNodeUrl());
                         if (node.isDeployingNode()) {
                             nodeSource.getDeploying().remove(node.getNodeUrl());
                         } else {
@@ -585,10 +589,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                             if (host != null) {
                                 host.getNodes().remove(node.getNodeUrl());
+                                logger.log(Level.SEVERE, "Removed form the host " + host.getHostName());
 
                                 if (host.getNodes().isEmpty()) {
                                     nodeSource.getHosts().remove(host);
+                                    logger.log(Level.SEVERE, "Removed empty host " + host.getHostName());
                                 }
+                            } else {
+                                logger.log(Level.SEVERE, "Host is null " + node.getHostName());
                             }
                         }
                     }
@@ -604,35 +612,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
         }
 
+        model.setNodes(newNodeSources);
+
         recalculatePhysicalVirtualHosts();
 
         recalculateStatistics();
 
-        model.notifyNodeListeners();
-
     }
 
-    private void addNewNodeSources(JSONObject obj){
+    private void addNewNodeSources(Map<String, NodeSource> newNodeSources, JSONObject obj){
         JSONArray jsNodeSources = obj.get("nodeSource").isArray();
-
         for (int i = 0; i < jsNodeSources.size(); i++) {
             JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
-
-            model.getNodeSources().put(nodeSource.getSourceName(), nodeSource);
+            newNodeSources.put(nodeSource.getSourceName(), nodeSource);
         }
     }
 
-    private void removeNodeSources(JSONObject obj){
+    private void removeNodeSources(Map<String, NodeSource> newNodeSources, JSONObject obj){
         JSONArray jsRemovedNodeSources = obj.get("removeNodeSourceEvents").isArray();
-
         for (int i = 0; i < jsRemovedNodeSources.size(); i++) {
             JSONObject jsNodeSource = jsRemovedNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
-
-            model.getNodeSources().remove(nodeSource.getSourceName());
+            newNodeSources.remove(nodeSource.getSourceName());
         }
     }
 
@@ -715,6 +719,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if(node.isLocked()){
             model.setNumLocked(model.getNumLocked() + 1);
         }
+    }
+
+    private NodeSource parseNodeSource(JSONObject nsObj) {
+        String sourceName = nsObj.get("sourceName").isString().stringValue();
+        String sourceDescription = getJsonStringNullable(nsObj, "nodeOwner");
+        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
+
+        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
     }
 
     private Node parseNode(JSONObject nodeObj) {

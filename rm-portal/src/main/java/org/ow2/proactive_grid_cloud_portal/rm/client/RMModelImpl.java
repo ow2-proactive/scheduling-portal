@@ -142,10 +142,6 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setNodes(HashMap<String, NodeSource> nodes) {
         this.nodes = nodes;
-        notifyNodeListeners();
-    }
-
-    public void notifyNodeListeners(){
         for (NodesListener list : this.nodesListeners) {
             list.nodesUpdated(nodes);
         }
