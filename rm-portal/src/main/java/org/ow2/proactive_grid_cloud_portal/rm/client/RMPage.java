@@ -39,7 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
@@ -424,7 +423,7 @@ public class RMPage implements LogListener {
             login = "";
 
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
-        nsButton.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        nsButton.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
         nsButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

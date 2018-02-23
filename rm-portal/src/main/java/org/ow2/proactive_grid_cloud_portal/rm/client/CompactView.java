@@ -458,7 +458,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                     String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-                    String deployItemImageResource = RMImages.instance.nodesource_16().getSafeUri().asString();
+                    String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
 
                     if (node != null) {
                         controller.selectNode(node);
