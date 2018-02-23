@@ -65,7 +65,13 @@ public enum NodeState {
     /**
      * a node cannot be provided to a RM user, it is under configuration
      */
-    CONFIGURING("Configuring");
+    CONFIGURING("Configuring"),
+
+    /**
+     * a node that was removed completely
+     */
+    REMOVED("Removed");
+
 
     private String desc;
 
@@ -97,6 +103,8 @@ public enum NodeState {
             return NodeState.LOST;
         else if (value.equalsIgnoreCase(CONFIGURING.toString()))
             return NodeState.CONFIGURING;
+        else if (value.equalsIgnoreCase(REMOVED.toString()))
+            return NodeState.REMOVED;
         else
             throw new IllegalArgumentException("'" + value + "' is not a valid NodeState");
     }

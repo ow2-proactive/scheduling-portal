@@ -110,11 +110,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private long maxNumberOfNodes = -1;
 
+<<<<<<< HEAD
     private int numDeployedNodeSources = 0;
 
     private int numUndeployedNodeSources = 0;
 
     private long maxCounter = 0;
+=======
+    private long maxCounter = -1;
+>>>>>>> Does not work
 
     RMModelImpl() {
         super();
@@ -132,12 +136,16 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
-    public Map<String, NodeSource> getNodes() {
+    public Map<String, NodeSource> getNodeSources() {
         return this.nodes;
     }
 
     void setNodes(HashMap<String, NodeSource> nodes) {
         this.nodes = nodes;
+        notifyNodeListeners();
+    }
+
+    public void notifyNodeListeners(){
         for (NodesListener list : this.nodesListeners) {
             list.nodesUpdated(nodes);
         }

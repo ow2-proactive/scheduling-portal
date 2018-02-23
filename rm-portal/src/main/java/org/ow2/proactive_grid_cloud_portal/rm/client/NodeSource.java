@@ -62,6 +62,7 @@ public class NodeSource {
     NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus) {
         this.sourceDescription = sourceDescription;
         this.sourceName = sourceName;
+        this.sourceDescription = sourceDescription;
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.hosts = new HashMap<String, Host>();
@@ -279,6 +280,10 @@ public class NodeSource {
                 }
             }
 
+            public boolean isRemoved() { return nodeState == NodeState.REMOVED; }
+
+            public boolean isDeployingNode() { return hostName == null || hostName.length() == 0; }
+
             public String getNodeUrl() {
                 return nodeUrl;
             }
@@ -353,6 +358,10 @@ public class NodeSource {
 
             public String getIconUnlocked() {
                 return getIcon(false);
+            }
+
+            public boolean isVirtual(){
+                return getNodeUrl().toLowerCase().contains("virt-");
             }
 
             /**

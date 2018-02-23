@@ -85,7 +85,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * <li>the view displays what it reads from the Model.
  * </code>
  *
- *
  * @author mschnoor
  */
 public class RMController extends Controller implements UncaughtExceptionHandler {
@@ -104,38 +103,56 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         return RMImagesUnbundled.LOGO_350;
     }
 
-    /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
+    /**
+     * if this is different than LOCAL_SESSION cookie, we need to disconnect
+     */
     private String localSessionNum;
 
-    /** periodically updates the local state */
+    /**
+     * periodically updates the local state
+     */
     private Timer updater = null;
 
-    /** periodically fetches runtime stats */
+    /**
+     * periodically fetches runtime stats
+     */
     private Timer statsUpdater = null;
 
-    /** remote gwt service */
+    /**
+     * remote gwt service
+     */
     private RMServiceAsync rm = null;
 
-    /** stores client data */
+    /**
+     * stores client data
+     */
     private RMModelImpl model = null;
 
-    /** shown when not logged in */
+    /**
+     * shown when not logged in
+     */
     private LoginPage loginPage = null;
 
-    /** shown when logged in */
+    /**
+     * shown when logged in
+     */
     private RMPage rmPage = null;
 
-    /** result of the latest call to {@link RMServiceAsync#getStatHistory(String, String, AsyncCallback)} */
+    /**
+     * result of the latest call to {@link RMServiceAsync#getStatHistory(String, String, AsyncCallback)}
+     */
     private Request statHistReq = null;
 
-    /** system.currenttimemillis of last StatHistory call */
+    /**
+     * system.currenttimemillis of last StatHistory call
+     */
     private long lastStatHistReq = 0;
 
     private Timer autoLoginTimer;
 
     /**
      * Default constructor
-     * 
+     *
      * @param rm rm server
      */
     RMController(RMServiceAsync rm) {
@@ -265,7 +282,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
-                                          loginModel.getSessionId() + ")");
+                loginModel.getSessionId() + ")");
     }
 
     @Override
@@ -303,7 +320,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                 if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
                     teardown("Duplicate session detected!<br>" +
-                             "Another tab or window in this browser is accessing this page.");
+                            "Another tab or window in this browser is accessing this page.");
                 }
                 fetchRMMonitoring();
 
@@ -347,13 +364,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
-                                          "AverageActivity" };
+        String[] sources = new String[]{"BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
+                "AverageActivity"};
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
             if (model.getStatHistory(src) != null &&
-                !model.getStatHistory(src).range.equals(model.getRequestedStatHistoryRange(src))) {
+                    !model.getStatHistory(src).range.equals(model.getRequestedStatHistoryRange(src))) {
                 changedRange = true;
             }
 
@@ -371,49 +388,49 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             this.lastStatHistReq = now;
 
             this.statHistReq = rm.getStatHistory(LoginModel.getInstance().getSessionId(),
-                                                 range,
-                                                 new AsyncCallback<String>() {
-                                                     @Override
-                                                     public void onSuccess(String result) {
+                    range,
+                    new AsyncCallback<String>() {
+                        @Override
+                        public void onSuccess(String result) {
 
-                                                         JSONValue val = RMController.this.parseJSON(result);
-                                                         JSONObject obj = val.isObject();
+                            JSONValue val = RMController.this.parseJSON(result);
+                            JSONObject obj = val.isObject();
 
-                                                         HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
-                                                         for (String source : obj.keySet()) {
-                                                             JSONArray arr = obj.get(source).isArray();
+                            HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
+                            for (String source : obj.keySet()) {
+                                JSONArray arr = obj.get(source).isArray();
 
-                                                             ArrayList<Double> values = new ArrayList<Double>();
-                                                             for (int i = 0; i < arr.size(); i++) {
-                                                                 JSONValue dval = arr.get(i);
-                                                                 if (dval.isNumber() != null) {
-                                                                     values.add(dval.isNumber().doubleValue());
-                                                                 } else if (i < arr.size() - 1) {
-                                                                     values.add(Double.NaN);
-                                                                 }
+                                ArrayList<Double> values = new ArrayList<Double>();
+                                for (int i = 0; i < arr.size(); i++) {
+                                    JSONValue dval = arr.get(i);
+                                    if (dval.isNumber() != null) {
+                                        values.add(dval.isNumber().doubleValue());
+                                    } else if (i < arr.size() - 1) {
+                                        values.add(Double.NaN);
+                                    }
 
-                                                             }
-                                                             StatHistory st = new StatHistory(source,
-                                                                                              values,
-                                                                                              model.getRequestedStatHistoryRange(source));
-                                                             stats.put(source, st);
-                                                         }
-                                                         model.setStatHistory(stats);
-                                                         LogModel.getInstance()
-                                                                 .logMessage("Updated Statistics History in " +
-                                                                             (System.currentTimeMillis() - now) + "ms");
-                                                     }
+                                }
+                                StatHistory st = new StatHistory(source,
+                                        values,
+                                        model.getRequestedStatHistoryRange(source));
+                                stats.put(source, st);
+                            }
+                            model.setStatHistory(stats);
+                            LogModel.getInstance()
+                                    .logMessage("Updated Statistics History in " +
+                                            (System.currentTimeMillis() - now) + "ms");
+                        }
 
-                                                     @Override
-                                                     public void onFailure(Throwable caught) {
-                                                         if (JSONUtils.getJsonErrorCode(caught) == 401) {
-                                                             teardown("You have been disconnected from the server.");
-                                                         } else {
-                                                             error("Failed to fetch Statistics History: " +
-                                                                   JSONUtils.getJsonErrorMessage(caught));
-                                                         }
-                                                     }
-                                                 });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            if (JSONUtils.getJsonErrorCode(caught) == 401) {
+                                teardown("You have been disconnected from the server.");
+                            } else {
+                                error("Failed to fetch Statistics History: " +
+                                        JSONUtils.getJsonErrorMessage(caught));
+                            }
+                        }
+                    });
         }
 
         /*
@@ -463,8 +480,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the requested history range for a given set of sources,
      * store it in the model, perform statistic fetch
-     *  
-     * @param r range to set
+     *
+     * @param r      range to set
      * @param source source names
      */
     public void setRuntimeRRDRange(Range r, String... source) {
@@ -489,10 +506,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 if (!LoginModel.getInstance().isLoggedIn())
                     return;
 
-                HashMap<String, NodeSource> nodes = parseRMMonitoring(result);
-                model.setNodes(nodes);
-                LogModel.getInstance().logMessage("Fetched " + nodes.size() + " node sources in " +
-                                                  (System.currentTimeMillis() - t) + "ms");
+                updateModelBasedOnResponse(result);
+
+                LogModel.getInstance().logMessage("Processed RM/monitoring in " +
+                        (System.currentTimeMillis() - t) + "ms");
             }
 
             public void onFailure(Throwable caught) {
@@ -505,175 +522,124 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
-    /**
-     * Parse the node state JSON string
-     * 
-     * @param json the "rm/monitoring" json result
-     * @return a POJO representation
-     */
-    private HashMap<String, NodeSource> parseRMMonitoring(String json) {
+    private NodeSource parseNodeSource(JSONObject nsObj) {
+        String sourceName = nsObj.get("sourceName").isString().stringValue();
+        String sourceDescription = getJsonStringNullable(nsObj, "nodeOwner");
+        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
 
-        JSONObject obj = this.parseJSON(json).isObject();
-        HashMap<String, NodeSource> ns = new HashMap<String, NodeSource>();
+        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
+    }
 
-        int numDeployedNodeSources = 0;
-        int numUndeployedNodeSources = 0;
+    private void updateModelBasedOnResponse(String json) {
+        HashMap<String, NodeSource> nodeSources = new HashMap<String, NodeSource>();
 
-
-        model.setMaxCounter(Long.valueOf(obj.get("latestCounter").isNumber().toString()));
-        JSONArray nodesources = obj.get("nodeSource").isArray();
-        for (int i = 0; i < nodesources.size(); i++) {
-            JSONObject nsObj = nodesources.get(i).isObject();
-
-            String sourceName = nsObj.get("sourceName").isString().stringValue();
-            String sourceDescription = "";
-            JSONString js = (nsObj.get("sourceDescription")).isString();
-            if (js != null)
-                sourceDescription = js.stringValue();
-            String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
-
-            String nodeSourceStatus = "";
-            JSONString statusjs = (nsObj.get("nodeSourceStatus")).isString();
-            if (statusjs != null)
-                nodeSourceStatus = statusjs.stringValue();
-
-            NodeSource nodeSource = new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
-
-            ns.put(sourceName, nodeSource);
-
-            switch (nodeSource.getNodeSourceStatus()) {
-                case NODES_DEPLOYED:
-                    numDeployedNodeSources++;
-                    break;
-                case NODES_UNDEPLOYED:
-                    numUndeployedNodeSources++;
-                    break;
-            }
+        if(model.getNodeSources() == null){
+            model.setNodes(new HashMap<>());
         }
 
-        model.setNumDeployedNodeSources(numDeployedNodeSources);
-        model.setNumUndeployedNodeSources(numUndeployedNodeSources);
+        JSONObject obj = this.parseJSON(json).isObject();
 
-        int numDeploying = 0;
-        int numLost = 0;
-        int numConfiguring = 0;
-        int numFree = 0;
-        int numBusy = 0;
-        int numDown = 0;
-        int numToBeRemoved = 0;
+        model.setMaxCounter(Long.valueOf(obj.get("latestCounter").isNumber().toString()));
 
-        int numLocked = 0;
+        addNewNodeSources(obj);
 
-        JSONArray nodes = obj.get("nodesEvents").isArray();
-        for (int i = 0; i < nodes.size(); i++) {
+        removeNodeSources(obj);
+
+        JSONArray jsNodes = obj.get("nodesEvents").isArray();
+        for (int i = 0; i < jsNodes.size(); i++) {
             try {
-                JSONObject nodeObj = nodes.get(i).isObject();
+                JSONObject jsNode = jsNodes.get(i).isObject();
 
-                String hostName = nodeObj.get("hostName").isString().stringValue();
-                String nss = nodeObj.get("nodeSource").isString().stringValue();
+                final Node node = parseNode(jsNode);
+                System.out.println("recieved " + node.getNodeUrl());
+                final NodeSource nodeSource = nodeSources.get(node.getSourceName());
 
-                String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
-                String nodeState = nodeObj.get("nodeState").isString().stringValue();
-                String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
-                String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
-                long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
-                String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
+                if (nodeSource != null) {
+                    if (!node.isRemoved()) {
 
-                String nodeOwner = getJsonStringNullable(nodeObj, "nodeOwner");
-                String vmName = getJsonStringNullable(nodeObj, "vmname");
-                String description = getJsonStringNullable(nodeObj, "nodeInfo");
-                String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
-                String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
+                        // deploying node
+                        if (node.isDeployingNode()) {
 
-                boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
-                long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
-                String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
+                            nodeSource.getDeploying().put(node.getNodeUrl(), node);
 
-                if (isLocked) {
-                    numLocked++;
-                }
+                        } else { // already deployed node
+                            Host host = nodeSource.getHosts().get(node.getHostName());
 
-                Node n = new Node(nodeUrl,
-                                  nodeState,
-                                  nodeInfo,
-                                  timeStamp,
-                                  timeStampFormatted,
-                                  nodeProvider,
-                                  nodeOwner,
-                                  nss,
-                                  hostName,
-                                  vmName,
-                                  description,
-                                  defaultJMXUrl,
-                                  proactiveJMXUrl,
-                                  isLocked,
-                                  lockTime,
-                                  nodeLocker);
+                            if (host == null) {
+                                host = new Host(node.getHostName(), node.getSourceName());
+                                nodeSource.getHosts().put(node.getHostName(), host);
+                            }
 
-                // deploying node
-                if (hostName == null || hostName.length() == 0) {
-                    ns.get(nss).getDeploying().put(nodeUrl, n);
-                }
-                // already deployed node
-                else {
+                            host.getNodes().put(node.getNodeUrl(), node);
 
-                    Host host = ns.get(nss).getHosts().get(hostName);
-                    if (host == null) {
-                        host = new Host(hostName, nss);
-                        ns.get(nss).getHosts().put(hostName, host);
-                    }
-                    host.getNodes().put(nodeUrl, n);
-                    if (nodeUrl.toLowerCase().contains("virt-")) {
-                        host.setVirtual(true);
+                            if (node.isVirtual()) {
+                                host.setVirtual(true);
+                            }
+                        }
+                    } else {
+                        if (node.isDeployingNode()) {
+                            nodeSource.getDeploying().remove(node.getNodeUrl());
+                        } else {
+                            Host host = nodeSource.getHosts().get(node.getHostName());
+
+                            if (host != null) {
+                                host.getNodes().remove(node.getNodeUrl());
+
+                                if (host.getNodes().isEmpty()) {
+                                    nodeSource.getHosts().remove(host);
+                                }
+                            }
+                        }
                     }
                 }
 
-                switch (n.getNodeState()) {
-                    case BUSY:
-                        numBusy++;
-                        break;
-                    case CONFIGURING:
-                        numConfiguring++;
-                        break;
-                    case DEPLOYING:
-                        numDeploying++;
-                        break;
-                    case DOWN:
-                        numDown++;
-                        break;
-                    case FREE:
-                        numFree++;
-                        break;
-                    case LOST:
-                        numLost++;
-                        break;
-                    case TO_BE_REMOVED:
-                        numToBeRemoved++;
-                        break;
-                }
             } catch (Throwable t) {
                 System.out.println("Failed to parse node : ");
-                System.out.println(nodes.get(i).toString());
+                System.out.println(jsNodes.get(i).toString());
                 t.printStackTrace();
 
                 LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
-                                                          " for input: " + nodes.get(i).toString());
+                        " for input: " + jsNodes.get(i).toString());
             }
         }
 
-        model.setNumBusy(numBusy);
-        model.setNumConfiguring(numConfiguring);
-        model.setNumDeploying(numDeploying);
-        model.setNumDown(numDown);
-        model.setNumFree(numFree);
-        model.setNumLost(numLost);
-        model.setNumToBeRemoved(numToBeRemoved);
+        recalculatePhysicalVirtualHosts();
 
-        model.setNumLocked(numLocked);
+        recalculateStatistics();
 
+        model.notifyNodeListeners();
+
+    }
+
+    private void addNewNodeSources(JSONObject obj){
+        JSONArray jsNodeSources = obj.get("nodeSource").isArray();
+
+        for (int i = 0; i < jsNodeSources.size(); i++) {
+            JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
+
+            NodeSource nodeSource = parseNodeSource(jsNodeSource);
+
+            model.getNodeSources().put(nodeSource.getSourceName(), nodeSource);
+        }
+    }
+
+    private void removeNodeSources(JSONObject obj){
+        JSONArray jsRemovedNodeSources = obj.get("removeNodeSourceEvents").isArray();
+
+        for (int i = 0; i < jsRemovedNodeSources.size(); i++) {
+            JSONObject jsNodeSource = jsRemovedNodeSources.get(i).isObject();
+
+            NodeSource nodeSource = parseNodeSource(jsNodeSource);
+
+            model.getNodeSources().remove(nodeSource.getSourceName());
+        }
+    }
+
+    private void recalculatePhysicalVirtualHosts() {
         int numPhysical = 0;
         int numVirtual = 0;
-        for (NodeSource nos : ns.values()) {
+        for (NodeSource nos : model.getNodeSources().values()) {
             for (Host h : nos.getHosts().values()) {
                 if (h.isVirtual()) {
                     numVirtual++;
@@ -686,7 +652,108 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         model.setNumPhysicalHosts(numPhysical);
         model.setNumVirtualHosts(numVirtual);
 
-        return ns;
+    }
+
+    private void recalculateStatistics() {
+        model.setNumBusy(0);
+        model.setNumConfiguring(0);
+        model.setNumDeploying(0);
+        model.setNumDown(0);
+        model.setNumFree(0);
+        model.setNumLost(0);
+        model.setNumToBeRemoved(0);
+        model.setNumLocked(0);
+        model.setNumDeployedNodeSources(0);
+        model.setNumUndeployedNodeSources(0);
+
+        for (NodeSource nodeSource : model.getNodeSources().values()) {
+            switch (nodeSource.getNodeSourceStatus()) {
+                case NODES_DEPLOYED:
+                    model.setNumDeployedNodeSources(model.getNumDeployedNodeSources() + 1);
+                    break;
+                case NODES_UNDEPLOYED:
+                    model.setNumUndeployedNodeSources(model.getNumUndeployedNodeSources() + 1);
+                    break;
+            }
+
+            for (Node node : nodeSource.getDeploying().values()) {
+                recalculateStatistics(node);
+            }
+
+            for (Host host : nodeSource.getHosts().values()) {
+                for (Node node : host.getNodes().values()) {
+                    recalculateStatistics(node);
+                }
+            }
+        }
+    }
+
+    private void recalculateStatistics(Node node) {
+        switch (node.getNodeState()) {
+            case BUSY:
+                model.setNumBusy(model.getNumBusy() + 1);
+                break;
+            case CONFIGURING:
+                model.setNumConfiguring(model.getNumConfiguring() + 1);
+                break;
+            case DEPLOYING:
+                model.setNumDeploying(model.getNumDeploying() + 1);
+                break;
+            case DOWN:
+                model.setNumDown(model.getNumDown() + 1);
+                break;
+            case FREE:
+                model.setNumFree(model.getNumFree() + 1);
+                break;
+            case LOST:
+                model.setNumLost(model.getNumLost() + 1);
+                break;
+            case TO_BE_REMOVED:
+                model.setNumToBeRemoved(model.getNumToBeRemoved() + 1);
+                break;
+        }
+        if(node.isLocked()){
+            model.setNumLocked(model.getNumLocked() + 1);
+        }
+    }
+
+    private Node parseNode(JSONObject nodeObj) {
+        String hostName = nodeObj.get("hostName").isString().stringValue();
+        String nss = nodeObj.get("nodeSource").isString().stringValue();
+
+        String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
+        String nodeState = nodeObj.get("nodeState").isString().stringValue();
+        String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
+        String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
+        long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
+        String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
+
+        String nodeOwner = getJsonStringNullable(nodeObj, "nodeOwner");
+        String vmName = getJsonStringNullable(nodeObj, "vmname");
+        String description = getJsonStringNullable(nodeObj, "nodeInfo");
+        String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
+        String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
+
+        boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
+        long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
+        String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
+
+        return new Node(nodeUrl,
+                nodeState,
+                nodeInfo,
+                timeStamp,
+                timeStampFormatted,
+                nodeProvider,
+                nodeOwner,
+                nss,
+                hostName,
+                vmName,
+                description,
+                defaultJMXUrl,
+                proactiveJMXUrl,
+                isLocked,
+                lockTime,
+                nodeLocker);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
@@ -726,6 +793,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Fetch and store NS Infrastructure and Policy creation parameters
      * store it in the model
+     *
      * @param success call this when it's done
      * @param failure call this if it fails
      */
@@ -847,7 +915,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
-                                                           JSONUtils.getJsonErrorMessage(caught));
+                        JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -866,7 +934,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
-                                                           JSONUtils.getJsonErrorMessage(caught));
+                        JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -913,7 +981,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             _msg = "Node " + model.getSelectedNode().getNodeUrl();
         } else if (model.getSelectedHost() != null) {
             _msg = "1 Node from Host " + model.getSelectedHost().getHostName() + " (ns: " +
-                   model.getSelectedHost().getSourceName() + ")";
+                    model.getSelectedHost().getSourceName() + ")";
             _numNodes = model.getSelectedHost().getNodes().size();
         } else if (model.getSelectedNodeSource() != null) {
             _msg = "NodeSource " + model.getSelectedNodeSource().getSourceName();
@@ -945,31 +1013,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
                     rm.removeNode(LoginModel.getInstance().getSessionId(),
-                                  model.getSelectedNode().getNodeUrl(),
-                                  force,
-                                  callback);
+                            model.getSelectedNode().getNodeUrl(),
+                            force,
+                            callback);
                 }
             });
         } else if (model.getSelectedHost() != null) {
             final Host h = model.getSelectedHost();
             confirmRemoveNode("Confirm removal of <strong>" + numNodes + " node" + ((numNodes > 1) ? "s" : "") +
-                              "</strong> on <strong>host " + h.getHostName() + "</strong>", new NodeRemovalCallback() {
-                                  public void run(boolean force) {
-                                      for (Node n : h.getNodes().values()) {
-                                          rm.removeNode(LoginModel.getInstance().getSessionId(),
-                                                        n.getNodeUrl(),
-                                                        force,
-                                                        callback);
-                                      }
-                                  }
-                              });
+                    "</strong> on <strong>host " + h.getHostName() + "</strong>", new NodeRemovalCallback() {
+                public void run(boolean force) {
+                    for (Node n : h.getNodes().values()) {
+                        rm.removeNode(LoginModel.getInstance().getSessionId(),
+                                n.getNodeUrl(),
+                                force,
+                                callback);
+                    }
+                }
+            });
         } else if (model.getSelectedNodeSource() != null) {
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
                     rm.removeNodesource(LoginModel.getInstance().getSessionId(),
-                                        model.getSelectedNodeSource().getSourceName(),
-                                        force,
-                                        callback);
+                            model.getSelectedNodeSource().getSourceName(),
+                            force,
+                            callback);
                 }
             });
         }
@@ -1041,8 +1109,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Override user settings, rewrite cookies, refresh corresponding ui elements
-     *  @param refreshTime refresh time for update thread in ms
      *
+     * @param refreshTime refresh time for update thread in ms
      */
     public void setUserSettings(String refreshTime) {
 
@@ -1059,7 +1127,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected node
      * notify listeners
-     * 
+     *
      * @param selection currently selected node
      */
     public void selectNode(Node selection) {
@@ -1069,7 +1137,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected node
      * notify listeners
-     * 
+     *
      * @param sel currently selected host
      */
     public void selectHost(Host sel) {
@@ -1079,7 +1147,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected ns
      * notify listeners
-     * 
+     *
      * @param sel currently selected ns
      */
     public void selectNodeSource(NodeSource sel) {
@@ -1111,6 +1179,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Shut down everything, get back to the login page
+     *
      * @param message an error message, or null
      */
     private void teardown(String message) {
@@ -1127,8 +1196,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
-     * @return a read only view of the clients local data, which stores everything 
-     * 		that was received from the server by the controller
+     * @return a read only view of the clients local data, which stores everything
+     * that was received from the server by the controller
      */
     @Override
     public RMModel getModel() {
@@ -1170,23 +1239,23 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void executeScript(final String script, final String engine, final String nodeUrl,
-            final Callback<String, String> syncCallBack) {
+                              final Callback<String, String> syncCallBack) {
         rm.executeNodeScript(LoginModel.getInstance().getSessionId(),
-                             script,
-                             engine,
-                             nodeUrl,
-                             new AsyncCallback<String>() {
-                                 public void onFailure(Throwable caught) {
-                                     LogModel.getInstance()
-                                             .logImportantMessage("Failed to execute a script " + script + " on " +
-                                                                  nodeUrl + " : " +
-                                                                  JSONUtils.getJsonErrorMessage(caught));
-                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
-                                 }
+                script,
+                engine,
+                nodeUrl,
+                new AsyncCallback<String>() {
+                    public void onFailure(Throwable caught) {
+                        LogModel.getInstance()
+                                .logImportantMessage("Failed to execute a script " + script + " on " +
+                                        nodeUrl + " : " +
+                                        JSONUtils.getJsonErrorMessage(caught));
+                        syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                    }
 
-                                 public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseScriptResult(result));
-                                 }
-                             });
+                    public void onSuccess(String result) {
+                        syncCallBack.onSuccess(parseScriptResult(result));
+                    }
+                });
     }
 }
