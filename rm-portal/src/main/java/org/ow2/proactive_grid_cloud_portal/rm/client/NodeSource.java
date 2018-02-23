@@ -59,6 +59,9 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
+    /** true if NodeSource was not deleted **/
+    private boolean exist = true;
+
     NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus) {
         this.sourceDescription = sourceDescription;
         this.sourceName = sourceName;
@@ -89,6 +92,10 @@ public class NodeSource {
             this.deploying.put(nodeid, new Node(n));
         }
     }
+
+    public boolean isExist() { return exist; }
+
+    public void setExist(boolean exist) { this.exist = exist; }
 
     public Map<String, Host> getHosts() {
         return hosts;

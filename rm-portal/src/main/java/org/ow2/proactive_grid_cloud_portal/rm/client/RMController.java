@@ -535,9 +535,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         model.setMaxCounter(latestCounter);
 
-        addNewNodeSources(newNodeSources, obj);
-
-        removeNodeSources(newNodeSources, obj);
+        processNodeSources(newNodeSources, obj);
 
         JSONArray jsNodes = obj.get("nodesEvents").isArray();
         for (int i = 0; i < jsNodes.size(); i++) {
@@ -574,6 +572,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         recalculateStatistics();
 
+    }
+
+    private void processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
+        JSONArray jsNodeSources = obj.get("nodeSource").isArray();
+        for (int i = 0; i < jsNodeSources.size(); i++) {
+            JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
+
+            NodeSource nodeSource = parseNodeSource(jsNodeSource);
+            if(nodeSource.isExist()){
+                newNodeSources.put(nodeSource.getSourceName(), nodeSource);
+            }else{
+                newNodeSources.remove(nodeSource.getSourceName());
+            }
+        }
     }
 
     private void removeNodeFromNodeSource(Node node, NodeSource nodeSource) {
@@ -621,26 +633,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
         }
         return newNodeSources;
-    }
-
-    private void addNewNodeSources(Map<String, NodeSource> newNodeSources, JSONObject obj){
-        JSONArray jsNodeSources = obj.get("nodeSource").isArray();
-        for (int i = 0; i < jsNodeSources.size(); i++) {
-            JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
-
-            NodeSource nodeSource = parseNodeSource(jsNodeSource);
-            newNodeSources.put(nodeSource.getSourceName(), nodeSource);
-        }
-    }
-
-    private void removeNodeSources(Map<String, NodeSource> newNodeSources, JSONObject obj){
-        JSONArray jsRemovedNodeSources = obj.get("removeNodeSourceEvents").isArray();
-        for (int i = 0; i < jsRemovedNodeSources.size(); i++) {
-            JSONObject jsNodeSource = jsRemovedNodeSources.get(i).isObject();
-
-            NodeSource nodeSource = parseNodeSource(jsNodeSource);
-            newNodeSources.remove(nodeSource.getSourceName());
-        }
     }
 
     private void recalculatePhysicalVirtualHosts() {
