@@ -38,35 +38,35 @@ public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
 
     public ToolStripButton getSchedulerLinkButton() {
-        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler");
+        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler/");
     }
 
     public ToolStripButton getSchedulerHighlightedLinkButton() {
         return getToolStripButtonHighlighted(Images.instance.scheduler_30(),
                                              "Scheduling & Orchestration",
-                                             "/scheduler");
+                                             "/scheduler/");
     }
 
     public ToolStripButton getStudioLinkButton() {
         ImageResource imageResource = Images.instance.studio_30();
         String title = "Workflow Studio";
-        String url = "/studio";
+        String url = "/studio/";
 
         return getToolStripButton(imageResource, title, url);
     }
 
     public ToolStripButton getResourceManagerLinkButton() {
-        return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm");
+        return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm/");
     }
 
     public ToolStripButton getResourceManagerHighlightedLinkButton() {
-        return getToolStripButtonHighlighted(Images.instance.rm_30(), "Resource Manager", "/rm");
+        return getToolStripButtonHighlighted(Images.instance.rm_30(), "Resource Manager", "/rm/");
     }
 
     public ToolStripButton getAutomationDashboardLinkButton() {
         return getToolStripButton(Images.instance.automation_dashboard_30(),
                                   "Automation Dashboard",
-                                  "/automation-dashboard");
+                                  "/automation-dashboard/");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
