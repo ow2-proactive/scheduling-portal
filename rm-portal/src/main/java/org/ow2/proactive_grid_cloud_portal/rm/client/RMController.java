@@ -518,6 +518,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onFailure(Throwable caught) {
+                model.setMaxCounter(-1);
                 if (JSONUtils.getJsonErrorCode(caught) == 401) {
                     teardown("You have been disconnected from the server.");
                 } else {
