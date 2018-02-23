@@ -110,15 +110,11 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private long maxNumberOfNodes = -1;
 
-<<<<<<< HEAD
     private int numDeployedNodeSources = 0;
 
     private int numUndeployedNodeSources = 0;
 
-    private long maxCounter = 0;
-=======
     private long maxCounter = -1;
->>>>>>> Does not work
 
     RMModelImpl() {
         super();
@@ -488,6 +484,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     public long getMaxCounter() { return maxCounter; }
 
-    public void setMaxCounter(long maxCounter) { this.maxCounter = maxCounter; }
+    public void setMaxCounter(long maxCounter) {
+        this.maxCounter = maxCounter;
+    }
 }
 

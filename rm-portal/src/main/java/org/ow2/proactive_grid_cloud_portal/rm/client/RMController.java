@@ -285,7 +285,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
-                loginModel.getSessionId() + ")");
+                                          loginModel.getSessionId() + ")");
     }
 
     @Override
@@ -323,7 +323,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                 if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
                     teardown("Duplicate session detected!<br>" +
-                            "Another tab or window in this browser is accessing this page.");
+                             "Another tab or window in this browser is accessing this page.");
                 }
                 fetchRMMonitoring();
 
@@ -367,13 +367,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[]{"BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
-                "AverageActivity"};
+        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
+                                          "AverageActivity" };
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
             if (model.getStatHistory(src) != null &&
-                    !model.getStatHistory(src).range.equals(model.getRequestedStatHistoryRange(src))) {
+                !model.getStatHistory(src).range.equals(model.getRequestedStatHistoryRange(src))) {
                 changedRange = true;
             }
 
@@ -391,49 +391,49 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             this.lastStatHistReq = now;
 
             this.statHistReq = rm.getStatHistory(LoginModel.getInstance().getSessionId(),
-                    range,
-                    new AsyncCallback<String>() {
-                        @Override
-                        public void onSuccess(String result) {
+                                                 range,
+                                                 new AsyncCallback<String>() {
+                                                     @Override
+                                                     public void onSuccess(String result) {
 
-                            JSONValue val = RMController.this.parseJSON(result);
-                            JSONObject obj = val.isObject();
+                                                         JSONValue val = RMController.this.parseJSON(result);
+                                                         JSONObject obj = val.isObject();
 
-                            HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
-                            for (String source : obj.keySet()) {
-                                JSONArray arr = obj.get(source).isArray();
+                                                         HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
+                                                         for (String source : obj.keySet()) {
+                                                             JSONArray arr = obj.get(source).isArray();
 
-                                ArrayList<Double> values = new ArrayList<Double>();
-                                for (int i = 0; i < arr.size(); i++) {
-                                    JSONValue dval = arr.get(i);
-                                    if (dval.isNumber() != null) {
-                                        values.add(dval.isNumber().doubleValue());
-                                    } else if (i < arr.size() - 1) {
-                                        values.add(Double.NaN);
-                                    }
+                                                             ArrayList<Double> values = new ArrayList<Double>();
+                                                             for (int i = 0; i < arr.size(); i++) {
+                                                                 JSONValue dval = arr.get(i);
+                                                                 if (dval.isNumber() != null) {
+                                                                     values.add(dval.isNumber().doubleValue());
+                                                                 } else if (i < arr.size() - 1) {
+                                                                     values.add(Double.NaN);
+                                                                 }
 
-                                }
-                                StatHistory st = new StatHistory(source,
-                                        values,
-                                        model.getRequestedStatHistoryRange(source));
-                                stats.put(source, st);
-                            }
-                            model.setStatHistory(stats);
-                            LogModel.getInstance()
-                                    .logMessage("Updated Statistics History in " +
-                                            (System.currentTimeMillis() - now) + "ms");
-                        }
+                                                             }
+                                                             StatHistory st = new StatHistory(source,
+                                                                                              values,
+                                                                                              model.getRequestedStatHistoryRange(source));
+                                                             stats.put(source, st);
+                                                         }
+                                                         model.setStatHistory(stats);
+                                                         LogModel.getInstance()
+                                                                 .logMessage("Updated Statistics History in " +
+                                                                             (System.currentTimeMillis() - now) + "ms");
+                                                     }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            if (JSONUtils.getJsonErrorCode(caught) == 401) {
-                                teardown("You have been disconnected from the server.");
-                            } else {
-                                error("Failed to fetch Statistics History: " +
-                                        JSONUtils.getJsonErrorMessage(caught));
-                            }
-                        }
-                    });
+                                                     @Override
+                                                     public void onFailure(Throwable caught) {
+                                                         if (JSONUtils.getJsonErrorCode(caught) == 401) {
+                                                             teardown("You have been disconnected from the server.");
+                                                         } else {
+                                                             error("Failed to fetch Statistics History: " +
+                                                                   JSONUtils.getJsonErrorMessage(caught));
+                                                         }
+                                                     }
+                                                 });
         }
 
         /*
@@ -496,7 +496,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             this.statHistReq.cancel();
         fetchStatHistory();
     }
-//    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
+
+    //    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
     /**
      * Perform the server call to fetch current nodes states,
      * store it on the model, notify listeners
@@ -512,8 +513,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                 updateModelBasedOnResponse(result);
 
-                LogModel.getInstance().logMessage("Processed RM/monitoring in " +
-                        (System.currentTimeMillis() - t) + "ms");
+                LogModel.getInstance()
+                        .logMessage("Processed RM/monitoring in " + (System.currentTimeMillis() - t) + "ms");
             }
 
             public void onFailure(Throwable caught) {
@@ -562,7 +563,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 t.printStackTrace();
 
                 LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
-                        " for input: " + jsNodes.get(i).toString());
+                                                          " for input: " + jsNodes.get(i).toString());
             }
         }
 
@@ -580,9 +581,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
-            if(nodeSource.isExist()){
+            if (nodeSource.isExist()) {
                 newNodeSources.put(nodeSource.getSourceName(), nodeSource);
-            }else{
+            } else {
                 newNodeSources.remove(nodeSource.getSourceName());
             }
         }
@@ -626,7 +627,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    private HashMap<String, NodeSource> cloneNodeSources(){
+    private HashMap<String, NodeSource> cloneNodeSources() {
         HashMap<String, NodeSource> newNodeSources = new HashMap<>();
         for (NodeSource nodeSource : model.getNodeSources().values()) {
             NodeSource newNodeSource = new NodeSource(nodeSource);
@@ -711,7 +712,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 model.setNumToBeRemoved(model.getNumToBeRemoved() + 1);
                 break;
         }
-        if(node.isLocked()){
+        if (node.isLocked()) {
             model.setNumLocked(model.getNumLocked() + 1);
         }
     }
@@ -747,21 +748,21 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
 
         return new Node(nodeUrl,
-                nodeState,
-                nodeInfo,
-                timeStamp,
-                timeStampFormatted,
-                nodeProvider,
-                nodeOwner,
-                nss,
-                hostName,
-                vmName,
-                description,
-                defaultJMXUrl,
-                proactiveJMXUrl,
-                isLocked,
-                lockTime,
-                nodeLocker);
+                        nodeState,
+                        nodeInfo,
+                        timeStamp,
+                        timeStampFormatted,
+                        nodeProvider,
+                        nodeOwner,
+                        nss,
+                        hostName,
+                        vmName,
+                        description,
+                        defaultJMXUrl,
+                        proactiveJMXUrl,
+                        isLocked,
+                        lockTime,
+                        nodeLocker);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
@@ -923,7 +924,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to lock " + nodeUrls.size() + " nodes: " +
-                        JSONUtils.getJsonErrorMessage(caught));
+                                                           JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -942,7 +943,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to unlock " + nodeUrls.size() + " nodes: " +
-                        JSONUtils.getJsonErrorMessage(caught));
+                                                           JSONUtils.getJsonErrorMessage(caught));
 
             }
 
@@ -989,7 +990,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             _msg = "Node " + model.getSelectedNode().getNodeUrl();
         } else if (model.getSelectedHost() != null) {
             _msg = "1 Node from Host " + model.getSelectedHost().getHostName() + " (ns: " +
-                    model.getSelectedHost().getSourceName() + ")";
+                   model.getSelectedHost().getSourceName() + ")";
             _numNodes = model.getSelectedHost().getNodes().size();
         } else if (model.getSelectedNodeSource() != null) {
             _msg = "NodeSource " + model.getSelectedNodeSource().getSourceName();
@@ -1021,31 +1022,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
                     rm.removeNode(LoginModel.getInstance().getSessionId(),
-                            model.getSelectedNode().getNodeUrl(),
-                            force,
-                            callback);
+                                  model.getSelectedNode().getNodeUrl(),
+                                  force,
+                                  callback);
                 }
             });
         } else if (model.getSelectedHost() != null) {
             final Host h = model.getSelectedHost();
             confirmRemoveNode("Confirm removal of <strong>" + numNodes + " node" + ((numNodes > 1) ? "s" : "") +
-                    "</strong> on <strong>host " + h.getHostName() + "</strong>", new NodeRemovalCallback() {
-                public void run(boolean force) {
-                    for (Node n : h.getNodes().values()) {
-                        rm.removeNode(LoginModel.getInstance().getSessionId(),
-                                n.getNodeUrl(),
-                                force,
-                                callback);
-                    }
-                }
-            });
+                              "</strong> on <strong>host " + h.getHostName() + "</strong>", new NodeRemovalCallback() {
+                                  public void run(boolean force) {
+                                      for (Node n : h.getNodes().values()) {
+                                          rm.removeNode(LoginModel.getInstance().getSessionId(),
+                                                        n.getNodeUrl(),
+                                                        force,
+                                                        callback);
+                                      }
+                                  }
+                              });
         } else if (model.getSelectedNodeSource() != null) {
             confirmRemoveNode("Confirm removal of <strong>" + msg + "</strong>", new NodeRemovalCallback() {
                 public void run(boolean force) {
                     rm.removeNodesource(LoginModel.getInstance().getSessionId(),
-                            model.getSelectedNodeSource().getSourceName(),
-                            force,
-                            callback);
+                                        model.getSelectedNodeSource().getSourceName(),
+                                        force,
+                                        callback);
                 }
             });
         }
@@ -1247,23 +1248,23 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void executeScript(final String script, final String engine, final String nodeUrl,
-                              final Callback<String, String> syncCallBack) {
+            final Callback<String, String> syncCallBack) {
         rm.executeNodeScript(LoginModel.getInstance().getSessionId(),
-                script,
-                engine,
-                nodeUrl,
-                new AsyncCallback<String>() {
-                    public void onFailure(Throwable caught) {
-                        LogModel.getInstance()
-                                .logImportantMessage("Failed to execute a script " + script + " on " +
-                                        nodeUrl + " : " +
-                                        JSONUtils.getJsonErrorMessage(caught));
-                        syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
-                    }
+                             script,
+                             engine,
+                             nodeUrl,
+                             new AsyncCallback<String>() {
+                                 public void onFailure(Throwable caught) {
+                                     LogModel.getInstance()
+                                             .logImportantMessage("Failed to execute a script " + script + " on " +
+                                                                  nodeUrl + " : " +
+                                                                  JSONUtils.getJsonErrorMessage(caught));
+                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                                 }
 
-                    public void onSuccess(String result) {
-                        syncCallBack.onSuccess(parseScriptResult(result));
-                    }
-                });
+                                 public void onSuccess(String result) {
+                                     syncCallBack.onSuccess(parseScriptResult(result));
+                                 }
+                             });
     }
 }

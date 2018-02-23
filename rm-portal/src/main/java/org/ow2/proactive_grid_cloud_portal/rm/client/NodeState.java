@@ -72,7 +72,6 @@ public enum NodeState {
      */
     REMOVED("Removed");
 
-
     private String desc;
 
     /**

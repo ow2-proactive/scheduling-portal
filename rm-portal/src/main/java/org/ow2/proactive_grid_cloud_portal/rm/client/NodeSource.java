@@ -93,9 +93,13 @@ public class NodeSource {
         }
     }
 
-    public boolean isExist() { return exist; }
+    public boolean isExist() {
+        return exist;
+    }
 
-    public void setExist(boolean exist) { this.exist = exist; }
+    public void setExist(boolean exist) {
+        this.exist = exist;
+    }
 
     public Map<String, Host> getHosts() {
         return hosts;
@@ -287,9 +291,13 @@ public class NodeSource {
                 }
             }
 
-            public boolean isRemoved() { return nodeState == NodeState.REMOVED; }
+            public boolean isRemoved() {
+                return nodeState == NodeState.REMOVED;
+            }
 
-            public boolean isDeployingNode() { return hostName == null || hostName.length() == 0; }
+            public boolean isDeployingNode() {
+                return hostName == null || hostName.length() == 0;
+            }
 
             public String getNodeUrl() {
                 return nodeUrl;
@@ -367,7 +375,7 @@ public class NodeSource {
                 return getIcon(false);
             }
 
-            public boolean isVirtual(){
+            public boolean isVirtual() {
                 return getNodeUrl().toLowerCase().contains("virt-");
             }
 
