@@ -515,6 +515,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
         ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
 
@@ -526,11 +527,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addSeparator();
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(12);
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
-        tools.addButton(resourceManagerLinkButton);
+        tools.addButton(schedulerLinkButton);
         tools.addSpacer(12);
-        tools.addButton(automationDashboardLinkButton);
+        tools.addButton(resourceManagerLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);

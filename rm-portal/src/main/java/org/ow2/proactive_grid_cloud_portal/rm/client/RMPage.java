@@ -450,6 +450,7 @@ public class RMPage implements LogListener {
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
         ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
+        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerHighlightedLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -458,11 +459,13 @@ public class RMPage implements LogListener {
         tools.addButton(nsButton);
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(12);
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
         tools.addSpacer(12);
-        tools.addButton(automationDashboardLinkButton);
+        tools.addButton(resourceManagerLinkButton);
         tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
