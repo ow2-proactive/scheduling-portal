@@ -496,7 +496,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             this.statHistReq.cancel();
         fetchStatHistory();
     }
-    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
+//    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
     /**
      * Perform the server call to fetch current nodes states,
      * store it on the model, notify listeners
@@ -527,16 +527,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     private void updateModelBasedOnResponse(String json) {
-        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
-        for (NodeSource nodeSource : model.getNodeSources().values()) {
-            NodeSource newNodeSource = new NodeSource(nodeSource);
-            newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
-        }
+        HashMap<String, NodeSource> newNodeSources = cloneNodeSources();
 
         JSONObject obj = this.parseJSON(json).isObject();
 
         final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
-        logger.log(Level.SEVERE, "latest counter " + latestCounter);
+
         model.setMaxCounter(latestCounter);
 
         addNewNodeSources(newNodeSources, obj);
@@ -551,54 +547,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 final Node node = parseNode(jsNode);
 
                 final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
-                if(nodeSource == null){
-                    logger.log(Level.SEVERE, "nodeSource == null");
-                } else {
-                    logger.log(Level.SEVERE, "nodeSource name is " + nodeSource.getSourceName());
-                }
 
+                // if node source was not deleted
                 if (nodeSource != null) {
-                    logger.log(Level.SEVERE, "nodeSource != null");
+
                     if (!node.isRemoved()) {
-                        logger.log(Level.SEVERE, "!node.isRemoved()");
-                        // deploying node
-                        if (node.isDeployingNode()) {
-
-                            nodeSource.getDeploying().put(node.getNodeUrl(), node);
-
-                        } else { // already deployed node
-                            Host host = nodeSource.getHosts().get(node.getHostName());
-
-                            if (host == null) {
-                                host = new Host(node.getHostName(), node.getSourceName());
-                                nodeSource.getHosts().put(node.getHostName(), host);
-                            }
-
-                            host.getNodes().put(node.getNodeUrl(), node);
-
-                            if (node.isVirtual()) {
-                                host.setVirtual(true);
-                            }
-                        }
+                        addNodeToNodeSource(node, nodeSource);
                     } else {
-                        logger.log(Level.SEVERE, "Going to remove node " + node.getNodeUrl());
-                        if (node.isDeployingNode()) {
-                            nodeSource.getDeploying().remove(node.getNodeUrl());
-                        } else {
-                            Host host = nodeSource.getHosts().get(node.getHostName());
-
-                            if (host != null) {
-                                host.getNodes().remove(node.getNodeUrl());
-                                logger.log(Level.SEVERE, "Removed form the host " + host.getHostName());
-
-                                if (host.getNodes().isEmpty()) {
-                                    nodeSource.getHosts().remove(host);
-                                    logger.log(Level.SEVERE, "Removed empty host " + host.getHostName());
-                                }
-                            } else {
-                                logger.log(Level.SEVERE, "Host is null " + node.getHostName());
-                            }
-                        }
+                        removeNodeFromNodeSource(node, nodeSource);
                     }
                 }
 
@@ -618,6 +574,53 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         recalculateStatistics();
 
+    }
+
+    private void removeNodeFromNodeSource(Node node, NodeSource nodeSource) {
+        if (node.isDeployingNode()) {
+            nodeSource.getDeploying().remove(node.getNodeUrl());
+        } else {
+            Host host = nodeSource.getHosts().get(node.getHostName());
+
+            if (host != null) {
+                host.getNodes().remove(node.getNodeUrl());
+
+                if (host.getNodes().isEmpty()) {
+                    nodeSource.getHosts().remove(host);
+                }
+            }
+        }
+    }
+
+    private void addNodeToNodeSource(Node node, NodeSource nodeSource) {
+        // as deploying node
+        if (node.isDeployingNode()) {
+
+            nodeSource.getDeploying().put(node.getNodeUrl(), node);
+
+        } else { // as already deployed node
+            Host host = nodeSource.getHosts().get(node.getHostName());
+
+            if (host == null) { // create host if there is no host
+                host = new Host(node.getHostName(), node.getSourceName());
+                nodeSource.getHosts().put(node.getHostName(), host);
+            }
+
+            host.getNodes().put(node.getNodeUrl(), node);
+
+            if (node.isVirtual()) {
+                host.setVirtual(true);
+            }
+        }
+    }
+
+    private HashMap<String, NodeSource> cloneNodeSources(){
+        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
+        for (NodeSource nodeSource : model.getNodeSources().values()) {
+            NodeSource newNodeSource = new NodeSource(nodeSource);
+            newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
+        }
+        return newNodeSources;
     }
 
     private void addNewNodeSources(Map<String, NodeSource> newNodeSources, JSONObject obj){
