@@ -527,8 +527,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
+    /**
+     * Model is rendered in the CompactView based on the new and old (current) model.
+     * That is why, we take old model and clone it. Then we process server response
+     * and alternate new model by adding/removing node/nodesources.
+     * @param json
+     */
     private void updateModelBasedOnResponse(String json) {
-        HashMap<String, NodeSource> newNodeSources = cloneNodeSources();
+        // clone old model
+        HashMap<String, NodeSource> newNodeSources = cloneNodeSources(model.getNodeSources());
 
         JSONObject obj = this.parseJSON(json).isObject();
 
@@ -627,9 +634,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    private HashMap<String, NodeSource> cloneNodeSources() {
+    /**
+     * @return clones node sources with all hosts and nodes
+     */
+    private HashMap<String, NodeSource> cloneNodeSources(Map<String, NodeSource> oldNodeSources) {
         HashMap<String, NodeSource> newNodeSources = new HashMap<>();
-        for (NodeSource nodeSource : model.getNodeSources().values()) {
+        for (NodeSource nodeSource : oldNodeSources.values()) {
             NodeSource newNodeSource = new NodeSource(nodeSource);
             newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
         }
