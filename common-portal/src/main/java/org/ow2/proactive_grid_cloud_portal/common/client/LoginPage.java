@@ -40,11 +40,15 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Location;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
@@ -277,13 +281,30 @@ public class LoginPage {
         errorLabel.setHeight(30);
         errorLabel.setAlign(Alignment.CENTER);
 
+        HLayout accountCreationLayout = new HLayout();
+        accountCreationLayout.setWidth100();
+        accountCreationLayout.setHeight(15);
+        accountCreationLayout.setAlign(Alignment.CENTER);
+        Anchor accountCreationLink = new Anchor("Or create an account",
+                                                "https://www.activeeon.com/register/web-download",
+                                                "_blank");
+        accountCreationLink.setWidth("103px");
+        accountCreationLink.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        accountCreationLayout.addMember(accountCreationLink);
+
         // contains the logo and the forms
         VLayout vlayout = new VLayout();
         vlayout.setMembersMargin(15);
         // 350(auth) + 2*10(padding) = 370
         vlayout.setWidth(370);
+        String hostName = Window.Location.getHostName();
+        boolean shouldDisplayLink = hostName == "try.activeeon.com" || hostName == "azure-try.activeeon.com";
+        if (shouldDisplayLink)
+            vlayout.setHeight(278);
+        // 140(auth) + 15(membersMargin) + 88(logo) + 2*10(padding) + 15 (anchor) = 278
+        else
+            vlayout.setHeight(263);
         // 140(auth) + 15(membersMargin) + 88(logo) + 2*10(padding) = 263
-        vlayout.setHeight(263);
         vlayout.setPadding(10);
         vlayout.setBackgroundColor("#fafafa");
         vlayout.setBorder("1px solid #ccc");
@@ -294,6 +315,8 @@ public class LoginPage {
         vlayout.addMember(logo);
         vlayout.addMember(errorLabel);
         vlayout.addMember(auth);
+        if (shouldDisplayLink)
+            vlayout.addMember(accountCreationLayout);
 
         vlayout.hideMember(errorLabel);
 
