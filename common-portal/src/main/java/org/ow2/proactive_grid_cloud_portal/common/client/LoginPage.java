@@ -298,7 +298,7 @@ public class LoginPage {
         // 350(auth) + 2*10(padding) = 370
         vlayout.setWidth(370);
         String hostName = Window.Location.getHostName();
-        boolean shouldDisplayLink = hostName == "try.activeeon.com" || hostName == "azure-try.activeeon.com";
+        boolean shouldDisplayLink = "try.activeeon.com".equals(hostName) || "azure-try.activeeon.com".equals(hostName);
         if (shouldDisplayLink)
             vlayout.setHeight(278);
         // 140(auth) + 15(membersMargin) + 88(logo) + 2*10(padding) + 15 (anchor) = 278
