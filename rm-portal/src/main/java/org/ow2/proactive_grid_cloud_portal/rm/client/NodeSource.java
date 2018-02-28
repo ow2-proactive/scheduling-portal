@@ -95,7 +95,7 @@ public class NodeSource {
     }
 
     public boolean isRemoved() {
-        return eventType.equalsIgnoreCase("NODESOURCE_REMOVED");
+        return "NODESOURCE_REMOVED".equalsIgnoreCase(eventType);
     }
 
     public Map<String, Host> getHosts() {
@@ -293,7 +293,7 @@ public class NodeSource {
             }
 
             public boolean isRemoved() {
-                return eventType.equalsIgnoreCase("NODE_REMOVED");
+                return "NODE_REMOVED".equalsIgnoreCase(eventType);
             }
 
             public boolean isDeployingNode() {
