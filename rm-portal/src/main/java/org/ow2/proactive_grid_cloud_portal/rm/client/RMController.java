@@ -106,49 +106,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         return RMImagesUnbundled.LOGO_350;
     }
 
-    /**
-     * if this is different than LOCAL_SESSION cookie, we need to disconnect
-     */
+    /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
     private String localSessionNum;
 
-    /**
-     * periodically updates the local state
-     */
+    /** periodically updates the local state */
     private Timer updater = null;
 
-    /**
-     * periodically fetches runtime stats
-     */
+    /** periodically fetches runtime stats */
     private Timer statsUpdater = null;
 
-    /**
-     * remote gwt service
-     */
+    /** remote gwt service */
     private RMServiceAsync rm = null;
 
-    /**
-     * stores client data
-     */
+    /** stores client data */
     private RMModelImpl model = null;
 
-    /**
-     * shown when not logged in
-     */
+    /** shown when not logged in */
     private LoginPage loginPage = null;
 
-    /**
-     * shown when logged in
-     */
+    /** shown when logged in */
     private RMPage rmPage = null;
 
-    /**
-     * result of the latest call to {@link RMServiceAsync#getStatHistory(String, String, AsyncCallback)}
-     */
+    /** result of the latest call to {@link RMServiceAsync#getStatHistory(String, String, AsyncCallback)} */
     private Request statHistReq = null;
 
-    /**
-     * system.currenttimemillis of last StatHistory call
-     */
+    /** system.currenttimemillis of last StatHistory call */
     private long lastStatHistReq = 0;
 
     private Timer autoLoginTimer;
@@ -497,8 +479,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         fetchStatHistory();
     }
 
-    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
-
     /**
      * Perform the server call to fetch current nodes states,
      * store it on the model, notify listeners
@@ -508,7 +488,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         rm.getMonitoring(LoginModel.getInstance().getSessionId(), model.getMaxCounter(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                logger.log(Level.SEVERE, "On success");
                 if (!LoginModel.getInstance().isLoggedIn()) {
                     return;
                 }
@@ -539,24 +518,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void updateModelBasedOnResponse(String json) {
         JSONObject obj = this.parseJSON(json).isObject();
 
-        logger.log(Level.SEVERE, "updateModelBasedOnResponse");
-
         final long currentCounter = model.getMaxCounter();
 
         final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
-
-        logger.log(Level.SEVERE, "current and latest " + currentCounter + " " + latestCounter);
 
         model.setMaxCounter(latestCounter);
 
         HashMap<String, NodeSource> newNodeSources = new HashMap<>();
         if (isRegularRequest(currentCounter, latestCounter)) {
-            logger.log(Level.SEVERE, "clone node source");
             copyNodesSources(model.getNodeSources(), newNodeSources);
         }
 
         processNodeSources(newNodeSources, obj);
 
+        // process nodes
         JSONArray jsNodes = obj.get("nodesEvents").isArray();
         for (int i = 0; i < jsNodes.size(); i++) {
             try {
@@ -608,6 +583,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         return 0 <= currentCounter && currentCounter <= latestCounter;
     }
 
+    /**
+     * Add and remove NodeSources
+     * @param newNodeSources
+     * @param obj
+     */
     private void processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
         JSONArray jsNodeSources = obj.get("nodeSource").isArray();
         for (int i = 0; i < jsNodeSources.size(); i++) {
@@ -615,10 +595,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
             if (nodeSource.isRemoved()) {
-                logger.log(Level.SEVERE, "nodeSource.!isExist()");
                 newNodeSources.remove(nodeSource.getSourceName());
             } else {
-                logger.log(Level.SEVERE, "nodeSource.isExist()");
                 newNodeSources.put(nodeSource.getSourceName(), nodeSource);
             }
         }
