@@ -61,7 +61,7 @@ public interface RestClient {
     @Path("/rm/monitoring")
     @Produces("application/json")
     InputStream monitoring(@HeaderParam("sessionid") String sessionId,
-            @HeaderParam("latestCounter") @DefaultValue("0") String counter);
+            @HeaderParam("clientCounter") @DefaultValue("-1") String counter);
 
     @GET
     @GZIP

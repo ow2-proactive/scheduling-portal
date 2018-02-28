@@ -72,11 +72,12 @@ public interface RMServiceAsync {
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others	
      * @param sessionId current session
+     * @param clientCounter latest counter client is aware of
      * @param callback async callback to return a JSON object containing two arrays 
      * 		named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
      */
-    void getMonitoring(String sessionId, Long counter, AsyncCallback<String> callback);
+    void getMonitoring(String sessionId, Long clientCounter, AsyncCallback<String> callback);
 
     /**
      * List of all supported Infrastructure Managers, and their parameters
