@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -183,6 +182,9 @@ public class SubmitWindow {
     private Hidden startAtParameter; // ----------------- START_AT value to send
     // along with the job
 
+    private Hidden planParameter; // ----------------- PLAN value to send
+    // along with the job
+
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
     // -------------------------------------------------- Start At Part
@@ -213,9 +215,6 @@ public class SubmitWindow {
     private Label waitLabel;
 
     private Label errorLabel;
-
-    // ----- Catalog temp maps
-    private HashMap<String, Integer> catalogBucketsMap;
 
     private String CATALOG_URL = null;
 
@@ -449,6 +448,7 @@ public class SubmitWindow {
     private void setStartAccordingPlanningRadioButtonState(String job) {
         if (job != null && isExecutionCalendarGIDefined(job)) {
             startAccordingPlanningRadioButton.setVisible(true);
+            startAccordingPlanningRadioButton.setValue(true);
         } else {
             startAccordingPlanningRadioButton.setVisible(false);
         }
@@ -460,6 +460,7 @@ public class SubmitWindow {
         startAtLayout.setGroupTitle("3. Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
+        planParameter = new Hidden("PLAN");
 
         startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
                                                             "Planned according to embedded Execution Calendar defintion");
@@ -688,8 +689,7 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/resources?kind=workflow";
+                    String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
@@ -731,14 +731,10 @@ public class SubmitWindow {
             public void onResponseReceived(Request request, Response response) {
                 JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
-                catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get("name").isString().stringValue();
-                    String bucketId = bucket.get("id").isNumber().toString();
-                    String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
-                    bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
-                    catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
+                    bucketsListBox.addItem(bucketName);
                 }
                 bucketsListBox.setEnabled(true);
             }
@@ -888,6 +884,9 @@ public class SubmitWindow {
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
                     hiddenPane.add(startAtParameter);
+                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
+                    planParameter.setValue("true");
+                    hiddenPane.add(planParameter);
                 }
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
@@ -946,10 +945,9 @@ public class SubmitWindow {
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 // filter only valid items
                 if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    formContent.add(new Hidden("bucketId", selectedBucketId));
+                    String selectedBucketName = bucketsListBox.getSelectedValue();
+                    formContent.add(new Hidden("bucketName", selectedBucketName));
                     formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
@@ -981,12 +979,18 @@ public class SubmitWindow {
                     } else {
                         GWT.log("JSON parse ERROR");
                         displayErrorMessage(res);
+                        //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                        setEnabledStartAtPart(false);
+                        startAccordingPlanningRadioButton.setVisible(false);
                         return;
                     }
 
                 } catch (JSONException t) {
                     GWT.log("JSON parse ERROR");
                     displayErrorMessage(res);
+                    //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                    setEnabledStartAtPart(false);
+                    startAccordingPlanningRadioButton.setVisible(false);
                     return;
                 }
                 redrawVariables();

@@ -190,8 +190,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.rootLayout = contentLayout;
         contentLayout.setWidth100();
         contentLayout.setHeight100();
-        contentLayout.setBackgroundColor("#fafafMerci de penser à apporter votre chéquier pour la caution, le 1er loyer et nos honoraires. Ces chèques ne seront encaissés que lors de votre entrée dans les lieux.\n" +
-                                         " a");
+        contentLayout.setBackgroundColor("#fafafa");
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
@@ -516,8 +515,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
-        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
-        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -528,13 +527,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addSeparator();
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(12);
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
+        tools.addButton(schedulerLinkButton);
+        tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(cloudAutomationLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(notificationPortalLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);
