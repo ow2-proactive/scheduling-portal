@@ -497,7 +497,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         fetchStatHistory();
     }
 
-    //    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
+    java.util.logging.Logger logger = Logger.getLogger("wtf logger");
+
     /**
      * Perform the server call to fetch current nodes states,
      * store it on the model, notify listeners
@@ -535,14 +536,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * @param json
      */
     private void updateModelBasedOnResponse(String json) {
-        // clone old model
-        HashMap<String, NodeSource> newNodeSources = cloneNodeSources(model.getNodeSources());
-
         JSONObject obj = this.parseJSON(json).isObject();
 
+        final long currentCounter = model.getMaxCounter();
         final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
-
         model.setMaxCounter(latestCounter);
+
+        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
+        logger.log(Level.INFO, "curre and latest " + currentCounter + " " + latestCounter);
+        if (isRegularRequest(currentCounter, latestCounter)) {
+            cloneNodeSources(model.getNodeSources(), newNodeSources);
+        }
 
         processNodeSources(newNodeSources, obj);
 
@@ -583,6 +587,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     }
 
+    /**
+     * Decides whether it was regular server request, or not.
+     * 'Not regular' request means that something went strange, e.g. server was restarted,
+     * or it is the very first request of this type.
+     * It it is regular, than rm portal should treat server response as a delta.
+     * If it is not regular, than rm portal should 'forget' what it knew, and start from the scratch
+     * @param currentCounter is current counter that client is aware of
+     * @param latestCounter is counter received from server
+     * @return true if request is regular
+     */
+    private boolean isRegularRequest(long currentCounter, Long latestCounter) {
+        return 0 <= currentCounter && currentCounter <= latestCounter;
+    }
+
     private void processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
         JSONArray jsNodeSources = obj.get("nodeSource").isArray();
         for (int i = 0; i < jsNodeSources.size(); i++) {
@@ -590,8 +608,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
             if (nodeSource.isExist()) {
+                logger.log(Level.INFO, "nodeSource.isExist()");
                 newNodeSources.put(nodeSource.getSourceName(), nodeSource);
             } else {
+                logger.log(Level.INFO, "nodeSource.!isExist()");
                 newNodeSources.remove(nodeSource.getSourceName());
             }
         }
@@ -638,13 +658,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * @return clones node sources with all hosts and nodes
      */
-    private HashMap<String, NodeSource> cloneNodeSources(Map<String, NodeSource> oldNodeSources) {
-        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
+    private void cloneNodeSources(Map<String, NodeSource> oldNodeSources, HashMap<String, NodeSource> newNodeSources) {
         for (NodeSource nodeSource : oldNodeSources.values()) {
             NodeSource newNodeSource = new NodeSource(nodeSource);
             newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
         }
-        return newNodeSources;
     }
 
     private void recalculatePhysicalVirtualHosts() {
@@ -731,15 +749,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "nodeOwner");
-        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
-
-        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
+        String eventType = getJsonStringNullable(nsObj, "eventType");
+        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus, eventType);
     }
 
     private Node parseNode(JSONObject nodeObj) {
         String hostName = nodeObj.get("hostName").isString().stringValue();
         String nss = nodeObj.get("nodeSource").isString().stringValue();
+
+        String eventType = getJsonStringNullable(nodeObj, "eventType");
 
         String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
         String nodeState = nodeObj.get("nodeState").isString().stringValue();
@@ -773,7 +793,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         proactiveJMXUrl,
                         isLocked,
                         lockTime,
-                        nodeLocker);
+                        nodeLocker,
+                        eventType);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {

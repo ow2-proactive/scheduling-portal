@@ -59,15 +59,15 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
-    /** true if NodeSource was not deleted **/
-    private boolean exist = true;
+    private String eventType;
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus) {
-        this.sourceDescription = sourceDescription;
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
+        this.eventType = eventType;
+
         this.hosts = new HashMap<String, Host>();
         this.deploying = new HashMap<String, Node>();
     }
@@ -77,6 +77,7 @@ public class NodeSource {
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.nodeSourceStatus = t.nodeSourceStatus;
+        this.eventType = t.eventType;
 
         Set<String> hostKeys = t.hosts.keySet();
         this.hosts = new HashMap<String, Host>(hostKeys.size());
@@ -94,11 +95,7 @@ public class NodeSource {
     }
 
     public boolean isExist() {
-        return exist;
-    }
-
-    public void setExist(boolean exist) {
-        this.exist = exist;
+        return eventType.equalsIgnoreCase("NODESOURCE_REMOVED");
     }
 
     public Map<String, Host> getHosts() {
@@ -241,10 +238,12 @@ public class NodeSource {
 
             private String nodeLocker = null;
 
+            private String eventType = null;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker) {
+                    String nodeLocker, String eventType) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
@@ -266,6 +265,7 @@ public class NodeSource {
                     this.lockTime = lockTime;
                     this.nodeLocker = nodeLocker;
                 }
+                this.eventType = eventType;
             }
 
             Node(Node t) {
@@ -285,6 +285,7 @@ public class NodeSource {
 
                 this.isLocked = t.isLocked;
 
+                this.eventType = t.eventType;
                 if (this.isLocked) {
                     this.lockTime = t.lockTime;
                     this.nodeLocker = t.nodeLocker;
@@ -292,7 +293,7 @@ public class NodeSource {
             }
 
             public boolean isRemoved() {
-                return nodeState == NodeState.REMOVED;
+                return eventType.equalsIgnoreCase("NODESOURCE_REMOVED");
             }
 
             public boolean isDeployingNode() {
