@@ -94,7 +94,7 @@ public class NodeSource {
         }
     }
 
-    public boolean isExist() {
+    public boolean isRemoved() {
         return eventType.equalsIgnoreCase("NODESOURCE_REMOVED");
     }
 
@@ -293,7 +293,7 @@ public class NodeSource {
             }
 
             public boolean isRemoved() {
-                return eventType.equalsIgnoreCase("NODESOURCE_REMOVED");
+                return eventType.equalsIgnoreCase("NODE_REMOVED");
             }
 
             public boolean isDeployingNode() {

@@ -508,6 +508,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         rm.getMonitoring(LoginModel.getInstance().getSessionId(), model.getMaxCounter(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
+                logger.log(Level.SEVERE, "On success");
                 if (!LoginModel.getInstance().isLoggedIn()) {
                     return;
                 }
@@ -538,14 +539,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void updateModelBasedOnResponse(String json) {
         JSONObject obj = this.parseJSON(json).isObject();
 
+        logger.log(Level.SEVERE, "updateModelBasedOnResponse");
+
         final long currentCounter = model.getMaxCounter();
+
         final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
+
+        logger.log(Level.SEVERE, "current and latest " + currentCounter + " " + latestCounter);
+
         model.setMaxCounter(latestCounter);
 
         HashMap<String, NodeSource> newNodeSources = new HashMap<>();
-        logger.log(Level.INFO, "curre and latest " + currentCounter + " " + latestCounter);
         if (isRegularRequest(currentCounter, latestCounter)) {
-            cloneNodeSources(model.getNodeSources(), newNodeSources);
+            logger.log(Level.SEVERE, "clone node source");
+            copyNodesSources(model.getNodeSources(), newNodeSources);
         }
 
         processNodeSources(newNodeSources, obj);
@@ -607,12 +614,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
-            if (nodeSource.isExist()) {
-                logger.log(Level.INFO, "nodeSource.isExist()");
-                newNodeSources.put(nodeSource.getSourceName(), nodeSource);
-            } else {
-                logger.log(Level.INFO, "nodeSource.!isExist()");
+            if (nodeSource.isRemoved()) {
+                logger.log(Level.SEVERE, "nodeSource.!isExist()");
                 newNodeSources.remove(nodeSource.getSourceName());
+            } else {
+                logger.log(Level.SEVERE, "nodeSource.isExist()");
+                newNodeSources.put(nodeSource.getSourceName(), nodeSource);
             }
         }
     }
@@ -658,7 +665,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * @return clones node sources with all hosts and nodes
      */
-    private void cloneNodeSources(Map<String, NodeSource> oldNodeSources, HashMap<String, NodeSource> newNodeSources) {
+    private void copyNodesSources(Map<String, NodeSource> oldNodeSources, HashMap<String, NodeSource> newNodeSources) {
         for (NodeSource nodeSource : oldNodeSources.values()) {
             NodeSource newNodeSource = new NodeSource(nodeSource);
             newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
