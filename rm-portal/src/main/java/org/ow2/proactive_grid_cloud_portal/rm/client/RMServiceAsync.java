@@ -93,6 +93,26 @@ public interface RMServiceAsync {
     void getPolicies(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * Defines a NodeSource
+     * @param sessionId current session
+     * @param nodeSourceName name of the new NS
+     * @param infrastructureType infrastructure manager full class name
+     * @param infrastructureParameters IM String parameters, null value for files
+     * @param infrastructureFileParameters file parameters
+     * @param policyType policy full class name
+     * @param policyParameters String parameters, null value for files
+     * @param policyFileParameters file parameters
+     * @param nodesRecoverable whether nodes can be recovered after a crash
+     * @param callback
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void defineNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable,
+            AsyncCallback<String> callback) throws RestServerException, ServiceException;
+
+    /**
      * Creates a NodeSource 
      * @param sessionId current session
      * @param nodeSourceName name of the new NS
@@ -110,6 +130,18 @@ public interface RMServiceAsync {
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters, String nodesRecoverable,
             AsyncCallback<String> callback);
+
+    /**
+     * Deploys a node source and starts acquiring its nodes
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the new NS
+     * @param callback
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void deployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
 
     /**
      * Lock a set of nodes
