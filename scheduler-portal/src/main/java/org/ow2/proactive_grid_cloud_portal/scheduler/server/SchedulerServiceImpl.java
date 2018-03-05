@@ -1340,7 +1340,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             try {
                 inputStream = action.apply(restClientProxy, jobId);
 
-                if (Boolean.parseBoolean(convertToString(inputStream))) {
+                if (actionName.startsWith("job set") || Boolean.parseBoolean(convertToString(inputStream))) {
                     success++;
                 } else {
                     failures++;
