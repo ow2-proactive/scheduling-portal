@@ -733,10 +733,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
-        String sourceDescription = getJsonStringNullable(nsObj, "nodeOwner");
+        String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
+        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
-        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus, eventType);
     }
 

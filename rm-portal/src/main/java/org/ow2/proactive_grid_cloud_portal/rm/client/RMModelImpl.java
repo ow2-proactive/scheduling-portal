@@ -482,10 +482,11 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.numUndeployedNodeSources = num;
     }
 
-    public long getMaxCounter() { return maxCounter; }
+    public long getMaxCounter() {
+        return maxCounter;
+    }
 
     public void setMaxCounter(long maxCounter) {
         this.maxCounter = maxCounter;
     }
 }
-

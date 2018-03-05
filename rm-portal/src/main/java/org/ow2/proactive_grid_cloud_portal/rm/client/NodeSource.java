@@ -61,15 +61,16 @@ public class NodeSource {
 
     private String eventType;
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus,
+            String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
 
-        this.hosts = new HashMap<String, Host>();
-        this.deploying = new HashMap<String, Node>();
+        this.hosts = new HashMap<>();
+        this.deploying = new HashMap<>();
     }
 
     NodeSource(NodeSource t) {
@@ -80,14 +81,14 @@ public class NodeSource {
         this.eventType = t.eventType;
 
         Set<String> hostKeys = t.hosts.keySet();
-        this.hosts = new HashMap<String, Host>(hostKeys.size());
+        this.hosts = new HashMap<>(hostKeys.size());
         for (String hostid : hostKeys) {
             Host h = t.hosts.get(hostid);
             this.hosts.put(hostid, new Host(h));
         }
 
         Set<String> deployingKeys = t.deploying.keySet();
-        this.deploying = new HashMap<String, Node>(deployingKeys.size());
+        this.deploying = new HashMap<>(deployingKeys.size());
         for (String nodeid : deployingKeys) {
             Node n = t.deploying.get(nodeid);
             this.deploying.put(nodeid, new Node(n));
