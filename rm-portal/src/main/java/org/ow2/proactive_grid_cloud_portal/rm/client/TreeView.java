@@ -168,6 +168,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
                 String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                 String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+                String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+
+                NodeSource currentSelectedNodeSource = null;
+                Node currentSelectedNode = null;
 
                 final TreeNode n = event.getNode();
                 if (n instanceof TNode) {
@@ -175,9 +179,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     TreeView.this.controller.selectNode(tn.rmNode);
                     lockItemImageResource = tn.rmNode.getIconLocked();
                     unlockItemImageResource = tn.rmNode.getIconUnlocked();
+                    currentSelectedNode = tn.rmNode;
                 } else if (n instanceof TNS) {
                     TNS tn = (TNS) n;
                     TreeView.this.controller.selectNodeSource(tn.rmNS);
+                    currentSelectedNodeSource = tn.rmNS;
                 } else if (n instanceof THost) {
                     THost tn = (THost) n;
                     TreeView.this.controller.selectHost(tn.rmHost);
@@ -229,7 +235,39 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 });
 
-                menu.setItems(expandItem, collapseItem, new MenuItemSeparator(), lockItem, unlockItem, removeItem);
+                MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
+                deployItem.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(MenuItemClickEvent event) {
+                        controller.deployNodeSource();
+                    }
+                });
+
+                if (currentSelectedNode != null) {
+                    if (currentSelectedNode.isLocked()) {
+                        lockItem.setEnabled(false);
+                        unlockItem.setEnabled(true);
+                    } else {
+                        lockItem.setEnabled(true);
+                        unlockItem.setEnabled(false);
+                    }
+                }
+
+                if (currentSelectedNodeSource != null &&
+                    currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+                    deployItem.setEnabled(true);
+                } else {
+                    deployItem.setEnabled(false);
+                }
+
+                menu.setItems(expandItem,
+                              collapseItem,
+                              new MenuItemSeparator(),
+                              deployItem,
+                              lockItem,
+                              unlockItem,
+                              removeItem);
+
                 treeGrid.setContextMenu(menu);
             }
         });
@@ -256,13 +294,21 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             TNS nsTreeNode = new TNS(nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
                                      ns.getNodeSourceAdmin() + "</span>", ns);
             nsTreeNode.setAttribute("nodeId", nsName);
-            nsTreeNode.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+            nsTreeNode.setIcon(ns.getIcon());
 
             /* NodeSources */
             NodeSource oldNs = (oldNodes != null) ? oldNodes.get(nsName) : null;
             if (oldNs == null) {
+                /* new node source */
                 this.tree.add(nsTreeNode, this.tree.getRoot());
                 this.curNodes.put(nsName, nsTreeNode);
+            } else {
+                /* node source update */
+                if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                    TNS curTreeNodeSource = (TNS) curNodes.get(nsName);
+                    curTreeNodeSource.rmNS = ns;
+                    curTreeNodeSource.setIcon(ns.getIcon());
+                }
             }
 
             for (Node n : ns.getDeploying().values()) {
