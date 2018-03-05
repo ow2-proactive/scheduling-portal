@@ -70,7 +70,7 @@ public class ToolButtonsRender {
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
-        ToolStripButton logoutButton = getSimpleToolStripButton(Images.instance.logout_30(), "Logout" + login);
+        ToolStripButton logoutButton = getSimpleToolStripButton(Images.instance.logout_30(), login);
         logoutButton.setIconOrientation("right");
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
