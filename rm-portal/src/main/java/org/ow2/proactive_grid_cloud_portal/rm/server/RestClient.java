@@ -30,7 +30,15 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.jboss.resteasy.annotations.GZIP;
 
@@ -67,7 +75,19 @@ public interface RestClient {
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @POST
-    @Path("/rm/nodesource/create")
+    @Path("/rm/nodesource")
+    @Produces("application/json")
+    InputStream defineNodeSource(@HeaderParam("sessionId") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName,
+            @FormParam("infrastructureType") String infrastructureType,
+            @FormParam("infrastructureParameters") String[] infrastructureParameters,
+            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
+            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
+            @FormParam("policyFileParameters") String[] policyFileParameters,
+            @FormParam("nodesRecoverable") String nodesRecoverable);
+
+    @POST
+    @Path("/rm/nodesource/create/recovery")
     @Produces("application/json")
     InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
@@ -75,7 +95,14 @@ public interface RestClient {
             @FormParam("infrastructureParameters") String[] infrastructureParameters,
             @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
             @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
-            @FormParam("policyFileParameters") String[] policyFileParameters);
+            @FormParam("policyFileParameters") String[] policyFileParameters,
+            @FormParam("nodesRecoverable") String nodesRecoverable);
+
+    @PUT
+    @Path("/rm/nodesource/deploy")
+    @Produces("application/json")
+    InputStream deployNodeSource(@HeaderParam("sessionid") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName);
 
     @POST
     @Path("/rm/node/lock")

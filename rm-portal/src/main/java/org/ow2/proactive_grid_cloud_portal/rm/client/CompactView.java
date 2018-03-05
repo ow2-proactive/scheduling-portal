@@ -301,6 +301,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     int i = curTiles.size();
                     flow.insert(nsTile, i);
                     this.curTiles.add(i, nsName);
+                } else {
+                    /* node source update */
+                    if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                        int i = this.curTiles.indexOf(nsName);
+                        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+                        nt.refresh(ns);
+                    }
                 }
 
                 /* deploying nodes : not in a host yet */
@@ -451,6 +458,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                     String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+                    String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
 
                     if (node != null) {
                         controller.selectNode(node);
@@ -491,6 +499,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     });
 
+                    MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
+                    deployItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
+                        @Override
+                        public void onClick(MenuItemClickEvent event) {
+                            controller.deployNodeSource();
+                        }
+                    });
+
                     if (node != null) {
                         if (node.isLocked()) {
                             lockItem.setEnabled(false);
@@ -501,7 +517,15 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     }
 
-                    menu.setItems(lockItem, unlockItem, removeItem);
+                    if (nodesource != null &&
+                        nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+                        deployItem.setEnabled(true);
+                    } else {
+                        deployItem.setEnabled(false);
+                    }
+
+                    menu.setItems(deployItem, lockItem, unlockItem, removeItem);
+
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
 
@@ -595,7 +619,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
         public NodeTile(NodeSource ns) {
-            super(RMImages.instance.nodesource_16().getSafeUri().asString());
+            super(ns.getIcon());
             this.nodesource = ns;
             init();
         }
@@ -604,6 +628,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             this.node = n;
             this.setUrl(n.getIcon());
             this.setHoverNodeLabel();
+        }
+
+        public void refresh(NodeSource ns) {
+            this.nodesource = ns;
+            this.setUrl(ns.getIcon());
         }
 
         private void setHoverNodeLabel() {

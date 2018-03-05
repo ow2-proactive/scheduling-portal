@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath "com.diffplug.gradle.spotless:spotless:2.4.0"
         classpath "org.ow2.proactive:coding-rules:1.0.0"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
         delete "gradle/ext"
         ant.unjar src: configurations.classpath.find { it.name.startsWith("coding-rules") }, dest: 'gradle/ext'
     }
@@ -20,6 +21,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'jetty'
     apply plugin: 'maven'
+    apply plugin: 'org.sonarqube'
 
     apply from: "$rootDir/gradle/ext/coding-format.gradle"
 
@@ -54,6 +56,9 @@ subprojects {
     }
 
     dependencies {
+
+        def jacksonVersion = "2.8.7"
+
         providedCompile 'com.google.gwt:gwt-user:2.8.0'
         providedCompile 'com.google.gwt:gwt-dev:2.8.0'
         providedCompile 'com.google.gwt:gwt-codeserver:2.8.0'
@@ -73,7 +78,17 @@ subprojects {
         compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-client-gwt:${schedulingPortalVersion}")
-        compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
+
+        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+        compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+        compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jacksonVersion}"
+        compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+        compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
+        compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:${jacksonVersion}"
+        compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
+        compile "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
+
         compile 'com.google.guava:guava:21.0'
         compile 'com.google.guava:guava-gwt:21.0'
 
@@ -117,7 +132,7 @@ project(':rm-portal') {
         compile 'org.jboss.resteasy:resteasy-client:3.0.17.Final'
 
         runtime 'org.slf4j:slf4j-simple:1.7.12'
-
+        compile 'org.codehaus.jettison:jettison:1.2'
         compile project(':common-portal')
     }
     war {

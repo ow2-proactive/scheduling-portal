@@ -102,7 +102,7 @@ public class UploadServlet extends HttpServlet {
             Iterator<?> i = fileItems.iterator();
 
             String sessionId = null;
-            String bucketId = null;
+            String bucketName = null;
             String workflowName = null;
 
             while (i.hasNext()) {
@@ -110,8 +110,8 @@ public class UploadServlet extends HttpServlet {
                 if (fi.isFormField()) {
                     if (fi.getFieldName().equals("sessionId")) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("bucketId")) {
-                        bucketId = fi.getString();
+                    } else if (fi.getFieldName().equals("bucketName")) {
+                        bucketName = fi.getString();
                     } else if (fi.getFieldName().equals("workflowName")) {
                         workflowName = fi.getString();
                     }
@@ -123,12 +123,12 @@ public class UploadServlet extends HttpServlet {
             }
 
             LOGGER.warn("sessionId=" + sessionId);
-            LOGGER.warn("bucketId=" + bucketId);
+            LOGGER.warn("bucketName=" + bucketName);
             LOGGER.warn("workflowName=" + workflowName);
             LOGGER.warn("job=" + job);
 
-            if (bucketId != null && workflowName != null) {
-                fetchFromCatalogAndWriteResponse(bucketId, workflowName, sessionId, response);
+            if (bucketName != null && workflowName != null) {
+                fetchFromCatalogAndWriteResponse(bucketName, workflowName, sessionId, response);
             } else {
                 writeResponse(job, response);
             }
@@ -145,7 +145,7 @@ public class UploadServlet extends HttpServlet {
         }
     }
 
-    private void fetchFromCatalogAndWriteResponse(String bucketId, String workflowName, String sessionId,
+    private void fetchFromCatalogAndWriteResponse(String bucketName, String workflowName, String sessionId,
             HttpServletResponse response) {
         String encodedWorkflowName;
         try {
@@ -153,7 +153,7 @@ public class UploadServlet extends HttpServlet {
         } catch (UnsupportedEncodingException e) {
             encodedWorkflowName = workflowName;
         }
-        String url = URL_CATALOG + "/buckets/" + bucketId + "/resources/" + encodedWorkflowName + "/raw";
+        String url = URL_CATALOG + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
         LOGGER.info("Sending request to catalog: " + url);
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(url);

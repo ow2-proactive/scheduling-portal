@@ -45,6 +45,9 @@ public class SchedulerConfig extends Config {
 
     private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
 
+    /** URL of the remote job-planner REST service */
+    public static final String JOBPLANNER_URL = "jobplanner.rest.url";
+
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
@@ -153,6 +156,21 @@ public class SchedulerConfig extends Config {
             return restUrl;
         }
         return restUrlFromProperties;
+    }
+
+    /**
+     * Returns the job-planner url from shceduler.conf if it exists or the default local URL otherwise.
+     * @return job-planner url
+     */
+    public String getJobplannerUrl() {
+        String jpUrlFromProperties = properties.get(JOBPLANNER_URL);
+        if (jpUrlFromProperties == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String port = com.google.gwt.user.client.Window.Location.getPort();
+            String jobplannerUrl = protocol + "://localhost:" + port + "/job-planner/planned_jobs";
+            return jobplannerUrl;
+        }
+        return jpUrlFromProperties;
     }
 
     /**

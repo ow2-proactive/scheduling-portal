@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
@@ -38,7 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
@@ -47,9 +47,8 @@ import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
@@ -59,10 +58,6 @@ import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import com.smartgwt.client.widgets.form.fields.events.FormItemClickHandler;
-import com.smartgwt.client.widgets.form.fields.events.FormItemIconClickEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
@@ -84,8 +79,6 @@ public class NSCreationWindow {
     private SelectItem infraSelect, policySelect;
 
     private String oldInfra = null, oldPolicy = null;
-
-    private Runnable policySelectChanged, infraSelectChanged;
 
     NSCreationWindow(RMController controller) {
         this.controller = controller;
@@ -138,22 +131,26 @@ public class NSCreationWindow {
                 policySelect.setWidth(300);
 
                 HiddenItem name = new HiddenItem("nsName");
+                HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
+                HiddenItem deploy = new HiddenItem("deploy");
                 HiddenItem callback = new HiddenItem("nsCallback");
                 HiddenItem session = new HiddenItem("sessionId");
 
-                ArrayList<FormItem> tmpAll = new ArrayList<FormItem>();
-                tmpAll.add(name);
-                tmpAll.add(callback);
-                tmpAll.add(session);
-                tmpAll.add(infraSelect);
+                ArrayList<FormItem> formParameters = new ArrayList<>();
+                formParameters.add(name);
+                formParameters.add(nodesRecoverable);
+                formParameters.add(deploy);
+                formParameters.add(callback);
+                formParameters.add(session);
+                formParameters.add(infraSelect);
 
-                LinkedHashMap<String, String> values = new LinkedHashMap<String, String>();
+                LinkedHashMap<String, String> values = new LinkedHashMap<>();
                 for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
                     String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
                     List<Field> configurableFields = inf.getConfigurableFields();
-                    ArrayList<FormItem> forms = new ArrayList<FormItem>(configurableFields.size());
+                    ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
                     for (Field f : configurableFields) {
                         FormItem infra = null;
                         if (f.isPassword()) {
@@ -164,13 +161,9 @@ public class NSCreationWindow {
                                 PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
                                                                                            .getSafeUri()
                                                                                            .asString()),
-                                                                 new FormItemClickHandler() {
-                                                                     @Override
-                                                                     public void onFormItemClick(
-                                                                             FormItemIconClickEvent event) {
-                                                                         CredentialsWindow win = new CredentialsWindow();
-                                                                         win.show();
-                                                                     }
+                                                                 formItemIconClickEvent -> {
+                                                                     CredentialsWindow win = new CredentialsWindow();
+                                                                     win.show();
                                                                  });
                                 cred.setPrompt("Create a Credential file");
                                 cred.setWidth(16);
@@ -185,21 +178,21 @@ public class NSCreationWindow {
                         infra.setWidth(250);
                         infra.setHint("<nobr>" + f.getDescription() + "</nobr>");
                         forms.add(infra);
-                        tmpAll.add(infra);
+                        formParameters.add(infra);
                     }
                     allForms.put(inf.getPluginName(), forms);
                 }
                 infraSelect.setValueMap(values);
 
-                tmpAll.add(new SpacerItem());
+                formParameters.add(new SpacerItem());
                 values.clear();
-                tmpAll.add(policySelect);
+                formParameters.add(policySelect);
                 for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
                     String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
                     List<Field> configurableFields = inf.getConfigurableFields();
-                    ArrayList<FormItem> forms = new ArrayList<FormItem>(configurableFields.size());
+                    ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
                     for (Field f : configurableFields) {
                         FormItem pol = null;
                         if (f.isPassword()) {
@@ -210,13 +203,9 @@ public class NSCreationWindow {
                                 PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
                                                                                            .getSafeUri()
                                                                                            .asString()),
-                                                                 new FormItemClickHandler() {
-                                                                     @Override
-                                                                     public void onFormItemClick(
-                                                                             FormItemIconClickEvent event) {
-                                                                         CredentialsWindow win = new CredentialsWindow();
-                                                                         win.show();
-                                                                     }
+                                                                 formItemIconClickEvent -> {
+                                                                     CredentialsWindow win = new CredentialsWindow();
+                                                                     win.show();
                                                                  });
                                 cred.setPrompt("Create a Credential file");
                                 cred.setWidth(16);
@@ -231,78 +220,17 @@ public class NSCreationWindow {
                         pol.setWidth(250);
                         pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
                         forms.add(pol);
-                        tmpAll.add(pol);
+                        formParameters.add(pol);
                     }
                     allForms.put(inf.getPluginName(), forms);
                 }
                 policySelect.setValueMap(values);
 
-                infraSelectChanged = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (policySelect.getValueAsString() == null) {
-                            return;
-                        }
+                infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
 
-                        String nsName = infraSelect.getValueAsString();
-                        if (oldInfra != null) {
-                            for (FormItem f : allForms.get(oldInfra)) {
-                                f.hide();
-                            }
-                        }
-                        for (FormItem f : allForms.get(nsName)) {
-                            f.show();
-                        }
+                policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
 
-                        if (oldInfra == null) {
-                            oldInfra = nsName;
-                            policySelectChanged.run();
-                        } else {
-                            oldInfra = nsName;
-                        }
-                    }
-                };
-
-                policySelectChanged = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (infraSelect.getValueAsString() == null) {
-                            return;
-                        }
-
-                        String policy = policySelect.getValueAsString();
-                        if (oldPolicy != null) {
-                            for (FormItem f : allForms.get(oldPolicy)) {
-                                f.hide();
-                            }
-                        }
-                        for (FormItem f : allForms.get(policy)) {
-                            f.show();
-                        }
-
-                        if (oldPolicy == null) {
-                            oldPolicy = policy;
-                            infraSelectChanged.run();
-                        } else {
-                            oldPolicy = policy;
-                        }
-
-                    }
-                };
-
-                infraSelect.addChangedHandler(new ChangedHandler() {
-                    public void onChanged(ChangedEvent event) {
-                        infraSelectChanged.run();
-                    }
-                });
-
-                policySelect.addChangedHandler(new ChangedHandler() {
-                    public void onChanged(ChangedEvent event) {
-                        policySelectChanged.run();
-                    }
-                });
-
-                infraForm.setFields(tmpAll.toArray(new FormItem[tmpAll.size()]));
+                infraForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
                 infraLabel.hide();
                 infraForm.show();
 
@@ -312,16 +240,15 @@ public class NSCreationWindow {
                     }
                 }
             }
-        }, new Runnable() {
-            @Override
-            public void run() {
-                window.hide();
-            }
-        });
+        }, () -> window.hide());
 
         final TextItem nameItem = new TextItem("nsName", "Name");
         DynamicForm nameForm = new DynamicForm();
-        nameForm.setFields(nameItem);
+
+        CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
+        nodesRecoverableItem.setValue(true);
+        nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
+        nameForm.setFields(nameItem, nodesRecoverableItem);
 
         HLayout buttons = new HLayout();
 
@@ -331,70 +258,37 @@ public class NSCreationWindow {
         buttons.setAlign(Alignment.RIGHT);
         buttons.setMembersMargin(5);
 
-        final IButton okButton = new IButton("Ok");
-        okButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        okButton.setShowDisabledIcon(false);
+        final IButton createAndDeployNodeSourceButton = new IButton("Deploy Now");
+        createAndDeployNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        createAndDeployNodeSourceButton.setShowDisabledIcon(false);
+        final IButton createOnlyNodeSourceButton = new IButton("Save and Keep Undeployed");
+        createOnlyNodeSourceButton.setWidth(createAndDeployNodeSourceButton.getWidth() * 2);
+        createOnlyNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        createOnlyNodeSourceButton.setShowDisabledIcon(false);
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
         cancelButton.setShowDisabledIcon(false);
+        List<IButton> buttonsList = new LinkedList<>();
+        buttonsList.add(createAndDeployNodeSourceButton);
+        buttonsList.add(createOnlyNodeSourceButton);
+        buttonsList.add(cancelButton);
 
-        okButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                infraForm.setValue("infra", infraSelect.getValueAsString());
-                infraForm.setValue("nsName", nameItem.getValueAsString());
-                infraForm.setValue("policy", policySelect.getValueAsString());
-                infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
-                infraForm.setCanSubmit(true);
-
-                /*
-                 * this smartGWT form looks nice but cannot do callbacks ;
-                 * we register a native JS function to the document, send it to
-                 * the servlet so that it writes it back when returning
-                 * when the browser reads the return value and interprets it as JS,
-                 * the callback is called
-                 */
-                infraForm.setValue("nsCallback", JSUtil.register(new JSUtil.JSCallback() {
-                    public void execute(JavaScriptObject obj) {
-                        JSONObject js = new JSONObject(obj);
-                        if (js.containsKey("result") && js.get("result").isBoolean().booleanValue()) {
-                            window.hide();
-                            LogModel.getInstance()
-                                    .logMessage("Successfully created nodesource: " + nameItem.getValueAsString());
-                        } else {
-                            String msg;
-                            if (js.get("errorMessage").isString() != null) {
-                                msg = js.get("errorMessage").isString().stringValue();
-                            } else {
-                                msg = js.toString();
-                            }
-                            label.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg +
-                                              "</span>");
-                            LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
-                                                                       nameItem.getValueAsString() + ": " + msg);
-                            layout.scrollToTop();
-                        }
-                        infraLabel.hide();
-                        infraForm.show();
-                        okButton.setDisabled(false);
-                        cancelButton.setDisabled(false);
-                    }
-                }));
-                infraForm.submitForm();
-
-                cancelButton.setDisabled(true);
-                okButton.setDisabled(true);
-
-                infraLabel.setContents("Node Source creation requested...");
-                infraLabel.show();
-                infraForm.hide();
-            }
-        });
-        cancelButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                window.hide();
-            }
-        });
-        buttons.setMembers(okButton, cancelButton);
+        createAndDeployNodeSourceButton.addClickHandler(clickEvent -> prepareCreateAndDeployFormAndSubmit(layout,
+                                                                                                          infraLabel,
+                                                                                                          infraForm,
+                                                                                                          label,
+                                                                                                          nameItem,
+                                                                                                          nodesRecoverableItem,
+                                                                                                          buttonsList));
+        createOnlyNodeSourceButton.addClickHandler(clickEvent -> prepareCreateOnlyFormAndSubmit(layout,
+                                                                                                infraLabel,
+                                                                                                infraForm,
+                                                                                                label,
+                                                                                                nameItem,
+                                                                                                nodesRecoverableItem,
+                                                                                                buttonsList));
+        cancelButton.addClickHandler(clickEvent -> window.hide());
+        buttons.setMembers(createAndDeployNodeSourceButton, createOnlyNodeSourceButton, cancelButton);
 
         VLayout scroll = new VLayout();
         scroll.setHeight100();
@@ -425,6 +319,114 @@ public class NSCreationWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    private void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {
+        if (infraSelect.getValueAsString() == null) {
+            return;
+        }
+
+        String policy = policySelect.getValueAsString();
+        if (oldPolicy != null) {
+            for (FormItem f : allForms.get(oldPolicy)) {
+                f.hide();
+            }
+        }
+        for (FormItem f : allForms.get(policy)) {
+            f.show();
+        }
+
+        if (oldPolicy == null) {
+            oldPolicy = policy;
+            resetFormForInfrastructureChange(allForms);
+        } else {
+            oldPolicy = policy;
+        }
+    }
+
+    private void resetFormForInfrastructureChange(HashMap<String, List<FormItem>> allForms) {
+        if (policySelect.getValueAsString() == null) {
+            return;
+        }
+
+        String nsName = infraSelect.getValueAsString();
+        if (oldInfra != null) {
+            for (FormItem f : allForms.get(oldInfra)) {
+                f.hide();
+            }
+        }
+        for (FormItem f : allForms.get(nsName)) {
+            f.show();
+        }
+
+        if (oldInfra == null) {
+            oldInfra = nsName;
+            resetFormForPolicyChange(allForms);
+        } else {
+            oldInfra = nsName;
+        }
+    }
+
+    private void prepareCreateAndDeployFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm,
+            Label label, TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList) {
+        infraForm.setValue("deploy", Boolean.TRUE.toString());
+        prepareCreateOnlyFormAndSubmit(layout,
+                                       infraLabel,
+                                       infraForm,
+                                       label,
+                                       nameItem,
+                                       nodesRecoverableItem,
+                                       buttonsList);
+    }
+
+    private void prepareCreateOnlyFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm, Label label,
+            TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList) {
+        infraForm.setValue("infra", infraSelect.getValueAsString());
+        infraForm.setValue("nsName", nameItem.getValueAsString());
+        infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
+        infraForm.setValue("policy", policySelect.getValueAsString());
+        infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
+        infraForm.setCanSubmit(true);
+
+        /*
+         * this smartGWT form looks nice but cannot do callbacks ;
+         * we register a native JS function to the document, send it to
+         * the servlet so that it writes it back when returning
+         * when the browser reads the return value and interprets it as JS,
+         * the callback is called
+         */
+        infraForm.setValue("nsCallback", JSUtil.register(javascriptObject -> {
+            JSONObject js = new JSONObject(javascriptObject);
+            if (js.containsKey("result") && js.get("result").isBoolean().booleanValue()) {
+                window.hide();
+                LogModel.getInstance().logMessage("Successfully created nodesource: " + nameItem.getValueAsString());
+            } else {
+                String msg;
+                if (js.get("errorMessage").isString() != null) {
+                    msg = js.get("errorMessage").isString().stringValue();
+                } else {
+                    msg = js.toString();
+                }
+                label.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg + "</span>");
+                LogModel.getInstance()
+                        .logImportantMessage("Failed to create nodesource " + nameItem.getValueAsString() + ": " + msg);
+                layout.scrollToTop();
+            }
+            infraLabel.hide();
+            infraForm.show();
+            for (IButton button : buttonsList) {
+                button.setDisabled(false);
+            }
+        }));
+        infraForm.submitForm();
+
+        for (IButton button : buttonsList) {
+            button.setDisabled(true);
+        }
+
+        infraLabel.setContents("Node Source creation requested...");
+        infraLabel.show();
+        infraForm.hide();
     }
 
 }

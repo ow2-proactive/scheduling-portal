@@ -516,6 +516,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         JSONObject obj = this.parseJSON(json).isObject();
         HashMap<String, NodeSource> ns = new HashMap<String, NodeSource>();
 
+        int numDeployedNodeSources = 0;
+        int numUndeployedNodeSources = 0;
+
         JSONArray nodesources = obj.get("nodeSource").isArray();
         for (int i = 0; i < nodesources.size(); i++) {
             JSONObject nsObj = nodesources.get(i).isObject();
@@ -527,8 +530,27 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 sourceDescription = js.stringValue();
             String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
 
-            ns.put(sourceName, new NodeSource(sourceName, sourceDescription, nodeSourceAdmin));
+            String nodeSourceStatus = "";
+            JSONString statusjs = (nsObj.get("nodeSourceStatus")).isString();
+            if (statusjs != null)
+                nodeSourceStatus = statusjs.stringValue();
+
+            NodeSource nodeSource = new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
+
+            ns.put(sourceName, nodeSource);
+
+            switch (nodeSource.getNodeSourceStatus()) {
+                case NODES_DEPLOYED:
+                    numDeployedNodeSources++;
+                    break;
+                case NODES_UNDEPLOYED:
+                    numUndeployedNodeSources++;
+                    break;
+            }
         }
+
+        model.setNumDeployedNodeSources(numDeployedNodeSources);
+        model.setNumUndeployedNodeSources(numUndeployedNodeSources);
 
         int numDeploying = 0;
         int numLost = 0;
@@ -851,6 +873,30 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 LogModel.getInstance().logMessage("Successfully unlocked " + nodeUrls.size() + " nodes");
             }
         });
+    }
+
+    public void deployNodeSource() {
+        if (model.getSelectedNodeSource() != null) {
+            String nodeSourceName = model.getSelectedNodeSource().getSourceName();
+
+            rm.deployNodeSource(LoginModel.getInstance().getSessionId(),
+                                model.getSelectedNodeSource().getSourceName(),
+                                new AsyncCallback<String>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        LogModel.getInstance()
+                                                .logImportantMessage("Failed to deploy node source " + nodeSourceName +
+                                                                     JSONUtils.getJsonErrorMessage(caught));
+
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        LogModel.getInstance()
+                                                .logMessage("Successfully deployed node source " + nodeSourceName);
+                                    }
+                                });
+        }
     }
 
     /**
