@@ -128,7 +128,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.nsCanvas.setHeight100();
         Label nsl = new Label("<h3>Node Source</h3>");
         nsl.setHeight(16);
-        nsl.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        nsl.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
         this.nsCanvas.addMember(nsl);
         this.nsCanvas.addMember(this.nsDetails);
         this.nsCanvas.hide();

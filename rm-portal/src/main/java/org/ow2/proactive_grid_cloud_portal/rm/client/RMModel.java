@@ -144,4 +144,14 @@ public abstract class RMModel implements Model {
      */
     public abstract int getNumVirtualHosts();
 
+    /**
+     * @return number of deployed node sources : node sources which acquire their nodes
+     */
+    public abstract int getNumDeployedNodeSources();
+
+    /**
+     * @return number of undeployed node sources : node sources which do not attempt to acquire their nodes
+     */
+    public abstract int getNumUndeployedNodeSources();
+
 }
