@@ -47,14 +47,14 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
  * Popup Window for opening the job planner portal
- *
- * @author mschnoor
  */
 public class PlanWindow {
 
-    private static final int width = 400;
+    private static final int WIDTH = 400;
 
-    private static final int height = 150;
+    private static final int HEIGHT = 150;
+
+    private static final String JPP_URL = "/automation-dashboard/#/portal/job-planner-calendar-def-workflows";
 
     private Window window;
 
@@ -124,23 +124,16 @@ public class PlanWindow {
         yesNoButtons.setAlign(Alignment.RIGHT);
 
         yesButton = new IButton("Yes");
-        yesButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                String url = "/automation-dashboard/#/portal/job-planner-calendar-def-workflows";
-                com.google.gwt.user.client.Window.open(url, url, "");
-                PlanWindow.this.window.hide();
-                PlanWindow.this.destroy();
-            }
+        yesButton.addClickHandler(clickEvent -> {
+            com.google.gwt.user.client.Window.open(JPP_URL, JPP_URL, "");
+            PlanWindow.this.window.hide();
+            PlanWindow.this.destroy();
         });
 
         noButton = new IButton("No");
-        noButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                PlanWindow.this.window.hide();
-                PlanWindow.this.destroy();
-            }
+        noButton.addClickHandler(clickEvent -> {
+            PlanWindow.this.window.hide();
+            PlanWindow.this.destroy();
         });
 
         yesNoButtons.setMembers(yesButton, noButton);
@@ -159,8 +152,8 @@ public class PlanWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(rootPage);
-        this.window.setWidth(this.width);
-        this.window.setHeight(this.height);
+        this.window.setWidth(WIDTH);
+        this.window.setHeight(HEIGHT);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
     }
