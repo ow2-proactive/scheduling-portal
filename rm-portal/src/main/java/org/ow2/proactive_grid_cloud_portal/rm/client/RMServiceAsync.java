@@ -136,13 +136,25 @@ public interface RMServiceAsync {
      * Deploys a node source and starts acquiring its nodes
      *
      * @param sessionId current session
-     * @param nodeSourceName name of the new NS
+     * @param nodeSourceName name of the node source to deploy
      * @param callback
     
      * @throws RestServerException
      * @throws ServiceException
      */
     void deployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
+
+    /**
+     * Undeploys a node source and removes its nodes
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to undeploy
+     * @param callback
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void undeployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
 
     /**
      * Lock a set of nodes

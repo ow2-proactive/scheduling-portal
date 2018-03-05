@@ -106,6 +106,12 @@ public interface RestClient {
     InputStream deployNodeSource(@HeaderParam("sessionid") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName);
 
+    @PUT
+    @Path("/rm/nodesource/undeploy")
+    @Produces("application/json")
+    InputStream undeployNodeSource(@HeaderParam("sessionid") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName);
+
     @POST
     @Path("/rm/node/lock")
     @Produces("application/json")

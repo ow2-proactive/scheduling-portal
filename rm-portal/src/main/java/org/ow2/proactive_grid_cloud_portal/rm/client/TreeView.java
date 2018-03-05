@@ -169,6 +169,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                 String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
                 String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+                String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
 
                 NodeSource currentSelectedNodeSource = null;
                 Node currentSelectedNode = null;
@@ -194,54 +195,27 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 menu.setShadowDepth(10);
 
                 MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
-                expandItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        expandAll();
-                    }
-                });
+                expandItem.addClickHandler(event17 -> expandAll());
 
                 MenuItem collapseItem = new MenuItem("Collapse all",
                                                      Images.instance.close_16().getSafeUri().asString());
-                collapseItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        closeAll();
-                    }
-                });
+                collapseItem.addClickHandler(event16 -> closeAll());
 
                 MenuItem removeItem = new MenuItem("Remove",
                                                    RMImages.instance.node_remove_16().getSafeUri().asString());
-                removeItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        controller.removeNodes();
-                    }
-                });
+                removeItem.addClickHandler(event15 -> controller.removeNodes());
 
                 MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-                lockItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        controller.lockNodes();
-                    }
-                });
+                lockItem.addClickHandler(event14 -> controller.lockNodes());
 
                 MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-                unlockItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        controller.unlockNodes();
-                    }
-                });
+                unlockItem.addClickHandler(event13 -> controller.unlockNodes());
 
                 MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-                deployItem.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(MenuItemClickEvent event) {
-                        controller.deployNodeSource();
-                    }
-                });
+                deployItem.addClickHandler(event12 -> controller.deployNodeSource());
+
+                MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
+                undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
                 if (currentSelectedNode != null) {
                     if (currentSelectedNode.isLocked()) {
@@ -253,17 +227,24 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 }
 
-                if (currentSelectedNodeSource != null &&
-                    currentSelectedNodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
-                    deployItem.setEnabled(true);
-                } else {
-                    deployItem.setEnabled(false);
+                if (currentSelectedNodeSource != null) {
+                    switch (currentSelectedNodeSource.getNodeSourceStatus()) {
+                        case NODES_DEPLOYED:
+                            deployItem.setEnabled(false);
+                            undeployItem.setEnabled(true);
+                            break;
+                        case NODES_UNDEPLOYED:
+                            deployItem.setEnabled(true);
+                            undeployItem.setEnabled(false);
+                            break;
+                    }
                 }
 
                 menu.setItems(expandItem,
                               collapseItem,
                               new MenuItemSeparator(),
                               deployItem,
+                              undeployItem,
                               lockItem,
                               unlockItem,
                               removeItem);

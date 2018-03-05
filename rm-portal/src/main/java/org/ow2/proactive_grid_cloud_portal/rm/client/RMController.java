@@ -995,6 +995,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void undeployNodeSource() {
+        if (model.getSelectedNodeSource() != null) {
+            String nodeSourceName = model.getSelectedNodeSource().getSourceName();
+
+            rm.undeployNodeSource(LoginModel.getInstance().getSessionId(),
+                                  model.getSelectedNodeSource().getSourceName(),
+                                  new AsyncCallback<String>() {
+                                      @Override
+                                      public void onFailure(Throwable caught) {
+                                          LogModel.getInstance()
+                                                  .logImportantMessage("Failed to undeploy node source " +
+                                                                       nodeSourceName +
+                                                                       JSONUtils.getJsonErrorMessage(caught));
+
+                                      }
+
+                                      @Override
+                                      public void onSuccess(String result) {
+                                          LogModel.getInstance()
+                                                  .logMessage("Successfully undeployed node source " + nodeSourceName);
+                                      }
+                                  });
+        }
+    }
+
     /**
      * Remove nodes according to the current selection:
      * if a host is selected, multiple nodes will be removed

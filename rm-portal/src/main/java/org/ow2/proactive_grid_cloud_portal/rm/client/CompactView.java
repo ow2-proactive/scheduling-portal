@@ -459,6 +459,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                     String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
                     String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+                    String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16()
+                                                                        .getSafeUri()
+                                                                        .asString();
 
                     if (node != null) {
                         controller.selectNode(node);
@@ -476,36 +479,19 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     MenuItem removeItem = new MenuItem("Remove",
                                                        RMImages.instance.node_remove_16().getSafeUri().asString());
-                    removeItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.removeNodes();
-                        }
-                    });
+                    removeItem.addClickHandler(event15 -> controller.removeNodes());
 
                     MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-                    lockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.lockNodes();
-                        }
-                    });
+                    lockItem.addClickHandler(event14 -> controller.lockNodes());
 
                     MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-                    unlockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.unlockNodes();
-                        }
-                    });
+                    unlockItem.addClickHandler(event13 -> controller.unlockNodes());
 
                     MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-                    deployItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.deployNodeSource();
-                        }
-                    });
+                    deployItem.addClickHandler(event12 -> controller.deployNodeSource());
+
+                    MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
+                    undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
                     if (node != null) {
                         if (node.isLocked()) {
@@ -517,14 +503,20 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     }
 
-                    if (nodesource != null &&
-                        nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
-                        deployItem.setEnabled(true);
-                    } else {
-                        deployItem.setEnabled(false);
+                    if (nodesource != null) {
+                        switch (nodesource.getNodeSourceStatus()) {
+                            case NODES_DEPLOYED:
+                                deployItem.setEnabled(false);
+                                undeployItem.setEnabled(true);
+                                break;
+                            case NODES_UNDEPLOYED:
+                                deployItem.setEnabled(true);
+                                undeployItem.setEnabled(false);
+                                break;
+                        }
                     }
 
-                    menu.setItems(deployItem, lockItem, unlockItem, removeItem);
+                    menu.setItems(deployItem, undeployItem, lockItem, unlockItem, removeItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
