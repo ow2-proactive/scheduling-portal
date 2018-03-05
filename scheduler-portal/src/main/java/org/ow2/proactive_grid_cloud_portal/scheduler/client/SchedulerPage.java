@@ -431,6 +431,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
+        ToolStripButton planButton = new ToolStripButton("Plan job");
+        planButton.setIcon(SchedulerImages.instance.job_plan_16().getSafeUri().asString());
+        planButton.setIconSize(20);
+        planButton.setTooltip("Plan a job");
+        planButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                PlanWindow w = new PlanWindow(SchedulerPage.this.controller);
+                w.show();
+            }
+        });
+
         schedStartButton = new MenuItem("Start");
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedStartButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
@@ -524,6 +535,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(submitButton);
+        tools.addSeparator();
+        tools.addButton(planButton);
         tools.addSeparator();
         tools.addButton(errorButton);
         tools.addFill();
