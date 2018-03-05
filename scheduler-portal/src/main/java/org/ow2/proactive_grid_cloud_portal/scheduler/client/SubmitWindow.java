@@ -55,13 +55,16 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -522,7 +525,21 @@ public class SubmitWindow {
         startAtRadioGroupPanel.setHeight("30px");
 
         startAtLayout.addMember(startAtRadioGroupPanel);
+
+        FlowPanel planJobPanel = new FlowPanel();
+        InlineLabel firstPart = new InlineLabel("Or use the ");
+        firstPart.getElement().getStyle().setProperty("margin-left", "15px");
+        planJobPanel.add(firstPart);
+        Anchor jobPlannerPortalLink = new Anchor("Job Planner Portal",
+                                                 "/automation-dashboard/#/portal/job-planner-calendar-def-workflows",
+                                                 "_blank");
+        planJobPanel.add(jobPlannerPortalLink);
+        planJobPanel.add(new InlineLabel(" to schedule the workflow execution periodically"));
+        planJobPanel.setHeight("20px");
+        startAtLayout.addMember(planJobPanel);
+
         rootPage.addMember(startAtLayout);
+
     }
 
     private void updateScheduledTimeAt() {
