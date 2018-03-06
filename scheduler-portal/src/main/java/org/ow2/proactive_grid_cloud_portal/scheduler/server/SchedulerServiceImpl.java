@@ -444,12 +444,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public void setPriorityByName(final String sessionId, List<Integer> jobIdList, final String priorityName)
             throws ServiceException, RestServerException {
-        executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+        executeVoidFunction(new BiFunction<RestClient, Integer, Void>() {
             @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.schedulerChangeJobPriorityByName(sessionId,
-                                                                        Integer.toString(jobId),
-                                                                        priorityName);
+            public Void apply(RestClient restClientProxy, Integer jobId) {
+                restClientProxy.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId), priorityName);
+                return null;
             }
         }, jobIdList, "job set to priority " + priorityName);
     }
@@ -1340,7 +1339,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             try {
                 inputStream = action.apply(restClientProxy, jobId);
 
-                if (actionName.startsWith("job set") || Boolean.parseBoolean(convertToString(inputStream))) {
+                if (Boolean.parseBoolean(convertToString(inputStream))) {
                     success++;
                 } else {
                     failures++;
@@ -1351,6 +1350,31 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
                 IOUtils.closeQuietly(inputStream);
+            }
+        }
+
+        if (failures > 0) {
+            throw new RestServerException("Requested " + jobIdList.size() + " " + actionName + ": " + success +
+                                          " succeeded, " + failures + " failed.");
+        }
+
+        return success;
+    }
+
+    private int executeVoidFunction(BiFunction<RestClient, Integer, Void> action, List<Integer> jobIdList,
+            String actionName) throws ServiceException, RestServerException {
+
+        RestClient restClientProxy = getRestClientProxy();
+
+        int failures = 0;
+        int success = 0;
+
+        for (Integer jobId : jobIdList) {
+            try {
+                action.apply(restClientProxy, jobId);
+                success++;
+            } catch (WebApplicationException e) {
+                failures++;
             }
         }
 
