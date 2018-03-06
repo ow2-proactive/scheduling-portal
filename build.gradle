@@ -17,11 +17,11 @@ buildscript {
     }
 }
 
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'jetty'
     apply plugin: 'maven'
-    apply plugin: 'org.sonarqube'
 
     apply from: "$rootDir/gradle/ext/coding-format.gradle"
 
@@ -173,6 +173,8 @@ project(':scheduler-portal') {
 
 configure([project(':scheduler-portal'), project(':rm-portal')]) {
     apply plugin: 'war'
+    apply plugin: 'org.sonarqube'
+
     task compileGwt(dependsOn: classes, type: JavaExec) {
         standardOutput = System.out
         errorOutput = System.err
