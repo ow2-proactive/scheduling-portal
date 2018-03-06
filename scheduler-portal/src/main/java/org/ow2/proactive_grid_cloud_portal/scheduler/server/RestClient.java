@@ -373,7 +373,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")
-    InputStream schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
+    void schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId, @PathParam("name") String priorityName);
 
