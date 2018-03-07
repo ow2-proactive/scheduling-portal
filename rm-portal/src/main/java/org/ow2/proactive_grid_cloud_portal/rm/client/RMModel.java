@@ -40,9 +40,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 public abstract class RMModel implements Model {
 
     /**
-     * @return most up to date view of the nodes on the remote RM
+     * @return most up to date view of the node sources on the remote RM
      */
-    public abstract Map<String, NodeSource> getNodes();
+    public abstract Map<String, NodeSource> getNodeSources();
 
     /**
      * @return current limit of alive nodes.

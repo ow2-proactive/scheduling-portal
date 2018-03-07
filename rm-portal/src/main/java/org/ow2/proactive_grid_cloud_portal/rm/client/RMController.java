@@ -28,7 +28,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -85,7 +88,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * <li>the view displays what it reads from the Model.
  * </code>
  *
- *
  * @author mschnoor
  */
 public class RMController extends Controller implements UncaughtExceptionHandler {
@@ -135,7 +137,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Default constructor
-     * 
+     *
      * @param rm rm server
      */
     RMController(RMServiceAsync rm) {
@@ -463,8 +465,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the requested history range for a given set of sources,
      * store it in the model, perform statistic fetch
-     *  
-     * @param r range to set
+     *
+     * @param r      range to set
      * @param source source names
      */
     public void setRuntimeRRDRange(Range r, String... source) {
@@ -484,18 +486,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void fetchRMMonitoring() {
         final long t = System.currentTimeMillis();
 
-        rm.getMonitoring(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+        rm.getMonitoring(LoginModel.getInstance().getSessionId(), model.getMaxCounter(), new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                if (!LoginModel.getInstance().isLoggedIn())
+                if (!LoginModel.getInstance().isLoggedIn()) {
                     return;
+                }
 
-                HashMap<String, NodeSource> nodes = parseRMMonitoring(result);
-                model.setNodes(nodes);
-                LogModel.getInstance().logMessage("Fetched " + nodes.size() + " node sources in " +
-                                                  (System.currentTimeMillis() - t) + "ms");
+                updateModelBasedOnResponse(result);
+
+                LogModel.getInstance()
+                        .logMessage("Processed RM/monitoring in " + (System.currentTimeMillis() - t) + "ms");
             }
 
             public void onFailure(Throwable caught) {
+                model.setMaxCounter(-1);
                 if (JSONUtils.getJsonErrorCode(caught) == 401) {
                     teardown("You have been disconnected from the server.");
                 } else {
@@ -506,172 +510,150 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
-     * Parse the node state JSON string
-     * 
-     * @param json the "rm/monitoring" json result
-     * @return a POJO representation
+     * Model is rendered in the CompactView based on the new and old (current) model.
+     * That is why, we take old model and clone it. Then we process server response
+     * and alternate new model by adding/removing node/nodesources.
+     * @param json
      */
-    private HashMap<String, NodeSource> parseRMMonitoring(String json) {
-
+    private void updateModelBasedOnResponse(String json) {
         JSONObject obj = this.parseJSON(json).isObject();
-        HashMap<String, NodeSource> ns = new HashMap<String, NodeSource>();
 
-        int numDeployedNodeSources = 0;
-        int numUndeployedNodeSources = 0;
+        final long currentCounter = model.getMaxCounter();
 
-        JSONArray nodesources = obj.get("nodeSource").isArray();
-        for (int i = 0; i < nodesources.size(); i++) {
-            JSONObject nsObj = nodesources.get(i).isObject();
+        final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
 
-            String sourceName = nsObj.get("sourceName").isString().stringValue();
-            String sourceDescription = "";
-            JSONString js = (nsObj.get("sourceDescription")).isString();
-            if (js != null)
-                sourceDescription = js.stringValue();
-            String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        model.setMaxCounter(latestCounter);
 
-            String nodeSourceStatus = "";
-            JSONString statusjs = (nsObj.get("nodeSourceStatus")).isString();
-            if (statusjs != null)
-                nodeSourceStatus = statusjs.stringValue();
-
-            NodeSource nodeSource = new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus);
-
-            ns.put(sourceName, nodeSource);
-
-            switch (nodeSource.getNodeSourceStatus()) {
-                case NODES_DEPLOYED:
-                    numDeployedNodeSources++;
-                    break;
-                case NODES_UNDEPLOYED:
-                    numUndeployedNodeSources++;
-                    break;
-            }
+        HashMap<String, NodeSource> newNodeSources = new HashMap<>();
+        if (isRegularRequest(currentCounter, latestCounter)) {
+            copyNodesSources(model.getNodeSources(), newNodeSources);
         }
 
-        model.setNumDeployedNodeSources(numDeployedNodeSources);
-        model.setNumUndeployedNodeSources(numUndeployedNodeSources);
+        processNodeSources(newNodeSources, obj);
 
-        int numDeploying = 0;
-        int numLost = 0;
-        int numConfiguring = 0;
-        int numFree = 0;
-        int numBusy = 0;
-        int numDown = 0;
-        int numToBeRemoved = 0;
-
-        int numLocked = 0;
-
-        JSONArray nodes = obj.get("nodesEvents").isArray();
-        for (int i = 0; i < nodes.size(); i++) {
+        // process nodes
+        JSONArray jsNodes = obj.get("nodesEvents").isArray();
+        for (int i = 0; i < jsNodes.size(); i++) {
             try {
-                JSONObject nodeObj = nodes.get(i).isObject();
+                JSONObject jsNode = jsNodes.get(i).isObject();
 
-                String hostName = nodeObj.get("hostName").isString().stringValue();
-                String nss = nodeObj.get("nodeSource").isString().stringValue();
+                final Node node = parseNode(jsNode);
 
-                String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
-                String nodeState = nodeObj.get("nodeState").isString().stringValue();
-                String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
-                String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
-                long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
-                String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
+                final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
 
-                String nodeOwner = getJsonStringNullable(nodeObj, "nodeOwner");
-                String vmName = getJsonStringNullable(nodeObj, "vmname");
-                String description = getJsonStringNullable(nodeObj, "nodeInfo");
-                String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
-                String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
+                // if node source was not deleted
+                if (nodeSource != null) {
 
-                boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
-                long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
-                String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
-
-                if (isLocked) {
-                    numLocked++;
-                }
-
-                Node n = new Node(nodeUrl,
-                                  nodeState,
-                                  nodeInfo,
-                                  timeStamp,
-                                  timeStampFormatted,
-                                  nodeProvider,
-                                  nodeOwner,
-                                  nss,
-                                  hostName,
-                                  vmName,
-                                  description,
-                                  defaultJMXUrl,
-                                  proactiveJMXUrl,
-                                  isLocked,
-                                  lockTime,
-                                  nodeLocker);
-
-                // deploying node
-                if (hostName == null || hostName.length() == 0) {
-                    ns.get(nss).getDeploying().put(nodeUrl, n);
-                }
-                // already deployed node
-                else {
-
-                    Host host = ns.get(nss).getHosts().get(hostName);
-                    if (host == null) {
-                        host = new Host(hostName, nss);
-                        ns.get(nss).getHosts().put(hostName, host);
-                    }
-                    host.getNodes().put(nodeUrl, n);
-                    if (nodeUrl.toLowerCase().contains("virt-")) {
-                        host.setVirtual(true);
+                    if (!node.isRemoved()) {
+                        addNodeToNodeSource(node, nodeSource);
+                    } else {
+                        removeNodeFromNodeSource(node, nodeSource);
                     }
                 }
 
-                switch (n.getNodeState()) {
-                    case BUSY:
-                        numBusy++;
-                        break;
-                    case CONFIGURING:
-                        numConfiguring++;
-                        break;
-                    case DEPLOYING:
-                        numDeploying++;
-                        break;
-                    case DOWN:
-                        numDown++;
-                        break;
-                    case FREE:
-                        numFree++;
-                        break;
-                    case LOST:
-                        numLost++;
-                        break;
-                    case TO_BE_REMOVED:
-                        numToBeRemoved++;
-                        break;
-                }
             } catch (Throwable t) {
                 System.out.println("Failed to parse node : ");
-                System.out.println(nodes.get(i).toString());
+                System.out.println(jsNodes.get(i).toString());
                 t.printStackTrace();
 
                 LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
-                                                          " for input: " + nodes.get(i).toString());
+                                                          " for input: " + jsNodes.get(i).toString());
             }
         }
 
-        model.setNumBusy(numBusy);
-        model.setNumConfiguring(numConfiguring);
-        model.setNumDeploying(numDeploying);
-        model.setNumDown(numDown);
-        model.setNumFree(numFree);
-        model.setNumLost(numLost);
-        model.setNumToBeRemoved(numToBeRemoved);
+        model.setNodes(newNodeSources);
 
-        model.setNumLocked(numLocked);
+        recalculatePhysicalVirtualHosts();
 
+        recalculateStatistics();
+
+    }
+
+    /**
+     * Decides whether it was regular server request, or not.
+     * 'Not regular' request means that something went strange, e.g. server was restarted,
+     * or it is the very first request of this type.
+     * It it is regular, than rm portal should treat server response as a delta.
+     * If it is not regular, than rm portal should 'forget' what it knew, and start from the scratch
+     * @param currentCounter is current counter that client is aware of
+     * @param latestCounter is counter received from server
+     * @return true if request is regular
+     */
+    private boolean isRegularRequest(long currentCounter, Long latestCounter) {
+        return 0 <= currentCounter && currentCounter <= latestCounter;
+    }
+
+    /**
+     * Add and remove NodeSources
+     * @param newNodeSources
+     * @param obj
+     */
+    private void processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
+        JSONArray jsNodeSources = obj.get("nodeSource").isArray();
+        for (int i = 0; i < jsNodeSources.size(); i++) {
+            JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
+
+            NodeSource nodeSource = parseNodeSource(jsNodeSource);
+            if (nodeSource.isRemoved()) {
+                newNodeSources.remove(nodeSource.getSourceName());
+            } else {
+                newNodeSources.put(nodeSource.getSourceName(), nodeSource);
+            }
+        }
+    }
+
+    private void removeNodeFromNodeSource(Node node, NodeSource nodeSource) {
+        if (node.isDeployingNode()) {
+            nodeSource.getDeploying().remove(node.getNodeUrl());
+        } else {
+            Host host = nodeSource.getHosts().get(node.getHostName());
+
+            if (host != null) {
+                host.getNodes().remove(node.getNodeUrl());
+
+                if (host.getNodes().isEmpty()) {
+                    nodeSource.getHosts().remove(host);
+                }
+            }
+        }
+    }
+
+    private void addNodeToNodeSource(Node node, NodeSource nodeSource) {
+        // as deploying node
+        if (node.isDeployingNode()) {
+
+            nodeSource.getDeploying().put(node.getNodeUrl(), node);
+
+        } else { // as already deployed node
+            Host host = nodeSource.getHosts().get(node.getHostName());
+
+            if (host == null) { // create host if there is no host
+                host = new Host(node.getHostName(), node.getSourceName());
+                nodeSource.getHosts().put(node.getHostName(), host);
+            }
+
+            host.getNodes().put(node.getNodeUrl(), node);
+
+            if (node.isVirtual()) {
+                host.setVirtual(true);
+            }
+        }
+    }
+
+    /**
+     * @return clones node sources with all hosts and nodes
+     */
+    private void copyNodesSources(Map<String, NodeSource> oldNodeSources, HashMap<String, NodeSource> newNodeSources) {
+        for (NodeSource nodeSource : oldNodeSources.values()) {
+            NodeSource newNodeSource = new NodeSource(nodeSource);
+            newNodeSources.put(newNodeSource.getSourceName(), newNodeSource);
+        }
+    }
+
+    private void recalculatePhysicalVirtualHosts() {
         int numPhysical = 0;
         int numVirtual = 0;
-        for (NodeSource nos : ns.values()) {
+        for (NodeSource nos : model.getNodeSources().values()) {
             for (Host h : nos.getHosts().values()) {
                 if (h.isVirtual()) {
                     numVirtual++;
@@ -684,7 +666,120 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         model.setNumPhysicalHosts(numPhysical);
         model.setNumVirtualHosts(numVirtual);
 
-        return ns;
+    }
+
+    private void recalculateStatistics() {
+        model.setNumBusy(0);
+        model.setNumConfiguring(0);
+        model.setNumDeploying(0);
+        model.setNumDown(0);
+        model.setNumFree(0);
+        model.setNumLost(0);
+        model.setNumToBeRemoved(0);
+        model.setNumLocked(0);
+        model.setNumDeployedNodeSources(0);
+        model.setNumUndeployedNodeSources(0);
+
+        for (NodeSource nodeSource : model.getNodeSources().values()) {
+            switch (nodeSource.getNodeSourceStatus()) {
+                case NODES_DEPLOYED:
+                    model.setNumDeployedNodeSources(model.getNumDeployedNodeSources() + 1);
+                    break;
+                case NODES_UNDEPLOYED:
+                    model.setNumUndeployedNodeSources(model.getNumUndeployedNodeSources() + 1);
+                    break;
+            }
+
+            for (Node node : nodeSource.getDeploying().values()) {
+                recalculateStatistics(node);
+            }
+
+            for (Host host : nodeSource.getHosts().values()) {
+                for (Node node : host.getNodes().values()) {
+                    recalculateStatistics(node);
+                }
+            }
+        }
+    }
+
+    private void recalculateStatistics(Node node) {
+        switch (node.getNodeState()) {
+            case BUSY:
+                model.setNumBusy(model.getNumBusy() + 1);
+                break;
+            case CONFIGURING:
+                model.setNumConfiguring(model.getNumConfiguring() + 1);
+                break;
+            case DEPLOYING:
+                model.setNumDeploying(model.getNumDeploying() + 1);
+                break;
+            case DOWN:
+                model.setNumDown(model.getNumDown() + 1);
+                break;
+            case FREE:
+                model.setNumFree(model.getNumFree() + 1);
+                break;
+            case LOST:
+                model.setNumLost(model.getNumLost() + 1);
+                break;
+            case TO_BE_REMOVED:
+                model.setNumToBeRemoved(model.getNumToBeRemoved() + 1);
+                break;
+        }
+        if (node.isLocked()) {
+            model.setNumLocked(model.getNumLocked() + 1);
+        }
+    }
+
+    private NodeSource parseNodeSource(JSONObject nsObj) {
+        String sourceName = nsObj.get("sourceName").isString().stringValue();
+        String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
+        String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
+        String eventType = getJsonStringNullable(nsObj, "eventType");
+        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus, eventType);
+    }
+
+    private Node parseNode(JSONObject nodeObj) {
+        String hostName = nodeObj.get("hostName").isString().stringValue();
+        String nss = nodeObj.get("nodeSource").isString().stringValue();
+
+        String eventType = getJsonStringNullable(nodeObj, "eventType");
+
+        String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
+        String nodeState = nodeObj.get("nodeState").isString().stringValue();
+        String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
+        String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
+        long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
+        String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
+
+        String nodeOwner = getJsonStringNullable(nodeObj, "nodeOwner");
+        String vmName = getJsonStringNullable(nodeObj, "vmname");
+        String description = getJsonStringNullable(nodeObj, "nodeInfo");
+        String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
+        String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
+
+        boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
+        long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
+        String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
+
+        return new Node(nodeUrl,
+                        nodeState,
+                        nodeInfo,
+                        timeStamp,
+                        timeStampFormatted,
+                        nodeProvider,
+                        nodeOwner,
+                        nss,
+                        hostName,
+                        vmName,
+                        description,
+                        defaultJMXUrl,
+                        proactiveJMXUrl,
+                        isLocked,
+                        lockTime,
+                        nodeLocker,
+                        eventType);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
@@ -724,6 +819,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Fetch and store NS Infrastructure and Policy creation parameters
      * store it in the model
+     *
      * @param success call this when it's done
      * @param failure call this if it fails
      */
@@ -1039,8 +1135,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Override user settings, rewrite cookies, refresh corresponding ui elements
-     *  @param refreshTime refresh time for update thread in ms
      *
+     * @param refreshTime refresh time for update thread in ms
      */
     public void setUserSettings(String refreshTime) {
 
@@ -1057,7 +1153,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected node
      * notify listeners
-     * 
+     *
      * @param selection currently selected node
      */
     public void selectNode(Node selection) {
@@ -1067,7 +1163,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected node
      * notify listeners
-     * 
+     *
      * @param sel currently selected host
      */
     public void selectHost(Host sel) {
@@ -1077,7 +1173,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     /**
      * Change the currently selected ns
      * notify listeners
-     * 
+     *
      * @param sel currently selected ns
      */
     public void selectNodeSource(NodeSource sel) {
@@ -1109,6 +1205,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     /**
      * Shut down everything, get back to the login page
+     *
      * @param message an error message, or null
      */
     private void teardown(String message) {
@@ -1125,8 +1222,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
-     * @return a read only view of the clients local data, which stores everything 
-     * 		that was received from the server by the controller
+     * @return a read only view of the clients local data, which stores everything
+     * that was received from the server by the controller
      */
     @Override
     public RMModel getModel() {

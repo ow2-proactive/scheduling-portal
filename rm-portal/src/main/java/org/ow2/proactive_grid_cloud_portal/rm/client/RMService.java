@@ -74,12 +74,13 @@ public interface RMService extends RemoteService {
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others
      * @param sessionId current session
+     * @param clientCounter latest counter client is aware of
      * @return a JSON object containing two arrays named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
      * @throws RestServerException 
      * @throws ServiceException
      */
-    String getMonitoring(String sessionId) throws RestServerException, ServiceException;
+    String getMonitoring(String sessionId, Long clientCounter) throws RestServerException, ServiceException;
 
     /**
      * List of all supported Infrastructure Managers, and their parameters
