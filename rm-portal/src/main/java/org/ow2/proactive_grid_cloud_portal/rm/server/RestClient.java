@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.ObjectName;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -60,7 +61,8 @@ public interface RestClient {
     @GZIP
     @Path("/rm/monitoring")
     @Produces("application/json")
-    InputStream monitoring(@HeaderParam("sessionid") String sessionId);
+    InputStream monitoring(@HeaderParam("sessionid") String sessionId,
+            @HeaderParam("clientCounter") @DefaultValue("-1") String counter);
 
     @GET
     @GZIP
