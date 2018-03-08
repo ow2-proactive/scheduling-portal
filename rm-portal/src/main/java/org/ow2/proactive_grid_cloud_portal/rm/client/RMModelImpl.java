@@ -110,6 +110,12 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private long maxNumberOfNodes = -1;
 
+    private int numDeployedNodeSources = 0;
+
+    private int numUndeployedNodeSources = 0;
+
+    private long maxCounter = -1;
+
     RMModelImpl() {
         super();
 
@@ -126,7 +132,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
-    public Map<String, NodeSource> getNodes() {
+    public Map<String, NodeSource> getNodeSources() {
         return this.nodes;
     }
 
@@ -393,6 +399,16 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
+    public int getNumDeployedNodeSources() {
+        return this.numDeployedNodeSources;
+    }
+
+    @Override
+    public int getNumUndeployedNodeSources() {
+        return this.numUndeployedNodeSources;
+    }
+
+    @Override
     public int getNumNodes() {
         return numFree + numBusy + numDown;
     }
@@ -458,4 +474,19 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.numVirtualHosts = num;
     }
 
+    void setNumDeployedNodeSources(int num) {
+        this.numDeployedNodeSources = num;
+    }
+
+    void setNumUndeployedNodeSources(int num) {
+        this.numUndeployedNodeSources = num;
+    }
+
+    public long getMaxCounter() {
+        return maxCounter;
+    }
+
+    public void setMaxCounter(long maxCounter) {
+        this.maxCounter = maxCounter;
+    }
 }

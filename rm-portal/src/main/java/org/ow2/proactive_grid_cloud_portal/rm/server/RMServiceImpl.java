@@ -216,11 +216,11 @@ public class RMServiceImpl extends Service implements RMService {
      * 
      * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getMonitoring(java.lang.String)
      */
-    public String getMonitoring(final String sessionId) throws RestServerException, ServiceException {
+    public String getMonitoring(final String sessionId, Long counter) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
             @Override
             public InputStream apply(RestClient restClient) {
-                return restClient.monitoring(sessionId);
+                return restClient.monitoring(sessionId, counter.toString());
             }
         });
     }
@@ -271,6 +271,22 @@ public class RMServiceImpl extends Service implements RMService {
         return entity;
     }
 
+    @Override
+    public String defineNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
+            final String[] infrastructureParameters, final String[] infrastructureFileParameters,
+            final String policyType, final String[] policyParameters, final String[] policyFileParameters,
+            final String nodesRecoverable) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.defineNodeSource(sessionId,
+                                                                                             nodeSourceName,
+                                                                                             infrastructureType,
+                                                                                             infrastructureParameters,
+                                                                                             infrastructureFileParameters,
+                                                                                             policyType,
+                                                                                             policyParameters,
+                                                                                             policyFileParameters,
+                                                                                             nodesRecoverable));
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -292,6 +308,13 @@ public class RMServiceImpl extends Service implements RMService {
                                                                                              policyParameters,
                                                                                              policyFileParameters,
                                                                                              nodesRecoverable));
+    }
+
+    @Override
+    public String deployNodeSource(final String sessionId, final String nodeSourceName)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.deployNodeSource(sessionId,
+                                                                                             nodeSourceName));
     }
 
     /*

@@ -56,32 +56,47 @@ public class NodeSource {
     /** login of the user that created the NS */
     private String nodeSourceAdmin;
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin) {
-        this.sourceDescription = sourceDescription;
+    /** if the node source is not deployed, it has no node */
+    private NodeSourceStatus nodeSourceStatus;
+
+    private String eventType;
+
+    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus,
+            String eventType) {
         this.sourceName = sourceName;
+        this.sourceDescription = sourceDescription;
         this.nodeSourceAdmin = nodeSourceAdmin;
-        this.hosts = new HashMap<String, Host>();
-        this.deploying = new HashMap<String, Node>();
+        this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
+        this.eventType = eventType;
+
+        this.hosts = new HashMap<>();
+        this.deploying = new HashMap<>();
     }
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
+        this.nodeSourceStatus = t.nodeSourceStatus;
+        this.eventType = t.eventType;
 
         Set<String> hostKeys = t.hosts.keySet();
-        this.hosts = new HashMap<String, Host>(hostKeys.size());
+        this.hosts = new HashMap<>(hostKeys.size());
         for (String hostid : hostKeys) {
             Host h = t.hosts.get(hostid);
             this.hosts.put(hostid, new Host(h));
         }
 
         Set<String> deployingKeys = t.deploying.keySet();
-        this.deploying = new HashMap<String, Node>(deployingKeys.size());
+        this.deploying = new HashMap<>(deployingKeys.size());
         for (String nodeid : deployingKeys) {
             Node n = t.deploying.get(nodeid);
             this.deploying.put(nodeid, new Node(n));
         }
+    }
+
+    public boolean isRemoved() {
+        return "NODESOURCE_REMOVED".equalsIgnoreCase(eventType);
     }
 
     public Map<String, Host> getHosts() {
@@ -102,6 +117,18 @@ public class NodeSource {
 
     public String getNodeSourceAdmin() {
         return nodeSourceAdmin;
+    }
+
+    public NodeSourceStatus getNodeSourceStatus() {
+        return nodeSourceStatus;
+    }
+
+    public String getIcon() {
+        if (nodeSourceStatus.equals(NodeSourceStatus.NODES_DEPLOYED)) {
+            return RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+        } else {
+            return RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
+        }
     }
 
     public static class Host {
@@ -212,10 +239,12 @@ public class NodeSource {
 
             private String nodeLocker = null;
 
+            private String eventType = null;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker) {
+                    String nodeLocker, String eventType) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
@@ -237,6 +266,7 @@ public class NodeSource {
                     this.lockTime = lockTime;
                     this.nodeLocker = nodeLocker;
                 }
+                this.eventType = eventType;
             }
 
             Node(Node t) {
@@ -256,10 +286,19 @@ public class NodeSource {
 
                 this.isLocked = t.isLocked;
 
+                this.eventType = t.eventType;
                 if (this.isLocked) {
                     this.lockTime = t.lockTime;
                     this.nodeLocker = t.nodeLocker;
                 }
+            }
+
+            public boolean isRemoved() {
+                return "NODE_REMOVED".equalsIgnoreCase(eventType);
+            }
+
+            public boolean isDeployingNode() {
+                return hostName == null || hostName.length() == 0;
             }
 
             public String getNodeUrl() {
@@ -336,6 +375,10 @@ public class NodeSource {
 
             public String getIconUnlocked() {
                 return getIcon(false);
+            }
+
+            public boolean isVirtual() {
+                return getNodeUrl().toLowerCase().contains("virt-");
             }
 
             /**
