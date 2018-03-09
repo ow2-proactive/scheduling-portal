@@ -40,14 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
 import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,7 +54,6 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
 
 /**
@@ -513,7 +505,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                                 deployItem.setEnabled(true);
                                 undeployItem.setEnabled(false);
                                 break;
+                            default:
+                                disableNodeSourceDeploymentItems(deployItem, undeployItem);
                         }
+                    } else {
+                        disableNodeSourceDeploymentItems(deployItem, undeployItem);
                     }
 
                     menu.setItems(deployItem, undeployItem, lockItem, unlockItem, removeItem);
@@ -528,6 +524,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     super.onBrowserEvent(event);
                     break;
             }
+        }
+
+        private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
+            deployItem.setEnabled(false);
+            undeployItem.setEnabled(false);
         }
 
         private void init() {
@@ -545,54 +546,42 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             this.hoverLabel = new Label();
             this.hover.addMember(this.hoverLabel);
 
-            this.addDomHandler(new ContextMenuHandler() {
-                @Override
-                public void onContextMenu(ContextMenuEvent event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            this.addDomHandler(event -> {
+                event.preventDefault();
+                event.stopPropagation();
             }, ContextMenuEvent.getType());
 
-            this.addMouseOverHandler(new MouseOverHandler() {
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    if (dirty) {
-                        if (globalHover != null)
-                            globalHover.hide();
-                        dirty = false;
-                        if (node != null) {
-                            setHoverNodeLabel();
-                        } else if (host != null) {
-                            hoverLabel.setContents("<strong>Host</strong><br>" + host.getHostName());
-                        } else if (nodesource != null) {
-                            hoverLabel.setContents("<strong>NodeSource</strong><br>" + nodesource.getSourceName());
-                        }
-                        hover.moveTo(event.getClientX() - 155, event.getClientY() - 65);
-                        hover.show();
-                        globalHover = hover;
+            this.addMouseOverHandler(event -> {
+                if (dirty) {
+                    if (globalHover != null)
+                        globalHover.hide();
+                    dirty = false;
+                    if (node != null) {
+                        setHoverNodeLabel();
+                    } else if (host != null) {
+                        hoverLabel.setContents("<strong>Host</strong><br>" + host.getHostName());
+                    } else if (nodesource != null) {
+                        hoverLabel.setContents("<strong>NodeSource</strong><br>" + nodesource.getSourceName());
                     }
+                    hover.moveTo(event.getClientX() - 155, event.getClientY() - 65);
+                    hover.show();
+                    globalHover = hover;
                 }
             });
-            this.addMouseOutHandler(new MouseOutHandler() {
-                @Override
-                public void onMouseOut(MouseOutEvent event) {
-                    dirty = true;
-                    hover.hide();
-                    globalHover = null;
-                }
+            this.addMouseOutHandler(event -> {
+                dirty = true;
+                hover.hide();
+                globalHover = null;
             });
 
-            this.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    _doNotScroll = true;
-                    if (node != null) {
-                        controller.selectNode(node);
-                    } else if (host != null) {
-                        controller.selectHost(host);
-                    } else if (nodesource != null) {
-                        controller.selectNodeSource(nodesource);
-                    }
+            this.addClickHandler(event -> {
+                _doNotScroll = true;
+                if (node != null) {
+                    controller.selectNode(node);
+                } else if (host != null) {
+                    controller.selectHost(host);
+                } else if (nodesource != null) {
+                    controller.selectNodeSource(nodesource);
                 }
             });
         }
@@ -693,4 +682,5 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
     }
+
 }

@@ -42,8 +42,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
-import com.smartgwt.client.widgets.menu.events.ClickHandler;
-import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
@@ -237,7 +235,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                             deployItem.setEnabled(true);
                             undeployItem.setEnabled(false);
                             break;
+                        default:
+                            disableNodeSourceDeploymentItems(deployItem, undeployItem);
                     }
+                } else {
+                    disableNodeSourceDeploymentItems(deployItem, undeployItem);
                 }
 
                 menu.setItems(expandItem,
@@ -255,6 +257,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         vl.addMember(treeGrid);
         return vl;
+    }
+
+    private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
+        deployItem.setEnabled(false);
+        undeployItem.setEnabled(false);
     }
 
     /*
