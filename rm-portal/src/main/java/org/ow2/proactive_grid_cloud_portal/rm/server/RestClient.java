@@ -110,7 +110,7 @@ public interface RestClient {
     @Path("/rm/nodesource/undeploy")
     @Produces("application/json")
     InputStream undeployNodeSource(@HeaderParam("sessionid") String sessionId,
-            @FormParam("nodeSourceName") String nodeSourceName);
+            @FormParam("nodeSourceName") String nodeSourceName, @FormParam("preempt") boolean preempt);
 
     @POST
     @Path("/rm/node/lock")

@@ -318,10 +318,11 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String undeployNodeSource(final String sessionId, final String nodeSourceName)
+    public String undeployNodeSource(final String sessionId, final String nodeSourceName, final boolean force)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.undeployNodeSource(sessionId,
-                                                                                               nodeSourceName));
+                                                                                               nodeSourceName,
+                                                                                               force));
     }
 
     /*

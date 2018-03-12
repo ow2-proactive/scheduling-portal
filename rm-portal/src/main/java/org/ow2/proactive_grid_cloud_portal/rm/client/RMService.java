@@ -157,7 +157,8 @@ public interface RMService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String undeployNodeSource(String sessionId, String nodeSourceName) throws RestServerException, ServiceException;
+    String undeployNodeSource(String sessionId, String nodeSourceName, boolean force)
+            throws RestServerException, ServiceException;
 
     /**
      * lock a set of nodes
