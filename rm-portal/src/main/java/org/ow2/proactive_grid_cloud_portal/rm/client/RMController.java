@@ -995,6 +995,41 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void undeployNodeSource() {
+        if (model.getSelectedNodeSource() != null) {
+            String nodeSourceName = model.getSelectedNodeSource().getSourceName();
+
+            if (model.getSelectedNodeSource() != null) {
+                confirmUndeployNodeSource("Confirm undeployment of <strong>" + "NodeSource " + nodeSourceName +
+                                          "</strong>", new NodeRemovalCallback() {
+                                              public void run(boolean force) {
+                                                  rm.undeployNodeSource(LoginModel.getInstance().getSessionId(),
+                                                                        model.getSelectedNodeSource().getSourceName(),
+                                                                        force,
+                                                                        new AsyncCallback<String>() {
+                                                                            @Override
+                                                                            public void onFailure(Throwable caught) {
+                                                                                LogModel.getInstance()
+                                                                                        .logImportantMessage("Failed to undeploy node source " +
+                                                                                                             nodeSourceName +
+                                                                                                             JSONUtils.getJsonErrorMessage(caught));
+
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onSuccess(String result) {
+                                                                                LogModel.getInstance()
+                                                                                        .logMessage("Successfully undeployed node source " +
+                                                                                                    nodeSourceName);
+                                                                            }
+                                                                        });
+                                              }
+                                          });
+            }
+
+        }
+    }
+
     /**
      * Remove nodes according to the current selection:
      * if a host is selected, multiple nodes will be removed
@@ -1073,9 +1108,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         public abstract void run(boolean force);
     }
 
-    private void confirmRemoveNode(String message, final NodeRemovalCallback callback) {
+    private void confirmRemove(String title, String message, final NodeRemovalCallback callback) {
         final Window win = new Window();
-        win.setTitle("Confirm node removal");
+        win.setTitle(title);
         win.setShowMinimizeButton(false);
         win.setIsModal(true);
         win.setShowModalMask(true);
@@ -1088,7 +1123,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Label label = new Label(message);
         label.setHeight(40);
 
+        // somehow the name of the checkbox is misleading compared to what it
+        // means (see name vs title). Thus we have to negate the value of the
+        // checkbox when to preserve meaning
         final CheckboxItem force = new CheckboxItem("force", "Wait task completion on busy nodes");
+        force.setValue(true);
         final DynamicForm form = new DynamicForm();
         form.setColWidths(25, "*");
         form.setItems(force);
@@ -1101,21 +1140,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         buttons.setAlign(Alignment.RIGHT);
         buttons.setHeight(25);
 
-        IButton ok = new IButton("OK", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                callback.run(force.getValueAsBoolean());
-                win.hide();
-                win.destroy();
-            }
+        IButton ok = new IButton("OK", event -> {
+            callback.run(!force.getValueAsBoolean());
+            win.hide();
+            win.destroy();
         });
         ok.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        IButton cancel = new IButton("Cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                win.hide();
-                win.destroy();
-            }
+        IButton cancel = new IButton("Cancel", event -> {
+            win.hide();
+            win.destroy();
         });
         cancel.setIcon(Images.instance.cancel_16().getSafeUri().asString());
         buttons.setMembers(ok, cancel);
@@ -1127,6 +1160,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         win.addItem(layout);
         win.show();
+    }
+
+    private void confirmRemoveNode(String message, final NodeRemovalCallback callback) {
+        confirmRemove("Confirm node removal", message, callback);
+    }
+
+    private void confirmUndeployNodeSource(String message, final NodeRemovalCallback callback) {
+        confirmRemove("Confirm node source undeployment", message, callback);
     }
 
     public RMServiceAsync getRMService() {

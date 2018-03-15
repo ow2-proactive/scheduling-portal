@@ -141,12 +141,24 @@ public interface RMService extends RemoteService {
      * Deploys a node source and starts acquiring its nodes
      *
      * @param sessionId current session
-     * @param nodeSourceName name of the new NS
+     * @param nodeSourceName name of the node source to deploy
     
      * @throws RestServerException
      * @throws ServiceException
      */
     String deployNodeSource(String sessionId, String nodeSourceName) throws RestServerException, ServiceException;
+
+    /**
+     * Undeploys a node source and removes its nodes
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to undeploy
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String undeployNodeSource(String sessionId, String nodeSourceName, boolean force)
+            throws RestServerException, ServiceException;
 
     /**
      * lock a set of nodes

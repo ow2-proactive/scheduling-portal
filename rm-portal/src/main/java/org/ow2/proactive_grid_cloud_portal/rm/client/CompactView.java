@@ -40,14 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
 import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,7 +54,6 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 
 
 /**
@@ -459,6 +451,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                     String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
                     String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+                    String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16()
+                                                                        .getSafeUri()
+                                                                        .asString();
 
                     if (node != null) {
                         controller.selectNode(node);
@@ -476,36 +471,19 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     MenuItem removeItem = new MenuItem("Remove",
                                                        RMImages.instance.node_remove_16().getSafeUri().asString());
-                    removeItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.removeNodes();
-                        }
-                    });
+                    removeItem.addClickHandler(event15 -> controller.removeNodes());
 
                     MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-                    lockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.lockNodes();
-                        }
-                    });
+                    lockItem.addClickHandler(event14 -> controller.lockNodes());
 
                     MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-                    unlockItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.unlockNodes();
-                        }
-                    });
+                    unlockItem.addClickHandler(event13 -> controller.unlockNodes());
 
                     MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-                    deployItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-                        @Override
-                        public void onClick(MenuItemClickEvent event) {
-                            controller.deployNodeSource();
-                        }
-                    });
+                    deployItem.addClickHandler(event12 -> controller.deployNodeSource());
+
+                    MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
+                    undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
                     if (node != null) {
                         if (node.isLocked()) {
@@ -517,14 +495,24 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         }
                     }
 
-                    if (nodesource != null &&
-                        nodesource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
-                        deployItem.setEnabled(true);
+                    if (nodesource != null) {
+                        switch (nodesource.getNodeSourceStatus()) {
+                            case NODES_DEPLOYED:
+                                deployItem.setEnabled(false);
+                                undeployItem.setEnabled(true);
+                                break;
+                            case NODES_UNDEPLOYED:
+                                deployItem.setEnabled(true);
+                                undeployItem.setEnabled(false);
+                                break;
+                            default:
+                                disableNodeSourceDeploymentItems(deployItem, undeployItem);
+                        }
                     } else {
-                        deployItem.setEnabled(false);
+                        disableNodeSourceDeploymentItems(deployItem, undeployItem);
                     }
 
-                    menu.setItems(deployItem, lockItem, unlockItem, removeItem);
+                    menu.setItems(deployItem, undeployItem, lockItem, unlockItem, removeItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
@@ -536,6 +524,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     super.onBrowserEvent(event);
                     break;
             }
+        }
+
+        private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
+            deployItem.setEnabled(false);
+            undeployItem.setEnabled(false);
         }
 
         private void init() {
@@ -553,54 +546,42 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             this.hoverLabel = new Label();
             this.hover.addMember(this.hoverLabel);
 
-            this.addDomHandler(new ContextMenuHandler() {
-                @Override
-                public void onContextMenu(ContextMenuEvent event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            this.addDomHandler(event -> {
+                event.preventDefault();
+                event.stopPropagation();
             }, ContextMenuEvent.getType());
 
-            this.addMouseOverHandler(new MouseOverHandler() {
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    if (dirty) {
-                        if (globalHover != null)
-                            globalHover.hide();
-                        dirty = false;
-                        if (node != null) {
-                            setHoverNodeLabel();
-                        } else if (host != null) {
-                            hoverLabel.setContents("<strong>Host</strong><br>" + host.getHostName());
-                        } else if (nodesource != null) {
-                            hoverLabel.setContents("<strong>NodeSource</strong><br>" + nodesource.getSourceName());
-                        }
-                        hover.moveTo(event.getClientX() - 155, event.getClientY() - 65);
-                        hover.show();
-                        globalHover = hover;
+            this.addMouseOverHandler(event -> {
+                if (dirty) {
+                    if (globalHover != null)
+                        globalHover.hide();
+                    dirty = false;
+                    if (node != null) {
+                        setHoverNodeLabel();
+                    } else if (host != null) {
+                        hoverLabel.setContents("<strong>Host</strong><br>" + host.getHostName());
+                    } else if (nodesource != null) {
+                        hoverLabel.setContents("<strong>NodeSource</strong><br>" + nodesource.getSourceName());
                     }
+                    hover.moveTo(event.getClientX() - 155, event.getClientY() - 65);
+                    hover.show();
+                    globalHover = hover;
                 }
             });
-            this.addMouseOutHandler(new MouseOutHandler() {
-                @Override
-                public void onMouseOut(MouseOutEvent event) {
-                    dirty = true;
-                    hover.hide();
-                    globalHover = null;
-                }
+            this.addMouseOutHandler(event -> {
+                dirty = true;
+                hover.hide();
+                globalHover = null;
             });
 
-            this.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    _doNotScroll = true;
-                    if (node != null) {
-                        controller.selectNode(node);
-                    } else if (host != null) {
-                        controller.selectHost(host);
-                    } else if (nodesource != null) {
-                        controller.selectNodeSource(nodesource);
-                    }
+            this.addClickHandler(event -> {
+                _doNotScroll = true;
+                if (node != null) {
+                    controller.selectNode(node);
+                } else if (host != null) {
+                    controller.selectHost(host);
+                } else if (nodesource != null) {
+                    controller.selectNodeSource(nodesource);
                 }
             });
         }
@@ -701,4 +682,5 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
     }
+
 }
