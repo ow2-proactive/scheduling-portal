@@ -231,9 +231,9 @@ public class NodeSource {
 
             private String eventType = null;
 
-            Node(String nodeUrl, String nodeState, long timeStamp,
-                    String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
-                    String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, String eventType) {
+            Node(String nodeUrl, String nodeState, long timeStamp, String nodeProvider, String nodeOwner,
+                    String sourceName, String hostName, String vmName, String description, String defaultJMXUrl,
+                    String proactiveJMXUrl, boolean isLocked, String eventType) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
