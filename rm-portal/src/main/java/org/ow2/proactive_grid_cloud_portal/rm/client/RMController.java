@@ -748,8 +748,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         String nodeUrl = nodeObj.get("nodeUrl").isString().stringValue();
         String nodeState = nodeObj.get("nodeState").isString().stringValue();
-        String nodeInfo = nodeObj.get("nodeInfo").isString().stringValue();
-        String timeStampFormatted = nodeObj.get("timeStampFormatted").isString().stringValue();
         long timeStamp = Math.round(nodeObj.get("timeStamp").isNumber().doubleValue());
         String nodeProvider = nodeObj.get("nodeProvider").isString().stringValue();
 
@@ -760,14 +758,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
 
         boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
-        long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
-        String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
 
         return new Node(nodeUrl,
                         nodeState,
-                        nodeInfo,
                         timeStamp,
-                        timeStampFormatted,
                         nodeProvider,
                         nodeOwner,
                         nss,
@@ -777,8 +771,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         defaultJMXUrl,
                         proactiveJMXUrl,
                         isLocked,
-                        lockTime,
-                        nodeLocker,
                         eventType);
     }
 
@@ -794,16 +786,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
 
         return result.booleanValue();
-    }
-
-    private long getJsonLongNullable(JSONObject jsonObject, String attributeName, long defaultValue) {
-        JSONNumber result = jsonObject.get(attributeName).isNumber();
-
-        if (result == null) {
-            return defaultValue;
-        }
-
-        return Long.parseLong(result.toString());
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName, String defaultValue) {

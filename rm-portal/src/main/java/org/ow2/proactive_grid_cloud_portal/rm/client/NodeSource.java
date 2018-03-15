@@ -200,14 +200,8 @@ public class NodeSource {
             /** current state of the node */
             private NodeState nodeState;
 
-            /** multiline String describing the node */
-            private String nodeInfo;
-
             /** timestamp */
             private long timeStamp;
-
-            /** time when the node changed to this nodeState*/
-            private String timeStampFormatted;
 
             /** user that created the node */
             private String nodeProvider;
@@ -235,21 +229,14 @@ public class NodeSource {
 
             private boolean isLocked = false;
 
-            private long lockTime = -1;
-
-            private String nodeLocker = null;
-
             private String eventType = null;
 
-            Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
+            Node(String nodeUrl, String nodeState, long timeStamp,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
-                    String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker, String eventType) {
+                    String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, String eventType) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
-                this.nodeInfo = nodeInfo;
-                this.timeStampFormatted = timeStampFormatted;
                 this.nodeProvider = nodeProvider;
                 this.nodeOwner = nodeOwner;
                 this.sourceName = sourceName;
@@ -259,21 +246,13 @@ public class NodeSource {
                 this.description = description;
                 this.defaultJMXUrl = defaultJMXUrl;
                 this.proactiveJMXUrl = proactiveJMXUrl;
-
                 this.isLocked = isLocked;
-
-                if (this.isLocked) {
-                    this.lockTime = lockTime;
-                    this.nodeLocker = nodeLocker;
-                }
                 this.eventType = eventType;
             }
 
             Node(Node t) {
                 this.nodeUrl = t.nodeUrl;
                 this.nodeState = t.nodeState;
-                this.nodeInfo = t.nodeInfo;
-                this.timeStampFormatted = t.timeStampFormatted;
                 this.nodeProvider = t.nodeProvider;
                 this.nodeOwner = t.nodeOwner;
                 this.sourceName = t.sourceName;
@@ -283,14 +262,8 @@ public class NodeSource {
                 this.description = t.description;
                 this.defaultJMXUrl = t.defaultJMXUrl;
                 this.proactiveJMXUrl = t.proactiveJMXUrl;
-
                 this.isLocked = t.isLocked;
-
                 this.eventType = t.eventType;
-                if (this.isLocked) {
-                    this.lockTime = t.lockTime;
-                    this.nodeLocker = t.nodeLocker;
-                }
             }
 
             public boolean isRemoved() {
@@ -309,16 +282,8 @@ public class NodeSource {
                 return nodeState;
             }
 
-            public String getNodeInfo() {
-                return nodeInfo;
-            }
-
             public long getTimeStamp() {
                 return timeStamp;
-            }
-
-            public String getTimeStampFormatted() {
-                return timeStampFormatted;
             }
 
             public String getNodeProvider() {
@@ -355,14 +320,6 @@ public class NodeSource {
 
             public boolean isLocked() {
                 return isLocked;
-            }
-
-            public long getLockTime() {
-                return lockTime;
-            }
-
-            public String getNodeLocker() {
-                return nodeLocker;
             }
 
             public String getIcon() {
