@@ -287,29 +287,6 @@ public class RMServiceImpl extends Service implements RMService {
                                                                                              nodesRecoverable));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.rm.client.RMService#createNodeSource(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String[], java.lang.String[], java.lang.String,
-     * java.lang.String[], java.lang.String[])
-     */
-    public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
-            final String[] infrastructureParameters, final String[] infrastructureFileParameters,
-            final String policyType, final String[] policyParameters, final String[] policyFileParameters,
-            final String nodesRecoverable) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.createnodeSource(sessionId,
-                                                                                             nodeSourceName,
-                                                                                             infrastructureType,
-                                                                                             infrastructureParameters,
-                                                                                             infrastructureFileParameters,
-                                                                                             policyType,
-                                                                                             policyParameters,
-                                                                                             policyFileParameters,
-                                                                                             nodesRecoverable));
-    }
-
     @Override
     public String deployNodeSource(final String sessionId, final String nodeSourceName)
             throws RestServerException, ServiceException {

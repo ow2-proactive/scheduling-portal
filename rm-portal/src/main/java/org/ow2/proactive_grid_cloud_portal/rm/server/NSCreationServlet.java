@@ -150,28 +150,20 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult;
+            String jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                       nsName,
+                                                                                       infra,
+                                                                                       toArray(infraParams),
+                                                                                       toArray(infraFileParams),
+                                                                                       policy,
+                                                                                       toArray(policyParams),
+                                                                                       toArray(policyFileParams),
+                                                                                       nodesRecoverable);
+
             if (deployNodeSource) {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(sessionId,
-                                                                                    nsName,
-                                                                                    infra,
-                                                                                    toArray(infraParams),
-                                                                                    toArray(infraFileParams),
-                                                                                    policy,
-                                                                                    toArray(policyParams),
-                                                                                    toArray(policyFileParams),
-                                                                                    nodesRecoverable);
-            } else {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                    nsName,
-                                                                                    infra,
-                                                                                    toArray(infraParams),
-                                                                                    toArray(infraFileParams),
-                                                                                    policy,
-                                                                                    toArray(policyParams),
-                                                                                    toArray(policyFileParams),
-                                                                                    nodesRecoverable);
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);
             }
+
             JSONObject json = new JSONObject(jsonResult);
             if (json != null) {
                 if (json.has("result")) {
