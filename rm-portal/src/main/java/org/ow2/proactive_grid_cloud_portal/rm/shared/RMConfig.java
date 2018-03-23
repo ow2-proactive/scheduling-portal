@@ -59,7 +59,7 @@ public class RMConfig extends Config {
 
     public static final String CLIENT_BURST_REFRESH_TIME = "rm.client.burst.refresh.time";
 
-    private static final String d_CLIENT_BURST_REFRESH_TIME = "3";
+    private static final String d_CLIENT_BURST_REFRESH_TIME = "10";
 
     /** release version string */
     public static final String VERSION = "rm.version";
