@@ -855,6 +855,41 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
+    /**
+     * Fetch and store in the model the current configuration of a node source
+     *
+     * @param success call this when it's done
+     * @param failure call this if it fails
+     */
+    public void fetchNodeSourceConfiguration(String nodeSourceName, Runnable success, Runnable failure) {
+        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                      nodeSourceName,
+                                      new AsyncCallback<String>() {
+
+                                          public void onFailure(Throwable caught) {
+                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
+                                                      ":<br>" + msg);
+                                              failure.run();
+                                          }
+
+                                          public void onSuccess(String result) {
+                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
+                                              success.run();
+                                          }
+                                      });
+    }
+
+    private NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
+        JSONObject jsonObject = this.parseJSON(json).isObject();
+
+        String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
+
+        // TODO
+
+        return new NodeSourceConfiguration(nodeSourceName, false, null, null);
+    }
+
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
         JSONArray arr = this.parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<String, PluginDescriptor>();
@@ -1033,8 +1068,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    public void editNodeSource() {
-        this.rmPage.showNodeSourceEditWindow();
+    public void editNodeSource(String nodeSourceName) {
+        this.rmPage.showNodeSourceEditWindow(nodeSourceName);
     }
 
     /**

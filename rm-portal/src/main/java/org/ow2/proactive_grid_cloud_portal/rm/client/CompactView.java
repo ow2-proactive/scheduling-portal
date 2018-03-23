@@ -487,7 +487,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
                     MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-                    editItem.addClickHandler(event1 -> controller.editNodeSource());
+                    String nodeSourceName = nodesource == null ? "toto" : nodesource.getSourceName();
+                    editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
 
                     if (node != null) {
                         if (node.isLocked()) {

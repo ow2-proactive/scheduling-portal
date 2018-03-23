@@ -562,9 +562,9 @@ public class RMPage implements LogListener {
         RMPage.this.nsWindow.show();
     }
 
-    public void showNodeSourceEditWindow() {
+    public void showNodeSourceEditWindow(String nodeSourceName) {
         destroyNodeSourceWindow();
-        RMPage.this.nsWindow = new NodeSourceEditWindow(controller);
+        RMPage.this.nsWindow = new NodeSourceEditWindow(controller, nodeSourceName);
         RMPage.this.nsWindow.show();
     }
 

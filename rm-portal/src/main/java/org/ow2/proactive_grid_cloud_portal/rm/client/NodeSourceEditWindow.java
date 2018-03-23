@@ -25,22 +25,96 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.*;
 
 
 public class NodeSourceEditWindow extends NodeSourceWindow {
 
-    public NodeSourceEditWindow(RMController controller) {
+    private String nodeSourceName;
+
+    public NodeSourceEditWindow(RMController controller, String nodeSourceName) {
         super(controller, "Edit node source", "Retrieving current node source configuration");
+        this.nodeSourceName = nodeSourceName;
+        this.buildForm();
     }
 
     @Override
     protected void populateFormValues(Label infraLabel, DynamicForm infraForm, TextItem nameItem,
             CheckboxItem nodesRecoverableItem) {
+        this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
+            nameItem.setDefaultValue(this.nodeSourceName);
+            nameItem.setCanEdit(false);
+
+            HashMap<String, List<FormItem>> allForms = new HashMap<>();
+
+            infraSelect = new SelectItem("infra", "Infrastructure");
+            infraSelect.setRequired(true);
+            policySelect = new SelectItem("policy", "Policy");
+            policySelect.setRequired(true);
+
+            infraSelect.setWidth(300);
+            policySelect.setWidth(300);
+
+            HiddenItem name = new HiddenItem("nsName");
+            HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
+            HiddenItem deploy = new HiddenItem("deploy");
+            HiddenItem callback = new HiddenItem("nsCallback");
+            HiddenItem session = new HiddenItem("sessionId");
+
+            ArrayList<FormItem> formParameters = new ArrayList<>();
+            formParameters.add(name);
+            formParameters.add(nodesRecoverable);
+            formParameters.add(deploy);
+            formParameters.add(callback);
+            formParameters.add(session);
+            formParameters.add(infraSelect);
+
+            LinkedHashMap<String, String> values = new LinkedHashMap<>();
+            for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
+                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
+                values.put(inf.getPluginName(), shortName);
+
+                ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
+                formParameters.addAll(infraFormItems);
+                allForms.put(inf.getPluginName(), infraFormItems);
+            }
+            infraSelect.setValueMap(values);
+
+            formParameters.add(new SpacerItem());
+            values.clear();
+            formParameters.add(policySelect);
+            for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
+                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
+                values.put(inf.getPluginName(), shortName);
+
+                ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
+                formParameters.addAll(policyFormItems);
+                allForms.put(inf.getPluginName(), policyFormItems);
+            }
+            policySelect.setValueMap(values);
+
+            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
+
+            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
+
+            infraForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
+            infraLabel.hide();
+            infraForm.show();
+
+            for (List<FormItem> li : allForms.values()) {
+                for (FormItem it : li) {
+                    it.hide();
+                }
+            }
+        }, () -> window.hide());
     }
 
 }

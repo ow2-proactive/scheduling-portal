@@ -75,6 +75,11 @@ public abstract class RMModel implements Model {
     public abstract Map<String, PluginDescriptor> getSupportedPolicies();
 
     /**
+     * @return an object that represents the configuration of a node source
+     */
+    public abstract NodeSourceConfiguration getEditedNodeSourceConfiguration();
+
+    /**
      * @return number of deploying nodes
      */
     public abstract int getNumDeploying();

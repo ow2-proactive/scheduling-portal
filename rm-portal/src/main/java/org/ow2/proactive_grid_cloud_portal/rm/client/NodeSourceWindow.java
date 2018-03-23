@@ -70,7 +70,6 @@ public abstract class NodeSourceWindow {
         this.controller = controller;
         this.windowTitle = windowTitle;
         this.waitingMessage = waitingMessage;
-        this.build();
     }
 
     public void show() {
@@ -164,7 +163,7 @@ public abstract class NodeSourceWindow {
         }
     }
 
-    private void build() {
+    protected void buildForm() {
         final VLayout layout = new VLayout();
         layout.setMargin(5);
 

@@ -44,6 +44,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
     public NodeSourceCreationWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating available Infrastructures and Policies");
+        this.buildForm();
     }
 
     @Override

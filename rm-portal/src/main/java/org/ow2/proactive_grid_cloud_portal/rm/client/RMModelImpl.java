@@ -66,6 +66,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private NodeSource selectedNodeSource = null;
 
+    private NodeSourceConfiguration editedNodeSourceConfiguration = null;
+
     private HashMap<String, PluginDescriptor> infrastructures = null;
 
     private HashMap<String, PluginDescriptor> policies = null;
@@ -282,6 +284,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setSupportedPolicies(HashMap<String, PluginDescriptor> pol) {
         this.policies = pol;
+    }
+
+    @Override
+    public NodeSourceConfiguration getEditedNodeSourceConfiguration() {
+        return this.editedNodeSourceConfiguration;
+    }
+
+    void setEditedNodeSourceConfiguration(NodeSourceConfiguration editedNodeSourceConfiguration) {
+        this.editedNodeSourceConfiguration = editedNodeSourceConfiguration;
     }
 
     @Override

@@ -48,8 +48,6 @@ import com.smartgwt.client.widgets.tree.TreeGridField;
 import com.smartgwt.client.widgets.tree.TreeNode;
 import com.smartgwt.client.widgets.tree.events.NodeClickEvent;
 import com.smartgwt.client.widgets.tree.events.NodeClickHandler;
-import com.smartgwt.client.widgets.tree.events.NodeContextClickEvent;
-import com.smartgwt.client.widgets.tree.events.NodeContextClickHandler;
 
 
 /**
@@ -213,7 +211,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
             MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-            editItem.addClickHandler(event1 -> controller.editNodeSource());
+            String nodeSourceName = currentSelectedNodeSource == null ? "titi"
+                                                                      : currentSelectedNodeSource.getSourceName();
+            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
 
             if (currentSelectedNode != null) {
                 if (currentSelectedNode.isLocked()) {
