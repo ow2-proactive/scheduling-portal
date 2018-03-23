@@ -88,18 +88,6 @@ public interface RestClient {
             @FormParam("policyFileParameters") String[] policyFileParameters,
             @FormParam("nodesRecoverable") String nodesRecoverable);
 
-    @POST
-    @Path("/rm/nodesource/create/recovery")
-    @Produces("application/json")
-    InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
-            @FormParam("nodeSourceName") String nodeSourceName,
-            @FormParam("infrastructureType") String infrastructureType,
-            @FormParam("infrastructureParameters") String[] infrastructureParameters,
-            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
-            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
-            @FormParam("policyFileParameters") String[] policyFileParameters,
-            @FormParam("nodesRecoverable") String nodesRecoverable);
-
     @PUT
     @Path("/rm/nodesource/deploy")
     @Produces("application/json")
