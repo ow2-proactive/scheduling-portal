@@ -100,6 +100,20 @@ public interface RMService extends RemoteService {
     String getPolicies(String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * Retrieve the configuration of a given node source, in other words, a
+     * representation of all the parameters with which a node source was
+     * configured.
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to get the configuration from
+     * @return a JSON object containing the current node source configuration
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException;
+
+    /**
      * Defines a NodeSource
      * @param sessionId current session
      * @param nodeSourceName name of the new NS

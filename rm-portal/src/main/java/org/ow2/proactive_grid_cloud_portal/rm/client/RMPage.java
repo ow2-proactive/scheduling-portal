@@ -389,12 +389,7 @@ public class RMPage implements LogListener {
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
-        logMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        logMenuItem.addClickHandler(e -> showLogWindow());
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
@@ -425,25 +420,12 @@ public class RMPage implements LogListener {
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
         nsButton.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
-        nsButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (RMPage.this.nsWindow != null)
-                    RMPage.this.nsWindow.destroy();
-                RMPage.this.nsWindow = new NSCreationWindow(controller);
-                RMPage.this.nsWindow.show();
-            }
-        });
+        nsButton.addClickHandler(e -> showNodeSourceWindow());
 
         errorButton = new ToolStripButton("<strong>Error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
-        errorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
@@ -574,4 +556,17 @@ public class RMPage implements LogListener {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
     }
+
+    private void showNodeSourceWindow() {
+        if (RMPage.this.nsWindow != null)
+            RMPage.this.nsWindow.destroy();
+        RMPage.this.nsWindow = new NSCreationWindow(controller);
+        RMPage.this.nsWindow.show();
+    }
+
+    private void showLogWindow() {
+        RMPage.this.logWindow.show();
+        errorButton.hide();
+    }
+
 }

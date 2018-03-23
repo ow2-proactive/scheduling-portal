@@ -283,6 +283,13 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeSourceConfiguration(sessionId,
+                                                                                                       nodeSourceName));
+    }
+
+    @Override
     public String lockNodes(String sessionId, Set<String> urls) throws RestServerException, ServiceException {
         return executeFunction((restClient, strings) -> restClient.lockNodes(sessionId, strings), urls, "lock");
     }

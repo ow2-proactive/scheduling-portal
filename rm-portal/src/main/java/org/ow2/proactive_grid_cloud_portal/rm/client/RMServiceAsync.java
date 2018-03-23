@@ -94,6 +94,19 @@ public interface RMServiceAsync {
     void getPolicies(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * Retrieve the configuration of a given node source, in other words, a
+     * representation of all the parameters with which a node source was
+     * configured.
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to get the configuration from
+     * @return a JSON object containing the current node source configuration
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void getNodeSourceConfiguration(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
+
+    /**
      * Defines a NodeSource
      * @param sessionId current session
      * @param nodeSourceName name of the new NS

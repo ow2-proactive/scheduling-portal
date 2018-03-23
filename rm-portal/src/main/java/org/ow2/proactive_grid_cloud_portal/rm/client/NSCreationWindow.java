@@ -149,38 +149,9 @@ public class NSCreationWindow {
                     String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
-                    List<Field> configurableFields = inf.getConfigurableFields();
-                    ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
-                    for (Field f : configurableFields) {
-                        FormItem infra = null;
-                        if (f.isPassword()) {
-                            infra = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
-                        } else if (f.isFile() || f.isCredential()) {
-                            infra = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
-                            if (f.isCredential()) {
-                                PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
-                                                                                           .getSafeUri()
-                                                                                           .asString()),
-                                                                 formItemIconClickEvent -> {
-                                                                     CredentialsWindow win = new CredentialsWindow();
-                                                                     win.show();
-                                                                 });
-                                cred.setPrompt("Create a Credential file");
-                                cred.setWidth(16);
-                                cred.setHeight(16);
-                                cred.setAttribute("hspace", 6);
-                                infra.setIcons(cred);
-                            }
-                        } else {
-                            infra = new TextItem(inf.getPluginName() + f.getName(), f.getName());
-                        }
-                        infra.setValue(f.getValue());
-                        infra.setWidth(250);
-                        infra.setHint("<nobr>" + f.getDescription() + "</nobr>");
-                        forms.add(infra);
-                        formParameters.add(infra);
-                    }
-                    allForms.put(inf.getPluginName(), forms);
+                    ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
+                    formParameters.addAll(infraFormItems);
+                    allForms.put(inf.getPluginName(), infraFormItems);
                 }
                 infraSelect.setValueMap(values);
 
@@ -191,38 +162,9 @@ public class NSCreationWindow {
                     String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
                     values.put(inf.getPluginName(), shortName);
 
-                    List<Field> configurableFields = inf.getConfigurableFields();
-                    ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
-                    for (Field f : configurableFields) {
-                        FormItem pol = null;
-                        if (f.isPassword()) {
-                            pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
-                        } else if (f.isFile() || f.isCredential()) {
-                            pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
-                            if (f.isCredential()) {
-                                PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16()
-                                                                                           .getSafeUri()
-                                                                                           .asString()),
-                                                                 formItemIconClickEvent -> {
-                                                                     CredentialsWindow win = new CredentialsWindow();
-                                                                     win.show();
-                                                                 });
-                                cred.setPrompt("Create a Credential file");
-                                cred.setWidth(16);
-                                cred.setHeight(16);
-                                cred.setAttribute("hspace", 6);
-                                pol.setIcons(cred);
-                            }
-                        } else {
-                            pol = new TextItem(inf.getPluginName() + f.getName(), f.getName());
-                        }
-                        pol.setValue(f.getValue());
-                        pol.setWidth(250);
-                        pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
-                        forms.add(pol);
-                        formParameters.add(pol);
-                    }
-                    allForms.put(inf.getPluginName(), forms);
+                    ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
+                    formParameters.addAll(policyFormItems);
+                    allForms.put(inf.getPluginName(), policyFormItems);
                 }
                 policySelect.setValueMap(values);
 
@@ -319,6 +261,38 @@ public class NSCreationWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    private ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
+        List<Field> configurableFields = inf.getConfigurableFields();
+        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
+        for (Field f : configurableFields) {
+            FormItem pol = null;
+            if (f.isPassword()) {
+                pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
+            } else if (f.isFile() || f.isCredential()) {
+                pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
+                if (f.isCredential()) {
+                    PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16().getSafeUri().asString()),
+                                                     formItemIconClickEvent -> {
+                                                         CredentialsWindow win = new CredentialsWindow();
+                                                         win.show();
+                                                     });
+                    cred.setPrompt("Create a Credential file");
+                    cred.setWidth(16);
+                    cred.setHeight(16);
+                    cred.setAttribute("hspace", 6);
+                    pol.setIcons(cred);
+                }
+            } else {
+                pol = new TextItem(inf.getPluginName() + f.getName(), f.getName());
+            }
+            pol.setValue(f.getValue());
+            pol.setWidth(250);
+            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
+            forms.add(pol);
+        }
+        return forms;
     }
 
     private void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {

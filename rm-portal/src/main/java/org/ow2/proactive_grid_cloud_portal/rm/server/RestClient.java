@@ -76,6 +76,13 @@ public interface RestClient {
     @Produces("application/json")
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
+    @GET
+    @GZIP
+    @Path("/rm/nodesource/configuration")
+    @Produces("application/json")
+    InputStream getNodeSourceConfiguration(@HeaderParam("sessionid") String sessionId,
+            @QueryParam("nodeSourceName") String nodeSourceName);
+
     @POST
     @Path("/rm/nodesource")
     @Produces("application/json")
