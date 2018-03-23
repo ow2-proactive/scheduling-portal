@@ -1037,6 +1037,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void editNodeSource() {
+        this.rmPage.showNodeSourceWindow();
+    }
+
     /**
      * Remove nodes according to the current selection:
      * if a host is selected, multiple nodes will be removed

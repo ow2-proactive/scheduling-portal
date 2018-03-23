@@ -454,6 +454,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16()
                                                                         .getSafeUri()
                                                                         .asString();
+                    String editItemImageResource = RMImages.instance.nodesource_edit_16().getSafeUri().asString();
 
                     if (node != null) {
                         controller.selectNode(node);
@@ -485,6 +486,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
                     undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
+                    MenuItem editItem = new MenuItem("Edit", editItemImageResource);
+                    editItem.addClickHandler(event1 -> controller.editNodeSource());
+
                     if (node != null) {
                         if (node.isLocked()) {
                             lockItem.setEnabled(false);
@@ -498,21 +502,21 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     if (nodesource != null) {
                         switch (nodesource.getNodeSourceStatus()) {
                             case NODES_DEPLOYED:
-                                deployItem.setEnabled(false);
-                                undeployItem.setEnabled(true);
+                                enableItems(new MenuItem[] { undeployItem });
+                                disableItems(new MenuItem[] { deployItem, editItem });
                                 break;
                             case NODES_UNDEPLOYED:
-                                deployItem.setEnabled(true);
-                                undeployItem.setEnabled(false);
+                                enableItems(new MenuItem[] { deployItem, editItem });
+                                disableItems(new MenuItem[] { undeployItem });
                                 break;
                             default:
-                                disableNodeSourceDeploymentItems(deployItem, undeployItem);
+                                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                         }
                     } else {
-                        disableNodeSourceDeploymentItems(deployItem, undeployItem);
+                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                     }
 
-                    menu.setItems(deployItem, undeployItem, lockItem, unlockItem, removeItem);
+                    menu.setItems(deployItem, undeployItem, editItem, lockItem, unlockItem, removeItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
@@ -526,9 +530,16 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             }
         }
 
-        private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
-            deployItem.setEnabled(false);
-            undeployItem.setEnabled(false);
+        private void disableItems(MenuItem[] items) {
+            for (MenuItem item : items) {
+                item.setEnabled(false);
+            }
+        }
+
+        private void enableItems(MenuItem[] items) {
+            for (MenuItem item : items) {
+                item.setEnabled(true);
+            }
         }
 
         private void init() {

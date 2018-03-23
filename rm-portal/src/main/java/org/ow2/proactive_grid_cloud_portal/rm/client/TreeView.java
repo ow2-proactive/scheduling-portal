@@ -160,108 +160,115 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             }
         });
 
-        this.treeGrid.addNodeContextClickHandler(new NodeContextClickHandler() {
-            @Override
-            public void onNodeContextClick(NodeContextClickEvent event) {
+        this.treeGrid.addNodeContextClickHandler(event -> {
 
-                String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
-                String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-                String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
-                String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
+            String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
+            String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
+            String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+            String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
+            String editItemImageResource = RMImages.instance.nodesource_edit_16().getSafeUri().asString();
 
-                NodeSource currentSelectedNodeSource = null;
-                Node currentSelectedNode = null;
+            NodeSource currentSelectedNodeSource = null;
+            Node currentSelectedNode = null;
 
-                final TreeNode n = event.getNode();
-                if (n instanceof TNode) {
-                    TNode tn = (TNode) n;
-                    TreeView.this.controller.selectNode(tn.rmNode);
-                    lockItemImageResource = tn.rmNode.getIconLocked();
-                    unlockItemImageResource = tn.rmNode.getIconUnlocked();
-                    currentSelectedNode = tn.rmNode;
-                } else if (n instanceof TNS) {
-                    TNS tn = (TNS) n;
-                    TreeView.this.controller.selectNodeSource(tn.rmNS);
-                    currentSelectedNodeSource = tn.rmNS;
-                } else if (n instanceof THost) {
-                    THost tn = (THost) n;
-                    TreeView.this.controller.selectHost(tn.rmHost);
-                }
-
-                Menu menu = new Menu();
-                menu.setShowShadow(true);
-                menu.setShadowDepth(10);
-
-                MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
-                expandItem.addClickHandler(event17 -> expandAll());
-
-                MenuItem collapseItem = new MenuItem("Collapse all",
-                                                     Images.instance.close_16().getSafeUri().asString());
-                collapseItem.addClickHandler(event16 -> closeAll());
-
-                MenuItem removeItem = new MenuItem("Remove",
-                                                   RMImages.instance.node_remove_16().getSafeUri().asString());
-                removeItem.addClickHandler(event15 -> controller.removeNodes());
-
-                MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-                lockItem.addClickHandler(event14 -> controller.lockNodes());
-
-                MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-                unlockItem.addClickHandler(event13 -> controller.unlockNodes());
-
-                MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-                deployItem.addClickHandler(event12 -> controller.deployNodeSource());
-
-                MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
-                undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
-
-                if (currentSelectedNode != null) {
-                    if (currentSelectedNode.isLocked()) {
-                        lockItem.setEnabled(false);
-                        unlockItem.setEnabled(true);
-                    } else {
-                        lockItem.setEnabled(true);
-                        unlockItem.setEnabled(false);
-                    }
-                }
-
-                if (currentSelectedNodeSource != null) {
-                    switch (currentSelectedNodeSource.getNodeSourceStatus()) {
-                        case NODES_DEPLOYED:
-                            deployItem.setEnabled(false);
-                            undeployItem.setEnabled(true);
-                            break;
-                        case NODES_UNDEPLOYED:
-                            deployItem.setEnabled(true);
-                            undeployItem.setEnabled(false);
-                            break;
-                        default:
-                            disableNodeSourceDeploymentItems(deployItem, undeployItem);
-                    }
-                } else {
-                    disableNodeSourceDeploymentItems(deployItem, undeployItem);
-                }
-
-                menu.setItems(expandItem,
-                              collapseItem,
-                              new MenuItemSeparator(),
-                              deployItem,
-                              undeployItem,
-                              lockItem,
-                              unlockItem,
-                              removeItem);
-
-                treeGrid.setContextMenu(menu);
+            final TreeNode n = event.getNode();
+            if (n instanceof TNode) {
+                TNode tn = (TNode) n;
+                TreeView.this.controller.selectNode(tn.rmNode);
+                lockItemImageResource = tn.rmNode.getIconLocked();
+                unlockItemImageResource = tn.rmNode.getIconUnlocked();
+                currentSelectedNode = tn.rmNode;
+            } else if (n instanceof TNS) {
+                TNS tn = (TNS) n;
+                TreeView.this.controller.selectNodeSource(tn.rmNS);
+                currentSelectedNodeSource = tn.rmNS;
+            } else if (n instanceof THost) {
+                THost tn = (THost) n;
+                TreeView.this.controller.selectHost(tn.rmHost);
             }
+
+            Menu menu = new Menu();
+            menu.setShowShadow(true);
+            menu.setShadowDepth(10);
+
+            MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
+            expandItem.addClickHandler(event17 -> expandAll());
+
+            MenuItem collapseItem = new MenuItem("Collapse all", Images.instance.close_16().getSafeUri().asString());
+            collapseItem.addClickHandler(event16 -> closeAll());
+
+            MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
+            removeItem.addClickHandler(event15 -> controller.removeNodes());
+
+            MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
+            lockItem.addClickHandler(event14 -> controller.lockNodes());
+
+            MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
+            unlockItem.addClickHandler(event13 -> controller.unlockNodes());
+
+            MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
+            deployItem.addClickHandler(event12 -> controller.deployNodeSource());
+
+            MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
+            undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
+
+            MenuItem editItem = new MenuItem("Edit", editItemImageResource);
+            editItem.addClickHandler(event1 -> controller.editNodeSource());
+
+            if (currentSelectedNode != null) {
+                if (currentSelectedNode.isLocked()) {
+                    lockItem.setEnabled(false);
+                    unlockItem.setEnabled(true);
+                } else {
+                    lockItem.setEnabled(true);
+                    unlockItem.setEnabled(false);
+                }
+            }
+
+            if (currentSelectedNodeSource != null) {
+                switch (currentSelectedNodeSource.getNodeSourceStatus()) {
+                    case NODES_DEPLOYED:
+                        enableItems(new MenuItem[] { undeployItem });
+                        disableItems(new MenuItem[] { deployItem, editItem });
+                        break;
+                    case NODES_UNDEPLOYED:
+                        enableItems(new MenuItem[] { deployItem, editItem });
+                        disableItems(new MenuItem[] { undeployItem });
+                        break;
+                    default:
+                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                }
+            } else {
+                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+            }
+
+            menu.setItems(expandItem,
+                          collapseItem,
+                          new MenuItemSeparator(),
+                          deployItem,
+                          undeployItem,
+                          editItem,
+                          lockItem,
+                          unlockItem,
+                          removeItem);
+
+            treeGrid.setContextMenu(menu);
         });
 
         vl.addMember(treeGrid);
         return vl;
     }
 
-    private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
-        deployItem.setEnabled(false);
-        undeployItem.setEnabled(false);
+    private void disableItems(MenuItem[] items) {
+        for (MenuItem item : items) {
+            item.setEnabled(false);
+        }
+    }
+
+    private void enableItems(MenuItem[] items) {
+        for (MenuItem item : items) {
+            item.setEnabled(true);
+        }
     }
 
     /*

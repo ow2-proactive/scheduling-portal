@@ -557,7 +557,7 @@ public class RMPage implements LogListener {
         this.errorButton.show();
     }
 
-    private void showNodeSourceWindow() {
+    void showNodeSourceWindow() {
         if (RMPage.this.nsWindow != null)
             RMPage.this.nsWindow.destroy();
         RMPage.this.nsWindow = new NSCreationWindow(controller);
