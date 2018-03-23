@@ -57,6 +57,10 @@ public class RMConfig extends Config {
 
     private static final String d_CLIENT_REFRESH_TIME = "3000";
 
+    public static final String CLIENT_BURST_REFRESH_TIME = "rm.client.burst.refresh.time";
+
+    private static final String d_CLIENT_BURST_REFRESH_TIME = "3";
+
     /** release version string */
     public static final String VERSION = "rm.version";
 
@@ -129,6 +133,7 @@ public class RMConfig extends Config {
         properties.put(REST_URL, d_REST_URL);
         properties.put(RM_URL, d_RM_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
+        properties.put(CLIENT_BURST_REFRESH_TIME, d_CLIENT_BURST_REFRESH_TIME);
         properties.put(VERSION, d_VERSION);
         properties.put(RM_VERSION, d_RM_VERSION);
         properties.put(REST_VERSION, d_REST_VERSION);
@@ -186,6 +191,10 @@ public class RMConfig extends Config {
      */
     public int getClientRefreshTime() {
         return Integer.parseInt(properties.get(CLIENT_REFRESH_TIME));
+    }
+
+    public int getClientBurstRefreshTime() {
+        return Integer.parseInt(properties.get(CLIENT_BURST_REFRESH_TIME));
     }
 
     /**
