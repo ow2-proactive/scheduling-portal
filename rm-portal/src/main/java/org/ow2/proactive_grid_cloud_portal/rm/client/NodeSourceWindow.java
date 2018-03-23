@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,7 +35,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
@@ -48,40 +46,30 @@ import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.form.fields.PasswordItem;
-import com.smartgwt.client.widgets.form.fields.PickerIcon;
-import com.smartgwt.client.widgets.form.fields.PickerIcon.Picker;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.fields.UploadItem;
+import com.smartgwt.client.widgets.form.fields.*;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
 
 
-/**
- * NodeSource creation dialog.
- * <p>
- * Dynamically downloads infrastructure and policy info when created.
- *
- * @author mschnoor
- */
-public class NSCreationWindow {
+public abstract class NodeSourceWindow {
 
-    private RMController controller;
+    protected RMController controller;
 
-    private Window window;
+    protected SelectItem infraSelect, policySelect;
 
-    private SelectItem infraSelect, policySelect;
+    protected Window window;
+
+    private String windowTitle;
+
+    private String waitingMessage;
 
     private String oldInfra = null, oldPolicy = null;
 
-    NSCreationWindow(RMController controller) {
+    protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
+        this.windowTitle = windowTitle;
+        this.waitingMessage = waitingMessage;
         this.build();
     }
 
@@ -93,13 +81,96 @@ public class NSCreationWindow {
         this.window.destroy();
     }
 
+    protected abstract void populateFormValues(Label infraLabel, DynamicForm infraForm, TextItem nameItem,
+            CheckboxItem nodesRecoverableItem);
+
+    protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
+        List<PluginDescriptor.Field> configurableFields = inf.getConfigurableFields();
+        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
+        for (PluginDescriptor.Field f : configurableFields) {
+            FormItem pol = null;
+            if (f.isPassword()) {
+                pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
+            } else if (f.isFile() || f.isCredential()) {
+                pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
+                if (f.isCredential()) {
+                    PickerIcon cred = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
+                                                                                          .getSafeUri()
+                                                                                          .asString()),
+                                                     formItemIconClickEvent -> {
+                                                         CredentialsWindow win = new CredentialsWindow();
+                                                         win.show();
+                                                     });
+                    cred.setPrompt("Create a Credential file");
+                    cred.setWidth(16);
+                    cred.setHeight(16);
+                    cred.setAttribute("hspace", 6);
+                    pol.setIcons(cred);
+                }
+            } else {
+                pol = new TextItem(inf.getPluginName() + f.getName(), f.getName());
+            }
+            pol.setValue(f.getValue());
+            pol.setWidth(250);
+            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
+            forms.add(pol);
+        }
+        return forms;
+    }
+
+    protected void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {
+        if (infraSelect.getValueAsString() == null) {
+            return;
+        }
+
+        String policy = policySelect.getValueAsString();
+        if (oldPolicy != null) {
+            for (FormItem f : allForms.get(oldPolicy)) {
+                f.hide();
+            }
+        }
+        for (FormItem f : allForms.get(policy)) {
+            f.show();
+        }
+
+        if (oldPolicy == null) {
+            oldPolicy = policy;
+            resetFormForInfrastructureChange(allForms);
+        } else {
+            oldPolicy = policy;
+        }
+    }
+
+    protected void resetFormForInfrastructureChange(HashMap<String, List<FormItem>> allForms) {
+        if (policySelect.getValueAsString() == null) {
+            return;
+        }
+
+        String nsName = infraSelect.getValueAsString();
+        if (oldInfra != null) {
+            for (FormItem f : allForms.get(oldInfra)) {
+                f.hide();
+            }
+        }
+        for (FormItem f : allForms.get(nsName)) {
+            f.show();
+        }
+
+        if (oldInfra == null) {
+            oldInfra = nsName;
+            resetFormForPolicyChange(allForms);
+        } else {
+            oldInfra = nsName;
+        }
+    }
+
     private void build() {
         final VLayout layout = new VLayout();
         layout.setMargin(5);
 
         final VStack infraLayout = new VStack();
         infraLayout.setHeight(26);
-        final Label infraLabel = new Label("Updating available Infrastructures and Policies");
+        final Label infraLabel = new Label(this.waitingMessage);
         infraLabel.setIcon("loading.gif");
         infraLabel.setHeight(26);
         infraLabel.setAlign(Alignment.CENTER);
@@ -117,80 +188,14 @@ public class NSCreationWindow {
                                       " will be acquired, and a Policy, that dictates when resources can be acquired.");
         label.setHeight(40);
 
-        final HashMap<String, List<FormItem>> allForms = new HashMap<String, List<FormItem>>();
-
-        controller.fetchSupportedInfrastructuresAndPolicies(new Runnable() {
-            public void run() {
-
-                infraSelect = new SelectItem("infra", "Infrastructure");
-                infraSelect.setRequired(true);
-                policySelect = new SelectItem("policy", "Policy");
-                policySelect.setRequired(true);
-
-                infraSelect.setWidth(300);
-                policySelect.setWidth(300);
-
-                HiddenItem name = new HiddenItem("nsName");
-                HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
-                HiddenItem deploy = new HiddenItem("deploy");
-                HiddenItem callback = new HiddenItem("nsCallback");
-                HiddenItem session = new HiddenItem("sessionId");
-
-                ArrayList<FormItem> formParameters = new ArrayList<>();
-                formParameters.add(name);
-                formParameters.add(nodesRecoverable);
-                formParameters.add(deploy);
-                formParameters.add(callback);
-                formParameters.add(session);
-                formParameters.add(infraSelect);
-
-                LinkedHashMap<String, String> values = new LinkedHashMap<>();
-                for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
-                    String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
-                    values.put(inf.getPluginName(), shortName);
-
-                    ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
-                    formParameters.addAll(infraFormItems);
-                    allForms.put(inf.getPluginName(), infraFormItems);
-                }
-                infraSelect.setValueMap(values);
-
-                formParameters.add(new SpacerItem());
-                values.clear();
-                formParameters.add(policySelect);
-                for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                    String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
-                    values.put(inf.getPluginName(), shortName);
-
-                    ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
-                    formParameters.addAll(policyFormItems);
-                    allForms.put(inf.getPluginName(), policyFormItems);
-                }
-                policySelect.setValueMap(values);
-
-                infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
-
-                policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
-
-                infraForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
-                infraLabel.hide();
-                infraForm.show();
-
-                for (List<FormItem> li : allForms.values()) {
-                    for (FormItem it : li) {
-                        it.hide();
-                    }
-                }
-            }
-        }, () -> window.hide());
-
         final TextItem nameItem = new TextItem("nsName", "Name");
         DynamicForm nameForm = new DynamicForm();
 
         CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
-        nodesRecoverableItem.setValue(true);
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
         nameForm.setFields(nameItem, nodesRecoverableItem);
+
+        this.populateFormValues(infraLabel, infraForm, nameItem, nodesRecoverableItem);
 
         HLayout buttons = new HLayout();
 
@@ -251,7 +256,7 @@ public class NSCreationWindow {
         winHeight = Math.min(1000, winHeight);
 
         this.window = new Window();
-        this.window.setTitle("Create Node Source");
+        this.window.setTitle(this.windowTitle);
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
@@ -261,84 +266,6 @@ public class NSCreationWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
-    }
-
-    private ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
-        List<Field> configurableFields = inf.getConfigurableFields();
-        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
-        for (Field f : configurableFields) {
-            FormItem pol = null;
-            if (f.isPassword()) {
-                pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
-            } else if (f.isFile() || f.isCredential()) {
-                pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
-                if (f.isCredential()) {
-                    PickerIcon cred = new PickerIcon(new Picker(Images.instance.key_16().getSafeUri().asString()),
-                                                     formItemIconClickEvent -> {
-                                                         CredentialsWindow win = new CredentialsWindow();
-                                                         win.show();
-                                                     });
-                    cred.setPrompt("Create a Credential file");
-                    cred.setWidth(16);
-                    cred.setHeight(16);
-                    cred.setAttribute("hspace", 6);
-                    pol.setIcons(cred);
-                }
-            } else {
-                pol = new TextItem(inf.getPluginName() + f.getName(), f.getName());
-            }
-            pol.setValue(f.getValue());
-            pol.setWidth(250);
-            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
-            forms.add(pol);
-        }
-        return forms;
-    }
-
-    private void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {
-        if (infraSelect.getValueAsString() == null) {
-            return;
-        }
-
-        String policy = policySelect.getValueAsString();
-        if (oldPolicy != null) {
-            for (FormItem f : allForms.get(oldPolicy)) {
-                f.hide();
-            }
-        }
-        for (FormItem f : allForms.get(policy)) {
-            f.show();
-        }
-
-        if (oldPolicy == null) {
-            oldPolicy = policy;
-            resetFormForInfrastructureChange(allForms);
-        } else {
-            oldPolicy = policy;
-        }
-    }
-
-    private void resetFormForInfrastructureChange(HashMap<String, List<FormItem>> allForms) {
-        if (policySelect.getValueAsString() == null) {
-            return;
-        }
-
-        String nsName = infraSelect.getValueAsString();
-        if (oldInfra != null) {
-            for (FormItem f : allForms.get(oldInfra)) {
-                f.hide();
-            }
-        }
-        for (FormItem f : allForms.get(nsName)) {
-            f.show();
-        }
-
-        if (oldInfra == null) {
-            oldInfra = nsName;
-            resetFormForPolicyChange(allForms);
-        } else {
-            oldInfra = nsName;
-        }
     }
 
     private void prepareCreateAndDeployFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm,

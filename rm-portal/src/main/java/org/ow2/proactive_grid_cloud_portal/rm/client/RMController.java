@@ -30,8 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -69,8 +67,6 @@ import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -1038,7 +1034,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void editNodeSource() {
-        this.rmPage.showNodeSourceWindow();
+        this.rmPage.showNodeSourceEditWindow();
     }
 
     /**

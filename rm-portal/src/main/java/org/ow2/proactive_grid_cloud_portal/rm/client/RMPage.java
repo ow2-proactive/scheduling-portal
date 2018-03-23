@@ -108,8 +108,8 @@ public class RMPage implements LogListener {
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
 
-    /** create node sources */
-    private NSCreationWindow nsWindow = null;
+    /** manage node sources */
+    private NodeSourceWindow nsWindow = null;
 
     /** node launcher window */
     private AddNodeWindow addNodeWindow = null;
@@ -420,7 +420,7 @@ public class RMPage implements LogListener {
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
         nsButton.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
-        nsButton.addClickHandler(e -> showNodeSourceWindow());
+        nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 
         errorButton = new ToolStripButton("<strong>Error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
@@ -531,8 +531,7 @@ public class RMPage implements LogListener {
         this.settingsWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
-        if (this.nsWindow != null)
-            this.nsWindow.destroy();
+        this.destroyNodeSourceWindow();
     }
 
     @Override
@@ -557,11 +556,22 @@ public class RMPage implements LogListener {
         this.errorButton.show();
     }
 
-    void showNodeSourceWindow() {
-        if (RMPage.this.nsWindow != null)
-            RMPage.this.nsWindow.destroy();
-        RMPage.this.nsWindow = new NSCreationWindow(controller);
+    public void showNodeSourceCreationWindow() {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new NodeSourceCreationWindow(controller);
         RMPage.this.nsWindow.show();
+    }
+
+    public void showNodeSourceEditWindow() {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new NodeSourceEditWindow(controller);
+        RMPage.this.nsWindow.show();
+    }
+
+    private void destroyNodeSourceWindow() {
+        if (RMPage.this.nsWindow != null) {
+            RMPage.this.nsWindow.destroy();
+        }
     }
 
     private void showLogWindow() {
