@@ -311,7 +311,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             }
         };
-        this.updater.scheduleRepeating(RMConfig.get().getClientRefreshTime());
+        this.updater.schedule(RMConfig.get().getClientRefreshTime());
 
         this.statsUpdater = new Timer() {
             @Override
@@ -492,10 +492,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     return;
                 }
 
+                long counterBefore = model.getMaxCounter();
                 updateModelBasedOnResponse(result);
-
+                long counterAfter = model.getMaxCounter();
+                if (counterBefore != counterAfter) {
+                    updater.schedule(RMConfig.get().getClientBurstRefreshTime());
+                } else {
+                    updater.schedule(RMConfig.get().getClientRefreshTime());
+                }
                 LogModel.getInstance()
-                        .logMessage("Processed RM/monitoring in " + (System.currentTimeMillis() - t) + "ms");
+                        .logMessage("[ " + (System.currentTimeMillis() % 1000000) + " ]Processed RM/monitoring in " +
+                                    (System.currentTimeMillis() - t) + "ms " + counterBefore + " -> " + counterAfter);
             }
 
             public void onFailure(Throwable caught) {
