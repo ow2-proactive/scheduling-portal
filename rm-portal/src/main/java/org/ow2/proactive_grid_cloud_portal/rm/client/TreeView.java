@@ -211,8 +211,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
             MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-            String nodeSourceName = currentSelectedNodeSource == null ? "titi"
-                                                                      : currentSelectedNodeSource.getSourceName();
+            String nodeSourceName = currentSelectedNodeSource == null ? "" : currentSelectedNodeSource.getSourceName();
             editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
 
             if (currentSelectedNode != null) {

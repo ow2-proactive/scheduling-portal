@@ -31,32 +31,32 @@ public class NodeSourceConfiguration {
 
     private boolean nodesRecoverable;
 
-    /** An array of two plugin descriptors: the first is the descriptor of the
-     * infrastructure and the second is the descriptor of the policy */
-    private PluginDescriptor[] infrastructureAndPolicyDescriptors;
+    private PluginDescriptor infrastructurePluginDescriptor;
+
+    private PluginDescriptor policyPluginDescriptor;
 
     public NodeSourceConfiguration(String nodeSourceName, boolean nodesRecoverable,
             PluginDescriptor infrastructurePluginDescriptor, PluginDescriptor policyPluginDescriptor) {
         this.nodeSourceName = nodeSourceName;
         this.nodesRecoverable = nodesRecoverable;
-        this.infrastructureAndPolicyDescriptors = new PluginDescriptor[] { infrastructurePluginDescriptor,
-                                                                           policyPluginDescriptor };
+        this.infrastructurePluginDescriptor = infrastructurePluginDescriptor;
+        this.policyPluginDescriptor = policyPluginDescriptor;
     }
 
     public String getNodeSourceName() {
         return this.nodeSourceName;
     }
 
-    public boolean isNodesRecoverable() {
+    public boolean getNodesRecoverable() {
         return this.nodesRecoverable;
     }
 
-    public PluginDescriptor getInfrastructurePluginDescriptors() {
-        return this.infrastructureAndPolicyDescriptors[0];
+    public PluginDescriptor getInfrastructurePluginDescriptor() {
+        return this.infrastructurePluginDescriptor;
     }
 
-    public PluginDescriptor getPolicyPluginDescriptors() {
-        return this.infrastructureAndPolicyDescriptors[1];
+    public PluginDescriptor getPolicyPluginDescriptor() {
+        return this.policyPluginDescriptor;
     }
 
 }

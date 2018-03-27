@@ -50,8 +50,13 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             CheckboxItem nodesRecoverableItem) {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
-            nameItem.setDefaultValue(this.nodeSourceName);
+            nameItem.setDefaultValue(controller.getModel().getEditedNodeSourceConfiguration().getNodeSourceName());
+            // the only thing we cannot edit is the node source name
             nameItem.setCanEdit(false);
+
+            nodesRecoverableItem.setValue(controller.getModel()
+                                                    .getEditedNodeSourceConfiguration()
+                                                    .getNodesRecoverable());
 
             HashMap<String, List<FormItem>> allForms = new HashMap<>();
 
@@ -99,6 +104,38 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
                 formParameters.addAll(policyFormItems);
                 allForms.put(inf.getPluginName(), policyFormItems);
             }
+
+            /*
+             * LinkedHashMap<String, String> values = new LinkedHashMap<>();
+             * PluginDescriptor infrastructure = controller.getModel()
+             * .getEditedNodeSourceConfiguration()
+             * .getInfrastructurePluginDescriptor();
+             * String infrastructureShortName = infrastructure.getPluginName()
+             * .substring(infrastructure.getPluginName().lastIndexOf('.') +
+             * 1);
+             * values.put(infrastructure.getPluginName(), infrastructureShortName);
+             * 
+             * ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructure);
+             * formParameters.addAll(infraFormItems);
+             * allForms.put(infrastructure.getPluginName(), infraFormItems);
+             * 
+             * infraSelect.setValueMap(values);
+             * 
+             * formParameters.add(new SpacerItem());
+             * values.clear();
+             * formParameters.add(policySelect);
+             * PluginDescriptor policy = controller.getModel()
+             * .getEditedNodeSourceConfiguration()
+             * .getPolicyPluginDescriptor();
+             * String shortName =
+             * policy.getPluginName().substring(policy.getPluginName().lastIndexOf('.') + 1);
+             * values.put(policy.getPluginName(), shortName);
+             * 
+             * ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policy);
+             * formParameters.addAll(policyFormItems);
+             * allForms.put(policy.getPluginName(), policyFormItems);
+             */
+
             policySelect.setValueMap(values);
 
             infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));

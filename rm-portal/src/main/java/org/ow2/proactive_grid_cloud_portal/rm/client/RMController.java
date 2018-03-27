@@ -885,9 +885,37 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
 
-        // TODO
+        boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
-        return new NodeSourceConfiguration(nodeSourceName, false, null, null);
+        /*
+         * PluginDescriptor infrastructurePluginDescriptor = null;
+         * try {
+         * JSONObject infrastructurePluginDescriptorJson =
+         * jsonObject.get("infrastructurePluginDescriptor").isObject();
+         * String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
+         * .isString()
+         * .stringValue();
+         * infrastructurePluginDescriptor =
+         * parsePluginDescriptor(infrastructurePluginDescriptorJson,
+         * infrastructurePluginName);
+         * } catch (RuntimeException e) {
+         * 
+         * }
+         * 
+         * PluginDescriptor policyPluginDescriptor = null;
+         * try {
+         * JSONObject policyPluginDescriptorJson =
+         * jsonObject.get("policyPluginDescriptor").isObject();
+         * String policyPluginName =
+         * policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+         * policyPluginDescriptor = parsePluginDescriptor(policyPluginDescriptorJson,
+         * policyPluginName);
+         * } catch (RuntimeException e) {
+         * 
+         * }
+         */
+
+        return new NodeSourceConfiguration(nodeSourceName, nodesRecoverable, null, null);
     }
 
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
@@ -898,37 +926,42 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject p = arr.get(i).isObject();
 
             String pluginName = p.get("pluginName").isString().stringValue();
-            String pluginDescription = p.get("pluginDescription").isString().stringValue();
-            PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
-
-            JSONArray fields = p.get("configurableFields").isArray();
-            for (int j = 0; j < fields.size(); j++) {
-                JSONObject field = fields.get(j).isObject();
-
-                String name = field.get("name").isString().stringValue();
-                String value = field.get("value").isString().stringValue();
-
-                JSONObject meta = field.get("meta").isObject();
-                String metaType = meta.get("type").isString().stringValue();
-                String descr = meta.get("description").isString().stringValue();
-
-                boolean pass = false, cred = false, file = false;
-                if (metaType.equalsIgnoreCase("password"))
-                    pass = true;
-                else if (metaType.equalsIgnoreCase("fileBrowser"))
-                    file = true;
-                else if (metaType.equalsIgnoreCase("credential"))
-                    cred = true;
-
-                Field f = new PluginDescriptor.Field(name, value, descr, pass, cred, file);
-
-                desc.getConfigurableFields().add(f);
-            }
+            PluginDescriptor desc = getPluginDescriptor(p, pluginName);
 
             plugins.put(pluginName, desc);
         }
 
         return plugins;
+    }
+
+    private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
+        String pluginDescription = p.get("pluginDescription").isString().stringValue();
+        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
+
+        JSONArray fields = p.get("configurableFields").isArray();
+        for (int j = 0; j < fields.size(); j++) {
+            JSONObject field = fields.get(j).isObject();
+
+            String name = field.get("name").isString().stringValue();
+            String value = field.get("value").isString().stringValue();
+
+            JSONObject meta = field.get("meta").isObject();
+            String metaType = meta.get("type").isString().stringValue();
+            String descr = meta.get("description").isString().stringValue();
+
+            boolean pass = false, cred = false, file = false;
+            if (metaType.equalsIgnoreCase("password"))
+                pass = true;
+            else if (metaType.equalsIgnoreCase("fileBrowser"))
+                file = true;
+            else if (metaType.equalsIgnoreCase("credential"))
+                cred = true;
+
+            Field f = new Field(name, value, descr, pass, cred, file);
+
+            desc.getConfigurableFields().add(f);
+        }
+        return desc;
     }
 
     /**
