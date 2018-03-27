@@ -258,6 +258,22 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String editNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.editNodeSource(sessionId,
+                                                                                           nodeSourceName,
+                                                                                           infrastructureType,
+                                                                                           infrastructureParameters,
+                                                                                           infrastructureFileParameters,
+                                                                                           policyType,
+                                                                                           policyParameters,
+                                                                                           policyFileParameters,
+                                                                                           nodesRecoverable));
+    }
+
+    @Override
     public String deployNodeSource(String sessionId, String nodeSourceName)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.deployNodeSource(sessionId,

@@ -85,6 +85,7 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
+        boolean nodeSourceEdited = false;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -111,6 +112,8 @@ public class NSCreationServlet extends HttpServlet {
                         if (fi.getString().equals(Boolean.TRUE.toString())) {
                             deployNodeSource = true;
                         }
+                    } else if (fieldName.equals("nodeSourceEdited")) {
+                        nodeSourceEdited = Boolean.valueOf(fi.getString());
                     } else if (fieldName.equals("infra")) {
                         infra = fi.getString();
                         readingInfraParams = true;
@@ -150,15 +153,28 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                       nsName,
-                                                                                       infra,
-                                                                                       toArray(infraParams),
-                                                                                       toArray(infraFileParams),
-                                                                                       policy,
-                                                                                       toArray(policyParams),
-                                                                                       toArray(policyFileParams),
-                                                                                       nodesRecoverable);
+            String jsonResult;
+            if (nodeSourceEdited) {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
+                                                                                  nsName,
+                                                                                  infra,
+                                                                                  toArray(infraParams),
+                                                                                  toArray(infraFileParams),
+                                                                                  policy,
+                                                                                  toArray(policyParams),
+                                                                                  toArray(policyFileParams),
+                                                                                  nodesRecoverable);
+            } else {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                    nsName,
+                                                                                    infra,
+                                                                                    toArray(infraParams),
+                                                                                    toArray(infraFileParams),
+                                                                                    policy,
+                                                                                    toArray(policyParams),
+                                                                                    toArray(policyFileParams),
+                                                                                    nodesRecoverable);
+            }
 
             if (deployNodeSource) {
                 jsonResult = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);

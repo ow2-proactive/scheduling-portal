@@ -52,6 +52,11 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
                                                                  () -> window.hide());
     }
 
+    @Override
+    protected boolean isNodeSourceEdited() {
+        return true;
+    }
+
     private void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
             TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
@@ -73,7 +78,7 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             String infrastructureShortName = getPluginShortName(infrastructurePluginDescriptor);
             values.put(infrastructurePluginDescriptor.getPluginName(), infrastructureShortName);
 
-            ArrayList<FormItem> infraFormItems = getPrefilledOnlyTextFormItems(infrastructurePluginDescriptor);
+            ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
             formParameters.addAll(infraFormItems);
             allForms.put(infrastructurePluginDescriptor.getPluginName(), infraFormItems);
             addPluginDescriptorsToValues(values,
@@ -92,7 +97,7 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             String policyShortName = getPluginShortName(policyPluginDescriptor);
             values.put(policyPluginDescriptor.getPluginName(), policyShortName);
 
-            ArrayList<FormItem> policyFormItems = getPrefilledOnlyTextFormItems(policyPluginDescriptor);
+            ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policyPluginDescriptor);
             formParameters.addAll(policyFormItems);
             allForms.put(policyPluginDescriptor.getPluginName(), policyFormItems);
             addPluginDescriptorsToValues(values, policyPluginDescriptor, controller.getModel().getSupportedPolicies());

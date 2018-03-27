@@ -46,7 +46,14 @@ import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.HiddenItem;
+import com.smartgwt.client.widgets.form.fields.PasswordItem;
+import com.smartgwt.client.widgets.form.fields.PickerIcon;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
@@ -83,6 +90,8 @@ public abstract class NodeSourceWindow {
     protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
 
+    protected abstract boolean isNodeSourceEdited();
+
     protected String getPluginShortName(PluginDescriptor infrastructurePluginDescriptor) {
         return infrastructurePluginDescriptor.getPluginName().substring(
                                                                         infrastructurePluginDescriptor.getPluginName()
@@ -102,6 +111,7 @@ public abstract class NodeSourceWindow {
         HiddenItem name = new HiddenItem("nsName");
         HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
         HiddenItem deploy = new HiddenItem("deploy");
+        HiddenItem nodeSourceEdited = new HiddenItem("nodeSourceEdited");
         HiddenItem callback = new HiddenItem("nsCallback");
         HiddenItem session = new HiddenItem("sessionId");
 
@@ -109,6 +119,7 @@ public abstract class NodeSourceWindow {
         formParameters.add(name);
         formParameters.add(nodesRecoverable);
         formParameters.add(deploy);
+        formParameters.add(nodeSourceEdited);
         formParameters.add(callback);
         formParameters.add(session);
         formParameters.add(infraSelect);
@@ -149,6 +160,7 @@ public abstract class NodeSourceWindow {
         return forms;
     }
 
+    // TODO To use when the server is ready to deal with password/credential/file fields that are not treated like file parameters
     protected ArrayList<FormItem> getPrefilledOnlyTextFormItems(PluginDescriptor pluginDescriptor) {
         List<PluginDescriptor.Field> configurableFields = pluginDescriptor.getConfigurableFields();
         ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
@@ -270,14 +282,16 @@ public abstract class NodeSourceWindow {
                                                                                                           label,
                                                                                                           nameItem,
                                                                                                           nodesRecoverableItem,
-                                                                                                          buttonsList));
+                                                                                                          buttonsList,
+                                                                                                          isNodeSourceEdited()));
         createOnlyNodeSourceButton.addClickHandler(clickEvent -> prepareCreateOnlyFormAndSubmit(layout,
                                                                                                 infraLabel,
                                                                                                 infraForm,
                                                                                                 label,
                                                                                                 nameItem,
                                                                                                 nodesRecoverableItem,
-                                                                                                buttonsList));
+                                                                                                buttonsList,
+                                                                                                isNodeSourceEdited()));
         cancelButton.addClickHandler(clickEvent -> window.hide());
         buttons.setMembers(createAndDeployNodeSourceButton, createOnlyNodeSourceButton, cancelButton);
 
@@ -313,7 +327,8 @@ public abstract class NodeSourceWindow {
     }
 
     private void prepareCreateAndDeployFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm,
-            Label label, TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList) {
+            Label label, TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList,
+            boolean nodeSourceEdited) {
         infraForm.setValue("deploy", Boolean.TRUE.toString());
         prepareCreateOnlyFormAndSubmit(layout,
                                        infraLabel,
@@ -321,16 +336,18 @@ public abstract class NodeSourceWindow {
                                        label,
                                        nameItem,
                                        nodesRecoverableItem,
-                                       buttonsList);
+                                       buttonsList,
+                                       nodeSourceEdited);
     }
 
     private void prepareCreateOnlyFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm, Label label,
-            TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList) {
+            TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList, boolean nodeSourceEdited) {
         infraForm.setValue("infra", infraSelect.getValueAsString());
         infraForm.setValue("nsName", nameItem.getValueAsString());
         infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
         infraForm.setValue("policy", policySelect.getValueAsString());
         infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
+        infraForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
         infraForm.setCanSubmit(true);
 
         /*

@@ -32,7 +32,10 @@ import java.util.List;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.SpacerItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 
 
 /**
@@ -101,6 +104,11 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
                 }
             }
         }, () -> window.hide());
+    }
+
+    @Override
+    protected boolean isNodeSourceEdited() {
+        return false;
     }
 
 }
