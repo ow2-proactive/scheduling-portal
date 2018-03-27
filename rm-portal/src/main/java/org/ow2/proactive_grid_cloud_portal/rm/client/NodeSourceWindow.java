@@ -90,6 +90,31 @@ public abstract class NodeSourceWindow {
                                                                         1);
     }
 
+    protected ArrayList<FormItem> prepareFormParameters() {
+        infraSelect = new SelectItem("infra", "Infrastructure");
+        infraSelect.setRequired(true);
+        policySelect = new SelectItem("policy", "Policy");
+        policySelect.setRequired(true);
+
+        infraSelect.setWidth(300);
+        policySelect.setWidth(300);
+
+        HiddenItem name = new HiddenItem("nsName");
+        HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
+        HiddenItem deploy = new HiddenItem("deploy");
+        HiddenItem callback = new HiddenItem("nsCallback");
+        HiddenItem session = new HiddenItem("sessionId");
+
+        ArrayList<FormItem> formParameters = new ArrayList<>();
+        formParameters.add(name);
+        formParameters.add(nodesRecoverable);
+        formParameters.add(deploy);
+        formParameters.add(callback);
+        formParameters.add(session);
+        formParameters.add(infraSelect);
+        return formParameters;
+    }
+
     protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
         List<PluginDescriptor.Field> configurableFields = inf.getConfigurableFields();
         ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());

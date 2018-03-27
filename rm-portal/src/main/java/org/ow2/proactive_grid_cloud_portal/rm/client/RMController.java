@@ -887,33 +887,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
-        PluginDescriptor infrastructurePluginDescriptor = null;
-        try {
-            JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
-            String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
-                                                                                .isString()
-                                                                                .stringValue();
-            infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
-                                                                 infrastructurePluginName);
-        } catch (RuntimeException e) {
+        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
+        PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
+                                                                              infrastructurePluginName);
 
-        }
+        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
+        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+        PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
 
-        /*
-         * PluginDescriptor policyPluginDescriptor = null;
-         * try {
-         * JSONObject policyPluginDescriptorJson =
-         * jsonObject.get("policyPluginDescriptor").isObject();
-         * String policyPluginName =
-         * policyPluginDescriptorJson.get("pluginName").isString().stringValue();
-         * policyPluginDescriptor = parsePluginDescriptor(policyPluginDescriptorJson,
-         * policyPluginName);
-         * } catch (RuntimeException e) {
-         * 
-         * }
-         */
-
-        return new NodeSourceConfiguration(nodeSourceName, nodesRecoverable, infrastructurePluginDescriptor, null);
+        return new NodeSourceConfiguration(nodeSourceName,
+                                           nodesRecoverable,
+                                           infrastructurePluginDescriptor,
+                                           policyPluginDescriptor);
     }
 
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {

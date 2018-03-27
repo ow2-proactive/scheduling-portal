@@ -57,29 +57,10 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
             HashMap<String, List<FormItem>> allForms = new HashMap<>();
 
-            infraSelect = new SelectItem("infra", "Infrastructure");
-            infraSelect.setRequired(true);
-            policySelect = new SelectItem("policy", "Policy");
-            policySelect.setRequired(true);
-
-            infraSelect.setWidth(300);
-            policySelect.setWidth(300);
-
-            HiddenItem name = new HiddenItem("nsName");
-            HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
-            HiddenItem deploy = new HiddenItem("deploy");
-            HiddenItem callback = new HiddenItem("nsCallback");
-            HiddenItem session = new HiddenItem("sessionId");
-
-            ArrayList<FormItem> formParameters = new ArrayList<>();
-            formParameters.add(name);
-            formParameters.add(nodesRecoverable);
-            formParameters.add(deploy);
-            formParameters.add(callback);
-            formParameters.add(session);
-            formParameters.add(infraSelect);
+            ArrayList<FormItem> formParameters = prepareFormParameters();
 
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
+
             for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
                 String shortName = getPluginShortName(inf);
                 values.put(inf.getPluginName(), shortName);
@@ -91,8 +72,11 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
             infraSelect.setValueMap(values);
 
             formParameters.add(new SpacerItem());
+
             values.clear();
+
             formParameters.add(policySelect);
+
             for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
                 String shortName = getPluginShortName(inf);
                 values.put(inf.getPluginName(), shortName);

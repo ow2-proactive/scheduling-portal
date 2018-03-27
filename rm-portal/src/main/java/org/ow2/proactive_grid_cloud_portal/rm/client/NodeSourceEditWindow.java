@@ -57,101 +57,40 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
 
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
-            HashMap<String, List<FormItem>> allForms = new HashMap<>();
+            ArrayList<FormItem> formParameters = prepareFormParameters();
 
-            infraSelect = new SelectItem("infra", "Infrastructure");
-            infraSelect.setRequired(true);
-            policySelect = new SelectItem("policy", "Policy");
-            policySelect.setRequired(true);
-
-            infraSelect.setWidth(300);
-            policySelect.setWidth(300);
-
-            HiddenItem name = new HiddenItem("nsName");
-            HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
-            HiddenItem deploy = new HiddenItem("deploy");
-            HiddenItem callback = new HiddenItem("nsCallback");
-            HiddenItem session = new HiddenItem("sessionId");
-
-            ArrayList<FormItem> formParameters = new ArrayList<>();
-            formParameters.add(name);
-            formParameters.add(nodesRecoverable);
-            formParameters.add(deploy);
-            formParameters.add(callback);
-            formParameters.add(session);
-            formParameters.add(infraSelect);
+            LinkedHashMap<String, String> values = new LinkedHashMap<>();
 
             PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            LinkedHashMap<String, String> values = new LinkedHashMap<>();
             String infrastructureShortName = getPluginShortName(infrastructurePluginDescriptor);
             values.put(infrastructurePluginDescriptor.getPluginName(), infrastructureShortName);
 
             ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
             formParameters.addAll(infraFormItems);
-            allForms.put(infrastructurePluginDescriptor.getPluginName(), infraFormItems);
-
             infraSelect.setValueMap(values);
 
             formParameters.add(new SpacerItem());
+
             values.clear();
+
             formParameters.add(policySelect);
-            for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                String shortName = getPluginShortName(inf);
-                values.put(inf.getPluginName(), shortName);
 
-                ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
-                formParameters.addAll(policyFormItems);
-                allForms.put(inf.getPluginName(), policyFormItems);
-            }
+            PluginDescriptor policyPluginDescriptor = nodeSourceConfiguration.getPolicyPluginDescriptor();
+            String shortName = getPluginShortName(policyPluginDescriptor);
+            values.put(policyPluginDescriptor.getPluginName(), shortName);
 
-            /*
-             * LinkedHashMap<String, String> values = new LinkedHashMap<>();
-             * PluginDescriptor infrastructure = controller.getModel()
-             * .getEditedNodeSourceConfiguration()
-             * .getInfrastructurePluginDescriptor();
-             * String infrastructureShortName = infrastructure.getPluginName()
-             * .substring(infrastructure.getPluginName().lastIndexOf('.') +
-             * 1);
-             * values.put(infrastructure.getPluginName(), infrastructureShortName);
-             * 
-             * ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructure);
-             * formParameters.addAll(infraFormItems);
-             * allForms.put(infrastructure.getPluginName(), infraFormItems);
-             * 
-             * infraSelect.setValueMap(values);
-             * 
-             * formParameters.add(new SpacerItem());
-             * values.clear();
-             * formParameters.add(policySelect);
-             * PluginDescriptor policy = controller.getModel()
-             * .getEditedNodeSourceConfiguration()
-             * .getPolicyPluginDescriptor();
-             * String shortName =
-             * policy.getPluginName().substring(policy.getPluginName().lastIndexOf('.') + 1);
-             * values.put(policy.getPluginName(), shortName);
-             * 
-             * ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policy);
-             * formParameters.addAll(policyFormItems);
-             * allForms.put(policy.getPluginName(), policyFormItems);
-             */
-
+            ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policyPluginDescriptor);
+            formParameters.addAll(policyFormItems);
             policySelect.setValueMap(values);
 
-            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
+            //infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
 
-            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
+            //policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
 
             windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
             windowLabel.hide();
             windowForm.show();
 
-            /*
-             * for (List<FormItem> li : allForms.values()) {
-             * for (FormItem it : li) {
-             * it.hide();
-             * }
-             * }
-             */
         }, () -> window.hide());
     }
 
