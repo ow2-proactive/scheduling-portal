@@ -25,10 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -48,6 +45,15 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
     @Override
     protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
+        this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(windowLabel,
+                                                                                                                windowForm,
+                                                                                                                nodeSourceNameItem,
+                                                                                                                nodesRecoverableItem),
+                                                                 () -> window.hide());
+    }
+
+    private void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
+            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
             NodeSourceConfiguration nodeSourceConfiguration = controller.getModel().getEditedNodeSourceConfiguration();
@@ -56,6 +62,8 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             nodeSourceNameItem.setCanEdit(false);
 
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
+
+            HashMap<String, List<FormItem>> allForms = new HashMap<>();
 
             ArrayList<FormItem> formParameters = prepareFormParameters();
 
@@ -67,7 +75,12 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
 
             ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
             formParameters.addAll(infraFormItems);
+            allForms.put(infrastructurePluginDescriptor.getPluginName(), infraFormItems);
+            addPluginDescriptorsToValues(values,
+                                         infrastructurePluginDescriptor,
+                                         controller.getModel().getSupportedInfrastructures());
             infraSelect.setValueMap(values);
+            infraSelect.setDefaultToFirstOption(true);
 
             formParameters.add(new SpacerItem());
 
@@ -76,22 +89,35 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             formParameters.add(policySelect);
 
             PluginDescriptor policyPluginDescriptor = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            String shortName = getPluginShortName(policyPluginDescriptor);
-            values.put(policyPluginDescriptor.getPluginName(), shortName);
+            String policyShortName = getPluginShortName(policyPluginDescriptor);
+            values.put(policyPluginDescriptor.getPluginName(), policyShortName);
 
             ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policyPluginDescriptor);
             formParameters.addAll(policyFormItems);
+            allForms.put(policyPluginDescriptor.getPluginName(), policyFormItems);
+            addPluginDescriptorsToValues(values, policyPluginDescriptor, controller.getModel().getSupportedPolicies());
             policySelect.setValueMap(values);
+            policySelect.setDefaultToFirstOption(true);
 
-            //infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
+            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
 
-            //policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
+            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
 
             windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
             windowLabel.hide();
             windowForm.show();
 
         }, () -> window.hide());
+    }
+
+    private void addPluginDescriptorsToValues(LinkedHashMap<String, String> values,
+            PluginDescriptor infrastructurePluginDescriptor, Map<String, PluginDescriptor> supportedInfrastructures) {
+        for (Map.Entry<String, PluginDescriptor> entry : supportedInfrastructures.entrySet()) {
+            PluginDescriptor pluginDescriptor = entry.getValue();
+            if (!pluginDescriptor.getPluginName().equals(infrastructurePluginDescriptor.getPluginName())) {
+                values.put(pluginDescriptor.getPluginName(), getPluginShortName(pluginDescriptor));
+            }
+        }
     }
 
 }

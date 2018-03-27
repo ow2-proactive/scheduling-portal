@@ -115,15 +115,15 @@ public abstract class NodeSourceWindow {
         return formParameters;
     }
 
-    protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
-        List<PluginDescriptor.Field> configurableFields = inf.getConfigurableFields();
+    protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor pluginDescriptor) {
+        List<PluginDescriptor.Field> configurableFields = pluginDescriptor.getConfigurableFields();
         ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
         for (PluginDescriptor.Field f : configurableFields) {
             FormItem pol = null;
             if (f.isPassword()) {
-                pol = new PasswordItem(inf.getPluginName() + f.getName(), f.getName());
+                pol = new PasswordItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
             } else if (f.isFile() || f.isCredential()) {
-                pol = new UploadItem(inf.getPluginName() + f.getName(), f.getName());
+                pol = new UploadItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
                 if (f.isCredential()) {
                     PickerIcon cred = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
                                                                                           .getSafeUri()
@@ -139,7 +139,7 @@ public abstract class NodeSourceWindow {
                     pol.setIcons(cred);
                 }
             } else {
-                pol = new TextItem(inf.getPluginName() + f.getName(), f.getName());
+                pol = new TextItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
             }
             pol.setValue(f.getValue());
             pol.setWidth(250);
