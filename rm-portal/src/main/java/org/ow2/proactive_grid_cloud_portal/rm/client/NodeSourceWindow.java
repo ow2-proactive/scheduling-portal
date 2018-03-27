@@ -80,8 +80,15 @@ public abstract class NodeSourceWindow {
         this.window.destroy();
     }
 
-    protected abstract void populateFormValues(Label infraLabel, DynamicForm infraForm, TextItem nameItem,
+    protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
+
+    protected String getPluginShortName(PluginDescriptor infrastructurePluginDescriptor) {
+        return infrastructurePluginDescriptor.getPluginName().substring(
+                                                                        infrastructurePluginDescriptor.getPluginName()
+                                                                                                      .lastIndexOf('.') +
+                                                                        1);
+    }
 
     protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor inf) {
         List<PluginDescriptor.Field> configurableFields = inf.getConfigurableFields();

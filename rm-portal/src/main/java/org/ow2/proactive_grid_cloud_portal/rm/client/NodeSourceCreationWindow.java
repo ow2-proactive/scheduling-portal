@@ -48,7 +48,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label infraLabel, DynamicForm infraForm, TextItem nameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
 
         nodesRecoverableItem.setValue(true);
@@ -81,7 +81,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
             for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
-                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
+                String shortName = getPluginShortName(inf);
                 values.put(inf.getPluginName(), shortName);
 
                 ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
@@ -94,7 +94,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
             values.clear();
             formParameters.add(policySelect);
             for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
+                String shortName = getPluginShortName(inf);
                 values.put(inf.getPluginName(), shortName);
 
                 ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
@@ -107,9 +107,9 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
             policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
 
-            infraForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
-            infraLabel.hide();
-            infraForm.show();
+            windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
+            windowLabel.hide();
+            windowForm.show();
 
             for (List<FormItem> li : allForms.values()) {
                 for (FormItem it : li) {

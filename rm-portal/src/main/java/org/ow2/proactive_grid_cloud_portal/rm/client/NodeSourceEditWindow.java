@@ -46,17 +46,16 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label infraLabel, DynamicForm infraForm, TextItem nameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
-            nameItem.setDefaultValue(controller.getModel().getEditedNodeSourceConfiguration().getNodeSourceName());
-            // the only thing we cannot edit is the node source name
-            nameItem.setCanEdit(false);
+            NodeSourceConfiguration nodeSourceConfiguration = controller.getModel().getEditedNodeSourceConfiguration();
 
-            nodesRecoverableItem.setValue(controller.getModel()
-                                                    .getEditedNodeSourceConfiguration()
-                                                    .getNodesRecoverable());
+            nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            nodeSourceNameItem.setCanEdit(false);
+
+            nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
             HashMap<String, List<FormItem>> allForms = new HashMap<>();
 
@@ -82,22 +81,22 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             formParameters.add(session);
             formParameters.add(infraSelect);
 
+            PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
-            for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
-                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
-                values.put(inf.getPluginName(), shortName);
+            String infrastructureShortName = getPluginShortName(infrastructurePluginDescriptor);
+            values.put(infrastructurePluginDescriptor.getPluginName(), infrastructureShortName);
 
-                ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
-                formParameters.addAll(infraFormItems);
-                allForms.put(inf.getPluginName(), infraFormItems);
-            }
+            ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
+            formParameters.addAll(infraFormItems);
+            allForms.put(infrastructurePluginDescriptor.getPluginName(), infraFormItems);
+
             infraSelect.setValueMap(values);
 
             formParameters.add(new SpacerItem());
             values.clear();
             formParameters.add(policySelect);
             for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                String shortName = inf.getPluginName().substring(inf.getPluginName().lastIndexOf('.') + 1);
+                String shortName = getPluginShortName(inf);
                 values.put(inf.getPluginName(), shortName);
 
                 ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
@@ -142,15 +141,17 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
 
             policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
 
-            infraForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
-            infraLabel.hide();
-            infraForm.show();
+            windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
+            windowLabel.hide();
+            windowForm.show();
 
-            for (List<FormItem> li : allForms.values()) {
-                for (FormItem it : li) {
-                    it.hide();
-                }
-            }
+            /*
+             * for (List<FormItem> li : allForms.values()) {
+             * for (FormItem it : li) {
+             * it.hide();
+             * }
+             * }
+             */
         }, () -> window.hide());
     }
 

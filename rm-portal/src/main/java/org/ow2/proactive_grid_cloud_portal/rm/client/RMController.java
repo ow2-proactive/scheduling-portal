@@ -887,21 +887,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
+        PluginDescriptor infrastructurePluginDescriptor = null;
+        try {
+            JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+            String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
+                                                                                .isString()
+                                                                                .stringValue();
+            infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
+                                                                 infrastructurePluginName);
+        } catch (RuntimeException e) {
+
+        }
+
         /*
-         * PluginDescriptor infrastructurePluginDescriptor = null;
-         * try {
-         * JSONObject infrastructurePluginDescriptorJson =
-         * jsonObject.get("infrastructurePluginDescriptor").isObject();
-         * String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
-         * .isString()
-         * .stringValue();
-         * infrastructurePluginDescriptor =
-         * parsePluginDescriptor(infrastructurePluginDescriptorJson,
-         * infrastructurePluginName);
-         * } catch (RuntimeException e) {
-         * 
-         * }
-         * 
          * PluginDescriptor policyPluginDescriptor = null;
          * try {
          * JSONObject policyPluginDescriptorJson =
@@ -915,7 +913,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
          * }
          */
 
-        return new NodeSourceConfiguration(nodeSourceName, nodesRecoverable, null, null);
+        return new NodeSourceConfiguration(nodeSourceName, nodesRecoverable, infrastructurePluginDescriptor, null);
     }
 
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
