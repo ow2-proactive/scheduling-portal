@@ -149,6 +149,19 @@ public abstract class NodeSourceWindow {
         return forms;
     }
 
+    protected ArrayList<FormItem> getPrefilledOnlyTextFormItems(PluginDescriptor pluginDescriptor) {
+        List<PluginDescriptor.Field> configurableFields = pluginDescriptor.getConfigurableFields();
+        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
+        for (PluginDescriptor.Field f : configurableFields) {
+            FormItem pol = new TextItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
+            pol.setValue(f.getValue());
+            pol.setWidth(250);
+            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
+            forms.add(pol);
+        }
+        return forms;
+    }
+
     protected void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {
         if (infraSelect.getValueAsString() == null) {
             return;
