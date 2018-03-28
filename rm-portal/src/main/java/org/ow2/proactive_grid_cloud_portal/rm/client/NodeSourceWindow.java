@@ -122,7 +122,6 @@ public abstract class NodeSourceWindow {
         formParameters.add(nodeSourceEdited);
         formParameters.add(callback);
         formParameters.add(session);
-        formParameters.add(infraSelect);
         return formParameters;
     }
 

@@ -25,10 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -58,47 +55,37 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
         controller.fetchSupportedInfrastructuresAndPolicies(() -> {
 
-            HashMap<String, List<FormItem>> allForms = new HashMap<>();
+            HashMap<String, List<FormItem>> formParametersMap = new HashMap<>();
 
             ArrayList<FormItem> formParameters = prepareFormParameters();
 
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
 
-            for (PluginDescriptor inf : controller.getModel().getSupportedInfrastructures().values()) {
-                String shortName = getPluginShortName(inf);
-                values.put(inf.getPluginName(), shortName);
-
-                ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
-                formParameters.addAll(infraFormItems);
-                allForms.put(inf.getPluginName(), infraFormItems);
-            }
+            formParameters.add(infraSelect);
+            addAllFormValues(formParametersMap,
+                             formParameters,
+                             values,
+                             controller.getModel().getSupportedInfrastructures().values());
             infraSelect.setValueMap(values);
 
             formParameters.add(new SpacerItem());
-
             values.clear();
 
             formParameters.add(policySelect);
-
-            for (PluginDescriptor inf : controller.getModel().getSupportedPolicies().values()) {
-                String shortName = getPluginShortName(inf);
-                values.put(inf.getPluginName(), shortName);
-
-                ArrayList<FormItem> policyFormItems = getPrefilledFormItems(inf);
-                formParameters.addAll(policyFormItems);
-                allForms.put(inf.getPluginName(), policyFormItems);
-            }
+            addAllFormValues(formParametersMap,
+                             formParameters,
+                             values,
+                             controller.getModel().getSupportedPolicies().values());
             policySelect.setValueMap(values);
 
-            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
-
-            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
+            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(formParametersMap));
+            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(formParametersMap));
 
             windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
             windowLabel.hide();
             windowForm.show();
 
-            for (List<FormItem> li : allForms.values()) {
+            for (List<FormItem> li : formParametersMap.values()) {
                 for (FormItem it : li) {
                     it.hide();
                 }
@@ -109,6 +96,18 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
     @Override
     protected boolean isNodeSourceEdited() {
         return false;
+    }
+
+    private void addAllFormValues(HashMap<String, List<FormItem>> formParametersMap, ArrayList<FormItem> formParameters,
+            LinkedHashMap<String, String> values, Collection<PluginDescriptor> allPluginDescriptors) {
+        for (PluginDescriptor inf : allPluginDescriptors) {
+            String shortName = getPluginShortName(inf);
+            values.put(inf.getPluginName(), shortName);
+
+            ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
+            formParameters.addAll(infraFormItems);
+            formParametersMap.put(inf.getPluginName(), infraFormItems);
+        }
     }
 
 }

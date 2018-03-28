@@ -64,55 +64,57 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             NodeSourceConfiguration nodeSourceConfiguration = controller.getModel().getEditedNodeSourceConfiguration();
 
             nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            nodeSourceNameItem.setCanEdit(false);
+            nodeSourceNameItem.disable();
 
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
-            HashMap<String, List<FormItem>> allForms = new HashMap<>();
+            HashMap<String, List<FormItem>> formParametersMap = new HashMap<>();
 
             ArrayList<FormItem> formParameters = prepareFormParameters();
 
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
 
-            PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            String infrastructureShortName = getPluginShortName(infrastructurePluginDescriptor);
-            values.put(infrastructurePluginDescriptor.getPluginName(), infrastructureShortName);
-
-            ArrayList<FormItem> infraFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
-            formParameters.addAll(infraFormItems);
-            allForms.put(infrastructurePluginDescriptor.getPluginName(), infraFormItems);
-            addPluginDescriptorsToValues(values,
-                                         infrastructurePluginDescriptor,
-                                         controller.getModel().getSupportedInfrastructures());
+            formParameters.add(infraSelect);
+            addAllFormValues(formParametersMap,
+                             formParameters,
+                             values,
+                             nodeSourceConfiguration.getInfrastructurePluginDescriptor(),
+                             controller.getModel().getSupportedInfrastructures());
             infraSelect.setValueMap(values);
             infraSelect.setDefaultToFirstOption(true);
 
             formParameters.add(new SpacerItem());
-
             values.clear();
 
             formParameters.add(policySelect);
-
-            PluginDescriptor policyPluginDescriptor = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            String policyShortName = getPluginShortName(policyPluginDescriptor);
-            values.put(policyPluginDescriptor.getPluginName(), policyShortName);
-
-            ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policyPluginDescriptor);
-            formParameters.addAll(policyFormItems);
-            allForms.put(policyPluginDescriptor.getPluginName(), policyFormItems);
-            addPluginDescriptorsToValues(values, policyPluginDescriptor, controller.getModel().getSupportedPolicies());
+            addAllFormValues(formParametersMap,
+                             formParameters,
+                             values,
+                             nodeSourceConfiguration.getPolicyPluginDescriptor(),
+                             controller.getModel().getSupportedPolicies());
             policySelect.setValueMap(values);
             policySelect.setDefaultToFirstOption(true);
 
-            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(allForms));
-
-            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(allForms));
+            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(formParametersMap));
+            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(formParametersMap));
 
             windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
             windowLabel.hide();
             windowForm.show();
 
         }, () -> window.hide());
+    }
+
+    private void addAllFormValues(HashMap<String, List<FormItem>> formParametersMap, ArrayList<FormItem> formParameters,
+            LinkedHashMap<String, String> values, PluginDescriptor policyPluginDescriptor,
+            Map<String, PluginDescriptor> supportedPolicies) {
+        String policyShortName = getPluginShortName(policyPluginDescriptor);
+        values.put(policyPluginDescriptor.getPluginName(), policyShortName);
+
+        ArrayList<FormItem> policyFormItems = getPrefilledFormItems(policyPluginDescriptor);
+        formParameters.addAll(policyFormItems);
+        formParametersMap.put(policyPluginDescriptor.getPluginName(), policyFormItems);
+        addPluginDescriptorsToValues(values, policyPluginDescriptor, supportedPolicies);
     }
 
     private void addPluginDescriptorsToValues(LinkedHashMap<String, String> values,
