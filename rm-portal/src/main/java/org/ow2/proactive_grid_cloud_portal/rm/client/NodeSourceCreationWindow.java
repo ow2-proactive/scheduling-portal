@@ -100,13 +100,13 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
     private void addAllFormValues(HashMap<String, List<FormItem>> formParametersMap, ArrayList<FormItem> formParameters,
             LinkedHashMap<String, String> values, Collection<PluginDescriptor> allPluginDescriptors) {
-        for (PluginDescriptor inf : allPluginDescriptors) {
-            String shortName = getPluginShortName(inf);
-            values.put(inf.getPluginName(), shortName);
+        for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
+            String shortName = getPluginShortName(pluginDescriptor);
+            values.put(pluginDescriptor.getPluginName(), shortName);
 
-            ArrayList<FormItem> infraFormItems = getPrefilledFormItems(inf);
-            formParameters.addAll(infraFormItems);
-            formParametersMap.put(inf.getPluginName(), infraFormItems);
+            ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
+            formParameters.addAll(currentPluginFormItems);
+            formParametersMap.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
         }
     }
 

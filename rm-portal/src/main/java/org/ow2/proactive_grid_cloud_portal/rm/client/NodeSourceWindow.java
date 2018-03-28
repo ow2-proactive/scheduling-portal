@@ -65,13 +65,13 @@ public abstract class NodeSourceWindow {
 
     protected SelectItem infraSelect, policySelect;
 
+    protected String oldInfra = null, oldPolicy = null;
+
     protected Window window;
 
     private String windowTitle;
 
     private String waitingMessage;
-
-    private String oldInfra = null, oldPolicy = null;
 
     protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
