@@ -273,6 +273,8 @@ public class InfoView implements NodeSelectedListener, NodesListener {
 
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
 
+        // TODO insert node source icon change
+
         this.label.hide();
         this.nodeCanvas.hide();
         this.hostCanvas.hide();

@@ -295,7 +295,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     this.curTiles.add(i, nsName);
                 } else {
                     /* node source update */
-                    if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                    if (!oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus()) ||
+                        !oldNs.getSourceDescription().equals(ns.getSourceDescription())) {
                         int i = this.curTiles.indexOf(nsName);
                         NodeTile nt = ((NodeTile) this.flow.getWidget(i));
                         nt.refresh(ns);

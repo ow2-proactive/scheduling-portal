@@ -285,23 +285,25 @@ public class TreeView implements NodesListener, NodeSelectedListener {
          */
         for (NodeSource ns : nodes.values()) {
             String nsName = ns.getSourceName();
-            TNS nsTreeNode = new TNS(nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
-                                     ns.getNodeSourceAdmin() + "</span>", ns);
-            nsTreeNode.setAttribute("nodeId", nsName);
-            nsTreeNode.setIcon(ns.getIcon());
 
             /* NodeSources */
             NodeSource oldNs = (oldNodes != null) ? oldNodes.get(nsName) : null;
             if (oldNs == null) {
                 /* new node source */
+                TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(ns, nsName), ns);
+                nsTreeNode.setAttribute("nodeId", nsName);
+                nsTreeNode.setIcon(ns.getIcon());
                 this.tree.add(nsTreeNode, this.tree.getRoot());
                 this.curNodes.put(nsName, nsTreeNode);
             } else {
                 /* node source update */
-                if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                if (!oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus()) ||
+                    !oldNs.getSourceDescription().equals(ns.getSourceDescription())) {
                     TNS curTreeNodeSource = (TNS) curNodes.get(nsName);
                     curTreeNodeSource.rmNS = ns;
+                    curTreeNodeSource.setName(getNodeSourceDisplayedDescription(ns, nsName));
                     curTreeNodeSource.setIcon(ns.getIcon());
+                    this.treeGrid.refreshFields();
                 }
             }
 
@@ -412,6 +414,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.oldNodes = nodes;
 
         this.treeGrid.markForRedraw();
+    }
+
+    private String getNodeSourceDisplayedDescription(NodeSource ns, String nsName) {
+        return nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
+               ns.getNodeSourceAdmin() + "</span>";
     }
 
     void expandAll() {

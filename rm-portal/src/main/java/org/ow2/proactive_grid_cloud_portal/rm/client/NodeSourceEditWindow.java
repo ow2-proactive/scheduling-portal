@@ -75,12 +75,15 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
             PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+            Map<String, PluginDescriptor> allSupportedInfrastructures = controller.getModel()
+                                                                                  .getSupportedInfrastructures();
+
             formParameters.add(infraSelect);
             addAllFormValues(formParametersMap,
                              formParameters,
                              selectItemValues,
                              infrastructurePluginDescriptor,
-                             controller.getModel().getSupportedInfrastructures());
+                             allSupportedInfrastructures);
             infraSelect.setValueMap(selectItemValues);
             infraSelect.setDefaultToFirstOption(true);
             oldInfra = infrastructurePluginDescriptor.getPluginName();
@@ -89,22 +92,20 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             selectItemValues.clear();
 
             PluginDescriptor policyPluginDescriptor = nodeSourceConfiguration.getPolicyPluginDescriptor();
+            Map<String, PluginDescriptor> allSupportedPolicies = controller.getModel().getSupportedPolicies();
+
             formParameters.add(policySelect);
             addAllFormValues(formParametersMap,
                              formParameters,
                              selectItemValues,
                              policyPluginDescriptor,
-                             controller.getModel().getSupportedPolicies());
+                             allSupportedPolicies);
             policySelect.setValueMap(selectItemValues);
             policySelect.setDefaultToFirstOption(true);
             oldPolicy = policyPluginDescriptor.getPluginName();
 
-            infraSelect.addChangedHandler(changedEvent -> {
-                resetFormForInfrastructureChange(formParametersMap);
-            });
-            policySelect.addChangedHandler(changedEvent -> {
-                resetFormForPolicyChange(formParametersMap);
-            });
+            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(formParametersMap));
+            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(formParametersMap));
 
             windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
             windowLabel.hide();
