@@ -25,7 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -36,15 +40,19 @@ import com.smartgwt.client.widgets.form.fields.TextItem;
 
 
 /**
- * NodeSource creation dialog.
- * <p>
- * Dynamically downloads infrastructure and policy info when created.
+ * Dialog window to create a node source. Downloads dynamically supported
+ * infrastructures and policies when the window is created.
  */
 public class NodeSourceCreationWindow extends NodeSourceWindow {
 
     public NodeSourceCreationWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating available Infrastructures and Policies");
         this.buildForm();
+    }
+
+    @Override
+    protected boolean isNodeSourceEdited() {
+        return false;
     }
 
     @Override
@@ -55,58 +63,62 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
         controller.fetchSupportedInfrastructuresAndPolicies(() -> {
 
-            HashMap<String, List<FormItem>> formParametersMap = new HashMap<>();
+            HashMap<String, List<FormItem>> allFormItemsPerPlugin = new HashMap<>();
+            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
-            ArrayList<FormItem> formParameters = prepareFormParameters();
+            ArrayList<FormItem> allFormItems = prepareFormItems();
 
-            LinkedHashMap<String, String> values = new LinkedHashMap<>();
+            allFormItems.add(infrastructureSelectItem);
+            addAllPluginValuesToAllFormItems(allFormItemsPerPlugin,
+                                             allFormItems,
+                                             selectItemValues,
+                                             controller.getModel().getSupportedInfrastructures().values());
+            infrastructureSelectItem.setValueMap(selectItemValues);
 
-            formParameters.add(infraSelect);
-            addAllFormValues(formParametersMap,
-                             formParameters,
-                             values,
-                             controller.getModel().getSupportedInfrastructures().values());
-            infraSelect.setValueMap(values);
+            allFormItems.add(new SpacerItem());
+            selectItemValues.clear();
 
-            formParameters.add(new SpacerItem());
-            values.clear();
+            allFormItems.add(policySelectItem);
+            addAllPluginValuesToAllFormItems(allFormItemsPerPlugin,
+                                             allFormItems,
+                                             selectItemValues,
+                                             controller.getModel().getSupportedPolicies().values());
+            policySelectItem.setValueMap(selectItemValues);
 
-            formParameters.add(policySelect);
-            addAllFormValues(formParametersMap,
-                             formParameters,
-                             values,
-                             controller.getModel().getSupportedPolicies().values());
-            policySelect.setValueMap(values);
+            infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange(allFormItemsPerPlugin));
+            policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange(allFormItemsPerPlugin));
 
-            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(formParametersMap));
-            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(formParametersMap));
-
-            windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
+            windowForm.setFields(allFormItems.toArray(new FormItem[allFormItems.size()]));
             windowLabel.hide();
             windowForm.show();
 
-            for (List<FormItem> li : formParametersMap.values()) {
-                for (FormItem it : li) {
-                    it.hide();
-                }
-            }
+            hideAllFormItems(allFormItemsPerPlugin);
+
         }, () -> window.hide());
     }
 
-    @Override
-    protected boolean isNodeSourceEdited() {
-        return false;
+    private void hideAllFormItems(HashMap<String, List<FormItem>> allFormItemsPerPlugin) {
+
+        for (List<FormItem> li : allFormItemsPerPlugin.values()) {
+
+            for (FormItem it : li) {
+                it.hide();
+            }
+        }
     }
 
-    private void addAllFormValues(HashMap<String, List<FormItem>> formParametersMap, ArrayList<FormItem> formParameters,
-            LinkedHashMap<String, String> values, Collection<PluginDescriptor> allPluginDescriptors) {
+    private void addAllPluginValuesToAllFormItems(HashMap<String, List<FormItem>> allFormItemsPerPlugin,
+            ArrayList<FormItem> allFormItems, LinkedHashMap<String, String> selectItemValues,
+            Collection<PluginDescriptor> allPluginDescriptors) {
+
         for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
+
             String shortName = getPluginShortName(pluginDescriptor);
-            values.put(pluginDescriptor.getPluginName(), shortName);
+            selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
 
             ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
-            formParameters.addAll(currentPluginFormItems);
-            formParametersMap.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+            allFormItems.addAll(currentPluginFormItems);
+            allFormItemsPerPlugin.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
         }
     }
 

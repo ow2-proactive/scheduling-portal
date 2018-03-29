@@ -25,13 +25,25 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.SpacerItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 
 
+/**
+ * Dialog window to edit a node source. Downloads dynamically the information 
+ * of the current node source, and downloads dynamically all the supported
+ * infrastructures and policies when the window is created.
+ */
 public class NodeSourceEditWindow extends NodeSourceWindow {
 
     private String nodeSourceName;
@@ -40,6 +52,11 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
         super(controller, "Edit node source", "Retrieving current node source configuration");
         this.nodeSourceName = nodeSourceName;
         this.buildForm();
+    }
+
+    @Override
+    protected boolean isNodeSourceEdited() {
+        return true;
     }
 
     @Override
@@ -52,104 +69,116 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
                                                                  () -> window.hide());
     }
 
-    @Override
-    protected boolean isNodeSourceEdited() {
-        return true;
-    }
-
     private void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
             TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
             NodeSourceConfiguration nodeSourceConfiguration = controller.getModel().getEditedNodeSourceConfiguration();
 
             nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            // we do not allow the node source name to be modified
             nodeSourceNameItem.disable();
 
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
-            HashMap<String, List<FormItem>> formParametersMap = new HashMap<>();
-
-            ArrayList<FormItem> formParameters = prepareFormParameters();
-
+            HashMap<String, List<FormItem>> allFormItemsPerPlugin = new HashMap<>();
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
-            PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+            ArrayList<FormItem> allFormItems = prepareFormItems();
+
+            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
             Map<String, PluginDescriptor> allSupportedInfrastructures = controller.getModel()
                                                                                   .getSupportedInfrastructures();
 
-            formParameters.add(infraSelect);
-            addAllFormValues(formParametersMap,
-                             formParameters,
-                             selectItemValues,
-                             infrastructurePluginDescriptor,
-                             allSupportedInfrastructures);
-            infraSelect.setValueMap(selectItemValues);
-            infraSelect.setDefaultToFirstOption(true);
-            oldInfra = infrastructurePluginDescriptor.getPluginName();
+            allFormItems.add(infrastructureSelectItem);
+            addAllPluginValuesToAllFormItems(allFormItemsPerPlugin,
+                                             allFormItems,
+                                             selectItemValues,
+                                             focusedInfrastructurePlugin,
+                                             allSupportedInfrastructures);
+            infrastructureSelectItem.setValueMap(selectItemValues);
+            infrastructureSelectItem.setDefaultToFirstOption(true);
+            previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
 
-            formParameters.add(new SpacerItem());
+            allFormItems.add(new SpacerItem());
             selectItemValues.clear();
 
-            PluginDescriptor policyPluginDescriptor = nodeSourceConfiguration.getPolicyPluginDescriptor();
+            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
             Map<String, PluginDescriptor> allSupportedPolicies = controller.getModel().getSupportedPolicies();
 
-            formParameters.add(policySelect);
-            addAllFormValues(formParametersMap,
-                             formParameters,
-                             selectItemValues,
-                             policyPluginDescriptor,
-                             allSupportedPolicies);
-            policySelect.setValueMap(selectItemValues);
-            policySelect.setDefaultToFirstOption(true);
-            oldPolicy = policyPluginDescriptor.getPluginName();
+            allFormItems.add(policySelectItem);
+            addAllPluginValuesToAllFormItems(allFormItemsPerPlugin,
+                                             allFormItems,
+                                             selectItemValues,
+                                             focusedPolicyPlugin,
+                                             allSupportedPolicies);
+            policySelectItem.setValueMap(selectItemValues);
+            policySelectItem.setDefaultToFirstOption(true);
+            previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
 
-            infraSelect.addChangedHandler(changedEvent -> resetFormForInfrastructureChange(formParametersMap));
-            policySelect.addChangedHandler(changedEvent -> resetFormForPolicyChange(formParametersMap));
+            infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange(allFormItemsPerPlugin));
+            policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange(allFormItemsPerPlugin));
 
-            windowForm.setFields(formParameters.toArray(new FormItem[formParameters.size()]));
+            windowForm.setFields(allFormItems.toArray(new FormItem[allFormItems.size()]));
             windowLabel.hide();
             windowForm.show();
 
-            for (Map.Entry<String, List<FormItem>> entry : formParametersMap.entrySet()) {
-                String pluginName = entry.getKey();
-                if (!pluginName.equals(infrastructurePluginDescriptor.getPluginName()) &&
-                    !pluginName.equals(policyPluginDescriptor.getPluginName())) {
-                    for (FormItem item : entry.getValue()) {
-                        item.hide();
-                    }
-                }
-            }
+            hideNotFocusedFormItems(allFormItemsPerPlugin, focusedInfrastructurePlugin, focusedPolicyPlugin);
 
         }, () -> window.hide());
     }
 
-    private void addAllFormValues(HashMap<String, List<FormItem>> formParametersMap, ArrayList<FormItem> formParameters,
-            LinkedHashMap<String, String> selectListValues, PluginDescriptor pluginDescriptor,
-            Map<String, PluginDescriptor> supportedPlugins) {
-        String shortName = getPluginShortName(pluginDescriptor);
-        selectListValues.put(pluginDescriptor.getPluginName(), shortName);
+    private void hideNotFocusedFormItems(HashMap<String, List<FormItem>> allFormItemsPerPlugin,
+            PluginDescriptor focusedInfrastructurePlugin, PluginDescriptor focusedPolicyPlugin) {
 
-        ArrayList<FormItem> pluginFormItems = getPrefilledFormItems(pluginDescriptor);
-        formParameters.addAll(pluginFormItems);
-        formParametersMap.put(pluginDescriptor.getPluginName(), pluginFormItems);
-        addPluginDescriptorsToValues(formParametersMap,
-                                     formParameters,
-                                     selectListValues,
-                                     pluginDescriptor,
-                                     supportedPlugins);
+        for (Map.Entry<String, List<FormItem>> entry : allFormItemsPerPlugin.entrySet()) {
+
+            String pluginName = entry.getKey();
+            List<FormItem> formItemsForPlugin = entry.getValue();
+
+            if (!pluginName.equals(focusedInfrastructurePlugin.getPluginName()) &&
+                !pluginName.equals(focusedPolicyPlugin.getPluginName())) {
+
+                for (FormItem formItem : formItemsForPlugin) {
+                    formItem.hide();
+                }
+            }
+        }
     }
 
-    private void addPluginDescriptorsToValues(HashMap<String, List<FormItem>> formParametersMap,
-            ArrayList<FormItem> formParameters, LinkedHashMap<String, String> selectItemValues,
-            PluginDescriptor excludedPluginDescriptor, Map<String, PluginDescriptor> supportedPlugins) {
-        for (Map.Entry<String, PluginDescriptor> entry : supportedPlugins.entrySet()) {
-            PluginDescriptor pluginDescriptor = entry.getValue();
-            if (!pluginDescriptor.getPluginName().equals(excludedPluginDescriptor.getPluginName())) {
-                selectItemValues.put(pluginDescriptor.getPluginName(), getPluginShortName(pluginDescriptor));
-                ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
-                formParameters.addAll(currentPluginFormItems);
-                formParametersMap.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+    private void addAllPluginValuesToAllFormItems(HashMap<String, List<FormItem>> allFormItemsPerPlugin,
+            ArrayList<FormItem> allFormItems, LinkedHashMap<String, String> selectItemValues,
+            PluginDescriptor focusedPlugin, Map<String, PluginDescriptor> allPluginDescriptors) {
+
+        String shortName = getPluginShortName(focusedPlugin);
+        selectItemValues.put(focusedPlugin.getPluginName(), shortName);
+
+        ArrayList<FormItem> pluginFormItems = getPrefilledFormItems(focusedPlugin);
+        allFormItems.addAll(pluginFormItems);
+        allFormItemsPerPlugin.put(focusedPlugin.getPluginName(), pluginFormItems);
+
+        addPluginValuesToAllFormItemOtherThanFocused(allFormItemsPerPlugin,
+                                                     allFormItems,
+                                                     selectItemValues,
+                                                     focusedPlugin,
+                                                     allPluginDescriptors);
+    }
+
+    private void addPluginValuesToAllFormItemOtherThanFocused(HashMap<String, List<FormItem>> allFormItemsPerPlugin,
+            ArrayList<FormItem> allFormItems, LinkedHashMap<String, String> selectItemValues,
+            PluginDescriptor focusedPlugin, Map<String, PluginDescriptor> allPluginDescriptors) {
+
+        for (Map.Entry<String, PluginDescriptor> entry : allPluginDescriptors.entrySet()) {
+
+            PluginDescriptor plugin = entry.getValue();
+
+            if (!plugin.getPluginName().equals(focusedPlugin.getPluginName())) {
+
+                selectItemValues.put(plugin.getPluginName(), getPluginShortName(plugin));
+                ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(plugin);
+                allFormItems.addAll(currentPluginFormItems);
+                allFormItemsPerPlugin.put(plugin.getPluginName(), currentPluginFormItems);
             }
         }
     }

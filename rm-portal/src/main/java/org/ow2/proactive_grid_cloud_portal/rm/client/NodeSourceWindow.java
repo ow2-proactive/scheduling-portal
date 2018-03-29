@@ -63,9 +63,9 @@ public abstract class NodeSourceWindow {
 
     protected RMController controller;
 
-    protected SelectItem infraSelect, policySelect;
+    protected SelectItem infrastructureSelectItem, policySelectItem;
 
-    protected String oldInfra = null, oldPolicy = null;
+    protected String previousSelectedInfrastructure = null, previousSelectedPolicy = null;
 
     protected Window window;
 
@@ -87,10 +87,10 @@ public abstract class NodeSourceWindow {
         this.window.destroy();
     }
 
+    protected abstract boolean isNodeSourceEdited();
+
     protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
-
-    protected abstract boolean isNodeSourceEdited();
 
     protected String getPluginShortName(PluginDescriptor infrastructurePluginDescriptor) {
         return infrastructurePluginDescriptor.getPluginName().substring(
@@ -99,14 +99,14 @@ public abstract class NodeSourceWindow {
                                                                         1);
     }
 
-    protected ArrayList<FormItem> prepareFormParameters() {
-        infraSelect = new SelectItem("infra", "Infrastructure");
-        infraSelect.setRequired(true);
-        policySelect = new SelectItem("policy", "Policy");
-        policySelect.setRequired(true);
+    protected ArrayList<FormItem> prepareFormItems() {
+        infrastructureSelectItem = new SelectItem("infra", "Infrastructure");
+        infrastructureSelectItem.setRequired(true);
+        policySelectItem = new SelectItem("policy", "Policy");
+        policySelectItem.setRequired(true);
 
-        infraSelect.setWidth(300);
-        policySelect.setWidth(300);
+        infrastructureSelectItem.setWidth(300);
+        policySelectItem.setWidth(300);
 
         HiddenItem name = new HiddenItem("nsName");
         HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
@@ -173,14 +173,14 @@ public abstract class NodeSourceWindow {
         return forms;
     }
 
-    protected void resetFormForPolicyChange(HashMap<String, List<FormItem>> allForms) {
-        if (infraSelect.getValueAsString() == null) {
+    protected void resetFormForPolicySelectChange(HashMap<String, List<FormItem>> allForms) {
+        if (infrastructureSelectItem.getValueAsString() == null) {
             return;
         }
 
-        String policy = policySelect.getValueAsString();
-        if (oldPolicy != null) {
-            for (FormItem f : allForms.get(oldPolicy)) {
+        String policy = policySelectItem.getValueAsString();
+        if (previousSelectedPolicy != null) {
+            for (FormItem f : allForms.get(previousSelectedPolicy)) {
                 f.hide();
             }
         }
@@ -188,22 +188,22 @@ public abstract class NodeSourceWindow {
             f.show();
         }
 
-        if (oldPolicy == null) {
-            oldPolicy = policy;
-            resetFormForInfrastructureChange(allForms);
+        if (previousSelectedPolicy == null) {
+            previousSelectedPolicy = policy;
+            resetFormForInfrastructureSelectChange(allForms);
         } else {
-            oldPolicy = policy;
+            previousSelectedPolicy = policy;
         }
     }
 
-    protected void resetFormForInfrastructureChange(HashMap<String, List<FormItem>> allForms) {
-        if (policySelect.getValueAsString() == null) {
+    protected void resetFormForInfrastructureSelectChange(HashMap<String, List<FormItem>> allForms) {
+        if (policySelectItem.getValueAsString() == null) {
             return;
         }
 
-        String nsName = infraSelect.getValueAsString();
-        if (oldInfra != null) {
-            for (FormItem f : allForms.get(oldInfra)) {
+        String nsName = infrastructureSelectItem.getValueAsString();
+        if (previousSelectedInfrastructure != null) {
+            for (FormItem f : allForms.get(previousSelectedInfrastructure)) {
                 f.hide();
             }
         }
@@ -211,11 +211,11 @@ public abstract class NodeSourceWindow {
             f.show();
         }
 
-        if (oldInfra == null) {
-            oldInfra = nsName;
-            resetFormForPolicyChange(allForms);
+        if (previousSelectedInfrastructure == null) {
+            previousSelectedInfrastructure = nsName;
+            resetFormForPolicySelectChange(allForms);
         } else {
-            oldInfra = nsName;
+            previousSelectedInfrastructure = nsName;
         }
     }
 
@@ -341,10 +341,10 @@ public abstract class NodeSourceWindow {
 
     private void prepareCreateOnlyFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm, Label label,
             TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList, boolean nodeSourceEdited) {
-        infraForm.setValue("infra", infraSelect.getValueAsString());
+        infraForm.setValue("infra", infrastructureSelectItem.getValueAsString());
         infraForm.setValue("nsName", nameItem.getValueAsString());
         infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
-        infraForm.setValue("policy", policySelect.getValueAsString());
+        infraForm.setValue("policy", policySelectItem.getValueAsString());
         infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
         infraForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
         infraForm.setCanSubmit(true);
