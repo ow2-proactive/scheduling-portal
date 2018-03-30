@@ -862,9 +862,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * @param failure call this if it fails
      */
     public void fetchNodeSourceConfiguration(String nodeSourceName, Runnable success, Runnable failure) {
+
         rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
                                       nodeSourceName,
                                       new AsyncCallback<String>() {
+
+                                          public void onSuccess(String result) {
+                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
+                                              success.run();
+                                          }
 
                                           public void onFailure(Throwable caught) {
                                               String msg = JSONUtils.getJsonErrorMessage(caught);
@@ -872,15 +878,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                       ":<br>" + msg);
                                               failure.run();
                                           }
-
-                                          public void onSuccess(String result) {
-                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
-                                              success.run();
-                                          }
                                       });
     }
 
     private NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
+
         JSONObject jsonObject = this.parseJSON(json).isObject();
 
         String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();

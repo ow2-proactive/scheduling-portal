@@ -92,14 +92,13 @@ public abstract class NodeSourceWindow {
     protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
 
-    protected String getPluginShortName(PluginDescriptor infrastructurePluginDescriptor) {
-        return infrastructurePluginDescriptor.getPluginName().substring(
-                                                                        infrastructurePluginDescriptor.getPluginName()
-                                                                                                      .lastIndexOf('.') +
-                                                                        1);
+    protected String getPluginShortName(PluginDescriptor plugin) {
+
+        return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
     }
 
     protected ArrayList<FormItem> prepareFormItems() {
+
         infrastructureSelectItem = new SelectItem("infra", "Infrastructure");
         infrastructureSelectItem.setRequired(true);
         policySelectItem = new SelectItem("policy", "Policy");
@@ -115,197 +114,232 @@ public abstract class NodeSourceWindow {
         HiddenItem callback = new HiddenItem("nsCallback");
         HiddenItem session = new HiddenItem("sessionId");
 
-        ArrayList<FormItem> formParameters = new ArrayList<>();
-        formParameters.add(name);
-        formParameters.add(nodesRecoverable);
-        formParameters.add(deploy);
-        formParameters.add(nodeSourceEdited);
-        formParameters.add(callback);
-        formParameters.add(session);
-        return formParameters;
+        ArrayList<FormItem> formItems = new ArrayList<>();
+
+        formItems.add(name);
+        formItems.add(nodesRecoverable);
+        formItems.add(deploy);
+        formItems.add(nodeSourceEdited);
+        formItems.add(callback);
+        formItems.add(session);
+
+        return formItems;
     }
 
-    protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor pluginDescriptor) {
-        List<PluginDescriptor.Field> configurableFields = pluginDescriptor.getConfigurableFields();
-        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
-        for (PluginDescriptor.Field f : configurableFields) {
-            FormItem pol = null;
-            if (f.isPassword()) {
-                pol = new PasswordItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
-            } else if (f.isFile() || f.isCredential()) {
-                pol = new UploadItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
-                if (f.isCredential()) {
-                    PickerIcon cred = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
-                                                                                          .getSafeUri()
-                                                                                          .asString()),
-                                                     formItemIconClickEvent -> {
-                                                         CredentialsWindow win = new CredentialsWindow();
-                                                         win.show();
-                                                     });
-                    cred.setPrompt("Create a Credential file");
-                    cred.setWidth(16);
-                    cred.setHeight(16);
-                    cred.setAttribute("hspace", 6);
-                    pol.setIcons(cred);
+    protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
+
+        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
+        ArrayList<FormItem> formItems = new ArrayList<>(pluginFields.size());
+
+        FormItem formItem;
+        for (PluginDescriptor.Field pluginField : pluginFields) {
+
+            if (pluginField.isPassword()) {
+
+                formItem = new PasswordItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+
+            } else if (pluginField.isFile() || pluginField.isCredential()) {
+
+                formItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+
+                if (pluginField.isCredential()) {
+
+                    PickerIcon createCredentialsPicker = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
+                                                                                                             .getSafeUri()
+                                                                                                             .asString()),
+                                                                        formItemIconClickEvent -> {
+                                                                            CredentialsWindow win = new CredentialsWindow();
+                                                                            win.show();
+                                                                        });
+                    createCredentialsPicker.setPrompt("Create a Credential file");
+                    createCredentialsPicker.setWidth(16);
+                    createCredentialsPicker.setHeight(16);
+                    createCredentialsPicker.setAttribute("hspace", 6);
+
+                    formItem.setIcons(createCredentialsPicker);
                 }
             } else {
-                pol = new TextItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
+
+                formItem = new TextItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
             }
-            pol.setValue(f.getValue());
-            pol.setWidth(250);
-            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
-            forms.add(pol);
+
+            formItem.setValue(pluginField.getValue());
+            formItem.setWidth(250);
+            formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+
+            formItems.add(formItem);
         }
-        return forms;
+        return formItems;
     }
 
-    // TODO To use when the server is ready to deal with password/credential/file fields that are not treated like file parameters
-    protected ArrayList<FormItem> getPrefilledOnlyTextFormItems(PluginDescriptor pluginDescriptor) {
-        List<PluginDescriptor.Field> configurableFields = pluginDescriptor.getConfigurableFields();
-        ArrayList<FormItem> forms = new ArrayList<>(configurableFields.size());
-        for (PluginDescriptor.Field f : configurableFields) {
-            FormItem pol = new TextItem(pluginDescriptor.getPluginName() + f.getName(), f.getName());
-            pol.setValue(f.getValue());
-            pol.setWidth(250);
-            pol.setHint("<nobr>" + f.getDescription() + "</nobr>");
-            forms.add(pol);
+    // TODO Method to use when the server is ready to deal with
+    // password/credential/file fields that are not treated like file
+    // parameters
+    protected ArrayList<FormItem> getPrefilledOnlyTextFormItems(PluginDescriptor plugin) {
+
+        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
+        ArrayList<FormItem> formItems = new ArrayList<>(pluginFields.size());
+
+        for (PluginDescriptor.Field f : pluginFields) {
+
+            FormItem formItem = new TextItem(plugin.getPluginName() + f.getName(), f.getName());
+
+            formItem.setValue(f.getValue());
+            formItem.setWidth(250);
+            formItem.setHint("<nobr>" + f.getDescription() + "</nobr>");
+
+            formItems.add(formItem);
         }
-        return forms;
+
+        return formItems;
     }
 
-    protected void resetFormForPolicySelectChange(HashMap<String, List<FormItem>> allForms) {
+    protected void resetFormForPolicySelectChange(HashMap<String, List<FormItem>> allFormItemsPerPlugin) {
+
         if (infrastructureSelectItem.getValueAsString() == null) {
             return;
         }
 
-        String policy = policySelectItem.getValueAsString();
+        String policyPluginName = policySelectItem.getValueAsString();
         if (previousSelectedPolicy != null) {
-            for (FormItem f : allForms.get(previousSelectedPolicy)) {
-                f.hide();
+            for (FormItem formItem : allFormItemsPerPlugin.get(previousSelectedPolicy)) {
+                formItem.hide();
             }
         }
-        for (FormItem f : allForms.get(policy)) {
-            f.show();
+
+        for (FormItem formItem : allFormItemsPerPlugin.get(policyPluginName)) {
+            formItem.show();
         }
 
         if (previousSelectedPolicy == null) {
-            previousSelectedPolicy = policy;
-            resetFormForInfrastructureSelectChange(allForms);
+            previousSelectedPolicy = policyPluginName;
+            resetFormForInfrastructureSelectChange(allFormItemsPerPlugin);
         } else {
-            previousSelectedPolicy = policy;
+            previousSelectedPolicy = policyPluginName;
         }
     }
 
-    protected void resetFormForInfrastructureSelectChange(HashMap<String, List<FormItem>> allForms) {
+    protected void resetFormForInfrastructureSelectChange(HashMap<String, List<FormItem>> allFormItemsPerPlugin) {
+
         if (policySelectItem.getValueAsString() == null) {
             return;
         }
 
-        String nsName = infrastructureSelectItem.getValueAsString();
+        String infrastructurePluginName = infrastructureSelectItem.getValueAsString();
         if (previousSelectedInfrastructure != null) {
-            for (FormItem f : allForms.get(previousSelectedInfrastructure)) {
-                f.hide();
+            for (FormItem formItem : allFormItemsPerPlugin.get(previousSelectedInfrastructure)) {
+                formItem.hide();
             }
         }
-        for (FormItem f : allForms.get(nsName)) {
-            f.show();
+
+        for (FormItem formItem : allFormItemsPerPlugin.get(infrastructurePluginName)) {
+            formItem.show();
         }
 
         if (previousSelectedInfrastructure == null) {
-            previousSelectedInfrastructure = nsName;
-            resetFormForPolicySelectChange(allForms);
+            previousSelectedInfrastructure = infrastructurePluginName;
+            resetFormForPolicySelectChange(allFormItemsPerPlugin);
         } else {
-            previousSelectedInfrastructure = nsName;
+            previousSelectedInfrastructure = infrastructurePluginName;
         }
     }
 
     protected void buildForm() {
-        final VLayout layout = new VLayout();
-        layout.setMargin(5);
 
-        final VStack infraLayout = new VStack();
-        infraLayout.setHeight(26);
-        final Label infraLabel = new Label(this.waitingMessage);
-        infraLabel.setIcon("loading.gif");
-        infraLabel.setHeight(26);
-        infraLabel.setAlign(Alignment.CENTER);
-        infraLayout.addMember(infraLabel);
+        final VLayout nodeSourceWindowLayout = new VLayout();
+        nodeSourceWindowLayout.setMargin(5);
 
-        final DynamicForm infraForm = new DynamicForm();
-        infraForm.setEncoding(Encoding.MULTIPART);
-        infraForm.setMethod(FormMethod.POST);
-        infraForm.setAction(GWT.getModuleBaseURL() + "createnodesource");
-        infraForm.setTarget("__hiddenFrame");
+        final VStack nodeSourcePluginsLayout = new VStack();
+        nodeSourcePluginsLayout.setHeight(26);
 
-        infraLayout.addMember(infraForm);
+        final Label nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
+        nodeSourcePluginsWaitingLabel.setIcon("loading.gif");
+        nodeSourcePluginsWaitingLabel.setHeight(26);
+        nodeSourcePluginsWaitingLabel.setAlign(Alignment.CENTER);
+        nodeSourcePluginsLayout.addMember(nodeSourcePluginsWaitingLabel);
 
-        final Label label = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
-                                      " will be acquired, and a Policy, that dictates when resources can be acquired.");
-        label.setHeight(40);
+        final DynamicForm nodeSourcePluginsForm = new DynamicForm();
+        nodeSourcePluginsForm.setEncoding(Encoding.MULTIPART);
+        nodeSourcePluginsForm.setMethod(FormMethod.POST);
+        nodeSourcePluginsForm.setAction(GWT.getModuleBaseURL() + "createnodesource");
+        nodeSourcePluginsForm.setTarget("__hiddenFrame");
 
-        final TextItem nameItem = new TextItem("nsName", "Name");
-        DynamicForm nameForm = new DynamicForm();
+        nodeSourcePluginsLayout.addMember(nodeSourcePluginsForm);
+
+        final Label nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
+                                                      " will be acquired, and a Policy, that dictates when resources can be acquired.");
+        nodeSourceWindowLabel.setHeight(40);
+
+        final TextItem nodeSourceNameItem = new TextItem("nsName", "Name");
+        DynamicForm nodeSourceWindowForm = new DynamicForm();
 
         CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
-        nameForm.setFields(nameItem, nodesRecoverableItem);
+        nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
 
-        this.populateFormValues(infraLabel, infraForm, nameItem, nodesRecoverableItem);
+        this.populateFormValues(nodeSourcePluginsWaitingLabel,
+                                nodeSourcePluginsForm,
+                                nodeSourceNameItem,
+                                nodesRecoverableItem);
 
-        HLayout buttons = new HLayout();
+        HLayout buttonsLayout = new HLayout();
 
-        buttons.setWidth100();
-        buttons.setHeight(22);
-        buttons.setMargin(5);
-        buttons.setAlign(Alignment.RIGHT);
-        buttons.setMembersMargin(5);
+        buttonsLayout.setWidth100();
+        buttonsLayout.setHeight(22);
+        buttonsLayout.setMargin(5);
+        buttonsLayout.setAlign(Alignment.RIGHT);
+        buttonsLayout.setMembersMargin(5);
 
         final IButton createAndDeployNodeSourceButton = new IButton("Deploy Now");
         createAndDeployNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
         createAndDeployNodeSourceButton.setShowDisabledIcon(false);
+
         final IButton createOnlyNodeSourceButton = new IButton("Save and Keep Undeployed");
         createOnlyNodeSourceButton.setWidth(createAndDeployNodeSourceButton.getWidth() * 2);
         createOnlyNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
         createOnlyNodeSourceButton.setShowDisabledIcon(false);
+
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
         cancelButton.setShowDisabledIcon(false);
-        List<IButton> buttonsList = new LinkedList<>();
-        buttonsList.add(createAndDeployNodeSourceButton);
-        buttonsList.add(createOnlyNodeSourceButton);
-        buttonsList.add(cancelButton);
 
-        createAndDeployNodeSourceButton.addClickHandler(clickEvent -> prepareCreateAndDeployFormAndSubmit(layout,
-                                                                                                          infraLabel,
-                                                                                                          infraForm,
-                                                                                                          label,
-                                                                                                          nameItem,
+        List<IButton> buttonList = new LinkedList<>();
+        buttonList.add(createAndDeployNodeSourceButton);
+        buttonList.add(createOnlyNodeSourceButton);
+        buttonList.add(cancelButton);
+
+        createAndDeployNodeSourceButton.addClickHandler(clickEvent -> prepareCreateAndDeployFormAndSubmit(nodeSourceWindowLayout,
+                                                                                                          nodeSourcePluginsWaitingLabel,
+                                                                                                          nodeSourcePluginsForm,
+                                                                                                          nodeSourceWindowLabel,
+                                                                                                          nodeSourceNameItem,
                                                                                                           nodesRecoverableItem,
-                                                                                                          buttonsList,
+                                                                                                          buttonList,
                                                                                                           isNodeSourceEdited()));
-        createOnlyNodeSourceButton.addClickHandler(clickEvent -> prepareCreateOnlyFormAndSubmit(layout,
-                                                                                                infraLabel,
-                                                                                                infraForm,
-                                                                                                label,
-                                                                                                nameItem,
+
+        createOnlyNodeSourceButton.addClickHandler(clickEvent -> prepareCreateOnlyFormAndSubmit(nodeSourceWindowLayout,
+                                                                                                nodeSourcePluginsWaitingLabel,
+                                                                                                nodeSourcePluginsForm,
+                                                                                                nodeSourceWindowLabel,
+                                                                                                nodeSourceNameItem,
                                                                                                 nodesRecoverableItem,
-                                                                                                buttonsList,
+                                                                                                buttonList,
                                                                                                 isNodeSourceEdited()));
         cancelButton.addClickHandler(clickEvent -> window.hide());
-        buttons.setMembers(createAndDeployNodeSourceButton, createOnlyNodeSourceButton, cancelButton);
+        buttonsLayout.setMembers(createAndDeployNodeSourceButton, createOnlyNodeSourceButton, cancelButton);
 
-        VLayout scroll = new VLayout();
-        scroll.setHeight100();
-        scroll.setWidth100();
-        scroll.setMembers(infraLayout);
-        scroll.setOverflow(Overflow.AUTO);
-        scroll.setBorder("1px solid #ddd");
-        scroll.setBackgroundColor("#fafafa");
+        VLayout scrollLayout = new VLayout();
+        scrollLayout.setHeight100();
+        scrollLayout.setWidth100();
+        scrollLayout.setMembers(nodeSourcePluginsLayout);
+        scrollLayout.setOverflow(Overflow.AUTO);
+        scrollLayout.setBorder("1px solid #ddd");
+        scrollLayout.setBackgroundColor("#fafafa");
 
-        layout.addMember(label);
-        layout.addMember(nameForm);
-        layout.addMember(scroll);
-        layout.addMember(buttons);
+        nodeSourceWindowLayout.addMember(nodeSourceWindowLabel);
+        nodeSourceWindowLayout.addMember(nodeSourceWindowForm);
+        nodeSourceWindowLayout.addMember(scrollLayout);
+        nodeSourceWindowLayout.addMember(buttonsLayout);
 
         int winWidth = com.google.gwt.user.client.Window.getClientWidth() * 80 / 100;
         int winHeight = com.google.gwt.user.client.Window.getClientHeight() * 80 / 100;
@@ -317,7 +351,7 @@ public abstract class NodeSourceWindow {
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
-        this.window.addItem(layout);
+        this.window.addItem(nodeSourceWindowLayout);
         this.window.setWidth(winWidth);
         this.window.setHeight(winHeight);
         this.window.setCanDragResize(true);
@@ -325,29 +359,34 @@ public abstract class NodeSourceWindow {
         this.window.centerInPage();
     }
 
-    private void prepareCreateAndDeployFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm,
-            Label label, TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList,
+    private void prepareCreateAndDeployFormAndSubmit(VLayout nodeSourceWindowLayout,
+            Label nodeSourcePluginsWaitingLabel, DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel,
+            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonList,
             boolean nodeSourceEdited) {
-        infraForm.setValue("deploy", Boolean.TRUE.toString());
-        prepareCreateOnlyFormAndSubmit(layout,
-                                       infraLabel,
-                                       infraForm,
-                                       label,
-                                       nameItem,
+
+        nodeSourcePluginsForm.setValue("deploy", Boolean.TRUE.toString());
+
+        prepareCreateOnlyFormAndSubmit(nodeSourceWindowLayout,
+                                       nodeSourcePluginsWaitingLabel,
+                                       nodeSourcePluginsForm,
+                                       nodeSourceWindowLabel,
+                                       nodeSourceNameItem,
                                        nodesRecoverableItem,
-                                       buttonsList,
+                                       buttonList,
                                        nodeSourceEdited);
     }
 
-    private void prepareCreateOnlyFormAndSubmit(VLayout layout, Label infraLabel, DynamicForm infraForm, Label label,
-            TextItem nameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonsList, boolean nodeSourceEdited) {
-        infraForm.setValue("infra", infrastructureSelectItem.getValueAsString());
-        infraForm.setValue("nsName", nameItem.getValueAsString());
-        infraForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
-        infraForm.setValue("policy", policySelectItem.getValueAsString());
-        infraForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
-        infraForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
-        infraForm.setCanSubmit(true);
+    private void prepareCreateOnlyFormAndSubmit(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            CheckboxItem nodesRecoverableItem, List<IButton> buttonList, boolean nodeSourceEdited) {
+
+        nodeSourcePluginsForm.setValue("infra", infrastructureSelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue("nsName", nodeSourceNameItem.getValueAsString());
+        nodeSourcePluginsForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
+        nodeSourcePluginsForm.setValue("policy", policySelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
+        nodeSourcePluginsForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
+        nodeSourcePluginsForm.setCanSubmit(true);
 
         /*
          * this smartGWT form looks nice but cannot do callbacks ;
@@ -356,38 +395,58 @@ public abstract class NodeSourceWindow {
          * when the browser reads the return value and interprets it as JS,
          * the callback is called
          */
-        infraForm.setValue("nsCallback", JSUtil.register(javascriptObject -> {
-            JSONObject js = new JSONObject(javascriptObject);
-            if (js.containsKey("result") && js.get("result").isBoolean().booleanValue()) {
+        nodeSourcePluginsForm.setValue("nsCallback", JSUtil.register(javascriptObject -> {
+
+            JSONObject jsonCallback = new JSONObject(javascriptObject);
+
+            if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
+
                 window.hide();
-                LogModel.getInstance().logMessage("Successfully created nodesource: " + nameItem.getValueAsString());
-            } else {
-                String msg;
-                if (js.get("errorMessage").isString() != null) {
-                    msg = js.get("errorMessage").isString().stringValue();
-                } else {
-                    msg = js.toString();
-                }
-                label.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg + "</span>");
                 LogModel.getInstance()
-                        .logImportantMessage("Failed to create nodesource " + nameItem.getValueAsString() + ": " + msg);
-                layout.scrollToTop();
+                        .logMessage("Successfully created nodesource: " + nodeSourceNameItem.getValueAsString());
+
+            } else {
+
+                handleNodeSourceCreationError(nodeSourceWindowLayout,
+                                              nodeSourceWindowLabel,
+                                              nodeSourceNameItem,
+                                              jsonCallback);
             }
-            infraLabel.hide();
-            infraForm.show();
-            for (IButton button : buttonsList) {
+
+            nodeSourcePluginsWaitingLabel.hide();
+            nodeSourcePluginsForm.show();
+
+            for (IButton button : buttonList) {
                 button.setDisabled(false);
             }
         }));
-        infraForm.submitForm();
 
-        for (IButton button : buttonsList) {
+        nodeSourcePluginsForm.submitForm();
+
+        for (IButton button : buttonList) {
             button.setDisabled(true);
         }
 
-        infraLabel.setContents("Node Source creation requested...");
-        infraLabel.show();
-        infraForm.hide();
+        nodeSourcePluginsWaitingLabel.setContents("Node Source creation requested...");
+        nodeSourcePluginsWaitingLabel.show();
+        nodeSourcePluginsForm.hide();
+    }
+
+    private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, Label nodeSourceWindowLabel,
+            TextItem nodeSourceNameItem, JSONObject jsonCallback) {
+
+        String msg;
+        if (jsonCallback.get("errorMessage").isString() != null) {
+            msg = jsonCallback.get("errorMessage").isString().stringValue();
+        } else {
+            msg = jsonCallback.toString();
+        }
+
+        nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg +
+                                          "</span>");
+        LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
+                                                   nodeSourceNameItem.getValueAsString() + ": " + msg);
+        nodeSourceWindowLayout.scrollToTop();
     }
 
 }
