@@ -28,10 +28,12 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
@@ -48,8 +50,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ResizedEvent;
-import com.smartgwt.client.widgets.events.ResizedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
@@ -86,7 +86,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private LinkedList<String> curTiles = null;
 
     /* nodes as they were last time #nodesUpdated was called */
-    private Map<String, NodeSource> oldNodes = null;
+    private Map<String, NodeSource> model = new HashMap<>();
 
     /* currently selected tile */
     private NodeTile curSelTile = null;
@@ -102,7 +102,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
         eventDispatcher.addNodesListener(this);
         eventDispatcher.addNodeSelectedListener(this);
-        this.oldNodes = new HashMap<String, NodeSource>();
+        this.model = new HashMap<String, NodeSource>();
     }
 
     Canvas build() {
@@ -187,238 +187,159 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         return username != null ? username.equals(n.getNodeOwner()) : false;
     }
 
-    /*
-     * create a copy of the original map containing only resources
-     * used by the current user
-     */
-    private Map<String, NodeSource> filterMyNodes(Map<String, NodeSource> origNodes) {
+    @Override
+    public void nodesUpdated(Map<String, NodeSource> nodes) {
 
-        String username = LoginModel.getInstance().getLogin();
-
-        Map<String, NodeSource> myNodesNsMap = new HashMap<String, NodeSource>();
-        for (String nsid : origNodes.keySet()) {
-            NodeSource origNs = origNodes.get(nsid);
-            NodeSource myNodesNs = null;
-            if (!usedBy(origNs, username)) {
-                continue;
-            } else {
-                myNodesNs = new NodeSource(origNs);
-                myNodesNsMap.put(nsid, myNodesNs);
-            }
-
-            // at this point, at least one node of this ns is being used
-
-            Iterator<String> hostsIt = myNodesNs.getHosts().keySet().iterator();
-            while (hostsIt.hasNext()) {
-                String hostid = hostsIt.next();
-                Host host = myNodesNs.getHosts().get(hostid);
-                if (!usedBy(host, username)) {
-                    hostsIt.remove();
-                    continue;
-                }
-
-                Iterator<String> nodesIt = host.getNodes().keySet().iterator();
-                while (nodesIt.hasNext()) {
-                    String nodeid = nodesIt.next();
-                    Node node = host.getNodes().get(nodeid);
-                    if (!usedBy(node, username)) {
-                        nodesIt.remove();
-                        continue;
-                    } else {
-                        // node used by the logged user found!
-                    }
-                }
-            }
-        }
-        return myNodesNsMap;
     }
 
     @Override
-    public void nodesUpdated(Map<String, NodeSource> nodes) {
-        /* show only nodes used by the logged user */
-        if (onlyMyNodes) {
-            nodes = filterMyNodes(nodes);
-        }
-
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        LogModel.getInstance().logMessage("updateByDeltass " + nodeSources.size() + ", " + nodes.size());
         /* first call : create the components */
         if (this.flow == null) {
+            LogModel.getInstance().logMessage("flow  === null");
             this.flow = new FlowPanel();
             this.flow.setWidth("100%");
             // removes the vertical space between lines
             this.flow.getElement().getStyle().setProperty("lineHeight", "0");
             this.curTiles = new LinkedList<String>();
 
-            // add every tile at once, else it will attempt to render the page
-            // each time we add a new tile
-            for (NodeSource ns : nodes.values()) {
-                flow.add(new NodeTile(ns));
-                curTiles.add(ns.getSourceName());
-                for (Node n : ns.getDeploying().values()) {
-                    flow.add(new NodeTile(n));
-                    curTiles.add(n.getNodeUrl());
-                }
-                for (Host hh : ns.getHosts().values()) {
-                    flow.add(new NodeTile(hh));
-                    curTiles.add(hh.getId());
-                    for (Node n : hh.getNodes().values()) {
-                        flow.add(new NodeTile(n));
-                        curTiles.add(n.getNodeUrl());
-                    }
-                }
-            }
             this.root.addMember(this.flow);
-            this.root.addResizedHandler(new ResizedHandler() {
-                @Override
-                public void onResized(ResizedEvent event) {
-                    int w = root.getWidth();
-                    int h = root.getHeight();
-                    flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
+            this.root.addResizedHandler(event -> {
+                int w = root.getWidth();
+                int h = root.getHeight();
+                flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
 
-                    // lazy hack to force this.flow to -really- relayout
-                    root.setBorder(_borderSwitch ? "1px solid white" : "0px");
-                    _borderSwitch = !_borderSwitch;
-                }
+                // lazy hack to force this.flow to -really- relayout
+                root.setBorder(_borderSwitch ? "1px solid white" : "0px");
+                _borderSwitch = !_borderSwitch;
             });
-        } else {
-            /* for each new nodesource */
-            for (NodeSource ns : nodes.values()) {
-                String nsName = ns.getSourceName();
+        }
+        for (NodeSource nodeSource : nodeSources) {
+            LogModel.getInstance()
+                    .logMessage("Going to process ns " + nodeSource.getSourceName() + " " + nodeSource.getEventType());
 
-                NodeSource oldNs = (oldNodes != null) ? oldNodes.get(nsName) : null;
-                /* new nodesource : adding at the end */
-                if (oldNs == null) {
-                    // WARN at first I was inserting new NS at the head
-                    // but it was added at the end without any warning!
-                    NodeTile nsTile = new NodeTile(ns);
+            if (nodeSource.isRemoved()) {
+                if (model.containsKey(nodeSource.getSourceName())) {
+                    final NodeSource modelNodeSource = model.get(nodeSource.getSourceName());
+                    removeAllTiles(modelNodeSource);
+                    model.remove(nodeSource.getSourceName());
+                }
+            } else {
+                if (!model.containsKey(nodeSource.getSourceName())) {
+                    model.put(nodeSource.getSourceName(), nodeSource);
+                    NodeTile nsTile = new NodeTile(nodeSource);
                     int i = curTiles.size();
                     flow.insert(nsTile, i);
-                    this.curTiles.add(i, nsName);
-                } else {
-                    /* node source update */
-                    if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
-                        int i = this.curTiles.indexOf(nsName);
-                        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-                        nt.refresh(ns);
-                    }
+                    this.curTiles.add(i, nodeSource.getSourceName());
                 }
 
-                /* deploying nodes : not in a host yet */
-                for (Node n : ns.getDeploying().values()) {
-                    String nodeUrl = n.getNodeUrl();
-
-                    Node oldNode = (oldNs != null) ? oldNs.getDeploying().get(nodeUrl) : null;
-                    /* new deploying node */
-                    if (oldNode == null) {
-                        NodeTile nodeTile = new NodeTile(n);
-                        int i = curTiles.indexOf(nsName) + 1;
-                        flow.insert(nodeTile, i);
-                        this.curTiles.add(i, nodeUrl);
-                    } else {
-                        if (!oldNode.getNodeState().equals(n.getNodeState()) || oldNode.isLocked() != n.isLocked()) {
-                            int i = this.curTiles.indexOf(nodeUrl);
-                            NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-                            nt.refresh(n);
-                        }
-                    }
-                }
-
-                /* hosts */
-                for (Host h : ns.getHosts().values()) {
-                    String hostName = h.getHostName();
-
-                    Host oldHost = (oldNs != null) ? oldNs.getHosts().get(hostName) : null;
-                    /* new host */
-                    if (oldHost == null) {
-                        NodeTile hostTile = new NodeTile(h);
-                        int i = curTiles.indexOf(nsName) + 1 + ns.getDeploying().size();
-                        flow.insert(hostTile, i);
-                        this.curTiles.add(i, h.getId());
-                    }
-                    /* nodes */
-                    for (Node n : h.getNodes().values()) {
-                        String nodeUrl = n.getNodeUrl();
-
-                        Node oldNode = (oldHost != null) ? oldHost.getNodes().get(nodeUrl) : null;
-                        /* new node */
-                        if (oldNode == null) {
-                            NodeTile nodeTile = new NodeTile(n);
-                            int i = curTiles.indexOf(h.getId()) + 1;
-                            flow.insert(nodeTile, i);
-                            this.curTiles.add(i, nodeUrl);
-                        }
-                        /* update old node status */
-                        else {
-                            if (!oldNode.getNodeState().equals(n.getNodeState()) ||
-                                oldNode.isLocked() != n.isLocked()) {
-                                int i = this.curTiles.indexOf(nodeUrl);
-                                NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-                                nt.refresh(n);
-                            }
-                        }
-                    }
-                }
-            }
-
-            /*
-             * now remove the difference between the nodes from this method call,
-             * and the ones from the previous call
-             */
-            for (Entry<String, NodeSource> oldNs : this.oldNodes.entrySet()) {
-                /* Keep NS */
-                NodeSource newNs = nodes.get(oldNs.getKey());
-                if (newNs != null) {
-                    for (Entry<String, Node> oldDepl : oldNs.getValue().getDeploying().entrySet()) {
-                        /* Keep deploying Node */
-                        if (newNs.getDeploying().containsKey(oldDepl.getKey())) {
-
-                        }
-                        /* Deploying Node to be removed */
-                        else if (curTiles.contains(oldDepl.getKey())) {
-                            removeTile(oldDepl.getKey());
-                        }
-                    }
-
-                    for (Entry<String, Host> oldHost : oldNs.getValue().getHosts().entrySet()) {
-                        /* Keep host */
-                        Host newHost = newNs.getHosts().get(oldHost.getKey());
-                        if (newHost != null && newHost.getNodes().size() > 0) {
-                            for (Entry<String, Node> oldNode : oldHost.getValue().getNodes().entrySet()) {
-                                /* Keep node */
-                                if (newHost.getNodes().containsKey(oldNode.getKey())) {
-                                }
-                                /* Node to be removed */
-                                else if (curTiles.contains(oldNode.getKey())) {
-                                    removeTile(oldNode.getKey());
-                                }
-                            }
-
-                        }
-                        /* Host to be removed */
-                        else if (curTiles.contains(oldHost.getValue().getId())) {
-                            removeTile(oldHost.getValue().getId());
-                            for (String n : oldHost.getValue().getNodes().keySet()) {
-                                removeTile(n);
-                            }
-                        }
-                    }
-
-                }
-                /* remove NS */
-                else {
-                    removeTile(oldNs.getKey());
-                    for (Node n : oldNs.getValue().getDeploying().values()) {
-                        removeTile(n.getNodeUrl());
-                    }
-                    for (Host h : oldNs.getValue().getHosts().values()) {
-                        removeTile(h.getId());
-                        for (String n : h.getNodes().keySet()) {
-                            removeTile(n);
-                        }
-                    }
+                if (nodeSource.isChanged()) {
+                    LogModel.getInstance().logMessage("changed");
+                    int i = this.curTiles.indexOf(nodeSource.getSourceName());
+                    NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+                    nt.refresh(nodeSource);
                 }
             }
         }
-        this.oldNodes = nodes;
+
+        for (Node node : nodes) {
+
+            LogModel.getInstance().logMessage("Gonna process node: " + node.getNodeUrl() + " " + node.getEventType() +
+                                              " " + node.getSourceName());
+
+            if (node.isRemoved()) {
+                if (curTiles.indexOf(node.getNodeUrl()) >= 0) {
+                    final NodeSource nodeSource = model.get(node.getSourceName());
+                    if (nodeSource != null) { // if node source was not removed before
+                        if (node.isDeployingNode()) {
+                            nodeSource.getDeploying().remove(node.getNodeUrl());
+                        } else {
+                            final Host host = nodeSource.getHosts().get(node.getHostName());
+                            if (!host.getNodes().containsKey(node.getNodeUrl())) {
+                                LogModel.getInstance().logCriticalMessage("Should not happen");
+                            }
+                            host.getNodes().remove(node.getNodeUrl());
+                            if (host.getNodes().isEmpty()) { // remove dangling host
+                                nodeSource.getHosts().remove(host.getId());
+                                removeTile(host);
+                            }
+                        }
+                    }
+
+                    removeTile(node);
+                    LogModel.getInstance().logMessage("removed " + node.getNodeUrl());
+                }
+            } else {
+                if (curTiles.indexOf(node.getNodeUrl()) < 0) {
+                    // there SHOULD be nodeSource for sure, otherwise it is server bug
+                    final NodeSource modelNodeSource = model.get(node.getSourceName());
+
+                    if (node.isDeployingNode()) {
+
+                        modelNodeSource.getDeploying().put(node.getNodeUrl(), node);
+
+                        NodeTile nodeTile = new NodeTile(node);
+                        int i = curTiles.indexOf(node.getSourceName()) + 1;
+                        flow.insert(nodeTile, i);
+                        this.curTiles.add(i, node.getNodeUrl());
+
+                    } else {
+
+                        Host modelHost = modelNodeSource.getHosts()
+                                                        .get(Host.generateId(node.getSourceName(), node.getHostName()));
+                        if (modelHost == null) { // if this node is the first node of the host, thus create host
+                            modelHost = new Host(node.getHostName(), node.getSourceName());
+                            if (node.isVirtual()) {
+                                modelHost.setVirtual(true);
+                            }
+                            modelNodeSource.getHosts().put(modelHost.getId(), modelHost);
+                            NodeTile hostTile = new NodeTile(modelHost);
+                            int i = curTiles.indexOf(node.getSourceName()) + modelNodeSource.getDeploying().size() + 1;
+                            flow.insert(hostTile, i);
+                            this.curTiles.add(i, modelHost.getId());
+                        }
+
+                        modelHost.getNodes().put(node.getNodeUrl(), node);
+
+                        NodeTile nodeTile = new NodeTile(node);
+                        int i = curTiles.indexOf(modelHost.getId()) + 1;
+                        flow.insert(nodeTile, i);
+                        this.curTiles.add(i, node.getNodeUrl());
+
+                    }
+                }
+
+                if (node.isChanged()) {
+                    int i = this.curTiles.indexOf(node.getNodeUrl());
+                    NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+                    nt.refresh(node);
+                }
+            }
+        }
+    }
+
+    private void removeAllTiles(NodeSource nodeSource) {
+        removeTile(nodeSource);
+        nodeSource.getDeploying().values().forEach(this::removeTile);
+        nodeSource.getHosts().values().forEach(this::removeAllTiles);
+    }
+
+    private void removeAllTiles(Host host) {
+        removeTile(host);
+        host.getNodes().values().forEach(this::removeTile);
+    }
+
+    private void removeTile(NodeSource nodeSource) {
+        removeTile(nodeSource.getSourceName());
+    }
+
+    private void removeTile(Host host) {
+        removeTile(host.getId());
+    }
+
+    private void removeTile(Node node) {
+        removeTile(node.getNodeUrl());
     }
 
     private void removeTile(String name) {

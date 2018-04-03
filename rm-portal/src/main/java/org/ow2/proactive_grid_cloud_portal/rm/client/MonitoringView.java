@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.*;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -223,6 +224,11 @@ public class MonitoringView implements NodesListener, NodeSelectedListener {
     @Override
     public void nodesUpdated(Map<String, NodeSource> nodes) {
         NodeLabel.update(nodes, nodeLabel, selectedNode);
+    }
+
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+
     }
 
 }

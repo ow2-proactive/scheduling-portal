@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -218,6 +219,11 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         }
 
         nodeUnselected();
+    }
+
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+
     }
 
     /*

@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -406,6 +407,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.oldNodes = nodes;
 
         this.treeGrid.markForRedraw();
+    }
+
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+
     }
 
     void expandAll() {

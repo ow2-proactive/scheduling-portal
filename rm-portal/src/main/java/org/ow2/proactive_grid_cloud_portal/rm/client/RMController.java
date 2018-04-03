@@ -28,10 +28,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -69,8 +69,6 @@ import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -536,7 +534,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             copyNodesSources(model.getNodeSources(), newNodeSources);
         }
 
-        processNodeSources(newNodeSources, obj);
+        final List<NodeSource> nodeSourceList = processNodeSources(newNodeSources, obj);
+
+        final List<Node> nodeList = new LinkedList<>();
 
         // process nodes
         JSONArray jsNodes = obj.get("nodesEvents").isArray();
@@ -545,6 +545,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 JSONObject jsNode = jsNodes.get(i).isObject();
 
                 final Node node = parseNode(jsNode);
+
+                nodeList.add(node);
 
                 final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
 
@@ -569,6 +571,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
 
         model.setNodes(newNodeSources);
+        model.nodesUpdate(newNodeSources);
+        model.updateByDelta(nodeSourceList, nodeList);
 
         recalculatePhysicalVirtualHosts();
 
@@ -595,18 +599,21 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      * @param newNodeSources
      * @param obj
      */
-    private void processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
+    private List<NodeSource> processNodeSources(HashMap<String, NodeSource> newNodeSources, JSONObject obj) {
+        List<NodeSource> nodeSourceList = new LinkedList<>();
         JSONArray jsNodeSources = obj.get("nodeSource").isArray();
         for (int i = 0; i < jsNodeSources.size(); i++) {
             JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
+            nodeSourceList.add(nodeSource);
             if (nodeSource.isRemoved()) {
                 newNodeSources.remove(nodeSource.getSourceName());
             } else {
                 newNodeSources.put(nodeSource.getSourceName(), nodeSource);
             }
         }
+        return nodeSourceList;
     }
 
     private void removeNodeFromNodeSource(Node node, NodeSource nodeSource) {

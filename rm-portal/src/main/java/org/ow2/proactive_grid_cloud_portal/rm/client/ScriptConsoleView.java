@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -276,6 +277,11 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
     @Override
     public void nodesUpdated(Map<String, NodeSource> nodes) {
         NodeLabel.update(nodes, nodeLabel, nodeSourceName, nodeHostName, nodeUrl);
+    }
+
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+
     }
 
 }

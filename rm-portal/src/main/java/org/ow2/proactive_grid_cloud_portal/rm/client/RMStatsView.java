@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
@@ -419,6 +420,11 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColTable.setValue(6, 7, lost);
 
         nodeColChart.draw(nodeColTable, nodeColOpts);
+
+    }
+
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<NodeSource.Host.Node> nodes) {
 
     }
 }

@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -48,7 +49,9 @@ public class RMListeners {
          * 
          * @param nodes nodesources, hosts and nodes stored hierarchically
          */
-        public void nodesUpdated(Map<String, NodeSource> nodes);
+        void nodesUpdated(Map<String, NodeSource> nodes);
+
+        void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes);
 
     }
 
