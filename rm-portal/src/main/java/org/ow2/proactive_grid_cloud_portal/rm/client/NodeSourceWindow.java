@@ -25,10 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -65,7 +62,11 @@ public abstract class NodeSourceWindow {
 
     protected SelectItem infrastructureSelectItem, policySelectItem;
 
-    protected String previousSelectedInfrastructure = null, previousSelectedPolicy = null;
+    protected String previousSelectedInfrastructure;
+
+    protected String previousSelectedPolicy;
+
+    protected Map<String, List<FormItem>> allFormItemsPerPlugin;
 
     protected Window window;
 
@@ -77,6 +78,7 @@ public abstract class NodeSourceWindow {
         this.controller = controller;
         this.windowTitle = windowTitle;
         this.waitingMessage = waitingMessage;
+        this.allFormItemsPerPlugin = new HashMap<>();
     }
 
     public void show() {
@@ -92,6 +94,9 @@ public abstract class NodeSourceWindow {
     protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
 
+    protected abstract List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin,
+            PluginDescriptor.Field pluginField);
+
     protected String getPluginShortName(PluginDescriptor plugin) {
 
         return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
@@ -99,13 +104,13 @@ public abstract class NodeSourceWindow {
 
     protected ArrayList<FormItem> prepareFormItems() {
 
-        infrastructureSelectItem = new SelectItem("infra", "Infrastructure");
-        infrastructureSelectItem.setRequired(true);
-        policySelectItem = new SelectItem("policy", "Policy");
-        policySelectItem.setRequired(true);
+        this.infrastructureSelectItem = new SelectItem("infra", "Infrastructure");
+        this.infrastructureSelectItem.setRequired(true);
+        this.policySelectItem = new SelectItem("policy", "Policy");
+        this.policySelectItem.setRequired(true);
 
-        infrastructureSelectItem.setWidth(300);
-        policySelectItem.setWidth(300);
+        this.infrastructureSelectItem.setWidth(300);
+        this.policySelectItem.setWidth(300);
 
         HiddenItem name = new HiddenItem("nsName");
         HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
@@ -131,44 +136,36 @@ public abstract class NodeSourceWindow {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
         ArrayList<FormItem> formItems = new ArrayList<>(pluginFields.size());
 
-        FormItem formItem;
+        List<FormItem> formItemsForField = new LinkedList<>();
         for (PluginDescriptor.Field pluginField : pluginFields) {
 
             if (pluginField.isPassword()) {
 
-                formItem = new PasswordItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+                formItemsForField.add(new PasswordItem(plugin.getPluginName() + pluginField.getName(),
+                                                       pluginField.getName()));
 
             } else if (pluginField.isFile() || pluginField.isCredential()) {
 
-                formItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+                formItemsForField.addAll(handleNonTextualPluginField(plugin, pluginField));
 
-                if (pluginField.isCredential()) {
-
-                    PickerIcon createCredentialsPicker = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
-                                                                                                             .getSafeUri()
-                                                                                                             .asString()),
-                                                                        formItemIconClickEvent -> {
-                                                                            CredentialsWindow win = new CredentialsWindow();
-                                                                            win.show();
-                                                                        });
-                    createCredentialsPicker.setPrompt("Create a Credential file");
-                    createCredentialsPicker.setWidth(16);
-                    createCredentialsPicker.setHeight(16);
-                    createCredentialsPicker.setAttribute("hspace", 6);
-
-                    formItem.setIcons(createCredentialsPicker);
-                }
             } else {
 
-                formItem = new TextItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+                formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
+                                                   pluginField.getName()));
             }
 
-            formItem.setValue(pluginField.getValue());
-            formItem.setWidth(250);
-            formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+            formItemsForField.forEach(formItem -> {
+                formItem.setValue(pluginField.getValue());
+                formItem.setWidth(250);
+                if (!formItem.getName().equals(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_NAME)) {
+                    formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+                }
+            });
 
-            formItems.add(formItem);
+            formItems.addAll(formItemsForField);
+            formItemsForField.clear();
         }
+
         return formItems;
     }
 
@@ -194,53 +191,53 @@ public abstract class NodeSourceWindow {
         return formItems;
     }
 
-    protected void resetFormForPolicySelectChange(HashMap<String, List<FormItem>> allFormItemsPerPlugin) {
+    protected void resetFormForPolicySelectChange() {
 
-        if (infrastructureSelectItem.getValueAsString() == null) {
+        if (this.infrastructureSelectItem.getValueAsString() == null) {
             return;
         }
 
-        String policyPluginName = policySelectItem.getValueAsString();
-        if (previousSelectedPolicy != null) {
-            for (FormItem formItem : allFormItemsPerPlugin.get(previousSelectedPolicy)) {
+        String policyPluginName = this.policySelectItem.getValueAsString();
+        if (this.previousSelectedPolicy != null) {
+            for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedPolicy)) {
                 formItem.hide();
             }
         }
 
-        for (FormItem formItem : allFormItemsPerPlugin.get(policyPluginName)) {
+        for (FormItem formItem : this.allFormItemsPerPlugin.get(policyPluginName)) {
             formItem.show();
         }
 
-        if (previousSelectedPolicy == null) {
-            previousSelectedPolicy = policyPluginName;
-            resetFormForInfrastructureSelectChange(allFormItemsPerPlugin);
+        if (this.previousSelectedPolicy == null) {
+            this.previousSelectedPolicy = policyPluginName;
+            resetFormForInfrastructureSelectChange();
         } else {
-            previousSelectedPolicy = policyPluginName;
+            this.previousSelectedPolicy = policyPluginName;
         }
     }
 
-    protected void resetFormForInfrastructureSelectChange(HashMap<String, List<FormItem>> allFormItemsPerPlugin) {
+    protected void resetFormForInfrastructureSelectChange() {
 
-        if (policySelectItem.getValueAsString() == null) {
+        if (this.policySelectItem.getValueAsString() == null) {
             return;
         }
 
-        String infrastructurePluginName = infrastructureSelectItem.getValueAsString();
-        if (previousSelectedInfrastructure != null) {
-            for (FormItem formItem : allFormItemsPerPlugin.get(previousSelectedInfrastructure)) {
+        String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
+        if (this.previousSelectedInfrastructure != null) {
+            for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedInfrastructure)) {
                 formItem.hide();
             }
         }
 
-        for (FormItem formItem : allFormItemsPerPlugin.get(infrastructurePluginName)) {
+        for (FormItem formItem : this.allFormItemsPerPlugin.get(infrastructurePluginName)) {
             formItem.show();
         }
 
-        if (previousSelectedInfrastructure == null) {
-            previousSelectedInfrastructure = infrastructurePluginName;
-            resetFormForPolicySelectChange(allFormItemsPerPlugin);
+        if (this.previousSelectedInfrastructure == null) {
+            this.previousSelectedInfrastructure = infrastructurePluginName;
+            resetFormForPolicySelectChange();
         } else {
-            previousSelectedInfrastructure = infrastructurePluginName;
+            this.previousSelectedInfrastructure = infrastructurePluginName;
         }
     }
 
@@ -263,6 +260,7 @@ public abstract class NodeSourceWindow {
         nodeSourcePluginsForm.setMethod(FormMethod.POST);
         nodeSourcePluginsForm.setAction(GWT.getModuleBaseURL() + "createnodesource");
         nodeSourcePluginsForm.setTarget("__hiddenFrame");
+        nodeSourcePluginsForm.setTitleSuffix("");
 
         nodeSourcePluginsLayout.addMember(nodeSourcePluginsForm);
 
@@ -276,6 +274,7 @@ public abstract class NodeSourceWindow {
         CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
         nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
+        nodeSourceWindowForm.setTitleSuffix("");
 
         this.populateFormValues(nodeSourcePluginsWaitingLabel,
                                 nodeSourcePluginsForm,
@@ -380,10 +379,10 @@ public abstract class NodeSourceWindow {
             DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, boolean nodeSourceEdited) {
 
-        nodeSourcePluginsForm.setValue("infra", infrastructureSelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue("infra", this.infrastructureSelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue("nsName", nodeSourceNameItem.getValueAsString());
         nodeSourcePluginsForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
-        nodeSourcePluginsForm.setValue("policy", policySelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue("policy", this.policySelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
         nodeSourcePluginsForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
         nodeSourcePluginsForm.setCanSubmit(true);
@@ -401,7 +400,7 @@ public abstract class NodeSourceWindow {
 
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
 
-                window.hide();
+                this.window.hide();
                 LogModel.getInstance()
                         .logMessage("Successfully created nodesource: " + nodeSourceNameItem.getValueAsString());
 
@@ -447,6 +446,28 @@ public abstract class NodeSourceWindow {
         LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
                                                    nodeSourceNameItem.getValueAsString() + ": " + msg);
         nodeSourceWindowLayout.scrollToTop();
+    }
+
+    protected void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
+            FormItem formItem) {
+        if (pluginField.isCredential()) {
+
+            PickerIcon createCredentialsPicker = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
+                                                                                                     .getSafeUri()
+                                                                                                     .asString()),
+                                                                formItemIconClickEvent -> {
+                                                                    CredentialsWindow win = new CredentialsWindow();
+                                                                    win.show();
+                                                                });
+            createCredentialsPicker.setPrompt("Create a Credential file");
+            createCredentialsPicker.setWidth(16);
+            createCredentialsPicker.setHeight(16);
+            createCredentialsPicker.setAttribute("hspace", 6);
+
+            formItem.setIcons(createCredentialsPicker);
+        }
+
+        formItems.add(formItem);
     }
 
 }
