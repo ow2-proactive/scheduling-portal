@@ -935,18 +935,18 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
 
-            boolean pass = false;
-            boolean cred = false;
+            boolean password = false;
+            boolean credentials = false;
             boolean file = false;
 
             if (metaType.equalsIgnoreCase("password"))
-                pass = true;
+                password = true;
             else if (metaType.equalsIgnoreCase("fileBrowser"))
                 file = true;
             else if (metaType.equalsIgnoreCase("credential"))
-                cred = true;
+                credentials = true;
 
-            Field f = new Field(name, value, descr, pass, cred, file);
+            Field f = new Field(name, value, descr, password, credentials, file);
 
             desc.getConfigurableFields().add(f);
         }

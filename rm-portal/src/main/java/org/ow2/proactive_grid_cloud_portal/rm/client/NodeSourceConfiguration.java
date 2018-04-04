@@ -25,6 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+/**
+ * Represent the configuration of a node source at a given time, with all its
+ * currently applied parameters.
+ */
 public class NodeSourceConfiguration {
 
     private String nodeSourceName;

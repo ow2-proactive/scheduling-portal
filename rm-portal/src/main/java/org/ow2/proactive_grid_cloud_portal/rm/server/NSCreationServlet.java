@@ -102,57 +102,58 @@ public class NSCreationServlet extends HttpServlet {
             List<?> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
-                String fieldName = fi.getFieldName();
-                if (fi.isFormField()) {
-                    if (fieldName.equals("sessionId")) {
-                        sessionId = fi.getString();
-                    } else if (fieldName.equals("nsCallback")) {
-                        callbackName = fi.getString();
-                    } else if (fieldName.equals("nsName")) {
-                        nsName = fi.getString();
-                    } else if (fieldName.equals("nodesRecoverable")) {
-                        nodesRecoverable = fi.getString();
-                    } else if (fieldName.equals("deploy")) {
-                        if (fi.getString().equals(Boolean.TRUE.toString())) {
+                FileItem formField = (FileItem) i.next();
+                String formFieldName = formField.getFieldName();
+                if (formField.isFormField()) {
+                    String formFieldValue = formField.getString();
+                    if (formFieldName.equals("sessionId")) {
+                        sessionId = formFieldValue;
+                    } else if (formFieldName.equals("nsCallback")) {
+                        callbackName = formFieldValue;
+                    } else if (formFieldName.equals("nsName")) {
+                        nsName = formFieldValue;
+                    } else if (formFieldName.equals("nodesRecoverable")) {
+                        nodesRecoverable = formFieldValue;
+                    } else if (formFieldName.equals("deploy")) {
+                        if (formFieldValue.equals(Boolean.TRUE.toString())) {
                             deployNodeSource = true;
                         }
-                    } else if (fieldName.equals("nodeSourceEdited")) {
-                        nodeSourceEdited = Boolean.valueOf(fi.getString());
-                    } else if (fieldName.equals("infra")) {
-                        infra = fi.getString();
+                    } else if (formFieldName.equals("nodeSourceEdited")) {
+                        nodeSourceEdited = Boolean.valueOf(formFieldValue);
+                    } else if (formFieldName.equals("infra")) {
+                        infra = formFieldValue;
                         readingInfraParams = true;
-                    } else if (fieldName.equals("policy")) {
-                        policy = fi.getString();
+                    } else if (formFieldName.equals("policy")) {
+                        policy = formFieldValue;
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        if (fieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
-                            takeInlineContent = fi.getString().endsWith(NodeSourceEditWindow.EDIT_RADIO_OPTION_NAME);
-                        } else if (fieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                        if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+                            takeInlineContent = formFieldValue.endsWith(NodeSourceEditWindow.EDIT_RADIO_OPTION_NAME);
+                        } else if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
                             if (takeInlineContent) {
-                                infraFileParams.add(fi.getString());
+                                infraFileParams.add(formFieldValue);
                             }
                         } else {
-                            infraParams.add(fi.getString());
+                            infraParams.add(formFieldValue);
                         }
                     } else if (readingPolicyParams) {
-                        policyParams.add(fi.getString());
+                        policyParams.add(formFieldValue);
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 } else {
                     if (readingInfraParams) {
                         if (!takeInlineContent) {
-                            byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                            byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                             infraFileParams.add(new String(bytes));
                             takeInlineContent = true;
                         }
                     } else if (readingPolicyParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 }
             }
