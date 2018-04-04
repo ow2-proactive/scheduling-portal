@@ -606,7 +606,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject jsNodeSource = jsNodeSources.get(i).isObject();
 
             NodeSource nodeSource = parseNodeSource(jsNodeSource);
-            nodeSourceList.add(nodeSource);
+            nodeSourceList.add(new NodeSource(nodeSource));
             if (nodeSource.isRemoved()) {
                 newNodeSources.remove(nodeSource.getSourceName());
             } else {

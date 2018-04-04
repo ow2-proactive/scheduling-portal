@@ -194,15 +194,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        LogModel.getInstance().logMessage("updateByDeltass " + nodeSources.size() + ", " + nodes.size());
         /* first call : create the components */
         if (this.flow == null) {
-            LogModel.getInstance().logMessage("flow  === null");
             this.flow = new FlowPanel();
             this.flow.setWidth("100%");
             // removes the vertical space between lines
             this.flow.getElement().getStyle().setProperty("lineHeight", "0");
             this.curTiles = new LinkedList<String>();
+            this.model = new HashMap<>();
 
             this.root.addMember(this.flow);
             this.root.addResizedHandler(event -> {
@@ -216,9 +215,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             });
         }
         for (NodeSource nodeSource : nodeSources) {
-            LogModel.getInstance()
-                    .logMessage("Going to process ns " + nodeSource.getSourceName() + " " + nodeSource.getEventType());
-
             if (nodeSource.isRemoved()) {
                 if (model.containsKey(nodeSource.getSourceName())) {
                     final NodeSource modelNodeSource = model.get(nodeSource.getSourceName());
@@ -235,7 +231,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 }
 
                 if (nodeSource.isChanged()) {
-                    LogModel.getInstance().logMessage("changed");
                     int i = this.curTiles.indexOf(nodeSource.getSourceName());
                     NodeTile nt = ((NodeTile) this.flow.getWidget(i));
                     nt.refresh(nodeSource);
@@ -244,10 +239,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
 
         for (Node node : nodes) {
-
-            LogModel.getInstance().logMessage("Gonna process node: " + node.getNodeUrl() + " " + node.getEventType() +
-                                              " " + node.getSourceName());
-
             if (node.isRemoved()) {
                 if (curTiles.indexOf(node.getNodeUrl()) >= 0) {
                     final NodeSource nodeSource = model.get(node.getSourceName());
@@ -256,19 +247,15 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                             nodeSource.getDeploying().remove(node.getNodeUrl());
                         } else {
                             final Host host = nodeSource.getHosts().get(node.getHostName());
-                            if (!host.getNodes().containsKey(node.getNodeUrl())) {
-                                LogModel.getInstance().logCriticalMessage("Should not happen");
-                            }
                             host.getNodes().remove(node.getNodeUrl());
                             if (host.getNodes().isEmpty()) { // remove dangling host
-                                nodeSource.getHosts().remove(host.getId());
+                                nodeSource.getHosts().remove(host.getHostName());
                                 removeTile(host);
                             }
                         }
                     }
 
                     removeTile(node);
-                    LogModel.getInstance().logMessage("removed " + node.getNodeUrl());
                 }
             } else {
                 if (curTiles.indexOf(node.getNodeUrl()) < 0) {
@@ -286,14 +273,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     } else {
 
-                        Host modelHost = modelNodeSource.getHosts()
-                                                        .get(Host.generateId(node.getSourceName(), node.getHostName()));
+                        Host modelHost = modelNodeSource.getHosts().get(node.getHostName());
                         if (modelHost == null) { // if this node is the first node of the host, thus create host
                             modelHost = new Host(node.getHostName(), node.getSourceName());
                             if (node.isVirtual()) {
                                 modelHost.setVirtual(true);
                             }
-                            modelNodeSource.getHosts().put(modelHost.getId(), modelHost);
+                            modelNodeSource.getHosts().put(modelHost.getHostName(), modelHost);
                             NodeTile hostTile = new NodeTile(modelHost);
                             int i = curTiles.indexOf(node.getSourceName()) + modelNodeSource.getDeploying().size() + 1;
                             flow.insert(hostTile, i);
