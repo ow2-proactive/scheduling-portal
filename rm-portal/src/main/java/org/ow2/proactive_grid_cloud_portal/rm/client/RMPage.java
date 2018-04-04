@@ -418,7 +418,7 @@ public class RMPage implements LogListener {
             login = "";
 
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
-        nsButton.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
+        nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
         nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 

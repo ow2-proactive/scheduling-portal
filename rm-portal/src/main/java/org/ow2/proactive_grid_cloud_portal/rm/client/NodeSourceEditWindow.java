@@ -25,20 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
-import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.fields.UploadItem;
+import com.smartgwt.client.widgets.form.fields.*;
 
 
 /**
@@ -48,11 +39,13 @@ import com.smartgwt.client.widgets.form.fields.UploadItem;
  */
 public class NodeSourceEditWindow extends NodeSourceWindow {
 
-    public static final String KEEP_OR_CHANGE_FORM_ITEM_NAME = "keepOrChange";
+    public static final String KEEP_OR_CHANGE_FORM_ITEM_SUFFIX = ".keepOrChange";
 
-    private static final String KEEP_RADIO_OPTION_NAME = "keep";
+    public static final String KEEP_FORM_ITEM_SUFFIX = ".keep";
 
-    private static final String CHANGE_RADIO_OPTION_NAME = "change";
+    public static final String KEEP_RADIO_OPTION_NAME = "keep";
+
+    public static final String CHANGE_RADIO_OPTION_NAME = "change";
 
     private String nodeSourceName;
 
@@ -93,7 +86,8 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
             radioOptions.put(KEEP_RADIO_OPTION_NAME, "Keep previous");
             radioOptions.put(CHANGE_RADIO_OPTION_NAME, "Change");
-            RadioGroupItem keepOrChangeFormItem = new RadioGroupItem(KEEP_OR_CHANGE_FORM_ITEM_NAME,
+            RadioGroupItem keepOrChangeFormItem = new RadioGroupItem(plugin.getPluginName() + pluginField.getName() +
+                                                                     KEEP_OR_CHANGE_FORM_ITEM_SUFFIX,
                                                                      pluginField.getName());
             keepOrChangeFormItem.setValueMap(radioOptions);
             keepOrChangeFormItem.setVertical(false);
@@ -110,6 +104,13 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             });
 
             formItems.add(keepOrChangeFormItem);
+
+            AutoFitTextAreaItem previousValueItem = new AutoFitTextAreaItem(plugin.getPluginName() +
+                                                                            pluginField.getName() +
+                                                                            KEEP_FORM_ITEM_SUFFIX, "");
+            previousValueItem.setDefaultValue(pluginField.getValue());
+            //previousValueItem.hide();
+            formItems.add(previousValueItem);
 
             chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
             chooseCredentialsFormItem.disable();
@@ -211,8 +212,8 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
             LinkedHashMap<String, String> selectItemValues, PluginDescriptor focusedPlugin,
             Map<String, PluginDescriptor> allPluginDescriptors) {
 
-        String shortName = getPluginShortName(focusedPlugin);
-        selectItemValues.put(focusedPlugin.getPluginName(), shortName);
+        String pluginShortName = getPluginShortName(focusedPlugin);
+        selectItemValues.put(focusedPlugin.getPluginName(), pluginShortName);
 
         ArrayList<FormItem> pluginFormItems = getPrefilledFormItems(focusedPlugin);
         allFormItems.addAll(pluginFormItems);

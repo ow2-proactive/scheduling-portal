@@ -40,6 +40,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceEditWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,10 @@ public class NSCreationServlet extends HttpServlet {
         boolean deployNodeSource = false;
         boolean nodeSourceEdited = false;
 
+        // in case of node source edit, we need to know if we take the
+        // previous value of a file parameter or if we load a new file
+        boolean keepPreviousValue = true;
+
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
             factory.setSizeThreshold(4096);
@@ -122,7 +127,15 @@ public class NSCreationServlet extends HttpServlet {
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        infraParams.add(fi.getString());
+                        if (fieldName.endsWith(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_SUFFIX)) {
+                            keepPreviousValue = fi.getString().endsWith(NodeSourceEditWindow.KEEP_RADIO_OPTION_NAME);
+                        } else if (fieldName.endsWith(NodeSourceEditWindow.KEEP_FORM_ITEM_SUFFIX)) {
+                            if (keepPreviousValue) {
+                                infraFileParams.add(fi.getString());
+                            }
+                        } else {
+                            infraParams.add(fi.getString());
+                        }
                     } else if (readingPolicyParams) {
                         policyParams.add(fi.getString());
                     } else {
@@ -130,8 +143,10 @@ public class NSCreationServlet extends HttpServlet {
                     }
                 } else {
                     if (readingInfraParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
-                        infraFileParams.add(new String(bytes));
+                        if (!keepPreviousValue) {
+                            byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                            infraFileParams.add(new String(bytes));
+                        }
                     } else if (readingPolicyParams) {
                         byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
                         policyFileParams.add(new String(bytes));

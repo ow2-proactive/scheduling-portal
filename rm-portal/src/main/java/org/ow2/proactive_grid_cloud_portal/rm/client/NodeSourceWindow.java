@@ -50,7 +50,6 @@ import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.PickerIcon;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
@@ -157,35 +156,17 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
-                if (!formItem.getName().equals(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_NAME)) {
-                    formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+                if (!formItem.getName().endsWith(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_SUFFIX)) {
+                    if (formItem.getName().endsWith(NodeSourceEditWindow.KEEP_FORM_ITEM_SUFFIX)) {
+                        formItem.setHint("<nobr>Edit in line</nobr>");
+                    } else {
+                        formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+                    }
                 }
             });
 
             formItems.addAll(formItemsForField);
             formItemsForField.clear();
-        }
-
-        return formItems;
-    }
-
-    // TODO Method to use when the server is ready to deal with
-    // password/credential/file fields that are not treated like file
-    // parameters
-    protected ArrayList<FormItem> getPrefilledOnlyTextFormItems(PluginDescriptor plugin) {
-
-        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
-        ArrayList<FormItem> formItems = new ArrayList<>(pluginFields.size());
-
-        for (PluginDescriptor.Field f : pluginFields) {
-
-            FormItem formItem = new TextItem(plugin.getPluginName() + f.getName(), f.getName());
-
-            formItem.setValue(f.getValue());
-            formItem.setWidth(250);
-            formItem.setHint("<nobr>" + f.getDescription() + "</nobr>");
-
-            formItems.add(formItem);
         }
 
         return formItems;
