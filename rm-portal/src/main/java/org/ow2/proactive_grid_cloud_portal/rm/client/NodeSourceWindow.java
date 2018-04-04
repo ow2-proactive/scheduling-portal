@@ -57,9 +57,15 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 public abstract class NodeSourceWindow {
 
+    private static final String NODES_RECOVERABLE_FORM_KEY = "nodesRecoverable";
+
+    private static final String NS_NAME_FORM_KEY = "nsName";
+
     protected RMController controller;
 
-    protected SelectItem infrastructureSelectItem, policySelectItem;
+    protected SelectItem infrastructureSelectItem;
+
+    protected SelectItem policySelectItem;
 
     protected String previousSelectedInfrastructure;
 
@@ -111,8 +117,8 @@ public abstract class NodeSourceWindow {
         this.infrastructureSelectItem.setWidth(300);
         this.policySelectItem.setWidth(300);
 
-        HiddenItem name = new HiddenItem("nsName");
-        HiddenItem nodesRecoverable = new HiddenItem("nodesRecoverable");
+        HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
+        HiddenItem nodesRecoverable = new HiddenItem(NODES_RECOVERABLE_FORM_KEY);
         HiddenItem deploy = new HiddenItem("deploy");
         HiddenItem nodeSourceEdited = new HiddenItem("nodeSourceEdited");
         HiddenItem callback = new HiddenItem("nsCallback");
@@ -156,12 +162,9 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
-                if (!formItem.getName().endsWith(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_SUFFIX)) {
-                    if (formItem.getName().endsWith(NodeSourceEditWindow.KEEP_FORM_ITEM_SUFFIX)) {
-                        formItem.setHint("<nobr>Edit in line</nobr>");
-                    } else {
-                        formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
-                    }
+                if (!formItem.getName().endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
+                    !formItem.getName().endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                    formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
                 }
             });
 
@@ -249,10 +252,10 @@ public abstract class NodeSourceWindow {
                                                       " will be acquired, and a Policy, that dictates when resources can be acquired.");
         nodeSourceWindowLabel.setHeight(40);
 
-        final TextItem nodeSourceNameItem = new TextItem("nsName", "Name");
+        final TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
         DynamicForm nodeSourceWindowForm = new DynamicForm();
 
-        CheckboxItem nodesRecoverableItem = new CheckboxItem("nodesRecoverable", "Nodes Recoverable");
+        CheckboxItem nodesRecoverableItem = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
         nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
         nodeSourceWindowForm.setTitleSuffix("");
@@ -361,20 +364,13 @@ public abstract class NodeSourceWindow {
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, boolean nodeSourceEdited) {
 
         nodeSourcePluginsForm.setValue("infra", this.infrastructureSelectItem.getValueAsString());
-        nodeSourcePluginsForm.setValue("nsName", nodeSourceNameItem.getValueAsString());
-        nodeSourcePluginsForm.setValue("nodesRecoverable", nodesRecoverableItem.getValueAsBoolean().toString());
+        nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, nodeSourceNameItem.getValueAsString());
+        nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY, nodesRecoverableItem.getValueAsBoolean().toString());
         nodeSourcePluginsForm.setValue("policy", this.policySelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
         nodeSourcePluginsForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
         nodeSourcePluginsForm.setCanSubmit(true);
 
-        /*
-         * this smartGWT form looks nice but cannot do callbacks ;
-         * we register a native JS function to the document, send it to
-         * the servlet so that it writes it back when returning
-         * when the browser reads the return value and interprets it as JS,
-         * the callback is called
-         */
         nodeSourcePluginsForm.setValue("nsCallback", JSUtil.register(javascriptObject -> {
 
             JSONObject jsonCallback = new JSONObject(javascriptObject);

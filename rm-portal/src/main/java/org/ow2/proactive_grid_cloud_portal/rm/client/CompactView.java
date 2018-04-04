@@ -54,6 +54,7 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
+import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 
 
 /**
@@ -267,17 +268,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 }
             }
             this.root.addMember(this.flow);
-            this.root.addResizedHandler(new ResizedHandler() {
-                @Override
-                public void onResized(ResizedEvent event) {
-                    int w = root.getWidth();
-                    int h = root.getHeight();
-                    flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
+            this.root.addResizedHandler(event -> {
+                int w = root.getWidth();
+                int h = root.getHeight();
+                flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
 
-                    // lazy hack to force this.flow to -really- relayout
-                    root.setBorder(_borderSwitch ? "1px solid white" : "0px");
-                    _borderSwitch = !_borderSwitch;
-                }
+                // lazy hack to force this.flow to -really- relayout
+                root.setBorder(_borderSwitch ? "1px solid white" : "0px");
+                _borderSwitch = !_borderSwitch;
             });
         } else {
             /* for each new nodesource */
@@ -518,7 +516,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                     }
 
-                    menu.setItems(deployItem, undeployItem, editItem, lockItem, unlockItem, removeItem);
+                    menu.setItems(deployItem,
+                                  undeployItem,
+                                  editItem,
+                                  new MenuItemSeparator(),
+                                  lockItem,
+                                  unlockItem,
+                                  removeItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();

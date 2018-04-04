@@ -247,6 +247,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                           deployItem,
                           undeployItem,
                           editItem,
+                          new MenuItemSeparator(),
                           lockItem,
                           unlockItem,
                           removeItem);

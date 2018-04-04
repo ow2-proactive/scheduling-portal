@@ -92,7 +92,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
             hideAllFormItems();
 
-        }, () -> this.window.hide());
+        }, this.window::hide);
     }
 
     @Override

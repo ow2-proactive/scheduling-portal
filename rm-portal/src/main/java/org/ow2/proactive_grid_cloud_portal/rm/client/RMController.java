@@ -935,7 +935,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
 
-            boolean pass = false, cred = false, file = false;
+            boolean pass = false;
+            boolean cred = false;
+            boolean file = false;
+
             if (metaType.equalsIgnoreCase("password"))
                 pass = true;
             else if (metaType.equalsIgnoreCase("fileBrowser"))

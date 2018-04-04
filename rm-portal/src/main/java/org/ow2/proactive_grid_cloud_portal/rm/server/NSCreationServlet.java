@@ -90,7 +90,7 @@ public class NSCreationServlet extends HttpServlet {
 
         // in case of node source edit, we need to know if we take the
         // previous value of a file parameter or if we load a new file
-        boolean keepPreviousValue = true;
+        boolean takeInlineContent = true;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -127,10 +127,10 @@ public class NSCreationServlet extends HttpServlet {
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        if (fieldName.endsWith(NodeSourceEditWindow.KEEP_OR_CHANGE_FORM_ITEM_SUFFIX)) {
-                            keepPreviousValue = fi.getString().endsWith(NodeSourceEditWindow.KEEP_RADIO_OPTION_NAME);
-                        } else if (fieldName.endsWith(NodeSourceEditWindow.KEEP_FORM_ITEM_SUFFIX)) {
-                            if (keepPreviousValue) {
+                        if (fieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+                            takeInlineContent = fi.getString().endsWith(NodeSourceEditWindow.EDIT_RADIO_OPTION_NAME);
+                        } else if (fieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                            if (takeInlineContent) {
                                 infraFileParams.add(fi.getString());
                             }
                         } else {
@@ -143,9 +143,10 @@ public class NSCreationServlet extends HttpServlet {
                     }
                 } else {
                     if (readingInfraParams) {
-                        if (!keepPreviousValue) {
+                        if (!takeInlineContent) {
                             byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
                             infraFileParams.add(new String(bytes));
+                            takeInlineContent = true;
                         }
                     } else if (readingPolicyParams) {
                         byte[] bytes = IOUtils.toByteArray(fi.getInputStream());

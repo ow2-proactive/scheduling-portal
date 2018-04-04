@@ -25,11 +25,22 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
+import com.smartgwt.client.widgets.form.fields.SpacerItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.UploadItem;
 
 
 /**
@@ -39,13 +50,13 @@ import com.smartgwt.client.widgets.form.fields.*;
  */
 public class NodeSourceEditWindow extends NodeSourceWindow {
 
-    public static final String KEEP_OR_CHANGE_FORM_ITEM_SUFFIX = ".keepOrChange";
+    public static final String EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX = ".modify";
 
-    public static final String KEEP_FORM_ITEM_SUFFIX = ".keep";
+    public static final String EDIT_FORM_ITEM_SUFFIX = ".edit";
 
-    public static final String KEEP_RADIO_OPTION_NAME = "keep";
+    public static final String EDIT_RADIO_OPTION_NAME = "edit";
 
-    public static final String CHANGE_RADIO_OPTION_NAME = "change";
+    public static final String UPLOAD_RADIO_OPTION_NAME = "upload";
 
     private String nodeSourceName;
 
@@ -71,7 +82,7 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
                                                                                                                 windowForm,
                                                                                                                 nodeSourceNameItem,
                                                                                                                 nodesRecoverableItem),
-                                                                 () -> this.window.hide());
+                                                                 this.window::hide);
     }
 
     @Override
@@ -83,39 +94,16 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
         if (plugin.getPluginName().equals(this.focusedInfrastructurePluginName) ||
             plugin.getPluginName().equals(this.focusedPolicyPluginName)) {
 
-            LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
-            radioOptions.put(KEEP_RADIO_OPTION_NAME, "Keep previous");
-            radioOptions.put(CHANGE_RADIO_OPTION_NAME, "Change");
-            RadioGroupItem keepOrChangeFormItem = new RadioGroupItem(plugin.getPluginName() + pluginField.getName() +
-                                                                     KEEP_OR_CHANGE_FORM_ITEM_SUFFIX,
-                                                                     pluginField.getName());
-            keepOrChangeFormItem.setValueMap(radioOptions);
-            keepOrChangeFormItem.setVertical(false);
-            keepOrChangeFormItem.setDefaultValue(KEEP_RADIO_OPTION_NAME);
+            RadioGroupItem editOrUploadFormItem = createRadioItemToModifyPluginField(plugin, pluginField);
+            formItems.add(editOrUploadFormItem);
 
-            keepOrChangeFormItem.addChangedHandler(changedEvent -> {
-                String radioValue = changedEvent.getValue().toString();
-                List<FormItem> formItemsForPlugin = this.allFormItemsPerPlugin.get(plugin.getPluginName());
-                formItemsForPlugin.stream()
-                                  .filter(formItem -> formItem.getName()
-                                                              .equals(plugin.getPluginName() + pluginField.getName()))
-                                  .findFirst()
-                                  .ifPresent(formItem -> enableFormItemIfChangeIsSelected(radioValue, formItem));
-            });
-
-            formItems.add(keepOrChangeFormItem);
-
-            AutoFitTextAreaItem previousValueItem = new AutoFitTextAreaItem(plugin.getPluginName() +
-                                                                            pluginField.getName() +
-                                                                            KEEP_FORM_ITEM_SUFFIX, "");
-            previousValueItem.setDefaultValue(pluginField.getValue());
-            //previousValueItem.hide();
+            TextAreaItem previousValueItem = createTextItemPrefilledWithFileContent(plugin, pluginField);
             formItems.add(previousValueItem);
 
-            chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
-            chooseCredentialsFormItem.disable();
+            chooseCredentialsFormItem = createUploadItemDisabled(plugin, pluginField);
 
         } else {
+
             chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName());
         }
@@ -125,10 +113,94 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
         return formItems;
     }
 
-    private void enableFormItemIfChangeIsSelected(String radioValue, FormItem formItem) {
-        if (radioValue.equals(KEEP_RADIO_OPTION_NAME)) {
-            formItem.disable();
+    private FormItem createUploadItemDisabled(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
+
+        FormItem chooseCredentialsFormItem;
+        chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
+        chooseCredentialsFormItem.disable();
+        return chooseCredentialsFormItem;
+    }
+
+    private TextAreaItem createTextItemPrefilledWithFileContent(PluginDescriptor plugin,
+            PluginDescriptor.Field pluginField) {
+
+        TextAreaItem previousValueItem = new TextAreaItem(plugin.getPluginName() + pluginField.getName() +
+                                                          EDIT_FORM_ITEM_SUFFIX, "");
+
+        if (isBlank(pluginField.getValue())) {
+            previousValueItem.setDefaultValue("toto");
         } else {
+            previousValueItem.setDefaultValue(pluginField.getValue());
+        }
+        return previousValueItem;
+    }
+
+    private boolean isBlank(String text) {
+        return text == null || text.trim().length() == 0;
+    }
+
+    private RadioGroupItem createRadioItemToModifyPluginField(PluginDescriptor plugin,
+            PluginDescriptor.Field pluginField) {
+
+        String formItemPrefixName = plugin.getPluginName() + pluginField.getName();
+
+        LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
+        radioOptions.put(EDIT_RADIO_OPTION_NAME, "In-line editing");
+        radioOptions.put(UPLOAD_RADIO_OPTION_NAME, "Upload new file");
+
+        RadioGroupItem editOrUploadFormItem = new RadioGroupItem(formItemPrefixName + EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX,
+                                                                 pluginField.getName());
+        editOrUploadFormItem.setValueMap(radioOptions);
+        editOrUploadFormItem.setVertical(false);
+        editOrUploadFormItem.setDefaultValue(EDIT_RADIO_OPTION_NAME);
+
+        editOrUploadFormItem.addChangedHandler(changedEvent -> {
+
+            String radioValue = changedEvent.getValue().toString();
+            List<FormItem> formItemsForPlugin = this.allFormItemsPerPlugin.get(plugin.getPluginName());
+
+            if (radioValue.equals(EDIT_RADIO_OPTION_NAME)) {
+                enableEditInLine(formItemPrefixName, formItemsForPlugin);
+            } else if (radioValue.equals(UPLOAD_RADIO_OPTION_NAME)) {
+                enableUploadNewFile(formItemPrefixName, formItemsForPlugin);
+            }
+        });
+
+        return editOrUploadFormItem;
+    }
+
+    private void enableUploadNewFile(String pluginFieldName, List<FormItem> formItemsForPlugin) {
+
+        formItemsForPlugin.stream()
+                          .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
+                          .forEach(formItem -> enableUploadNewFile(pluginFieldName, formItem));
+    }
+
+    private void enableUploadNewFile(String pluginFieldName, FormItem formItem) {
+
+        if (formItem.getName().equals(pluginFieldName)) {
+            formItem.enable();
+
+        } else if (formItem.getName().startsWith(pluginFieldName) &&
+                   formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
+            formItem.disable();
+        }
+    }
+
+    private void enableEditInLine(String pluginFieldName, List<FormItem> formItemsForPlugin) {
+
+        formItemsForPlugin.stream()
+                          .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
+                          .forEach(formItem -> enableEditInLine(pluginFieldName, formItem));
+    }
+
+    private void enableEditInLine(String pluginFieldName, FormItem formItem) {
+
+        if (formItem.getName().equals(pluginFieldName)) {
+            formItem.disable();
+
+        } else if (formItem.getName().startsWith(pluginFieldName) &&
+                   formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
             formItem.enable();
         }
     }
@@ -187,7 +259,7 @@ public class NodeSourceEditWindow extends NodeSourceWindow {
 
             hideNotFocusedFormItems(focusedInfrastructurePlugin, focusedPolicyPlugin);
 
-        }, () -> this.window.hide());
+        }, this.window::hide);
     }
 
     private void hideNotFocusedFormItems(PluginDescriptor focusedInfrastructurePlugin,

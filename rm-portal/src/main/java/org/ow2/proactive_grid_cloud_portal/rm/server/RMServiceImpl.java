@@ -333,7 +333,7 @@ public class RMServiceImpl extends Service implements RMService {
 
     @Override
     public String getVersion() throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getVersion());
+        return executeFunctionReturnStreamAsString(RestClient::getVersion);
     }
 
     @Override
