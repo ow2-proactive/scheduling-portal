@@ -423,8 +423,4 @@ public class RMStatsView implements StatsListener, NodesListener {
 
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<NodeSource.Host.Node> nodes) {
-
-    }
 }

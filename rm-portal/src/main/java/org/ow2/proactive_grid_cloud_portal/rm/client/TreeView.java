@@ -409,11 +409,6 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.treeGrid.markForRedraw();
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-
-    }
-
     void expandAll() {
         tree.openAll();
     }

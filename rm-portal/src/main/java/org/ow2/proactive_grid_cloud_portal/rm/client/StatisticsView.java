@@ -212,11 +212,6 @@ public class StatisticsView implements NodesListener {
         this.grid.setData(r);
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<NodeSource.Host.Node> nodes) {
-
-    }
-
     private boolean isAliveNodesLimited() {
         return controller.getModel().getMaxNumberOfNodes() > -1;
     }

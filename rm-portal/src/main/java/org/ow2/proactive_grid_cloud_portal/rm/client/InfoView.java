@@ -221,11 +221,6 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         nodeUnselected();
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-
-    }
-
     /*
      * (non-Javadoc)
      * 

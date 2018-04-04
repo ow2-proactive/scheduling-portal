@@ -25,14 +25,360 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+
 import com.google.gwt.user.client.ui.FlowPanel;
 
 
 public class CompactFlowPanel extends FlowPanel {
 
+    private List<HierarchyNodeSource> model = new LinkedList<>();
+
     public CompactFlowPanel() {
+        super();
         this.setWidth("100%");
         // removes the vertical space between lines
         this.getElement().getStyle().setProperty("lineHeight", "0");
+    }
+
+    public void drawNodeSource(NodeSource nodeSource, CompactView.NodeTile nsTile) {
+        int index = size();
+        this.insert(nsTile, index);
+        LogModel.getInstance().logMessage("drawNodeSource " + index);
+        model.add(new HierarchyNodeSource(nodeSource));
+    }
+
+    private int size() {
+        return model.stream().map(HierarchyNodeSource::getTiles).reduce((a, b) -> a + b).orElse(0);
+    }
+
+    public void redrawNodeSource(NodeSource nodeSource) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
+                break;
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+
+        CompactView.NodeTile nt = ((CompactView.NodeTile) this.getWidget(index));
+        nt.refresh(nodeSource);
+    }
+
+    public boolean isNodeSourceDrawn(String sourceName) {
+        return model.stream().anyMatch(hierarchyNodeSource -> hierarchyNodeSource.getNodeSource()
+                                                                                 .getSourceName()
+                                                                                 .equals(sourceName));
+    }
+
+    public Optional<Integer> isNodeDrawn(NodeSource.Host.Node node) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+                ++index;
+                if (node.isDeployingNode()) {
+                    for (NodeSource.Host.Node existingNode : hierarchyNodeSource.getDeploying()) {
+                        if (existingNode.equals(node)) {
+                            return Optional.of(index);
+                        } else {
+                            ++index;
+                        }
+                    }
+                } else {
+                    for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                        if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                            ++index;
+                            for (NodeSource.Host.Node existingNode : hierarchyHost.getNodes()) {
+                                if (existingNode.equals(node)) {
+                                    return Optional.of(index);
+                                } else {
+                                    ++index;
+                                }
+                            }
+                            return Optional.empty();
+                        } else {
+                            index += hierarchyHost.getTiles();
+                        }
+                    }
+
+                }
+                return Optional.empty();
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+        return Optional.empty();
+    }
+
+    public void redrawNode(NodeSource.Host.Node node) {
+        int index = isNodeDrawn(node).get();
+        CompactView.NodeTile nt = ((CompactView.NodeTile) this.getWidget(index));
+        nt.refresh(node);
+    }
+
+    public void drawNode(NodeSource.Host.Node node, CompactView.NodeTile nodeTile) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+                ++index;
+                index += hierarchyNodeSource.getDeploying().size();
+
+                for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                    if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                        ++index;
+
+                        hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
+                        hierarchyHost.setTiles(hierarchyHost.getTiles() + 1);
+
+                        hierarchyHost.getNodes().add(0, node);
+
+                        this.insert(nodeTile, index);
+                        LogModel.getInstance().logMessage("drawNode " + index);
+
+                    } else {
+                        index += hierarchyHost.getTiles();
+                    }
+                }
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+    }
+
+    public void drawDeployingNode(NodeSource.Host.Node node, CompactView.NodeTile nodeTile) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+                ++index;
+
+                hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
+
+                hierarchyNodeSource.getDeploying().add(0, node);
+
+                LogModel.getInstance().logMessage("drawDeployingNode " + index);
+                this.insert(nodeTile, index);
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+    }
+
+    public void drawHost(NodeSource.Host host, CompactView.NodeTile hostTile) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
+                ++index;
+                index += hierarchyNodeSource.getDeploying().size();
+
+                hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
+
+                hierarchyNodeSource.getHosts().add(0, new HierarchyHost(host));
+
+                this.insert(hostTile, index);
+                LogModel.getInstance().logMessage("drawHost " + index);
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+    }
+
+    public void removeAllTiles(NodeSource nodeSource) {
+        int index = 0;
+        final Iterator<HierarchyNodeSource> iterator = model.iterator();
+        while (iterator.hasNext()) {
+            final HierarchyNodeSource hierarchyNodeSource = iterator.next();
+            if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
+                LogModel.getInstance().logMessage("remove " + hierarchyNodeSource.getTiles() + " from " + index);
+                for (int i = 0; i < hierarchyNodeSource.getTiles(); ++i) {
+
+                    remove(index);
+                }
+
+                iterator.remove();
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+    }
+
+    public void removeTile(NodeSource.Host host) {
+        LogModel.getInstance().logMessage("call removeHost " + host);
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
+                ++index;
+                final Iterator<HierarchyHost> iterator = hierarchyNodeSource.getHosts().iterator();
+                while (iterator.hasNext()) {
+                    final HierarchyHost existedHost = iterator.next();
+                    if (existedHost.getHost().equals(host)) {
+                        iterator.remove();
+                        hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
+                        this.remove(index);
+                        LogModel.getInstance().logMessage("removeHost " + index);
+                        return;
+                    } else {
+                        index += existedHost.getTiles();
+                    }
+                }
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+
+    }
+
+    public void removeTile(NodeSource.Host.Node node) {
+        LogModel.getInstance().logMessage("call removeNode " + node);
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+                ++index;
+
+                if (node.isDeployingNode()) {
+                    final Iterator<NodeSource.Host.Node> iterator = hierarchyNodeSource.getDeploying().iterator();
+                    while (iterator.hasNext()) {
+                        final NodeSource.Host.Node existing = iterator.next();
+                        if (existing.equals(node)) {
+                            iterator.remove();
+                            hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
+                            this.remove(index);
+                            LogModel.getInstance()
+                                    .logMessage("removeDeploying " + node.getNodeUrl() + " " + index +
+                                                " more deploying " + hierarchyNodeSource.getDeploying().size());
+                            return;
+                        } else {
+                            ++index;
+                        }
+                    }
+
+                } else {
+                    for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                        if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                            ++index;
+
+                            final Iterator<NodeSource.Host.Node> iterator = hierarchyHost.getNodes().iterator();
+                            while (iterator.hasNext()) {
+                                final NodeSource.Host.Node existing = iterator.next();
+                                if (existing.equals(node)) {
+                                    iterator.remove();
+                                    hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
+                                    hierarchyHost.setTiles(hierarchyHost.getTiles() - 1);
+                                    this.remove(index);
+                                    LogModel.getInstance().logMessage("removeNode " + node.getNodeUrl() + " " + index);
+                                    return;
+                                } else {
+                                    ++index;
+                                }
+                            }
+
+                        } else {
+                            index += hierarchyHost.getTiles();
+                        }
+                    }
+
+                }
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+
+        LogModel.getInstance().logMessage("DIDNOT removeNode " + node.getNodeUrl() + " " + index);
+        print();
+    }
+
+    void print() {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            LogModel.getInstance().logMessage(index++ + " " + hierarchyNodeSource.getNodeSource().getSourceName());
+
+            for (NodeSource.Host.Node node : hierarchyNodeSource.getDeploying()) {
+                LogModel.getInstance().logMessage(index++ + " " + node.getNodeUrl());
+            }
+
+            for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                LogModel.getInstance().logMessage(index++ + " " + hierarchyHost.getHost().getHostName());
+
+                for (NodeSource.Host.Node node : hierarchyHost.getNodes()) {
+                    LogModel.getInstance().logMessage(index++ + " " + node.getNodeUrl());
+                }
+
+            }
+
+        }
+
+    }
+}
+
+class HierarchyNodeSource {
+    private NodeSource nodeSource;
+
+    private int tiles = 1;
+
+    private List<HierarchyHost> hosts = new LinkedList<>();
+
+    private List<NodeSource.Host.Node> deploying = new LinkedList<>();
+
+    public HierarchyNodeSource(NodeSource nodeSource) {
+        this.nodeSource = nodeSource;
+    }
+
+    public NodeSource getNodeSource() {
+        return nodeSource;
+    }
+
+    public int getTiles() {
+        return tiles;
+    }
+
+    public List<HierarchyHost> getHosts() {
+        return hosts;
+    }
+
+    public List<NodeSource.Host.Node> getDeploying() {
+        return deploying;
+    }
+
+    public void setTiles(int tiles) {
+        this.tiles = tiles;
+    }
+}
+
+class HierarchyHost {
+    private NodeSource.Host host;
+
+    private int tiles = 1;
+
+    private List<NodeSource.Host.Node> nodes = new LinkedList<>();
+
+    public HierarchyHost(NodeSource.Host host) {
+        this.host = host;
+    }
+
+    public NodeSource.Host getHost() {
+        return host;
+    }
+
+    public int getTiles() {
+        return tiles;
+    }
+
+    public List<NodeSource.Host.Node> getNodes() {
+        return nodes;
+    }
+
+    public void setTiles(int tiles) {
+        this.tiles = tiles;
     }
 }

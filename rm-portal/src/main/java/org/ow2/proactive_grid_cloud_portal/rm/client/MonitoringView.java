@@ -226,9 +226,4 @@ public class MonitoringView implements NodesListener, NodeSelectedListener {
         NodeLabel.update(nodes, nodeLabel, selectedNode);
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-
-    }
-
 }

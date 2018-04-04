@@ -279,9 +279,4 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         NodeLabel.update(nodes, nodeLabel, nodeSourceName, nodeHostName, nodeUrl);
     }
 
-    @Override
-    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-
-    }
-
 }

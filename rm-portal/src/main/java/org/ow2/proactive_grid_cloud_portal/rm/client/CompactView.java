@@ -72,7 +72,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private Layout root;
 
     /* displays nodes as a compact grid */
-    private FlowPanel flow;
+    private CompactFlowPanel flow;
 
     boolean _borderSwitch;
 
@@ -211,10 +211,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                         host.getNodes().remove(node.getNodeUrl());
                         if (host.getNodes().isEmpty()) { // remove dangling host
                             nodeSource.getHosts().remove(host.getHostName());
-                            removeTile(host);
+                            flow.removeTile(host);
                         }
                     }
-                    removeTile(node);
+                    flow.removeTile(node);
                 }
             } else {
                 if (!isNodeDrawn(node)) {
@@ -255,29 +255,21 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private void drawHost(NodeSource nodeSource, Host host) {
         NodeTile hostTile = new NodeTile(host);
-        int i = curTiles.indexOf(nodeSource.getSourceName()) + nodeSource.getDeploying().size() + 1;
-        flow.insert(hostTile, i);
-        this.curTiles.add(i, host.getId());
+        flow.drawHost(host, hostTile);
     }
 
     private void redrawNode(Node node) {
-        int i = this.curTiles.indexOf(node.getNodeUrl());
-        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-        nt.refresh(node);
+        flow.redrawNode(node);
     }
 
     private void drawNode(Node node, Host host) {
         NodeTile nodeTile = new NodeTile(node);
-        int i = curTiles.indexOf(host.getId()) + 1;
-        flow.insert(nodeTile, i);
-        this.curTiles.add(i, node.getNodeUrl());
+        flow.drawNode(node, nodeTile);
     }
 
     private void drawDeployingNode(Node node) {
         NodeTile nodeTile = new NodeTile(node);
-        int i = curTiles.indexOf(node.getSourceName()) + 1;
-        flow.insert(nodeTile, i);
-        this.curTiles.add(i, node.getNodeUrl());
+        flow.drawDeployingNode(node, nodeTile);
     }
 
     private void processNodeSources(List<NodeSource> nodeSources) {
@@ -285,7 +277,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             if (nodeSource.isRemoved()) {
                 if (isNodeSourceDrawn(nodeSource)) {
                     final NodeSource modelNodeSource = model.get(nodeSource.getSourceName());
-                    removeAllTiles(modelNodeSource);
+                    flow.removeAllTiles(modelNodeSource);
                     model.remove(nodeSource.getSourceName());
                 }
             } else {
@@ -302,16 +294,12 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     private void redrawNodeSource(NodeSource nodeSource) {
-        int i = this.curTiles.indexOf(nodeSource.getSourceName());
-        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-        nt.refresh(nodeSource);
+        flow.redrawNodeSource(nodeSource);
     }
 
     private void drawNodeSource(NodeSource nodeSource) {
         NodeTile nsTile = new NodeTile(nodeSource);
-        int i = curTiles.size();
-        flow.insert(nsTile, i);
-        this.curTiles.add(i, nodeSource.getSourceName());
+        flow.drawNodeSource(nodeSource, nsTile);
     }
 
     private void initializePanel() {
@@ -333,7 +321,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     private boolean isNodeDrawn(Node node) {
-        return curTiles.indexOf(node.getNodeUrl()) >= 0;
+        return flow.isNodeDrawn(node).isPresent();
     }
 
     private boolean isNodeSourceDrawn(NodeSource nodeSource) {
@@ -341,41 +329,18 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     private boolean isNodeSourceDrawn(String sourceName) {
-        return model.containsKey(sourceName);
+        return flow.isNodeSourceDrawn(sourceName);
     }
 
-    private void removeAllTiles(NodeSource nodeSource) {
-        removeTile(nodeSource);
-        nodeSource.getDeploying().values().forEach(this::removeTile);
-        nodeSource.getHosts().values().forEach(this::removeAllTiles);
-    }
+    //    private void removeTile(String name) {
+    //        int index = this.curTiles.indexOf(name);
+    //        if (index >= 0) {
+    //            this.curTiles.remove(index);
+    //            this.flow.remove(index);
+    //        }
+    //    }
 
-    private void removeAllTiles(Host host) {
-        removeTile(host);
-        host.getNodes().values().forEach(this::removeTile);
-    }
-
-    private void removeTile(NodeSource nodeSource) {
-        removeTile(nodeSource.getSourceName());
-    }
-
-    private void removeTile(Host host) {
-        removeTile(host.getId());
-    }
-
-    private void removeTile(Node node) {
-        removeTile(node.getNodeUrl());
-    }
-
-    private void removeTile(String name) {
-        int index = this.curTiles.indexOf(name);
-        if (index >= 0) {
-            this.curTiles.remove(index);
-            this.flow.remove(index);
-        }
-    }
-
-    private class NodeTile extends Image {
+    public class NodeTile extends Image {
 
         private Node node;
 
