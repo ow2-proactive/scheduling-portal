@@ -39,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.CompactFlowPanel;
 
 import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
@@ -188,121 +189,159 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     @Override
-    public void nodesUpdated(Map<String, NodeSource> nodes) {
-
-    }
-
-    @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
         /* first call : create the components */
         if (this.flow == null) {
-            this.flow = new FlowPanel();
-            this.flow.setWidth("100%");
-            // removes the vertical space between lines
-            this.flow.getElement().getStyle().setProperty("lineHeight", "0");
-            this.curTiles = new LinkedList<String>();
-            this.model = new HashMap<>();
-
-            this.root.addMember(this.flow);
-            this.root.addResizedHandler(event -> {
-                int w = root.getWidth();
-                int h = root.getHeight();
-                flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
-
-                // lazy hack to force this.flow to -really- relayout
-                root.setBorder(_borderSwitch ? "1px solid white" : "0px");
-                _borderSwitch = !_borderSwitch;
-            });
+            initializePanel();
         }
-        for (NodeSource nodeSource : nodeSources) {
-            if (nodeSource.isRemoved()) {
-                if (model.containsKey(nodeSource.getSourceName())) {
-                    final NodeSource modelNodeSource = model.get(nodeSource.getSourceName());
-                    removeAllTiles(modelNodeSource);
-                    model.remove(nodeSource.getSourceName());
-                }
-            } else {
-                if (!model.containsKey(nodeSource.getSourceName())) {
-                    model.put(nodeSource.getSourceName(), nodeSource);
-                    NodeTile nsTile = new NodeTile(nodeSource);
-                    int i = curTiles.size();
-                    flow.insert(nsTile, i);
-                    this.curTiles.add(i, nodeSource.getSourceName());
-                }
+        processNodeSources(nodeSources);
 
-                if (nodeSource.isChanged()) {
-                    int i = this.curTiles.indexOf(nodeSource.getSourceName());
-                    NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-                    nt.refresh(nodeSource);
-                }
-            }
-        }
+        processNodes(nodes);
+    }
 
+    private void processNodes(List<Node> nodes) {
         for (Node node : nodes) {
             if (node.isRemoved()) {
-                if (curTiles.indexOf(node.getNodeUrl()) >= 0) {
+                if (isNodeDrawn(node) && isNodeSourceDrawn(node.getSourceName())) {
                     final NodeSource nodeSource = model.get(node.getSourceName());
-                    if (nodeSource != null) { // if node source was not removed before
-                        if (node.isDeployingNode()) {
-                            nodeSource.getDeploying().remove(node.getNodeUrl());
-                        } else {
-                            final Host host = nodeSource.getHosts().get(node.getHostName());
-                            host.getNodes().remove(node.getNodeUrl());
-                            if (host.getNodes().isEmpty()) { // remove dangling host
-                                nodeSource.getHosts().remove(host.getHostName());
-                                removeTile(host);
-                            }
+                    if (node.isDeployingNode()) {
+                        nodeSource.getDeploying().remove(node.getNodeUrl());
+                    } else {
+                        final Host host = nodeSource.getHosts().get(node.getHostName());
+                        host.getNodes().remove(node.getNodeUrl());
+                        if (host.getNodes().isEmpty()) { // remove dangling host
+                            nodeSource.getHosts().remove(host.getHostName());
+                            removeTile(host);
                         }
                     }
-
                     removeTile(node);
                 }
             } else {
-                if (curTiles.indexOf(node.getNodeUrl()) < 0) {
+                if (!isNodeDrawn(node)) {
                     // there SHOULD be nodeSource for sure, otherwise it is server bug
-                    final NodeSource modelNodeSource = model.get(node.getSourceName());
+                    final NodeSource existingNodeSource = model.get(node.getSourceName());
 
                     if (node.isDeployingNode()) {
 
-                        modelNodeSource.getDeploying().put(node.getNodeUrl(), node);
+                        existingNodeSource.getDeploying().put(node.getNodeUrl(), node);
 
-                        NodeTile nodeTile = new NodeTile(node);
-                        int i = curTiles.indexOf(node.getSourceName()) + 1;
-                        flow.insert(nodeTile, i);
-                        this.curTiles.add(i, node.getNodeUrl());
+                        drawDeployingNode(node);
 
                     } else {
 
-                        Host modelHost = modelNodeSource.getHosts().get(node.getHostName());
-                        if (modelHost == null) { // if this node is the first node of the host, thus create host
-                            modelHost = new Host(node.getHostName(), node.getSourceName());
+                        Host host = existingNodeSource.getHosts().get(node.getHostName());
+                        if (host == null) { // if this node is the first node of the host, thus create host
+                            host = new Host(node.getHostName(), node.getSourceName());
                             if (node.isVirtual()) {
-                                modelHost.setVirtual(true);
+                                host.setVirtual(true);
                             }
-                            modelNodeSource.getHosts().put(modelHost.getHostName(), modelHost);
-                            NodeTile hostTile = new NodeTile(modelHost);
-                            int i = curTiles.indexOf(node.getSourceName()) + modelNodeSource.getDeploying().size() + 1;
-                            flow.insert(hostTile, i);
-                            this.curTiles.add(i, modelHost.getId());
+                            existingNodeSource.getHosts().put(host.getHostName(), host);
+                            drawHost(existingNodeSource, host);
                         }
 
-                        modelHost.getNodes().put(node.getNodeUrl(), node);
+                        host.getNodes().put(node.getNodeUrl(), node);
 
-                        NodeTile nodeTile = new NodeTile(node);
-                        int i = curTiles.indexOf(modelHost.getId()) + 1;
-                        flow.insert(nodeTile, i);
-                        this.curTiles.add(i, node.getNodeUrl());
+                        drawNode(node, host);
 
                     }
                 }
 
                 if (node.isChanged()) {
-                    int i = this.curTiles.indexOf(node.getNodeUrl());
-                    NodeTile nt = ((NodeTile) this.flow.getWidget(i));
-                    nt.refresh(node);
+                    redrawNode(node);
                 }
             }
         }
+    }
+
+    private void drawHost(NodeSource nodeSource, Host host) {
+        NodeTile hostTile = new NodeTile(host);
+        int i = curTiles.indexOf(nodeSource.getSourceName()) + nodeSource.getDeploying().size() + 1;
+        flow.insert(hostTile, i);
+        this.curTiles.add(i, host.getId());
+    }
+
+    private void redrawNode(Node node) {
+        int i = this.curTiles.indexOf(node.getNodeUrl());
+        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+        nt.refresh(node);
+    }
+
+    private void drawNode(Node node, Host host) {
+        NodeTile nodeTile = new NodeTile(node);
+        int i = curTiles.indexOf(host.getId()) + 1;
+        flow.insert(nodeTile, i);
+        this.curTiles.add(i, node.getNodeUrl());
+    }
+
+    private void drawDeployingNode(Node node) {
+        NodeTile nodeTile = new NodeTile(node);
+        int i = curTiles.indexOf(node.getSourceName()) + 1;
+        flow.insert(nodeTile, i);
+        this.curTiles.add(i, node.getNodeUrl());
+    }
+
+    private void processNodeSources(List<NodeSource> nodeSources) {
+        for (NodeSource nodeSource : nodeSources) {
+            if (nodeSource.isRemoved()) {
+                if (isNodeSourceDrawn(nodeSource)) {
+                    final NodeSource modelNodeSource = model.get(nodeSource.getSourceName());
+                    removeAllTiles(modelNodeSource);
+                    model.remove(nodeSource.getSourceName());
+                }
+            } else {
+                if (!isNodeSourceDrawn(nodeSource)) {
+                    model.put(nodeSource.getSourceName(), nodeSource);
+                    drawNodeSource(nodeSource);
+                }
+
+                if (nodeSource.isChanged()) {
+                    redrawNodeSource(nodeSource);
+                }
+            }
+        }
+    }
+
+    private void redrawNodeSource(NodeSource nodeSource) {
+        int i = this.curTiles.indexOf(nodeSource.getSourceName());
+        NodeTile nt = ((NodeTile) this.flow.getWidget(i));
+        nt.refresh(nodeSource);
+    }
+
+    private void drawNodeSource(NodeSource nodeSource) {
+        NodeTile nsTile = new NodeTile(nodeSource);
+        int i = curTiles.size();
+        flow.insert(nsTile, i);
+        this.curTiles.add(i, nodeSource.getSourceName());
+    }
+
+    private void initializePanel() {
+        this.flow = new CompactFlowPanel();
+
+        this.curTiles = new LinkedList<String>();
+        this.model = new HashMap<>();
+
+        this.root.addMember(this.flow);
+        this.root.addResizedHandler(event -> {
+            int w = root.getWidth();
+            int h = root.getHeight();
+            flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
+
+            // lazy hack to force this.flow to -really- relayout
+            root.setBorder(_borderSwitch ? "1px solid white" : "0px");
+            _borderSwitch = !_borderSwitch;
+        });
+    }
+
+    private boolean isNodeDrawn(Node node) {
+        return curTiles.indexOf(node.getNodeUrl()) >= 0;
+    }
+
+    private boolean isNodeSourceDrawn(NodeSource nodeSource) {
+        return isNodeSourceDrawn(nodeSource.getSourceName());
+    }
+
+    private boolean isNodeSourceDrawn(String sourceName) {
+        return model.containsKey(sourceName);
     }
 
     private void removeAllTiles(NodeSource nodeSource) {

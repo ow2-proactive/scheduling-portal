@@ -42,16 +42,18 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
  */
 public class RMListeners {
 
-    public interface NodesListener {
+    interface NodesListener {
 
         /**
          * The list of nodesources, hosts and nodes has changed
          * 
          * @param nodes nodesources, hosts and nodes stored hierarchically
          */
-        void nodesUpdated(Map<String, NodeSource> nodes);
+        default void nodesUpdated(Map<String, NodeSource> nodes) {
+        }
 
-        void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes);
+        default void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        }
 
     }
 
