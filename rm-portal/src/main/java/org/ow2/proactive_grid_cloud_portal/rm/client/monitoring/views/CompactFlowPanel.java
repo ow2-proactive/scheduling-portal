@@ -48,7 +48,7 @@ public class CompactFlowPanel extends FlowPanel {
         this.getElement().getStyle().setProperty("lineHeight", "0");
     }
 
-    public void drawNodeSource(NodeSource nodeSource, CompactView.NodeTile nsTile) {
+    public void drawNodeSource(NodeSource nodeSource, CompactView.Tile nsTile) {
         int index = size();
         this.insert(nsTile, index);
         LogModel.getInstance().logMessage("drawNodeSource " + index);
@@ -69,7 +69,7 @@ public class CompactFlowPanel extends FlowPanel {
             }
         }
 
-        CompactView.NodeTile nt = ((CompactView.NodeTile) this.getWidget(index));
+        CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
         nt.refresh(nodeSource);
     }
 
@@ -120,11 +120,11 @@ public class CompactFlowPanel extends FlowPanel {
 
     public void redrawNode(NodeSource.Host.Node node) {
         int index = isNodeDrawn(node).get();
-        CompactView.NodeTile nt = ((CompactView.NodeTile) this.getWidget(index));
+        CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
         nt.refresh(node);
     }
 
-    public void drawNode(NodeSource.Host.Node node, CompactView.NodeTile nodeTile) {
+    public void drawNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
@@ -135,8 +135,8 @@ public class CompactFlowPanel extends FlowPanel {
                     if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
                         ++index;
 
-                        hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
-                        hierarchyHost.setTiles(hierarchyHost.getTiles() + 1);
+                        hierarchyNodeSource.incrementTiles();
+                        hierarchyHost.incrementTiles();
 
                         hierarchyHost.getNodes().add(0, node);
 
@@ -154,13 +154,13 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void drawDeployingNode(NodeSource.Host.Node node, CompactView.NodeTile nodeTile) {
+    public void drawDeployingNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
                 ++index;
 
-                hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
+                hierarchyNodeSource.incrementTiles();
 
                 hierarchyNodeSource.getDeploying().add(0, node);
 
@@ -172,14 +172,14 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void drawHost(NodeSource.Host host, CompactView.NodeTile hostTile) {
+    public void drawHost(NodeSource.Host host, CompactView.Tile hostTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
                 ++index;
                 index += hierarchyNodeSource.getDeploying().size();
 
-                hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() + 1);
+                hierarchyNodeSource.incrementTiles();
 
                 hierarchyNodeSource.getHosts().add(0, new HierarchyHost(host));
 
@@ -200,7 +200,6 @@ public class CompactFlowPanel extends FlowPanel {
             if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
                 LogModel.getInstance().logMessage("remove " + hierarchyNodeSource.getTiles() + " from " + index);
                 for (int i = 0; i < hierarchyNodeSource.getTiles(); ++i) {
-
                     remove(index);
                 }
 
@@ -222,7 +221,7 @@ public class CompactFlowPanel extends FlowPanel {
                     final HierarchyHost existedHost = iterator.next();
                     if (existedHost.getHost().equals(host)) {
                         iterator.remove();
-                        hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
+                        hierarchyNodeSource.decrementTiles();
                         this.remove(index);
                         LogModel.getInstance().logMessage("removeHost " + index);
                         return;
@@ -251,7 +250,7 @@ public class CompactFlowPanel extends FlowPanel {
                         final NodeSource.Host.Node existing = iterator.next();
                         if (existing.equals(node)) {
                             iterator.remove();
-                            hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
+                            hierarchyNodeSource.decrementTiles();
                             this.remove(index);
                             LogModel.getInstance()
                                     .logMessage("removeDeploying " + node.getNodeUrl() + " " + index +
@@ -272,8 +271,8 @@ public class CompactFlowPanel extends FlowPanel {
                                 final NodeSource.Host.Node existing = iterator.next();
                                 if (existing.equals(node)) {
                                     iterator.remove();
-                                    hierarchyNodeSource.setTiles(hierarchyNodeSource.getTiles() - 1);
-                                    hierarchyHost.setTiles(hierarchyHost.getTiles() - 1);
+                                    hierarchyNodeSource.decrementTiles();
+                                    hierarchyHost.decrementTiles();
                                     this.remove(index);
                                     LogModel.getInstance().logMessage("removeNode " + node.getNodeUrl() + " " + index);
                                     return;
@@ -313,11 +312,73 @@ public class CompactFlowPanel extends FlowPanel {
                 for (NodeSource.Host.Node node : hierarchyHost.getNodes()) {
                     LogModel.getInstance().logMessage(index++ + " " + node.getNodeUrl());
                 }
-
             }
+        }
+    }
 
+    public int indexOfHost(NodeSource.Host host) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
+                ++index;
+                index += hierarchyNodeSource.getDeploying().size();
+                for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                    if (hierarchyHost.getHost().getHostName().equals(host.getHostName())) {
+                        return index;
+                    } else {
+                        index += hierarchyHost.getTiles();
+                    }
+                }
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
         }
 
+        return -1;
+    }
+
+    public int indexOfNodeSource(NodeSource ns) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(ns.getSourceName())) {
+                return index;
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+        return -1;
+    }
+
+    public int indexOfNode(NodeSource.Host.Node node) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+                ++index;
+                index += hierarchyNodeSource.getDeploying().size();
+                for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                    if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                        ++index;
+
+                        for (NodeSource.Host.Node existingNode : hierarchyHost.getNodes()) {
+                            if (existingNode.getNodeUrl().equals(node.getNodeUrl())) {
+                                return index;
+                            } else {
+                                ++index;
+                            }
+                        }
+
+                    } else {
+                        index += hierarchyHost.getTiles();
+                    }
+                }
+
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+
+        return -1;
     }
 }
 
@@ -330,28 +391,32 @@ class HierarchyNodeSource {
 
     private List<NodeSource.Host.Node> deploying = new LinkedList<>();
 
-    public HierarchyNodeSource(NodeSource nodeSource) {
+    HierarchyNodeSource(NodeSource nodeSource) {
         this.nodeSource = nodeSource;
     }
 
-    public NodeSource getNodeSource() {
+    NodeSource getNodeSource() {
         return nodeSource;
     }
 
-    public int getTiles() {
+    int getTiles() {
         return tiles;
     }
 
-    public List<HierarchyHost> getHosts() {
+    List<HierarchyHost> getHosts() {
         return hosts;
     }
 
-    public List<NodeSource.Host.Node> getDeploying() {
+    List<NodeSource.Host.Node> getDeploying() {
         return deploying;
     }
 
-    public void setTiles(int tiles) {
-        this.tiles = tiles;
+    void decrementTiles() {
+        --tiles;
+    }
+
+    void incrementTiles() {
+        ++tiles;
     }
 }
 
@@ -362,23 +427,27 @@ class HierarchyHost {
 
     private List<NodeSource.Host.Node> nodes = new LinkedList<>();
 
-    public HierarchyHost(NodeSource.Host host) {
+    HierarchyHost(NodeSource.Host host) {
         this.host = host;
     }
 
-    public NodeSource.Host getHost() {
+    NodeSource.Host getHost() {
         return host;
     }
 
-    public int getTiles() {
+    int getTiles() {
         return tiles;
     }
 
-    public List<NodeSource.Host.Node> getNodes() {
+    List<NodeSource.Host.Node> getNodes() {
         return nodes;
     }
 
-    public void setTiles(int tiles) {
-        this.tiles = tiles;
+    void decrementTiles() {
+        --tiles;
+    }
+
+    void incrementTiles() {
+        ++tiles;
     }
 }

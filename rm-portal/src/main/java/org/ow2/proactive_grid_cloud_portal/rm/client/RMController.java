@@ -493,11 +493,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 long counterBefore = model.getMaxCounter();
                 updateModelBasedOnResponse(result);
                 long counterAfter = model.getMaxCounter();
-                if (counterBefore != counterAfter) {
-                    updater.schedule(RMConfig.get().getClientBurstRefreshTime());
-                } else {
-                    updater.schedule(RMConfig.get().getClientRefreshTime());
-                }
+                //                if (counterBefore != counterAfter) {
+                //                    updater.schedule(RMConfig.get().getClientBurstRefreshTime());
+                //                } else {
+                updater.schedule(RMConfig.get().getClientRefreshTime());
+                //                }
                 LogModel.getInstance()
                         .logMessage("[ " + (System.currentTimeMillis() % 1000000) + " ]Processed RM/monitoring in " +
                                     (System.currentTimeMillis() - t) + "ms " + counterBefore + " -> " + counterAfter);
