@@ -25,10 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -120,17 +117,17 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void nodeSelected(Node node) {
-        changeSelection(flow.indexOfNode(node));
+        changeSelection(flow.indexOf(node).get());
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
-        changeSelection(flow.indexOfNodeSource(ns));
+        changeSelection(flow.indexOf(ns).get());
     }
 
     @Override
     public void hostSelected(Host h) {
-        changeSelection(flow.indexOfHost(h));
+        changeSelection(flow.indexOf(h).get());
     }
 
     private void changeSelection(int id) {
@@ -157,24 +154,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         _doNotScroll = false;
     }
 
-    private boolean usedBy(NodeSource ns, String username) {
-        for (String hostid : ns.getHosts().keySet()) {
-            Host host = ns.getHosts().get(hostid);
-            if (usedBy(host, username))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean usedBy(Host h, String username) {
-        for (String nodeid : h.getNodes().keySet()) {
-            Node node = h.getNodes().get(nodeid);
-            if (usedBy(node, username))
-                return true;
-        }
-        return false;
-    }
-
     private boolean usedBy(Node n, String username) {
         return username != null ? username.equals(n.getNodeOwner()) : false;
     }
@@ -185,7 +164,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         if (this.flow == null) {
             initializePanel();
         }
-        processNodeSources(nodeSources);
         processNodeSources(nodeSources);
 
         processNodes(nodes);
@@ -200,76 +178,43 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     flow.removeNode(node);
                 }
             } else {
-                if (!isNodeDrawn(node)) {
-                    // there SHOULD be nodeSource for sure, otherwise it is server bug
+                if (!flow.isNodeDrawn(node)) {
                     Tile nodeTile = new Tile(node);
-                    flow.drawNode(node, nodeTile);
-
-//                        if (host == null) { // if this node is the first node of the host, thus create host
-//                            host = new Host(node.getHostName(), node.getSourceName());
-//                            if (node.isVirtual()) {
-//                                host.setVirtual(true);
-//                            }
-//                            existingNodeSource.getHosts().put(host.getHostName(), host);
-//                            drawHost(host);
-//                        }
-
+                    Tile hostTile = new Tile(new Host(node.getHostName(), node.getSourceName()));
+                    if(node.isVirtual()){
+                        hostTile.getHost().setVirtual(true);
+                    }
+                    flow.drawNode(nodeTile, hostTile);
                 }
 
                 if (node.isChanged()) {
-                    redrawNode(node);
+                    flow.redrawNode(node);
                 }
             }
         }
     }
 
-    private void drawHost(Host host) {
-        Tile hostTile = new Tile(host);
-        flow.drawHost(host, hostTile);
-
-    }
-
-    private void redrawNode(Node node) {
-        flow.redrawNode(node);
-    }
-
-    private void drawNode(Node node) {
-        Tile nodeTile = new Tile(node);
-        flow.drawNode(node, nodeTile);
-    }
-
-    private void drawDeployingNode(Node node) {
-        Tile nodeTile = new Tile(node);
-        flow.drawDeployingNode(node, nodeTile);
-    }
 
     private void processNodeSources(List<NodeSource> nodeSources) {
         for (NodeSource nodeSource : nodeSources) {
             if (nodeSource.isRemoved()) {
-                if (isNodeSourceDrawn(nodeSource)) {
-//                    flow.removeAllTiles(modelNodeSource);
+                if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
+                    flow.removeAllTiles(nodeSource);
                 }
             } else {
-                if (!isNodeSourceDrawn(nodeSource)) {
-                    drawNodeSource(nodeSource);
+                if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
+                    Tile nsTile = new Tile(nodeSource);
+                    flow.drawNodeSource(nsTile);
                 }
 
                 if (nodeSource.isChanged()) {
-                    redrawNodeSource(nodeSource);
+                    flow.redrawNodeSource(nodeSource);
                 }
             }
         }
     }
 
-    private void redrawNodeSource(NodeSource nodeSource) {
-        flow.redrawNodeSource(nodeSource);
-    }
 
-    private void drawNodeSource(NodeSource nodeSource) {
-        Tile nsTile = new Tile(nodeSource);
-        flow.drawNodeSource(nodeSource, nsTile);
-
-    }
 
     private void initializePanel() {
         this.flow = new CompactFlowPanel();
@@ -309,56 +254,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 .collect(Collectors.toList());
     }
 
-
-    /*
-     * create a copy of the original map containing only resources
-     * used by the current user
-     */
-    private Map<String, NodeSource> filterMyNodes(Map<String, NodeSource> origNodes) {
-
-        String username = LoginModel.getInstance().getLogin();
-
-        Map<String, NodeSource> myNodesNsMap = new HashMap<>();
-        for (String nsid : origNodes.keySet()) {
-            NodeSource origNs = origNodes.get(nsid);
-            NodeSource myNodesNs = null;
-            if (!usedBy(origNs, username)) {
-                continue;
-            } else {
-                myNodesNs = new NodeSource(origNs);
-                myNodesNsMap.put(nsid, myNodesNs);
-            }
-
-            // at this point, at least one node of this ns is being used
-
-            Iterator<String> hostsIt = myNodesNs.getHosts().keySet().iterator();
-            while (hostsIt.hasNext()) {
-                String hostid = hostsIt.next();
-                Host host = myNodesNs.getHosts().get(hostid);
-                if (!usedBy(host, username)) {
-                    hostsIt.remove();
-                    continue;
-                }
-
-                Iterator<String> nodesIt = host.getNodes().keySet().iterator();
-                while (nodesIt.hasNext()) {
-                    String nodeid = nodesIt.next();
-                    Node node = host.getNodes().get(nodeid);
-                    if (!usedBy(node, username)) {
-                        nodesIt.remove();
-                        continue;
-                    } else {
-                        // node used by the logged user found!
-                    }
-                }
-            }
-        }
-        return myNodesNsMap;
-    }
-
-    private boolean isNodeDrawn(Node node) {
-        return flow.isNodeDrawn(node);
-    }
 
     private boolean isNodeSourceDrawn(NodeSource nodeSource) {
         return isNodeSourceDrawn(nodeSource.getSourceName());
@@ -544,6 +439,18 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             init();
         }
 
+        public Node getNode() {
+            return node;
+        }
+
+        public Host getHost() {
+            return host;
+        }
+
+        public NodeSource getNodesource() {
+            return nodesource;
+        }
+
         public void refresh(Node n) {
             this.node = n;
             this.setUrl(n.getIcon());
@@ -582,9 +489,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             if (host != null || nodesource != null) {
                 int id;
                 if (host == null) {
-                    id = CompactView.this.flow.indexOfNodeSource(nodesource);
+                    id = CompactView.this.flow.indexOf(nodesource).get();
                 } else {
-                    id = CompactView.this.flow.indexOfHost(host);
+                    id = CompactView.this.flow.indexOf(host).get();
                 }
 
                 while (true) {

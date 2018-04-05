@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
@@ -48,11 +47,10 @@ public class CompactFlowPanel extends FlowPanel {
         this.getElement().getStyle().setProperty("lineHeight", "0");
     }
 
-    public void drawNodeSource(NodeSource nodeSource, CompactView.Tile nsTile) {
+    public void drawNodeSource(CompactView.Tile nsTile) {
         int index = size();
         this.insert(nsTile, index);
-        LogModel.getInstance().logMessage("drawNodeSource " + index);
-        model.add(new HierarchyNodeSource(nodeSource));
+        model.add(new HierarchyNodeSource(nsTile.getNodesource()));
     }
 
     private int size() {
@@ -82,80 +80,39 @@ public class CompactFlowPanel extends FlowPanel {
     public boolean isNodeDrawn(NodeSource.Host.Node node) {
         return indexOf(node).isPresent();
     }
-    public Optional<Integer> indexOf(NodeSource.Host.Node node) {
-        int index = 0;
-        for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
-                ++index;
-                if (node.isDeployingNode()) {
-                    for (NodeSource.Host.Node existingNode : hierarchyNodeSource.getDeploying()) {
-                        if (existingNode.equals(node)) {
-                            return Optional.of(index);
-                        } else {
-                            ++index;
-                        }
-                    }
-                } else {
-                    index += hierarchyNodeSource.getDeploying().size();
-                    for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
-                        if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
-                            ++index;
-                            for (NodeSource.Host.Node existingNode : hierarchyHost.getNodes()) {
-                                if (existingNode.equals(node)) {
-                                    return Optional.of(index);
-                                } else {
-                                    ++index;
-                                }
-                            }
-                            return Optional.empty();
-                        } else {
-                            index += hierarchyHost.getTiles();
-                        }
-                    }
-
-                }
-                return Optional.empty();
-            } else {
-                index += hierarchyNodeSource.getTiles();
-            }
-        }
-        return Optional.empty();
-    }
-
     public void redrawNode(NodeSource.Host.Node node) {
         int index = indexOf(node).get();
         CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
         nt.refresh(node);
     }
 
-    public void drawNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
-        if(node.isDeployingNode()){
-            drawDeployingNode(node, nodeTile);
+    public void drawNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
+        if(nodeTile.getNode().isDeployingNode()){
+            drawDeployingNode(nodeTile);
         } else {
-            drawNormalNode(node, nodeTile);
+            drawNormalNode(nodeTile, hostTile);
         }
     }
 
-    public void drawNormalNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
+    private void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
                 ++index;
                 index += hierarchyNodeSource.getDeploying().size();
 
                 int indexOfFirstHost = index;
 
                 for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
-                    if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                    if (hierarchyHost.getHost().getHostName().equals(nodeTile.getNode().getHostName())) {
                         ++index;
 
                         hierarchyNodeSource.incrementTiles();
                         hierarchyHost.incrementTiles();
 
-                        hierarchyHost.getNodes().add(0, node);
+                        hierarchyHost.getNodes().add(0, nodeTile.getNode());
 
                         this.insert(nodeTile, index);
-                        LogModel.getInstance().logMessage("drawNode " + index);
                         return;
                     } else {
                         index += hierarchyHost.getTiles();
@@ -164,8 +121,17 @@ public class CompactFlowPanel extends FlowPanel {
 
                 // if we are here than there is no host for this node yet
                 // thus we will add it and node after
+                hierarchyNodeSource.incrementTiles();
+                final HierarchyHost hierarchyHost = new HierarchyHost(hostTile.getHost());
+                hierarchyNodeSource.getHosts().add(0, hierarchyHost);
+                this.insert(hostTile, indexOfFirstHost);
 
+                hierarchyNodeSource.incrementTiles();
+                hierarchyHost.incrementTiles();
+                hierarchyHost.getNodes().add(0, nodeTile.getNode());
+                this.insert(nodeTile, indexOfFirstHost + 1);
 
+                return;
 
             } else {
                 index += hierarchyNodeSource.getTiles();
@@ -173,37 +139,17 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void drawDeployingNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
+    private void drawDeployingNode(CompactView.Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
                 ++index;
 
                 hierarchyNodeSource.incrementTiles();
 
-                hierarchyNodeSource.getDeploying().add(0, node);
+                hierarchyNodeSource.getDeploying().add(0, nodeTile.getNode());
 
                 this.insert(nodeTile, index);
-                return;
-            } else {
-                index += hierarchyNodeSource.getTiles();
-            }
-        }
-    }
-
-    public void drawHost(NodeSource.Host host, CompactView.Tile hostTile) {
-        int index = 0;
-        for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
-                ++index;
-                index += hierarchyNodeSource.getDeploying().size();
-
-                hierarchyNodeSource.incrementTiles();
-
-                hierarchyNodeSource.getHosts().add(0, new HierarchyHost(host));
-
-                this.insert(hostTile, index);
-                LogModel.getInstance().logMessage("drawHost " + index);
                 return;
             } else {
                 index += hierarchyNodeSource.getTiles();
@@ -217,7 +163,6 @@ public class CompactFlowPanel extends FlowPanel {
         while (iterator.hasNext()) {
             final HierarchyNodeSource hierarchyNodeSource = iterator.next();
             if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
-                LogModel.getInstance().logMessage("remove " + hierarchyNodeSource.getTiles() + " from " + index);
                 for (int i = 0; i < hierarchyNodeSource.getTiles(); ++i) {
                     remove(index);
                 }
@@ -293,7 +238,19 @@ public class CompactFlowPanel extends FlowPanel {
 
     }
 
-    public int indexOfHost(NodeSource.Host host) {
+    public Optional<Integer> indexOf(NodeSource ns) {
+        int index = 0;
+        for (HierarchyNodeSource hierarchyNodeSource : model) {
+            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(ns.getSourceName())) {
+                return Optional.of(index);
+            } else {
+                index += hierarchyNodeSource.getTiles();
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Integer> indexOf(NodeSource.Host host) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
@@ -301,7 +258,7 @@ public class CompactFlowPanel extends FlowPanel {
                 index += hierarchyNodeSource.getDeploying().size();
                 for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
                     if (hierarchyHost.getHost().getHostName().equals(host.getHostName())) {
-                        return index;
+                        return Optional.of(index);
                     } else {
                         index += hierarchyHost.getTiles();
                     }
@@ -312,51 +269,49 @@ public class CompactFlowPanel extends FlowPanel {
             }
         }
 
-        return -1;
+        return Optional.empty();
     }
 
-    public int indexOfNodeSource(NodeSource ns) {
-        int index = 0;
-        for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(ns.getSourceName())) {
-                return index;
-            } else {
-                index += hierarchyNodeSource.getTiles();
-            }
-        }
-        return -1;
-    }
-
-    public int indexOfNode(NodeSource.Host.Node node) {
+    public Optional<Integer> indexOf(NodeSource.Host.Node node) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
                 ++index;
-                index += hierarchyNodeSource.getDeploying().size();
-                for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
-                    if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
-                        ++index;
-
-                        for (NodeSource.Host.Node existingNode : hierarchyHost.getNodes()) {
-                            if (existingNode.getNodeUrl().equals(node.getNodeUrl())) {
-                                return index;
-                            } else {
-                                ++index;
-                            }
+                if (node.isDeployingNode()) {
+                    for (NodeSource.Host.Node existingNode : hierarchyNodeSource.getDeploying()) {
+                        if (existingNode.equals(node)) {
+                            return Optional.of(index);
+                        } else {
+                            ++index;
                         }
-
-                    } else {
-                        index += hierarchyHost.getTiles();
                     }
-                }
+                } else {
+                    index += hierarchyNodeSource.getDeploying().size();
+                    for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                        if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
+                            ++index;
+                            for (NodeSource.Host.Node existingNode : hierarchyHost.getNodes()) {
+                                if (existingNode.equals(node)) {
+                                    return Optional.of(index);
+                                } else {
+                                    ++index;
+                                }
+                            }
+                            return Optional.empty();
+                        } else {
+                            index += hierarchyHost.getTiles();
+                        }
+                    }
 
+                }
+                return Optional.empty();
             } else {
                 index += hierarchyNodeSource.getTiles();
             }
         }
-
-        return -1;
+        return Optional.empty();
     }
+
 }
 
 class HierarchyNodeSource {
