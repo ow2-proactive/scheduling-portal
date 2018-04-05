@@ -40,6 +40,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceEditWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,11 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
+        boolean nodeSourceEdited = false;
+
+        // in case of node source edit, we need to know if we take the
+        // previous value of a file parameter or if we load a new file
+        boolean takeInlineContent = true;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -96,44 +102,58 @@ public class NSCreationServlet extends HttpServlet {
             List<?> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
-                String fieldName = fi.getFieldName();
-                if (fi.isFormField()) {
-                    if (fieldName.equals("sessionId")) {
-                        sessionId = fi.getString();
-                    } else if (fieldName.equals("nsCallback")) {
-                        callbackName = fi.getString();
-                    } else if (fieldName.equals("nsName")) {
-                        nsName = fi.getString();
-                    } else if (fieldName.equals("nodesRecoverable")) {
-                        nodesRecoverable = fi.getString();
-                    } else if (fieldName.equals("deploy")) {
-                        if (fi.getString().equals(Boolean.TRUE.toString())) {
+                FileItem formField = (FileItem) i.next();
+                String formFieldName = formField.getFieldName();
+                if (formField.isFormField()) {
+                    String formFieldValue = formField.getString();
+                    if (formFieldName.equals("sessionId")) {
+                        sessionId = formFieldValue;
+                    } else if (formFieldName.equals("nsCallback")) {
+                        callbackName = formFieldValue;
+                    } else if (formFieldName.equals("nsName")) {
+                        nsName = formFieldValue;
+                    } else if (formFieldName.equals("nodesRecoverable")) {
+                        nodesRecoverable = formFieldValue;
+                    } else if (formFieldName.equals("deploy")) {
+                        if (formFieldValue.equals(Boolean.TRUE.toString())) {
                             deployNodeSource = true;
                         }
-                    } else if (fieldName.equals("infra")) {
-                        infra = fi.getString();
+                    } else if (formFieldName.equals("nodeSourceEdited")) {
+                        nodeSourceEdited = Boolean.valueOf(formFieldValue);
+                    } else if (formFieldName.equals("infra")) {
+                        infra = formFieldValue;
                         readingInfraParams = true;
-                    } else if (fieldName.equals("policy")) {
-                        policy = fi.getString();
+                    } else if (formFieldName.equals("policy")) {
+                        policy = formFieldValue;
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        infraParams.add(fi.getString());
+                        if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+                            takeInlineContent = formFieldValue.endsWith(NodeSourceEditWindow.EDIT_RADIO_OPTION_NAME);
+                        } else if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                            if (takeInlineContent) {
+                                infraFileParams.add(formFieldValue);
+                            }
+                        } else {
+                            infraParams.add(formFieldValue);
+                        }
                     } else if (readingPolicyParams) {
-                        policyParams.add(fi.getString());
+                        policyParams.add(formFieldValue);
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 } else {
                     if (readingInfraParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
-                        infraFileParams.add(new String(bytes));
+                        if (!takeInlineContent) {
+                            byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                            infraFileParams.add(new String(bytes));
+                            takeInlineContent = true;
+                        }
                     } else if (readingPolicyParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 }
             }
@@ -150,15 +170,28 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                       nsName,
-                                                                                       infra,
-                                                                                       toArray(infraParams),
-                                                                                       toArray(infraFileParams),
-                                                                                       policy,
-                                                                                       toArray(policyParams),
-                                                                                       toArray(policyFileParams),
-                                                                                       nodesRecoverable);
+            String jsonResult;
+            if (nodeSourceEdited) {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
+                                                                                  nsName,
+                                                                                  infra,
+                                                                                  toArray(infraParams),
+                                                                                  toArray(infraFileParams),
+                                                                                  policy,
+                                                                                  toArray(policyParams),
+                                                                                  toArray(policyFileParams),
+                                                                                  nodesRecoverable);
+            } else {
+                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                    nsName,
+                                                                                    infra,
+                                                                                    toArray(infraParams),
+                                                                                    toArray(infraFileParams),
+                                                                                    policy,
+                                                                                    toArray(policyParams),
+                                                                                    toArray(policyFileParams),
+                                                                                    nodesRecoverable);
+            }
 
             if (deployNodeSource) {
                 jsonResult = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);

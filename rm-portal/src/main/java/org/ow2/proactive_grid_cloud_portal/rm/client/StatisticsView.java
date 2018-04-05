@@ -197,14 +197,14 @@ public class StatisticsView implements NodesListener {
         ListGridRecord r12 = new ListGridRecord();
         r12.setAttribute("status", "Deployed");
         r12.setAttribute("type", "Node Sources");
-        r12.setAttribute("icon", RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
+        r12.setAttribute("icon", RMImages.instance.nodesource_deployed().getSafeUri().asString());
         r12.setAttribute("count", controller.getModel().getNumDeployedNodeSources());
         r[12] = r12;
 
         ListGridRecord r13 = new ListGridRecord();
         r13.setAttribute("status", "Undeployed");
         r13.setAttribute("type", "Node Sources");
-        r13.setAttribute("icon", RMImages.instance.nodesource_undeployed_16().getSafeUri().asString());
+        r13.setAttribute("icon", RMImages.instance.nodesource_undeployed().getSafeUri().asString());
         r13.setAttribute("count", controller.getModel().getNumUndeployedNodeSources());
         r[13] = r13;
 

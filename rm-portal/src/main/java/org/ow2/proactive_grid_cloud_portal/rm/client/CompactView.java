@@ -54,6 +54,7 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
+import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 
 
 /**
@@ -267,17 +268,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 }
             }
             this.root.addMember(this.flow);
-            this.root.addResizedHandler(new ResizedHandler() {
-                @Override
-                public void onResized(ResizedEvent event) {
-                    int w = root.getWidth();
-                    int h = root.getHeight();
-                    flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
+            this.root.addResizedHandler(event -> {
+                int w = root.getWidth();
+                int h = root.getHeight();
+                flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
 
-                    // lazy hack to force this.flow to -really- relayout
-                    root.setBorder(_borderSwitch ? "1px solid white" : "0px");
-                    _borderSwitch = !_borderSwitch;
-                }
+                // lazy hack to force this.flow to -really- relayout
+                root.setBorder(_borderSwitch ? "1px solid white" : "0px");
+                _borderSwitch = !_borderSwitch;
             });
         } else {
             /* for each new nodesource */
@@ -295,7 +293,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     this.curTiles.add(i, nsName);
                 } else {
                     /* node source update */
-                    if (oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus())) {
+                    if (!oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus()) ||
+                        !oldNs.getSourceDescription().equals(ns.getSourceDescription())) {
                         int i = this.curTiles.indexOf(nsName);
                         NodeTile nt = ((NodeTile) this.flow.getWidget(i));
                         nt.refresh(ns);
@@ -450,10 +449,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
                     String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                     String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-                    String deployItemImageResource = RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
-                    String undeployItemImageResource = RMImages.instance.nodesource_undeployed_16()
+                    String deployItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
+                    String undeployItemImageResource = RMImages.instance.nodesource_undeployed()
                                                                         .getSafeUri()
                                                                         .asString();
+                    String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
 
                     if (node != null) {
                         controller.selectNode(node);
@@ -485,6 +485,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
                     undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
 
+                    MenuItem editItem = new MenuItem("Edit", editItemImageResource);
+                    String nodeSourceName = nodesource == null ? "" : nodesource.getSourceName();
+                    editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
+
                     if (node != null) {
                         if (node.isLocked()) {
                             lockItem.setEnabled(false);
@@ -498,21 +502,27 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                     if (nodesource != null) {
                         switch (nodesource.getNodeSourceStatus()) {
                             case NODES_DEPLOYED:
-                                deployItem.setEnabled(false);
-                                undeployItem.setEnabled(true);
+                                enableItems(new MenuItem[] { undeployItem });
+                                disableItems(new MenuItem[] { deployItem, editItem });
                                 break;
                             case NODES_UNDEPLOYED:
-                                deployItem.setEnabled(true);
-                                undeployItem.setEnabled(false);
+                                enableItems(new MenuItem[] { deployItem, editItem });
+                                disableItems(new MenuItem[] { undeployItem });
                                 break;
                             default:
-                                disableNodeSourceDeploymentItems(deployItem, undeployItem);
+                                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                         }
                     } else {
-                        disableNodeSourceDeploymentItems(deployItem, undeployItem);
+                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                     }
 
-                    menu.setItems(deployItem, undeployItem, lockItem, unlockItem, removeItem);
+                    menu.setItems(deployItem,
+                                  undeployItem,
+                                  editItem,
+                                  new MenuItemSeparator(),
+                                  lockItem,
+                                  unlockItem,
+                                  removeItem);
 
                     menu.moveTo(event.getClientX(), event.getClientY());
                     menu.show();
@@ -526,9 +536,16 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             }
         }
 
-        private void disableNodeSourceDeploymentItems(MenuItem deployItem, MenuItem undeployItem) {
-            deployItem.setEnabled(false);
-            undeployItem.setEnabled(false);
+        private void disableItems(MenuItem[] items) {
+            for (MenuItem item : items) {
+                item.setEnabled(false);
+            }
+        }
+
+        private void enableItems(MenuItem[] items) {
+            for (MenuItem item : items) {
+                item.setEnabled(true);
+            }
         }
 
         private void init() {
