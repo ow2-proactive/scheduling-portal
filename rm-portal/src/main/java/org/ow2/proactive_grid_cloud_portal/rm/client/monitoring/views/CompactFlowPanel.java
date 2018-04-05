@@ -93,6 +93,7 @@ public class CompactFlowPanel extends FlowPanel {
                         }
                     }
                 } else {
+                    index += hierarchyNodeSource.getDeploying().size();
                     for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
                         if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
                             ++index;
@@ -122,6 +123,7 @@ public class CompactFlowPanel extends FlowPanel {
         int index = isNodeDrawn(node).get();
         CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
         nt.refresh(node);
+        LogModel.getInstance().logMessage("redraw " + index);
     }
 
     public void drawNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
@@ -142,7 +144,7 @@ public class CompactFlowPanel extends FlowPanel {
 
                         this.insert(nodeTile, index);
                         LogModel.getInstance().logMessage("drawNode " + index);
-
+                        return;
                     } else {
                         index += hierarchyHost.getTiles();
                     }
@@ -164,8 +166,9 @@ public class CompactFlowPanel extends FlowPanel {
 
                 hierarchyNodeSource.getDeploying().add(0, node);
 
-                LogModel.getInstance().logMessage("drawDeployingNode " + index);
+                LogModel.getInstance().logMessage("drawDeploying " + index);
                 this.insert(nodeTile, index);
+                return;
             } else {
                 index += hierarchyNodeSource.getTiles();
             }
@@ -185,7 +188,7 @@ public class CompactFlowPanel extends FlowPanel {
 
                 this.insert(hostTile, index);
                 LogModel.getInstance().logMessage("drawHost " + index);
-
+                return;
             } else {
                 index += hierarchyNodeSource.getTiles();
             }
@@ -204,6 +207,7 @@ public class CompactFlowPanel extends FlowPanel {
                 }
 
                 iterator.remove();
+                return;
             } else {
                 index += hierarchyNodeSource.getTiles();
             }

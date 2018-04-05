@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;

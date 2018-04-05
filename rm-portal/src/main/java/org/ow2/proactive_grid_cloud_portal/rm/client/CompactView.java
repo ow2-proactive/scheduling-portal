@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -150,6 +151,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             int numPerLine = flow.getElement().getClientWidth() / 20;
             if (numPerLine > 0) {
                 int height = 20 * (id / numPerLine);
+                LogModel.getInstance().logMessage("scroll to " + height + " " + numPerLine);
                 this.root.scrollTo(0, height);
             }
         }
@@ -293,6 +295,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private void drawNodeSource(NodeSource nodeSource) {
         Tile nsTile = new Tile(nodeSource);
         flow.drawNodeSource(nodeSource, nsTile);
+
     }
 
     private void initializePanel() {
@@ -301,6 +304,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         this.model = new HashMap<>();
 
         this.root.addMember(this.flow);
+
         this.root.addResizedHandler(event -> {
             int w = root.getWidth();
             int h = root.getHeight();

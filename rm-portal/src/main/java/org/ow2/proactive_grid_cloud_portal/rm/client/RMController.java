@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -573,6 +574,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         model.setNodes(newNodeSources);
         model.nodesUpdate(newNodeSources);
         model.updateByDelta(nodeSourceList, nodeList);
+
 
         recalculatePhysicalVirtualHosts();
 
