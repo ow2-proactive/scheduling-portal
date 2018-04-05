@@ -90,6 +90,7 @@ public class CompactFlowPanel extends FlowPanel {
     public boolean isNodeDrawn(NodeSource.Host.Node node) {
         return indexOf(node).isPresent();
     }
+
     public void redrawNode(NodeSource.Host.Node node) {
         int index = indexOf(node).get();
         CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
@@ -97,7 +98,7 @@ public class CompactFlowPanel extends FlowPanel {
     }
 
     public void drawNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
-        if(nodeTile.getNode().isDeployingNode()){
+        if (nodeTile.getNode().isDeployingNode()) {
             drawDeployingNode(nodeTile);
         } else {
             drawNormalNode(nodeTile, hostTile);
@@ -207,7 +208,7 @@ public class CompactFlowPanel extends FlowPanel {
                 } else {
                     index += hierarchyNodeSource.getDeploying().size();
                     final Iterator<HierarchyHost> hostIterator = hierarchyNodeSource.getHosts().iterator();
-                    while(hostIterator.hasNext()){
+                    while (hostIterator.hasNext()) {
                         final HierarchyHost hierarchyHost = hostIterator.next();
                         if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
                             ++index;
@@ -222,7 +223,7 @@ public class CompactFlowPanel extends FlowPanel {
                                     this.remove(index);
 
                                     // remove dangling host
-                                    if(hierarchyHost.getNodes().isEmpty()){
+                                    if (hierarchyHost.getNodes().isEmpty()) {
                                         hostIterator.remove();
                                         hierarchyNodeSource.decrementTiles();
                                         this.remove(index - 1);

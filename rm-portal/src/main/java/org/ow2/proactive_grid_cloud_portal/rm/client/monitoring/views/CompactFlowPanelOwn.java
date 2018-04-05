@@ -25,15 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class CompactFlowPanelOwn extends CompactFlowPanel {
+import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
+
+public class CompactFlowPanelOwn extends CompactFlowPanel {
 
     private Map<String, CompactView.Tile> nodeSourceTiles = new HashMap<>();
 
@@ -74,7 +74,6 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
             this.insert(nsTile, size());
             model.add(new HierarchyNodeSource(nsTile.getNodesource()));
         }
-
 
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
@@ -123,7 +122,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
     public void remove(NodeSource.Host.Node node) {
         int index = 0;
         final Iterator<HierarchyNodeSource> nsIterator = model.iterator();
-        while(nsIterator.hasNext()){
+        while (nsIterator.hasNext()) {
             final HierarchyNodeSource hierarchyNodeSource = nsIterator.next();
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
                 ++index;
@@ -150,13 +149,11 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
                                     this.remove(index - 1);
                                 }
 
-
                                 // remove dangling nodesource
-                                if(hierarchyNodeSource.getHosts().isEmpty()){
+                                if (hierarchyNodeSource.getHosts().isEmpty()) {
                                     nsIterator.remove();
                                     this.remove(index - 2);
                                 }
-
 
                                 return;
                             } else {
