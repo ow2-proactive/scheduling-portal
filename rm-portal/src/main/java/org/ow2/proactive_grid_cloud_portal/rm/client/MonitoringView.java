@@ -114,7 +114,7 @@ public class MonitoringView implements NodesListener, NodeSelectedListener {
         this.sourceCanvas.setWidth100();
         this.sourceCanvas.setHeight100();
         this.sourceLabel = new Label();
-        this.sourceLabel.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
+        this.sourceLabel.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         this.sourceLabel.setHeight(16);
         this.sourceCanvas.addMember(sourceLabel);
         this.sourceCanvas.addMember(sourceMonitoring);

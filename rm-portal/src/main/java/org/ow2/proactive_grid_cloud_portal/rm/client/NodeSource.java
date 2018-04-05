@@ -154,9 +154,9 @@ public class NodeSource {
 
     public String getIcon() {
         if (nodeSourceStatus.equals(NodeSourceStatus.NODES_DEPLOYED)) {
-            return RMImages.instance.nodesource_deployed_16().getSafeUri().asString();
+            return RMImages.instance.nodesource_deployed().getSafeUri().asString();
         } else {
-            return RMImages.instance.nodesource_undeployed_16().getSafeUri().asString();
+            return RMImages.instance.nodesource_undeployed().getSafeUri().asString();
         }
     }
 

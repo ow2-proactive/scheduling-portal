@@ -100,6 +100,20 @@ public interface RMService extends RemoteService {
     String getPolicies(String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * Retrieve the configuration of a given node source, in other words, a
+     * representation of all the parameters with which a node source was
+     * configured.
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to get the configuration from
+     * @return a JSON object containing the current node source configuration
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException;
+
+    /**
      * Defines a NodeSource
      * @param sessionId current session
      * @param nodeSourceName name of the new NS
@@ -114,6 +128,25 @@ public interface RMService extends RemoteService {
      * @throws ServiceException
      */
     String defineNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Edit a NodeSource
+     * @param sessionId current session
+     * @param nodeSourceName name of the NS to edit
+     * @param infrastructureType infrastructure manager full class name
+     * @param infrastructureParameters IM String parameters, null value for files
+     * @param infrastructureFileParameters file parameters
+     * @param policyType policy full class name
+     * @param policyParameters String parameters, null value for files
+     * @param policyFileParameters file parameters
+     * @param nodesRecoverable whether nodes can be recovered after a crash
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String editNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
             throws RestServerException, ServiceException;

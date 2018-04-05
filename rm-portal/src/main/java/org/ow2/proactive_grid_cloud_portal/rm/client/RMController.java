@@ -867,6 +867,55 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
+    /**
+     * Fetch and store in the model the current configuration of a node source
+     *
+     * @param success call this when it's done
+     * @param failure call this if it fails
+     */
+    public void fetchNodeSourceConfiguration(String nodeSourceName, Runnable success, Runnable failure) {
+
+        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                      nodeSourceName,
+                                      new AsyncCallback<String>() {
+
+                                          public void onSuccess(String result) {
+                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
+                                              success.run();
+                                          }
+
+                                          public void onFailure(Throwable caught) {
+                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
+                                                      ":<br>" + msg);
+                                              failure.run();
+                                          }
+                                      });
+    }
+
+    private NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
+
+        JSONObject jsonObject = this.parseJSON(json).isObject();
+
+        String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
+
+        boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
+
+        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
+        PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
+                                                                              infrastructurePluginName);
+
+        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
+        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+        PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
+
+        return new NodeSourceConfiguration(nodeSourceName,
+                                           nodesRecoverable,
+                                           infrastructurePluginDescriptor,
+                                           policyPluginDescriptor);
+    }
+
     private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
         JSONArray arr = this.parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<String, PluginDescriptor>();
@@ -875,37 +924,45 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject p = arr.get(i).isObject();
 
             String pluginName = p.get("pluginName").isString().stringValue();
-            String pluginDescription = p.get("pluginDescription").isString().stringValue();
-            PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
-
-            JSONArray fields = p.get("configurableFields").isArray();
-            for (int j = 0; j < fields.size(); j++) {
-                JSONObject field = fields.get(j).isObject();
-
-                String name = field.get("name").isString().stringValue();
-                String value = field.get("value").isString().stringValue();
-
-                JSONObject meta = field.get("meta").isObject();
-                String metaType = meta.get("type").isString().stringValue();
-                String descr = meta.get("description").isString().stringValue();
-
-                boolean pass = false, cred = false, file = false;
-                if (metaType.equalsIgnoreCase("password"))
-                    pass = true;
-                else if (metaType.equalsIgnoreCase("fileBrowser"))
-                    file = true;
-                else if (metaType.equalsIgnoreCase("credential"))
-                    cred = true;
-
-                Field f = new PluginDescriptor.Field(name, value, descr, pass, cred, file);
-
-                desc.getConfigurableFields().add(f);
-            }
+            PluginDescriptor desc = getPluginDescriptor(p, pluginName);
 
             plugins.put(pluginName, desc);
         }
 
         return plugins;
+    }
+
+    private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
+        String pluginDescription = p.get("pluginDescription").isString().stringValue();
+        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
+
+        JSONArray fields = p.get("configurableFields").isArray();
+        for (int j = 0; j < fields.size(); j++) {
+            JSONObject field = fields.get(j).isObject();
+
+            String name = field.get("name").isString().stringValue();
+            String value = field.get("value").isString().stringValue();
+
+            JSONObject meta = field.get("meta").isObject();
+            String metaType = meta.get("type").isString().stringValue();
+            String descr = meta.get("description").isString().stringValue();
+
+            boolean password = false;
+            boolean credentials = false;
+            boolean file = false;
+
+            if (metaType.equalsIgnoreCase("password"))
+                password = true;
+            else if (metaType.equalsIgnoreCase("fileBrowser"))
+                file = true;
+            else if (metaType.equalsIgnoreCase("credential"))
+                credentials = true;
+
+            Field f = new Field(name, value, descr, password, credentials, file);
+
+            desc.getConfigurableFields().add(f);
+        }
+        return desc;
     }
 
     /**
@@ -1043,6 +1100,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
         }
+    }
+
+    public void editNodeSource(String nodeSourceName) {
+        this.rmPage.showNodeSourceEditWindow(nodeSourceName);
     }
 
     /**
