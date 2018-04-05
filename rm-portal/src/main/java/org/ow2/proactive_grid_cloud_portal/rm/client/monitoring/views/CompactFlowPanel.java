@@ -79,7 +79,10 @@ public class CompactFlowPanel extends FlowPanel {
                                                                                  .equals(sourceName));
     }
 
-    public Optional<Integer> isNodeDrawn(NodeSource.Host.Node node) {
+    public boolean isNodeDrawn(NodeSource.Host.Node node) {
+        return indexOf(node).isPresent();
+    }
+    public Optional<Integer> indexOf(NodeSource.Host.Node node) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
@@ -120,18 +123,27 @@ public class CompactFlowPanel extends FlowPanel {
     }
 
     public void redrawNode(NodeSource.Host.Node node) {
-        int index = isNodeDrawn(node).get();
+        int index = indexOf(node).get();
         CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
         nt.refresh(node);
-        LogModel.getInstance().logMessage("redraw " + index);
     }
 
     public void drawNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
+        if(node.isDeployingNode()){
+            drawDeployingNode(node, nodeTile);
+        } else {
+            drawNormalNode(node, nodeTile);
+        }
+    }
+
+    public void drawNormalNode(NodeSource.Host.Node node, CompactView.Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
                 ++index;
                 index += hierarchyNodeSource.getDeploying().size();
+
+                int indexOfFirstHost = index;
 
                 for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
                     if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
@@ -150,6 +162,11 @@ public class CompactFlowPanel extends FlowPanel {
                     }
                 }
 
+                // if we are here than there is no host for this node yet
+                // thus we will add it and node after
+
+
+
             } else {
                 index += hierarchyNodeSource.getTiles();
             }
@@ -166,7 +183,6 @@ public class CompactFlowPanel extends FlowPanel {
 
                 hierarchyNodeSource.getDeploying().add(0, node);
 
-                LogModel.getInstance().logMessage("drawDeploying " + index);
                 this.insert(nodeTile, index);
                 return;
             } else {
@@ -214,35 +230,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void removeTile(NodeSource.Host host) {
-        LogModel.getInstance().logMessage("call removeHost " + host);
-        int index = 0;
-        for (HierarchyNodeSource hierarchyNodeSource : model) {
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(host.getSourceName())) {
-                ++index;
-                final Iterator<HierarchyHost> iterator = hierarchyNodeSource.getHosts().iterator();
-                while (iterator.hasNext()) {
-                    final HierarchyHost existedHost = iterator.next();
-                    if (existedHost.getHost().equals(host)) {
-                        iterator.remove();
-                        hierarchyNodeSource.decrementTiles();
-                        this.remove(index);
-                        LogModel.getInstance().logMessage("removeHost " + index);
-                        return;
-                    } else {
-                        index += existedHost.getTiles();
-                    }
-                }
-
-            } else {
-                index += hierarchyNodeSource.getTiles();
-            }
-        }
-
-    }
-
-    public void removeTile(NodeSource.Host.Node node) {
-        LogModel.getInstance().logMessage("call removeNode " + node);
+    public void removeNode(NodeSource.Host.Node node) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
@@ -256,9 +244,6 @@ public class CompactFlowPanel extends FlowPanel {
                             iterator.remove();
                             hierarchyNodeSource.decrementTiles();
                             this.remove(index);
-                            LogModel.getInstance()
-                                    .logMessage("removeDeploying " + node.getNodeUrl() + " " + index +
-                                                " more deploying " + hierarchyNodeSource.getDeploying().size());
                             return;
                         } else {
                             ++index;
@@ -266,19 +251,28 @@ public class CompactFlowPanel extends FlowPanel {
                     }
 
                 } else {
-                    for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
+                    index += hierarchyNodeSource.getDeploying().size();
+                    final Iterator<HierarchyHost> hostIterator = hierarchyNodeSource.getHosts().iterator();
+                    while(hostIterator.hasNext()){
+                        final HierarchyHost hierarchyHost = hostIterator.next();
                         if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
                             ++index;
 
-                            final Iterator<NodeSource.Host.Node> iterator = hierarchyHost.getNodes().iterator();
-                            while (iterator.hasNext()) {
-                                final NodeSource.Host.Node existing = iterator.next();
+                            final Iterator<NodeSource.Host.Node> nodeIterator = hierarchyHost.getNodes().iterator();
+                            while (nodeIterator.hasNext()) {
+                                final NodeSource.Host.Node existing = nodeIterator.next();
                                 if (existing.equals(node)) {
-                                    iterator.remove();
+                                    nodeIterator.remove();
                                     hierarchyNodeSource.decrementTiles();
                                     hierarchyHost.decrementTiles();
                                     this.remove(index);
-                                    LogModel.getInstance().logMessage("removeNode " + node.getNodeUrl() + " " + index);
+
+                                    // remove dangling host
+                                    if(hierarchyHost.getNodes().isEmpty()){
+                                        hostIterator.remove();
+                                        hierarchyNodeSource.decrementTiles();
+                                        this.remove(index - 1);
+                                    }
                                     return;
                                 } else {
                                     ++index;
@@ -297,27 +291,6 @@ public class CompactFlowPanel extends FlowPanel {
             }
         }
 
-        LogModel.getInstance().logMessage("DIDNOT removeNode " + node.getNodeUrl() + " " + index);
-        print();
-    }
-
-    void print() {
-        int index = 0;
-        for (HierarchyNodeSource hierarchyNodeSource : model) {
-            LogModel.getInstance().logMessage(index++ + " " + hierarchyNodeSource.getNodeSource().getSourceName());
-
-            for (NodeSource.Host.Node node : hierarchyNodeSource.getDeploying()) {
-                LogModel.getInstance().logMessage(index++ + " " + node.getNodeUrl());
-            }
-
-            for (HierarchyHost hierarchyHost : hierarchyNodeSource.getHosts()) {
-                LogModel.getInstance().logMessage(index++ + " " + hierarchyHost.getHost().getHostName());
-
-                for (NodeSource.Host.Node node : hierarchyHost.getNodes()) {
-                    LogModel.getInstance().logMessage(index++ + " " + node.getNodeUrl());
-                }
-            }
-        }
     }
 
     public int indexOfHost(NodeSource.Host host) {
