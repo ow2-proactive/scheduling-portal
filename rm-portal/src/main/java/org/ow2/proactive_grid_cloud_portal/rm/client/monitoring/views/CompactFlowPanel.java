@@ -38,7 +38,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 public class CompactFlowPanel extends FlowPanel {
 
-    private List<HierarchyNodeSource> model = new LinkedList<>();
+    protected List<HierarchyNodeSource> model = new LinkedList<>();
+
+    private CompactView.Tile curSelTile;
 
     public CompactFlowPanel() {
         super();
@@ -47,13 +49,21 @@ public class CompactFlowPanel extends FlowPanel {
         this.getElement().getStyle().setProperty("lineHeight", "0");
     }
 
+    public CompactView.Tile getCurSelTile() {
+        return curSelTile;
+    }
+
+    public void setCurSelTile(CompactView.Tile curSelTile) {
+        this.curSelTile = curSelTile;
+    }
+
     public void drawNodeSource(CompactView.Tile nsTile) {
         int index = size();
         this.insert(nsTile, index);
         model.add(new HierarchyNodeSource(nsTile.getNodesource()));
     }
 
-    private int size() {
+    protected int size() {
         return model.stream().map(HierarchyNodeSource::getTiles).reduce((a, b) -> a + b).orElse(0);
     }
 
@@ -94,7 +104,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    private void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
+    protected void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
@@ -139,7 +149,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    private void drawDeployingNode(CompactView.Tile nodeTile) {
+    protected void drawDeployingNode(CompactView.Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
@@ -157,7 +167,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void removeAllTiles(NodeSource nodeSource) {
+    public void remove(NodeSource nodeSource) {
         int index = 0;
         final Iterator<HierarchyNodeSource> iterator = model.iterator();
         while (iterator.hasNext()) {
@@ -166,7 +176,6 @@ public class CompactFlowPanel extends FlowPanel {
                 for (int i = 0; i < hierarchyNodeSource.getTiles(); ++i) {
                     remove(index);
                 }
-
                 iterator.remove();
                 return;
             } else {
@@ -175,7 +184,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    public void removeNode(NodeSource.Host.Node node) {
+    public void remove(NodeSource.Host.Node node) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {

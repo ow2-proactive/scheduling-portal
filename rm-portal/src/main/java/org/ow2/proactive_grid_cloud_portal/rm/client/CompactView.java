@@ -25,9 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.smartgwt.client.widgets.WidgetCanvas;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -50,6 +54,7 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.CompactFlowPanelOwn;
 
 
 /**
@@ -70,7 +75,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private CompactFlowPanel flow;
 
     /* displays own nodes as a compact grid */
-    private CompactFlowPanel ownFlow;
+    private CompactFlowPanelOwn ownFlow;
+
+    private WidgetCanvas flowCanvas = null;
+
+    private WidgetCanvas ownFlowCanvas = null;
 
     private boolean _borderSwitch;
 
@@ -78,8 +87,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private static Layout globalHover = null;
 
-    /* currently selected tile */
-    private Tile curSelTile = null;
 
     /*
      * if view only my nodes is available (to see only nodes currently used by
@@ -103,51 +110,66 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     void setViewMyNodes(boolean value) {
-        this.onlyMyNodes = value;
-        this.root.clear();
+        onlyMyNodes = value;
+        if(onlyMyNodes){
+            root.removeMember(flowCanvas);
+            root.addMember(ownFlowCanvas);
+        } else {
+            root.removeMember(ownFlowCanvas);
+            root.addMember(flowCanvas);
+        }
+
     }
 
     @Override
     public void nodeUnselected() {
-        if (this.curSelTile != null) {
-            this.curSelTile.setSelectedTile(false);
-            this.curSelTile = null;
+        if (flow.getCurSelTile()!= null) {
+            flow.getCurSelTile().setSelectedTile(false);
+            flow.setCurSelTile(null);
         }
-    }
+        if (ownFlow.getCurSelTile()!= null) {
+            ownFlow.getCurSelTile().setSelectedTile(false);
+            ownFlow.setCurSelTile(null);
+        }
 
-    @Override
-    public void nodeSelected(Node node) {
-        changeSelection(flow.indexOf(node).get());
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
-        changeSelection(flow.indexOf(ns).get());
+        flow.indexOf(ns).ifPresent(integer -> changeSelection(flow, integer));
+        ownFlow.indexOf(ns).ifPresent(integer -> changeSelection(ownFlow, integer));
     }
 
     @Override
     public void hostSelected(Host h) {
-        changeSelection(flow.indexOf(h).get());
+        flow.indexOf(h).ifPresent(integer -> changeSelection(flow, integer));
+        ownFlow.indexOf(h).ifPresent(integer -> changeSelection(ownFlow, integer));
     }
 
-    private void changeSelection(int id) {
-        if (id < 0)
+    @Override
+    public void nodeSelected(Node node) {
+        flow.indexOf(node).ifPresent(integer -> changeSelection(flow, integer));
+        ownFlow.indexOf(node).ifPresent(integer -> changeSelection(ownFlow, integer));
+    }
+
+    private void changeSelection(CompactFlowPanel flow, int id) {
+        if (id < 0) {
             return;
+        }
 
-        Tile nt = (Tile) this.flow.getWidget(id);
+        Tile nt = (Tile) flow.getWidget(id);
 
-        if (this.curSelTile != null) {
-            this.curSelTile.setSelectedTile(false);
+        if (flow.getCurSelTile() != null) {
+            flow.getCurSelTile().setSelectedTile(false);
         }
         nt.setSelectedTile(true);
-        this.curSelTile = nt;
+        flow.setCurSelTile(nt);
 
         // attempt to scroll at the right position
         if (!_doNotScroll) {
             int numPerLine = flow.getElement().getClientWidth() / 20;
             if (numPerLine > 0) {
                 int height = 20 * (id / numPerLine);
-                LogModel.getInstance().logMessage("scroll to " + height + " " + numPerLine);
                 this.root.scrollTo(0, height);
             }
         }
@@ -155,7 +177,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     private boolean usedBy(Node n, String username) {
-        return username != null ? username.equals(n.getNodeOwner()) : false;
+        return username != null && username.equals(n.getNodeOwner());
     }
 
     @Override
@@ -164,18 +186,28 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         if (this.flow == null) {
             initializePanel();
         }
-        processNodeSources(nodeSources);
+        processNodeSources(flow, nodeSources);
 
-        processNodes(nodes);
+        processNodes(flow, nodes);
+
+        processNodeSources(ownFlow, nodeSources);
+
+        processNodes(ownFlow, filterOwnNodes(nodes));
+
+//         if ownFlow already have some nodes, but they do not became to us anymore, then delete them
+        filterOtherNodes(nodes).stream()
+                .filter(node -> ownFlow.isNodeDrawn(node))
+                .forEach(node -> ownFlow.remove(node));
+
 
     }
 
-    private void processNodes(List<Node> nodes) {
+    private void processNodes(CompactFlowPanel flow, List<Node> nodes) {
         for (Node node : nodes) {
             if (node.isRemoved()) {
                 if (flow.isNodeDrawn(node)
                         && flow.isNodeSourceDrawn(node.getSourceName())) {
-                    flow.removeNode(node);
+                    flow.remove(node);
                 }
             } else {
                 if (!flow.isNodeDrawn(node)) {
@@ -195,11 +227,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
 
-    private void processNodeSources(List<NodeSource> nodeSources) {
+    private void processNodeSources(CompactFlowPanel flow, List<NodeSource> nodeSources) {
         for (NodeSource nodeSource : nodeSources) {
             if (nodeSource.isRemoved()) {
                 if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
-                    flow.removeAllTiles(nodeSource);
+                    flow.remove(nodeSource);
                 }
             } else {
                 if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
@@ -217,12 +249,16 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
 
     private void initializePanel() {
-        this.flow = new CompactFlowPanel();
-        this.ownFlow = new CompactFlowPanel();
+        flow = new CompactFlowPanel();
+        ownFlow = new CompactFlowPanelOwn();
 
-        this.root.addMember(this.flow);
+        flowCanvas = new WidgetCanvas(flow);
+        ownFlowCanvas = new WidgetCanvas(ownFlow);
 
-        this.root.addResizedHandler(event -> {
+        root.addMember(flowCanvas);
+
+
+        root.addResizedHandler(event -> {
             int w = root.getWidth();
             int h = root.getHeight();
             flow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
@@ -233,7 +269,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             _borderSwitch = !_borderSwitch;
         });
 
-        this.root.addResizedHandler(event -> {
+        root.addResizedHandler(event -> {
             int w = root.getWidth();
             int h = root.getHeight();
             ownFlow.setPixelSize(w - root.getScrollbarSize(), h - root.getScrollbarSize());
@@ -246,7 +282,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
 
-    private List<Node> filterMyNodeSources(List<Node> nodes){
+    private List<Node> filterOwnNodes(List<Node> nodes){
         String username = LoginModel.getInstance().getLogin();
 
         return nodes.stream()
@@ -254,13 +290,12 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 .collect(Collectors.toList());
     }
 
+    private List<Node> filterOtherNodes(List<Node> nodes){
+        String username = LoginModel.getInstance().getLogin();
 
-    private boolean isNodeSourceDrawn(NodeSource nodeSource) {
-        return isNodeSourceDrawn(nodeSource.getSourceName());
-    }
-
-    private boolean isNodeSourceDrawn(String sourceName) {
-        return flow.isNodeSourceDrawn(sourceName);
+        return nodes.stream()
+                .filter(node -> !usedBy(node, username))
+                .collect(Collectors.toList());
     }
 
     public class Tile extends Image {
