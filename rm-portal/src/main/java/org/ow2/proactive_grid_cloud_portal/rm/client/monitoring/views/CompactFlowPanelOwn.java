@@ -33,8 +33,6 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
-import com.google.gwt.dev.util.collect.Lists;
-
 
 /**
  * It is flow panel to draw compact representation of hodesources/hosts/nodes
@@ -89,7 +87,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
             final CompactView.Tile nsTile = nodeSourceTiles.get(nodeTile.getNode().getSourceName());
             this.insert(nsTile, size());
             model.add(new HierarchyNodeSource(nsTile.getNodesource()));
-            Lists.sort(model, Comparator.comparing(a -> a.getNodeSource().getSourceName()));
+            model.sort(Comparator.comparing(a -> a.getNodeSource().getSourceName()));
         }
 
         for (HierarchyNodeSource hierarchyNodeSource : model) {
