@@ -88,10 +88,6 @@ public class NSCreationServlet extends HttpServlet {
         boolean deployNodeSource = false;
         boolean nodeSourceEdited = false;
 
-        // in case of node source edit, we need to know if we take the
-        // previous value of a file parameter or if we load a new file
-        boolean takeInlineContent = true;
-
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
             factory.setSizeThreshold(4096);
@@ -128,13 +124,9 @@ public class NSCreationServlet extends HttpServlet {
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
-                            takeInlineContent = formFieldValue.endsWith(NodeSourceEditWindow.EDIT_RADIO_OPTION_NAME);
-                        } else if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
-                            if (takeInlineContent) {
-                                infraFileParams.add(formFieldValue);
-                            }
-                        } else {
+                        if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                            infraFileParams.add(formFieldValue);
+                        } else if (!formFieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
                             infraParams.add(formFieldValue);
                         }
                     } else if (readingPolicyParams) {
@@ -144,11 +136,8 @@ public class NSCreationServlet extends HttpServlet {
                     }
                 } else {
                     if (readingInfraParams) {
-                        if (!takeInlineContent) {
-                            byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
-                            infraFileParams.add(new String(bytes));
-                            takeInlineContent = true;
-                        }
+                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                        infraFileParams.add(new String(bytes));
                     } else if (readingPolicyParams) {
                         byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         policyFileParams.add(new String(bytes));
