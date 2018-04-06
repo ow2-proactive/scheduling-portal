@@ -57,9 +57,21 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 public abstract class NodeSourceWindow {
 
+    private static final String NS_NAME_FORM_KEY = "nsName";
+
     private static final String NODES_RECOVERABLE_FORM_KEY = "nodesRecoverable";
 
-    private static final String NS_NAME_FORM_KEY = "nsName";
+    public static final String DEPLOY_FORM_KEY = "deploy";
+
+    public static final String NODE_SOURCE_EDITED_FORM_KEY = "nodeSourceEdited";
+
+    public static final String INFRASTRUCTURE_FORM_KEY = "infra";
+
+    public static final String POLICY_FORM_KEY = "policy";
+
+    public static final String SESSION_ID_FORM_KEY = "sessionId";
+
+    public static final String NS_CALLBACK_FORM_KEY = "nsCallback";
 
     protected RMController controller;
 
@@ -109,9 +121,9 @@ public abstract class NodeSourceWindow {
 
     protected ArrayList<FormItem> prepareFormItems() {
 
-        this.infrastructureSelectItem = new SelectItem("infra", "Infrastructure");
+        this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
-        this.policySelectItem = new SelectItem("policy", "Policy");
+        this.policySelectItem = new SelectItem(POLICY_FORM_KEY, "Policy");
         this.policySelectItem.setRequired(true);
 
         this.infrastructureSelectItem.setWidth(300);
@@ -119,10 +131,10 @@ public abstract class NodeSourceWindow {
 
         HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
         HiddenItem nodesRecoverable = new HiddenItem(NODES_RECOVERABLE_FORM_KEY);
-        HiddenItem deploy = new HiddenItem("deploy");
-        HiddenItem nodeSourceEdited = new HiddenItem("nodeSourceEdited");
-        HiddenItem callback = new HiddenItem("nsCallback");
-        HiddenItem session = new HiddenItem("sessionId");
+        HiddenItem deploy = new HiddenItem(DEPLOY_FORM_KEY);
+        HiddenItem nodeSourceEdited = new HiddenItem(NODE_SOURCE_EDITED_FORM_KEY);
+        HiddenItem callback = new HiddenItem(NS_CALLBACK_FORM_KEY);
+        HiddenItem session = new HiddenItem(SESSION_ID_FORM_KEY);
 
         ArrayList<FormItem> formItems = new ArrayList<>();
 
@@ -347,7 +359,7 @@ public abstract class NodeSourceWindow {
             TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonList,
             boolean nodeSourceEdited) {
 
-        nodeSourcePluginsForm.setValue("deploy", Boolean.TRUE.toString());
+        nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.TRUE.toString());
 
         prepareCreateOnlyFormAndSubmit(nodeSourceWindowLayout,
                                        nodeSourcePluginsWaitingLabel,
@@ -363,15 +375,15 @@ public abstract class NodeSourceWindow {
             DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, boolean nodeSourceEdited) {
 
-        nodeSourcePluginsForm.setValue("infra", this.infrastructureSelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, nodeSourceNameItem.getValueAsString());
         nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY, nodesRecoverableItem.getValueAsBoolean().toString());
-        nodeSourcePluginsForm.setValue("policy", this.policySelectItem.getValueAsString());
-        nodeSourcePluginsForm.setValue("sessionId", LoginModel.getInstance().getSessionId());
-        nodeSourcePluginsForm.setValue("nodeSourceEdited", Boolean.toString(nodeSourceEdited));
+        nodeSourcePluginsForm.setValue(POLICY_FORM_KEY, this.policySelectItem.getValueAsString());
+        nodeSourcePluginsForm.setValue(SESSION_ID_FORM_KEY, LoginModel.getInstance().getSessionId());
+        nodeSourcePluginsForm.setValue(NODE_SOURCE_EDITED_FORM_KEY, Boolean.toString(nodeSourceEdited));
         nodeSourcePluginsForm.setCanSubmit(true);
 
-        nodeSourcePluginsForm.setValue("nsCallback", JSUtil.register(javascriptObject -> {
+        nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
 
             JSONObject jsonCallback = new JSONObject(javascriptObject);
 
