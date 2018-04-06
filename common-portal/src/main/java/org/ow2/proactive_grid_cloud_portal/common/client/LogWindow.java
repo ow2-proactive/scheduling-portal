@@ -118,7 +118,7 @@ public class LogWindow implements LogListener {
 
         if (this.displayAllMessages) {
             this.text.setContents(this.fullContent + "<br>");
-            //            this.text.scrollToBottom();
+            this.text.scrollToBottom();
         }
     }
 
