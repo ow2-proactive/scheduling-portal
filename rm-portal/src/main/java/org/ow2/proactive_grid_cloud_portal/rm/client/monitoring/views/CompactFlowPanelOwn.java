@@ -85,9 +85,9 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
 
         if (!isNodeSourceDrawn(nodeTile.getNode().getSourceName())) {
             final CompactView.Tile nsTile = nodeSourceTiles.get(nodeTile.getNode().getSourceName());
-            this.insert(nsTile, size());
             model.add(new HierarchyNodeSource(nsTile.getNodesource()));
             model.sort(Comparator.comparing(a -> a.getNodeSource().getSourceName()));
+            this.insert(nsTile, indexOf(nsTile.getNodesource()).get());
         }
 
         for (HierarchyNodeSource hierarchyNodeSource : model) {
