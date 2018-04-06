@@ -56,8 +56,9 @@ import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 
 /**
  * Display all current nodes as a single small icon per node
- * so that the state of a large infrastructure can be monitored easily
- * 
+ * so that the state of a large infrastructure can be monitored easily.
+ *
+ *
  * 
  * @author mschnoor
  *
@@ -77,11 +78,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     /* displays nodes as a compact grid */
     private CompactFlowPanel normalFlow;
 
+    /* canvas for normalFlow (used to remove normalFlow from Layout) */
     private WidgetCanvas normalFlowCanvas;
 
-    /* displays own nodes as a compact grid */
+    /* displays only nodes used by current user as a compact grid */
     private CompactFlowPanelOwn myNodesFlow;
 
+    /* canvas for myNodesFlow (used to remove myNodesFlow from Layout) */
     private WidgetCanvas myNodesFlowCanvas;
 
     CompactView(RMController controller) {
@@ -99,6 +102,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         return root;
     }
 
+    /**
+     * Switches which canvas should be displayed in root
+     * @param value true to show only canvas with my nodes, false to show all nodes
+     */
     void setViewMyNodes(boolean value) {
         if (value) {
             root.removeMember(normalFlowCanvas);

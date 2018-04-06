@@ -25,12 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+
+import com.google.gwt.dev.util.collect.Lists;
 
 
 public class CompactFlowPanelOwn extends CompactFlowPanel {
@@ -73,6 +76,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
             final CompactView.Tile nsTile = nodeSourceTiles.get(nodeTile.getNode().getSourceName());
             this.insert(nsTile, size());
             model.add(new HierarchyNodeSource(nsTile.getNodesource()));
+            Lists.sort(model, Comparator.comparing(a -> a.getNodeSource().getSourceName()));
         }
 
         for (HierarchyNodeSource hierarchyNodeSource : model) {

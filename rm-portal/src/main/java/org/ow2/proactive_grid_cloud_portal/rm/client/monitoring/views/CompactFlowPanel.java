@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Optional;
 import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
+import com.google.gwt.dev.util.collect.Lists;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 
@@ -61,6 +63,7 @@ public class CompactFlowPanel extends FlowPanel {
         int index = size();
         this.insert(nsTile, index);
         model.add(new HierarchyNodeSource(nsTile.getNodesource()));
+        Lists.sort(model, Comparator.comparing(a -> a.getNodeSource().getSourceName()));
     }
 
     protected int size() {
