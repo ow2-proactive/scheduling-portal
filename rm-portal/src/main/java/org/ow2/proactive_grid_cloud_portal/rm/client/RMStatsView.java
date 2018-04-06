@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
@@ -42,7 +41,6 @@ import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -423,5 +421,4 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColChart.draw(nodeColTable, nodeColOpts);
 
     }
-
 }

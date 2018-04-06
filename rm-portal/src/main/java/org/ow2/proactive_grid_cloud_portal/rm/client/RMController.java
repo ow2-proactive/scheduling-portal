@@ -417,48 +417,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                  });
         }
 
-        /*
-         * max nodes from RRD on RM
-         * not used right now, uncomment if needed
-         * 
-         * List<String> attrs = new ArrayList<String>();
-         * attrs.add("MaxFreeNodes");
-         * attrs.add("MaxBusyNodes");
-         * attrs.add("MaxDownNodes");
-         * // attrs.add("MaxTotalNodes"); // for some reason there is no Max Total Nodes...
-         * 
-         * rm.getMBeanInfo(model.getSessionId(),
-         * "ProActiveResourceManager:name=RuntimeData", attrs,
-         * new AsyncCallback<String>() {
-         * 
-         * @Override
-         * public void onFailure(Throwable caught) {
-         * error("Failed to get MBean Info: "
-         * + getJsonErrorMessage(caught));
-         * 
-         * }
-         * 
-         * @Override
-         * public void onSuccess(String result) {
-         * JSONArray arr = JSONParser.parseStrict(result)
-         * .isArray();
-         * for (int i = 0; i < arr.size(); i++) {
-         * String name = arr.get(i).isObject().get("name")
-         * .isString().stringValue();
-         * int value = (int) arr.get(i).isObject()
-         * .get("value").isNumber().doubleValue();
-         * if (name.equals("MaxFreeNodes")) {
-         * model.setMaxNumFree(value);
-         * } else if (name.equals("MaxBusyNodes")) {
-         * model.setMaxNumBusy(value);
-         * } else if (name.equals("MaxDownNodes")) {
-         * model.setMaxNumDown(value);
-         * }
-         * }
-         * 
-         * }
-         * });
-         */
     }
 
     /**
