@@ -4,7 +4,7 @@
  * Workflows & Scheduling, Orchestration, Cloud Automation
  * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (c) 2007 - 2017 ActiveEon
+ * Copyright (c) 2007 - 2018 ActiveEon
  * Contact: contact@activeeon.com
  *
  * This library is free software: you can redistribute it and/or
@@ -36,6 +36,14 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import com.google.gwt.dev.util.collect.Lists;
 
 
+/**
+ * It is flow panel to draw compact representation of hodesources/hosts/nodes
+ * where all nodes are nodes own by the current user.
+ * In comparing to CompactFlowPanel, this class also treats nodesources as
+ * ephemeral items. So whenever CompactView asks to draw nodesource, it is just stored
+ * in the nodeSourceTiles. And then if at some point we have a node to draw we will
+ * draw nodesource as well.
+ */
 public class CompactFlowPanelOwn extends CompactFlowPanel {
 
     private Map<String, CompactView.Tile> nodeSourceTiles = new HashMap<>();
@@ -68,6 +76,11 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
         }
     }
 
+    /**
+     * draws a node and if necessary draws nodesource, and if necessary draws host
+     * @param nodeTile
+     * @param hostTile
+     */
     @Override
     protected void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
         int index = 0;
@@ -122,6 +135,10 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
         }
     }
 
+    /**
+     * removes node tile, and dangling hosts and nodesources
+     * @param node
+     */
     @Override
     public void remove(NodeSource.Host.Node node) {
         int index = 0;

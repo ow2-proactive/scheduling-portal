@@ -4,7 +4,7 @@
  * Workflows & Scheduling, Orchestration, Cloud Automation
  * and Big Data Analysis on Enterprise Grids & Clouds.
  *
- * Copyright (c) 2007 - 2017 ActiveEon
+ * Copyright (c) 2007 - 2018 ActiveEon
  * Contact: contact@activeeon.com
  *
  * This library is free software: you can redistribute it and/or
@@ -38,6 +38,27 @@ import com.google.gwt.dev.util.collect.Lists;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 
+/**
+ * It is flow panel to draw compact representation of hodesources/hosts/nodes.
+ * Underlying stucture (FlowPanel) is kind of ArrayList.
+ * However, we have hierarchical structure (model)
+ * So to represent model as flat structure we have to be able to identify
+ * index of model elements. Where index is the position of item from model in
+ * FlowPanel. Plus we should be quite fast in finding indexes (in case we have 20K nodes).
+ *
+ * Thus, to have at the same time hierarchical structure (model) and
+ * be able to find any index of this model we keep always updated tiles field
+ * in HierarchyNodeSource and HierarchyHost.
+ * For example: we want to update node. For this we need to find index of the tile which represents
+ * this node. Initially index is zero. Then we sequentially go through nodesources,
+ * hosts, and nodes. Until we find our node, we add to index value of tiles field of HierarchyNodeSource
+ * and HierarchyHost, and 1 for the case of Node.
+ *
+ * Host tiles are ephemeral because CompactFlowPanel handle them by it self.
+ * Add soon there is node but there is no dedicated host for this node, host will be created.
+ * Also, host will be deleted automatically as soon as it does not have nodes anymore.
+ *
+ */
 public class CompactFlowPanel extends FlowPanel {
 
     protected List<HierarchyNodeSource> model = new LinkedList<>();
@@ -327,6 +348,12 @@ public class CompactFlowPanel extends FlowPanel {
 
 }
 
+/**
+ * It is a wrapper around NodeSource
+ * It stores deploying nodes and hosts, in lists so their order it preserved.
+ * Also it has tiles tiles which represent number of tiles which are need to represent
+ * this nodesource with all its content into CompactFlowPanel
+ */
 class HierarchyNodeSource {
     private NodeSource nodeSource;
 
@@ -365,6 +392,12 @@ class HierarchyNodeSource {
     }
 }
 
+/**
+ * It is a wrapper around Host
+ * It stores nodes in list so its order it preserved.
+ * Also it has tiles tiles which represent number of tiles which are need to represent
+ * this host with all its content into CompactFlowPanel
+ */
 class HierarchyHost {
     private NodeSource.Host host;
 
