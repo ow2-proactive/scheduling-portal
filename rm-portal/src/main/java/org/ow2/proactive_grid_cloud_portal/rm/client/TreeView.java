@@ -227,11 +227,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (currentSelectedNodeSource != null) {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
+                        editItem.setTitle("Edit dynamic parameters");
                         enableItems(new MenuItem[] { undeployItem });
-                        disableItems(new MenuItem[] { deployItem, editItem });
+                        disableItems(new MenuItem[] { deployItem });
                         break;
                     case NODES_UNDEPLOYED:
-                        enableItems(new MenuItem[] { deployItem, editItem });
+                        editItem.setTitle("Edit node source");
+                        enableItems(new MenuItem[] { deployItem });
                         disableItems(new MenuItem[] { undeployItem });
                         break;
                     default:

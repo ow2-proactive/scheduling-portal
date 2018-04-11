@@ -882,9 +882,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject p = arr.get(i).isObject();
 
             String pluginName = p.get("pluginName").isString().stringValue();
-            PluginDescriptor desc = getPluginDescriptor(p, pluginName);
+            PluginDescriptor pluginDescriptor = getPluginDescriptor(p, pluginName);
 
-            plugins.put(pluginName, desc);
+            plugins.put(pluginName, pluginDescriptor);
         }
 
         return plugins;
@@ -908,15 +908,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
+            boolean dynamic = false;
 
-            if (metaType.equalsIgnoreCase("password"))
+            if (metaType.equalsIgnoreCase("password")) {
                 password = true;
-            else if (metaType.equalsIgnoreCase("fileBrowser"))
+            } else if (metaType.equalsIgnoreCase("fileBrowser")) {
                 file = true;
-            else if (metaType.equalsIgnoreCase("credential"))
+            } else if (metaType.equalsIgnoreCase("credential")) {
                 credentials = true;
+            } else if (metaType.equalsIgnoreCase("dynamic")) {
+                dynamic = true;
+            }
 
-            Field f = new Field(name, value, descr, password, credentials, file);
+            Field f = new Field(name, value, descr, password, credentials, file, dynamic);
 
             desc.getConfigurableFields().add(f);
         }
