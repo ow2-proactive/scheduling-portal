@@ -23,14 +23,17 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
+import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;

@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
 import java.util.*;
 
@@ -32,6 +32,8 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;

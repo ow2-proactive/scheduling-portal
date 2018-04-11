@@ -41,7 +41,7 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceEditWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceEditWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
