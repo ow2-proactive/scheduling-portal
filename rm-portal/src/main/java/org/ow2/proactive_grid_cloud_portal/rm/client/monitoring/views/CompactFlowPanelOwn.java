@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
@@ -44,6 +43,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
  */
 public class CompactFlowPanelOwn extends CompactFlowPanel {
 
+    /**
+     * Because nodeSources are drawn by necessity we store them for a while in this map
+     */
     private Map<String, CompactView.Tile> nodeSourceTiles = new HashMap<>();
 
     public CompactFlowPanelOwn() {
@@ -109,7 +111,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
                         this.insert(nodeTile, index);
                         return;
                     } else {
-                        index += hierarchyHost.getTiles();
+                        index += hierarchyHost.getTilesNumber();
                     }
                 }
 
@@ -139,56 +141,31 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
      */
     @Override
     public void remove(NodeSource.Host.Node node) {
-        int index = 0;
-        final Iterator<HierarchyNodeSource> nsIterator = model.iterator();
-        while (nsIterator.hasNext()) {
-            final HierarchyNodeSource hierarchyNodeSource = nsIterator.next();
-            if (hierarchyNodeSource.getNodeSource().getSourceName().equals(node.getSourceName())) {
-                ++index;
+        new NodeRemover(this) {
+            @Override
+            public void findAndRemove(NodeSource.Host.Node node) {
+                init(node);
+                if(findNodeSource() && findHost() && findNode()){
+                    nodeIterator.remove();
+                    hierarchyNodeSource.decrementTiles();
+                    hierarchyHost.decrementTiles();
+                    compactFlowPanel.remove(index);
 
-                final Iterator<HierarchyHost> hostIterator = hierarchyNodeSource.getHosts().iterator();
-                while (hostIterator.hasNext()) {
-                    final HierarchyHost hierarchyHost = hostIterator.next();
-                    if (hierarchyHost.getHost().getHostName().equals(node.getHostName())) {
-                        ++index;
-
-                        final Iterator<NodeSource.Host.Node> nodeIterator = hierarchyHost.getNodes().iterator();
-                        while (nodeIterator.hasNext()) {
-                            final NodeSource.Host.Node existing = nodeIterator.next();
-                            if (existing.equals(node)) {
-                                nodeIterator.remove();
-                                hierarchyNodeSource.decrementTiles();
-                                hierarchyHost.decrementTiles();
-                                this.remove(index);
-
-                                // remove dangling host
-                                if (hierarchyHost.getNodes().isEmpty()) {
-                                    hostIterator.remove();
-                                    hierarchyNodeSource.decrementTiles();
-                                    this.remove(index - 1);
-                                }
-
-                                // remove dangling nodesource
-                                if (hierarchyNodeSource.getHosts().isEmpty()) {
-                                    nsIterator.remove();
-                                    this.remove(index - 2);
-                                }
-
-                                return;
-                            } else {
-                                ++index;
-                            }
-                        }
-
-                    } else {
-                        index += hierarchyHost.getTiles();
+                    // remove dangling host
+                    if (hierarchyHost.getNodes().isEmpty()) {
+                        hierarchyHostIterator.remove();
+                        hierarchyNodeSource.decrementTiles();
+                        compactFlowPanel.remove(index - 1);
                     }
 
+                    // remove dangling nodesource
+                    if (hierarchyNodeSource.getHosts().isEmpty()) {
+                        hierarchyNodeSourceIterator.remove();
+                        compactFlowPanel.remove(index - 2);
+                    }
                 }
-
-            } else {
-                index += hierarchyNodeSource.getTilesNumber();
             }
-        }
+        }.findAndRemove(node);
     }
+
 }

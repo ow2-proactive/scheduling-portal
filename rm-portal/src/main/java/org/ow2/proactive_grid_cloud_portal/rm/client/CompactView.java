@@ -191,7 +191,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         // if myNodesFlow already have some nodes, but they do not belong to us anymore, then delete them
         nodes.stream()
              .filter(node -> !usedBy(node, username))
-             .filter(node -> myNodesFlow.isNodeDrawn(node))
              .forEach(node -> myNodesFlow.remove(node));
 
     }
@@ -200,45 +199,69 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         return username != null && username.equals(n.getNodeOwner());
     }
 
-    private void processNodes(CompactFlowPanel flow, List<Node> nodes) {
-        for (Node node : nodes) {
-            if (node.isRemoved()) {
-                if (flow.isNodeDrawn(node) && flow.isNodeSourceDrawn(node.getSourceName())) {
-                    flow.remove(node);
-                }
+    private void processNodeSources(CompactFlowPanel flow, List<NodeSource> nodeSources) {
+        for (NodeSource nodeSource : nodeSources) {
+            if (nodeSource.isRemoved()) {
+                removeNodeSource(flow, nodeSource);
             } else {
-                if (!flow.isNodeDrawn(node)) {
-                    Tile nodeTile = new Tile(node);
-                    Tile hostTile = new Tile(new Host(node.getHostName(), node.getSourceName()));
-                    if (node.isVirtual()) {
-                        hostTile.getHost().setVirtual(true);
-                    }
-                    flow.drawNode(nodeTile, hostTile);
-                }
-
-                if (node.isChanged()) {
-                    flow.redrawNode(node);
-                }
+                addNodeSourceIfNotExists(flow, nodeSource);
+                changeNodeSourceStatusIfChanged(flow, nodeSource);
             }
         }
     }
 
-    private void processNodeSources(CompactFlowPanel flow, List<NodeSource> nodeSources) {
-        for (NodeSource nodeSource : nodeSources) {
-            if (nodeSource.isRemoved()) {
-                if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
-                    flow.remove(nodeSource);
-                }
+    private void processNodes(CompactFlowPanel flow, List<Node> nodes) {
+        for (Node node : nodes) {
+            if (node.isRemoved()) {
+                removeNode(flow, node);
             } else {
-                if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
-                    Tile nsTile = new Tile(nodeSource);
-                    flow.drawNodeSource(nsTile);
-                }
-
-                if (nodeSource.isChanged()) {
-                    flow.redrawNodeSource(nodeSource);
-                }
+                addNodeIfNotExists(flow, node);
+                changeNodeStatusIfChanged(flow, node);
             }
+        }
+    }
+
+    private void removeNode(CompactFlowPanel flow, Node node) {
+        if (flow.isNodeSourceDrawn(node.getSourceName())) {
+            flow.remove(node);
+        }
+    }
+
+    private void changeNodeStatusIfChanged(CompactFlowPanel flow, Node node) {
+        if (node.isChanged()) {
+            flow.redrawNode(node);
+        }
+    }
+
+    private void addNodeIfNotExists(CompactFlowPanel flow, Node node) {
+        if (!flow.isNodeDrawn(node)) {
+            Tile nodeTile = new Tile(node);
+            Tile hostTile = new Tile(new Host(node.getHostName(), node.getSourceName()));
+            if (node.isVirtual()) {
+                hostTile.getHost().setVirtual(true);
+            }
+            flow.drawNode(nodeTile, hostTile);
+        }
+    }
+
+
+
+    private void changeNodeSourceStatusIfChanged(CompactFlowPanel flow, NodeSource nodeSource) {
+        if (nodeSource.isChanged()) {
+            flow.redrawNodeSource(nodeSource);
+        }
+    }
+
+    private void addNodeSourceIfNotExists(CompactFlowPanel flow, NodeSource nodeSource) {
+        if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
+            Tile nsTile = new Tile(nodeSource);
+            flow.drawNodeSource(nsTile);
+        }
+    }
+
+    private void removeNodeSource(CompactFlowPanel flow, NodeSource nodeSource) {
+        if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
+            flow.remove(nodeSource);
         }
     }
 
