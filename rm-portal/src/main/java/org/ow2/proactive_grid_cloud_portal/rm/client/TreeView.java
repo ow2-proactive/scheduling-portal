@@ -34,6 +34,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TreeModelType;
@@ -212,7 +214,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
             MenuItem editItem = new MenuItem("Edit", editItemImageResource);
             String nodeSourceName = currentSelectedNodeSource == null ? "" : currentSelectedNodeSource.getSourceName();
-            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
+            NodeSourceStatus nodeSourceStatus = currentSelectedNodeSource == null ? null
+                                                                                  : currentSelectedNodeSource.getNodeSourceStatus();
+            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
             if (currentSelectedNode != null) {
                 if (currentSelectedNode.isLocked()) {
@@ -227,12 +231,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (currentSelectedNodeSource != null) {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
-                        editItem.setTitle("Edit dynamic parameters");
+                        editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
                         enableItems(new MenuItem[] { undeployItem });
                         disableItems(new MenuItem[] { deployItem });
                         break;
                     case NODES_UNDEPLOYED:
-                        editItem.setTitle("Edit node source");
+                        editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
                         enableItems(new MenuItem[] { deployItem });
                         disableItems(new MenuItem[] { undeployItem });
                         break;

@@ -36,8 +36,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceCreationWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceEditWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.CreateNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -562,13 +563,21 @@ public class RMPage implements LogListener {
 
     public void showNodeSourceCreationWindow() {
         destroyNodeSourceWindow();
-        RMPage.this.nsWindow = new NodeSourceCreationWindow(controller);
+        RMPage.this.nsWindow = new CreateNodeSourceWindow(controller);
         RMPage.this.nsWindow.show();
     }
 
-    public void showNodeSourceEditWindow(String nodeSourceName) {
+    public void showEditNodeSourceWindow(String nodeSourceName) {
         destroyNodeSourceWindow();
-        RMPage.this.nsWindow = new NodeSourceEditWindow(controller, nodeSourceName);
+        RMPage.this.nsWindow = new EditNodeSourceWindow(controller, nodeSourceName, EditNodeSourceWindow.WINDOW_TITLE);
+        RMPage.this.nsWindow.show();
+    }
+
+    public void showEditDynamicParametersWindow(String nodeSourceName) {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new EditDynamicParametersWindow(controller,
+                                                               nodeSourceName,
+                                                               EditDynamicParametersWindow.WINDOW_TITLE);
         RMPage.this.nsWindow.show();
     }
 

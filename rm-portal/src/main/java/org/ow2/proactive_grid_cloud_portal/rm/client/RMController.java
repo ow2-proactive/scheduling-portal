@@ -904,11 +904,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject meta = field.get("meta").isObject();
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
+            boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
 
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
-            boolean dynamic = false;
 
             if (metaType.equalsIgnoreCase("password")) {
                 password = true;
@@ -916,8 +916,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 file = true;
             } else if (metaType.equalsIgnoreCase("credential")) {
                 credentials = true;
-            } else if (metaType.equalsIgnoreCase("dynamic")) {
-                dynamic = true;
             }
 
             Field f = new Field(name, value, descr, password, credentials, file, dynamic);
@@ -1064,8 +1062,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    public void editNodeSource(String nodeSourceName) {
-        this.rmPage.showNodeSourceEditWindow(nodeSourceName);
+    public void editNodeSource(String nodeSourceName, NodeSourceStatus nodeSourceStatus) {
+        if (nodeSourceStatus.equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+            this.rmPage.showEditNodeSourceWindow(nodeSourceName);
+        } else {
+            this.rmPage.showEditDynamicParametersWindow(nodeSourceName);
+        }
     }
 
     /**

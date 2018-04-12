@@ -85,6 +85,8 @@ public abstract class NodeSourceWindow {
 
     protected String previousSelectedPolicy;
 
+    protected List<FormItem> allFormItems;
+
     protected Map<String, List<FormItem>> allFormItemsPerPlugin;
 
     protected Window window;
@@ -121,7 +123,7 @@ public abstract class NodeSourceWindow {
         return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
     }
 
-    protected ArrayList<FormItem> prepareFormItems() {
+    protected List<FormItem> prepareFormItems() {
 
         this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
@@ -176,8 +178,8 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
-                if (!formItem.getName().endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
-                    !formItem.getName().endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                if (!formItem.getName().endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
+                    !formItem.getName().endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
                     formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
                 }
             });

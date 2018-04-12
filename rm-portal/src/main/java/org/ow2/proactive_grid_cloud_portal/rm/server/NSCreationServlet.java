@@ -41,7 +41,7 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceEditWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,9 +125,9 @@ public class NSCreationServlet extends HttpServlet {
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        if (formFieldName.endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
                             infraFileParams.add(formFieldValue);
-                        } else if (!formFieldName.endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+                        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
                             infraParams.add(formFieldValue);
                         }
                     } else if (readingPolicyParams) {

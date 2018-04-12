@@ -25,11 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -47,9 +43,9 @@ import com.smartgwt.client.widgets.form.fields.UploadItem;
  * Dialog window to create a node source. Downloads dynamically supported
  * infrastructures and policies when the window is created.
  */
-public class NodeSourceCreationWindow extends NodeSourceWindow {
+public class CreateNodeSourceWindow extends NodeSourceWindow {
 
-    public NodeSourceCreationWindow(RMController controller) {
+    public CreateNodeSourceWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating available Infrastructures and Policies");
         buildForm();
     }
@@ -69,27 +65,25 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
-            ArrayList<FormItem> allFormItems = prepareFormItems();
+            this.allFormItems = prepareFormItems();
 
-            allFormItems.add(this.infrastructureSelectItem);
-            addAllPluginValuesToAllFormItems(allFormItems,
-                                             selectItemValues,
+            this.allFormItems.add(this.infrastructureSelectItem);
+            addAllPluginValuesToAllFormItems(selectItemValues,
                                              this.controller.getModel().getSupportedInfrastructures().values());
             this.infrastructureSelectItem.setValueMap(selectItemValues);
 
-            allFormItems.add(new SpacerItem());
+            this.allFormItems.add(new SpacerItem());
             selectItemValues.clear();
 
-            allFormItems.add(this.policySelectItem);
-            addAllPluginValuesToAllFormItems(allFormItems,
-                                             selectItemValues,
+            this.allFormItems.add(this.policySelectItem);
+            addAllPluginValuesToAllFormItems(selectItemValues,
                                              this.controller.getModel().getSupportedPolicies().values());
             this.policySelectItem.setValueMap(selectItemValues);
 
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            windowForm.setFields(allFormItems.toArray(new FormItem[allFormItems.size()]));
+            windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
             windowLabel.hide();
             windowForm.show();
 
@@ -119,8 +113,8 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
         }
     }
 
-    private void addAllPluginValuesToAllFormItems(ArrayList<FormItem> allFormItems,
-            LinkedHashMap<String, String> selectItemValues, Collection<PluginDescriptor> allPluginDescriptors) {
+    private void addAllPluginValuesToAllFormItems(Map<String, String> selectItemValues,
+            Collection<PluginDescriptor> allPluginDescriptors) {
 
         for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
 
@@ -128,7 +122,7 @@ public class NodeSourceCreationWindow extends NodeSourceWindow {
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
 
             ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
-            allFormItems.addAll(currentPluginFormItems);
+            this.allFormItems.addAll(currentPluginFormItems);
             this.allFormItemsPerPlugin.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
         }
     }
