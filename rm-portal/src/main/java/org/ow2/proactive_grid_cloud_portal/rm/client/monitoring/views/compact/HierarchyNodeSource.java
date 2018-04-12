@@ -73,5 +73,9 @@ public class HierarchyNodeSource {
     void incrementTiles() {
         ++tilesNumber;
     }
+
+    boolean isDangling(){
+        return hosts.isEmpty();
+    }
 }
 

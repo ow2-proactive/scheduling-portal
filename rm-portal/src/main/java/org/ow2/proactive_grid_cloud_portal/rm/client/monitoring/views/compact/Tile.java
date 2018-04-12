@@ -237,18 +237,6 @@ public class Tile extends Image {
     }
 
 
-    public Node getNode() {
-        return node;
-    }
-
-    public Host getHost() {
-        return host;
-    }
-
-    public NodeSource getNodesource() {
-        return nodesource;
-    }
-
     public void refresh(Node n) {
         this.node = n;
         this.setUrl(n.getIcon());
@@ -328,6 +316,18 @@ public class Tile extends Image {
             return this.nodesource.getSourceName().equals(t.nodesource.getSourceName());
         }
         return false;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public Host getHost() {
+        return host;
+    }
+
+    public NodeSource getNodesource() {
+        return nodesource;
     }
 
 }

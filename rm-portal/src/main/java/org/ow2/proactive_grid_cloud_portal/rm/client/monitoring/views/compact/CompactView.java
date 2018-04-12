@@ -28,32 +28,20 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMEventDispatcher;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Image;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.WidgetCanvas;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.menu.Menu;
-import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 
 
 /**

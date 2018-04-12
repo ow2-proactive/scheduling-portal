@@ -66,4 +66,8 @@ public class HierarchyHost {
     void incrementTiles() {
         ++tilesNumber;
     }
+
+    boolean isDangling(){
+        return nodes.isEmpty();
+    }
 }

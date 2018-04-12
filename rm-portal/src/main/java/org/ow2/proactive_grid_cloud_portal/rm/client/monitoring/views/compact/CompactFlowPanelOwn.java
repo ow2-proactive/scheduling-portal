@@ -145,20 +145,15 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
             public void findAndRemove(NodeSource.Host.Node node) {
                 init(node);
                 if(findNodeSource() && findHost() && findNode()){
-                    nodeIterator.remove();
-                    hierarchyNodeSource.decrementTiles();
-                    hierarchyHost.decrementTiles();
-                    compactFlowPanel.remove(index);
+                    removeNode();
 
                     // remove dangling host
-                    if (hierarchyHost.getNodes().isEmpty()) {
-                        hierarchyHostIterator.remove();
-                        hierarchyNodeSource.decrementTiles();
-                        compactFlowPanel.remove(index - 1);
+                    if (hierarchyHost.isDangling()) {
+                        removeHost();
                     }
 
                     // remove dangling nodesource
-                    if (hierarchyNodeSource.getHosts().isEmpty()) {
+                    if (hierarchyNodeSource.isDangling()) {
                         hierarchyNodeSourceIterator.remove();
                         compactFlowPanel.remove(index - 2);
                     }

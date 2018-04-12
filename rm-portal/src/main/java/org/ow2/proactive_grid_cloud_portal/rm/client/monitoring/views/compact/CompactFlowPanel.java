@@ -118,6 +118,7 @@ public class CompactFlowPanel extends FlowPanel {
 
     protected void drawNormalNode(Tile nodeTile, Tile hostTile) {
         int index = 0;
+
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
                 ++index;
