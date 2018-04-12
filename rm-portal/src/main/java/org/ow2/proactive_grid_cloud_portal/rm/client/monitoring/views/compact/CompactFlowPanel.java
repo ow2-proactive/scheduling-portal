@@ -23,21 +23,15 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
+package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
+
+import com.google.gwt.user.client.ui.FlowPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-
-import com.google.gwt.user.client.ui.FlowPanel;
-
-import javax.xml.soap.Node;
-
 
 /**
  * It is flow panel to draw compact representation of hodesources/hosts/nodes.
@@ -64,7 +58,7 @@ public class CompactFlowPanel extends FlowPanel {
 
     protected List<HierarchyNodeSource> model = new LinkedList<>();
 
-    private CompactView.Tile currentSelectedTile;
+    private Tile currentSelectedTile;
 
     private NodeRemover nodeRemover;
 
@@ -76,15 +70,15 @@ public class CompactFlowPanel extends FlowPanel {
         nodeRemover = new NodeRemover(this);
     }
 
-    public CompactView.Tile getCurrentSelectedTile() {
+    public Tile getCurrentSelectedTile() {
         return currentSelectedTile;
     }
 
-    public void setCurrentSelectedTile(CompactView.Tile currentSelectedTile) {
+    public void setCurrentSelectedTile(Tile currentSelectedTile) {
         this.currentSelectedTile = currentSelectedTile;
     }
 
-    public void drawNodeSource(CompactView.Tile nsTile) {
+    public void drawNodeSource(Tile nsTile) {
         model.add(new HierarchyNodeSource(nsTile.getNodesource()));
         model.sort(Comparator.comparing(a -> a.getNodeSource().getSourceName()));
 
@@ -94,7 +88,7 @@ public class CompactFlowPanel extends FlowPanel {
     public void redrawNodeSource(NodeSource nodeSource) {
         int index = indexOf(nodeSource).get();
 
-        CompactView.Tile nodeSourceTile = ((CompactView.Tile) this.getWidget(index));
+        Tile nodeSourceTile = ((Tile) this.getWidget(index));
         nodeSourceTile.refresh(nodeSource);
     }
 
@@ -110,11 +104,11 @@ public class CompactFlowPanel extends FlowPanel {
 
     public void redrawNode(NodeSource.Host.Node node) {
         int index = indexOf(node).get();
-        CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
+        Tile nt = ((Tile) this.getWidget(index));
         nt.refresh(node);
     }
 
-    public void drawNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
+    public void drawNode(Tile nodeTile, Tile hostTile) {
         if (nodeTile.getNode().isDeployingNode()) {
             drawDeployingNode(nodeTile);
         } else {
@@ -122,7 +116,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    protected void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
+    protected void drawNormalNode(Tile nodeTile, Tile hostTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
@@ -167,7 +161,7 @@ public class CompactFlowPanel extends FlowPanel {
         }
     }
 
-    protected void drawDeployingNode(CompactView.Tile nodeTile) {
+    protected void drawDeployingNode(Tile nodeTile) {
         int index = 0;
         for (HierarchyNodeSource hierarchyNodeSource : model) {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(nodeTile.getNode().getSourceName())) {
@@ -212,84 +206,3 @@ public class CompactFlowPanel extends FlowPanel {
 
 }
 
-/**
- * It is a wrapper around NodeSource
- * It stores deploying nodes and hosts, in lists so their order it preserved.
- * Also it has tilesNumber tilesNumber which represent number of tilesNumber which are need to represent
- * this nodesource with all its content into CompactFlowPanel
- */
-class HierarchyNodeSource {
-    private NodeSource nodeSource;
-
-    private int tilesNumber = 1;
-
-    private List<HierarchyHost> hosts = new LinkedList<>();
-
-    private List<NodeSource.Host.Node> deploying = new LinkedList<>();
-
-    HierarchyNodeSource(NodeSource nodeSource) {
-        this.nodeSource = nodeSource;
-    }
-
-    NodeSource getNodeSource() {
-        return nodeSource;
-    }
-
-    int getTilesNumber() {
-        return tilesNumber;
-    }
-
-    List<HierarchyHost> getHosts() {
-        return hosts;
-    }
-
-    List<NodeSource.Host.Node> getDeploying() {
-        return deploying;
-    }
-
-    void decrementTiles() {
-        --tilesNumber;
-    }
-
-    void incrementTiles() {
-        ++tilesNumber;
-    }
-}
-
-/**
- * It is a wrapper around Host
- * It stores nodes in list so its order it preserved.
- * Also it has tilesNumber tilesNumber which represent number of tilesNumber which are need to represent
- * this host with all its content into CompactFlowPanel
- */
-class HierarchyHost {
-    private NodeSource.Host host;
-
-    private int tilesNumber = 1;
-
-    private List<NodeSource.Host.Node> nodes = new LinkedList<>();
-
-    HierarchyHost(NodeSource.Host host) {
-        this.host = host;
-    }
-
-    NodeSource.Host getHost() {
-        return host;
-    }
-
-    int getTilesNumber() {
-        return tilesNumber;
-    }
-
-    List<NodeSource.Host.Node> getNodes() {
-        return nodes;
-    }
-
-    void decrementTiles() {
-        --tilesNumber;
-    }
-
-    void incrementTiles() {
-        ++tilesNumber;
-    }
-}

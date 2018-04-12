@@ -42,7 +42,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
  */
 public class RMListeners {
 
-    interface NodesListener {
+    public interface NodesListener {
 
         /**
          * This method called when any node/nodesource was add/removed/updated

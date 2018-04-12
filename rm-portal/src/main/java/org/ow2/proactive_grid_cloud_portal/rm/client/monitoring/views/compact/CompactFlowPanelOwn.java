@@ -23,13 +23,12 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
+package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
 
@@ -46,14 +45,14 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
     /**
      * Because nodeSources are drawn by necessity we store them for a while in this map
      */
-    private Map<String, CompactView.Tile> nodeSourceTiles = new HashMap<>();
+    private Map<String, Tile> nodeSourceTiles = new HashMap<>();
 
     public CompactFlowPanelOwn() {
         super();
     }
 
     @Override
-    public void drawNodeSource(CompactView.Tile nsTile) {
+    public void drawNodeSource(Tile nsTile) {
         nodeSourceTiles.put(nsTile.getNodesource().getSourceName(), nsTile);
     }
 
@@ -64,8 +63,8 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
     }
 
     @Override
-    protected void drawDeployingNode(CompactView.Tile nodeTile) {
-        // own nodes are nodes that already been deployed and used by user
+    protected void drawDeployingNode(Tile nodeTile) {
+//         own nodes are nodes that already been deployed and used by user
     }
 
     @Override
@@ -82,11 +81,11 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
      * @param hostTile
      */
     @Override
-    protected void drawNormalNode(CompactView.Tile nodeTile, CompactView.Tile hostTile) {
+    protected void drawNormalNode(Tile nodeTile, Tile hostTile) {
         int index = 0;
 
         if (!isNodeSourceDrawn(nodeTile.getNode().getSourceName())) {
-            final CompactView.Tile nsTile = nodeSourceTiles.get(nodeTile.getNode().getSourceName());
+            final Tile nsTile = nodeSourceTiles.get(nodeTile.getNode().getSourceName());
             model.add(new HierarchyNodeSource(nsTile.getNodesource()));
             model.sort(Comparator.comparing(a -> a.getNodeSource().getSourceName()));
             this.insert(nsTile, indexOf(nsTile.getNodesource()).get());

@@ -174,7 +174,7 @@ public class NodeSource {
         /** true if one of the contained nodes contains 'VIRT' in its URL */
         private boolean virtual = false;
 
-        Host(String hostName, String sourceName) {
+        public Host(String hostName, String sourceName) {
             this.hostName = hostName;
             this.nodes = new HashMap<String, Node>();
             this.sourceName = sourceName;
