@@ -119,13 +119,13 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void nodeUnselected() {
-        if (normalFlow.getCurSelTile() != null) {
-            normalFlow.getCurSelTile().setSelectedTile(false);
-            normalFlow.setCurSelTile(null);
+        if (normalFlow.getCurrentSelectedTile() != null) {
+            normalFlow.getCurrentSelectedTile().setSelectedTile(false);
+            normalFlow.setCurrentSelectedTile(null);
         }
-        if (myNodesFlow.getCurSelTile() != null) {
-            myNodesFlow.getCurSelTile().setSelectedTile(false);
-            myNodesFlow.setCurSelTile(null);
+        if (myNodesFlow.getCurrentSelectedTile() != null) {
+            myNodesFlow.getCurrentSelectedTile().setSelectedTile(false);
+            myNodesFlow.setCurrentSelectedTile(null);
         }
 
     }
@@ -155,11 +155,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
         Tile nt = (Tile) flow.getWidget(id);
 
-        if (flow.getCurSelTile() != null) {
-            flow.getCurSelTile().setSelectedTile(false);
+        if (flow.getCurrentSelectedTile() != null) {
+            flow.getCurrentSelectedTile().setSelectedTile(false);
         }
         nt.setSelectedTile(true);
-        flow.setCurSelTile(nt);
+        flow.setCurrentSelectedTile(nt);
 
         // attempt to scroll at the right position
         if (!_doNotScroll) {
@@ -188,7 +188,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
         processNodes(myNodesFlow, nodes.stream().filter(node -> usedBy(node, username)).collect(Collectors.toList()));
 
-        //         if myNodesFlow already have some nodes, but they do not became to us anymore, then delete them
+        // if myNodesFlow already have some nodes, but they do not belong to us anymore, then delete them
         nodes.stream()
              .filter(node -> !usedBy(node, username))
              .filter(node -> myNodesFlow.isNodeDrawn(node))

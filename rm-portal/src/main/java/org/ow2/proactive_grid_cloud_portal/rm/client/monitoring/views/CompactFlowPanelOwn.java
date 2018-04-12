@@ -35,7 +35,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
 
 /**
- * It is flow panel to draw compact representation of hodesources/hosts/nodes
+ * It is flow panel to draw compact representation of nodesources/hosts/nodes
  * where all nodes are nodes own by the current user.
  * In comparing to CompactFlowPanel, this class also treats nodesources as
  * ephemeral items. So whenever CompactView asks to draw nodesource, it is just stored
@@ -128,7 +128,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
                 return;
 
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
     }
@@ -187,7 +187,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
                 }
 
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
     }

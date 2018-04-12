@@ -46,15 +46,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
  * FlowPanel. Plus we should be quite fast in finding indexes (in case we have 20K nodes).
  *
  * Thus, to have at the same time hierarchical structure (model) and
- * be able to find any index of this model we keep always updated tiles field
+ * be able to find any index of this model we keep always updated tilesNumber field
  * in HierarchyNodeSource and HierarchyHost.
  * For example: we want to update node. For this we need to find index of the tile which represents
  * this node. Initially index is zero. Then we sequentially go through nodesources,
- * hosts, and nodes. Until we find our node, we add to index value of tiles field of HierarchyNodeSource
+ * hosts, and nodes. Until we find our node, we add to index value of tilesNumber field of HierarchyNodeSource
  * and HierarchyHost, and 1 for the case of Node.
  *
- * Host tiles are ephemeral because CompactFlowPanel handle them by it self.
- * Add soon there is node but there is no dedicated host for this node, host will be created.
+ * Host tilesNumber are ephemeral because CompactFlowPanel handle them by it self.
+ * As soon there is node but there is no dedicated host for this node, host will be created.
  * Also, host will be deleted automatically as soon as it does not have nodes anymore.
  *
  */
@@ -62,7 +62,7 @@ public class CompactFlowPanel extends FlowPanel {
 
     protected List<HierarchyNodeSource> model = new LinkedList<>();
 
-    private CompactView.Tile curSelTile;
+    private CompactView.Tile currentSelectedTile;
 
     public CompactFlowPanel() {
         super();
@@ -71,12 +71,12 @@ public class CompactFlowPanel extends FlowPanel {
         this.getElement().getStyle().setProperty("lineHeight", "0");
     }
 
-    public CompactView.Tile getCurSelTile() {
-        return curSelTile;
+    public CompactView.Tile getCurrentSelectedTile() {
+        return currentSelectedTile;
     }
 
-    public void setCurSelTile(CompactView.Tile curSelTile) {
-        this.curSelTile = curSelTile;
+    public void setCurrentSelectedTile(CompactView.Tile currentSelectedTile) {
+        this.currentSelectedTile = currentSelectedTile;
     }
 
     public void drawNodeSource(CompactView.Tile nsTile) {
@@ -92,12 +92,12 @@ public class CompactFlowPanel extends FlowPanel {
             if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
                 break;
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
 
-        CompactView.Tile nt = ((CompactView.Tile) this.getWidget(index));
-        nt.refresh(nodeSource);
+        CompactView.Tile nodeSourceTile = ((CompactView.Tile) this.getWidget(index));
+        nodeSourceTile.refresh(nodeSource);
     }
 
     public boolean isNodeSourceDrawn(String sourceName) {
@@ -164,7 +164,7 @@ public class CompactFlowPanel extends FlowPanel {
                 return;
 
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
     }
@@ -182,7 +182,7 @@ public class CompactFlowPanel extends FlowPanel {
                 this.insert(nodeTile, index);
                 return;
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
     }
@@ -193,13 +193,13 @@ public class CompactFlowPanel extends FlowPanel {
         while (iterator.hasNext()) {
             final HierarchyNodeSource hierarchyNodeSource = iterator.next();
             if (hierarchyNodeSource.getNodeSource().equals(nodeSource)) {
-                for (int i = 0; i < hierarchyNodeSource.getTiles(); ++i) {
+                for (int i = 0; i < hierarchyNodeSource.getTilesNumber(); ++i) {
                     remove(index);
                 }
                 iterator.remove();
                 return;
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
     }
@@ -261,7 +261,7 @@ public class CompactFlowPanel extends FlowPanel {
                 }
 
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
 
@@ -273,7 +273,7 @@ public class CompactFlowPanel extends FlowPanel {
             if (hierarchyNodeSource.getNodeSource().getSourceName().equals(ns.getSourceName())) {
                 return Optional.of(index);
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
         return Optional.empty();
@@ -294,7 +294,7 @@ public class CompactFlowPanel extends FlowPanel {
                 }
 
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
 
@@ -335,7 +335,7 @@ public class CompactFlowPanel extends FlowPanel {
                 }
                 return Optional.empty();
             } else {
-                index += hierarchyNodeSource.getTiles();
+                index += hierarchyNodeSource.getTilesNumber();
             }
         }
         return Optional.empty();
@@ -346,13 +346,13 @@ public class CompactFlowPanel extends FlowPanel {
 /**
  * It is a wrapper around NodeSource
  * It stores deploying nodes and hosts, in lists so their order it preserved.
- * Also it has tiles tiles which represent number of tiles which are need to represent
+ * Also it has tilesNumber tilesNumber which represent number of tilesNumber which are need to represent
  * this nodesource with all its content into CompactFlowPanel
  */
 class HierarchyNodeSource {
     private NodeSource nodeSource;
 
-    private int tiles = 1;
+    private int tilesNumber = 1;
 
     private List<HierarchyHost> hosts = new LinkedList<>();
 
@@ -366,8 +366,8 @@ class HierarchyNodeSource {
         return nodeSource;
     }
 
-    int getTiles() {
-        return tiles;
+    int getTilesNumber() {
+        return tilesNumber;
     }
 
     List<HierarchyHost> getHosts() {
@@ -379,18 +379,18 @@ class HierarchyNodeSource {
     }
 
     void decrementTiles() {
-        --tiles;
+        --tilesNumber;
     }
 
     void incrementTiles() {
-        ++tiles;
+        ++tilesNumber;
     }
 }
 
 /**
  * It is a wrapper around Host
  * It stores nodes in list so its order it preserved.
- * Also it has tiles tiles which represent number of tiles which are need to represent
+ * Also it has tilesNumber tilesNumber which represent number of tilesNumber which are need to represent
  * this host with all its content into CompactFlowPanel
  */
 class HierarchyHost {
