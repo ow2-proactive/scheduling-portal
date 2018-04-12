@@ -1,4 +1,36 @@
+/*
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
+ *
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
+ *
+ * This library is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation: version 3 of
+ * the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * If needed, contact us to obtain a release under GPL Version 2 or 3
+ * or a different license than the AGPL.
+ */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
+
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -10,12 +42,7 @@ import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
-import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
 
 public class Tile extends Image {
 
@@ -45,7 +72,7 @@ public class Tile extends Image {
 
     Tile(CompactView compactView, CompactFlowPanel panel, Host host) {
         super(host.isVirtual() ? RMImages.instance.host_virtual_16().getSafeUri().asString()
-                : RMImages.instance.host_16().getSafeUri().asString());
+                               : RMImages.instance.host_16().getSafeUri().asString());
         this.host = host;
         this.compactView = compactView;
         this.panel = panel;
@@ -68,9 +95,7 @@ public class Tile extends Image {
                 String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
                 String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
                 String deployItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
-                String undeployItemImageResource = RMImages.instance.nodesource_undeployed()
-                        .getSafeUri()
-                        .asString();
+                String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
                 String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
 
                 if (node != null) {
@@ -88,7 +113,7 @@ public class Tile extends Image {
                 menu.setShadowDepth(10);
 
                 MenuItem removeItem = new MenuItem("Remove",
-                        RMImages.instance.node_remove_16().getSafeUri().asString());
+                                                   RMImages.instance.node_remove_16().getSafeUri().asString());
                 removeItem.addClickHandler(event15 -> compactView.getController().removeNodes());
 
                 MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
@@ -135,12 +160,12 @@ public class Tile extends Image {
                 }
 
                 menu.setItems(deployItem,
-                        undeployItem,
-                        editItem,
-                        new MenuItemSeparator(),
-                        lockItem,
-                        unlockItem,
-                        removeItem);
+                              undeployItem,
+                              editItem,
+                              new MenuItemSeparator(),
+                              lockItem,
+                              unlockItem,
+                              removeItem);
 
                 menu.moveTo(event.getClientX(), event.getClientY());
                 menu.show();
@@ -197,7 +222,7 @@ public class Tile extends Image {
     private void addMouseOverHandler() {
         this.addMouseOverHandler(event -> {
             if (dirty) {
-                if (CompactView.getGlobalHover() != null){
+                if (CompactView.getGlobalHover() != null) {
                     CompactView.getGlobalHover().hide();
                 }
                 dirty = false;
@@ -235,7 +260,6 @@ public class Tile extends Image {
             CompactView.setGlobalHover(null);
         });
     }
-
 
     public void refresh(Node n) {
         this.node = n;

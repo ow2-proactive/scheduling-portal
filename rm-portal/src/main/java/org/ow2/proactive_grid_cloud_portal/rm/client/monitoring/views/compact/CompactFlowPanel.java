@@ -25,13 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
-import com.google.gwt.user.client.ui.FlowPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+
+import com.google.gwt.user.client.ui.FlowPanel;
+
 
 /**
  * It is flow panel to draw compact representation of hodesources/hosts/nodes.
@@ -184,7 +186,6 @@ public class CompactFlowPanel extends FlowPanel {
         nodeRemover.findAndRemove(nodeSource);
     }
 
-
     public void remove(NodeSource.Host.Node node) {
         nodeRemover.findAndRemove(node);
     }
@@ -206,4 +207,3 @@ public class CompactFlowPanel extends FlowPanel {
     }
 
 }
-

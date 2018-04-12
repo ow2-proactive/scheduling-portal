@@ -25,13 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
 
 import java.util.Iterator;
 import java.util.Optional;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+
 
 public class NodeRemover {
 
@@ -59,7 +60,6 @@ public class NodeRemover {
         this.compactFlowPanel = compactFlowPanel;
     }
 
-
     /**
      * Tries to find node source with the same id (sourceName) as given
      * @param ns
@@ -67,7 +67,7 @@ public class NodeRemover {
      */
     public Optional<Integer> find(NodeSource ns) {
         init(ns);
-        if(findNodeSource()){
+        if (findNodeSource()) {
             return Optional.of(index);
         } else {
             return Optional.empty();
@@ -81,7 +81,7 @@ public class NodeRemover {
      */
     public Optional<Integer> find(Host host) {
         init(host);
-        if(findNodeSource() && findHost()){
+        if (findNodeSource() && findHost()) {
             return Optional.of(index);
         } else {
             return Optional.empty();
@@ -93,25 +93,22 @@ public class NodeRemover {
      * @param node
      * @return index of node if found
      */
-    public Optional<Integer> find(Node node){
+    public Optional<Integer> find(Node node) {
         init(node);
-        if(findNodeSource() &&
-                ((node.isDeployingNode() && findDeploying())
-                        || (findHost() && findNode()))){
+        if (findNodeSource() && ((node.isDeployingNode() && findDeploying()) || (findHost() && findNode()))) {
             return Optional.of(index);
         } else {
             return Optional.empty();
         }
     }
 
-
     /**
      * Tries to find and remove node source with the same id (sourceName) as given
      * @param nodeSource
      */
-    void findAndRemove(NodeSource nodeSource){
+    void findAndRemove(NodeSource nodeSource) {
         init(nodeSource);
-        if(findNodeSource()){
+        if (findNodeSource()) {
             hierarchyNodeSourceIterator.remove();
             compactFlowPanel.remove(index);
         }
@@ -123,11 +120,11 @@ public class NodeRemover {
      */
     public void findAndRemove(Node node) {
         init(node);
-        if(findNodeSource()){
-            if(node.isDeployingNode() && findDeploying()){
+        if (findNodeSource()) {
+            if (node.isDeployingNode() && findDeploying()) {
                 removeDeployingNode();
             } else {
-                if(findHost() && findNode()){
+                if (findHost() && findNode()) {
                     removeNode();
 
                     // remove dangling host
@@ -140,7 +137,6 @@ public class NodeRemover {
             }
         }
     }
-
 
     protected void removeHost() {
         hierarchyHostIterator.remove();
@@ -166,7 +162,7 @@ public class NodeRemover {
      * and make index point to this node source.
      * @return true if node source was found
      */
-    boolean findNodeSource(){
+    boolean findNodeSource() {
         final Iterator<HierarchyNodeSource> nsIterator = compactFlowPanel.getModel().iterator();
         while (nsIterator.hasNext()) {
             final HierarchyNodeSource hierarchyNodeSource = nsIterator.next();
@@ -186,7 +182,7 @@ public class NodeRemover {
      * Tries to find deploying node in the node source found before.
      * @return true if deploying node was found
      */
-    private boolean findDeploying(){
+    private boolean findDeploying() {
         ++index;
         final Iterator<NodeSource.Host.Node> nodeIterator = hierarchyNodeSource.getDeploying().iterator();
         while (nodeIterator.hasNext()) {
@@ -206,7 +202,7 @@ public class NodeRemover {
      * Tries to find host in the node source found before.
      * @return true if host was found
      */
-    boolean findHost(){
+    boolean findHost() {
         ++index;
         index += hierarchyNodeSource.getDeploying().size();
         final Iterator<HierarchyHost> hostIterator = hierarchyNodeSource.getHosts().iterator();
@@ -228,7 +224,7 @@ public class NodeRemover {
      * Tries to find node in the host found before.
      * @return true if node was found
      */
-    boolean findNode(){
+    boolean findNode() {
         ++index;
         final Iterator<NodeSource.Host.Node> nodeIterator = hierarchyHost.getNodes().iterator();
         while (nodeIterator.hasNext()) {
@@ -247,7 +243,7 @@ public class NodeRemover {
     /**
      * Reset current state.
      */
-    private void cleanState(){
+    private void cleanState() {
         this.nodeUrl = null;
         this.hostName = null;
         this.sourceName = null;
@@ -259,7 +255,7 @@ public class NodeRemover {
         this.index = 0;
     }
 
-    protected void init(Node node){
+    protected void init(Node node) {
         cleanState();
         this.nodeUrl = node.getNodeUrl();
         this.hostName = node.getHostName();
@@ -276,6 +272,5 @@ public class NodeRemover {
         cleanState();
         this.sourceName = ns.getSourceName();
     }
-
 
 }

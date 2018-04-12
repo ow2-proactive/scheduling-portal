@@ -184,7 +184,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         processNodeSources(myNodesCompactPanel, nodeSources);
 
         String username = LoginModel.getInstance().getLogin();
-        processNodes(myNodesCompactPanel, nodes.stream().filter(node -> usedBy(node, username)).collect(Collectors.toList()));
+        processNodes(myNodesCompactPanel,
+                     nodes.stream().filter(node -> usedBy(node, username)).collect(Collectors.toList()));
         removeNodesWhichIsNotUsedAnymore(nodes, username);
 
     }
@@ -195,9 +196,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
      * @param username current username
      */
     private void removeNodesWhichIsNotUsedAnymore(List<Node> nodes, String username) {
-        nodes.stream()
-             .filter(node -> !usedBy(node, username))
-             .forEach(node -> myNodesCompactPanel.remove(node));
+        nodes.stream().filter(node -> !usedBy(node, username)).forEach(node -> myNodesCompactPanel.remove(node));
     }
 
     private boolean usedBy(Node n, String username) {
@@ -248,8 +247,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             flow.drawNode(nodeTile, hostTile);
         }
     }
-
-
 
     private void changeNodeSourceStatusIfChanged(CompactFlowPanel flow, NodeSource nodeSource) {
         if (nodeSource.isChanged()) {

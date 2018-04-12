@@ -25,10 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+
 
 /**
  * It is a wrapper around Host
@@ -67,7 +68,7 @@ public class HierarchyHost {
         ++tilesNumber;
     }
 
-    boolean isDangling(){
+    boolean isDangling() {
         return nodes.isEmpty();
     }
 }

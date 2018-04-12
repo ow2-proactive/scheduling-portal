@@ -270,6 +270,7 @@ public class NodeSource {
 
             /** name of the host containing this node */
             private String hostName;
+
             /** name of the JVM running this node */
 
             private String vmName;

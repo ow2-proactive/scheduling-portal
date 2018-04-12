@@ -64,7 +64,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
 
     @Override
     protected void drawDeployingNode(Tile nodeTile) {
-//         own nodes are nodes that already been deployed and used by user
+        //         own nodes are nodes that already been deployed and used by user
     }
 
     @Override
@@ -144,7 +144,7 @@ public class CompactFlowPanelOwn extends CompactFlowPanel {
             @Override
             public void findAndRemove(NodeSource.Host.Node node) {
                 init(node);
-                if(findNodeSource() && findHost() && findNode()){
+                if (findNodeSource() && findHost() && findNode()) {
                     removeNode();
 
                     // remove dangling host
