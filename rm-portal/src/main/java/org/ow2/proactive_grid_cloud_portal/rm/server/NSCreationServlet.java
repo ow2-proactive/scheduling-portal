@@ -38,6 +38,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceEditWindow;
@@ -159,53 +160,69 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult;
+            String jsonResponsePayload;
             if (nodeSourceEdited) {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
-                                                                                  nsName,
-                                                                                  infra,
-                                                                                  toArray(infraParams),
-                                                                                  toArray(infraFileParams),
-                                                                                  policy,
-                                                                                  toArray(policyParams),
-                                                                                  toArray(policyFileParams),
-                                                                                  nodesRecoverable);
+                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
+                                                                                           nsName,
+                                                                                           infra,
+                                                                                           toArray(infraParams),
+                                                                                           toArray(infraFileParams),
+                                                                                           policy,
+                                                                                           toArray(policyParams),
+                                                                                           toArray(policyFileParams),
+                                                                                           nodesRecoverable);
             } else {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                    nsName,
-                                                                                    infra,
-                                                                                    toArray(infraParams),
-                                                                                    toArray(infraFileParams),
-                                                                                    policy,
-                                                                                    toArray(policyParams),
-                                                                                    toArray(policyFileParams),
-                                                                                    nodesRecoverable);
+                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                             nsName,
+                                                                                             infra,
+                                                                                             toArray(infraParams),
+                                                                                             toArray(infraFileParams),
+                                                                                             policy,
+                                                                                             toArray(policyParams),
+                                                                                             toArray(policyFileParams),
+                                                                                             nodesRecoverable);
+            }
+
+            JSONObject jsonObject = new JSONObject(jsonResponsePayload);
+            if (hasResult(jsonObject) && isResultSuccessful(jsonObject)) {
+                jsonResponsePayload = createJsonPair(jsonObject);
+            } else {
+                deployNodeSource = false;
             }
 
             if (deployNodeSource) {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);
-            }
+                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);
 
-            JSONObject json = new JSONObject(jsonResult);
-            if (json != null) {
-                if (json.has("result")) {
-                    if (json.getBoolean("result")) {
-                        jsonResult = createNonEscapedSimpleJsonPair("result", "true");
-                    } else {
-                        String errorMessage = json.get("errorMessage").toString();
-                        write(response,
-                              createJavascriptPayload(callbackName,
-                                                      createEscapedSimpleJsonPair("errorMessage", errorMessage)));
-                        return;
-
-                    }
+                jsonObject = new JSONObject(jsonResponsePayload);
+                if (hasResult(jsonObject)) {
+                    jsonResponsePayload = createJsonPair(jsonObject);
                 }
             }
-            write(response, createJavascriptPayload(callbackName, jsonResult));
+
+            write(response, createJavascriptPayload(callbackName, jsonResponsePayload));
         } catch (Throwable t) {
             write(response,
                   createJavascriptPayload(callbackName, createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
         }
+    }
+
+    private String createJsonPair(JSONObject json) throws JSONException {
+        String jsonResult;
+        if (isResultSuccessful(json)) {
+            jsonResult = createNonEscapedSimpleJsonPair("result", "true");
+        } else {
+            String errorMessage = json.get("errorMessage").toString();
+            jsonResult = createEscapedSimpleJsonPair("errorMessage", errorMessage);
+        }
+        return jsonResult;
+    }
+
+    private boolean hasResult(JSONObject jsonObject) {
+        return jsonObject != null && jsonObject.has("result");
+    }
+
+    private boolean isResultSuccessful(JSONObject jsonObject) throws JSONException {
+        return jsonObject.getBoolean("result");
     }
 
     private void write(HttpServletResponse response, String s) {
