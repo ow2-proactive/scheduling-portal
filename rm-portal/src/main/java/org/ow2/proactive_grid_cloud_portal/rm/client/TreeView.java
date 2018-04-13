@@ -226,30 +226,30 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (currentSelectedNodeSource != null) {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
-                        enableItems(new MenuItem[]{undeployItem});
-                        disableItems(new MenuItem[]{deployItem, editItem});
+                        enableItems(new MenuItem[] { undeployItem });
+                        disableItems(new MenuItem[] { deployItem, editItem });
                         break;
                     case NODES_UNDEPLOYED:
-                        enableItems(new MenuItem[]{deployItem, editItem});
-                        disableItems(new MenuItem[]{undeployItem});
+                        enableItems(new MenuItem[] { deployItem, editItem });
+                        disableItems(new MenuItem[] { undeployItem });
                         break;
                     default:
-                        disableItems(new MenuItem[]{deployItem, undeployItem, editItem});
+                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
                 }
             } else {
-                disableItems(new MenuItem[]{deployItem, undeployItem, editItem});
+                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
             }
 
             menu.setItems(expandItem,
-                    collapseItem,
-                    new MenuItemSeparator(),
-                    deployItem,
-                    undeployItem,
-                    editItem,
-                    new MenuItemSeparator(),
-                    lockItem,
-                    unlockItem,
-                    removeItem);
+                          collapseItem,
+                          new MenuItemSeparator(),
+                          deployItem,
+                          undeployItem,
+                          editItem,
+                          new MenuItemSeparator(),
+                          lockItem,
+                          unlockItem,
+                          removeItem);
 
             treeGrid.setContextMenu(menu);
         });
@@ -270,17 +270,19 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
         processNodeSources(nodeSources);
+
+        treeGrid.refreshFields();
+
         processNodes(nodes);
 
         treeGrid.markForRedraw();
     }
 
     private void processNodes(List<Node> nodes) {
-        if(!nodes.isEmpty()) {
+        if (!nodes.isEmpty()) {
             for (Node node : nodes) {
                 if (node.isRemoved()) {
                     removeNode(node);
@@ -351,9 +353,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-
     private void processNodeSources(List<NodeSource> nodeSources) {
-        if(!nodeSources.isEmpty()) {
+        if (!nodeSources.isEmpty()) {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
                     removeNodeSource(nodeSource);
@@ -371,13 +372,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             curTreeNodeSource.rmNS = nodeSource;
             curTreeNodeSource.setName(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()));
             curTreeNodeSource.setIcon(nodeSource.getIcon());
-            this.treeGrid.refreshFields();
         }
     }
 
     private void addNodeSourceIfNotExists(NodeSource nodeSource) {
         if (!currentNodes.containsKey(nodeSource.getSourceName())) {
-            TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()), nodeSource);
+            TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()),
+                                     nodeSource);
             nsTreeNode.setIcon(nodeSource.getIcon());
             tree.add(nsTreeNode, this.tree.getRoot());
             currentNodes.put(nodeSource.getSourceName(), nsTreeNode);
@@ -392,10 +393,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-
     private String getNodeSourceDisplayedDescription(NodeSource ns, String nsName) {
         return nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
-                ns.getNodeSourceAdmin() + "</span>";
+               ns.getNodeSourceAdmin() + "</span>";
     }
 
     void expandAll() {
