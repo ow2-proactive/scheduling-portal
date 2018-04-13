@@ -30,21 +30,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.HiddenItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.layout.HLayout;
 
 
 public class EditDynamicParametersWindow extends EditNodeSourceWindow {
 
-    public static final String WINDOW_TITLE = "Edit dynamic parameters";
+    public static final String WINDOW_TITLE = "Edit Dynamic Parameters";
 
-    public EditDynamicParametersWindow(RMController controller, String nodeSourceName, String windowTitle) {
-        super(controller, nodeSourceName, windowTitle);
+    public EditDynamicParametersWindow(RMController controller, String nodeSourceName) {
+        super(controller, nodeSourceName, WINDOW_TITLE);
         buildForm();
+    }
+
+    @Override
+    protected NodeSourceAction getNodeSourceAction() {
+        return NodeSourceAction.UPDATE;
     }
 
     @Override
@@ -123,6 +134,17 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         }
 
         return allFormItemsWithHiddenFields;
+    }
+
+    @Override
+    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
+        buttonsLayout.setMembers(this.applyModificationsButton, this.cancelButton);
+    }
+
+    @Override
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+        super.manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
+        nodesRecoverableItem.disable();
     }
 
     private void disableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {

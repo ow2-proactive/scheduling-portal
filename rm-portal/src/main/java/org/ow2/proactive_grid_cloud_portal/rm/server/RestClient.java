@@ -108,6 +108,17 @@ public interface RestClient {
             @FormParam("nodesRecoverable") String nodesRecoverable);
 
     @PUT
+    @Path("/rm/nodesource/update")
+    @Produces("application/json")
+    InputStream editDynamicParameters(@HeaderParam("sessionId") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName,
+            @FormParam("infrastructureType") String infrastructureType,
+            @FormParam("infrastructureParameters") String[] infrastructureParameters,
+            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
+            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
+            @FormParam("policyFileParameters") String[] policyFileParameters);
+
+    @PUT
     @Path("/rm/nodesource/deploy")
     @Produces("application/json")
     InputStream deployNodeSource(@HeaderParam("sessionid") String sessionId,

@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
@@ -87,7 +89,7 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
-        boolean nodeSourceEdited = false;
+        String nodeSourceAction = "";
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -115,8 +117,8 @@ public class NSCreationServlet extends HttpServlet {
                         if (formFieldValue.equals(Boolean.TRUE.toString())) {
                             deployNodeSource = true;
                         }
-                    } else if (formFieldName.equals("nodeSourceEdited")) {
-                        nodeSourceEdited = Boolean.valueOf(formFieldValue);
+                    } else if (formFieldName.equals("nodeSourceAction")) {
+                        nodeSourceAction = formFieldValue;
                     } else if (formFieldName.equals("infra")) {
                         infra = formFieldValue;
                         readingInfraParams = true;
@@ -161,7 +163,7 @@ public class NSCreationServlet extends HttpServlet {
             }
 
             String jsonResponsePayload;
-            if (nodeSourceEdited) {
+            if (nodeSourceAction.equals("edit") || nodeSourceAction.equals("update")) {
                 jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
                                                                                            nsName,
                                                                                            infra,

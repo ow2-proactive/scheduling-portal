@@ -232,19 +232,19 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
                         editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
-                        enableItems(new MenuItem[] { undeployItem });
-                        disableItems(new MenuItem[] { deployItem });
+                        enableItems(undeployItem);
+                        disableItems(deployItem);
                         break;
                     case NODES_UNDEPLOYED:
                         editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
-                        enableItems(new MenuItem[] { deployItem });
-                        disableItems(new MenuItem[] { undeployItem });
+                        enableItems(deployItem);
+                        disableItems(undeployItem);
                         break;
                     default:
-                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                        disableItems(deployItem, undeployItem, editItem);
                 }
             } else {
-                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                disableItems(deployItem, undeployItem, editItem);
             }
 
             menu.setItems(expandItem,
@@ -265,13 +265,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         return vl;
     }
 
-    private void disableItems(MenuItem[] items) {
+    private void disableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(false);
         }
     }
 
-    private void enableItems(MenuItem[] items) {
+    private void enableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(true);
         }

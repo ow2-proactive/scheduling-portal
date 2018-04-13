@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
 import java.util.*;
 
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
@@ -37,6 +38,7 @@ import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
+import com.smartgwt.client.widgets.layout.HLayout;
 
 
 /**
@@ -46,13 +48,13 @@ import com.smartgwt.client.widgets.form.fields.UploadItem;
 public class CreateNodeSourceWindow extends NodeSourceWindow {
 
     public CreateNodeSourceWindow(RMController controller) {
-        super(controller, "Add Node Source", "Updating available Infrastructures and Policies");
+        super(controller, "Add Node Source", "Updating Available Infrastructures and Policies");
         buildForm();
     }
 
     @Override
-    protected boolean isNodeSourceEdited() {
-        return false;
+    protected NodeSourceAction getNodeSourceAction() {
+        return NodeSourceAction.CREATE;
     }
 
     @Override
@@ -101,6 +103,11 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
         addCredentialsPickerIcon(pluginField, formItems, chooseCredentialsFormItem);
 
         return formItems;
+    }
+
+    @Override
+    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
+        buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
     }
 
     private void hideAllFormItems() {

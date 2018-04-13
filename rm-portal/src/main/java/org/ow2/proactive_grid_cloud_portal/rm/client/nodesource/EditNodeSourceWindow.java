@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -43,6 +44,7 @@ import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
+import com.smartgwt.client.widgets.layout.HLayout;
 
 
 /**
@@ -52,7 +54,7 @@ import com.smartgwt.client.widgets.form.fields.UploadItem;
  */
 public class EditNodeSourceWindow extends NodeSourceWindow {
 
-    public static final String WINDOW_TITLE = "Edit node source";
+    public static final String WINDOW_TITLE = "Edit Node Source";
 
     public static final String EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX = ".modify";
 
@@ -68,15 +70,21 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     protected String focusedPolicyPluginName;
 
-    public EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
+    public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
+        super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
+        this.nodeSourceName = nodeSourceName;
+        buildForm();
+    }
+
+    protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
         super(controller, windowTitle, "Retrieving current node source configuration");
         this.nodeSourceName = nodeSourceName;
         buildForm();
     }
 
     @Override
-    protected boolean isNodeSourceEdited() {
-        return true;
+    protected NodeSourceAction getNodeSourceAction() {
+        return NodeSourceAction.EDIT;
     }
 
     @Override
@@ -117,6 +125,11 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         return formItemsReplacingNonTextualFormItems;
     }
 
+    @Override
+    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
+        buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
+    }
+
     protected void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
             TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
 
@@ -126,10 +139,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
                                                                              .getEditedNodeSourceConfiguration();
 
             nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            // we do not allow the node source name to be modified
-            nodeSourceNameItem.disable();
 
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
+
+            manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
@@ -159,12 +172,14 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
+            this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
+
             windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
             windowLabel.hide();
             windowForm.show();
 
-            this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
-            windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            //this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
+            //windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
 
         }, this.window::hide);
     }
@@ -208,6 +223,15 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         return this.allFormItems;
     }
 
+    /**
+     * Allow sub classes to select the items they need to disable.
+     */
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+
+        // we never allow the node source name to be modified
+        nodeSourceNameItem.disable();
+    }
+
     private FormItem createUploadItemDisabled(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
 
         FormItem chooseCredentialsFormItem;
@@ -225,10 +249,6 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         previousValueItem.setDefaultValue(pluginField.getValue());
 
         return previousValueItem;
-    }
-
-    private boolean isBlank(String text) {
-        return text == null || text.trim().length() == 0;
     }
 
     private RadioGroupItem createRadioItemToModifyPluginField(PluginDescriptor plugin,
