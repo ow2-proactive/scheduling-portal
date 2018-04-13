@@ -168,19 +168,19 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             NodeSource currentSelectedNodeSource = null;
             Node currentSelectedNode = null;
 
-            final TreeNode n = event.getNode();
-            if (n instanceof TNode) {
-                TNode tn = (TNode) n;
+            final TreeNode treeNode = event.getNode();
+            if (treeNode instanceof TNode) {
+                TNode tn = (TNode) treeNode;
                 TreeView.this.controller.selectNode(tn.rmNode);
                 lockItemImageResource = tn.rmNode.getIconLocked();
                 unlockItemImageResource = tn.rmNode.getIconUnlocked();
                 currentSelectedNode = tn.rmNode;
-            } else if (n instanceof TNS) {
-                TNS tn = (TNS) n;
+            } else if (treeNode instanceof TNS) {
+                TNS tn = (TNS) treeNode;
                 TreeView.this.controller.selectNodeSource(tn.rmNS);
                 currentSelectedNodeSource = tn.rmNS;
-            } else if (n instanceof THost) {
-                THost tn = (THost) n;
+            } else if (treeNode instanceof THost) {
+                THost tn = (THost) treeNode;
                 TreeView.this.controller.selectHost(tn.rmHost);
             }
 
@@ -296,10 +296,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private void changeNodeStatusIfChanged(Node node) {
         if (node.isChanged()) {
-            TNode curTreeNode = (TNode) currentNodes.get(node.getNodeUrl());
-            curTreeNode.setAttribute("nodeState", node.getNodeState().toString());
-            curTreeNode.rmNode = node;
-            curTreeNode.setIcon(node.getIcon());
+            TNode treeNode = (TNode) currentNodes.get(node.getNodeUrl());
+            treeNode.setAttribute("nodeState", node.getNodeState().toString());
+            treeNode.rmNode = node;
+            treeNode.setIcon(node.getIcon());
         }
     }
 
@@ -408,9 +408,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private void scrollList(TreeNode tn) {
         int id = treeGrid.getRecordIndex(tn);
-        if (id < 0)
-            return;
-        this.treeGrid.scrollToRow(id);
+        if (id >= 0) {
+            treeGrid.scrollToRow(id);
+        }
     }
 
     @Override
@@ -420,10 +420,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             return;
         }
 
-        this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.currentNodes.get(node.getNodeUrl());
-        this.treeGrid.selectRecord(tn, true);
-        scrollList(tn);
+        treeGrid.deselectAllRecords();
+        TreeNode treeNode = currentNodes.get(node.getNodeUrl());
+        treeGrid.selectRecord(treeNode, true);
+        scrollList(treeNode);
     }
 
     @Override
@@ -438,10 +438,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             return;
         }
 
-        this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.currentNodes.get(ns.getSourceName());
-        this.treeGrid.selectRecord(tn, true);
-        scrollList(tn);
+        treeGrid.deselectAllRecords();
+        TreeNode treeNode = currentNodes.get(ns.getSourceName());
+        treeGrid.selectRecord(treeNode, true);
+        scrollList(treeNode);
     }
 
     @Override
@@ -451,9 +451,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             return;
         }
 
-        this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.currentNodes.get(h.getId());
-        this.treeGrid.selectRecord(tn, true);
-        scrollList(tn);
+        treeGrid.deselectAllRecords();
+        TreeNode treeNode = currentNodes.get(h.getId());
+        treeGrid.selectRecord(treeNode, true);
+        scrollList(treeNode);
     }
 }
