@@ -26,8 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -46,64 +45,68 @@ import com.smartgwt.client.widgets.tree.Tree;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
 import com.smartgwt.client.widgets.tree.TreeNode;
-import com.smartgwt.client.widgets.tree.events.NodeClickEvent;
-import com.smartgwt.client.widgets.tree.events.NodeClickHandler;
 
 
 /**
  * Displays current nodes in a hierarchical tree view
  * <p>
  * NodeSource > Host > Node
- * 
- * 
- * 
- * 
- * @author mschnoor
  *
+ * @author mschnoor
  */
 public class TreeView implements NodesListener, NodeSelectedListener {
 
+    private static final String NODE_ID = "nodeId";
+
     private RMController controller = null;
 
-    /** tree view */
+    /**
+     * tree view
+     */
     private TreeGrid treeGrid = null;
 
-    /** tree data */
+    /**
+     * tree data
+     */
     private Tree tree = null;
 
-    /** parameter for {@link #nodesUpdated(Map)} last time it was called */
-    private Map<String, NodeSource> oldNodes = null;
+    /**
+     * treenodes currently held by {@link #tree}
+     */
+    private HashMap<String, TreeNode> currentNodes = null;
 
-    /** treenodes currently held by {@link #tree} */
-    private HashMap<String, TreeNode> curNodes = null;
-
-    /** prevent event cycling */
+    /**
+     * prevent event cycling
+     */
     private boolean ignoreNodeSelectedEvent = false;
 
     private class TNode extends TreeNode {
         Node rmNode = null;
 
-        public TNode(String name, Node node) {
+        TNode(String name, Node node) {
             super(name);
             this.rmNode = node;
+            this.setAttribute(NODE_ID, node.getNodeUrl());
         }
     }
 
     private class THost extends TreeNode {
         Host rmHost = null;
 
-        public THost(String name, Host h) {
+        THost(String name, Host h) {
             super(name);
             this.rmHost = h;
+            this.setAttribute(NODE_ID, h.getId());
         }
     }
 
     private class TNS extends TreeNode {
         NodeSource rmNS = null;
 
-        public TNS(String name, NodeSource ns) {
+        TNS(String name, NodeSource ns) {
             super(name);
             this.rmNS = ns;
+            this.setAttribute(NODE_ID, ns.getSourceName());
         }
     }
 
@@ -111,8 +114,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.controller = controller;
         this.controller.getEventDispatcher().addNodesListener(this);
         this.controller.getEventDispatcher().addNodeSelectedListener(this);
-        this.curNodes = new HashMap<String, TreeNode>();
-        this.oldNodes = new HashMap<String, NodeSource>();
+        this.currentNodes = new HashMap<>();
     }
 
     Canvas build() {
@@ -134,27 +136,24 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.tree = new Tree();
         tree.setModelType(TreeModelType.PARENT);
         tree.setNameProperty("name");
-        tree.setIdField("nodeId");
+        tree.setIdField(NODE_ID);
 
         this.treeGrid.setData(this.tree);
 
-        this.treeGrid.addNodeClickHandler(new NodeClickHandler() {
-            @Override
-            public void onNodeClick(NodeClickEvent event) {
-                TreeNode n = event.getNode();
-                if (n instanceof TNode) {
-                    TNode tn = (TNode) n;
-                    ignoreNodeSelectedEvent = true;
-                    TreeView.this.controller.selectNode(tn.rmNode);
-                } else if (n instanceof TNS) {
-                    TNS tn = (TNS) n;
-                    ignoreNodeSelectedEvent = true;
-                    TreeView.this.controller.selectNodeSource(tn.rmNS);
-                } else if (n instanceof THost) {
-                    THost tn = (THost) n;
-                    ignoreNodeSelectedEvent = true;
-                    TreeView.this.controller.selectHost(tn.rmHost);
-                }
+        this.treeGrid.addNodeClickHandler(event -> {
+            TreeNode n = event.getNode();
+            if (n instanceof TNode) {
+                TNode tn = (TNode) n;
+                ignoreNodeSelectedEvent = true;
+                TreeView.this.controller.selectNode(tn.rmNode);
+            } else if (n instanceof TNS) {
+                TNS tn = (TNS) n;
+                ignoreNodeSelectedEvent = true;
+                TreeView.this.controller.selectNodeSource(tn.rmNS);
+            } else if (n instanceof THost) {
+                THost tn = (THost) n;
+                ignoreNodeSelectedEvent = true;
+                TreeView.this.controller.selectHost(tn.rmHost);
             }
         });
 
@@ -227,30 +226,30 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (currentSelectedNodeSource != null) {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
-                        enableItems(new MenuItem[] { undeployItem });
-                        disableItems(new MenuItem[] { deployItem, editItem });
+                        enableItems(new MenuItem[]{undeployItem});
+                        disableItems(new MenuItem[]{deployItem, editItem});
                         break;
                     case NODES_UNDEPLOYED:
-                        enableItems(new MenuItem[] { deployItem, editItem });
-                        disableItems(new MenuItem[] { undeployItem });
+                        enableItems(new MenuItem[]{deployItem, editItem});
+                        disableItems(new MenuItem[]{undeployItem});
                         break;
                     default:
-                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                        disableItems(new MenuItem[]{deployItem, undeployItem, editItem});
                 }
             } else {
-                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                disableItems(new MenuItem[]{deployItem, undeployItem, editItem});
             }
 
             menu.setItems(expandItem,
-                          collapseItem,
-                          new MenuItemSeparator(),
-                          deployItem,
-                          undeployItem,
-                          editItem,
-                          new MenuItemSeparator(),
-                          lockItem,
-                          unlockItem,
-                          removeItem);
+                    collapseItem,
+                    new MenuItemSeparator(),
+                    deployItem,
+                    undeployItem,
+                    editItem,
+                    new MenuItemSeparator(),
+                    lockItem,
+                    unlockItem,
+                    removeItem);
 
             treeGrid.setContextMenu(menu);
         });
@@ -271,155 +270,132 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.rm.client.Listeners.NodesListener#nodesUpdated(java.util.
-     * Map)
-     */
-    public void nodesUpdated(Map<String, NodeSource> nodes) {
 
-        /*
-         * Add to _this.tree_ the nodes contained in _nodes_ but not present
-         * in _oldNodes_
-         */
-        for (NodeSource ns : nodes.values()) {
-            String nsName = ns.getSourceName();
+    @Override
+    public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        processNodeSources(nodeSources);
+        processNodes(nodes);
 
-            /* NodeSources */
-            NodeSource oldNs = (oldNodes != null) ? oldNodes.get(nsName) : null;
-            if (oldNs == null) {
-                /* new node source */
-                TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(ns, nsName), ns);
-                nsTreeNode.setAttribute("nodeId", nsName);
-                nsTreeNode.setIcon(ns.getIcon());
-                this.tree.add(nsTreeNode, this.tree.getRoot());
-                this.curNodes.put(nsName, nsTreeNode);
-            } else {
-                /* node source update */
-                if (!oldNs.getNodeSourceStatus().equals(ns.getNodeSourceStatus()) ||
-                    !oldNs.getSourceDescription().equals(ns.getSourceDescription())) {
-                    TNS curTreeNodeSource = (TNS) curNodes.get(nsName);
-                    curTreeNodeSource.rmNS = ns;
-                    curTreeNodeSource.setName(getNodeSourceDisplayedDescription(ns, nsName));
-                    curTreeNodeSource.setIcon(ns.getIcon());
-                    this.treeGrid.refreshFields();
-                }
-            }
-
-            for (Node n : ns.getDeploying().values()) {
-                String nodeUrl = n.getNodeUrl();
-                TNode nodeTreeNode = new TNode(nodeUrl, n);
-                nodeTreeNode.setAttribute("nodeId", nodeUrl);
-
-                /* Deploying nodes */
-                Node oldNode = (oldNs != null) ? oldNs.getDeploying().get(nodeUrl) : null;
-                if (oldNode == null) {
-                    this.tree.add(nodeTreeNode, this.curNodes.get(nsName));
-                    this.curNodes.put(nodeUrl, nodeTreeNode);
-                    nodeTreeNode.setIcon(n.getIcon());
-                } else {
-                    this.curNodes.get(nodeUrl).setIcon(n.getIcon());
-                }
-            }
-
-            for (Host h : ns.getHosts().values()) {
-                String hostName = h.getHostName();
-                THost hostTreeNode = new THost(hostName, h);
-                hostTreeNode.setAttribute("nodeId", h.getId());
-                if (h.isVirtual()) {
-                    hostTreeNode.setIcon(RMImages.instance.host_virtual_16().getSafeUri().asString());
-                } else {
-                    hostTreeNode.setIcon(RMImages.instance.host_16().getSafeUri().asString());
-                }
-
-                /* Hosts */
-                Host oldHost = (oldNs != null) ? oldNs.getHosts().get(hostName) : null;
-                if (oldHost == null) {
-                    this.tree.add(hostTreeNode, this.curNodes.get(nsName));
-                    this.curNodes.put(h.getId(), hostTreeNode);
-                }
-
-                for (Node n : h.getNodes().values()) {
-                    String nodeUrl = n.getNodeUrl();
-                    TNode nodeTreeNode = new TNode(nodeUrl, n);
-                    nodeTreeNode.setAttribute("nodeId", nodeUrl);
-
-                    /* Deployed Nodes */
-                    Node oldNode = (oldHost != null) ? oldHost.getNodes().get(nodeUrl) : null;
-
-                    if (oldNode == null) {
-                        this.tree.add(nodeTreeNode, this.curNodes.get(h.getId()));
-                        this.curNodes.put(nodeUrl, nodeTreeNode);
-                        nodeTreeNode.setAttribute("nodeState", n.getNodeState().toString());
-                        nodeTreeNode.setIcon(n.getIcon());
-                    } else {
-                        TNode curTreeNode = (TNode) curNodes.get(nodeUrl);
-                        curTreeNode.setAttribute("nodeState", n.getNodeState().toString());
-                        curTreeNode.rmNode = n;
-                        curTreeNode.setIcon(n.getIcon());
-                    }
-                }
-            }
-        }
-
-        /*
-         * Remove from _this.tree_ the nodes contained in _curNodes_ but not in _nodes_
-         */
-        for (Entry<String, NodeSource> oldNs : this.oldNodes.entrySet()) {
-            /* Keep NodeSource */
-            if (nodes.containsKey(oldNs.getKey())) {
-
-                NodeSource newNs = nodes.get(oldNs.getKey());
-                for (Entry<String, Node> oldDepl : oldNs.getValue().getDeploying().entrySet()) {
-                    /* Keep deploying Node */
-                    if (newNs.getDeploying().containsKey(oldDepl.getKey())) {
-
-                    }
-                    /* Deploying Node to be removed */
-                    else if (curNodes.containsKey(oldDepl.getKey())) {
-                        this.tree.remove(curNodes.remove(oldDepl.getKey()));
-                    }
-                }
-
-                for (Entry<String, Host> oldHost : oldNs.getValue().getHosts().entrySet()) {
-                    /* Keep host */
-                    if (newNs.getHosts().containsKey(oldHost.getKey())) {
-
-                        Host newHost = newNs.getHosts().get(oldHost.getKey());
-                        for (Entry<String, Node> oldNode : oldHost.getValue().getNodes().entrySet()) {
-                            /* Keep node */
-                            if (newHost.getNodes().containsKey(oldNode.getKey())) {
-                            }
-                            /* Node to be removed */
-                            else if (curNodes.containsKey(oldNode.getKey())) {
-                                this.tree.remove(curNodes.remove(oldNode.getKey()));
-                            }
-                        }
-
-                    }
-                    /* Host to be removed */
-                    else if (curNodes.containsKey(oldHost.getValue().getId())) {
-                        this.tree.remove(curNodes.remove(oldHost.getValue().getId()));
-                    }
-                }
-
-            }
-            /* NodeSource to be removed */
-            else if (curNodes.containsKey(oldNs.getKey())) {
-                this.tree.remove(curNodes.remove(oldNs.getKey()));
-            }
-        }
-
-        this.oldNodes = nodes;
-
-        this.treeGrid.markForRedraw();
+        treeGrid.markForRedraw();
     }
+
+    private void processNodes(List<Node> nodes) {
+        if(!nodes.isEmpty()) {
+            for (Node node : nodes) {
+                if (node.isRemoved()) {
+                    removeNode(node);
+                } else {
+                    addNodeIfNotExists(node);
+                    changeNodeStatusIfChanged(node);
+                }
+            }
+        }
+    }
+
+    private void changeNodeStatusIfChanged(Node node) {
+        if (node.isChanged()) {
+            TNode curTreeNode = (TNode) currentNodes.get(node.getNodeUrl());
+            curTreeNode.setAttribute("nodeState", node.getNodeState().toString());
+            curTreeNode.rmNode = node;
+            curTreeNode.setIcon(node.getIcon());
+        }
+    }
+
+    private void addNodeIfNotExists(Node node) {
+        if (!currentNodes.containsKey(node.getNodeUrl())) { // if there is no node
+            if (node.isDeployingNode()) {
+                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
+                nodeTreeNode.setIcon(node.getIcon());
+                tree.add(nodeTreeNode, this.currentNodes.get(node.getSourceName()));
+                currentNodes.put(node.getNodeUrl(), nodeTreeNode);
+            } else {
+                final Host host = new Host(node.getHostName(), node.getSourceName());
+
+                if (!currentNodes.containsKey(host.getId())) { // no host as well
+                    // we should add host first
+                    THost hostTreeNode = new THost(node.getHostName(), host);
+                    if (node.isVirtual()) {
+                        hostTreeNode.setIcon(RMImages.instance.host_virtual_16().getSafeUri().asString());
+                    } else {
+                        hostTreeNode.setIcon(RMImages.instance.host_16().getSafeUri().asString());
+                    }
+
+                    tree.add(hostTreeNode, currentNodes.get(node.getSourceName()));
+                    currentNodes.put(host.getId(), hostTreeNode);
+                }
+
+                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
+                nodeTreeNode.setAttribute("nodeState", node.getNodeState().toString());
+                nodeTreeNode.setIcon(node.getIcon());
+                tree.add(nodeTreeNode, currentNodes.get(host.getId()));
+                currentNodes.put(node.getNodeUrl(), nodeTreeNode);
+            }
+        }
+    }
+
+    private void removeNode(Node node) {
+        if (currentNodes.containsKey(node.getNodeUrl())) {
+            final TreeNode toRemove = currentNodes.get(node.getNodeUrl());
+
+            tree.remove(toRemove);
+            currentNodes.remove(node.getNodeUrl());
+
+            if (!node.isDeployingNode()) { // thus this node has a host, which might be removed
+                final TreeNode parent = tree.getParent(toRemove);
+                if (!tree.hasChildren(parent)) {
+                    tree.remove(parent);
+                    currentNodes.remove(parent.getAttribute(NODE_ID));
+                }
+            }
+        }
+
+    }
+
+
+    private void processNodeSources(List<NodeSource> nodeSources) {
+        if(!nodeSources.isEmpty()) {
+            for (NodeSource nodeSource : nodeSources) {
+                if (nodeSource.isRemoved()) {
+                    removeNodeSource(nodeSource);
+                } else {
+                    addNodeSourceIfNotExists(nodeSource);
+                    changeNodeSourceStatusIfChanged(nodeSource);
+                }
+            }
+        }
+    }
+
+    private void changeNodeSourceStatusIfChanged(NodeSource nodeSource) {
+        if (nodeSource.isChanged()) {
+            TNS curTreeNodeSource = (TNS) currentNodes.get(nodeSource.getSourceName());
+            curTreeNodeSource.rmNS = nodeSource;
+            curTreeNodeSource.setName(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()));
+            curTreeNodeSource.setIcon(nodeSource.getIcon());
+            this.treeGrid.refreshFields();
+        }
+    }
+
+    private void addNodeSourceIfNotExists(NodeSource nodeSource) {
+        if (!currentNodes.containsKey(nodeSource.getSourceName())) {
+            TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()), nodeSource);
+            nsTreeNode.setIcon(nodeSource.getIcon());
+            tree.add(nsTreeNode, this.tree.getRoot());
+            currentNodes.put(nodeSource.getSourceName(), nsTreeNode);
+        }
+
+    }
+
+    private void removeNodeSource(NodeSource nodeSource) {
+        if (currentNodes.containsKey(nodeSource.getSourceName())) {
+            tree.remove(currentNodes.remove(nodeSource.getSourceName()));
+            currentNodes.remove(nodeSource.getSourceName());
+        }
+    }
+
 
     private String getNodeSourceDisplayedDescription(NodeSource ns, String nsName) {
         return nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
-               ns.getNodeSourceAdmin() + "</span>";
+                ns.getNodeSourceAdmin() + "</span>";
     }
 
     void expandAll() {
@@ -445,7 +421,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
 
         this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.curNodes.get(node.getNodeUrl());
+        TreeNode tn = this.currentNodes.get(node.getNodeUrl());
         this.treeGrid.selectRecord(tn, true);
         scrollList(tn);
     }
@@ -463,7 +439,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
 
         this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.curNodes.get(ns.getSourceName());
+        TreeNode tn = this.currentNodes.get(ns.getSourceName());
         this.treeGrid.selectRecord(tn, true);
         scrollList(tn);
     }
@@ -476,7 +452,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
 
         this.treeGrid.deselectAllRecords();
-        TreeNode tn = this.curNodes.get(h.getId());
+        TreeNode tn = this.currentNodes.get(h.getId());
         this.treeGrid.selectRecord(tn, true);
         scrollList(tn);
     }
