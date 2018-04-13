@@ -164,7 +164,7 @@ public interface RMService extends RemoteService {
      * @throws RestServerException
      * @throws ServiceException
      */
-    String editDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+    String updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException;
 

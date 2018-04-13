@@ -436,8 +436,8 @@ public abstract class NodeSourceWindow {
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
 
                 this.window.hide();
-                LogModel.getInstance()
-                        .logMessage("Successfully created nodesource: " + nodeSourceNameItem.getValueAsString());
+                LogModel.getInstance().logMessage("Successfully applied action to Node Source: " +
+                                                  nodeSourceNameItem.getValueAsString());
 
             } else {
 
@@ -461,7 +461,7 @@ public abstract class NodeSourceWindow {
             button.setDisabled(true);
         }
 
-        nodeSourcePluginsWaitingLabel.setContents("Node Source creation requested...");
+        nodeSourcePluginsWaitingLabel.setContents("Node Source action requested...");
         nodeSourcePluginsWaitingLabel.show();
         nodeSourcePluginsForm.hide();
     }
@@ -476,9 +476,9 @@ public abstract class NodeSourceWindow {
             msg = jsonCallback.toString();
         }
 
-        nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg +
+        nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to apply action to Node Source :<br>" + msg +
                                           "</span>");
-        LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
+        LogModel.getInstance().logImportantMessage("Failed to apply action to Node Source " +
                                                    nodeSourceNameItem.getValueAsString() + ": " + msg);
         nodeSourceWindowLayout.scrollToTop();
     }

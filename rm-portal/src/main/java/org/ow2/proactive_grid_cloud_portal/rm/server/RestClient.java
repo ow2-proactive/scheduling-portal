@@ -108,9 +108,9 @@ public interface RestClient {
             @FormParam("nodesRecoverable") String nodesRecoverable);
 
     @PUT
-    @Path("/rm/nodesource/update")
+    @Path("/rm/nodesource/parameter")
     @Produces("application/json")
-    InputStream editDynamicParameters(@HeaderParam("sessionId") String sessionId,
+    InputStream updateDynamicParameters(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
             @FormParam("infrastructureParameters") String[] infrastructureParameters,

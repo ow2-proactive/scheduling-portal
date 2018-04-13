@@ -163,26 +163,48 @@ public class NSCreationServlet extends HttpServlet {
             }
 
             String jsonResponsePayload;
-            if (nodeSourceAction.equals("edit") || nodeSourceAction.equals("update")) {
-                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
-                                                                                           nsName,
-                                                                                           infra,
-                                                                                           toArray(infraParams),
-                                                                                           toArray(infraFileParams),
-                                                                                           policy,
-                                                                                           toArray(policyParams),
-                                                                                           toArray(policyFileParams),
-                                                                                           nodesRecoverable);
-            } else {
-                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                             nsName,
-                                                                                             infra,
-                                                                                             toArray(infraParams),
-                                                                                             toArray(infraFileParams),
-                                                                                             policy,
-                                                                                             toArray(policyParams),
-                                                                                             toArray(policyFileParams),
-                                                                                             nodesRecoverable);
+            switch (nodeSourceAction) {
+                case "edit":
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
+                                                                                               nsName,
+                                                                                               infra,
+                                                                                               toArray(infraParams),
+                                                                                               toArray(infraFileParams),
+                                                                                               policy,
+                                                                                               toArray(policyParams),
+                                                                                               toArray(policyFileParams),
+                                                                                               nodesRecoverable);
+                    break;
+                case "create":
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                                 nsName,
+                                                                                                 infra,
+                                                                                                 toArray(infraParams),
+                                                                                                 toArray(infraFileParams),
+                                                                                                 policy,
+                                                                                                 toArray(policyParams),
+                                                                                                 toArray(policyFileParams),
+                                                                                                 nodesRecoverable);
+                    break;
+                case "update":
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).updateDynamicParameters(sessionId,
+                                                                                                        nsName,
+                                                                                                        infra,
+                                                                                                        toArray(infraParams),
+                                                                                                        toArray(infraFileParams),
+                                                                                                        policy,
+                                                                                                        toArray(policyParams),
+                                                                                                        toArray(policyFileParams));
+                    break;
+                default:
+                    jsonResponsePayload = new JSONWriter(new StringWriter()).object()
+                                                                            .key("result")
+                                                                            .value(false)
+                                                                            .key("errorMessage")
+                                                                            .value("Unknown node source action")
+                                                                            .endObject()
+                                                                            .toString();
+                    break;
             }
 
             JSONObject jsonObject = new JSONObject(jsonResponsePayload);
@@ -252,6 +274,10 @@ public class NSCreationServlet extends HttpServlet {
     }
 
     private String createJavascriptPayload(String callbackName, String json) {
+
+        //writing the callback name in as an inlined script, so that the
+        // browser, upon receiving it, will evaluate the JS and call the
+        // function
         return "<script type='text/javascript'>window.opener.focus(); window.opener." + callbackName + "(" + json +
                "); window.close();</script>";
     }

@@ -160,7 +160,7 @@ public interface RMServiceAsync {
      * @throws RestServerException
      * @throws ServiceException
      */
-    void editDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+    void updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters, AsyncCallback<String> callback)
             throws RestServerException, ServiceException;

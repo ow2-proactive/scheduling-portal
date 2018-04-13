@@ -274,17 +274,17 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public String editDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+    public String updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.editDynamicParameters(sessionId,
-                                                                                                  nodeSourceName,
-                                                                                                  infrastructureType,
-                                                                                                  infrastructureParameters,
-                                                                                                  infrastructureFileParameters,
-                                                                                                  policyType,
-                                                                                                  policyParameters,
-                                                                                                  policyFileParameters));
+        return executeFunctionReturnStreamAsString(restClient -> restClient.updateDynamicParameters(sessionId,
+                                                                                                    nodeSourceName,
+                                                                                                    infrastructureType,
+                                                                                                    infrastructureParameters,
+                                                                                                    infrastructureFileParameters,
+                                                                                                    policyType,
+                                                                                                    policyParameters,
+                                                                                                    policyFileParameters));
     }
 
     @Override
