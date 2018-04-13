@@ -46,9 +46,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
 /**
  * Displays detailed info about the currently selected node
- * 
- * 
- * 
+ *
  * @author mschnoor
  *
  */

@@ -95,8 +95,37 @@ public class NodeSource {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        NodeSource that = (NodeSource) o;
+
+        return sourceName != null ? sourceName.equals(that.sourceName) : that.sourceName == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return sourceName != null ? sourceName.hashCode() : 0;
+    }
+
     public boolean isRemoved() {
         return "NODESOURCE_REMOVED".equalsIgnoreCase(eventType);
+    }
+
+    public boolean isAdded() {
+        return "NODESOURCE_DEFINED".equalsIgnoreCase(eventType);
+    }
+
+    public boolean isChanged() {
+        return !isAdded() && !isRemoved();
+    }
+
+    public String getEventType() {
+        return eventType;
     }
 
     public Map<String, Host> getHosts() {
@@ -145,7 +174,7 @@ public class NodeSource {
         /** true if one of the contained nodes contains 'VIRT' in its URL */
         private boolean virtual = false;
 
-        Host(String hostName, String sourceName) {
+        public Host(String hostName, String sourceName) {
             this.hostName = hostName;
             this.nodes = new HashMap<String, Node>();
             this.sourceName = sourceName;
@@ -162,6 +191,23 @@ public class NodeSource {
                 Node clone = new Node(t.nodes.get(nodeid));
                 this.nodes.put(nodeid, clone);
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+
+            Host host = (Host) o;
+
+            return hostName != null ? hostName.equals(host.hostName) : host.hostName == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return hostName != null ? hostName.hashCode() : 0;
         }
 
         public Map<String, Node> getNodes() {
@@ -189,6 +235,10 @@ public class NodeSource {
          * 		 since several NS can deploy on the same node
          */
         public String getId() {
+            return generateId(this.sourceName, this.hostName);
+        }
+
+        public static String generateId(String sourceName, String hostName) {
             return sourceName + "-host-" + hostName;
         }
 
@@ -222,6 +272,7 @@ public class NodeSource {
             private String hostName;
 
             /** name of the JVM running this node */
+
             private String vmName;
 
             /** toString() of the remote RMNode */
@@ -293,8 +344,37 @@ public class NodeSource {
                 }
             }
 
+            @Override
+            public boolean equals(Object o) {
+                if (this == o)
+                    return true;
+                if (o == null || getClass() != o.getClass())
+                    return false;
+
+                Node node = (Node) o;
+
+                return nodeUrl != null ? nodeUrl.equals(node.nodeUrl) : node.nodeUrl == null;
+            }
+
+            @Override
+            public int hashCode() {
+                return nodeUrl != null ? nodeUrl.hashCode() : 0;
+            }
+
             public boolean isRemoved() {
                 return "NODE_REMOVED".equalsIgnoreCase(eventType);
+            }
+
+            public boolean isAdded() {
+                return "NODE_ADDED".equalsIgnoreCase(eventType);
+            }
+
+            public boolean isChanged() {
+                return !isAdded() && !isRemoved();
+            }
+
+            public String getEventType() {
+                return eventType;
             }
 
             public boolean isDeployingNode() {

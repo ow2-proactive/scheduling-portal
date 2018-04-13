@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
@@ -140,8 +141,17 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setNodes(HashMap<String, NodeSource> nodes) {
         this.nodes = nodes;
+    }
+
+    void nodesUpdate(Map<String, NodeSource> nodes) {
         for (NodesListener list : this.nodesListeners) {
             list.nodesUpdated(nodes);
+        }
+    }
+
+    void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        for (NodesListener list : this.nodesListeners) {
+            list.updateByDelta(nodeSources, nodes);
         }
     }
 
