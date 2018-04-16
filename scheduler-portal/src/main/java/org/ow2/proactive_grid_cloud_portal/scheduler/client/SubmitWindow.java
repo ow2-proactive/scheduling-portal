@@ -55,6 +55,7 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -62,12 +63,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -223,6 +227,8 @@ public class SubmitWindow {
 
     private Map<String, JobVariable> variables;
 
+    private Map<String, JobGenericInformation> genericInformation;
+
     private String job;
 
     private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
@@ -351,13 +357,78 @@ public class SubmitWindow {
         rootPage.addMember(selectWfLayout);
     }
 
-    private void fillVarsPart() {
+    private void fillVarsPart(String jobDescriptor) {
 
         DynamicForm variablesVisualForm = initVariablesVisualForm();
 
         Layout hiddenVarsLayout = initVariablesActualForm();
 
         initVarsLayout();
+
+        Document dom = XMLParser.parse(jobDescriptor);
+        String documentation = null;
+        String icon = null;
+        String bucketName = null;
+        Boolean existBucketName = false;
+        Boolean existDocumentation = false;
+        Boolean existIcon = false;
+
+        NodeList genericInfo = dom.getElementsByTagName("genericInformation");
+        // check if the job has genericInformation or not
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            // get the first item
+            Node root = genericInfo.item(0);
+            NodeList list = root.getChildNodes();
+            for (int i = 0; i < list.getLength(); i++) {
+                Node node = list.item(i);
+                if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    for (int j = 0; j < attributes.getLength(); j++) {
+                        Node attribute = attributes.item(j);
+
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("bucketName")) {
+                            String bucketNameValue = attribute.getNodeValue();
+                            existBucketName = true;
+
+                        }
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("documentation")) {
+                            String label = attribute.getNodeValue();
+                            existDocumentation = true;
+
+                        }
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                            attribute.getNodeValue().equalsIgnoreCase("workflow.icon")) {
+                            String label = attribute.getNodeValue();
+                            existIcon = true;
+
+                        }
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
+                            existBucketName) {
+                            bucketName = attribute.getNodeValue();
+                            existBucketName = false;
+                        }
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
+                            existDocumentation) {
+                            documentation = attribute.getNodeValue();
+                            existDocumentation = false;
+                        }
+                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
+                            existIcon) {
+                            icon = attribute.getNodeValue();
+                            existIcon = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        Widget childOne = new HTML("Icon link " + icon +
+                                   " <br> Workflow Name : <br> Description : <br> Project Name : <br> Documentation :" +
+                                   documentation + " <br> Bucket name :" + bucketName);
+
+        varsLayout.addMember(childOne);
         varsLayout.addMember(variablesVisualForm);
         varsLayout.addMember(hiddenVarsLayout);
         rootPage.addMember(varsLayout);
@@ -370,7 +441,9 @@ public class SubmitWindow {
         variablesVisualForm = new DynamicForm();
         variablesVisualForm.setNumCols(3);
         variablesVisualForm.setColWidths("25%", "50%", "25%");
+
         fields = new FormItem[variables.size() * 2];
+
         int i = 0;
 
         for (Entry<String, JobVariable> var : variables.entrySet()) {
@@ -834,7 +907,7 @@ public class SubmitWindow {
                                     if (((JSONBoolean) obj.get("valid")).booleanValue()) {
                                         if (obj.containsKey("updatedVariables")) {
                                             updateVariables(obj.get("updatedVariables"));
-                                            redrawVariables();
+                                            redrawVariables(job);
                                         }
                                         GWT.log("Job validated");
                                         displayInfoMessage("Job is valid");
@@ -1010,15 +1083,15 @@ public class SubmitWindow {
                     startAccordingPlanningRadioButton.setVisible(false);
                     return;
                 }
-                redrawVariables();
+                redrawVariables(job);
             }
         };
     }
 
-    private void redrawVariables() {
+    private void redrawVariables(String job) {
         removeBottomMembers();
         setEnabledStartAtPart(true);
-        fillVarsPart();
+        fillVarsPart(job);
         rootPage.addMember(startAtLayout);
         clearMessagePanel();
         rootPage.addMember(messagePanel);
@@ -1254,6 +1327,37 @@ public class SubmitWindow {
         private String model;
 
         public JobVariable(String name, String value, String model) {
+            this.name = name;
+            this.value = value;
+            this.model = model;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+    }
+
+    class JobGenericInformation {
+        private String name;
+
+        private String value;
+
+        private String model;
+
+        public JobGenericInformation(String name, String value, String model) {
             this.name = name;
             this.value = value;
             this.model = model;
