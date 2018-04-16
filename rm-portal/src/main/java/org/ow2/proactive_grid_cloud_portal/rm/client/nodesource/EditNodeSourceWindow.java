@@ -178,9 +178,6 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             windowLabel.hide();
             windowForm.show();
 
-            //this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
-            //windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-
         }, this.window::hide);
     }
 
