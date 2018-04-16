@@ -110,8 +110,9 @@ public class NodeRemover {
         init(nodeSource);
         if (findNodeSource()) {
             hierarchyNodeSourceIterator.remove();
-            for(int i = 0; i < hierarchyNodeSource.getTilesNumber(); ++i){
+            while (hierarchyNodeSource.getTilesNumber() > 0) {
                 compactFlowPanel.remove(index);
+                hierarchyNodeSource.decrementTiles();
             }
         }
     }

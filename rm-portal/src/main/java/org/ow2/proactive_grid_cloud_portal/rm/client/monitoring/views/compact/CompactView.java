@@ -154,7 +154,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             int numPerLine = flow.getElement().getClientWidth() / 20;
             if (numPerLine > 0) {
                 int height = 20 * (id / numPerLine);
-                this.root.scrollTo(0, height);
+                root.scrollTo(0, height);
             }
         }
         _doNotScroll = false;
@@ -172,7 +172,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         updateCompactPanel(nodeSources, nodes);
 
         updateMyNodesCompactPanel(nodeSources, nodes);
-
     }
 
     private void updateCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
