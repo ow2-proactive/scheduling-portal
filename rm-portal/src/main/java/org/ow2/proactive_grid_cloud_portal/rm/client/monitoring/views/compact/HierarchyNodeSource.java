@@ -54,7 +54,7 @@ public class HierarchyNodeSource {
         return nodeSource;
     }
 
-    int getTilesNumber() {
+    public int getTilesNumber() {
         return tilesNumber;
     }
 
