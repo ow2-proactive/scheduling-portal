@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -73,7 +74,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     /**
      * treenodes currently held by {@link #tree}
      */
-    private HashMap<String, TreeNode> currentNodes = null;
+    private Map<String, TreeNode> currentNodes = null;
 
     /**
      * prevent event cycling
@@ -339,15 +340,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         if (currentNodes.containsKey(node.getNodeUrl())) {
             final TreeNode toRemove = currentNodes.get(node.getNodeUrl());
 
+            final TreeNode parent = tree.getParent(toRemove);
             tree.remove(toRemove);
             currentNodes.remove(node.getNodeUrl());
 
-            if (!node.isDeployingNode()) { // thus this node has a host, which might be removed
-                final TreeNode parent = tree.getParent(toRemove);
-                if (!tree.hasChildren(parent)) {
-                    tree.remove(parent);
-                    currentNodes.remove(parent.getAttribute(NODE_ID));
-                }
+            if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
+                tree.remove(parent);
+                currentNodes.remove(parent.getAttribute(NODE_ID));
             }
         }
 
@@ -388,7 +387,19 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private void removeNodeSource(NodeSource nodeSource) {
         if (currentNodes.containsKey(nodeSource.getSourceName())) {
-            tree.remove(currentNodes.remove(nodeSource.getSourceName()));
+            final TreeNode treeNodeSource = currentNodes.remove(nodeSource.getSourceName());
+
+            for (TreeNode treeNode : tree.getAllNodes(treeNodeSource)) {
+                if (treeNode instanceof THost) {
+                    final THost tHost = (THost) treeNode;
+                    currentNodes.remove(tHost.rmHost.getId());
+                } else if (treeNode instanceof TNode) {
+                    final TNode tNode = (TNode) treeNode;
+                    currentNodes.remove(tNode.rmNode.getNodeUrl());
+                }
+            }
+
+            tree.remove(treeNodeSource);
             currentNodes.remove(nodeSource.getSourceName());
         }
     }

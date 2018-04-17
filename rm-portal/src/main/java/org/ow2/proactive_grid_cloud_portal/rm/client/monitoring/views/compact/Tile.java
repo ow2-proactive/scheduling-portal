@@ -28,6 +28,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
 
+import java.util.Optional;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
@@ -299,9 +301,21 @@ public class Tile extends Image {
         if (host != null || nodesource != null) {
             int id;
             if (host == null) {
-                id = panel.indexOf(nodesource).get();
+                final Optional<Integer> opIndexOfNodeSource = panel.indexOf(nodesource);
+                if (opIndexOfNodeSource.isPresent()) {
+                    id = opIndexOfNodeSource.get();
+                } else {
+                    nodesource = null;
+                    return;
+                }
             } else {
-                id = panel.indexOf(host).get();
+                final Optional<Integer> opIndexOfHost = panel.indexOf(host);
+                if (opIndexOfHost.isPresent()) {
+                    id = opIndexOfHost.get();
+                } else {
+                    host = null;
+                    return;
+                }
             }
 
             while (true) {
