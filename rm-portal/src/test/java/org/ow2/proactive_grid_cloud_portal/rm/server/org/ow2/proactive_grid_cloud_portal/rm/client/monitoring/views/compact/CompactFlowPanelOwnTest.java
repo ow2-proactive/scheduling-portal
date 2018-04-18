@@ -43,17 +43,15 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 @RunWith(GwtMockitoTestRunner.class)
 public class CompactFlowPanelOwnTest {
 
-    private CompactFlowPanelOwn compactFlowPanel;
+    private CompactFlowPanelOwn spyCompactFlowPanel;
 
     @Before
     public void setUp() {
-        compactFlowPanel = new CompactFlowPanelOwn();
+        spyCompactFlowPanel = spy(new CompactFlowPanelOwn());
     }
 
     @Test
     public void testRemovingDanglingHostAndNodeSource() {
-        final CompactFlowPanelOwn spyCompactFlowPanel = spy(compactFlowPanel);
-
         for (Tile nodeSourceTile : nodeSources(1)) {
             spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
 

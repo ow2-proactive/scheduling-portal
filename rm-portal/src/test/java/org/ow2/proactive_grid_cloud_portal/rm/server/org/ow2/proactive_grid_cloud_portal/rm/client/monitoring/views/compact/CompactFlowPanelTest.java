@@ -53,17 +53,15 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 @RunWith(GwtMockitoTestRunner.class)
 public class CompactFlowPanelTest {
 
-    private CompactFlowPanel compactFlowPanel;
+    private CompactFlowPanel spyCompactFlowPanel;
 
     @Before
     public void setUp() {
-        compactFlowPanel = new CompactFlowPanel();
+        spyCompactFlowPanel = spy(new CompactFlowPanel());
     }
 
     @Test
     public void test() {
-        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
-
         for (Tile nodeSourceTile : nodeSources(5)) {
             spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
 
@@ -93,8 +91,6 @@ public class CompactFlowPanelTest {
 
     @Test
     public void testAddHostByNecessity() {
-        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
-
         assertEquals(0, spyCompactFlowPanel.getTilesNumber());
 
         spyCompactFlowPanel.drawNodeSource(nodeSources(1).get(0));
@@ -110,8 +106,6 @@ public class CompactFlowPanelTest {
 
     @Test
     public void testRemovingDanglingHost() {
-        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
-
         for (Tile nodeSourceTile : nodeSources(1)) {
             spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
 
@@ -127,6 +121,24 @@ public class CompactFlowPanelTest {
         assertEquals(1, spyCompactFlowPanel.getTilesNumber());
     }
 
+    @Test
+    public void testIndexOf() {
+
+        for (Tile nodeSourceTile : nodeSources(1)) {
+            spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
+
+            Tile hostTile = host(nodeSourceTile.getNodesource().getSourceName());
+            for (Tile nodeTile : nodes(nodeSourceTile.getNodesource().getSourceName(), 20000)) {
+                spyCompactFlowPanel.drawNode(nodeTile, hostTile);
+            }
+
+        }
+
+        final NodeSource.Host.Node node = spyCompactFlowPanel.getModel().get(0).getHosts().get(0).getNodes().get(10000);
+        assertEquals(10002, spyCompactFlowPanel.indexOf(node).get().longValue());
+
+    }
+
     public static Tile host(String sourceName) {
         NodeSource.Host host = new NodeSource.Host("defaultHost", sourceName);
         Tile tile = mock(Tile.class);
@@ -136,7 +148,7 @@ public class CompactFlowPanelTest {
 
     public static List<Tile> nodes(String sourceName, int num) {
         return IntStream.range(0, num).mapToObj(i -> {
-            NodeSource.Host.Node node = new NodeSource.Host.Node(sourceName, "defaultHost", sourceName + "i" + num);
+            NodeSource.Host.Node node = new NodeSource.Host.Node(sourceName, "defaultHost", sourceName + "i" + i);
             Tile tile = mock(Tile.class);
             when(tile.getNode()).thenReturn(node);
             return tile;
