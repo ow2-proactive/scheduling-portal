@@ -206,4 +206,7 @@ public class CompactFlowPanel extends FlowPanel {
         return model;
     }
 
+    public int getTilesNumber() {
+        return model.stream().mapToInt(HierarchyNodeSource::getTilesNumber).sum();
+    }
 }

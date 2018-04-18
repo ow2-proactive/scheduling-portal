@@ -50,7 +50,7 @@ public class HierarchyNodeSource {
         this.nodeSource = nodeSource;
     }
 
-    NodeSource getNodeSource() {
+    public NodeSource getNodeSource() {
         return nodeSource;
     }
 
@@ -58,7 +58,7 @@ public class HierarchyNodeSource {
         return tilesNumber;
     }
 
-    List<HierarchyHost> getHosts() {
+    public List<HierarchyHost> getHosts() {
         return hosts;
     }
 

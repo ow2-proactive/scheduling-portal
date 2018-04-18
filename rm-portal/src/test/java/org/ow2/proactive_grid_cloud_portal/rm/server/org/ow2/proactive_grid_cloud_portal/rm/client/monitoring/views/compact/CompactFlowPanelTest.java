@@ -26,8 +26,15 @@
 package org.ow2.proactive_grid_cloud_portal.rm.server.org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -37,11 +44,10 @@ import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceStatus;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactFlowPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.HierarchyNodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.Tile;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
@@ -59,18 +65,69 @@ public class CompactFlowPanelTest {
 
     @Test
     public void test() {
+        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
+
         for (Tile nodeSourceTile : nodeSources(5)) {
-            compactFlowPanel.drawNodeSource(nodeSourceTile);
+            spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
 
             final Tile hostTile = host(nodeSourceTile.getNodesource().getSourceName());
             for (Tile nodeTile : nodes(nodeSourceTile.getNodesource().getSourceName(), 5)) {
-                compactFlowPanel.drawNode(nodeTile, hostTile);
+                spyCompactFlowPanel.drawNode(nodeTile, hostTile);
             }
 
         }
 
-        assertEquals(5, compactFlowPanel.getModel().size());
-        assertEquals(7, compactFlowPanel.getModel().get(0).getTilesNumber());
+        ArgumentCaptor<Tile> captor = ArgumentCaptor.forClass(Tile.class);
+        verify(spyCompactFlowPanel).insert(captor.capture(), eq(0));
+        assertNotNull(captor.getValue().getNodesource());
+        assertNull(captor.getValue().getHost());
+
+        assertEquals(5, spyCompactFlowPanel.getModel().size());
+        assertEquals(7, spyCompactFlowPanel.getModel().get(0).getTilesNumber());
+
+        final NodeSource thirdNodeSource = spyCompactFlowPanel.getModel().get(2).getNodeSource();
+        final NodeSource forthNodeSource = spyCompactFlowPanel.getModel().get(3).getNodeSource();
+        assertEquals(14, spyCompactFlowPanel.indexOf(thirdNodeSource).get().longValue());
+        spyCompactFlowPanel.remove(thirdNodeSource);
+
+        assertEquals(14, spyCompactFlowPanel.indexOf(forthNodeSource).get().longValue());
+
+    }
+
+    @Test
+    public void testAddHostByNecessity() {
+        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
+
+        assertEquals(0, spyCompactFlowPanel.getTilesNumber());
+
+        spyCompactFlowPanel.drawNodeSource(nodeSources(1).get(0));
+        assertEquals(1, spyCompactFlowPanel.getTilesNumber());
+
+        final Tile hostTile = host(spyCompactFlowPanel.getModel().get(0).getNodeSource().getSourceName());
+
+        spyCompactFlowPanel.drawNode(nodes(spyCompactFlowPanel.getModel().get(0).getNodeSource().getSourceName(), 1)
+                                                                                                                    .get(0),
+                                     hostTile);
+        assertEquals(3, spyCompactFlowPanel.getTilesNumber());
+    }
+
+    @Test
+    public void testRemovingDanglingHost() {
+        final CompactFlowPanel spyCompactFlowPanel = spy(compactFlowPanel);
+
+        for (Tile nodeSourceTile : nodeSources(1)) {
+            spyCompactFlowPanel.drawNodeSource(nodeSourceTile);
+
+            final Tile hostTile = host(nodeSourceTile.getNodesource().getSourceName());
+            for (Tile nodeTile : nodes(nodeSourceTile.getNodesource().getSourceName(), 2)) {
+                spyCompactFlowPanel.drawNode(nodeTile, hostTile);
+            }
+        }
+        assertEquals(4, spyCompactFlowPanel.getTilesNumber());
+        spyCompactFlowPanel.remove(spyCompactFlowPanel.getModel().get(0).getHosts().get(0).getNodes().get(0));
+        assertEquals(3, spyCompactFlowPanel.getTilesNumber());
+        spyCompactFlowPanel.remove(spyCompactFlowPanel.getModel().get(0).getHosts().get(0).getNodes().get(0));
+        assertEquals(1, spyCompactFlowPanel.getTilesNumber());
     }
 
     private Tile host(String sourceName) {

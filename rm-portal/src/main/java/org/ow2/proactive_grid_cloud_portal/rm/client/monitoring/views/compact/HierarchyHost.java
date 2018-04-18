@@ -56,7 +56,7 @@ public class HierarchyHost {
         return tilesNumber;
     }
 
-    List<NodeSource.Host.Node> getNodes() {
+    public List<NodeSource.Host.Node> getNodes() {
         return nodes;
     }
 
