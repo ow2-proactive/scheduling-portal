@@ -48,7 +48,7 @@ public class HierarchyHost {
         this.host = host;
     }
 
-    NodeSource.Host getHost() {
+    public NodeSource.Host getHost() {
         return host;
     }
 

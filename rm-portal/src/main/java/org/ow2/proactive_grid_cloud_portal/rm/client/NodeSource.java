@@ -132,6 +132,10 @@ public class NodeSource {
         return eventType;
     }
 
+    void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
     public Map<String, Host> getHosts() {
         return hosts;
     }
@@ -401,6 +405,10 @@ public class NodeSource {
 
             public NodeState getNodeState() {
                 return nodeState;
+            }
+
+            void setNodeState(NodeState nodeState) {
+                this.nodeState = nodeState;
             }
 
             public String getNodeInfo() {

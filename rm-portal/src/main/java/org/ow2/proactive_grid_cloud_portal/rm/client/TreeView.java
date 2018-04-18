@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -71,12 +72,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     /**
      * tree data
      */
-    private Tree tree = null;
+    Tree tree = null;
 
     /**
      * treenodes currently held by {@link #tree}
      */
-    private Map<String, TreeNode> currentNodes = null;
+    Map<String, TreeNode> currentNodes = null;
 
     /**
      * prevent event cycling
@@ -279,6 +280,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        LogModel.getInstance().logMessage("TreeView updateByDelta");
         processNodeSources(nodeSources);
 
         treeGrid.refreshFields();
@@ -288,7 +290,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.markForRedraw();
     }
 
-    private void processNodes(List<Node> nodes) {
+    void processNodes(List<Node> nodes) {
         if (!nodes.isEmpty()) {
             for (Node node : nodes) {
                 if (node.isRemoved()) {
@@ -301,7 +303,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void changeNodeStatusIfChanged(Node node) {
+    void changeNodeStatusIfChanged(Node node) {
         if (node.isChanged()) {
             TNode treeNode = (TNode) currentNodes.get(node.getNodeUrl());
             treeNode.setAttribute("nodeState", node.getNodeState().toString());
@@ -310,7 +312,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void addNodeIfNotExists(Node node) {
+    void addNodeIfNotExists(Node node) {
         if (!currentNodes.containsKey(node.getNodeUrl())) { // if there is no node
             if (node.isDeployingNode()) {
                 TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
@@ -342,7 +344,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void removeNode(Node node) {
+    void removeNode(Node node) {
         if (currentNodes.containsKey(node.getNodeUrl())) {
             final TreeNode toRemove = currentNodes.get(node.getNodeUrl());
 
@@ -358,7 +360,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-    private void processNodeSources(List<NodeSource> nodeSources) {
+    void processNodeSources(List<NodeSource> nodeSources) {
         if (!nodeSources.isEmpty()) {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
@@ -371,7 +373,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void changeNodeSourceStatusIfChanged(NodeSource nodeSource) {
+    void changeNodeSourceStatusIfChanged(NodeSource nodeSource) {
         if (nodeSource.isChanged()) {
             TNS curTreeNodeSource = (TNS) currentNodes.get(nodeSource.getSourceName());
             curTreeNodeSource.rmNS = nodeSource;
@@ -380,7 +382,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void addNodeSourceIfNotExists(NodeSource nodeSource) {
+    void addNodeSourceIfNotExists(NodeSource nodeSource) {
         if (!currentNodes.containsKey(nodeSource.getSourceName())) {
             TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()),
                                      nodeSource);
@@ -391,7 +393,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-    private void removeNodeSource(NodeSource nodeSource) {
+    void removeNodeSource(NodeSource nodeSource) {
         if (currentNodes.containsKey(nodeSource.getSourceName())) {
             final TreeNode treeNodeSource = currentNodes.remove(nodeSource.getSourceName());
 
@@ -431,45 +433,33 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     @Override
-    public void nodeSelected(Node node) {
-        if (ignoreNodeSelectedEvent) {
-            ignoreNodeSelectedEvent = false;
-            return;
-        }
-
-        treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(node.getNodeUrl());
-        treeGrid.selectRecord(treeNode, true);
-        scrollList(treeNode);
-    }
-
-    @Override
     public void nodeUnselected() {
         this.treeGrid.deselectAllRecords();
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
-        if (ignoreNodeSelectedEvent) {
-            ignoreNodeSelectedEvent = false;
-            return;
-        }
-
-        treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(ns.getSourceName());
-        treeGrid.selectRecord(treeNode, true);
-        scrollList(treeNode);
+        selectTreeNode(ns.getSourceName());
     }
 
     @Override
     public void hostSelected(Host h) {
+        selectTreeNode(h.getId());
+    }
+
+    @Override
+    public void nodeSelected(Node node) {
+        selectTreeNode(node.getNodeUrl());
+    }
+
+    private void selectTreeNode(String id) {
         if (ignoreNodeSelectedEvent) {
             ignoreNodeSelectedEvent = false;
             return;
         }
 
         treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(h.getId());
+        TreeNode treeNode = currentNodes.get(id);
         treeGrid.selectRecord(treeNode, true);
         scrollList(treeNode);
     }
