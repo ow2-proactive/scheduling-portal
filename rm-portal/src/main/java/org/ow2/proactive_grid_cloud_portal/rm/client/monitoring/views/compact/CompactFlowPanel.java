@@ -69,7 +69,12 @@ public class CompactFlowPanel extends FlowPanel {
         this.setWidth("100%");
         // removes the vertical space between lines
         this.getElement().getStyle().setProperty("lineHeight", "0");
-        nodeRemover = new NodeRemover(this);
+        this.nodeRemover = new NodeRemover(this);
+    }
+
+    // for testing purpose
+    public void setNodeRemover(NodeRemover nodeRemover) {
+        this.nodeRemover = nodeRemover;
     }
 
     public Tile getCurrentSelectedTile() {

@@ -56,7 +56,7 @@ public class NodeRemover {
 
     CompactFlowPanel compactFlowPanel;
 
-    NodeRemover(CompactFlowPanel compactFlowPanel) {
+    public NodeRemover(CompactFlowPanel compactFlowPanel) {
         this.compactFlowPanel = compactFlowPanel;
     }
 

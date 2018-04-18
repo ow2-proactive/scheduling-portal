@@ -28,9 +28,11 @@ package org.ow2.proactive_grid_cloud_portal.rm.server.org.ow2.proactive_grid_clo
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +47,7 @@ import org.mockito.ArgumentCaptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceStatus;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactFlowPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.NodeRemover;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.Tile;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
@@ -58,6 +61,12 @@ public class CompactFlowPanelTest {
     @Before
     public void setUp() {
         spyCompactFlowPanel = spy(new CompactFlowPanel());
+        /**
+         * somehow without this setter Mockito does not see that
+         * NodeRemover::findAndRemove(NodeSource) calls
+         * CompactFlowPanelTest::remove(int)
+         */
+        spyCompactFlowPanel.setNodeRemover(new NodeRemover(spyCompactFlowPanel));
     }
 
     @Test
@@ -90,6 +99,13 @@ public class CompactFlowPanelTest {
     }
 
     @Test
+    public void testAddHostByNec() {
+        spyCompactFlowPanel.drawNodeSource(nodeSources(1).get(0));
+        spyCompactFlowPanel.remove(spyCompactFlowPanel.getModel().get(0).getNodeSource());
+        verify(spyCompactFlowPanel, times(1)).remove(anyInt());
+    }
+
+    @Test
     public void testAddHostByNecessity() {
         assertEquals(0, spyCompactFlowPanel.getTilesNumber());
 
@@ -118,6 +134,8 @@ public class CompactFlowPanelTest {
         spyCompactFlowPanel.remove(spyCompactFlowPanel.getModel().get(0).getHosts().get(0).getNodes().get(0));
         assertEquals(3, spyCompactFlowPanel.getTilesNumber());
         spyCompactFlowPanel.remove(spyCompactFlowPanel.getModel().get(0).getHosts().get(0).getNodes().get(0));
+        verify(spyCompactFlowPanel, times(2)).remove(eq(2));
+        verify(spyCompactFlowPanel, times(1)).remove(eq(1));
         assertEquals(1, spyCompactFlowPanel.getTilesNumber());
     }
 
