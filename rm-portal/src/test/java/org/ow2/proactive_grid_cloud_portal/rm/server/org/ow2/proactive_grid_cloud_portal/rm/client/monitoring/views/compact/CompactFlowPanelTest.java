@@ -28,12 +28,9 @@ package org.ow2.proactive_grid_cloud_portal.rm.server.org.ow2.proactive_grid_clo
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -130,14 +127,14 @@ public class CompactFlowPanelTest {
         assertEquals(1, spyCompactFlowPanel.getTilesNumber());
     }
 
-    private Tile host(String sourceName) {
+    public static Tile host(String sourceName) {
         NodeSource.Host host = new NodeSource.Host("defaultHost", sourceName);
         Tile tile = mock(Tile.class);
         when(tile.getHost()).thenReturn(host);
         return tile;
     }
 
-    private List<Tile> nodes(String sourceName, int num) {
+    public static List<Tile> nodes(String sourceName, int num) {
         return IntStream.range(0, num).mapToObj(i -> {
             NodeSource.Host.Node node = new NodeSource.Host.Node(sourceName, "defaultHost", sourceName + "i" + num);
             Tile tile = mock(Tile.class);
@@ -146,7 +143,7 @@ public class CompactFlowPanelTest {
         }).collect(Collectors.toList());
     }
 
-    private List<Tile> nodeSources(int num) {
+    public static List<Tile> nodeSources(int num) {
         return IntStream.range(0, num).mapToObj(i -> {
             final NodeSource nodeSource = new NodeSource("nodeSource" + i);
             nodeSource.setNodeSourceStatus(NodeSourceStatus.NODES_DEPLOYED);
