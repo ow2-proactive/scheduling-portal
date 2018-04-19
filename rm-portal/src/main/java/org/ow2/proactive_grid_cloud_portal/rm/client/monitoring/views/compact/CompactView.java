@@ -28,7 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -166,7 +165,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
      */
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        LogModel.getInstance().logMessage("CompactView updateByDelta");
         /* first call : create the components */
         if (this.compactPanel == null) {
             initializePanel();

@@ -29,8 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -43,8 +41,6 @@ import com.smartgwt.client.types.TreeModelType;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
-import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
@@ -163,101 +159,20 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         this.treeGrid.addNodeContextClickHandler(event -> {
 
-            String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
-            String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-            String deployItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
-            String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
-            String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
-
-            NodeSource currentSelectedNodeSource = null;
-            Node currentSelectedNode = null;
-
+            Object releated = null;
             final TreeNode treeNode = event.getNode();
             if (treeNode instanceof TNode) {
                 TNode tn = (TNode) treeNode;
-                TreeView.this.controller.selectNode(tn.rmNode);
-                lockItemImageResource = tn.rmNode.getIconLocked();
-                unlockItemImageResource = tn.rmNode.getIconUnlocked();
-                currentSelectedNode = tn.rmNode;
+                releated = tn.rmNode;
             } else if (treeNode instanceof TNS) {
                 TNS tn = (TNS) treeNode;
-                TreeView.this.controller.selectNodeSource(tn.rmNS);
-                currentSelectedNodeSource = tn.rmNS;
+                releated = tn.rmNS;
             } else if (treeNode instanceof THost) {
                 THost tn = (THost) treeNode;
-                TreeView.this.controller.selectHost(tn.rmHost);
+                releated = tn.rmHost;
             }
 
-            Menu menu = new Menu();
-            menu.setShowShadow(true);
-            menu.setShadowDepth(10);
-
-            MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
-            expandItem.addClickHandler(event17 -> expandAll());
-
-            MenuItem collapseItem = new MenuItem("Collapse all", Images.instance.close_16().getSafeUri().asString());
-            collapseItem.addClickHandler(event16 -> closeAll());
-
-            MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
-            removeItem.addClickHandler(event15 -> controller.removeNodes());
-
-            MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-            lockItem.addClickHandler(event14 -> controller.lockNodes());
-
-            MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-            unlockItem.addClickHandler(event13 -> controller.unlockNodes());
-
-            MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-            deployItem.addClickHandler(event12 -> controller.deployNodeSource());
-
-            MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
-            undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
-
-            MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-            String nodeSourceName = currentSelectedNodeSource == null ? "" : currentSelectedNodeSource.getSourceName();
-            NodeSourceStatus nodeSourceStatus = currentSelectedNodeSource == null ? null
-                                                                                  : currentSelectedNodeSource.getNodeSourceStatus();
-            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
-
-            if (currentSelectedNode != null) {
-                if (currentSelectedNode.isLocked()) {
-                    lockItem.setEnabled(false);
-                    unlockItem.setEnabled(true);
-                } else {
-                    lockItem.setEnabled(true);
-                    unlockItem.setEnabled(false);
-                }
-            }
-
-            if (currentSelectedNodeSource != null) {
-                switch (currentSelectedNodeSource.getNodeSourceStatus()) {
-                    case NODES_DEPLOYED:
-                        editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
-                        enableItems(undeployItem);
-                        disableItems(deployItem);
-                        break;
-                    case NODES_UNDEPLOYED:
-                        editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
-                        enableItems(deployItem);
-                        disableItems(undeployItem);
-                        break;
-                    default:
-                        disableItems(deployItem, undeployItem, editItem);
-                }
-            } else {
-                disableItems(deployItem, undeployItem, editItem);
-            }
-
-            menu.setItems(expandItem,
-                          collapseItem,
-                          new MenuItemSeparator(),
-                          deployItem,
-                          undeployItem,
-                          editItem,
-                          new MenuItemSeparator(),
-                          lockItem,
-                          unlockItem,
-                          removeItem);
+            final Menu menu = ContextMenu.createContextMenuFromTreeView(controller, releated, tree);
 
             treeGrid.setContextMenu(menu);
         });
@@ -266,21 +181,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         return vl;
     }
 
-    private void disableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(false);
-        }
-    }
-
-    private void enableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(true);
-        }
-    }
-
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        LogModel.getInstance().logMessage("TreeView updateByDelta");
         processNodeSources(nodeSources);
 
         treeGrid.refreshFields();
