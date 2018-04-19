@@ -127,7 +127,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
                 if (this.allFormItemsPerPlugin.keySet()
                                               .stream()
                                               .anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
-                    formItem.getName().equals("infra") || formItem.getName().equals("policy")) {
+                    formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
 
                     disableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
                 }
