@@ -34,6 +34,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TreeModelType;
@@ -212,7 +214,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
             MenuItem editItem = new MenuItem("Edit", editItemImageResource);
             String nodeSourceName = currentSelectedNodeSource == null ? "" : currentSelectedNodeSource.getSourceName();
-            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName));
+            NodeSourceStatus nodeSourceStatus = currentSelectedNodeSource == null ? null
+                                                                                  : currentSelectedNodeSource.getNodeSourceStatus();
+            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
             if (currentSelectedNode != null) {
                 if (currentSelectedNode.isLocked()) {
@@ -227,18 +231,20 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (currentSelectedNodeSource != null) {
                 switch (currentSelectedNodeSource.getNodeSourceStatus()) {
                     case NODES_DEPLOYED:
-                        enableItems(new MenuItem[] { undeployItem });
-                        disableItems(new MenuItem[] { deployItem, editItem });
+                        editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
+                        enableItems(undeployItem);
+                        disableItems(deployItem);
                         break;
                     case NODES_UNDEPLOYED:
-                        enableItems(new MenuItem[] { deployItem, editItem });
-                        disableItems(new MenuItem[] { undeployItem });
+                        editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
+                        enableItems(deployItem);
+                        disableItems(undeployItem);
                         break;
                     default:
-                        disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                        disableItems(deployItem, undeployItem, editItem);
                 }
             } else {
-                disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                disableItems(deployItem, undeployItem, editItem);
             }
 
             menu.setItems(expandItem,
@@ -259,13 +265,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         return vl;
     }
 
-    private void disableItems(MenuItem[] items) {
+    private void disableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(false);
         }
     }
 
-    private void enableItems(MenuItem[] items) {
+    private void enableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(true);
         }

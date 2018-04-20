@@ -60,21 +60,25 @@ public class PluginDescriptor {
 
         private boolean file;
 
+        private boolean dynamic;
+
         Field(String name, String value) {
             this(name, value, "");
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false);
+            this(name, value, description, false, false, false, false);
         }
 
-        Field(String name, String value, String description, boolean password, boolean credential, boolean file) {
+        Field(String name, String value, String description, boolean password, boolean credential, boolean file,
+                boolean dynamic) {
             this.name = name;
             this.value = value;
             this.description = description;
             this.password = password;
             this.credential = credential;
             this.file = file;
+            this.dynamic = dynamic;
         }
 
         public String getName() {
@@ -99,6 +103,10 @@ public class PluginDescriptor {
 
         public boolean isFile() {
             return file;
+        }
+
+        public boolean isDynamic() {
+            return dynamic;
         }
 
     }

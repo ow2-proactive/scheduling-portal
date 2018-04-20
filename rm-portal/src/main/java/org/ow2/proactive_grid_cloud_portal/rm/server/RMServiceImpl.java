@@ -274,6 +274,20 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.updateDynamicParameters(sessionId,
+                                                                                                    nodeSourceName,
+                                                                                                    infrastructureType,
+                                                                                                    infrastructureParameters,
+                                                                                                    infrastructureFileParameters,
+                                                                                                    policyType,
+                                                                                                    policyParameters,
+                                                                                                    policyFileParameters));
+    }
+
+    @Override
     public String deployNodeSource(String sessionId, String nodeSourceName)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.deployNodeSource(sessionId,

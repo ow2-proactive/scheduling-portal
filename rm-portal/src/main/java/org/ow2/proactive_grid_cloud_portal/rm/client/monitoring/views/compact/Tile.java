@@ -32,7 +32,10 @@ import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceStatus;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -132,7 +135,9 @@ public class Tile extends Image {
 
                 MenuItem editItem = new MenuItem("Edit", editItemImageResource);
                 String nodeSourceName = nodesource == null ? "" : nodesource.getSourceName();
-                editItem.addClickHandler(event1 -> compactView.getController().editNodeSource(nodeSourceName));
+                NodeSourceStatus nodeSourceStatus = nodesource == null ? null : nodesource.getNodeSourceStatus();
+                editItem.addClickHandler(event1 -> compactView.getController().editNodeSource(nodeSourceName,
+                                                                                              nodeSourceStatus));
 
                 if (node != null) {
                     if (node.isLocked()) {
@@ -147,18 +152,20 @@ public class Tile extends Image {
                 if (nodesource != null) {
                     switch (nodesource.getNodeSourceStatus()) {
                         case NODES_DEPLOYED:
-                            enableItems(new MenuItem[] { undeployItem });
-                            disableItems(new MenuItem[] { deployItem, editItem });
+                            editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
+                            enableItems(undeployItem);
+                            disableItems(deployItem);
                             break;
                         case NODES_UNDEPLOYED:
-                            enableItems(new MenuItem[] { deployItem, editItem });
-                            disableItems(new MenuItem[] { undeployItem });
+                            editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
+                            enableItems(deployItem);
+                            disableItems(undeployItem);
                             break;
                         default:
-                            disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                            disableItems(deployItem, undeployItem, editItem);
                     }
                 } else {
-                    disableItems(new MenuItem[] { deployItem, undeployItem, editItem });
+                    disableItems(deployItem, undeployItem, editItem);
                 }
 
                 menu.setItems(deployItem,
@@ -181,13 +188,13 @@ public class Tile extends Image {
         }
     }
 
-    private void disableItems(MenuItem[] items) {
+    private void disableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(false);
         }
     }
 
-    private void enableItems(MenuItem[] items) {
+    private void enableItems(MenuItem... items) {
         for (MenuItem item : items) {
             item.setEnabled(true);
         }

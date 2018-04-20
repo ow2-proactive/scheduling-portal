@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
 import java.util.*;
 
@@ -32,6 +32,9 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
+import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
@@ -63,7 +66,7 @@ public abstract class NodeSourceWindow {
 
     public static final String DEPLOY_FORM_KEY = "deploy";
 
-    public static final String NODE_SOURCE_EDITED_FORM_KEY = "nodeSourceEdited";
+    public static final String NODE_SOURCE_ACTION_FORM_KEY = "nodeSourceAction";
 
     public static final String INFRASTRUCTURE_FORM_KEY = "infra";
 
@@ -83,7 +86,17 @@ public abstract class NodeSourceWindow {
 
     protected String previousSelectedPolicy;
 
+    protected List<FormItem> allFormItems;
+
     protected Map<String, List<FormItem>> allFormItemsPerPlugin;
+
+    protected IButton deployNowButton;
+
+    protected IButton saveAndKeepUndeployedButton;
+
+    protected IButton cancelButton;
+
+    protected IButton applyModificationsButton;
 
     protected Window window;
 
@@ -106,7 +119,7 @@ public abstract class NodeSourceWindow {
         this.window.destroy();
     }
 
-    protected abstract boolean isNodeSourceEdited();
+    protected abstract NodeSourceAction getNodeSourceAction();
 
     protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem);
@@ -114,12 +127,14 @@ public abstract class NodeSourceWindow {
     protected abstract List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField);
 
+    protected abstract void addButtonsToButtonsLayout(HLayout buttonsLayout);
+
     protected String getPluginShortName(PluginDescriptor plugin) {
 
         return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
     }
 
-    protected ArrayList<FormItem> prepareFormItems() {
+    protected List<FormItem> prepareFormItems() {
 
         this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
@@ -132,7 +147,7 @@ public abstract class NodeSourceWindow {
         HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
         HiddenItem nodesRecoverable = new HiddenItem(NODES_RECOVERABLE_FORM_KEY);
         HiddenItem deploy = new HiddenItem(DEPLOY_FORM_KEY);
-        HiddenItem nodeSourceEdited = new HiddenItem(NODE_SOURCE_EDITED_FORM_KEY);
+        HiddenItem nodeSourceAction = new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY);
         HiddenItem callback = new HiddenItem(NS_CALLBACK_FORM_KEY);
         HiddenItem session = new HiddenItem(SESSION_ID_FORM_KEY);
 
@@ -141,7 +156,7 @@ public abstract class NodeSourceWindow {
         formItems.add(name);
         formItems.add(nodesRecoverable);
         formItems.add(deploy);
-        formItems.add(nodeSourceEdited);
+        formItems.add(nodeSourceAction);
         formItems.add(callback);
         formItems.add(session);
 
@@ -174,8 +189,8 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
-                if (!formItem.getName().endsWith(NodeSourceEditWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
-                    !formItem.getName().endsWith(NodeSourceEditWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                if (!formItem.getName().endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
+                    !formItem.getName().endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
                     formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
                 }
             });
@@ -285,43 +300,59 @@ public abstract class NodeSourceWindow {
         buttonsLayout.setAlign(Alignment.RIGHT);
         buttonsLayout.setMembersMargin(5);
 
-        final IButton createAndDeployNodeSourceButton = new IButton("Deploy Now");
-        createAndDeployNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        createAndDeployNodeSourceButton.setShowDisabledIcon(false);
+        this.applyModificationsButton = new IButton("Apply Modifications");
+        this.applyModificationsButton.setWidth(this.applyModificationsButton.getWidth() * 2);
+        this.applyModificationsButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.applyModificationsButton.setShowDisabledIcon(false);
 
-        final IButton createOnlyNodeSourceButton = new IButton("Save and Keep Undeployed");
-        createOnlyNodeSourceButton.setWidth(createAndDeployNodeSourceButton.getWidth() * 2);
-        createOnlyNodeSourceButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        createOnlyNodeSourceButton.setShowDisabledIcon(false);
+        this.deployNowButton = new IButton("Deploy Now");
+        this.deployNowButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.deployNowButton.setShowDisabledIcon(false);
 
-        final IButton cancelButton = new IButton("Cancel");
-        cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        cancelButton.setShowDisabledIcon(false);
+        this.saveAndKeepUndeployedButton = new IButton("Save and Keep Undeployed");
+        this.saveAndKeepUndeployedButton.setWidth(this.deployNowButton.getWidth() * 2);
+        this.saveAndKeepUndeployedButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.saveAndKeepUndeployedButton.setShowDisabledIcon(false);
+
+        this.cancelButton = new IButton("Cancel");
+        this.cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        this.cancelButton.setShowDisabledIcon(false);
 
         List<IButton> buttonList = new LinkedList<>();
-        buttonList.add(createAndDeployNodeSourceButton);
-        buttonList.add(createOnlyNodeSourceButton);
-        buttonList.add(cancelButton);
+        buttonList.add(this.applyModificationsButton);
+        buttonList.add(this.deployNowButton);
+        buttonList.add(this.saveAndKeepUndeployedButton);
+        buttonList.add(this.cancelButton);
 
-        createAndDeployNodeSourceButton.addClickHandler(clickEvent -> prepareCreateAndDeployFormAndSubmit(nodeSourceWindowLayout,
-                                                                                                          nodeSourcePluginsWaitingLabel,
-                                                                                                          nodeSourcePluginsForm,
-                                                                                                          nodeSourceWindowLabel,
-                                                                                                          nodeSourceNameItem,
-                                                                                                          nodesRecoverableItem,
-                                                                                                          buttonList,
-                                                                                                          isNodeSourceEdited()));
+        this.applyModificationsButton.addClickHandler(clickEvent -> applyModificationsToNodeSource(nodeSourceWindowLayout,
+                                                                                                   nodeSourcePluginsWaitingLabel,
+                                                                                                   nodeSourcePluginsForm,
+                                                                                                   nodeSourceWindowLabel,
+                                                                                                   nodeSourceNameItem,
+                                                                                                   nodesRecoverableItem,
+                                                                                                   buttonList,
+                                                                                                   getNodeSourceAction()));
 
-        createOnlyNodeSourceButton.addClickHandler(clickEvent -> prepareCreateOnlyFormAndSubmit(nodeSourceWindowLayout,
-                                                                                                nodeSourcePluginsWaitingLabel,
-                                                                                                nodeSourcePluginsForm,
-                                                                                                nodeSourceWindowLabel,
-                                                                                                nodeSourceNameItem,
-                                                                                                nodesRecoverableItem,
-                                                                                                buttonList,
-                                                                                                isNodeSourceEdited()));
-        cancelButton.addClickHandler(clickEvent -> window.hide());
-        buttonsLayout.setMembers(createAndDeployNodeSourceButton, createOnlyNodeSourceButton, cancelButton);
+        this.deployNowButton.addClickHandler(clickEvent -> saveAndDeployNodeSource(nodeSourceWindowLayout,
+                                                                                   nodeSourcePluginsWaitingLabel,
+                                                                                   nodeSourcePluginsForm,
+                                                                                   nodeSourceWindowLabel,
+                                                                                   nodeSourceNameItem,
+                                                                                   nodesRecoverableItem,
+                                                                                   buttonList,
+                                                                                   getNodeSourceAction()));
+
+        this.saveAndKeepUndeployedButton.addClickHandler(clickEvent -> saveNodeSource(nodeSourceWindowLayout,
+                                                                                      nodeSourcePluginsWaitingLabel,
+                                                                                      nodeSourcePluginsForm,
+                                                                                      nodeSourceWindowLabel,
+                                                                                      nodeSourceNameItem,
+                                                                                      nodesRecoverableItem,
+                                                                                      buttonList,
+                                                                                      getNodeSourceAction()));
+        this.cancelButton.addClickHandler(clickEvent -> window.hide());
+
+        addButtonsToButtonsLayout(buttonsLayout);
 
         VLayout scrollLayout = new VLayout();
         scrollLayout.setHeight100();
@@ -354,33 +385,48 @@ public abstract class NodeSourceWindow {
         this.window.centerInPage();
     }
 
-    private void prepareCreateAndDeployFormAndSubmit(VLayout nodeSourceWindowLayout,
-            Label nodeSourcePluginsWaitingLabel, DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel,
-            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem, List<IButton> buttonList,
-            boolean nodeSourceEdited) {
+    private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
+
+        nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.FALSE.toString());
+
+        saveNodeSource(nodeSourceWindowLayout,
+                       nodeSourcePluginsWaitingLabel,
+                       nodeSourcePluginsForm,
+                       nodeSourceWindowLabel,
+                       nodeSourceNameItem,
+                       nodesRecoverableItem,
+                       buttonList,
+                       nodeSourceAction);
+    }
+
+    private void saveAndDeployNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.TRUE.toString());
 
-        prepareCreateOnlyFormAndSubmit(nodeSourceWindowLayout,
-                                       nodeSourcePluginsWaitingLabel,
-                                       nodeSourcePluginsForm,
-                                       nodeSourceWindowLabel,
-                                       nodeSourceNameItem,
-                                       nodesRecoverableItem,
-                                       buttonList,
-                                       nodeSourceEdited);
+        saveNodeSource(nodeSourceWindowLayout,
+                       nodeSourcePluginsWaitingLabel,
+                       nodeSourcePluginsForm,
+                       nodeSourceWindowLabel,
+                       nodeSourceNameItem,
+                       nodesRecoverableItem,
+                       buttonList,
+                       nodeSourceAction);
     }
 
-    private void prepareCreateOnlyFormAndSubmit(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
+    private void saveNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
             DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem, List<IButton> buttonList, boolean nodeSourceEdited) {
+            CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, nodeSourceNameItem.getValueAsString());
         nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY, nodesRecoverableItem.getValueAsBoolean().toString());
         nodeSourcePluginsForm.setValue(POLICY_FORM_KEY, this.policySelectItem.getValueAsString());
         nodeSourcePluginsForm.setValue(SESSION_ID_FORM_KEY, LoginModel.getInstance().getSessionId());
-        nodeSourcePluginsForm.setValue(NODE_SOURCE_EDITED_FORM_KEY, Boolean.toString(nodeSourceEdited));
+        nodeSourcePluginsForm.setValue(NODE_SOURCE_ACTION_FORM_KEY, nodeSourceAction.getActionDescription());
         nodeSourcePluginsForm.setCanSubmit(true);
 
         nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
@@ -390,8 +436,8 @@ public abstract class NodeSourceWindow {
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
 
                 this.window.hide();
-                LogModel.getInstance()
-                        .logMessage("Successfully created nodesource: " + nodeSourceNameItem.getValueAsString());
+                LogModel.getInstance().logMessage("Successfully applied action to Node Source: " +
+                                                  nodeSourceNameItem.getValueAsString());
 
             } else {
 
@@ -415,7 +461,7 @@ public abstract class NodeSourceWindow {
             button.setDisabled(true);
         }
 
-        nodeSourcePluginsWaitingLabel.setContents("Node Source creation requested...");
+        nodeSourcePluginsWaitingLabel.setContents("Node Source action requested...");
         nodeSourcePluginsWaitingLabel.show();
         nodeSourcePluginsForm.hide();
     }
@@ -430,9 +476,9 @@ public abstract class NodeSourceWindow {
             msg = jsonCallback.toString();
         }
 
-        nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to create Node Source :<br>" + msg +
+        nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to apply action to Node Source :<br>" + msg +
                                           "</span>");
-        LogModel.getInstance().logImportantMessage("Failed to create nodesource " +
+        LogModel.getInstance().logImportantMessage("Failed to apply action to Node Source " +
                                                    nodeSourceNameItem.getValueAsString() + ": " + msg);
         nodeSourceWindowLayout.scrollToTop();
     }

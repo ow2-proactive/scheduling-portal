@@ -882,9 +882,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject p = arr.get(i).isObject();
 
             String pluginName = p.get("pluginName").isString().stringValue();
-            PluginDescriptor desc = getPluginDescriptor(p, pluginName);
+            PluginDescriptor pluginDescriptor = getPluginDescriptor(p, pluginName);
 
-            plugins.put(pluginName, desc);
+            plugins.put(pluginName, pluginDescriptor);
         }
 
         return plugins;
@@ -904,19 +904,21 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             JSONObject meta = field.get("meta").isObject();
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
+            boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
 
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
 
-            if (metaType.equalsIgnoreCase("password"))
+            if (metaType.equalsIgnoreCase("password")) {
                 password = true;
-            else if (metaType.equalsIgnoreCase("fileBrowser"))
+            } else if (metaType.equalsIgnoreCase("fileBrowser")) {
                 file = true;
-            else if (metaType.equalsIgnoreCase("credential"))
+            } else if (metaType.equalsIgnoreCase("credential")) {
                 credentials = true;
+            }
 
-            Field f = new Field(name, value, descr, password, credentials, file);
+            Field f = new Field(name, value, descr, password, credentials, file, dynamic);
 
             desc.getConfigurableFields().add(f);
         }
@@ -1060,8 +1062,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    public void editNodeSource(String nodeSourceName) {
-        this.rmPage.showNodeSourceEditWindow(nodeSourceName);
+    public void editNodeSource(String nodeSourceName, NodeSourceStatus nodeSourceStatus) {
+        if (nodeSourceStatus.equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
+            this.rmPage.showEditNodeSourceWindow(nodeSourceName);
+        } else {
+            this.rmPage.showEditDynamicParametersWindow(nodeSourceName);
+        }
     }
 
     /**
