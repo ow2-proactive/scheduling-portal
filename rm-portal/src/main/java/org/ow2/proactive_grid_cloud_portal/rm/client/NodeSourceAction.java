@@ -25,13 +25,18 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.Arrays;
+
+
 public enum NodeSourceAction {
 
     CREATE("create"),
 
     EDIT("edit"),
 
-    UPDATE("update");
+    UPDATE("update"),
+
+    UNKNOWN("unknown");
 
     private final String actionDescription;
 
@@ -41,6 +46,13 @@ public enum NodeSourceAction {
 
     public String getActionDescription() {
         return actionDescription;
+    }
+
+    public static NodeSourceAction getEnum(String actionDescription) {
+        return Arrays.stream(NodeSourceAction.values())
+                     .filter(status -> status.actionDescription.equals(actionDescription))
+                     .findAny()
+                     .orElseThrow(IllegalArgumentException::new);
     }
 
 }
