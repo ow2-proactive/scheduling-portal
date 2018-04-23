@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,6 +44,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +91,7 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
-        String nodeSourceAction = "";
+        NodeSourceAction nodeSourceAction = NodeSourceAction.UNKNOWN;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -98,7 +100,7 @@ public class NSCreationServlet extends HttpServlet {
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setSizeMax(MAX_UPLOAD_SIZE);
 
-            List<?> fileItems = upload.parseRequest(request);
+            List<FileItem> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
                 FileItem formField = (FileItem) i.next();
@@ -114,11 +116,9 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (formFieldName.equals("nodesRecoverable")) {
                         nodesRecoverable = formFieldValue;
                     } else if (formFieldName.equals("deploy")) {
-                        if (formFieldValue.equals(Boolean.TRUE.toString())) {
-                            deployNodeSource = true;
-                        }
+                        deployNodeSource = formFieldValue.equals(Boolean.TRUE.toString());
                     } else if (formFieldName.equals("nodeSourceAction")) {
-                        nodeSourceAction = formFieldValue;
+                        nodeSourceAction = NodeSourceAction.getEnum(formFieldValue);
                     } else if (formFieldName.equals("infra")) {
                         infra = formFieldValue;
                         readingInfraParams = true;
@@ -127,13 +127,9 @@ public class NSCreationServlet extends HttpServlet {
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
-                            infraFileParams.add(formFieldValue);
-                        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
-                            infraParams.add(formFieldValue);
-                        }
+                        addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {
-                        policyParams.add(formFieldValue);
+                        addToStringParamsOrToFileParams(policyParams, policyFileParams, formFieldName, formFieldValue);
                     } else {
                         LOGGER.warn("Unexpected param " + formFieldName);
                     }
@@ -159,12 +155,15 @@ public class NSCreationServlet extends HttpServlet {
             }
 
             if (failFast != null) {
+                LOGGER.error("Cannot apply node source action: " + failFast);
+                LOGGER.error("Request parameters: ");
+                fileItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
                 throw new RestServerException(failFast);
             }
 
             String jsonResponsePayload;
             switch (nodeSourceAction) {
-                case "edit":
+                case EDIT:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
                                                                                                nsName,
                                                                                                infra,
@@ -175,7 +174,7 @@ public class NSCreationServlet extends HttpServlet {
                                                                                                toArray(policyFileParams),
                                                                                                nodesRecoverable);
                     break;
-                case "create":
+                case CREATE:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
                                                                                                  nsName,
                                                                                                  infra,
@@ -186,7 +185,7 @@ public class NSCreationServlet extends HttpServlet {
                                                                                                  toArray(policyFileParams),
                                                                                                  nodesRecoverable);
                     break;
-                case "update":
+                case UPDATE:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).updateDynamicParameters(sessionId,
                                                                                                         nsName,
                                                                                                         infra,
@@ -227,6 +226,15 @@ public class NSCreationServlet extends HttpServlet {
         } catch (Throwable t) {
             write(response,
                   createJavascriptPayload(callbackName, createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
+        }
+    }
+
+    private void addToStringParamsOrToFileParams(ArrayList<String> params, ArrayList<String> fileParams,
+            String formFieldName, String formFieldValue) {
+        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
+            fileParams.add(formFieldValue);
+        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+            params.add(formFieldValue);
         }
     }
 
