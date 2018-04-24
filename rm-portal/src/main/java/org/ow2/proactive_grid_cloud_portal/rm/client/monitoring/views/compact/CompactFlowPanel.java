@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 
@@ -72,7 +73,7 @@ public class CompactFlowPanel extends FlowPanel {
         this.nodeRemover = new NodeRemover(this);
     }
 
-    // for testing purpose
+    @VisibleForTesting
     public void setNodeRemover(NodeRemover nodeRemover) {
         this.nodeRemover = nodeRemover;
     }

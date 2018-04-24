@@ -159,20 +159,20 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         this.treeGrid.addNodeContextClickHandler(event -> {
 
-            Object releated = null;
+            Object related = null;
             final TreeNode treeNode = event.getNode();
             if (treeNode instanceof TNode) {
                 TNode tn = (TNode) treeNode;
-                releated = tn.rmNode;
+                related = tn.rmNode;
             } else if (treeNode instanceof TNS) {
                 TNS tn = (TNS) treeNode;
-                releated = tn.rmNS;
+                related = tn.rmNS;
             } else if (treeNode instanceof THost) {
                 THost tn = (THost) treeNode;
-                releated = tn.rmHost;
+                related = tn.rmHost;
             }
 
-            final Menu menu = ContextMenu.createContextMenuFromTreeView(controller, releated, tree);
+            final Menu menu = ContextMenu.createContextMenuFromTreeView(controller, related, tree);
 
             treeGrid.setContextMenu(menu);
         });

@@ -137,7 +137,7 @@ public class CompactFlowPanelOwnTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testAddANode1() {
+    public void testTryToDrawNodeWithoutNodeSource() {
         final Tile nodeTile = node("SOURCEname", "local", "httpptth");
         final Tile hostTile = host(nodeTile.getNode().getSourceName(), nodeTile.getNode().getHostName());
         compactFlowPanelOwn.drawNode(nodeTile, hostTile);

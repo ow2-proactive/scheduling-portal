@@ -53,7 +53,7 @@ public class Tile extends Image {
 
     private NodeSource nodesource;
 
-    private Object releated;
+    private Object related;
 
     private Layout hover;
 
@@ -68,7 +68,7 @@ public class Tile extends Image {
     Tile(CompactView compactView, CompactFlowPanel panel, NodeSource ns) {
         super(ns.getIcon());
         this.nodesource = ns;
-        this.releated = ns;
+        this.related = ns;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -78,7 +78,7 @@ public class Tile extends Image {
         super(host.isVirtual() ? RMImages.instance.host_virtual_16().getSafeUri().asString()
                                : RMImages.instance.host_16().getSafeUri().asString());
         this.host = host;
-        this.releated = host;
+        this.related = host;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -87,7 +87,7 @@ public class Tile extends Image {
     Tile(CompactView compactView, CompactFlowPanel panel, Host.Node node) {
         super(node.getIcon());
         this.node = node;
-        this.releated = node;
+        this.related = node;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -98,7 +98,7 @@ public class Tile extends Image {
         switch (DOM.eventGetType(event)) {
             case Event.ONCONTEXTMENU:
 
-                final Menu menu = ContextMenu.createContextMenuFromCompactView(compactView.getController(), releated);
+                final Menu menu = ContextMenu.createContextMenuFromCompactView(compactView.getController(), related);
 
                 menu.moveTo(event.getClientX(), event.getClientY());
                 menu.show();
@@ -184,14 +184,14 @@ public class Tile extends Image {
 
     public void refresh(Node n) {
         this.node = n;
-        this.releated = n;
+        this.related = n;
         this.setUrl(n.getIcon());
         this.setHoverNodeLabel();
     }
 
     public void refresh(NodeSource ns) {
         this.nodesource = ns;
-        this.releated = ns;
+        this.related = ns;
         this.setUrl(ns.getIcon());
     }
 

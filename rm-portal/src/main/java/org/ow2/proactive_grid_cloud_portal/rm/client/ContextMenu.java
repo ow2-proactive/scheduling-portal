@@ -58,7 +58,7 @@ public class ContextMenu extends Menu {
 
     private NodeSource.Host.Node node;
 
-    public static Menu createContextMenuFromTreeView(RMController controller, Object releated, Tree tree) {
+    public static Menu createContextMenuFromTreeView(RMController controller, Object related, Tree tree) {
 
         MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
         expandItem.addClickHandler(event17 -> tree.openAll());
@@ -66,7 +66,7 @@ public class ContextMenu extends Menu {
         MenuItem collapseItem = new MenuItem("Collapse all", Images.instance.close_16().getSafeUri().asString());
         collapseItem.addClickHandler(event16 -> tree.closeAll());
 
-        final Menu menu = createContextMenuFromCompactView(controller, releated);
+        final Menu menu = createContextMenuFromCompactView(controller, related);
 
         final List<MenuItem> menuItems = new ArrayList<>();
 
@@ -82,10 +82,10 @@ public class ContextMenu extends Menu {
         return menu;
     }
 
-    public static Menu createContextMenuFromCompactView(RMController controller, Object releated) {
+    public static Menu createContextMenuFromCompactView(RMController controller, Object related) {
         ContextMenu menu = new ContextMenu();
 
-        menu.init(releated);
+        menu.init(related);
 
         if (menu.node != null) {
             controller.selectNode(menu.node);
@@ -155,18 +155,18 @@ public class ContextMenu extends Menu {
         return menu;
     }
 
-    private void init(Object releated) {
-        if (releated instanceof NodeSource) {
-            nodesource = (NodeSource) releated;
-        } else if (releated instanceof NodeSource.Host) {
-            host = (NodeSource.Host) releated;
-        } else if (releated instanceof NodeSource.Host.Node) {
-            node = (NodeSource.Host.Node) releated;
+    private void init(Object related) {
+        if (related instanceof NodeSource) {
+            nodesource = (NodeSource) related;
+        } else if (related instanceof NodeSource.Host) {
+            host = (NodeSource.Host) related;
+        } else if (related instanceof NodeSource.Host.Node) {
+            node = (NodeSource.Host.Node) related;
         } else {
             LogModel.getInstance().logCriticalMessage("Cannot show context menu, related object is wrong type: " +
-                                                      releated.getClass().getCanonicalName());
+                                                      related.getClass().getCanonicalName());
             throw new RuntimeException("Cannot show context menu, related object is wrong type: " +
-                                       releated.getClass().getCanonicalName());
+                                       related.getClass().getCanonicalName());
         }
     }
 
