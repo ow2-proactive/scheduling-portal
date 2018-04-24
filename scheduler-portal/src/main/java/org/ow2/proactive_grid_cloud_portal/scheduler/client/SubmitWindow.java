@@ -55,7 +55,6 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -66,7 +65,6 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -227,8 +225,6 @@ public class SubmitWindow {
 
     private Map<String, JobVariable> variables;
 
-    private Map<String, JobGenericInformation> genericInformation;
-
     private String job;
 
     private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
@@ -360,10 +356,17 @@ public class SubmitWindow {
     private void fillVarsPart(String jobDescriptor) {
 
         DynamicForm variablesVisualForm = initVariablesVisualForm();
-
         Layout hiddenVarsLayout = initVariablesActualForm();
-
         initVarsLayout();
+        Widget worfklowMetaDataWidget = prepareWorlflowInformation(jobDescriptor);
+        varsLayout.addMember(worfklowMetaDataWidget);
+        varsLayout.addMember(variablesVisualForm);
+        varsLayout.addMember(hiddenVarsLayout);
+        rootPage.addMember(varsLayout);
+        rootPage.reflow();
+    }
+
+    private Widget prepareWorlflowInformation(String jobDescriptor) {
 
         Document dom = XMLParser.parse(jobDescriptor);
         String documentation = null;
@@ -388,21 +391,15 @@ public class SubmitWindow {
 
                         if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
                             attribute.getNodeValue().equalsIgnoreCase("bucketName")) {
-                            String bucketNameValue = attribute.getNodeValue();
                             existBucketName = true;
-
                         }
                         if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
                             attribute.getNodeValue().equalsIgnoreCase("documentation")) {
-                            String label = attribute.getNodeValue();
                             existDocumentation = true;
-
                         }
                         if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
                             attribute.getNodeValue().equalsIgnoreCase("workflow.icon")) {
-                            String label = attribute.getNodeValue();
                             existIcon = true;
-
                         }
                         if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
                             existBucketName) {
@@ -424,15 +421,11 @@ public class SubmitWindow {
             }
         }
 
-        Widget childOne = new HTML("Icon link " + icon +
-                                   " <br> Workflow Name : <br> Description : <br> Project Name : <br> Documentation :" +
-                                   documentation + " <br> Bucket name :" + bucketName);
-
-        varsLayout.addMember(childOne);
-        varsLayout.addMember(variablesVisualForm);
-        varsLayout.addMember(hiddenVarsLayout);
-        rootPage.addMember(varsLayout);
-        rootPage.reflow();
+        Widget worfklowMetaDataWidget = new HTML("<center> <img src=" + icon +
+                                                 " height=40px width=40px> <br> <b>Documentation :</b> <a href=" +
+                                                 documentation + " target=_blank>" + documentation +
+                                                 " </a><br> <b> Bucket name :</b> " + bucketName + " </center>");
+        return worfklowMetaDataWidget;
     }
 
     private DynamicForm initVariablesVisualForm() {
@@ -486,7 +479,8 @@ public class SubmitWindow {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle("2. Fill workflow variables");
-        varsLayout.setWidth100();
+        varsLayout.setHeight100();
+        ;
         varsLayout.setHeight("100px");
         varsLayout.setMaxHeight(100);
         varsLayout.setPadding(5);
@@ -1349,36 +1343,4 @@ public class SubmitWindow {
         }
 
     }
-
-    class JobGenericInformation {
-        private String name;
-
-        private String value;
-
-        private String model;
-
-        public JobGenericInformation(String name, String value, String model) {
-            this.name = name;
-            this.value = value;
-            this.model = model;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getModel() {
-            return model;
-        }
-
-    }
-
 }
