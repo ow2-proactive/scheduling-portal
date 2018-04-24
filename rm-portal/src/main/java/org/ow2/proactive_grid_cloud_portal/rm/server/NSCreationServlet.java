@@ -116,7 +116,7 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (formFieldName.equals("nodesRecoverable")) {
                         nodesRecoverable = formFieldValue;
                     } else if (formFieldName.equals("deploy")) {
-                        deployNodeSource = formFieldValue.equals(Boolean.TRUE.toString());
+                        deployNodeSource = Boolean.parseBoolean(formFieldValue);
                     } else if (formFieldName.equals("nodeSourceAction")) {
                         nodeSourceAction = NodeSourceAction.getEnum(formFieldValue);
                     } else if (formFieldName.equals("infra")) {
