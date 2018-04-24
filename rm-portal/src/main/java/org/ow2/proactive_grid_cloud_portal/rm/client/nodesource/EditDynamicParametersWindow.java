@@ -39,6 +39,7 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -163,11 +164,16 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
 
         formItem.disable();
 
-        // since the form item is disabled, we need to add the item content in
-        // a hidden item for it to be submitted with the form
-        HiddenItem hiddenItem = new HiddenItem(formItem.getName());
-        hiddenItem.setValue(formItem.getValue());
-        allFormItemsWithHiddenFields.add(hiddenItem);
+        // when a form item is disabled, it will not be given as parameter of
+        // the submitted form, so we need to add the item content in a hidden
+        // item for it to be submitted with the form. This is true for all
+        // form items but the SelectItem (they are submitted as part of the
+        // form even if disabled), this is why we make a special case.
+        if (!(formItem instanceof SelectItem)) {
+            HiddenItem hiddenItem = new HiddenItem(formItem.getName());
+            hiddenItem.setValue(formItem.getValue());
+            allFormItemsWithHiddenFields.add(hiddenItem);
+        }
     }
 
 }
