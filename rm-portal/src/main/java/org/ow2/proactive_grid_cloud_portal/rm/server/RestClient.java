@@ -76,6 +76,13 @@ public interface RestClient {
     @Produces("application/json")
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
+    @GET
+    @GZIP
+    @Path("/rm/nodesource/configuration")
+    @Produces("application/json")
+    InputStream getNodeSourceConfiguration(@HeaderParam("sessionid") String sessionId,
+            @QueryParam("nodeSourceName") String nodeSourceName);
+
     @POST
     @Path("/rm/nodesource")
     @Produces("application/json")
@@ -88,10 +95,10 @@ public interface RestClient {
             @FormParam("policyFileParameters") String[] policyFileParameters,
             @FormParam("nodesRecoverable") String nodesRecoverable);
 
-    @POST
-    @Path("/rm/nodesource/create/recovery")
+    @PUT
+    @Path("/rm/nodesource/edit")
     @Produces("application/json")
-    InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
+    InputStream editNodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
             @FormParam("infrastructureParameters") String[] infrastructureParameters,
@@ -99,6 +106,17 @@ public interface RestClient {
             @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
             @FormParam("policyFileParameters") String[] policyFileParameters,
             @FormParam("nodesRecoverable") String nodesRecoverable);
+
+    @PUT
+    @Path("/rm/nodesource/parameter")
+    @Produces("application/json")
+    InputStream updateDynamicParameters(@HeaderParam("sessionId") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName,
+            @FormParam("infrastructureType") String infrastructureType,
+            @FormParam("infrastructureParameters") String[] infrastructureParameters,
+            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
+            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
+            @FormParam("policyFileParameters") String[] policyFileParameters);
 
     @PUT
     @Path("/rm/nodesource/deploy")

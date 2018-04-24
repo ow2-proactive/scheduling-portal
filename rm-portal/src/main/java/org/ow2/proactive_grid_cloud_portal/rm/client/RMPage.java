@@ -35,6 +35,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.CreateNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -108,8 +113,8 @@ public class RMPage implements LogListener {
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
 
-    /** create node sources */
-    private NSCreationWindow nsWindow = null;
+    /** manage node sources */
+    private NodeSourceWindow nsWindow = null;
 
     /** node launcher window */
     private AddNodeWindow addNodeWindow = null;
@@ -389,12 +394,7 @@ public class RMPage implements LogListener {
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
-        logMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        logMenuItem.addClickHandler(e -> showLogWindow());
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
@@ -423,27 +423,14 @@ public class RMPage implements LogListener {
             login = "";
 
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
-        nsButton.setIcon(RMImages.instance.nodesource_deployed_16().getSafeUri().asString());
+        nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
-        nsButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (RMPage.this.nsWindow != null)
-                    RMPage.this.nsWindow.destroy();
-                RMPage.this.nsWindow = new NSCreationWindow(controller);
-                RMPage.this.nsWindow.show();
-            }
-        });
+        nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 
         errorButton = new ToolStripButton("<strong>Error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
-        errorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
@@ -549,8 +536,7 @@ public class RMPage implements LogListener {
         this.settingsWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
-        if (this.nsWindow != null)
-            this.nsWindow.destroy();
+        this.destroyNodeSourceWindow();
     }
 
     @Override
@@ -574,4 +560,34 @@ public class RMPage implements LogListener {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
     }
+
+    public void showNodeSourceCreationWindow() {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new CreateNodeSourceWindow(controller);
+        RMPage.this.nsWindow.show();
+    }
+
+    public void showEditNodeSourceWindow(String nodeSourceName) {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new EditNodeSourceWindow(controller, nodeSourceName);
+        RMPage.this.nsWindow.show();
+    }
+
+    public void showEditDynamicParametersWindow(String nodeSourceName) {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new EditDynamicParametersWindow(controller, nodeSourceName);
+        RMPage.this.nsWindow.show();
+    }
+
+    private void destroyNodeSourceWindow() {
+        if (RMPage.this.nsWindow != null) {
+            RMPage.this.nsWindow.destroy();
+        }
+    }
+
+    private void showLogWindow() {
+        RMPage.this.logWindow.show();
+        errorButton.hide();
+    }
+
 }

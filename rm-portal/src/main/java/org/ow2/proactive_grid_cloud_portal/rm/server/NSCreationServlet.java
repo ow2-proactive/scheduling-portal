@@ -26,7 +26,9 @@
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,8 +40,12 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +91,7 @@ public class NSCreationServlet extends HttpServlet {
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
+        NodeSourceAction nodeSourceAction = NodeSourceAction.UNKNOWN;
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -93,47 +100,48 @@ public class NSCreationServlet extends HttpServlet {
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setSizeMax(MAX_UPLOAD_SIZE);
 
-            List<?> fileItems = upload.parseRequest(request);
+            List<FileItem> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
-                String fieldName = fi.getFieldName();
-                if (fi.isFormField()) {
-                    if (fieldName.equals("sessionId")) {
-                        sessionId = fi.getString();
-                    } else if (fieldName.equals("nsCallback")) {
-                        callbackName = fi.getString();
-                    } else if (fieldName.equals("nsName")) {
-                        nsName = fi.getString();
-                    } else if (fieldName.equals("nodesRecoverable")) {
-                        nodesRecoverable = fi.getString();
-                    } else if (fieldName.equals("deploy")) {
-                        if (fi.getString().equals(Boolean.TRUE.toString())) {
-                            deployNodeSource = true;
-                        }
-                    } else if (fieldName.equals("infra")) {
-                        infra = fi.getString();
+                FileItem formField = (FileItem) i.next();
+                String formFieldName = formField.getFieldName();
+                if (formField.isFormField()) {
+                    String formFieldValue = formField.getString();
+                    if (formFieldName.equals("sessionId")) {
+                        sessionId = formFieldValue;
+                    } else if (formFieldName.equals("nsCallback")) {
+                        callbackName = formFieldValue;
+                    } else if (formFieldName.equals("nsName")) {
+                        nsName = formFieldValue;
+                    } else if (formFieldName.equals("nodesRecoverable")) {
+                        nodesRecoverable = formFieldValue;
+                    } else if (formFieldName.equals("deploy")) {
+                        deployNodeSource = Boolean.parseBoolean(formFieldValue);
+                    } else if (formFieldName.equals("nodeSourceAction")) {
+                        nodeSourceAction = NodeSourceAction.getEnum(formFieldValue);
+                    } else if (formFieldName.equals("infra")) {
+                        infra = formFieldValue;
                         readingInfraParams = true;
-                    } else if (fieldName.equals("policy")) {
-                        policy = fi.getString();
+                    } else if (formFieldName.equals("policy")) {
+                        policy = formFieldValue;
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (readingInfraParams) {
-                        infraParams.add(fi.getString());
+                        addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {
-                        policyParams.add(fi.getString());
+                        addToStringParamsOrToFileParams(policyParams, policyFileParams, formFieldName, formFieldValue);
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 } else {
                     if (readingInfraParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         infraFileParams.add(new String(bytes));
                     } else if (readingPolicyParams) {
-                        byte[] bytes = IOUtils.toByteArray(fi.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("Unexpected param " + fieldName);
+                        LOGGER.warn("Unexpected param " + formFieldName);
                     }
                 }
             }
@@ -147,51 +155,106 @@ public class NSCreationServlet extends HttpServlet {
             }
 
             if (failFast != null) {
+                LOGGER.error("Cannot apply node source action: " + failFast);
+                LOGGER.error("Request parameters: ");
+                fileItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
                 throw new RestServerException(failFast);
             }
 
-            String jsonResult;
-            if (deployNodeSource) {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).createNodeSource(sessionId,
-                                                                                    nsName,
-                                                                                    infra,
-                                                                                    toArray(infraParams),
-                                                                                    toArray(infraFileParams),
-                                                                                    policy,
-                                                                                    toArray(policyParams),
-                                                                                    toArray(policyFileParams),
-                                                                                    nodesRecoverable);
-            } else {
-                jsonResult = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
-                                                                                    nsName,
-                                                                                    infra,
-                                                                                    toArray(infraParams),
-                                                                                    toArray(infraFileParams),
-                                                                                    policy,
-                                                                                    toArray(policyParams),
-                                                                                    toArray(policyFileParams),
-                                                                                    nodesRecoverable);
+            String jsonResponsePayload;
+            switch (nodeSourceAction) {
+                case EDIT:
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
+                                                                                               nsName,
+                                                                                               infra,
+                                                                                               toArray(infraParams),
+                                                                                               toArray(infraFileParams),
+                                                                                               policy,
+                                                                                               toArray(policyParams),
+                                                                                               toArray(policyFileParams),
+                                                                                               nodesRecoverable);
+                    break;
+                case CREATE:
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
+                                                                                                 nsName,
+                                                                                                 infra,
+                                                                                                 toArray(infraParams),
+                                                                                                 toArray(infraFileParams),
+                                                                                                 policy,
+                                                                                                 toArray(policyParams),
+                                                                                                 toArray(policyFileParams),
+                                                                                                 nodesRecoverable);
+                    break;
+                case UPDATE:
+                    jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).updateDynamicParameters(sessionId,
+                                                                                                        nsName,
+                                                                                                        infra,
+                                                                                                        toArray(infraParams),
+                                                                                                        toArray(infraFileParams),
+                                                                                                        policy,
+                                                                                                        toArray(policyParams),
+                                                                                                        toArray(policyFileParams));
+                    break;
+                default:
+                    jsonResponsePayload = new JSONWriter(new StringWriter()).object()
+                                                                            .key("result")
+                                                                            .value(false)
+                                                                            .key("errorMessage")
+                                                                            .value("Unknown node source action")
+                                                                            .endObject()
+                                                                            .toString();
+                    break;
             }
-            JSONObject json = new JSONObject(jsonResult);
-            if (json != null) {
-                if (json.has("result")) {
-                    if (json.getBoolean("result")) {
-                        jsonResult = createNonEscapedSimpleJsonPair("result", "true");
-                    } else {
-                        String errorMessage = json.get("errorMessage").toString();
-                        write(response,
-                              createJavascriptPayload(callbackName,
-                                                      createEscapedSimpleJsonPair("errorMessage", errorMessage)));
-                        return;
 
-                    }
+            JSONObject jsonObject = new JSONObject(jsonResponsePayload);
+            if (hasResult(jsonObject) && isResultSuccessful(jsonObject)) {
+                jsonResponsePayload = createJsonPair(jsonObject);
+            } else {
+                deployNodeSource = false;
+            }
+
+            if (deployNodeSource) {
+                jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).deployNodeSource(sessionId, nsName);
+
+                jsonObject = new JSONObject(jsonResponsePayload);
+                if (hasResult(jsonObject)) {
+                    jsonResponsePayload = createJsonPair(jsonObject);
                 }
             }
-            write(response, createJavascriptPayload(callbackName, jsonResult));
+
+            write(response, createJavascriptPayload(callbackName, jsonResponsePayload));
         } catch (Throwable t) {
             write(response,
                   createJavascriptPayload(callbackName, createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
         }
+    }
+
+    private void addToStringParamsOrToFileParams(ArrayList<String> params, ArrayList<String> fileParams,
+            String formFieldName, String formFieldValue) {
+        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
+            fileParams.add(formFieldValue);
+        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+            params.add(formFieldValue);
+        }
+    }
+
+    private String createJsonPair(JSONObject json) throws JSONException {
+        String jsonResult;
+        if (isResultSuccessful(json)) {
+            jsonResult = createNonEscapedSimpleJsonPair("result", "true");
+        } else {
+            String errorMessage = json.get("errorMessage").toString();
+            jsonResult = createEscapedSimpleJsonPair("errorMessage", errorMessage);
+        }
+        return jsonResult;
+    }
+
+    private boolean hasResult(JSONObject jsonObject) {
+        return jsonObject != null && jsonObject.has("result");
+    }
+
+    private boolean isResultSuccessful(JSONObject jsonObject) throws JSONException {
+        return jsonObject.getBoolean("result");
     }
 
     private void write(HttpServletResponse response, String s) {
@@ -219,6 +282,10 @@ public class NSCreationServlet extends HttpServlet {
     }
 
     private String createJavascriptPayload(String callbackName, String json) {
+
+        //writing the callback name in as an inlined script, so that the
+        // browser, upon receiving it, will evaluate the JS and call the
+        // function
         return "<script type='text/javascript'>window.opener.focus(); window.opener." + callbackName + "(" + json +
                "); window.close();</script>";
     }

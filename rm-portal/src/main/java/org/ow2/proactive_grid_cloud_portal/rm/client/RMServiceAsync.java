@@ -94,6 +94,19 @@ public interface RMServiceAsync {
     void getPolicies(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * Retrieve the configuration of a given node source, in other words, a
+     * representation of all the parameters with which a node source was
+     * configured.
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to get the configuration from
+     * @return a JSON object containing the current node source configuration
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void getNodeSourceConfiguration(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
+
+    /**
      * Defines a NodeSource
      * @param sessionId current session
      * @param nodeSourceName name of the new NS
@@ -114,9 +127,9 @@ public interface RMServiceAsync {
             AsyncCallback<String> callback) throws RestServerException, ServiceException;
 
     /**
-     * Creates a NodeSource 
+     * Edit a NodeSource
      * @param sessionId current session
-     * @param nodeSourceName name of the new NS
+     * @param nodeSourceName name of the NS to edit
      * @param infrastructureType infrastructure manager full class name
      * @param infrastructureParameters IM String parameters, null value for files
      * @param infrastructureFileParameters file parameters
@@ -125,12 +138,32 @@ public interface RMServiceAsync {
      * @param policyFileParameters file parameters
      * @param nodesRecoverable whether nodes can be recovered after a crash
      * @param callback
+     * @throws RestServerException
      * @throws ServiceException
      */
-    void createNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+    void editNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters, String nodesRecoverable,
-            AsyncCallback<String> callback);
+            AsyncCallback<String> callback) throws RestServerException, ServiceException;
+
+    /**
+     * Override the dynamic parameters of a NodeSource
+     * @param sessionId current session
+     * @param nodeSourceName name of the NS to edit
+     * @param infrastructureType infrastructure manager full class name
+     * @param infrastructureParameters IM String parameters, null value for files
+     * @param infrastructureFileParameters file parameters
+     * @param policyType policy full class name
+     * @param policyParameters String parameters, null value for files
+     * @param policyFileParameters file parameters
+     * @param callback
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    void updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, AsyncCallback<String> callback)
+            throws RestServerException, ServiceException;
 
     /**
      * Deploys a node source and starts acquiring its nodes
