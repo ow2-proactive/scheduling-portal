@@ -227,6 +227,18 @@ public class SubmitWindow {
 
     private String job;
 
+    private String documentation = null;
+
+    private String icon = null;
+
+    private String bucketName = null;
+
+    private Boolean existBucketName = false;
+
+    private Boolean existDocumentation = false;
+
+    private Boolean existIcon = false;
+
     private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
 
     /**
@@ -354,11 +366,11 @@ public class SubmitWindow {
     }
 
     private void fillVarsPart(String jobDescriptor) {
-
         DynamicForm variablesVisualForm = initVariablesVisualForm();
         Layout hiddenVarsLayout = initVariablesActualForm();
         initVarsLayout();
-        Widget worfklowMetaDataWidget = prepareWorlflowInformation(jobDescriptor);
+        getGenericInformationAttributes(jobDescriptor);
+        Widget worfklowMetaDataWidget = prepareWorlflowInformationWidget();
         varsLayout.addMember(worfklowMetaDataWidget);
         varsLayout.addMember(variablesVisualForm);
         varsLayout.addMember(hiddenVarsLayout);
@@ -366,66 +378,57 @@ public class SubmitWindow {
         rootPage.reflow();
     }
 
-    private Widget prepareWorlflowInformation(String jobDescriptor) {
+    private Widget prepareWorlflowInformationWidget() {
+        return new HTML("<center> <img src=" + icon + " height=40px width=40px> <br> <b>Documentation :</b> <a href=" +
+                        documentation + " target=_blank>" + documentation + " </a><br> <b> Bucket name :</b> " +
+                        bucketName + " </center>");
+    }
 
+    private void getGenericInformationAttributes(String jobDescriptor) {
         Document dom = XMLParser.parse(jobDescriptor);
-        String documentation = null;
-        String icon = null;
-        String bucketName = null;
-        Boolean existBucketName = false;
-        Boolean existDocumentation = false;
-        Boolean existIcon = false;
-
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
         // check if the job has genericInformation or not
         if (genericInfo != null && genericInfo.getLength() > 0) {
             // get the first item
             Node root = genericInfo.item(0);
-            NodeList list = root.getChildNodes();
-            for (int i = 0; i < list.getLength(); i++) {
-                Node node = list.item(i);
-                if (node.getNodeName().equals("info") && node.hasAttributes()) {
-                    NamedNodeMap attributes = node.getAttributes();
-                    for (int j = 0; j < attributes.getLength(); j++) {
-                        Node attribute = attributes.item(j);
-
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                            attribute.getNodeValue().equalsIgnoreCase("bucketName")) {
-                            existBucketName = true;
-                        }
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                            attribute.getNodeValue().equalsIgnoreCase("documentation")) {
-                            existDocumentation = true;
-                        }
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                            attribute.getNodeValue().equalsIgnoreCase("workflow.icon")) {
-                            existIcon = true;
-                        }
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
-                            existBucketName) {
-                            bucketName = attribute.getNodeValue();
-                            existBucketName = false;
-                        }
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
-                            existDocumentation) {
-                            documentation = attribute.getNodeValue();
-                            existDocumentation = false;
-                        }
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value") &&
-                            existIcon) {
-                            icon = attribute.getNodeValue();
-                            existIcon = false;
-                        }
-                    }
+            NodeList genericInfoMetaDataList = root.getChildNodes();
+            for (int i = 0; i < genericInfoMetaDataList.getLength(); i++) {
+                Node genericInfoMetadata = genericInfoMetaDataList.item(i);
+                if (genericInfoMetadata.getNodeName().equals("info") && genericInfoMetadata.hasAttributes()) {
+                    NamedNodeMap attributes = genericInfoMetadata.getAttributes();
+                    getGenericInformationValue(attributes);
                 }
             }
         }
+    }
 
-        Widget worfklowMetaDataWidget = new HTML("<center> <img src=" + icon +
-                                                 " height=40px width=40px> <br> <b>Documentation :</b> <a href=" +
-                                                 documentation + " target=_blank>" + documentation +
-                                                 " </a><br> <b> Bucket name :</b> " + bucketName + " </center>");
-        return worfklowMetaDataWidget;
+    private void getGenericInformationValue(NamedNodeMap attributes) {
+        for (int j = 0; j < attributes.getLength(); j++) {
+            Node attribute = attributes.item(j);
+            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name")) {
+                if (attribute.getNodeValue().equalsIgnoreCase("bucketName"))
+                    existBucketName = true;
+                if (attribute.getNodeValue().equalsIgnoreCase("documentation"))
+                    existDocumentation = true;
+                if (attribute.getNodeValue().equalsIgnoreCase("workflow.icon"))
+                    existIcon = true;
+            }
+
+            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value")) {
+                if (existBucketName) {
+                    bucketName = attribute.getNodeValue();
+                    existBucketName = false;
+                }
+                if (existDocumentation) {
+                    documentation = attribute.getNodeValue();
+                    existDocumentation = false;
+                }
+                if (existIcon) {
+                    icon = attribute.getNodeValue();
+                    existIcon = false;
+                }
+            }
+        }
     }
 
     private DynamicForm initVariablesVisualForm() {
@@ -480,7 +483,6 @@ public class SubmitWindow {
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle("2. Fill workflow variables");
         varsLayout.setHeight100();
-        ;
         varsLayout.setHeight("100px");
         varsLayout.setMaxHeight(100);
         varsLayout.setPadding(5);
