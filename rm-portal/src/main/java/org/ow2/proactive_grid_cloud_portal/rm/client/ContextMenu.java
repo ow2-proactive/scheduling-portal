@@ -31,13 +31,13 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 import com.smartgwt.client.widgets.tree.Tree;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 
 public class ContextMenu extends Menu {
@@ -119,8 +119,7 @@ public class ContextMenu extends Menu {
 
         String nodeSourceName = menu.nodesource == null ? "" : menu.nodesource.getSourceName();
         NodeSourceStatus nodeSourceStatus = menu.nodesource == null ? null : menu.nodesource.getNodeSourceStatus();
-        editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName,
-                nodeSourceStatus));
+        editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
         if (menu.node != null) {
             if (menu.node.isLocked()) {
