@@ -61,6 +61,10 @@ public class NodeSource {
 
     private String eventType;
 
+    public NodeSource(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
     NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus,
             String eventType) {
         this.sourceName = sourceName;
@@ -128,6 +132,10 @@ public class NodeSource {
         return eventType;
     }
 
+    void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
     public Map<String, Host> getHosts() {
         return hosts;
     }
@@ -150,6 +158,10 @@ public class NodeSource {
 
     public NodeSourceStatus getNodeSourceStatus() {
         return nodeSourceStatus;
+    }
+
+    public void setNodeSourceStatus(NodeSourceStatus nodeSourceStatus) {
+        this.nodeSourceStatus = nodeSourceStatus;
     }
 
     public String getIcon() {
@@ -320,6 +332,12 @@ public class NodeSource {
                 this.eventType = eventType;
             }
 
+            public Node(String sourceName, String hostName, String nodeUrl) {
+                this.sourceName = sourceName;
+                this.hostName = hostName;
+                this.nodeUrl = nodeUrl;
+            }
+
             Node(Node t) {
                 this.nodeUrl = t.nodeUrl;
                 this.nodeState = t.nodeState;
@@ -387,6 +405,10 @@ public class NodeSource {
 
             public NodeState getNodeState() {
                 return nodeState;
+            }
+
+            void setNodeState(NodeState nodeState) {
+                this.nodeState = nodeState;
             }
 
             public String getNodeInfo() {

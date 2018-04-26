@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -42,8 +41,6 @@ import com.smartgwt.client.types.TreeModelType;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
-import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
@@ -71,12 +68,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     /**
      * tree data
      */
-    private Tree tree = null;
+    Tree tree = null;
 
     /**
      * treenodes currently held by {@link #tree}
      */
-    private Map<String, TreeNode> currentNodes = null;
+    Map<String, TreeNode> currentNodes = null;
 
     /**
      * prevent event cycling
@@ -162,119 +159,26 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         this.treeGrid.addNodeContextClickHandler(event -> {
 
-            String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
-            String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-            String deployItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
-            String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
-            String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
-
-            NodeSource currentSelectedNodeSource = null;
-            Node currentSelectedNode = null;
-
+            Object related = null;
             final TreeNode treeNode = event.getNode();
             if (treeNode instanceof TNode) {
                 TNode tn = (TNode) treeNode;
-                TreeView.this.controller.selectNode(tn.rmNode);
-                lockItemImageResource = tn.rmNode.getIconLocked();
-                unlockItemImageResource = tn.rmNode.getIconUnlocked();
-                currentSelectedNode = tn.rmNode;
+                related = tn.rmNode;
             } else if (treeNode instanceof TNS) {
                 TNS tn = (TNS) treeNode;
-                TreeView.this.controller.selectNodeSource(tn.rmNS);
-                currentSelectedNodeSource = tn.rmNS;
+                related = tn.rmNS;
             } else if (treeNode instanceof THost) {
                 THost tn = (THost) treeNode;
-                TreeView.this.controller.selectHost(tn.rmHost);
+                related = tn.rmHost;
             }
 
-            Menu menu = new Menu();
-            menu.setShowShadow(true);
-            menu.setShadowDepth(10);
-
-            MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
-            expandItem.addClickHandler(event17 -> expandAll());
-
-            MenuItem collapseItem = new MenuItem("Collapse all", Images.instance.close_16().getSafeUri().asString());
-            collapseItem.addClickHandler(event16 -> closeAll());
-
-            MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
-            removeItem.addClickHandler(event15 -> controller.removeNodes());
-
-            MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-            lockItem.addClickHandler(event14 -> controller.lockNodes());
-
-            MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-            unlockItem.addClickHandler(event13 -> controller.unlockNodes());
-
-            MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-            deployItem.addClickHandler(event12 -> controller.deployNodeSource());
-
-            MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
-            undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
-
-            MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-            String nodeSourceName = currentSelectedNodeSource == null ? "" : currentSelectedNodeSource.getSourceName();
-            NodeSourceStatus nodeSourceStatus = currentSelectedNodeSource == null ? null
-                                                                                  : currentSelectedNodeSource.getNodeSourceStatus();
-            editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
-
-            if (currentSelectedNode != null) {
-                if (currentSelectedNode.isLocked()) {
-                    lockItem.setEnabled(false);
-                    unlockItem.setEnabled(true);
-                } else {
-                    lockItem.setEnabled(true);
-                    unlockItem.setEnabled(false);
-                }
-            }
-
-            if (currentSelectedNodeSource != null) {
-                switch (currentSelectedNodeSource.getNodeSourceStatus()) {
-                    case NODES_DEPLOYED:
-                        editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
-                        enableItems(undeployItem);
-                        disableItems(deployItem);
-                        break;
-                    case NODES_UNDEPLOYED:
-                        editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
-                        enableItems(deployItem);
-                        disableItems(undeployItem);
-                        break;
-                    default:
-                        disableItems(deployItem, undeployItem, editItem);
-                }
-            } else {
-                disableItems(deployItem, undeployItem, editItem);
-            }
-
-            menu.setItems(expandItem,
-                          collapseItem,
-                          new MenuItemSeparator(),
-                          deployItem,
-                          undeployItem,
-                          editItem,
-                          new MenuItemSeparator(),
-                          lockItem,
-                          unlockItem,
-                          removeItem);
+            final Menu menu = ContextMenu.createContextMenuFromTreeView(controller, related, tree);
 
             treeGrid.setContextMenu(menu);
         });
 
         vl.addMember(treeGrid);
         return vl;
-    }
-
-    private void disableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(false);
-        }
-    }
-
-    private void enableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(true);
-        }
     }
 
     @Override
@@ -288,7 +192,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.markForRedraw();
     }
 
-    private void processNodes(List<Node> nodes) {
+    void processNodes(List<Node> nodes) {
         if (!nodes.isEmpty()) {
             for (Node node : nodes) {
                 if (node.isRemoved()) {
@@ -301,7 +205,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void changeNodeStatusIfChanged(Node node) {
+    void changeNodeStatusIfChanged(Node node) {
         if (node.isChanged()) {
             TNode treeNode = (TNode) currentNodes.get(node.getNodeUrl());
             treeNode.setAttribute("nodeState", node.getNodeState().toString());
@@ -310,7 +214,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void addNodeIfNotExists(Node node) {
+    void addNodeIfNotExists(Node node) {
         if (!currentNodes.containsKey(node.getNodeUrl())) { // if there is no node
             if (node.isDeployingNode()) {
                 TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
@@ -342,7 +246,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void removeNode(Node node) {
+    void removeNode(Node node) {
         if (currentNodes.containsKey(node.getNodeUrl())) {
             final TreeNode toRemove = currentNodes.get(node.getNodeUrl());
 
@@ -358,7 +262,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-    private void processNodeSources(List<NodeSource> nodeSources) {
+    void processNodeSources(List<NodeSource> nodeSources) {
         if (!nodeSources.isEmpty()) {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
@@ -371,7 +275,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void changeNodeSourceStatusIfChanged(NodeSource nodeSource) {
+    void changeNodeSourceStatusIfChanged(NodeSource nodeSource) {
         if (nodeSource.isChanged()) {
             TNS curTreeNodeSource = (TNS) currentNodes.get(nodeSource.getSourceName());
             curTreeNodeSource.rmNS = nodeSource;
@@ -380,7 +284,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    private void addNodeSourceIfNotExists(NodeSource nodeSource) {
+    void addNodeSourceIfNotExists(NodeSource nodeSource) {
         if (!currentNodes.containsKey(nodeSource.getSourceName())) {
             TNS nsTreeNode = new TNS(getNodeSourceDisplayedDescription(nodeSource, nodeSource.getSourceName()),
                                      nodeSource);
@@ -391,7 +295,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-    private void removeNodeSource(NodeSource nodeSource) {
+    void removeNodeSource(NodeSource nodeSource) {
         if (currentNodes.containsKey(nodeSource.getSourceName())) {
             final TreeNode treeNodeSource = currentNodes.remove(nodeSource.getSourceName());
 
@@ -431,45 +335,33 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     @Override
-    public void nodeSelected(Node node) {
-        if (ignoreNodeSelectedEvent) {
-            ignoreNodeSelectedEvent = false;
-            return;
-        }
-
-        treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(node.getNodeUrl());
-        treeGrid.selectRecord(treeNode, true);
-        scrollList(treeNode);
-    }
-
-    @Override
     public void nodeUnselected() {
         this.treeGrid.deselectAllRecords();
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
-        if (ignoreNodeSelectedEvent) {
-            ignoreNodeSelectedEvent = false;
-            return;
-        }
-
-        treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(ns.getSourceName());
-        treeGrid.selectRecord(treeNode, true);
-        scrollList(treeNode);
+        selectTreeNode(ns.getSourceName());
     }
 
     @Override
     public void hostSelected(Host h) {
+        selectTreeNode(h.getId());
+    }
+
+    @Override
+    public void nodeSelected(Node node) {
+        selectTreeNode(node.getNodeUrl());
+    }
+
+    private void selectTreeNode(String id) {
         if (ignoreNodeSelectedEvent) {
             ignoreNodeSelectedEvent = false;
             return;
         }
 
         treeGrid.deselectAllRecords();
-        TreeNode treeNode = currentNodes.get(h.getId());
+        TreeNode treeNode = currentNodes.get(id);
         treeGrid.selectRecord(treeNode, true);
         scrollList(treeNode);
     }
