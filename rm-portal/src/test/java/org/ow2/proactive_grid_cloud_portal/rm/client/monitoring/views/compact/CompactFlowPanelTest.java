@@ -257,7 +257,6 @@ public class CompactFlowPanelTest {
         spyCompactFlowPanel.drawNode(nodeTile, hostTile);
 
         ArgumentCaptor<Tile> tileCaptor = ArgumentCaptor.forClass(Tile.class);
-        //        verify(spyCompactFlowPanel, times(1)).insert(tileCaptor.capture(), eq(12));
 
         verify(spyCompactFlowPanel, times(1)).insert(tileCaptor.capture(), eq(91));
         assertEquals(nodeTile, tileCaptor.getValue());
