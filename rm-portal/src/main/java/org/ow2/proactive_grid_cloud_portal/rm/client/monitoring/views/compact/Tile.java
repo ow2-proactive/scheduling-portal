@@ -97,7 +97,7 @@ public class Tile extends Image {
     public void onBrowserEvent(Event event) {
         switch (DOM.eventGetType(event)) {
             case Event.ONCONTEXTMENU:
-
+                compactView.setDoNotScroll(true);
                 final Menu menu = ContextMenu.createContextMenuFromCompactView(compactView.getController(), related);
 
                 menu.moveTo(event.getClientX(), event.getClientY());
