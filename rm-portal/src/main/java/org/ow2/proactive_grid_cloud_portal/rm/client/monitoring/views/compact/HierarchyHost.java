@@ -48,7 +48,7 @@ public class HierarchyHost {
         this.host = host;
     }
 
-    NodeSource.Host getHost() {
+    public NodeSource.Host getHost() {
         return host;
     }
 
@@ -56,7 +56,7 @@ public class HierarchyHost {
         return tilesNumber;
     }
 
-    List<NodeSource.Host.Node> getNodes() {
+    public List<NodeSource.Host.Node> getNodes() {
         return nodes;
     }
 

@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 
@@ -69,7 +70,12 @@ public class CompactFlowPanel extends FlowPanel {
         this.setWidth("100%");
         // removes the vertical space between lines
         this.getElement().getStyle().setProperty("lineHeight", "0");
-        nodeRemover = new NodeRemover(this);
+        this.nodeRemover = new NodeRemover(this);
+    }
+
+    @VisibleForTesting
+    public void setNodeRemover(NodeRemover nodeRemover) {
+        this.nodeRemover = nodeRemover;
     }
 
     public Tile getCurrentSelectedTile() {
@@ -206,4 +212,7 @@ public class CompactFlowPanel extends FlowPanel {
         return model;
     }
 
+    public int getTilesNumber() {
+        return model.stream().mapToInt(HierarchyNodeSource::getTilesNumber).sum();
+    }
 }

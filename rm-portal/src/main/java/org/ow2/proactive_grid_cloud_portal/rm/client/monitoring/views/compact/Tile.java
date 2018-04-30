@@ -31,11 +31,9 @@ import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
 import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
+import org.ow2.proactive_grid_cloud_portal.rm.client.ContextMenu;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceStatus;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -45,8 +43,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
-import com.smartgwt.client.widgets.menu.MenuItem;
-import com.smartgwt.client.widgets.menu.MenuItemSeparator;
 
 
 public class Tile extends Image {
@@ -56,6 +52,8 @@ public class Tile extends Image {
     private Host host;
 
     private NodeSource nodesource;
+
+    private Object related;
 
     private Layout hover;
 
@@ -70,6 +68,7 @@ public class Tile extends Image {
     Tile(CompactView compactView, CompactFlowPanel panel, NodeSource ns) {
         super(ns.getIcon());
         this.nodesource = ns;
+        this.related = ns;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -79,6 +78,7 @@ public class Tile extends Image {
         super(host.isVirtual() ? RMImages.instance.host_virtual_16().getSafeUri().asString()
                                : RMImages.instance.host_16().getSafeUri().asString());
         this.host = host;
+        this.related = host;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -87,6 +87,7 @@ public class Tile extends Image {
     Tile(CompactView compactView, CompactFlowPanel panel, Host.Node node) {
         super(node.getIcon());
         this.node = node;
+        this.related = node;
         this.compactView = compactView;
         this.panel = panel;
         init();
@@ -96,85 +97,8 @@ public class Tile extends Image {
     public void onBrowserEvent(Event event) {
         switch (DOM.eventGetType(event)) {
             case Event.ONCONTEXTMENU:
-
-                String lockItemImageResource = RMImages.instance.node_add_16_locked().getSafeUri().asString();
-                String unlockItemImageResource = RMImages.instance.node_add_16().getSafeUri().asString();
-                String deployItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
-                String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
-                String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
-
-                if (node != null) {
-                    compactView.getController().selectNode(node);
-                    lockItemImageResource = node.getIconLocked();
-                    unlockItemImageResource = node.getIconUnlocked();
-                } else if (host != null) {
-                    compactView.getController().selectHost(host);
-                } else if (nodesource != null) {
-                    compactView.getController().selectNodeSource(nodesource);
-                }
-
-                Menu menu = new Menu();
-                menu.setShowShadow(true);
-                menu.setShadowDepth(10);
-
-                MenuItem removeItem = new MenuItem("Remove",
-                                                   RMImages.instance.node_remove_16().getSafeUri().asString());
-                removeItem.addClickHandler(event15 -> compactView.getController().removeNodes());
-
-                MenuItem lockItem = new MenuItem("Lock", lockItemImageResource);
-                lockItem.addClickHandler(event14 -> compactView.getController().lockNodes());
-
-                MenuItem unlockItem = new MenuItem("Unlock", unlockItemImageResource);
-                unlockItem.addClickHandler(event13 -> compactView.getController().unlockNodes());
-
-                MenuItem deployItem = new MenuItem("Deploy", deployItemImageResource);
-                deployItem.addClickHandler(event12 -> compactView.getController().deployNodeSource());
-
-                MenuItem undeployItem = new MenuItem("Undeploy", undeployItemImageResource);
-                undeployItem.addClickHandler(event1 -> compactView.getController().undeployNodeSource());
-
-                MenuItem editItem = new MenuItem("Edit", editItemImageResource);
-                String nodeSourceName = nodesource == null ? "" : nodesource.getSourceName();
-                NodeSourceStatus nodeSourceStatus = nodesource == null ? null : nodesource.getNodeSourceStatus();
-                editItem.addClickHandler(event1 -> compactView.getController().editNodeSource(nodeSourceName,
-                                                                                              nodeSourceStatus));
-
-                if (node != null) {
-                    if (node.isLocked()) {
-                        lockItem.setEnabled(false);
-                        unlockItem.setEnabled(true);
-                    } else {
-                        lockItem.setEnabled(true);
-                        unlockItem.setEnabled(false);
-                    }
-                }
-
-                if (nodesource != null) {
-                    switch (nodesource.getNodeSourceStatus()) {
-                        case NODES_DEPLOYED:
-                            editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
-                            enableItems(undeployItem);
-                            disableItems(deployItem);
-                            break;
-                        case NODES_UNDEPLOYED:
-                            editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
-                            enableItems(deployItem);
-                            disableItems(undeployItem);
-                            break;
-                        default:
-                            disableItems(deployItem, undeployItem, editItem);
-                    }
-                } else {
-                    disableItems(deployItem, undeployItem, editItem);
-                }
-
-                menu.setItems(deployItem,
-                              undeployItem,
-                              editItem,
-                              new MenuItemSeparator(),
-                              lockItem,
-                              unlockItem,
-                              removeItem);
+                compactView.setDoNotScroll(true);
+                final Menu menu = ContextMenu.createContextMenuFromCompactView(compactView.getController(), related);
 
                 menu.moveTo(event.getClientX(), event.getClientY());
                 menu.show();
@@ -185,18 +109,6 @@ public class Tile extends Image {
             default:
                 super.onBrowserEvent(event);
                 break;
-        }
-    }
-
-    private void disableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(false);
-        }
-    }
-
-    private void enableItems(MenuItem... items) {
-        for (MenuItem item : items) {
-            item.setEnabled(true);
         }
     }
 
@@ -272,12 +184,14 @@ public class Tile extends Image {
 
     public void refresh(Node n) {
         this.node = n;
+        this.related = n;
         this.setUrl(n.getIcon());
         this.setHoverNodeLabel();
     }
 
     public void refresh(NodeSource ns) {
         this.nodesource = ns;
+        this.related = ns;
         this.setUrl(ns.getIcon());
     }
 
