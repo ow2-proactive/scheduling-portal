@@ -104,6 +104,12 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class SubmitWindow {
 
+    private static final String KEY_OF_MODEL = "model";
+
+    private static final String KEY_OF_NAME = "name";
+
+    private static final String KEY_OF_VALUE = "value";
+
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
 
     private static final String CATALOG_SELECT_WF = "Select a Workflow";
@@ -128,9 +134,9 @@ public class SubmitWindow {
 
     private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
-    private static final int widthWindows = 600;
+    private final int widthWindows = 600;
 
-    private static final int heightWindows = 620;
+    private final int heightWindows = 620;
 
     private Window window;
 
@@ -412,7 +418,7 @@ public class SubmitWindow {
     private void getGenericInformationName(NamedNodeMap attributes) {
         for (int j = 0; j < attributes.getLength(); j++) {
             Node attribute = attributes.item(j);
-            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name")) {
+            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_NAME)) {
                 if (attribute.getNodeValue().equalsIgnoreCase("bucketName"))
                     existBucketName = true;
                 if (attribute.getNodeValue().equalsIgnoreCase("documentation"))
@@ -425,7 +431,7 @@ public class SubmitWindow {
     }
 
     private void getGenericInformationValue(Node attribute) {
-        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value")) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_VALUE)) {
             if (existBucketName) {
                 bucketName = attribute.getNodeValue();
                 existBucketName = false;
@@ -801,7 +807,7 @@ public class SubmitWindow {
                             workflowsListBox.addItem(CATALOG_SELECT_WF);
                             for (int i = 0; i < workflowsSize; i++) {
                                 JSONObject workflow = workflows.get(i).isObject();
-                                String workflowName = workflow.get("name").isString().stringValue();
+                                String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
                                 workflowsListBox.addItem(workflowName);
                             }
                             workflowsListBox.setEnabled(true);
@@ -832,7 +838,7 @@ public class SubmitWindow {
                 int bucketSize = buckets.size();
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
-                    String bucketName = bucket.get("name").isString().stringValue();
+                    String bucketName = bucket.get(KEY_OF_NAME).isString().stringValue();
                     bucketsListBox.addItem(bucketName);
                 }
                 bucketsListBox.setEnabled(true);
@@ -879,6 +885,95 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                setAllValuesAsString();
+                handleStartAt();
+                enableValidation(true);
+                handleCompletedSubmission();
+                variablesActualForm.submit();
+                displayLoadingMessage();
+
+            }
+
+            private void handleCompletedSubmission() {
+                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(SubmitCompleteEvent event) {
+                        String result = event.getResults();
+                        if (isResultNull(result) || ifResultIsAnError(result)) {
+                            return;
+                        }
+
+                        try {
+                            JSONValue json = JSONParser.parseStrict(result);
+                            JSONObject obj = json.isObject();
+                            handleVariables(obj);
+                        } catch (Throwable t) {
+                            handleParsingError(result);
+                        }
+                    }
+
+                    private void handleParsingError(String result) {
+                        // JSON parsing error workaround to force extract error message
+                        MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
+                        if (errorMessageMatcher != null) {
+                            GWT.log(errorMessageMatcher.getGroup(1));
+                            displayErrorMessage(errorMessageMatcher.getGroup(1));
+                        } else {
+                            GWT.log(JSON_ERROR);
+                            displayErrorMessage(JSON_ERROR);
+                        }
+                    }
+
+                    private void handleVariables(JSONObject obj) {
+                        if (obj != null) {
+                            if (obj.containsKey("valid")) {
+                                if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                    if (obj.containsKey("updatedVariables")) {
+                                        updateVariables(obj.get("updatedVariables"));
+                                        redrawVariables(job);
+                                    }
+                                    GWT.log("Job validated");
+                                    displayInfoMessage("Job is valid");
+                                } else if (obj.containsKey(ERROR_MESSAGE)) {
+                                    String errorMessage = obj.get(ERROR_MESSAGE).toString();
+                                    if (errorMessage.contains("JobValidationException")) {
+                                        errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                                    }
+                                    displayErrorMessage(errorMessage);
+                                }
+                            }
+                        }
+                    }
+
+                    private boolean ifResultIsAnError(String result) {
+                        if (result.startsWith(SubmitEditServlet.ERROR)) {
+                            displayErrorMessage(result.substring(SubmitEditServlet.ERROR.length()));
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    private boolean isResultNull(String result) {
+                        if (result == null) {
+                            GWT.log("Unexpected empty result");
+                            displayErrorMessage("Unexpected empty result");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+
+            private void handleStartAt() {
+                if (startAtRadioButton.getValue()) {
+                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                    startAtParameter.setValue(iso8601DateStr);
+                    hiddenPane.add(startAtParameter);
+                }
+            }
+
+            private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
                     String val = "";
                     if (fields[2 * i].getValue() != null) {
@@ -886,65 +981,6 @@ public class SubmitWindow {
                     }
                     _fields[i].setValue(val);
                 }
-                if (startAtRadioButton.getValue()) {
-                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
-                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
-                    startAtParameter.setValue(iso8601DateStr);
-                    hiddenPane.add(startAtParameter);
-                }
-                enableValidation(true);
-                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-                    @Override
-                    public void onSubmitComplete(SubmitCompleteEvent event) {
-                        String result = event.getResults();
-                        if (result == null) {
-                            GWT.log("Unexpected empty result");
-                            displayErrorMessage("Unexpected empty result");
-                            return;
-                        }
-
-                        if (result.startsWith(SubmitEditServlet.ERROR)) {
-                            displayErrorMessage(result.substring(SubmitEditServlet.ERROR.length()));
-                            return;
-                        }
-
-                        try {
-                            JSONValue json = JSONParser.parseStrict(result);
-                            JSONObject obj = json.isObject();
-                            if (obj != null) {
-                                if (obj.containsKey("valid")) {
-                                    if (((JSONBoolean) obj.get("valid")).booleanValue()) {
-                                        if (obj.containsKey("updatedVariables")) {
-                                            updateVariables(obj.get("updatedVariables"));
-                                            redrawVariables(job);
-                                        }
-                                        GWT.log("Job validated");
-                                        displayInfoMessage("Job is valid");
-                                    } else if (obj.containsKey(ERROR_MESSAGE)) {
-                                        String errorMessage = obj.get(ERROR_MESSAGE).toString();
-                                        if (errorMessage.contains("JobValidationException")) {
-                                            errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
-                                        }
-                                        displayErrorMessage(errorMessage);
-                                    }
-                                }
-                            }
-                        } catch (Throwable t) {
-                            // JSON parsing error workaround to force extract error message
-                            MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
-                            if (errorMessageMatcher != null) {
-                                GWT.log(errorMessageMatcher.getGroup(1));
-                                displayErrorMessage(errorMessageMatcher.getGroup(1));
-                            } else {
-                                GWT.log(JSON_ERROR);
-                                displayErrorMessage(JSON_ERROR);
-                            }
-                        }
-                    }
-                });
-                variablesActualForm.submit();
-                displayLoadingMessage();
-
             }
         };
     }
@@ -970,26 +1006,16 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (int i = 0; i < _fields.length; i++) {
-                    String val = "";
-                    if (fields[2 * i].getValue() != null) {
-                        val = fields[2 * i].getValue().toString();
-                    }
-                    _fields[i].setValue(val);
-                }
+                setAllValuesAsString();
                 enableValidation(false);
-                if (startAtRadioButton.getValue()) {
-                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
-                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
-                    startAtParameter.setValue(iso8601DateStr);
-                    hiddenPane.add(startAtParameter);
-                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
-                    planParameter.setValue("true");
-                    hiddenPane.add(planParameter);
-                }
+                handleRadioButton();
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
+                        handleJobSubmission(event);
+                    }
+
+                    private void handleJobSubmission(SubmitCompleteEvent event) {
                         if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
 
                             GWT.log("Job submitted to the scheduler");
@@ -1017,6 +1043,28 @@ public class SubmitWindow {
                 variablesActualForm.submit();
                 displayLoadingMessage();
 
+            }
+
+            private void handleRadioButton() {
+                if (startAtRadioButton.getValue()) {
+                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                    startAtParameter.setValue(iso8601DateStr);
+                    hiddenPane.add(startAtParameter);
+                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
+                    planParameter.setValue("true");
+                    hiddenPane.add(planParameter);
+                }
+            }
+
+            private void setAllValuesAsString() {
+                for (int i = 0; i < _fields.length; i++) {
+                    String val = "";
+                    if (fields[2 * i].getValue() != null) {
+                        val = fields[2 * i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
             }
         };
     }
@@ -1060,9 +1108,6 @@ public class SubmitWindow {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String jobEditKey = "jobEdit";
-                String fn = fileUpload.getFilename();
-                // chrome workaround
-                final String fileName = fn.replace("C:\\fakepath\\", "");
                 String res = event.getResults();
 
                 try {
@@ -1240,32 +1285,11 @@ public class SubmitWindow {
                     NamedNodeMap attrs = variableNode.getAttributes();
                     try {
                         if (attrs != null && variableNode.hasAttributes()) {
-                            String name = null;
-                            String value = null;
-                            String model = null;
-                            for (int j = 0; j < attrs.getLength(); j++) {
-                                Node attr = attrs.item(j);
-                                if (attr.getNodeName().equals("name")) {
-                                    name = attr.getNodeValue();
-                                }
-                                if (attr.getNodeName().equals("value")) {
-                                    value = attr.getNodeValue();
-                                }
-                                if (attr.getNodeName().equals("model")) {
-                                    model = attr.getNodeValue();
-                                }
-                            }
-                            if (name != null && value != null) {
-                                if (!name.matches("[A-Za-z0-9._]+")) {
-                                    // this won't necessarily be a problem at
-                                    // job submission,
-                                    // but it definitely will be here in the
-                                    // client; don't bother
-                                    continue;
-                                }
+                            String name = extractNodeValue(attrs, KEY_OF_NAME);
+                            String value = extractNodeValue(attrs, KEY_OF_VALUE);
+                            String model = extractNodeValue(attrs, KEY_OF_MODEL);
 
-                                ret.put(name, new JobVariable(name, value, model));
-                            }
+                            createJobVariable(ret, name, value, model);
                         }
                     } catch (JavaScriptException t) {
                         // Node.hasAttributes() throws if there are no
@@ -1275,6 +1299,31 @@ public class SubmitWindow {
             }
         }
         return ret;
+    }
+
+    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
+        if (name != null && value != null) {
+            if (name.matches("[A-Za-z0-9._]+")) {
+                // this won't necessarily be a problem at
+                // job submission,
+                // but it definitely will be here in the
+                // client; don't bother
+                ret.put(name, new JobVariable(name, value, model));
+            }
+
+        }
+    }
+
+    private String extractNodeValue(NamedNodeMap attrs, String keyOf) {
+
+        for (int j = 0; j < attrs.getLength(); j++) {
+            Node attr = attrs.item(j);
+            if (attr.getNodeName().equals(keyOf)) {
+                return attr.getNodeValue();
+            }
+
+        }
+        return null;
     }
 
     private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
@@ -1291,7 +1340,6 @@ public class SubmitWindow {
 
     private Boolean searchCalendarGI(Node genericInfoNode) {
         Boolean exists = false;
-        Boolean executionCalendarDefined = false;
         NodeList list = genericInfoNode.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
@@ -1299,21 +1347,33 @@ public class SubmitWindow {
                 NamedNodeMap attributes = node.getAttributes();
                 for (int j = 0; j < attributes.getLength(); j++) {
                     Node attribute = attributes.item(j);
-                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
-                        exists = true;
-                    }
-                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                        executionCalendarDefined = true;
-                        if (!attribute.getNodeValue().isEmpty())
-                            isExecCalendarValueNull = false;
+                    exists = checkExecutionCalendarName(exists, attribute);
+                    if (checkExecutionCalendarValue(exists, attribute)) {
+                        return true;
                     }
 
                 }
             }
-
         }
-        return executionCalendarDefined;
+        return false;
+    }
+
+    private boolean checkExecutionCalendarValue(Boolean exists, Node attribute) {
+        if (isAttributeExecCalendarValueDefined(attribute, KEY_OF_VALUE) && exists) {
+            if (!attribute.getNodeValue().isEmpty()) {
+                isExecCalendarValueNull = false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkExecutionCalendarName(Boolean exists, Node attribute) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_NAME) &&
+            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+            exists = true;
+        }
+        return exists;
     }
 
     private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
