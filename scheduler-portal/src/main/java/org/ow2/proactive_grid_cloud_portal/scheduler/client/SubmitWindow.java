@@ -63,6 +63,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -121,11 +122,15 @@ public class SubmitWindow {
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
+    private static final String ERROR_MESSAGE = "errorMessage";
+
+    private static final String JSON_ERROR = "JSON parse ERROR";
+
     private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
-    private static final int width = 600;
+    private static final int widthWindows = 600;
 
-    private static final int height = 520;
+    private static final int heightWindows = 620;
 
     private Window window;
 
@@ -299,6 +304,8 @@ public class SubmitWindow {
         // This panel changes depending on the selected method of getting a
         // workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
+        selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         selectWorkflowButtonsPanel.setSpacing(5);
         selectWorkflowButtonsPanel.setHeight("50px");
 
@@ -396,13 +403,13 @@ public class SubmitWindow {
                 Node genericInfoMetadata = genericInfoMetaDataList.item(i);
                 if (genericInfoMetadata.getNodeName().equals("info") && genericInfoMetadata.hasAttributes()) {
                     NamedNodeMap attributes = genericInfoMetadata.getAttributes();
-                    getGenericInformationValue(attributes);
+                    getGenericInformationName(attributes);
                 }
             }
         }
     }
 
-    private void getGenericInformationValue(NamedNodeMap attributes) {
+    private void getGenericInformationName(NamedNodeMap attributes) {
         for (int j = 0; j < attributes.getLength(); j++) {
             Node attribute = attributes.item(j);
             if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name")) {
@@ -413,20 +420,23 @@ public class SubmitWindow {
                 if (attribute.getNodeValue().equalsIgnoreCase("workflow.icon"))
                     existIcon = true;
             }
+            getGenericInformationValue(attribute);
+        }
+    }
 
-            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value")) {
-                if (existBucketName) {
-                    bucketName = attribute.getNodeValue();
-                    existBucketName = false;
-                }
-                if (existDocumentation) {
-                    documentation = attribute.getNodeValue();
-                    existDocumentation = false;
-                }
-                if (existIcon) {
-                    icon = attribute.getNodeValue();
-                    existIcon = false;
-                }
+    private void getGenericInformationValue(Node attribute) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("value")) {
+            if (existBucketName) {
+                bucketName = attribute.getNodeValue();
+                existBucketName = false;
+            }
+            if (existDocumentation) {
+                documentation = attribute.getNodeValue();
+                existDocumentation = false;
+            }
+            if (existIcon) {
+                icon = attribute.getNodeValue();
+                existIcon = false;
             }
         }
     }
@@ -482,9 +492,9 @@ public class SubmitWindow {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle("2. Fill workflow variables");
-        varsLayout.setHeight100();
-        varsLayout.setHeight("100px");
-        varsLayout.setMaxHeight(100);
+        varsLayout.setWidth100();
+        varsLayout.setHeight("150px");
+        varsLayout.setMaxHeight(150);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
     }
@@ -527,6 +537,7 @@ public class SubmitWindow {
     }
 
     private void initSubmitAtPart() {
+        String startButton = "startAtRadioGroup";
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
         startAtLayout.setGroupTitle("3. Scheduled time");
@@ -534,10 +545,10 @@ public class SubmitWindow {
         startAtParameter = new Hidden("START_AT");
         planParameter = new Hidden("PLAN");
 
-        startAccordingPlanningRadioButton = new RadioButton("startAtRadioGroup",
+        startAccordingPlanningRadioButton = new RadioButton(startButton,
                                                             "Planned according to embedded Execution Calendar defintion");
-        startNowRadioButton = new RadioButton("startAtRadioGroup", "As soon as possible");
-        startAtRadioButton = new RadioButton("startAtRadioGroup", "At");
+        startNowRadioButton = new RadioButton(startButton, "As soon as possible");
+        startAtRadioButton = new RadioButton(startButton, "At");
 
         startAccordingPlanningRadioButton.setVisible(true);
 
@@ -580,7 +591,7 @@ public class SubmitWindow {
         dateChooser.setUse24HourTime(true);
         dateChooser.setShowTodayButton(true);
         dateChooser.setShowApplyButton(false);
-        dateChooser.setWidth(width / 2);
+        dateChooser.setWidth(widthWindows / 2);
         dateChooser.setLayoutAlign(Alignment.CENTER);
         dateChooser.setMargin(10);
 
@@ -719,7 +730,7 @@ public class SubmitWindow {
         errorLabel.setWidth100();
         errorLabel.setMargin(10);
         errorLabel.setAlign(Alignment.CENTER);
-        errorLabel.setStyleName("errorMessage");
+        errorLabel.setStyleName(ERROR_MESSAGE);
 
         messagePanel.addMember(errorLabel);
 
@@ -761,6 +772,8 @@ public class SubmitWindow {
         fromCatalogPanel.setHeight("30px");
         fromCatalogPanel.setWidth("100%");
         fromCatalogPanel.setSpacing(2);
+        fromCatalogPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         bucketsListBox = new ListBox();
         workflowsListBox = new ListBox();
 
@@ -907,8 +920,8 @@ public class SubmitWindow {
                                         }
                                         GWT.log("Job validated");
                                         displayInfoMessage("Job is valid");
-                                    } else if (obj.containsKey("errorMessage")) {
-                                        String errorMessage = obj.get("errorMessage").toString();
+                                    } else if (obj.containsKey(ERROR_MESSAGE)) {
+                                        String errorMessage = obj.get(ERROR_MESSAGE).toString();
                                         if (errorMessage.contains("JobValidationException")) {
                                             errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
                                         }
@@ -923,8 +936,8 @@ public class SubmitWindow {
                                 GWT.log(errorMessageMatcher.getGroup(1));
                                 displayErrorMessage(errorMessageMatcher.getGroup(1));
                             } else {
-                                GWT.log("JSON parse ERROR");
-                                displayErrorMessage("JSON parse ERROR");
+                                GWT.log(JSON_ERROR);
+                                displayErrorMessage(JSON_ERROR);
                             }
                         }
                     }
@@ -987,8 +1000,8 @@ public class SubmitWindow {
                             String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
                             JSONValue json = controller.parseJSON(jsonError);
                             JSONObject obj = json.isObject();
-                            if (obj != null && obj.containsKey("errorMessage")) {
-                                String errorMessage = obj.get("errorMessage").toString();
+                            if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
+                                String errorMessage = obj.get(ERROR_MESSAGE).toString();
                                 if (errorMessage.contains("JobValidationException")) {
                                     errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
                                 }
@@ -1046,7 +1059,7 @@ public class SubmitWindow {
         return new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-
+                String jobEditKey = "jobEdit";
                 String fn = fileUpload.getFilename();
                 // chrome workaround
                 final String fileName = fn.replace("C:\\fakepath\\", "");
@@ -1056,14 +1069,14 @@ public class SubmitWindow {
                     JSONValue js = JSONParser.parseStrict(res);
                     JSONObject obj = js.isObject();
 
-                    if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
-                        String val = obj.get("jobEdit").isString().stringValue();
+                    if (obj.get(jobEditKey) != null && obj.get(jobEditKey).isString() != null) {
+                        String val = obj.get(jobEditKey).isString().stringValue();
                         job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
                         // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
                         setStartAccordingPlanningRadioButtonState(job);
                         variables = readVars(job);
                     } else {
-                        GWT.log("JSON parse ERROR");
+                        GWT.log(JSON_ERROR);
                         displayErrorMessage(res);
                         //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
                         setEnabledStartAtPart(false);
@@ -1072,7 +1085,7 @@ public class SubmitWindow {
                     }
 
                 } catch (JSONException t) {
-                    GWT.log("JSON parse ERROR");
+                    GWT.log(JSON_ERROR);
                     displayErrorMessage(res);
                     //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
                     setEnabledStartAtPart(false);
@@ -1200,8 +1213,8 @@ public class SubmitWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(rootPage);
-        this.window.setWidth(this.width);
-        this.window.setHeight(this.height);
+        this.window.setWidth(this.widthWindows);
+        this.window.setHeight(this.heightWindows);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
     }
@@ -1266,36 +1279,41 @@ public class SubmitWindow {
 
     private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
         Document dom = XMLParser.parse(jobDescriptor);
-        Boolean exists = false;
-        Boolean executionCalendarDefined = false;
+
         NodeList genericInfo = dom.getElementsByTagName("genericInformation");
         // check if the job has genericInformation or not
         if (genericInfo != null && genericInfo.getLength() > 0) {
-            // get the first item
-            Node root = genericInfo.item(0);
-            NodeList list = root.getChildNodes();
-            for (int i = 0; i < list.getLength(); i++) {
-                Node node = list.item(i);
-                if (node.getNodeName().equals("info") && node.hasAttributes()) {
-                    NamedNodeMap attributes = node.getAttributes();
-                    for (int j = 0; j < attributes.getLength(); j++) {
-                        Node attribute = attributes.item(j);
-                        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
-                            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
-                            exists = true;
-                        }
-                        if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
-                            executionCalendarDefined = true;
-                            if (!attribute.getNodeValue().isEmpty())
-                                isExecCalendarValueNull = false;
-                        }
+            // search calendar GI in the first item
+            return searchCalendarGI(genericInfo.item(0));
+        } else
+            return false;
+    }
 
+    private Boolean searchCalendarGI(Node genericInfoNode) {
+        Boolean exists = false;
+        Boolean executionCalendarDefined = false;
+        NodeList list = genericInfoNode.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                NamedNodeMap attributes = node.getAttributes();
+                for (int j = 0; j < attributes.getLength(); j++) {
+                    Node attribute = attributes.item(j);
+                    if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals("name") &&
+                        attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+                        exists = true;
                     }
+                    if (isAttributeExecCalendarValueDefined(attribute, "value") && exists) {
+                        executionCalendarDefined = true;
+                        if (!attribute.getNodeValue().isEmpty())
+                            isExecCalendarValueNull = false;
+                    }
+
                 }
             }
+
         }
         return executionCalendarDefined;
-
     }
 
     private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
