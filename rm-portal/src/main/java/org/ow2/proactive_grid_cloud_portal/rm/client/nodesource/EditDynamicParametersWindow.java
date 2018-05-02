@@ -102,34 +102,36 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     protected List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
             PluginDescriptor focusedPolicyPlugin) {
 
-        List<PluginDescriptor.Field> policyDynamicFields = focusedPolicyPlugin.getConfigurableFields()
-                                                                              .stream()
-                                                                              .filter(PluginDescriptor.Field::isDynamic)
-                                                                              .collect(Collectors.toList());
+        List<String> policyDynamicFieldFullNames = focusedPolicyPlugin.getConfigurableFields()
+                                                                      .stream()
+                                                                      .filter(PluginDescriptor.Field::isDynamic)
+                                                                      .map(field -> focusedPolicyPlugin.getPluginName() +
+                                                                                    field.getName())
+                                                                      .collect(Collectors.toList());
+        List<String> infrastructureDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
+                                                                                      .stream()
+                                                                                      .filter(PluginDescriptor.Field::isDynamic)
+                                                                                      .map(field -> focusedPolicyPlugin.getPluginName() +
+                                                                                                    field.getName())
+                                                                                      .collect(Collectors.toList());
+        List<String> allDynamicFieldFullNames = new LinkedList<>();
+        allDynamicFieldFullNames.addAll(policyDynamicFieldFullNames);
+        allDynamicFieldFullNames.addAll(infrastructureDynamicFieldFullNames);
 
-        List<PluginDescriptor.Field> infrastructureDynamicIFields = focusedInfrastructurePlugin.getConfigurableFields()
-                                                                                               .stream()
-                                                                                               .filter(PluginDescriptor.Field::isDynamic)
-                                                                                               .collect(Collectors.toList());
-        List<PluginDescriptor.Field> allDynamicFields = new LinkedList<>();
-        allDynamicFields.addAll(policyDynamicFields);
-        allDynamicFields.addAll(infrastructureDynamicIFields);
-
+        // this list will have all the initial items plus one hidden item for
+        // each item that will be disabled by the following code. The item
+        // ordering is preserved while inserting hidden items.
         List<FormItem> allFormItemsWithHiddenFields = new LinkedList<>();
 
         for (FormItem formItem : this.allFormItems) {
             allFormItemsWithHiddenFields.add(formItem);
-            if (allDynamicFields.stream()
-                                .noneMatch(field -> isPartOfDynamicFields(focusedInfrastructurePlugin,
-                                                                          focusedPolicyPlugin,
-                                                                          formItem,
-                                                                          field))) {
-
+            if (allDynamicFieldFullNames.stream()
+                                        .noneMatch(fieldFullName -> isItemEqualToDynamicField(formItem,
+                                                                                              fieldFullName))) {
                 if (this.allFormItemsPerPlugin.keySet()
                                               .stream()
                                               .anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
                     formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
-
                     disableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
                 }
             }
@@ -138,15 +140,9 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         return allFormItemsWithHiddenFields;
     }
 
-    private boolean isPartOfDynamicFields(PluginDescriptor focusedInfrastructurePlugin,
-            PluginDescriptor focusedPolicyPlugin, FormItem formItem, PluginDescriptor.Field field) {
-
-        return formItem.getName().equals(focusedPolicyPlugin.getPluginName() + field.getName()) ||
-               formItem.getName().equals(focusedInfrastructurePlugin.getPluginName() + field.getName()) ||
-               formItem.getName()
-                       .equals(focusedPolicyPlugin.getPluginName() + field.getName() + EDIT_FORM_ITEM_SUFFIX) ||
-               formItem.getName()
-                       .equals(focusedInfrastructurePlugin.getPluginName() + field.getName() + EDIT_FORM_ITEM_SUFFIX);
+    private boolean isItemEqualToDynamicField(FormItem formItem, String fieldFullName) {
+        return formItem.getName().equals(fieldFullName) ||
+               formItem.getName().equals(fieldFullName + EDIT_FORM_ITEM_SUFFIX);
     }
 
     @Override
