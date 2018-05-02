@@ -1019,15 +1019,14 @@ public class SubmitWindow {
                         checkEventResults(event);
                     }
 
-					
                 });
                 variablesActualForm.submit();
                 displayLoadingMessage();
 
             }
-            
+
             private void checkEventResults(SubmitCompleteEvent event) {
-				if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
+                if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
 
                     GWT.log("Job submitted to the scheduler");
                     SubmitWindow.this.window.removeMember(rootPage);
@@ -1049,7 +1048,7 @@ public class SubmitWindow {
                     }
 
                 }
-			}
+            }
 
             private void handleRadioButton() {
                 if (startAtRadioButton.getValue()) {
@@ -1300,14 +1299,14 @@ public class SubmitWindow {
         return ret;
     }
 
-	private void checkIfAttributes(Map<String, JobVariable> ret, Node variableNode, NamedNodeMap attrs) {
-		if (attrs != null && variableNode.hasAttributes()) {
-		    String name = extractNodeValue(attrs, KEY_OF_NAME);
-		    String value = extractNodeValue(attrs, KEY_OF_VALUE);
-		    String model = extractNodeValue(attrs, KEY_OF_MODEL);
-		    createJobVariable(ret, name, value, model);
-		}
-	}
+    private void checkIfAttributes(Map<String, JobVariable> ret, Node variableNode, NamedNodeMap attrs) {
+        if (attrs != null && variableNode.hasAttributes()) {
+            String name = extractNodeValue(attrs, KEY_OF_NAME);
+            String value = extractNodeValue(attrs, KEY_OF_VALUE);
+            String model = extractNodeValue(attrs, KEY_OF_MODEL);
+            createJobVariable(ret, name, value, model);
+        }
+    }
 
     private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
         if (name != null && value != null) {
