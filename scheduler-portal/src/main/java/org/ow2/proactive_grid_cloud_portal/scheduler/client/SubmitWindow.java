@@ -1016,34 +1016,40 @@ public class SubmitWindow {
                     }
 
                     private void handleJobSubmission(SubmitCompleteEvent event) {
-                        if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
-
-                            GWT.log("Job submitted to the scheduler");
-                            SubmitWindow.this.window.removeMember(rootPage);
-                            SubmitWindow.this.window.hide();
-                            SubmitWindow.this.destroy();
-                        } else {
-                            String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
-                            JSONValue json = controller.parseJSON(jsonError);
-                            JSONObject obj = json.isObject();
-                            if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
-                                String errorMessage = obj.get(ERROR_MESSAGE).toString();
-                                if (errorMessage.contains("JobValidationException")) {
-                                    errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
-                                }
-                                displayErrorMessage(errorMessage);
-
-                            } else {
-                                displayErrorMessage(jsonError);
-                            }
-
-                        }
+                        checkEventResults(event);
                     }
+
+					
                 });
                 variablesActualForm.submit();
                 displayLoadingMessage();
 
             }
+            
+            private void checkEventResults(SubmitCompleteEvent event) {
+				if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
+
+                    GWT.log("Job submitted to the scheduler");
+                    SubmitWindow.this.window.removeMember(rootPage);
+                    SubmitWindow.this.window.hide();
+                    SubmitWindow.this.destroy();
+                } else {
+                    String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
+                    JSONValue json = controller.parseJSON(jsonError);
+                    JSONObject obj = json.isObject();
+                    if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
+                        String errorMessage = obj.get(ERROR_MESSAGE).toString();
+                        if (errorMessage.contains("JobValidationException")) {
+                            errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                        }
+                        displayErrorMessage(errorMessage);
+
+                    } else {
+                        displayErrorMessage(jsonError);
+                    }
+
+                }
+			}
 
             private void handleRadioButton() {
                 if (startAtRadioButton.getValue()) {
@@ -1273,8 +1279,7 @@ public class SubmitWindow {
          * this will fail if someday the XML schema gets another <variable> tag
          * elsewhere
          */
-        Document dom = XMLParser.parse(jobDescriptor);
-        NodeList variables = dom.getElementsByTagName("variable");
+        NodeList variables = XMLParser.parse(jobDescriptor).getElementsByTagName("variable");
         Map<String, JobVariable> ret = new LinkedHashMap<>();
 
         if (variables.getLength() > 0) {
@@ -1284,13 +1289,7 @@ public class SubmitWindow {
                 if (variableNode != null && !isTaskVariableElement(variableNode)) {
                     NamedNodeMap attrs = variableNode.getAttributes();
                     try {
-                        if (attrs != null && variableNode.hasAttributes()) {
-                            String name = extractNodeValue(attrs, KEY_OF_NAME);
-                            String value = extractNodeValue(attrs, KEY_OF_VALUE);
-                            String model = extractNodeValue(attrs, KEY_OF_MODEL);
-
-                            createJobVariable(ret, name, value, model);
-                        }
+                        checkIfAttributes(ret, variableNode, attrs);
                     } catch (JavaScriptException t) {
                         // Node.hasAttributes() throws if there are no
                         // attributes... (GWT 2.1.0)
@@ -1300,6 +1299,15 @@ public class SubmitWindow {
         }
         return ret;
     }
+
+	private void checkIfAttributes(Map<String, JobVariable> ret, Node variableNode, NamedNodeMap attrs) {
+		if (attrs != null && variableNode.hasAttributes()) {
+		    String name = extractNodeValue(attrs, KEY_OF_NAME);
+		    String value = extractNodeValue(attrs, KEY_OF_VALUE);
+		    String model = extractNodeValue(attrs, KEY_OF_MODEL);
+		    createJobVariable(ret, name, value, model);
+		}
+	}
 
     private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
         if (name != null && value != null) {
