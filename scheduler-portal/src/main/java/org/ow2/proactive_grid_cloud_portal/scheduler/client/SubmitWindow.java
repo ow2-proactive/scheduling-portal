@@ -242,7 +242,7 @@ public class SubmitWindow {
 
     private String icon = null;
 
-    private String bucketName = null;
+    private String bucketNameGI = null;
 
     private Boolean existBucketName = false;
 
@@ -394,7 +394,7 @@ public class SubmitWindow {
     private Widget prepareWorlflowInformationWidget() {
         return new HTML("<center> <img src=" + icon + " height=40px width=40px> <br> <b>Documentation :</b> <a href=" +
                         documentation + " target=_blank>" + documentation + " </a><br> <b> Bucket name :</b> " +
-                        bucketName + " </center>");
+                        bucketNameGI + " </center>");
     }
 
     private void getGenericInformationAttributes(String jobDescriptor) {
@@ -433,7 +433,7 @@ public class SubmitWindow {
     private void getGenericInformationValue(Node attribute) {
         if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_VALUE)) {
             if (existBucketName) {
-                bucketName = attribute.getNodeValue();
+                bucketNameGI = attribute.getNodeValue();
                 existBucketName = false;
             }
             if (existDocumentation) {
@@ -925,24 +925,24 @@ public class SubmitWindow {
                     }
 
                     private void handleVariables(JSONObject obj) {
-                        if (obj != null) {
-                            if (obj.containsKey("valid")) {
-                                if (((JSONBoolean) obj.get("valid")).booleanValue()) {
-                                    if (obj.containsKey("updatedVariables")) {
-                                        updateVariables(obj.get("updatedVariables"));
-                                        redrawVariables(job);
-                                    }
-                                    GWT.log("Job validated");
-                                    displayInfoMessage("Job is valid");
-                                } else if (obj.containsKey(ERROR_MESSAGE)) {
-                                    String errorMessage = obj.get(ERROR_MESSAGE).toString();
-                                    if (errorMessage.contains("JobValidationException")) {
-                                        errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
-                                    }
-                                    displayErrorMessage(errorMessage);
+
+                        if (obj != null && obj.containsKey("valid")) {
+                            if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                if (obj.containsKey("updatedVariables")) {
+                                    updateVariables(obj.get("updatedVariables"));
+                                    redrawVariables(job);
                                 }
+                                GWT.log("Job validated");
+                                displayInfoMessage("Job is valid");
+                            } else if (obj.containsKey(ERROR_MESSAGE)) {
+                                String errorMessage = obj.get(ERROR_MESSAGE).toString();
+                                if (errorMessage.contains("JobValidationException")) {
+                                    errorMessage = errorMessage.substring(errorMessage.indexOf(':') + 2);
+                                }
+                                displayErrorMessage(errorMessage);
                             }
                         }
+
                     }
 
                     private boolean ifResultIsAnError(String result) {
@@ -1039,7 +1039,7 @@ public class SubmitWindow {
                     if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
                         String errorMessage = obj.get(ERROR_MESSAGE).toString();
                         if (errorMessage.contains("JobValidationException")) {
-                            errorMessage = errorMessage.substring(errorMessage.indexOf(":") + 2);
+                            errorMessage = errorMessage.substring(errorMessage.indexOf(':') + 2);
                         }
                         displayErrorMessage(errorMessage);
 
