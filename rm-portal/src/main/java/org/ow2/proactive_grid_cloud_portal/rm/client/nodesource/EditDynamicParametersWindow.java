@@ -102,21 +102,23 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     protected List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
             PluginDescriptor focusedPolicyPlugin) {
 
+        List<String> infrastructureDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
+                                                                                      .stream()
+                                                                                      .filter(PluginDescriptor.Field::isDynamic)
+                                                                                      .map(field -> focusedInfrastructurePlugin.getPluginName() +
+                                                                                                    field.getName())
+                                                                                      .collect(Collectors.toList());
+
         List<String> policyDynamicFieldFullNames = focusedPolicyPlugin.getConfigurableFields()
                                                                       .stream()
                                                                       .filter(PluginDescriptor.Field::isDynamic)
                                                                       .map(field -> focusedPolicyPlugin.getPluginName() +
                                                                                     field.getName())
                                                                       .collect(Collectors.toList());
-        List<String> infrastructureDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
-                                                                                      .stream()
-                                                                                      .filter(PluginDescriptor.Field::isDynamic)
-                                                                                      .map(field -> focusedPolicyPlugin.getPluginName() +
-                                                                                                    field.getName())
-                                                                                      .collect(Collectors.toList());
+
         List<String> allDynamicFieldFullNames = new LinkedList<>();
-        allDynamicFieldFullNames.addAll(policyDynamicFieldFullNames);
         allDynamicFieldFullNames.addAll(infrastructureDynamicFieldFullNames);
+        allDynamicFieldFullNames.addAll(policyDynamicFieldFullNames);
 
         // this list will have all the initial items plus one hidden item for
         // each item that will be disabled by the following code. The item
@@ -128,16 +130,20 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
             if (allDynamicFieldFullNames.stream()
                                         .noneMatch(fieldFullName -> isItemEqualToDynamicField(formItem,
                                                                                               fieldFullName))) {
-                if (this.allFormItemsPerPlugin.keySet()
-                                              .stream()
-                                              .anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
-                    formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
-                    disableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
-                }
+                filterAndDisableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
             }
         }
 
         return allFormItemsWithHiddenFields;
+    }
+
+    private void filterAndDisableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {
+        if (this.allFormItemsPerPlugin.keySet()
+                                      .stream()
+                                      .anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
+            formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
+            disableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
+        }
     }
 
     private boolean isItemEqualToDynamicField(FormItem formItem, String fieldFullName) {
