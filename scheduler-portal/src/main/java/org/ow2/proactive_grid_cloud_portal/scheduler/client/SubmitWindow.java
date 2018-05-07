@@ -393,9 +393,9 @@ public class SubmitWindow {
 
     private Widget prepareWorlflowInformationWidget() {
 
-        String widgetIcon = "Please add an icon to the workflow <br>";
-        String widgetDocumentation = "Please add a documentation link to the workflow <br>";
-        String widgetBucketName = "Please add a bucket name to the workflow";
+        String widgetIcon = "No icone <br>";
+        String widgetDocumentation = "No documentation <br>";
+        String widgetBucketName = "No bucket name";
 
         if (icon != null) {
             widgetIcon = "<img src=" + icon + " height=40px width=40px> <br>";
