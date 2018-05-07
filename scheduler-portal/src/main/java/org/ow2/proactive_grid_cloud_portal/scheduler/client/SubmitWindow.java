@@ -136,7 +136,7 @@ public class SubmitWindow {
 
     private final int widthWindows = 600;
 
-    private final int heightWindows = 620;
+    private final int heightWindows = 600;
 
     private Window window;
 
@@ -392,9 +392,26 @@ public class SubmitWindow {
     }
 
     private Widget prepareWorlflowInformationWidget() {
-        return new HTML("<center> <img src=" + icon + " height=40px width=40px> <br> <b>Documentation :</b> <a href=" +
-                        documentation + " target=_blank>" + documentation + " </a><br> <b> Bucket name :</b> " +
-                        bucketNameGI + " </center>");
+
+        String widgetIcon = "No icone <br>";
+        String widgetDocumentation = "No documentation <br>";
+        String widgetBucketName = "No bucket name";
+
+        if (icon != null) {
+            widgetIcon = "<img src=" + icon + " height=40px width=40px> <br>";
+        }
+
+        if (documentation != null) {
+            widgetDocumentation = "<b>Documentation :</b> <a href=" + documentation + " target=_blank>" +
+                                  documentation + " </a><br>";
+        }
+
+        if (bucketNameGI != null) {
+            widgetBucketName = "<b> Bucket name :</b> " + bucketNameGI;
+        }
+
+        return new HTML("<center> " + widgetIcon + widgetDocumentation + widgetBucketName + " </center>");
+
     }
 
     private void getGenericInformationAttributes(String jobDescriptor) {
@@ -1009,6 +1026,11 @@ public class SubmitWindow {
                 setAllValuesAsString();
                 enableValidation(false);
                 handleRadioButton();
+                submitWithVariables();
+                displayLoadingMessage();
+            }
+
+            private void submitWithVariables() {
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
@@ -1018,16 +1040,12 @@ public class SubmitWindow {
                     private void handleJobSubmission(SubmitCompleteEvent event) {
                         checkEventResults(event);
                     }
-
                 });
                 variablesActualForm.submit();
-                displayLoadingMessage();
-
             }
 
             private void checkEventResults(SubmitCompleteEvent event) {
                 if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
-
                     GWT.log("Job submitted to the scheduler");
                     SubmitWindow.this.window.removeMember(rootPage);
                     SubmitWindow.this.window.hide();
@@ -1042,11 +1060,9 @@ public class SubmitWindow {
                             errorMessage = errorMessage.substring(errorMessage.indexOf(':') + 2);
                         }
                         displayErrorMessage(errorMessage);
-
                     } else {
                         displayErrorMessage(jsonError);
                     }
-
                 }
             }
 
