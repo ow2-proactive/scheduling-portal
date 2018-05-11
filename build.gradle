@@ -57,7 +57,7 @@ subprojects {
 
     dependencies {
 
-        def jacksonVersion = "2.8.7"
+        def jacksonVersion = "2.7.9"
 
         providedCompile 'com.google.gwt:gwt-user:2.8.0'
         providedCompile 'com.google.gwt:gwt-dev:2.8.0'
