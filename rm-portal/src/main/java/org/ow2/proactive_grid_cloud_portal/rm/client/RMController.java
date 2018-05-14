@@ -1070,6 +1070,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void exportNodeSource() {
+        // TODO redirect to node source servlet
+    }
+
     /**
      * Remove nodes according to the current selection:
      * if a host is selected, multiple nodes will be removed
