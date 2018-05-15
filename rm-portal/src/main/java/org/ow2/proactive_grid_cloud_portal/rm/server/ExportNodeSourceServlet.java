@@ -35,8 +35,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,66 +53,71 @@ public class ExportNodeSourceServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceServlet.class);
 
+    private static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
+
     public static final String SERVLET_MAPPING = "exportnodesource";
 
     public static final String MAIN_FORM_ITEM_NAME = "nodeSourceJson";
 
-    public static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
+    public static final String NODE_SOURCE_NAME_KEY = "nodeSourceName";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        login(request, response);
+        downloadJsonFile(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        login(request, response);
+        downloadJsonFile(request, response);
     }
 
-    private void login(HttpServletRequest request, HttpServletResponse response) {
+    private void downloadJsonFile(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("application/json");
-
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(4096);
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(1000000);
+            String jsonContent = extractJsonStringFromRequest(request);
+            String nodeSourceName = extractNodeSourceName(jsonContent);
 
-            List<?> fileItems = upload.parseRequest(request);
-            Iterator<?> i = fileItems.iterator();
-
-            String result = "";
-
-            while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
-
-                if (fi.isFormField()) {
-                    String name = fi.getFieldName();
-                    String value = fi.getString();
-
-                    if (name.equals(MAIN_FORM_ITEM_NAME)) {
-                        result = value;
-
-                    }
-                }
-
-                fi.delete();
-            }
-
-            String jsonContent = result;
             response.setHeader("Content-disposition",
-                               "attachment; filename=nodesourceexport" + NODE_SOURCE_FILE_NAME_SUFFIX);
-            response.setHeader("Location", "nodesourceexport" + NODE_SOURCE_FILE_NAME_SUFFIX);
+                               "attachment; filename=" + nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
+            response.setHeader("Location", nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
             response.getWriter().write(jsonContent);
-
         } catch (Throwable t) {
             try {
+                LOGGER.warn("Export node source failed", t);
                 response.getWriter().write(t.getMessage());
-            } catch (IOException e1) {
-                LOGGER.warn("Failed to return login error to client, error was:" + t.getMessage(), e1);
+            } catch (IOException e) {
+                LOGGER.warn("Failed to return node source export error to client, error was:" + t.getMessage(), e);
             }
         }
+    }
+
+    private String extractJsonStringFromRequest(HttpServletRequest request) throws FileUploadException {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(4096);
+        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(1000000);
+        List<?> fileItems = upload.parseRequest(request);
+        Iterator<?> iterator = fileItems.iterator();
+
+        String jsonContent = "";
+        while (iterator.hasNext()) {
+            FileItem fi = (FileItem) iterator.next();
+            if (fi.isFormField()) {
+                String name = fi.getFieldName();
+                String value = fi.getString();
+                if (name.equalsIgnoreCase(MAIN_FORM_ITEM_NAME)) {
+                    jsonContent = value;
+                }
+            }
+            fi.delete();
+        }
+        return jsonContent;
+    }
+
+    private String extractNodeSourceName(String jsonContent) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonContent);
+        return jsonObject.getString(NODE_SOURCE_NAME_KEY);
     }
 
 }
