@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -48,9 +47,11 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
@@ -64,6 +65,9 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -1070,8 +1074,38 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    public void exportNodeSource() {
-        // TODO redirect to node source servlet
+    public void exportNodeSource(String nodeSourceName) {
+        FormPanel nodeSourceJsonForm = new FormPanel();
+        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
+        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceServlet.SERVLET_MAPPING);
+
+        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceServlet.MAIN_FORM_ITEM_NAME);
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.add(nodeSourceJsonItem);
+        nodeSourceJsonForm.setWidget(panel);
+
+        Window window = new Window();
+        window.addChild(nodeSourceJsonForm);
+        window.show();
+
+        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                      nodeSourceName,
+                                      new AsyncCallback<String>() {
+                                          public void onSuccess(String result) {
+                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
+                                              nodeSourceJsonItem.setValue(result);
+                                              nodeSourceJsonForm.submit();
+                                              window.hide();
+                                          }
+
+                                          public void onFailure(Throwable caught) {
+                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
+                                                      ":<br>" + msg);
+                                          }
+                                      });
     }
 
     /**

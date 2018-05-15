@@ -33,6 +33,11 @@
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.NSCreationServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>ExportNodeSourceServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet</servlet-class>
+	</servlet>
+
 	<!-- common -->
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
@@ -60,8 +65,10 @@
 		<url-pattern>/portal/createnodesource</url-pattern>
 	</servlet-mapping>
 
-
-
+	<servlet-mapping>
+		<servlet-name>ExportNodeSourceServlet</servlet-name>
+		<url-pattern>/portal/exportnodesource</url-pattern>
+	</servlet-mapping>
 
 	<mime-mapping>
 		<extension>gif</extension>

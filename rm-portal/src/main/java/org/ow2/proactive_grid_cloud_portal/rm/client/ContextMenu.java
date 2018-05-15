@@ -123,7 +123,7 @@ public class ContextMenu extends Menu {
         editItem.addClickHandler(onClick -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
         MenuItem exportItem = new MenuItem("Export", menu.exportItemImageResource);
-        undeployItem.addClickHandler(onClick -> controller.exportNodeSource());
+        exportItem.addClickHandler(onClick -> controller.exportNodeSource(nodeSourceName));
 
         if (menu.node != null) {
             if (menu.node.isLocked()) {
