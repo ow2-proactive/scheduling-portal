@@ -38,6 +38,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
@@ -46,19 +47,15 @@ import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.form.fields.PasswordItem;
-import com.smartgwt.client.widgets.form.fields.PickerIcon;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.*;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
 
 
 public abstract class NodeSourceWindow {
+
+    private static final String IMPORT_NODE_SOURCE_KEY = "importNodeSource";
 
     private static final String NS_NAME_FORM_KEY = "nsName";
 
@@ -254,19 +251,19 @@ public abstract class NodeSourceWindow {
 
     protected void buildForm() {
 
-        final VLayout nodeSourceWindowLayout = new VLayout();
+        VLayout nodeSourceWindowLayout = new VLayout();
         nodeSourceWindowLayout.setMargin(5);
 
-        final VStack nodeSourcePluginsLayout = new VStack();
+        VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
 
-        final Label nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
+        Label nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
         nodeSourcePluginsWaitingLabel.setIcon("loading.gif");
         nodeSourcePluginsWaitingLabel.setHeight(26);
         nodeSourcePluginsWaitingLabel.setAlign(Alignment.CENTER);
         nodeSourcePluginsLayout.addMember(nodeSourcePluginsWaitingLabel);
 
-        final DynamicForm nodeSourcePluginsForm = new DynamicForm();
+        DynamicForm nodeSourcePluginsForm = new DynamicForm();
         nodeSourcePluginsForm.setEncoding(Encoding.MULTIPART);
         nodeSourcePluginsForm.setMethod(FormMethod.POST);
         nodeSourcePluginsForm.setAction(GWT.getModuleBaseURL() + "createnodesource");
@@ -275,16 +272,18 @@ public abstract class NodeSourceWindow {
 
         nodeSourcePluginsLayout.addMember(nodeSourcePluginsForm);
 
-        final Label nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
-                                                      " will be acquired, and a Policy, that dictates when resources can be acquired.");
+        Label nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
+                                                " will be acquired, and a Policy, that dictates when resources can be acquired.");
         nodeSourceWindowLabel.setHeight(40);
 
-        final TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
-        DynamicForm nodeSourceWindowForm = new DynamicForm();
+        UploadItem uploadItem = new UploadItem(IMPORT_NODE_SOURCE_KEY, "Import");
 
+        TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
         CheckboxItem nodesRecoverableItem = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
-        nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
+
+        DynamicForm nodeSourceWindowForm = new DynamicForm();
+        nodeSourceWindowForm.setFields(uploadItem, new RowSpacerItem(), nodeSourceNameItem, nodesRecoverableItem);
         nodeSourceWindowForm.setTitleSuffix("");
 
         this.populateFormValues(nodeSourcePluginsWaitingLabel,
