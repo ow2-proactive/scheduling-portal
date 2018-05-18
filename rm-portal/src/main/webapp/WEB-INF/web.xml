@@ -38,6 +38,11 @@
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>ImportNodeSourceServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet</servlet-class>
+	</servlet>
+
 	<!-- common -->
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
@@ -68,6 +73,11 @@
 	<servlet-mapping>
 		<servlet-name>ExportNodeSourceServlet</servlet-name>
 		<url-pattern>/portal/exportnodesource</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ImportNodeSourceServlet</servlet-name>
+		<url-pattern>/portal/importnodesource</url-pattern>
 	</servlet-mapping>
 
 	<mime-mapping>

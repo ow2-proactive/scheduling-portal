@@ -28,7 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 

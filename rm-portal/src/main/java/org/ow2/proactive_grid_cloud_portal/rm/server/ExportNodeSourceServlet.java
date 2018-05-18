@@ -72,8 +72,8 @@ public class ExportNodeSourceServlet extends HttpServlet {
     }
 
     private void downloadJsonFile(HttpServletRequest request, HttpServletResponse response) {
-        response.setContentType("application/json");
         try {
+            response.setContentType("application/json");
             String jsonContent = extractJsonStringFromRequest(request);
             String nodeSourceName = extractNodeSourceName(jsonContent);
 

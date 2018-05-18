@@ -25,7 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet.SERVLET_MAPPING;
+
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -35,10 +38,14 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.ui.*;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
@@ -54,8 +61,6 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 
 public abstract class NodeSourceWindow {
-
-    private static final String IMPORT_NODE_SOURCE_KEY = "importNodeSource";
 
     private static final String NS_NAME_FORM_KEY = "nsName";
 
@@ -118,8 +123,8 @@ public abstract class NodeSourceWindow {
 
     protected abstract NodeSourceAction getNodeSourceAction();
 
-    protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem);
+    protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm,
+            TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem);
 
     protected abstract List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField);
@@ -276,14 +281,71 @@ public abstract class NodeSourceWindow {
                                                 " will be acquired, and a Policy, that dictates when resources can be acquired.");
         nodeSourceWindowLabel.setHeight(40);
 
-        UploadItem uploadItem = new UploadItem(IMPORT_NODE_SOURCE_KEY, "Import");
-
-        TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
+        TextAreaItem nodeSourceNameItem = new TextAreaItem(NS_NAME_FORM_KEY, "Name");
         CheckboxItem nodesRecoverableItem = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
 
+        Label selectLabel = new Label("Import");
+        FileUpload fileUpload = new FileUpload();
+        fileUpload.setName("ImportNS");
+        final FormPanel importNodeSourceFormPanel = new FormPanel();
+        importNodeSourceFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importNodeSourceFormPanel.setMethod(FormPanel.METHOD_POST);
+        importNodeSourceFormPanel.setAction(GWT.getModuleBaseURL() + ImportNodeSourceServlet.SERVLET_MAPPING);
+        importNodeSourceFormPanel.addSubmitCompleteHandler(onCompleted -> {
+            String jobEditKey = "jobEdit";
+            String res = onCompleted.getResults();
+            try {
+                nodeSourceNameItem.setDefaultValue(res);
+                /*
+                 * JSONValue js = JSONParser.parseStrict(res);
+                 * JSONObject obj = js.isObject();
+                 * 
+                 * if (obj.get(jobEditKey) != null && obj.get(jobEditKey).isString() != null) {
+                 * String val = obj.get(jobEditKey).isString().stringValue();
+                 * job = new
+                 * String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(
+                 * val));
+                 * // if the job has an EXECUTION_CALENDAR Generic Information defined, the
+                 * startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
+                 * setStartAccordingPlanningRadioButtonState(job);
+                 * variables = readVars(job);
+                 * } else {
+                 * GWT.log(JSON_ERROR);
+                 * displayErrorMessage(res);
+                 * //Force disable check&submit buttons to prevent confusion if a valid job was
+                 * uploaded first but not submitted
+                 * setEnabledStartAtPart(false);
+                 * startAccordingPlanningRadioButton.setVisible(false);
+                 * return;
+                 * }
+                 */
+            } catch (JSONException t) {
+                /*
+                 * GWT.log(JSON_ERROR);
+                 * displayErrorMessage(res);
+                 * //Force disable check&submit buttons to prevent confusion if a valid job was
+                 * uploaded first but not submitted
+                 * setEnabledStartAtPart(false);
+                 * startAccordingPlanningRadioButton.setVisible(false);
+                 * return;
+                 */
+            }
+        });
+
+        fileUpload.addChangeHandler(onImport -> {
+            if (!fileUpload.getFilename().isEmpty()) {
+                importNodeSourceFormPanel.submit();
+            }
+        });
+        importNodeSourceFormPanel.add(fileUpload);
+
+        HLayout importNodeSourceLayout = new HLayout();
+        importNodeSourceLayout.addMember(selectLabel);
+        importNodeSourceLayout.addMember(importNodeSourceFormPanel);
+
         DynamicForm nodeSourceWindowForm = new DynamicForm();
-        nodeSourceWindowForm.setFields(uploadItem, new RowSpacerItem(), nodeSourceNameItem, nodesRecoverableItem);
+        nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
         nodeSourceWindowForm.setTitleSuffix("");
 
         this.populateFormValues(nodeSourcePluginsWaitingLabel,
@@ -362,6 +424,7 @@ public abstract class NodeSourceWindow {
         scrollLayout.setBackgroundColor("#fafafa");
 
         nodeSourceWindowLayout.addMember(nodeSourceWindowLabel);
+        nodeSourceWindowLayout.addMember(importNodeSourceLayout);
         nodeSourceWindowLayout.addMember(nodeSourceWindowForm);
         nodeSourceWindowLayout.addMember(scrollLayout);
         nodeSourceWindowLayout.addMember(buttonsLayout);
@@ -385,7 +448,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.FALSE.toString());
@@ -401,7 +464,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void saveAndDeployNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.TRUE.toString());
@@ -417,7 +480,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void saveNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
@@ -466,7 +529,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, Label nodeSourceWindowLabel,
-            TextItem nodeSourceNameItem, JSONObject jsonCallback) {
+            TextAreaItem nodeSourceNameItem, JSONObject jsonCallback) {
 
         String msg;
         if (jsonCallback.get("errorMessage").isString() != null) {

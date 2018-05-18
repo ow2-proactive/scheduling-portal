@@ -88,7 +88,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextAreaItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(windowLabel,
                                                                                                                 windowForm,
@@ -131,7 +131,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     protected void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
-            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+            TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
 
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
@@ -223,7 +223,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     /**
      * Allow sub classes to select the items they need to disable.
      */
-    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    protected void manageNodeSourceWindowItems(TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
 
         // we never allow the node source name to be modified
         nodeSourceNameItem.disable();
