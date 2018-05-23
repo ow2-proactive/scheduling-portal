@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -230,9 +233,9 @@ public class NSCreationServlet extends HttpServlet {
 
     private void addToStringParamsOrToFileParams(ArrayList<String> params, ArrayList<String> fileParams,
             String formFieldName, String formFieldValue) {
-        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
+        if (formFieldName.endsWith(EDIT_FORM_ITEM_SUFFIX)) {
             fileParams.add(formFieldValue);
-        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+        } else if (!formFieldName.endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
             params.add(formFieldValue);
         }
     }

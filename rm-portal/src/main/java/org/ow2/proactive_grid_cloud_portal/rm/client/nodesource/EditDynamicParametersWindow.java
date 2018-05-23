@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_FORM_ITEM_SUFFIX;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,6 @@ import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 

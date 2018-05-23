@@ -68,7 +68,7 @@ public class NodeSourceConfigurationParser {
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
         JSONArray arr = this.controller.parseJSON(json).isArray();
-        HashMap<String, PluginDescriptor> plugins = new HashMap<String, PluginDescriptor>();
+        HashMap<String, PluginDescriptor> plugins = new HashMap<>();
 
         for (int i = 0; i < arr.size(); i++) {
             JSONObject p = arr.get(i).isObject();

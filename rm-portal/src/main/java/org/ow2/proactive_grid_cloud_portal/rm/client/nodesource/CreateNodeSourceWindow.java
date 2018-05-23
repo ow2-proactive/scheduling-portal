@@ -25,7 +25,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
@@ -33,7 +38,11 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.SpacerItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -43,8 +52,11 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class CreateNodeSourceWindow extends NodeSourceWindow {
 
+    private final NonTextualItemAternativeChoiceCreator nonTextualItemAternativeChoiceCreator;
+
     public CreateNodeSourceWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating Available Infrastructures and Policies");
+        this.nonTextualItemAternativeChoiceCreator = new NonTextualItemAternativeChoiceCreator(this);
         buildForm();
     }
 
@@ -92,13 +104,17 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
 
     @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
+        if (this.createdFromImport) {
+            return this.nonTextualItemAternativeChoiceCreator.getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                            pluginField);
+        } else {
+            List<FormItem> formItems = new LinkedList<>();
+            FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
+                                                                pluginField.getName());
+            addCredentialsPickerIcon(pluginField, formItems, chooseCredentialsFormItem);
 
-        List<FormItem> formItems = new LinkedList<>();
-        FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
-                                                            pluginField.getName());
-        addCredentialsPickerIcon(pluginField, formItems, chooseCredentialsFormItem);
-
-        return formItems;
+            return formItems;
+        }
     }
 
     @Override
