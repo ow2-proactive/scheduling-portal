@@ -43,6 +43,7 @@ import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -61,7 +62,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextAreaItem nodeSourceNameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
         fetchNodeSourceConfigurationWithCallback(windowLabel, windowForm, nodeSourceNameItem, nodesRecoverableItem);
     }
@@ -158,7 +159,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void manageNodeSourceWindowItems(TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
         super.manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
         nodesRecoverableItem.disable();
     }

@@ -41,7 +41,7 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
@@ -66,7 +66,7 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextAreaItem nodeSourceNameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
 
         nodesRecoverableItem.setValue(true);

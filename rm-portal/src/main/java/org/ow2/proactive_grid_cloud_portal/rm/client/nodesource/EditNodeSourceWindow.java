@@ -38,7 +38,7 @@ import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -72,7 +72,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextAreaItem nodeSourceNameItem,
+    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem) {
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(windowLabel,
                                                                                                                 windowForm,
@@ -92,13 +92,13 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void manageNodeSourceWindowItems(TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
         // we never allow the node source name to be modified
         nodeSourceNameItem.disable();
     }
 
     protected void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
-            TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
 
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 

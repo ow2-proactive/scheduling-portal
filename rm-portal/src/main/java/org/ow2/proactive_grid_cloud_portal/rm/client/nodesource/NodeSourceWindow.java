@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.smartgwt.client.types.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -51,6 +50,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.Encoding;
+import com.smartgwt.client.types.FormMethod;
+import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -62,10 +65,8 @@ import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.PickerIcon;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -140,8 +141,8 @@ public abstract class NodeSourceWindow {
 
     protected abstract NodeSourceAction getNodeSourceAction();
 
-    protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm,
-            TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem);
+    protected abstract void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
+            CheckboxItem nodesRecoverableItem);
 
     protected abstract List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField);
@@ -298,7 +299,7 @@ public abstract class NodeSourceWindow {
                                                 " will be acquired, and a Policy, that dictates when resources can be acquired.");
         nodeSourceWindowLabel.setHeight(40);
 
-        TextAreaItem nodeSourceNameItem = new TextAreaItem(NS_NAME_FORM_KEY, "Name");
+        TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
         CheckboxItem nodesRecoverableItem = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
 
@@ -499,7 +500,7 @@ public abstract class NodeSourceWindow {
     /**
      * Allow sub classes to alter the node source name and recoverable items.
      */
-    protected void manageNodeSourceWindowItems(TextAreaItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
 
     }
 
@@ -555,7 +556,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.FALSE.toString());
@@ -571,7 +572,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void saveAndDeployNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.TRUE.toString());
@@ -587,7 +588,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void saveNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
-            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextAreaItem nodeSourceNameItem,
+            DynamicForm nodeSourcePluginsForm, Label nodeSourceWindowLabel, TextItem nodeSourceNameItem,
             CheckboxItem nodesRecoverableItem, List<IButton> buttonList, NodeSourceAction nodeSourceAction) {
 
         nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
@@ -636,7 +637,7 @@ public abstract class NodeSourceWindow {
     }
 
     private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, Label nodeSourceWindowLabel,
-            TextAreaItem nodeSourceNameItem, JSONObject jsonCallback) {
+            TextItem nodeSourceNameItem, JSONObject jsonCallback) {
 
         String msg;
         if (jsonCallback.get("errorMessage").isString() != null) {
