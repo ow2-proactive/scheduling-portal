@@ -47,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -138,6 +139,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private Timer autoLoginTimer;
 
+    private NodeSourceConfigurationParser nodeSourceConfigurationParser;
+
     /**
      * Default constructor
      *
@@ -146,7 +149,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     RMController(RMServiceAsync rm) {
         this.rm = rm;
         this.model = new RMModelImpl();
-
+        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser(this);
         this.init();
     }
 
@@ -810,7 +813,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onSuccess(String result) {
-                model.setSupportedInfrastructures(parsePluginDescriptors(result));
+                model.setSupportedInfrastructures(nodeSourceConfigurationParser.parsePluginDescriptors(result));
 
                 rm.getPolicies(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
 
@@ -821,7 +824,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     }
 
                     public void onSuccess(String result) {
-                        model.setSupportedPolicies(parsePluginDescriptors(result));
+                        model.setSupportedPolicies(nodeSourceConfigurationParser.parsePluginDescriptors(result));
                         success.run();
                     }
                 });
@@ -842,7 +845,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                       new AsyncCallback<String>() {
 
                                           public void onSuccess(String result) {
-                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
+                                              model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
                                               success.run();
                                           }
 
@@ -853,80 +856,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               failure.run();
                                           }
                                       });
-    }
-
-    private NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
-
-        JSONObject jsonObject = this.parseJSON(json).isObject();
-
-        String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
-
-        boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
-
-        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
-        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
-        PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
-                                                                              infrastructurePluginName);
-
-        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
-        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
-        PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
-
-        return new NodeSourceConfiguration(nodeSourceName,
-                                           nodesRecoverable,
-                                           infrastructurePluginDescriptor,
-                                           policyPluginDescriptor);
-    }
-
-    private HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
-        JSONArray arr = this.parseJSON(json).isArray();
-        HashMap<String, PluginDescriptor> plugins = new HashMap<String, PluginDescriptor>();
-
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject p = arr.get(i).isObject();
-
-            String pluginName = p.get("pluginName").isString().stringValue();
-            PluginDescriptor pluginDescriptor = getPluginDescriptor(p, pluginName);
-
-            plugins.put(pluginName, pluginDescriptor);
-        }
-
-        return plugins;
-    }
-
-    private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
-        String pluginDescription = p.get("pluginDescription").isString().stringValue();
-        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
-
-        JSONArray fields = p.get("configurableFields").isArray();
-        for (int j = 0; j < fields.size(); j++) {
-            JSONObject field = fields.get(j).isObject();
-
-            String name = field.get("name").isString().stringValue();
-            String value = field.get("value").isString().stringValue();
-
-            JSONObject meta = field.get("meta").isObject();
-            String metaType = meta.get("type").isString().stringValue();
-            String descr = meta.get("description").isString().stringValue();
-            boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
-
-            boolean password = false;
-            boolean credentials = false;
-            boolean file = false;
-
-            if (metaType.equalsIgnoreCase("password")) {
-                password = true;
-            } else if (metaType.equalsIgnoreCase("fileBrowser")) {
-                file = true;
-            } else if (metaType.equalsIgnoreCase("credential")) {
-                credentials = true;
-            }
-
-            Field f = new Field(name, value, descr, password, credentials, file, dynamic);
-
-            desc.getConfigurableFields().add(f);
-        }
-        return desc;
     }
 
     /**
@@ -1094,7 +1023,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                       nodeSourceName,
                                       new AsyncCallback<String>() {
                                           public void onSuccess(String result) {
-                                              model.setEditedNodeSourceConfiguration(parseNodeSourceConfiguration(result));
                                               nodeSourceJsonItem.setValue(result);
                                               nodeSourceJsonForm.submit();
                                               window.hide();

@@ -70,7 +70,7 @@ public class PluginDescriptor {
             this(name, value, description, false, false, false, false);
         }
 
-        Field(String name, String value, String description, boolean password, boolean credential, boolean file,
+        public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
                 boolean dynamic) {
             this.name = name;
             this.value = value;
@@ -111,7 +111,7 @@ public class PluginDescriptor {
 
     }
 
-    PluginDescriptor(String pluginName, String pluginDescription) {
+    public PluginDescriptor(String pluginName, String pluginDescription) {
         this.pluginDescription = pluginDescription;
         this.pluginName = pluginName;
         this.configurableFields = new ArrayList<Field>();
