@@ -56,7 +56,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     protected String nodeSourceName;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
-        this(controller, WINDOW_TITLE, "Retrieving current node source configuration");
+        super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
+        this.nodeSourceName = nodeSourceName;
+        this.nonTextualItemAternativeChoiceCreator = new NonTextualItemAternativeChoiceCreator(this);
+        buildForm();
     }
 
     protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
