@@ -46,9 +46,7 @@ public class NodeSourceConfigurationParser {
     public NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
 
         JSONObject jsonObject = this.controller.parseJSON(json).isObject();
-
         String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
-
         boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
         JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
@@ -67,6 +65,7 @@ public class NodeSourceConfigurationParser {
     }
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
+
         JSONArray arr = this.controller.parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<>();
 
@@ -83,6 +82,7 @@ public class NodeSourceConfigurationParser {
     }
 
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
+
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
         PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
 

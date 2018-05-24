@@ -25,8 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_FORM_ITEM_SUFFIX;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -47,7 +47,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

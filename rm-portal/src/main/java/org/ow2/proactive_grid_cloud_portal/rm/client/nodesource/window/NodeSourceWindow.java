@@ -23,10 +23,10 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_FORM_ITEM_SUFFIX;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NonTextualItemAternativeChoiceCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet;
 
 import com.google.gwt.core.client.GWT;
@@ -137,6 +138,10 @@ public abstract class NodeSourceWindow {
 
     public void destroy() {
         this.window.destroy();
+    }
+
+    public List<FormItem> getFormItemsOfPlugin(String pluginName) {
+        return this.allFormItemsPerPlugin.get(pluginName);
     }
 
     protected abstract NodeSourceAction getNodeSourceAction();
@@ -306,61 +311,10 @@ public abstract class NodeSourceWindow {
         Label importNodeSourceLabel = new Label("Import Node Source");
         FileUpload fileUpload = new FileUpload();
         fileUpload.setName("ImportNS");
-        final FormPanel importNodeSourceFormPanel = new FormPanel();
-        importNodeSourceFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
-        importNodeSourceFormPanel.setMethod(FormPanel.METHOD_POST);
-        importNodeSourceFormPanel.setAction(GWT.getModuleBaseURL() + ImportNodeSourceServlet.SERVLET_MAPPING);
-        importNodeSourceFormPanel.addSubmitCompleteHandler(importCompleteEvent -> {
-            this.createdFromImport = true;
-            String importedNodeSourceJsonString = importCompleteEvent.getResults();
-            NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser(this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
-            nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
-
-            manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
-
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-
-            this.allFormItems = prepareFormItems();
-
-            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-            this.allFormItems.add(this.infrastructureSelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-            handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-            this.infrastructureSelectItem.setValueMap(selectItemValues);
-            this.infrastructureSelectItem.setDefaultToFirstOption(true);
-            this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
-
-            this.allFormItems.add(new SpacerItem());
-            selectItemValues.clear();
-
-            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-            this.allFormItems.add(this.policySelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-            handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-            this.policySelectItem.setValueMap(selectItemValues);
-            this.policySelectItem.setDefaultToFirstOption(true);
-            this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
-
-            this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
-
-            this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
-
-            nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            nodeSourcePluginsForm.hide();
-            nodeSourcePluginsForm.show();
-            this.createdFromImport = false;
-        });
-
-        fileUpload.addChangeHandler(onImport -> {
-            if (!fileUpload.getFilename().isEmpty()) {
-                importNodeSourceFormPanel.submit();
-            }
-        });
-        importNodeSourceFormPanel.add(fileUpload);
+        final FormPanel importNodeSourceFormPanel = new ImportNodeSourcePanelBuilder(nodeSourcePluginsForm,
+                                                                                     nodeSourceNameItem,
+                                                                                     nodesRecoverableItem,
+                                                                                     fileUpload).build();
 
         HLayout importNodeSourceLayout = new HLayout();
         importNodeSourceLayout.setLayoutAlign(Alignment.RIGHT);
@@ -653,7 +607,7 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowLayout.scrollToTop();
     }
 
-    protected void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
+    public void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
             FormItem formItem) {
         if (pluginField.isCredential()) {
 
@@ -681,6 +635,90 @@ public abstract class NodeSourceWindow {
 
     public String getFocusedPolicyPluginName() {
         return focusedPolicyPluginName;
+    }
+
+    private class ImportNodeSourcePanelBuilder {
+
+        private DynamicForm nodeSourcePluginsForm;
+
+        private TextItem nodeSourceNameItem;
+
+        private CheckboxItem nodesRecoverableItem;
+
+        private FileUpload fileUpload;
+
+        public ImportNodeSourcePanelBuilder(DynamicForm nodeSourcePluginsForm, TextItem nodeSourceNameItem,
+                CheckboxItem nodesRecoverableItem, FileUpload fileUpload) {
+            this.nodeSourcePluginsForm = nodeSourcePluginsForm;
+            this.nodeSourceNameItem = nodeSourceNameItem;
+            this.nodesRecoverableItem = nodesRecoverableItem;
+            this.fileUpload = fileUpload;
+        }
+
+        public FormPanel build() {
+
+            final FormPanel importNodeSourceFormPanel = new FormPanel();
+            importNodeSourceFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+            importNodeSourceFormPanel.setMethod(FormPanel.METHOD_POST);
+            importNodeSourceFormPanel.setAction(GWT.getModuleBaseURL() + ImportNodeSourceServlet.SERVLET_MAPPING);
+            importNodeSourceFormPanel.addSubmitCompleteHandler(this::handleNodeSourceImport);
+
+            fileUpload.addChangeHandler(onImport -> {
+                if (!fileUpload.getFilename().isEmpty()) {
+                    importNodeSourceFormPanel.submit();
+                }
+            });
+            importNodeSourceFormPanel.add(fileUpload);
+            return importNodeSourceFormPanel;
+        }
+
+        private void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
+
+            NodeSourceWindow.this.createdFromImport = true;
+            String importedNodeSourceJsonString = importCompleteEvent.getResults();
+            NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
+            nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
+
+            manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
+
+            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+
+            NodeSourceWindow.this.allFormItems = prepareFormItems();
+
+            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+            NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
+            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
+            fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
+            handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+            NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
+            NodeSourceWindow.this.infrastructureSelectItem.setDefaultToFirstOption(true);
+            NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+
+            NodeSourceWindow.this.allFormItems.add(new SpacerItem());
+            selectItemValues.clear();
+
+            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+            NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
+            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
+            fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
+            handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+            NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
+            NodeSourceWindow.this.policySelectItem.setDefaultToFirstOption(true);
+            NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+
+            NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
+            NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
+
+            NodeSourceWindow.this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin,
+                                                                              focusedPolicyPlugin);
+
+            nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
+            nodeSourcePluginsForm.hide();
+            nodeSourcePluginsForm.show();
+            NodeSourceWindow.this.createdFromImport = false;
+        }
+
     }
 
 }

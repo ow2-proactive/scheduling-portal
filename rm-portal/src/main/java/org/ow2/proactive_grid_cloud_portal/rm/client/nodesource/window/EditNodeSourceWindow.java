@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +32,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -51,21 +52,21 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     public static final String WINDOW_TITLE = "Edit Node Source";
 
-    private NonTextualItemAternativeChoiceCreator nonTextualItemAternativeChoiceCreator;
+    private InlineItemModificationCreator inlineItemModificationCreator;
 
     protected String nodeSourceName;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
         super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
         this.nodeSourceName = nodeSourceName;
-        this.nonTextualItemAternativeChoiceCreator = new NonTextualItemAternativeChoiceCreator(this);
+        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
     protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
         super(controller, windowTitle, "Retrieving current node source configuration");
         this.nodeSourceName = nodeSourceName;
-        this.nonTextualItemAternativeChoiceCreator = new NonTextualItemAternativeChoiceCreator(this);
+        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
@@ -86,7 +87,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-        return nonTextualItemAternativeChoiceCreator.getModificationChoiceItemsForNonTextualFields(plugin, pluginField);
+        return inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin, pluginField);
     }
 
     @Override

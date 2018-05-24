@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +35,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -52,11 +53,11 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class CreateNodeSourceWindow extends NodeSourceWindow {
 
-    private final NonTextualItemAternativeChoiceCreator nonTextualItemAternativeChoiceCreator;
+    private final InlineItemModificationCreator inlineItemModificationCreator;
 
     public CreateNodeSourceWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating Available Infrastructures and Policies");
-        this.nonTextualItemAternativeChoiceCreator = new NonTextualItemAternativeChoiceCreator(this);
+        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
@@ -105,8 +106,8 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
         if (this.createdFromImport) {
-            return this.nonTextualItemAternativeChoiceCreator.getModificationChoiceItemsForNonTextualFields(plugin,
-                                                                                                            pluginField);
+            return this.inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                    pluginField);
         } else {
             List<FormItem> formItems = new LinkedList<>();
             FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),

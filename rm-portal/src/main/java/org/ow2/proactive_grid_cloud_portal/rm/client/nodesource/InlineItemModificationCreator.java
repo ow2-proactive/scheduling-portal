@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.NodeSourceWindow;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
@@ -37,7 +38,7 @@ import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
 
 
-public class NonTextualItemAternativeChoiceCreator {
+public class InlineItemModificationCreator {
 
     public static final String EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX = ".modify";
 
@@ -49,11 +50,11 @@ public class NonTextualItemAternativeChoiceCreator {
 
     private final NodeSourceWindow nodeSourceWindow;
 
-    public NonTextualItemAternativeChoiceCreator(NodeSourceWindow nodeSourceWindow) {
+    public InlineItemModificationCreator(NodeSourceWindow nodeSourceWindow) {
         this.nodeSourceWindow = nodeSourceWindow;
     }
 
-    List<FormItem> getModificationChoiceItemsForNonTextualFields(PluginDescriptor plugin,
+    public List<FormItem> getModificationChoiceItemsForNonTextualFields(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField) {
         FormItem chooseCredentialsFormItem;
         List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<FormItem>();
@@ -119,7 +120,7 @@ public class NonTextualItemAternativeChoiceCreator {
         editOrUploadFormItem.addChangedHandler(changedEvent -> {
 
             String radioValue = changedEvent.getValue().toString();
-            List<FormItem> formItemsForPlugin = this.nodeSourceWindow.allFormItemsPerPlugin.get(plugin.getPluginName());
+            List<FormItem> formItemsForPlugin = this.nodeSourceWindow.getFormItemsOfPlugin(plugin.getPluginName());
 
             if (radioValue.equals(EDIT_RADIO_OPTION_NAME)) {
                 enableEditInLine(formItemPrefixName, formItemsForPlugin);
