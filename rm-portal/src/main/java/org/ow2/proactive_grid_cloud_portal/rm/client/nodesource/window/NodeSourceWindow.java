@@ -674,7 +674,9 @@ public abstract class NodeSourceWindow {
 
         private void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
 
+            this.nodeSourcePluginsForm.reset();
             NodeSourceWindow.this.createdFromImport = true;
+
             String importedNodeSourceJsonString = importCompleteEvent.getResults();
             NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
             nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
@@ -714,7 +716,6 @@ public abstract class NodeSourceWindow {
                                                                               focusedPolicyPlugin);
 
             nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
-            nodeSourcePluginsForm.hide();
             nodeSourcePluginsForm.show();
             NodeSourceWindow.this.createdFromImport = false;
         }

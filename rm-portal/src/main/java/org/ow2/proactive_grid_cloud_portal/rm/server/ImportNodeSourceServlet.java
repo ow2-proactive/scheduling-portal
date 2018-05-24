@@ -68,13 +68,11 @@ public class ImportNodeSourceServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        LOGGER.warn("request=" + request);
         readNodeSourceConfigurationFile(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        LOGGER.warn("request=" + request);
         readNodeSourceConfigurationFile(request, response);
     }
 
@@ -89,7 +87,6 @@ public class ImportNodeSourceServlet extends HttpServlet {
             upload.setSizeMax(MAX_UPLOAD_SIZE);
 
             List<FileItem> fileItems = upload.parseRequest(request);
-            LOGGER.warn("response=" + Arrays.toString(fileItems.toArray()));
             Iterator<?> i = fileItems.iterator();
             while (i.hasNext()) {
 
@@ -104,9 +101,6 @@ public class ImportNodeSourceServlet extends HttpServlet {
                 while ((len = stream.read(buffer, 0, buffer.length)) != -1) {
                     out.write(buffer, 0, len);
                 }
-
-                LOGGER.warn("response=" + new String(out.toByteArray(), StandardCharsets.UTF_8));
-
                 response.getWriter().write(new String(out.toByteArray(), StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
@@ -128,10 +122,8 @@ public class ImportNodeSourceServlet extends HttpServlet {
                                                                        .endObject()
                                                                        .toString();
             response.getWriter().write(jsonErrorString);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (JSONException e1) {
-            e1.printStackTrace();
+        } catch (IOException | JSONException e1) {
+            LOGGER.warn("Failed to return error message", e);
         }
     }
 
