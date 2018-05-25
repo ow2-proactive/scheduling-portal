@@ -47,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor.Field;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
@@ -845,11 +846,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                       new AsyncCallback<String>() {
 
                                           public void onSuccess(String result) {
-                                              model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
-                                              success.run();
+                                              try {
+                                                  model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
+                                                  success.run();
+                                              } catch (ImportException e) {
+                                                  runFailure(e);
+                                              }
                                           }
 
                                           public void onFailure(Throwable caught) {
+                                              runFailure(caught);
+                                          }
+
+                                          private void runFailure(Throwable caught) {
                                               String msg = JSONUtils.getJsonErrorMessage(caught);
                                               SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
                                                       ":<br>" + msg);

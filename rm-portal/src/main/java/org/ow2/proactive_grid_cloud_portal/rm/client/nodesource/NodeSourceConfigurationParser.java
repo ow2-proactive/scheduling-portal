@@ -32,6 +32,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 
 
@@ -43,25 +44,38 @@ public class NodeSourceConfigurationParser {
         this.controller = controller;
     }
 
-    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
+    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) throws ImportException {
 
-        JSONObject jsonObject = this.controller.parseJSON(json).isObject();
-        String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
-        boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
+        JSONObject jsonObject;
 
-        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
-        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
-        PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
-                                                                              infrastructurePluginName);
+        try {
+            jsonObject = this.controller.parseJSON(json).isObject();
+        } catch (JSONException e) {
+            throw new ImportException("The imported node source is not a valid JSON file", e);
+        }
 
-        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
-        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
-        PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
+        try {
+            String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
+            boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
-        return new NodeSourceConfiguration(nodeSourceName,
-                                           nodesRecoverable,
-                                           infrastructurePluginDescriptor,
-                                           policyPluginDescriptor);
+            JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+            String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
+                                                                                .isString()
+                                                                                .stringValue();
+            PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
+                                                                                  infrastructurePluginName);
+
+            JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
+            String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+            PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
+
+            return new NodeSourceConfiguration(nodeSourceName,
+                                               nodesRecoverable,
+                                               infrastructurePluginDescriptor,
+                                               policyPluginDescriptor);
+        } catch (RuntimeException e) {
+            throw new ImportException("The imported node source has incorrect parameters.", e);
+        }
     }
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {

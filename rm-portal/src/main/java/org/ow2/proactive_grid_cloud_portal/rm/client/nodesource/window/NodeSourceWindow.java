@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet;
 
@@ -311,7 +312,8 @@ public abstract class NodeSourceWindow {
         Label importNodeSourceLabel = new Label("Import Node Source");
         FileUpload fileUpload = new FileUpload();
         fileUpload.setName("ImportNS");
-        final FormPanel importNodeSourceFormPanel = new ImportNodeSourcePanelBuilder(nodeSourcePluginsForm,
+        final FormPanel importNodeSourceFormPanel = new ImportNodeSourcePanelBuilder(nodeSourceWindowLabel,
+                                                                                     nodeSourcePluginsForm,
                                                                                      nodeSourceNameItem,
                                                                                      nodesRecoverableItem,
                                                                                      fileUpload).build();
@@ -639,6 +641,8 @@ public abstract class NodeSourceWindow {
 
     private class ImportNodeSourcePanelBuilder {
 
+        private Label nodeSourceWindowLabel;
+
         private DynamicForm nodeSourcePluginsForm;
 
         private TextItem nodeSourceNameItem;
@@ -647,8 +651,9 @@ public abstract class NodeSourceWindow {
 
         private FileUpload fileUpload;
 
-        public ImportNodeSourcePanelBuilder(DynamicForm nodeSourcePluginsForm, TextItem nodeSourceNameItem,
-                CheckboxItem nodesRecoverableItem, FileUpload fileUpload) {
+        public ImportNodeSourcePanelBuilder(Label nodeSourceWindowLabel, DynamicForm nodeSourcePluginsForm,
+                TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem, FileUpload fileUpload) {
+            this.nodeSourceWindowLabel = nodeSourceWindowLabel;
             this.nodeSourcePluginsForm = nodeSourcePluginsForm;
             this.nodeSourceNameItem = nodeSourceNameItem;
             this.nodesRecoverableItem = nodesRecoverableItem;
@@ -676,48 +681,57 @@ public abstract class NodeSourceWindow {
 
             this.nodeSourcePluginsForm.reset();
             NodeSourceWindow.this.createdFromImport = true;
-
             String importedNodeSourceJsonString = importCompleteEvent.getResults();
-            NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
-            nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
-            manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
+            NodeSourceConfiguration nodeSourceConfiguration;
 
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+            try {
+                nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
 
-            NodeSourceWindow.this.allFormItems = prepareFormItems();
+                nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+                nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
 
-            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-            handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-            NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
-            NodeSourceWindow.this.infrastructureSelectItem.setDefaultToFirstOption(true);
-            NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+                manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
 
-            NodeSourceWindow.this.allFormItems.add(new SpacerItem());
-            selectItemValues.clear();
+                LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
-            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-            handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-            NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
-            NodeSourceWindow.this.policySelectItem.setDefaultToFirstOption(true);
-            NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+                NodeSourceWindow.this.allFormItems = prepareFormItems();
 
-            NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
+                PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+                NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
+                NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
+                fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
+                handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+                NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
+                NodeSourceWindow.this.infrastructureSelectItem.setDefaultToFirstOption(true);
+                NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
 
-            NodeSourceWindow.this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin,
-                                                                              focusedPolicyPlugin);
+                NodeSourceWindow.this.allFormItems.add(new SpacerItem());
+                selectItemValues.clear();
 
-            nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
-            nodeSourcePluginsForm.show();
-            NodeSourceWindow.this.createdFromImport = false;
+                PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+                NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
+                NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
+                fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
+                handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+                NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
+                NodeSourceWindow.this.policySelectItem.setDefaultToFirstOption(true);
+                NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+
+                NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
+                NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
+
+                NodeSourceWindow.this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin,
+                                                                                  focusedPolicyPlugin);
+
+                nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
+                nodeSourcePluginsForm.show();
+            } catch (ImportException e) {
+                nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to import Node Source :<br>" +
+                                                  e.getMessage() + "</span>");
+            } finally {
+                NodeSourceWindow.this.createdFromImport = false;
+            }
         }
 
     }
