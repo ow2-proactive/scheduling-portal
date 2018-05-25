@@ -110,13 +110,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
                                                                              .getEditedNodeSourceConfiguration();
 
             nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-
             nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
-
             manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-
             this.allFormItems = prepareFormItems();
 
             PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();

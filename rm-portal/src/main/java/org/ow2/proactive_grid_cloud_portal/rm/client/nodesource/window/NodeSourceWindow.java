@@ -496,11 +496,8 @@ public abstract class NodeSourceWindow {
 
     protected void addPluginValuesToAllFormItemOtherThanFocused(Map<String, String> selectItemValues,
             PluginDescriptor focusedPlugin, Map<String, PluginDescriptor> allPluginDescriptors) {
-
         for (Map.Entry<String, PluginDescriptor> entry : allPluginDescriptors.entrySet()) {
-
             PluginDescriptor plugin = entry.getValue();
-
             if (!plugin.getPluginName().equals(focusedPlugin.getPluginName())) {
 
                 selectItemValues.put(plugin.getPluginName(), getPluginShortName(plugin));

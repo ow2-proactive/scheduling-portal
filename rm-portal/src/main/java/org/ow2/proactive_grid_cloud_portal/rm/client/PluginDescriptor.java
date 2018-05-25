@@ -114,7 +114,7 @@ public class PluginDescriptor {
     public PluginDescriptor(String pluginName, String pluginDescription) {
         this.pluginDescription = pluginDescription;
         this.pluginName = pluginName;
-        this.configurableFields = new ArrayList<Field>();
+        this.configurableFields = new ArrayList<>();
     }
 
     public String getPluginName() {
