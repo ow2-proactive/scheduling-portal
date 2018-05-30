@@ -122,8 +122,12 @@ public class ContextMenu extends Menu {
         NodeSourceStatus nodeSourceStatus = menu.nodesource == null ? null : menu.nodesource.getNodeSourceStatus();
         editItem.addClickHandler(onClick -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
-        MenuItem exportItem = new MenuItem("Export", menu.exportItemImageResource);
-        exportItem.addClickHandler(onClick -> controller.exportNodeSource(nodeSourceName));
+        MenuItem exportNodeSourceItem = new MenuItem("Export Node Source", menu.exportItemImageResource);
+        Menu exportNodeSourceSubItems = new Menu();
+        MenuItem exportNodeSourceToFileItem = new MenuItem("To File", menu.exportItemImageResource);
+        exportNodeSourceToFileItem.addClickHandler(onClick -> controller.exportNodeSource(nodeSourceName));
+        exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem);
+        exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
 
         if (menu.node != null) {
             if (menu.node.isLocked()) {
@@ -151,7 +155,7 @@ public class ContextMenu extends Menu {
                     menu.disableItems(deployItem, undeployItem, editItem);
             }
         } else {
-            menu.disableItems(deployItem, undeployItem, editItem);
+            menu.disableItems(deployItem, undeployItem, editItem, exportNodeSourceItem);
         }
 
         menu.setItems(deployItem,
@@ -162,7 +166,7 @@ public class ContextMenu extends Menu {
                       unlockItem,
                       removeItem,
                       new MenuItemSeparator(),
-                      exportItem);
+                      exportNodeSourceItem);
 
         return menu;
     }
