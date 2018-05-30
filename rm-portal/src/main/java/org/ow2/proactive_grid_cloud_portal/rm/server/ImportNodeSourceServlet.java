@@ -25,11 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.NSCreationServlet.MAX_UPLOAD_SIZE;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,12 +45,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.client.GWT;
 
 
 /**
@@ -58,13 +59,7 @@ public class ImportNodeSourceServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportNodeSourceServlet.class);
 
-    private static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
-
     public static final String SERVLET_MAPPING = "importnodesource";
-
-    public static final String MAIN_FORM_ITEM_NAME = "nodeSourceJson";
-
-    public static final String NODE_SOURCE_NAME_KEY = "nodeSourceName";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -81,18 +76,14 @@ public class ImportNodeSourceServlet extends HttpServlet {
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(4096);
+            factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
             factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(MAX_UPLOAD_SIZE);
+            upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
 
-            List<FileItem> fileItems = upload.parseRequest(request);
-            Iterator<?> i = fileItems.iterator();
-            while (i.hasNext()) {
-
-                FileItem item = (FileItem) i.next();
-                String name = item.getFieldName();
-                InputStream stream = item.getInputStream();
+            List<FileItem> requestItems = upload.parseRequest(request);
+            for (FileItem requestItem : requestItems) {
+                InputStream stream = requestItem.getInputStream();
 
                 // Process the input stream
                 ByteArrayOutputStream out = new ByteArrayOutputStream();

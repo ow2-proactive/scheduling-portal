@@ -25,9 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -81,36 +83,34 @@ public class ExportNodeSourceServlet extends HttpServlet {
                                "attachment; filename=" + nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
             response.setHeader("Location", nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
             response.getWriter().write(jsonContent);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             try {
-                LOGGER.warn("Export node source failed", t);
-                response.getWriter().write(t.getMessage());
-            } catch (IOException e) {
-                LOGGER.warn("Failed to return node source export error to client, error was:" + t.getMessage(), e);
+                LOGGER.warn("Export node source failed", e);
+                response.getWriter().write(e.getMessage());
+            } catch (IOException ioe) {
+                LOGGER.warn("Failed to return node source export error to client", ioe);
             }
         }
     }
 
     private String extractJsonStringFromRequest(HttpServletRequest request) throws FileUploadException {
         DiskFileItemFactory factory = new DiskFileItemFactory();
-        factory.setSizeThreshold(4096);
+        factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
         factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
         ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(1000000);
-        List<?> fileItems = upload.parseRequest(request);
-        Iterator<?> iterator = fileItems.iterator();
+        upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
 
+        List<FileItem> requestItems = upload.parseRequest(request);
         String jsonContent = "";
-        while (iterator.hasNext()) {
-            FileItem fi = (FileItem) iterator.next();
-            if (fi.isFormField()) {
-                String name = fi.getFieldName();
-                String value = fi.getString();
+        for (FileItem requestItem : requestItems) {
+            if (requestItem.isFormField()) {
+                String name = requestItem.getFieldName();
+                String value = requestItem.getString();
                 if (name.equalsIgnoreCase(MAIN_FORM_ITEM_NAME)) {
                     jsonContent = value;
                 }
             }
-            fi.delete();
+            requestItem.delete();
         }
         return jsonContent;
     }

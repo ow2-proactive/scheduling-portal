@@ -27,6 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -62,8 +64,6 @@ public class NSCreationServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NSCreationServlet.class);
 
-    public static final int MAX_UPLOAD_SIZE = 1048576; // in Bytes
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         createNs(request, response);
@@ -96,10 +96,10 @@ public class NSCreationServlet extends HttpServlet {
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(4096);
+            factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
             factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(MAX_UPLOAD_SIZE);
+            upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
 
             List<FileItem> fileItems = upload.parseRequest(request);
             Iterator<?> i = fileItems.iterator();
@@ -132,7 +132,7 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (readingPolicyParams) {
                         addToStringParamsOrToFileParams(policyParams, policyFileParams, formFieldName, formFieldValue);
                     } else {
-                        LOGGER.warn("Unexpected param " + formFieldName);
+                        LOGGER.warn("Unexpected parameter " + formFieldName);
                     }
                 } else {
                     if (readingInfraParams) {
@@ -142,7 +142,7 @@ public class NSCreationServlet extends HttpServlet {
                         byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("Unexpected param " + formFieldName);
+                        LOGGER.warn("Unexpected parameter " + formFieldName);
                     }
                 }
             }
