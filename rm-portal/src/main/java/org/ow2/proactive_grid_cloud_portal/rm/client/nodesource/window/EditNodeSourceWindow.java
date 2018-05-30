@@ -116,26 +116,13 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
             this.allFormItems = prepareFormItems();
 
-            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-            this.allFormItems.add(this.infrastructureSelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-            handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-            this.infrastructureSelectItem.setValueMap(selectItemValues);
-            this.infrastructureSelectItem.setDefaultToFirstOption(true);
-            this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+            PluginDescriptor focusedInfrastructurePlugin = prepareInfrastructureFormItems(nodeSourceConfiguration,
+                                                                                          selectItemValues);
 
             this.allFormItems.add(new SpacerItem());
             selectItemValues.clear();
 
-            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-            this.allFormItems.add(this.policySelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-            handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-            this.policySelectItem.setValueMap(selectItemValues);
-            this.policySelectItem.setDefaultToFirstOption(true);
-            this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+            PluginDescriptor focusedPolicyPlugin = preparePolicyFormItems(nodeSourceConfiguration, selectItemValues);
 
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
@@ -147,6 +134,32 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             windowForm.show();
 
         }, this.window::hide);
+    }
+
+    private PluginDescriptor preparePolicyFormItems(NodeSourceConfiguration nodeSourceConfiguration,
+            LinkedHashMap<String, String> selectItemValues) {
+        PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+        this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
+        this.allFormItems.add(this.policySelectItem);
+        fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
+        handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+        this.policySelectItem.setValueMap(selectItemValues);
+        this.policySelectItem.setDefaultToFirstOption(true);
+        this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+        return focusedPolicyPlugin;
+    }
+
+    private PluginDescriptor prepareInfrastructureFormItems(NodeSourceConfiguration nodeSourceConfiguration,
+            LinkedHashMap<String, String> selectItemValues) {
+        PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+        this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
+        this.allFormItems.add(this.infrastructureSelectItem);
+        fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
+        handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+        this.infrastructureSelectItem.setValueMap(selectItemValues);
+        this.infrastructureSelectItem.setDefaultToFirstOption(true);
+        this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+        return focusedInfrastructurePlugin;
     }
 
 }
