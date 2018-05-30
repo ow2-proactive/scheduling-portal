@@ -84,9 +84,7 @@ public class InlineItemModificationCreator {
     }
 
     private FormItem createUploadItemDisabled(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-
-        FormItem chooseCredentialsFormItem;
-        chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
+        FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
         chooseCredentialsFormItem.disable();
         return chooseCredentialsFormItem;
     }
@@ -123,24 +121,22 @@ public class InlineItemModificationCreator {
             List<FormItem> formItemsForPlugin = this.nodeSourceWindow.getFormItemsOfPlugin(plugin.getPluginName());
 
             if (radioValue.equals(EDIT_RADIO_OPTION_NAME)) {
-                enableEditInLine(formItemPrefixName, formItemsForPlugin);
+                enableOrDisableEditInLine(formItemPrefixName, formItemsForPlugin);
             } else if (radioValue.equals(UPLOAD_RADIO_OPTION_NAME)) {
-                enableUploadNewFile(formItemPrefixName, formItemsForPlugin);
+                enableOrDisableUploadNewFile(formItemPrefixName, formItemsForPlugin);
             }
         });
 
         return editOrUploadFormItem;
     }
 
-    private void enableUploadNewFile(String pluginFieldName, List<FormItem> formItemsForPlugin) {
-
+    private void enableOrDisableUploadNewFile(String pluginFieldName, List<FormItem> formItemsForPlugin) {
         formItemsForPlugin.stream()
                           .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
-                          .forEach(formItem -> enableUploadNewFile(pluginFieldName, formItem));
+                          .forEach(formItem -> enableOrDisableUploadNewFile(pluginFieldName, formItem));
     }
 
-    private void enableUploadNewFile(String pluginFieldName, FormItem formItem) {
-
+    private void enableOrDisableUploadNewFile(String pluginFieldName, FormItem formItem) {
         if (formItem.getName().equals(pluginFieldName)) {
             formItem.enable();
 
@@ -150,14 +146,14 @@ public class InlineItemModificationCreator {
         }
     }
 
-    private void enableEditInLine(String pluginFieldName, List<FormItem> formItemsForPlugin) {
+    private void enableOrDisableEditInLine(String pluginFieldName, List<FormItem> formItemsForPlugin) {
 
         formItemsForPlugin.stream()
                           .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
-                          .forEach(formItem -> enableEditInLine(pluginFieldName, formItem));
+                          .forEach(formItem -> enableOrDisableEditInLine(pluginFieldName, formItem));
     }
 
-    private void enableEditInLine(String pluginFieldName, FormItem formItem) {
+    private void enableOrDisableEditInLine(String pluginFieldName, FormItem formItem) {
 
         if (formItem.getName().equals(pluginFieldName)) {
             formItem.disable();

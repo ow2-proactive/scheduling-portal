@@ -25,8 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer.BUFFER_READ_SIZE;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONWriter;
 import org.slf4j.Logger;
@@ -69,20 +68,16 @@ public class ImportNodeSourceServlet extends HttpServlet {
         response.setContentType("text/html");
         try {
             for (FileItem formItem : new ServletRequestTransformer().getFormItems(request)) {
-                InputStream stream = formItem.getInputStream();
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                int len;
-                byte[] buffer = new byte[BUFFER_READ_SIZE];
-                while ((len = stream.read(buffer, 0, buffer.length)) != -1) {
-                    out.write(buffer, 0, len);
+                try (InputStream in = formItem.getInputStream()) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    IOUtils.copy(in, out);
+                    response.getWriter().write(new String(out.toByteArray(), StandardCharsets.UTF_8));
                 }
-                response.getWriter().write(new String(out.toByteArray(), StandardCharsets.UTF_8));
             }
         } catch (Exception e) {
             handleNodeSourceImportException(response, e);
             throw new RuntimeException(e);
         }
-
     }
 
     private void handleNodeSourceImportException(HttpServletResponse response, Exception e) {

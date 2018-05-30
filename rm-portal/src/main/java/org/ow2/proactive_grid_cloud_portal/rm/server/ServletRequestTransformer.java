@@ -40,8 +40,6 @@ public class ServletRequestTransformer {
 
     // in Bytes
 
-    public static final int BUFFER_READ_SIZE = 8192;
-
     private static final int MAX_FILE_UPLOAD_SIZE = 1048576;
 
     private static final int FILE_ITEM_THRESHOLD_SIZE = 4096;
