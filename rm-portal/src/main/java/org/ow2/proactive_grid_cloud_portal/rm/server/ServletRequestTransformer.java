@@ -25,10 +25,35 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-public class ServletConfiguration {
+import java.io.File;
+import java.util.List;
 
-    public static final int MAX_FILE_UPLOAD_SIZE = 1048576; // in Bytes
+import javax.servlet.http.HttpServletRequest;
 
-    public static final int FILE_ITEM_THRESHOLD_SIZE = 4096;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+
+public class ServletRequestTransformer {
+
+    // in Bytes
+
+    public static final int BUFFER_READ_SIZE = 8192;
+
+    private static final int MAX_FILE_UPLOAD_SIZE = 1048576;
+
+    private static final int FILE_ITEM_THRESHOLD_SIZE = 4096;
+
+    @SuppressWarnings("unchecked")
+    public List<FileItem> getFormItems(HttpServletRequest request) throws FileUploadException {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
+        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
+        return (List<FileItem>) upload.parseRequest(request);
+    }
 
 }

@@ -25,12 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -78,7 +71,6 @@ public class ExportNodeSourceServlet extends HttpServlet {
             response.setContentType("application/json");
             String jsonContent = extractJsonStringFromRequest(request);
             String nodeSourceName = extractNodeSourceName(jsonContent);
-
             response.setHeader("Content-disposition",
                                "attachment; filename=" + nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
             response.setHeader("Location", nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
@@ -94,15 +86,8 @@ public class ExportNodeSourceServlet extends HttpServlet {
     }
 
     private String extractJsonStringFromRequest(HttpServletRequest request) throws FileUploadException {
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
-        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
-
-        List<FileItem> requestItems = upload.parseRequest(request);
         String jsonContent = "";
-        for (FileItem requestItem : requestItems) {
+        for (FileItem requestItem : new ServletRequestTransformer().getFormItems(request)) {
             if (requestItem.isFormField()) {
                 String name = requestItem.getFieldName();
                 String value = requestItem.getString();

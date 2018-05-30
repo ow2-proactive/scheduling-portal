@@ -25,25 +25,19 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
+import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer.BUFFER_READ_SIZE;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONWriter;
 import org.slf4j.Logger;
@@ -73,22 +67,12 @@ public class ImportNodeSourceServlet extends HttpServlet {
 
     private void readNodeSourceConfigurationFile(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("text/html");
-
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
-
-            List<FileItem> requestItems = upload.parseRequest(request);
-            for (FileItem requestItem : requestItems) {
-                InputStream stream = requestItem.getInputStream();
-
-                // Process the input stream
+            for (FileItem formItem : new ServletRequestTransformer().getFormItems(request)) {
+                InputStream stream = formItem.getInputStream();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 int len;
-                byte[] buffer = new byte[8192];
+                byte[] buffer = new byte[BUFFER_READ_SIZE];
                 while ((len = stream.read(buffer, 0, buffer.length)) != -1) {
                     out.write(buffer, 0, len);
                 }

@@ -27,13 +27,9 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.FILE_ITEM_THRESHOLD_SIZE;
-import static org.ow2.proactive_grid_cloud_portal.rm.server.ServletConfiguration.MAX_FILE_UPLOAD_SIZE;
 
-import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -41,8 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -95,19 +89,12 @@ public class NSCreationServlet extends HttpServlet {
         NodeSourceAction nodeSourceAction = NodeSourceAction.UNKNOWN;
 
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(FILE_ITEM_THRESHOLD_SIZE);
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(MAX_FILE_UPLOAD_SIZE);
+            List<FileItem> formItems = new ServletRequestTransformer().getFormItems(request);
 
-            List<FileItem> fileItems = upload.parseRequest(request);
-            Iterator<?> i = fileItems.iterator();
-            while (i.hasNext()) {
-                FileItem formField = (FileItem) i.next();
-                String formFieldName = formField.getFieldName();
-                if (formField.isFormField()) {
-                    String formFieldValue = formField.getString();
+            for (FileItem formItem : formItems) {
+                String formFieldName = formItem.getFieldName();
+                if (formItem.isFormField()) {
+                    String formFieldValue = formItem.getString();
                     if (formFieldName.equals("sessionId")) {
                         sessionId = formFieldValue;
                     } else if (formFieldName.equals("nsCallback")) {
@@ -136,10 +123,10 @@ public class NSCreationServlet extends HttpServlet {
                     }
                 } else {
                     if (readingInfraParams) {
-                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
                         infraFileParams.add(new String(bytes));
                     } else if (readingPolicyParams) {
-                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
                         LOGGER.warn("Unexpected parameter " + formFieldName);
@@ -158,7 +145,7 @@ public class NSCreationServlet extends HttpServlet {
             if (failFast != null) {
                 LOGGER.error("Cannot apply node source action: " + failFast);
                 LOGGER.error("Request parameters: ");
-                fileItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
+                formItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
                 throw new RestServerException(failFast);
             }
 
