@@ -23,9 +23,17 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
 
-import java.util.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -33,11 +41,17 @@ import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.ImportException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
@@ -52,6 +66,7 @@ import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.PickerIcon;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
+import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -90,6 +105,12 @@ public abstract class NodeSourceWindow {
 
     protected Map<String, List<FormItem>> allFormItemsPerPlugin;
 
+    protected String focusedInfrastructurePluginName;
+
+    protected String focusedPolicyPluginName;
+
+    protected boolean createdFromImport;
+
     protected IButton deployNowButton;
 
     protected IButton saveAndKeepUndeployedButton;
@@ -107,6 +128,7 @@ public abstract class NodeSourceWindow {
     protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
         this.windowTitle = windowTitle;
+        this.createdFromImport = false;
         this.waitingMessage = waitingMessage;
         this.allFormItemsPerPlugin = new HashMap<>();
     }
@@ -117,6 +139,10 @@ public abstract class NodeSourceWindow {
 
     public void destroy() {
         this.window.destroy();
+    }
+
+    public List<FormItem> getFormItemsOfPlugin(String pluginName) {
+        return this.allFormItemsPerPlugin.get(pluginName);
     }
 
     protected abstract NodeSourceAction getNodeSourceAction();
@@ -189,8 +215,8 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
-                if (!formItem.getName().endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
-                    !formItem.getName().endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
+                if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
+                    !formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
                     formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
                 }
             });
@@ -254,19 +280,19 @@ public abstract class NodeSourceWindow {
 
     protected void buildForm() {
 
-        final VLayout nodeSourceWindowLayout = new VLayout();
+        VLayout nodeSourceWindowLayout = new VLayout();
         nodeSourceWindowLayout.setMargin(5);
 
-        final VStack nodeSourcePluginsLayout = new VStack();
+        VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
 
-        final Label nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
+        Label nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
         nodeSourcePluginsWaitingLabel.setIcon("loading.gif");
         nodeSourcePluginsWaitingLabel.setHeight(26);
         nodeSourcePluginsWaitingLabel.setAlign(Alignment.CENTER);
         nodeSourcePluginsLayout.addMember(nodeSourcePluginsWaitingLabel);
 
-        final DynamicForm nodeSourcePluginsForm = new DynamicForm();
+        DynamicForm nodeSourcePluginsForm = new DynamicForm();
         nodeSourcePluginsForm.setEncoding(Encoding.MULTIPART);
         nodeSourcePluginsForm.setMethod(FormMethod.POST);
         nodeSourcePluginsForm.setAction(GWT.getModuleBaseURL() + "createnodesource");
@@ -275,15 +301,29 @@ public abstract class NodeSourceWindow {
 
         nodeSourcePluginsLayout.addMember(nodeSourcePluginsForm);
 
-        final Label nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
-                                                      " will be acquired, and a Policy, that dictates when resources can be acquired.");
+        Label nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
+                                                " will be acquired, and a Policy, that dictates when resources can be acquired.");
         nodeSourceWindowLabel.setHeight(40);
 
-        final TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
-        DynamicForm nodeSourceWindowForm = new DynamicForm();
-
+        TextItem nodeSourceNameItem = new TextItem(NS_NAME_FORM_KEY, "Name");
         CheckboxItem nodesRecoverableItem = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         nodesRecoverableItem.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
+
+        Label importNodeSourceLabel = new Label("Import Node Source");
+        FileUpload fileUpload = new FileUpload();
+        fileUpload.setName("ImportNS");
+        final FormPanel importNodeSourceFormPanel = new ImportNodeSourcePanelBuilder(nodeSourceWindowLabel,
+                                                                                     nodeSourcePluginsForm,
+                                                                                     nodeSourceNameItem,
+                                                                                     nodesRecoverableItem,
+                                                                                     fileUpload).build();
+
+        HLayout importNodeSourceLayout = new HLayout();
+        importNodeSourceLayout.setLayoutAlign(Alignment.RIGHT);
+        importNodeSourceLayout.addMember(importNodeSourceLabel);
+        importNodeSourceLayout.addMember(importNodeSourceFormPanel);
+
+        DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
         nodeSourceWindowForm.setTitleSuffix("");
 
@@ -363,6 +403,7 @@ public abstract class NodeSourceWindow {
         scrollLayout.setBackgroundColor("#fafafa");
 
         nodeSourceWindowLayout.addMember(nodeSourceWindowLabel);
+        nodeSourceWindowLayout.addMember(importNodeSourceLayout);
         nodeSourceWindowLayout.addMember(nodeSourceWindowForm);
         nodeSourceWindowLayout.addMember(scrollLayout);
         nodeSourceWindowLayout.addMember(buttonsLayout);
@@ -383,6 +424,88 @@ public abstract class NodeSourceWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    /**
+     * Allow sub classes to rework the form items that have been added to the
+     * form.
+     */
+    protected List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
+            PluginDescriptor focusedPolicyPlugin) {
+
+        for (Map.Entry<String, List<FormItem>> entry : this.allFormItemsPerPlugin.entrySet()) {
+
+            hideNotFocusedFormItem(focusedInfrastructurePlugin, focusedPolicyPlugin, entry.getKey(), entry.getValue());
+        }
+
+        return this.allFormItems;
+    }
+
+    private void hideNotFocusedFormItem(PluginDescriptor focusedInfrastructurePlugin,
+            PluginDescriptor focusedPolicyPlugin, String pluginName, List<FormItem> formItemsForPlugin) {
+
+        if (!pluginName.equals(focusedInfrastructurePlugin.getPluginName()) &&
+            !pluginName.equals(focusedPolicyPlugin.getPluginName())) {
+
+            for (FormItem formItem : formItemsForPlugin) {
+                formItem.hide();
+            }
+        }
+    }
+
+    /**
+     * Allow sub classes to alter the node source name and recoverable items.
+     */
+    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+
+    }
+
+    /**
+     * Allow sub classes to redefine a custom behavior regarding what to do,
+     * regarding policies, in addition to the focused policy plugin.
+     */
+    protected void handleAdditionalPolicyFormItems(Map<String, String> selectItemValues,
+            PluginDescriptor focusedPolicyPlugin) {
+        Map<String, PluginDescriptor> allSupportedPolicies = this.controller.getModel().getSupportedPolicies();
+        addPluginValuesToAllFormItemOtherThanFocused(selectItemValues, focusedPolicyPlugin, allSupportedPolicies);
+    }
+
+    /**
+     * Allow sub classes to redefine a custom behavior regarding what to do,
+     * regarding infrastructures, in addition to the focused infrastructure
+     * plugin.
+     */
+    protected void handleAdditionalInfrastructureFormItems(Map<String, String> selectItemValues,
+            PluginDescriptor focusedInfrastructurePlugin) {
+        Map<String, PluginDescriptor> allSupportedInfrastructures = this.controller.getModel()
+                                                                                   .getSupportedInfrastructures();
+        addPluginValuesToAllFormItemOtherThanFocused(selectItemValues,
+                                                     focusedInfrastructurePlugin,
+                                                     allSupportedInfrastructures);
+    }
+
+    protected void fillFocusedPluginValues(LinkedHashMap<String, String> selectItemValues,
+            PluginDescriptor focusedPlugin) {
+        String pluginShortName = getPluginShortName(focusedPlugin);
+        selectItemValues.put(focusedPlugin.getPluginName(), pluginShortName);
+
+        List<FormItem> pluginFormItems = getPrefilledFormItems(focusedPlugin);
+        this.allFormItems.addAll(pluginFormItems);
+        this.allFormItemsPerPlugin.put(focusedPlugin.getPluginName(), pluginFormItems);
+    }
+
+    protected void addPluginValuesToAllFormItemOtherThanFocused(Map<String, String> selectItemValues,
+            PluginDescriptor focusedPlugin, Map<String, PluginDescriptor> allPluginDescriptors) {
+        for (Map.Entry<String, PluginDescriptor> entry : allPluginDescriptors.entrySet()) {
+            PluginDescriptor plugin = entry.getValue();
+            if (!plugin.getPluginName().equals(focusedPlugin.getPluginName())) {
+
+                selectItemValues.put(plugin.getPluginName(), getPluginShortName(plugin));
+                List<FormItem> currentPluginFormItems = getPrefilledFormItems(plugin);
+                this.allFormItems.addAll(currentPluginFormItems);
+                this.allFormItemsPerPlugin.put(plugin.getPluginName(), currentPluginFormItems);
+            }
+        }
     }
 
     private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, Label nodeSourcePluginsWaitingLabel,
@@ -483,7 +606,7 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowLayout.scrollToTop();
     }
 
-    protected void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
+    public void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
             FormItem formItem) {
         if (pluginField.isCredential()) {
 
@@ -503,6 +626,111 @@ public abstract class NodeSourceWindow {
         }
 
         formItems.add(formItem);
+    }
+
+    public String getFocusedInfrastructurePluginName() {
+        return focusedInfrastructurePluginName;
+    }
+
+    public String getFocusedPolicyPluginName() {
+        return focusedPolicyPluginName;
+    }
+
+    private class ImportNodeSourcePanelBuilder {
+
+        private Label nodeSourceWindowLabel;
+
+        private DynamicForm nodeSourcePluginsForm;
+
+        private TextItem nodeSourceNameItem;
+
+        private CheckboxItem nodesRecoverableItem;
+
+        private FileUpload fileUpload;
+
+        public ImportNodeSourcePanelBuilder(Label nodeSourceWindowLabel, DynamicForm nodeSourcePluginsForm,
+                TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem, FileUpload fileUpload) {
+            this.nodeSourceWindowLabel = nodeSourceWindowLabel;
+            this.nodeSourcePluginsForm = nodeSourcePluginsForm;
+            this.nodeSourceNameItem = nodeSourceNameItem;
+            this.nodesRecoverableItem = nodesRecoverableItem;
+            this.fileUpload = fileUpload;
+        }
+
+        public FormPanel build() {
+
+            final FormPanel importNodeSourceFormPanel = new FormPanel();
+            importNodeSourceFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+            importNodeSourceFormPanel.setMethod(FormPanel.METHOD_POST);
+            importNodeSourceFormPanel.setAction(GWT.getModuleBaseURL() + ImportNodeSourceServlet.SERVLET_MAPPING);
+            importNodeSourceFormPanel.addSubmitCompleteHandler(this::handleNodeSourceImport);
+
+            fileUpload.addChangeHandler(onImport -> {
+                if (!fileUpload.getFilename().isEmpty()) {
+                    importNodeSourceFormPanel.submit();
+                }
+            });
+            importNodeSourceFormPanel.add(fileUpload);
+            return importNodeSourceFormPanel;
+        }
+
+        private void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
+
+            this.nodeSourcePluginsForm.reset();
+            NodeSourceWindow.this.createdFromImport = true;
+            String importedNodeSourceJsonString = importCompleteEvent.getResults();
+
+            NodeSourceConfiguration nodeSourceConfiguration;
+
+            try {
+                nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
+
+                nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+                nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
+
+                manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
+
+                LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+
+                NodeSourceWindow.this.allFormItems = prepareFormItems();
+
+                PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+                NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
+                NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
+                fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
+                handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+                NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
+                NodeSourceWindow.this.infrastructureSelectItem.setValue(getPluginShortName(focusedInfrastructurePlugin));
+                NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+
+                NodeSourceWindow.this.allFormItems.add(new SpacerItem());
+                selectItemValues.clear();
+
+                PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+                NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
+                NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
+                fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
+                handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+                NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
+                NodeSourceWindow.this.policySelectItem.setValue(getPluginShortName(focusedPolicyPlugin));
+                NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+
+                NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
+                NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
+
+                NodeSourceWindow.this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin,
+                                                                                  focusedPolicyPlugin);
+
+                nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
+                nodeSourcePluginsForm.show();
+            } catch (ImportException e) {
+                nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to import Node Source :<br>" +
+                                                  e.getMessage() + "</span>");
+            } finally {
+                NodeSourceWindow.this.createdFromImport = false;
+            }
+        }
+
     }
 
 }

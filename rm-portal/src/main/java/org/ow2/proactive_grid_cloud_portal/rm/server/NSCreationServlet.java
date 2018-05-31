@@ -25,11 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import java.io.File;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -37,15 +37,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +57,6 @@ import org.slf4j.LoggerFactory;
 public class NSCreationServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NSCreationServlet.class);
-
-    public static final int MAX_UPLOAD_SIZE = 1048576; // in Bytes
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -94,19 +89,12 @@ public class NSCreationServlet extends HttpServlet {
         NodeSourceAction nodeSourceAction = NodeSourceAction.UNKNOWN;
 
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(4096);
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(MAX_UPLOAD_SIZE);
+            List<FileItem> formItems = new ServletRequestTransformer().getFormItems(request);
 
-            List<FileItem> fileItems = upload.parseRequest(request);
-            Iterator<?> i = fileItems.iterator();
-            while (i.hasNext()) {
-                FileItem formField = (FileItem) i.next();
-                String formFieldName = formField.getFieldName();
-                if (formField.isFormField()) {
-                    String formFieldValue = formField.getString();
+            for (FileItem formItem : formItems) {
+                String formFieldName = formItem.getFieldName();
+                if (formItem.isFormField()) {
+                    String formFieldValue = formItem.getString();
                     if (formFieldName.equals("sessionId")) {
                         sessionId = formFieldValue;
                     } else if (formFieldName.equals("nsCallback")) {
@@ -131,17 +119,17 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (readingPolicyParams) {
                         addToStringParamsOrToFileParams(policyParams, policyFileParams, formFieldName, formFieldValue);
                     } else {
-                        LOGGER.warn("Unexpected param " + formFieldName);
+                        LOGGER.warn("Unexpected parameter " + formFieldName);
                     }
                 } else {
                     if (readingInfraParams) {
-                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
                         infraFileParams.add(new String(bytes));
                     } else if (readingPolicyParams) {
-                        byte[] bytes = IOUtils.toByteArray(formField.getInputStream());
+                        byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
                         policyFileParams.add(new String(bytes));
                     } else {
-                        LOGGER.warn("Unexpected param " + formFieldName);
+                        LOGGER.warn("Unexpected parameter " + formFieldName);
                     }
                 }
             }
@@ -157,7 +145,7 @@ public class NSCreationServlet extends HttpServlet {
             if (failFast != null) {
                 LOGGER.error("Cannot apply node source action: " + failFast);
                 LOGGER.error("Request parameters: ");
-                fileItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
+                formItems.forEach(fileItem -> LOGGER.error(fileItem.getFieldName() + "=" + fileItem.getString()));
                 throw new RestServerException(failFast);
             }
 
@@ -231,9 +219,9 @@ public class NSCreationServlet extends HttpServlet {
 
     private void addToStringParamsOrToFileParams(ArrayList<String> params, ArrayList<String> fileParams,
             String formFieldName, String formFieldValue) {
-        if (formFieldName.endsWith(EditNodeSourceWindow.EDIT_FORM_ITEM_SUFFIX)) {
+        if (formFieldName.endsWith(EDIT_FORM_ITEM_SUFFIX)) {
             fileParams.add(formFieldValue);
-        } else if (!formFieldName.endsWith(EditNodeSourceWindow.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
+        } else if (!formFieldName.endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
             params.add(formFieldValue);
         }
     }

@@ -31,8 +31,8 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditDynamicParametersWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.EditNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.EditNodeSourceWindow;
 
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -51,6 +51,8 @@ public class ContextMenu extends Menu {
     private String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
 
     private String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
+
+    private String exportItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
 
     private NodeSource nodesource;
 
@@ -101,25 +103,31 @@ public class ContextMenu extends Menu {
         menu.setShadowDepth(10);
 
         MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
-        removeItem.addClickHandler(event15 -> controller.removeNodes());
+        removeItem.addClickHandler(onClick -> controller.removeNodes());
 
         MenuItem lockItem = new MenuItem("Lock", menu.lockItemImageResource);
-        lockItem.addClickHandler(event14 -> controller.lockNodes());
+        lockItem.addClickHandler(onClick -> controller.lockNodes());
 
         MenuItem unlockItem = new MenuItem("Unlock", menu.unlockItemImageResource);
-        unlockItem.addClickHandler(event13 -> controller.unlockNodes());
+        unlockItem.addClickHandler(onClick -> controller.unlockNodes());
 
         MenuItem deployItem = new MenuItem("Deploy", menu.deployItemImageResource);
-        deployItem.addClickHandler(event12 -> controller.deployNodeSource());
+        deployItem.addClickHandler(onClick -> controller.deployNodeSource());
 
         MenuItem undeployItem = new MenuItem("Undeploy", menu.undeployItemImageResource);
-        undeployItem.addClickHandler(event1 -> controller.undeployNodeSource());
+        undeployItem.addClickHandler(onClick -> controller.undeployNodeSource());
 
         MenuItem editItem = new MenuItem("Edit", menu.editItemImageResource);
-
         String nodeSourceName = menu.nodesource == null ? "" : menu.nodesource.getSourceName();
         NodeSourceStatus nodeSourceStatus = menu.nodesource == null ? null : menu.nodesource.getNodeSourceStatus();
-        editItem.addClickHandler(event1 -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
+        editItem.addClickHandler(onClick -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
+
+        MenuItem exportNodeSourceItem = new MenuItem("Export Node Source", menu.exportItemImageResource);
+        Menu exportNodeSourceSubItems = new Menu();
+        MenuItem exportNodeSourceToFileItem = new MenuItem("To File", menu.exportItemImageResource);
+        exportNodeSourceToFileItem.addClickHandler(onClick -> controller.exportNodeSource(nodeSourceName));
+        exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem);
+        exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
 
         if (menu.node != null) {
             if (menu.node.isLocked()) {
@@ -147,10 +155,18 @@ public class ContextMenu extends Menu {
                     menu.disableItems(deployItem, undeployItem, editItem);
             }
         } else {
-            menu.disableItems(deployItem, undeployItem, editItem);
+            menu.disableItems(deployItem, undeployItem, editItem, exportNodeSourceItem);
         }
 
-        menu.setItems(deployItem, undeployItem, editItem, new MenuItemSeparator(), lockItem, unlockItem, removeItem);
+        menu.setItems(deployItem,
+                      undeployItem,
+                      editItem,
+                      new MenuItemSeparator(),
+                      lockItem,
+                      unlockItem,
+                      removeItem,
+                      new MenuItemSeparator(),
+                      exportNodeSourceItem);
 
         return menu;
     }
