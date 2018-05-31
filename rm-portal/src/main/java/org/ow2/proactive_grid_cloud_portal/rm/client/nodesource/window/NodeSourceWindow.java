@@ -283,6 +283,9 @@ public abstract class NodeSourceWindow {
         VLayout nodeSourceWindowLayout = new VLayout();
         nodeSourceWindowLayout.setMargin(5);
 
+        HLayout nodeSourceWindowSubLayoutTop = new HLayout();
+        HLayout nodeSourceWindowSubLayoutBottom = new HLayout();
+
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
 
@@ -319,11 +322,11 @@ public abstract class NodeSourceWindow {
                                                                                      fileUpload).build();
 
         HLayout importNodeSourceLayout = new HLayout();
-        importNodeSourceLayout.setLayoutAlign(Alignment.RIGHT);
         importNodeSourceLayout.addMember(importNodeSourceLabel);
         importNodeSourceLayout.addMember(importNodeSourceFormPanel);
 
         DynamicForm nodeSourceWindowForm = new DynamicForm();
+        nodeSourceWindowForm.setWidth100();
         nodeSourceWindowForm.setFields(nodeSourceNameItem, nodesRecoverableItem);
         nodeSourceWindowForm.setTitleSuffix("");
 
@@ -403,9 +406,13 @@ public abstract class NodeSourceWindow {
         scrollLayout.setBackgroundColor("#fafafa");
 
         nodeSourceWindowLayout.addMember(nodeSourceWindowLabel);
-        nodeSourceWindowLayout.addMember(importNodeSourceLayout);
-        nodeSourceWindowLayout.addMember(nodeSourceWindowForm);
-        nodeSourceWindowLayout.addMember(scrollLayout);
+        nodeSourceWindowSubLayoutTop.addMember(nodeSourceWindowForm);
+        nodeSourceWindowSubLayoutTop.addMember(importNodeSourceLayout);
+        nodeSourceWindowLayout.addMember(nodeSourceWindowSubLayoutTop);
+        nodeSourceWindowSubLayoutBottom.setHeight100();
+        nodeSourceWindowSubLayoutBottom.setWidth100();
+        nodeSourceWindowSubLayoutBottom.addMember(scrollLayout);
+        nodeSourceWindowLayout.addMember(nodeSourceWindowSubLayoutBottom);
         nodeSourceWindowLayout.addMember(buttonsLayout);
 
         int winWidth = com.google.gwt.user.client.Window.getClientWidth() * 80 / 100;
