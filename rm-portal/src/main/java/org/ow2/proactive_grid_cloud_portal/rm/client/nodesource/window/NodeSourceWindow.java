@@ -700,8 +700,8 @@ public abstract class NodeSourceWindow {
                 fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
                 handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
                 NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
-                NodeSourceWindow.this.infrastructureSelectItem.setValue(getPluginShortName(focusedInfrastructurePlugin));
                 NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+                NodeSourceWindow.this.infrastructureSelectItem.setValue(NodeSourceWindow.this.previousSelectedInfrastructure);
 
                 NodeSourceWindow.this.allFormItems.add(new SpacerItem());
                 selectItemValues.clear();
@@ -712,8 +712,8 @@ public abstract class NodeSourceWindow {
                 fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
                 handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
                 NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
-                NodeSourceWindow.this.policySelectItem.setValue(getPluginShortName(focusedPolicyPlugin));
                 NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+                NodeSourceWindow.this.policySelectItem.setValue(NodeSourceWindow.this.previousSelectedPolicy);
 
                 NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
                 NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
