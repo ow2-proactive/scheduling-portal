@@ -37,7 +37,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
@@ -45,15 +44,14 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.smartgwt.client.util.SC;
 
 
-public class ImportFromCatalog {
+public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private static final String NAME_KEY = "name";
 
-    private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
-
-    private static final String CATALOG_SELECT_WF = "Select a Workflow";
+    private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Select a Node Source";
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
@@ -61,42 +59,20 @@ public class ImportFromCatalog {
 
     private String CATALOG_URL = null;
 
-    /**
-     * Builds the catalog URL. If none is configured in the settings file, sets
-     * the URL to the bundled Catalog
-     *
-     */
-    private void buildCatalogUrl() {
-        String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
-        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-            CATALOG_URL = defaultCatalogUrl;
-        } else {
-            CATALOG_URL = catalogUrlFromConfig;
-        }
-    }
+    private NodeSourceWindow.NodeSourcePanelGroupsBuilder.ImportNodeSourcePanelBuilder importNodeSourcePanel;
 
-    public Panel initSelectWorkflowFromCatalogPanel() {
+    public ImportFromCatalogPanel(
+            NodeSourceWindow.NodeSourcePanelGroupsBuilder.ImportNodeSourcePanelBuilder importNodeSourcePanel) {
+        this.importNodeSourcePanel = importNodeSourcePanel;
         buildCatalogUrl();
-        HorizontalPanel fromCatalogPanel = new HorizontalPanel();
-        fromCatalogPanel.setHeight("30px");
-        fromCatalogPanel.setWidth("100%");
-        fromCatalogPanel.setSpacing(2);
-        fromCatalogPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        configureSize();
 
-        ListBox bucketsListBox = new ListBox();
-        ListBox workflowsListBox = new ListBox();
-
-        bucketsListBox.setEnabled(false);
-        bucketsListBox.addItem(CATALOG_SELECT_BUCKET);
-
-        workflowsListBox.setEnabled(false);
-        workflowsListBox.addItem(CATALOG_SELECT_WF);
-
-        bucketsListBox.addChangeHandler(event -> {
-            String selectedBucket = bucketsListBox.getSelectedValue();
-            if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=nodesource";
+        ListBox nodeSourceListBox = getListBox();
+        nodeSourceListBox.addChangeHandler(event -> {
+            String selectedNodeSourceInList = nodeSourceListBox.getSelectedValue();
+            if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
+                String workflowUrl = CATALOG_URL + "/buckets/node-sources/resources/" + selectedNodeSourceInList +
+                                     "/raw";
                 RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                 req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                 req.setCallback(new RequestCallback() {
@@ -104,15 +80,19 @@ public class ImportFromCatalog {
                     public void onResponseReceived(Request request, Response response) {
                         JSONArray workflows = JSONParser.parseStrict(response.getText()).isArray();
                         int workflowsSize = workflows.size();
-                        workflowsListBox.setEnabled(false);
-                        workflowsListBox.clear();
-                        workflowsListBox.addItem(CATALOG_SELECT_WF);
-                        for (int i = 0; i < workflowsSize; i++) {
-                            JSONObject workflow = workflows.get(i).isObject();
-                            String workflowName = workflow.get(NAME_KEY).isString().stringValue();
-                            workflowsListBox.addItem(workflowName);
-                        }
-                        workflowsListBox.setEnabled(true);
+                        importNodeSourcePanel.importNodeSourceFromJson(response.getText());
+                        // TODO parse and fill
+                        /*
+                         * workflowsListBox.setEnabled(false);
+                         * workflowsListBox.clear();
+                         * workflowsListBox.addItem(CATALOG_SELECT_WF);
+                         * for (int i = 0; i < workflowsSize; i++) {
+                         * JSONObject workflow = workflows.get(i).isObject();
+                         * String workflowName = workflow.get(NAME_KEY).isString().stringValue();
+                         * workflowsListBox.addItem(workflowName);
+                         * }
+                         * workflowsListBox.setEnabled(true);
+                         */
                     }
 
                     @Override
@@ -130,7 +110,8 @@ public class ImportFromCatalog {
             }
         });
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=nodesource");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET,
+                                                CATALOG_URL + "/buckets/node-sources/resources?kind=nodesource");
         req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override
@@ -140,9 +121,9 @@ public class ImportFromCatalog {
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get(NAME_KEY).isString().stringValue();
-                    bucketsListBox.addItem(bucketName);
+                    nodeSourceListBox.addItem(bucketName);
                 }
-                bucketsListBox.setEnabled(true);
+                nodeSourceListBox.setEnabled(true);
             }
 
             @Override
@@ -158,11 +139,8 @@ public class ImportFromCatalog {
             e.printStackTrace();
         }
 
-        fromCatalogPanel.add(bucketsListBox);
-        fromCatalogPanel.add(workflowsListBox);
-
-        bucketsListBox.setWidth("130px");
-        workflowsListBox.setWidth("230px");
+        add(nodeSourceListBox);
+        nodeSourceListBox.setWidth("130px");
 
         final VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
@@ -175,14 +153,40 @@ public class ImportFromCatalog {
         importFromCatalogformPanel.add(formContent);
         importFromCatalogformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
         importFromCatalogformPanel.setHeight("30px");
-        fromCatalogPanel.add(importFromCatalogformPanel);
+        add(importFromCatalogformPanel);
 
-        Button sendFromCatalogButton = new Button("Import workflow");
-        sendFromCatalogButton.addClickHandler(clickHandlerForUploadFromCatalogButton(formContent,
-                                                                                     importFromCatalogformPanel));
+        // TODO to use when a work flow is chosen
+        // clickHandlerForUploadFromCatalogButton(formContent, importFromCatalogformPanel));
+    }
 
-        fromCatalogPanel.add(sendFromCatalogButton);
-        return fromCatalogPanel;
+    private ListBox getListBox() {
+        ListBox nodeSourceListBox = new ListBox();
+
+        nodeSourceListBox.setEnabled(false);
+        nodeSourceListBox.addItem(SELECT_NODE_SOURCE_GENERIC_ENTRY);
+        return nodeSourceListBox;
+    }
+
+    private void configureSize() {
+        setHeight("30px");
+        setWidth("100%");
+        setSpacing(2);
+        setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    }
+
+    /**
+     * Builds the catalog URL. If none is configured in the settings file, sets
+     * the URL to the bundled Catalog
+     *
+     */
+    private void buildCatalogUrl() {
+        String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
+        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
+            CATALOG_URL = defaultCatalogUrl;
+        } else {
+            CATALOG_URL = catalogUrlFromConfig;
+        }
     }
 
     private FormPanel.SubmitCompleteHandler fileUploadCompleteHandler() {

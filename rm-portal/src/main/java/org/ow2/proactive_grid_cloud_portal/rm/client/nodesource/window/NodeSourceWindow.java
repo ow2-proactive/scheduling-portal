@@ -638,11 +638,11 @@ public abstract class NodeSourceWindow {
 
     public class NodeSourcePanelGroupsBuilder {
 
-        private VLayout importGroupLayout;
+        private VLayout importNodeSourceGroupLayout;
 
-        private VerticalPanel importPanel;
+        private VerticalPanel importNodeSourcePanel;
 
-        private ListBox wfMethodsListBox;
+        private ListBox nodeSourceListBox;
 
         private Label nodeSourceWindowLabel;
 
@@ -661,35 +661,38 @@ public abstract class NodeSourceWindow {
         }
 
         public Layout build() {
-            importGroupLayout = new VLayout();
-            importGroupLayout.setGroupTitle("Import Node Source");
-            importGroupLayout.setIsGroup(true);
-            importGroupLayout.setHeight("80px");
-            importGroupLayout.setWidth("300px");
+            importNodeSourceGroupLayout = new VLayout();
+            importNodeSourceGroupLayout.setGroupTitle("Import Node Source");
+            importNodeSourceGroupLayout.setIsGroup(true);
+            importNodeSourceGroupLayout.setHeight("80px");
+            importNodeSourceGroupLayout.setWidth("350px");
 
-            importPanel = new VerticalPanel();
-            importPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+            importNodeSourcePanel = new VerticalPanel();
+            importNodeSourcePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-            importPanel.setSpacing(10);
-            importPanel.setHeight("20px");
+            importNodeSourcePanel.setSpacing(10);
+            importNodeSourcePanel.setHeight("20px");
 
-            importPanel.add(new ImportNodeSourcePanelBuilder().build());
+            ImportNodeSourcePanelBuilder importNodeSourcePanelBuilder = new ImportNodeSourcePanelBuilder();
+            FormPanel importNodeSourcePanel = importNodeSourcePanelBuilder.build();
 
-            final VerticalPanel getWfMethodsPanel = new VerticalPanel();
-            getWfMethodsPanel.setSpacing(10);
-            getWfMethodsPanel.setHeight("20px");
-            wfMethodsListBox = new ListBox();
-            wfMethodsListBox.addItem("Import from File");
-            wfMethodsListBox.addItem("Import from Catalog");
-            getWfMethodsPanel.add(wfMethodsListBox);
+            this.importNodeSourcePanel.add(importNodeSourcePanel);
 
-            wfMethodsListBox.addChangeHandler(new ChangeHandler() {
+            final VerticalPanel importNodeSourceMethodPanel = new VerticalPanel();
+            importNodeSourceMethodPanel.setSpacing(10);
+            importNodeSourceMethodPanel.setHeight("20px");
+            nodeSourceListBox = new ListBox();
+            nodeSourceListBox.addItem("Import from File");
+            nodeSourceListBox.addItem("Import from Catalog");
+            importNodeSourceMethodPanel.add(nodeSourceListBox);
+
+            nodeSourceListBox.addChangeHandler(new ChangeHandler() {
                 @Override
                 public void onChange(ChangeEvent event) {
-                    importPanel.clear();
-                    importPanel.add(new ImportFromCatalog().initSelectWorkflowFromCatalogPanel());
+                    NodeSourcePanelGroupsBuilder.this.importNodeSourcePanel.clear();
+                    NodeSourcePanelGroupsBuilder.this.importNodeSourcePanel.add(new ImportFromCatalogPanel(importNodeSourcePanelBuilder));
                     /*
-                     * String selectedMethod = wfMethodsListBox.getSelectedValue();
+                     * String selectedMethod = nodeSourceListBox.getSelectedValue();
                      * if (METHOD_FROM_FILE.compareTo(selectedMethod) == 0) {
                      * clearPanel();
                      * initSelectWorkflowFromFilePanel();
@@ -728,13 +731,13 @@ public abstract class NodeSourceWindow {
              * initSelectWorkflowFromCatalogPanel();
              */
 
-            importGroupLayout.addMember(getWfMethodsPanel);
-            importGroupLayout.addMember(importPanel);
+            importNodeSourceGroupLayout.addMember(importNodeSourceMethodPanel);
+            importNodeSourceGroupLayout.addMember(this.importNodeSourcePanel);
 
-            return importGroupLayout;
+            return importNodeSourceGroupLayout;
         }
 
-        private class ImportNodeSourcePanelBuilder {
+        public class ImportNodeSourcePanelBuilder {
 
             public FormPanel build() {
 
@@ -758,9 +761,14 @@ public abstract class NodeSourceWindow {
 
             private void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
 
+                String importedNodeSourceJsonString = importCompleteEvent.getResults();
+
+                importNodeSourceFromJson(importedNodeSourceJsonString);
+            }
+
+            public void importNodeSourceFromJson(String importedNodeSourceJsonString) {
                 nodeSourcePluginsForm.reset();
                 NodeSourceWindow.this.createdFromImport = true;
-                String importedNodeSourceJsonString = importCompleteEvent.getResults();
 
                 NodeSourceConfiguration nodeSourceConfiguration;
 
