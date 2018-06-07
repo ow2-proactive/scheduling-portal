@@ -31,8 +31,8 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.EditDynamicParametersWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.EditNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditNodeSourceWindow;
 
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;

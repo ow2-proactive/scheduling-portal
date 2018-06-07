@@ -23,10 +23,10 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,8 +44,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.ImportException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportFromCatalogPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet;
 
 import com.google.gwt.core.client.GWT;
@@ -77,21 +78,21 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 public abstract class NodeSourceWindow {
 
+    protected static final String INFRASTRUCTURE_FORM_KEY = "infra";
+
+    protected static final String POLICY_FORM_KEY = "policy";
+
     private static final String NS_NAME_FORM_KEY = "nsName";
 
     private static final String NODES_RECOVERABLE_FORM_KEY = "nodesRecoverable";
 
-    public static final String DEPLOY_FORM_KEY = "deploy";
+    private static final String DEPLOY_FORM_KEY = "deploy";
 
-    public static final String NODE_SOURCE_ACTION_FORM_KEY = "nodeSourceAction";
+    private static final String NODE_SOURCE_ACTION_FORM_KEY = "nodeSourceAction";
 
-    public static final String INFRASTRUCTURE_FORM_KEY = "infra";
+    private static final String SESSION_ID_FORM_KEY = "sessionId";
 
-    public static final String POLICY_FORM_KEY = "policy";
-
-    public static final String SESSION_ID_FORM_KEY = "sessionId";
-
-    public static final String NS_CALLBACK_FORM_KEY = "nsCallback";
+    private static final String NS_CALLBACK_FORM_KEY = "nsCallback";
 
     protected RMController controller;
 
@@ -665,7 +666,7 @@ public abstract class NodeSourceWindow {
             importNodeSourceGroupLayout.setGroupTitle("Import Node Source");
             importNodeSourceGroupLayout.setIsGroup(true);
             importNodeSourceGroupLayout.setHeight("80px");
-            importNodeSourceGroupLayout.setWidth("350px");
+            importNodeSourceGroupLayout.setWidth("240px");
 
             importNodeSourcePanel = new VerticalPanel();
             importNodeSourcePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);

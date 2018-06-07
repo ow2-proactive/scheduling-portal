@@ -25,8 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
 import java.io.StringWriter;
 import java.util.ArrayList;

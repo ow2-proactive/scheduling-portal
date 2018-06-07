@@ -23,14 +23,14 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
