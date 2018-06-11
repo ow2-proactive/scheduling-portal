@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -38,23 +37,23 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 
 
 public class ImportFromCatalogPanel extends HorizontalPanel {
 
+    static final String CATALOG_OPTION_NAME = "Import from Catalog";
+
     private static final String NAME_KEY = "name";
 
-    private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Select a Node Source";
+    private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
-    private NodeSourceWindow.NodeSourcePanelGroupsBuilder.ImportNodeSourcePanelBuilder importNodeSourcePanel;
+    private ImportNodeSourceLayout importNodeSourcePanel;
 
-    public ImportFromCatalogPanel(
-            NodeSourceWindow.NodeSourcePanelGroupsBuilder.ImportNodeSourcePanelBuilder importNodeSourcePanel) {
+    ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourcePanel) {
         this.importNodeSourcePanel = importNodeSourcePanel;
         String catalogUrl = getCatalogUrl();
         configureSize();
@@ -70,20 +69,18 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
                 req.setCallback(new RequestCallback() {
                     @Override
                     public void onResponseReceived(Request request, Response response) {
-                        importNodeSourcePanel.importNodeSourceFromJson(response.getText());
+                        ImportFromCatalogPanel.this.importNodeSourcePanel.handleNodeSourceImport(response.getText());
                     }
 
                     @Override
-                    public void onError(Request request, Throwable exception) {
-                        GWT.log("OOPS:" + request.toString());
+                    public void onError(Request request, Throwable t) {
+                        GWT.log("Import node source from catalog failed. Request was " + request.toString(), t);
                     }
                 });
                 try {
                     req.send();
                 } catch (RequestException e) {
-                    GWT.log("Error occured when fetching workflows from Catalog");
-                    e.printStackTrace();
-
+                    GWT.log("Request sent to catalog failed", e);
                 }
             }
         });
@@ -118,7 +115,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
         }
 
         add(nodeSourceListBox);
-        nodeSourceListBox.setWidth("130px");
+        nodeSourceListBox.setWidth("190px");
     }
 
     private ListBox getListBox() {
@@ -131,8 +128,6 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void configureSize() {
         setHeight("30px");
         setWidth("100%");
-        setSpacing(2);
-        setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     }
 
     private String getCatalogUrl() {

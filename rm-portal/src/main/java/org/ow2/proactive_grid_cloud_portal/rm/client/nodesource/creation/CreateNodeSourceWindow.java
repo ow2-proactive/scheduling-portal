@@ -68,10 +68,9 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem) {
+    protected void populateFormValues() {
 
-        nodesRecoverableItem.setValue(true);
+        this.nodesRecoverableCheckbox.setValue(true);
 
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
 
@@ -95,9 +94,9 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            windowLabel.hide();
-            windowForm.show();
+            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            this.nodeSourcePluginsWaitingLabel.hide();
+            this.nodeSourcePluginsForm.show();
 
             hideAllFormItems();
 

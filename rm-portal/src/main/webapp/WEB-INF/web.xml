@@ -40,7 +40,7 @@
 
 	<servlet>
 		<servlet-name>ImportNodeSourceServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->

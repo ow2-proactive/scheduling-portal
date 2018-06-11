@@ -62,9 +62,8 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem) {
-        fetchNodeSourceConfigurationWithCallback(windowLabel, windowForm, nodeSourceNameItem, nodesRecoverableItem);
+    protected void populateFormValues() {
+        fetchNodeSourceConfigurationWithCallback();
     }
 
     @Override
@@ -159,9 +158,9 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
-        super.manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
-        nodesRecoverableItem.disable();
+    public void manageNodeSourceWindowItems() {
+        super.manageNodeSourceWindowItems();
+        this.nodesRecoverableCheckbox.disable();
     }
 
     private void disableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {

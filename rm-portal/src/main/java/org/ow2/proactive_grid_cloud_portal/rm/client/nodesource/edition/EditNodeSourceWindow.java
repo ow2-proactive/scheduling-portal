@@ -34,12 +34,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -76,12 +72,8 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem) {
-        this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(windowLabel,
-                                                                                                                windowForm,
-                                                                                                                nodeSourceNameItem,
-                                                                                                                nodesRecoverableItem),
+    protected void populateFormValues() {
+        this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(),
                                                                  this.window::hide);
     }
 
@@ -96,22 +88,21 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    public void manageNodeSourceWindowItems() {
         // we never allow the node source name to be modified
-        nodeSourceNameItem.disable();
+        this.nodeSourceNameText.disable();
     }
 
-    protected void fetchNodeSourceConfigurationWithCallback(Label windowLabel, DynamicForm windowForm,
-            TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
+    protected void fetchNodeSourceConfigurationWithCallback() {
 
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
 
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
 
-            nodeSourceNameItem.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            nodesRecoverableItem.setValue(nodeSourceConfiguration.getNodesRecoverable());
-            manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
+            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
+            manageNodeSourceWindowItems();
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
             this.allFormItems = prepareFormItems();
@@ -129,9 +120,9 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
             this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
 
-            windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            windowLabel.hide();
-            windowForm.show();
+            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            this.nodeSourceWindowLabel.hide();
+            this.nodeSourcePluginsForm.show();
 
         }, this.window::hide);
     }
