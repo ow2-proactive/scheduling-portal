@@ -849,7 +849,6 @@ public class SubmitWindow {
         });
 
         RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
-        SC.say("submit bucket url: " + CATALOG_URL + "/buckets?kind=workflow");
         req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override

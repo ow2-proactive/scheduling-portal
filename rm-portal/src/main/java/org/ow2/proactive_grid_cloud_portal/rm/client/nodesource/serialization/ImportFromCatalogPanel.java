@@ -51,78 +51,18 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
+    private String catalogUrl;
+
     private ImportNodeSourceLayout importNodeSourcePanel;
+
+    private ListBox nodeSourceListBox;
 
     ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourcePanel) {
         this.importNodeSourcePanel = importNodeSourcePanel;
-        String catalogUrl = getCatalogUrl();
         configureSize();
-
-        ListBox nodeSourceListBox = getListBox();
-        nodeSourceListBox.addChangeHandler(event -> {
-            String selectedNodeSourceInList = nodeSourceListBox.getSelectedValue();
-            if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
-                String workflowUrl = catalogUrl + "/buckets/node-sources/resources/" + selectedNodeSourceInList +
-                                     "/raw";
-                RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
-                req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
-                req.setCallback(new RequestCallback() {
-                    @Override
-                    public void onResponseReceived(Request request, Response response) {
-                        ImportFromCatalogPanel.this.importNodeSourcePanel.handleNodeSourceImport(response.getText());
-                    }
-
-                    @Override
-                    public void onError(Request request, Throwable t) {
-                        GWT.log("Import node source from catalog failed. Request was " + request.toString(), t);
-                    }
-                });
-                try {
-                    req.send();
-                } catch (RequestException e) {
-                    GWT.log("Request sent to catalog failed", e);
-                }
-            }
-        });
-
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET,
-                                                catalogUrl + "/buckets/node-sources/resources?kind=nodesource");
-        req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
-        req.setCallback(new RequestCallback() {
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
-                int bucketSize = buckets.size();
-                for (int i = 0; i < bucketSize; i++) {
-                    JSONObject bucket = buckets.get(i).isObject();
-                    String bucketName = bucket.get(NAME_KEY).isString().stringValue();
-                    nodeSourceListBox.addItem(bucketName);
-                }
-                nodeSourceListBox.setEnabled(true);
-            }
-
-            @Override
-            public void onError(Request request, Throwable exception) {
-                GWT.log("Error occurred when fetching buckets from Catalog");
-            }
-        });
-
-        try {
-            req.send();
-        } catch (RequestException e) {
-            GWT.log("Error occured when fetching buckets from Catalog");
-            e.printStackTrace();
-        }
-
-        add(nodeSourceListBox);
-        nodeSourceListBox.setWidth("190px");
-    }
-
-    private ListBox getListBox() {
-        ListBox nodeSourceListBox = new ListBox();
-        nodeSourceListBox.setEnabled(false);
-        nodeSourceListBox.addItem(SELECT_NODE_SOURCE_GENERIC_ENTRY);
-        return nodeSourceListBox;
+        getCatalogUrl();
+        createListBox();
+        requestNodeSourcesList();
     }
 
     private void configureSize() {
@@ -130,13 +70,77 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
         setWidth("100%");
     }
 
-    private String getCatalogUrl() {
+    private void getCatalogUrl() {
         String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
         String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
         if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-            return defaultCatalogUrl;
+            this.catalogUrl = defaultCatalogUrl;
         } else {
-            return catalogUrlFromConfig;
+            this.catalogUrl = catalogUrlFromConfig;
+        }
+    }
+
+    private void createListBox() {
+        this.nodeSourceListBox = new ListBox();
+        this.nodeSourceListBox.setEnabled(false);
+        this.nodeSourceListBox.addItem(SELECT_NODE_SOURCE_GENERIC_ENTRY);
+        this.nodeSourceListBox.setWidth("190px");
+        this.nodeSourceListBox.addChangeHandler(onNodeSourceSelected -> requestNodeSourceConfiguration());
+        add(this.nodeSourceListBox);
+    }
+
+    private void requestNodeSourceConfiguration() {
+        String selectedNodeSourceInList = this.nodeSourceListBox.getSelectedValue();
+        if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
+            String nodeSourceConfigurationUrl = this.catalogUrl + "/buckets/node-sources/resources/" +
+                                                selectedNodeSourceInList + "/raw";
+            RequestBuilder request = new RequestBuilder(RequestBuilder.GET, nodeSourceConfigurationUrl);
+            request.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+            request.setCallback(new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    ImportFromCatalogPanel.this.importNodeSourcePanel.handleNodeSourceImport(response.getText());
+                }
+
+                @Override
+                public void onError(Request request, Throwable t) {
+                    GWT.log("Import node source from catalog failed. Request was " + request.toString(), t);
+                }
+            });
+            try {
+                request.send();
+            } catch (RequestException e) {
+                GWT.log("Request sent to catalog failed", e);
+            }
+        }
+    }
+
+    private void requestNodeSourcesList() {
+        String nodeSourcesListUrl = catalogUrl + "/buckets/node-sources/resources?kind=nodesource";
+        RequestBuilder request = new RequestBuilder(RequestBuilder.GET, nodeSourcesListUrl);
+        request.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+        request.setCallback(new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                JSONArray nodeSources = JSONParser.parseStrict(response.getText()).isArray();
+                for (int i = 0; i < nodeSources.size(); i++) {
+                    JSONObject nodeSource = nodeSources.get(i).isObject();
+                    String nodeSourceName = nodeSource.get(NAME_KEY).isString().stringValue();
+                    ImportFromCatalogPanel.this.nodeSourceListBox.addItem(nodeSourceName);
+                }
+                ImportFromCatalogPanel.this.nodeSourceListBox.setEnabled(true);
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                GWT.log("Error occurred when fetching buckets from Catalog");
+            }
+        });
+        try {
+            request.send();
+        } catch (RequestException e) {
+            GWT.log("Error occured when fetching buckets from Catalog");
+            e.printStackTrace();
         }
     }
 

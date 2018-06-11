@@ -125,7 +125,7 @@ public class ContextMenu extends Menu {
         MenuItem exportNodeSourceItem = new MenuItem("Export Node Source", menu.exportItemImageResource);
         Menu exportNodeSourceSubItems = new Menu();
         MenuItem exportNodeSourceToFileItem = new MenuItem("To File", menu.exportItemImageResource);
-        exportNodeSourceToFileItem.addClickHandler(onClick -> controller.exportNodeSource(nodeSourceName));
+        exportNodeSourceToFileItem.addClickHandler(onClick -> controller.exportNodeSourceToFile(nodeSourceName));
         exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem);
         exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
 

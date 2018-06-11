@@ -1011,7 +1011,40 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
-    public void exportNodeSource(String nodeSourceName) {
+    public void exportNodeSourceToFile(String nodeSourceName) {
+        FormPanel nodeSourceJsonForm = new FormPanel();
+        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
+        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceServlet.SERVLET_MAPPING);
+
+        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceServlet.MAIN_FORM_ITEM_NAME);
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.add(nodeSourceJsonItem);
+        nodeSourceJsonForm.setWidget(panel);
+
+        Window window = new Window();
+        window.addChild(nodeSourceJsonForm);
+        window.show();
+
+        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                      nodeSourceName,
+                                      new AsyncCallback<String>() {
+                                          public void onSuccess(String result) {
+                                              nodeSourceJsonItem.setValue(result);
+                                              nodeSourceJsonForm.submit();
+                                              window.hide();
+                                          }
+
+                                          public void onFailure(Throwable caught) {
+                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
+                                                      ":<br>" + msg);
+                                          }
+                                      });
+    }
+
+    public void exportNodeSourceToCatalog(String nodeSourceName) {
         FormPanel nodeSourceJsonForm = new FormPanel();
         nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
