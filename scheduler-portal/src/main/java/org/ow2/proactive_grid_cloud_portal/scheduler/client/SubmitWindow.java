@@ -79,7 +79,6 @@ import com.google.gwt.xml.client.XMLParser;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.DateChooser;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -813,7 +812,6 @@ public class SubmitWindow {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                     String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
-                    SC.say("submit workflow URL: " + workflowUrl);
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                     req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {

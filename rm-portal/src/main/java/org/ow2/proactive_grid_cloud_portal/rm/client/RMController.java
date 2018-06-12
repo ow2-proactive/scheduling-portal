@@ -48,7 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
@@ -1015,42 +1015,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         FormPanel nodeSourceJsonForm = new FormPanel();
         nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceServlet.SERVLET_MAPPING);
+        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceToFileServlet.SERVLET_MAPPING);
 
-        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceServlet.MAIN_FORM_ITEM_NAME);
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(nodeSourceJsonItem);
-        nodeSourceJsonForm.setWidget(panel);
-
-        Window window = new Window();
-        window.addChild(nodeSourceJsonForm);
-        window.show();
-
-        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                      nodeSourceName,
-                                      new AsyncCallback<String>() {
-                                          public void onSuccess(String result) {
-                                              nodeSourceJsonItem.setValue(result);
-                                              nodeSourceJsonForm.submit();
-                                              window.hide();
-                                          }
-
-                                          public void onFailure(Throwable caught) {
-                                              String msg = JSONUtils.getJsonErrorMessage(caught);
-                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
-                                                      ":<br>" + msg);
-                                          }
-                                      });
-    }
-
-    public void exportNodeSourceToCatalog(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new FormPanel();
-        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceServlet.SERVLET_MAPPING);
-
-        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceServlet.MAIN_FORM_ITEM_NAME);
+        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
 
         VerticalPanel panel = new VerticalPanel();
         panel.add(nodeSourceJsonItem);

@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -59,8 +58,8 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourcePanel) {
         this.importNodeSourcePanel = importNodeSourcePanel;
+        this.catalogUrl = new CatalogUrlBuilder().getCatalogUrl();
         configureSize();
-        getCatalogUrl();
         createListBox();
         requestNodeSourcesList();
     }
@@ -68,16 +67,6 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void configureSize() {
         setHeight("30px");
         setWidth("100%");
-    }
-
-    private void getCatalogUrl() {
-        String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
-        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-            this.catalogUrl = defaultCatalogUrl;
-        } else {
-            this.catalogUrl = catalogUrlFromConfig;
-        }
     }
 
     private void createListBox() {
@@ -132,15 +121,14 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
             }
 
             @Override
-            public void onError(Request request, Throwable exception) {
-                GWT.log("Error occurred when fetching buckets from Catalog");
+            public void onError(Request request, Throwable t) {
+                GWT.log("List node source from catalog failed. Request was " + request.toString(), t);
             }
         });
         try {
             request.send();
         } catch (RequestException e) {
-            GWT.log("Error occured when fetching buckets from Catalog");
-            e.printStackTrace();
+            GWT.log("Request sent to catalog failed", e);
         }
     }
 
