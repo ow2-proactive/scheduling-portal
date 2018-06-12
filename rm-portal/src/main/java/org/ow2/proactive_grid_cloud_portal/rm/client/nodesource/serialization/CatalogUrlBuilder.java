@@ -32,14 +32,19 @@ import com.google.gwt.core.client.GWT;
 
 public class CatalogUrlBuilder {
 
+    private String catalogUrl;
+
     public String getCatalogUrl() {
-        String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
-        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-            return defaultCatalogUrl;
-        } else {
-            return catalogUrlFromConfig;
+        if (this.catalogUrl == null) {
+            String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+            String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
+            if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
+                this.catalogUrl = defaultCatalogUrl;
+            } else {
+                this.catalogUrl = catalogUrlFromConfig;
+            }
         }
+        return this.catalogUrl;
     }
 
 }
