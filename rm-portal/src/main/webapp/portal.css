@@ -16,9 +16,13 @@
 
 }
 
-
 .toolStripButton, .toolStripButtonOver, .toolStripButtonFocused, .toolStripButtonFocusedOver, .toolStripButtonDown, .toolStripButtonFocusedDown, .toolStripButtonSelected, .toolStripButtonSelectedFocused, .toolStripButtonSelectedDown, .toolStripButtonSelectedFocusedDown, .toolStripButtonSelectedOver, .toolStripButtonSelectedFocusedOver, .toolStripButtonDisabled, .toolStripButtonSelectedDisabled {
     color: #777 !important;
     font-size: 14px !important;
 	padding: 3px 5px !important;
+}
+
+.gwt-FileUpload {
+                font-size : 11px;
+                margin-left : 60px;
 }
