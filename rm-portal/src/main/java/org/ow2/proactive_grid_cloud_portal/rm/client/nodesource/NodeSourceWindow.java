@@ -649,13 +649,13 @@ public abstract class NodeSourceWindow {
             this.nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
             this.nodeSourcePluginsForm.show();
         } catch (ImportException e) {
-            setNodeSourceWindowLabelWithError("Failed to import Node Source", "", e);
+            setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         } finally {
             NodeSourceWindow.this.createdFromImport = false;
         }
     }
 
-    public void setNodeSourceWindowLabelWithError(String errorMessage, String additionalLogMessage, Throwable e) {
+    public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
         GWT.log(errorMessage, e);
         this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + " :<br>" + e.getMessage() +
                                                "</span>");

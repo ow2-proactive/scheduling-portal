@@ -25,12 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -49,20 +45,16 @@ public class CatalogRequestBuilder {
 
     private ImportFromCatalogPanel importFromCatalogPanel;
 
+    private String catalogUrl;
+
     public CatalogRequestBuilder(ImportFromCatalogPanel importFromCatalogPanel) {
         this.importFromCatalogPanel = importFromCatalogPanel;
+        this.catalogUrl = new CatalogUrlBuilder().getCatalogUrl();
     }
 
-    public void requestNodeSourcesList() {
-        String nodeSourcesListUrl = new CatalogUrlBuilder().getCatalogUrl() + "/buckets";
-        RequestBuilder bucketsRequest = new RequestBuilder(RequestBuilder.GET, nodeSourcesListUrl);
-        bucketsRequest.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
-        bucketsRequest.setCallback(getBucketsRequestCallBack());
-        try {
-            bucketsRequest.send();
-        } catch (RequestException e) {
-            logErrorMessage(e);
-        }
+    public void requestNodeSourcesFromAllBuckets() {
+        String listBucketsUrl = this.catalogUrl + "/buckets";
+        sendRequestToCatalog(listBucketsUrl, getBucketsRequestCallBack());
     }
 
     private RequestCallback getBucketsRequestCallBack() {
@@ -70,13 +62,9 @@ public class CatalogRequestBuilder {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 JSONArray bucketsArray = JSONParser.parseStrict(response.getText()).isArray();
-                List<String> bucketNames = new LinkedList<>();
                 for (int i = 0; i < bucketsArray.size(); i++) {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
                     String bucketName = bucketObject.get(NAME_KEY).isString().stringValue();
-                    bucketNames.add(bucketName);
-                }
-                for (String bucketName : bucketNames) {
                     requestNodeSourcesForBucket(bucketName);
                 }
                 CatalogRequestBuilder.this.importFromCatalogPanel.enableNodeSourceListBox();
@@ -84,21 +72,25 @@ public class CatalogRequestBuilder {
 
             @Override
             public void onError(Request request, Throwable t) {
-                GWT.log("List buckets from catalog failed. Request was " + request.toString(), t);
+                CatalogRequestBuilder.this.importFromCatalogPanel.setNodeSourceWindowLabelWithError("List buckets from catalog failed",
+                                                                                                    t);
             }
         };
     }
 
     private void requestNodeSourcesForBucket(String bucketName) {
-        String nodeSourcesListUrl = new CatalogUrlBuilder().getCatalogUrl() + "/buckets/" + bucketName +
-                                    "/resources?kind=nodesource";
-        RequestBuilder nodeSourcesRequest = new RequestBuilder(RequestBuilder.GET, nodeSourcesListUrl);
-        nodeSourcesRequest.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
-        nodeSourcesRequest.setCallback(getNodeSourcesRequestCallback(bucketName));
+        String nodeSourcesListUrl = this.catalogUrl + "/buckets/" + bucketName + "/resources?kind=nodesource";
+        sendRequestToCatalog(nodeSourcesListUrl, getNodeSourcesRequestCallback(bucketName));
+    }
+
+    private void sendRequestToCatalog(String url, RequestCallback callback) {
+        RequestBuilder request = new RequestBuilder(RequestBuilder.GET, url);
+        request.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+        request.setCallback(callback);
         try {
-            nodeSourcesRequest.send();
+            request.send();
         } catch (RequestException e) {
-            logErrorMessage(e);
+            this.importFromCatalogPanel.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
         }
     }
 
@@ -118,13 +110,10 @@ public class CatalogRequestBuilder {
 
             @Override
             public void onError(Request request, Throwable t) {
-                GWT.log("List node sources from catalog failed. Request was " + request.toString(), t);
+                CatalogRequestBuilder.this.importFromCatalogPanel.setNodeSourceWindowLabelWithError("List node sources from catalog failed",
+                                                                                                    t);
             }
         };
-    }
-
-    private void logErrorMessage(RequestException e) {
-        GWT.log("Request to catalog failed", e);
     }
 
 }

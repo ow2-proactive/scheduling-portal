@@ -55,8 +55,8 @@ public class ImportNodeSourceLayout extends VLayout {
         addSelectedImportMethodPanel();
     }
 
-    public void setNodeSourceWindowLabelWithError(String errorMessage, String additionalLogMessage, Throwable e) {
-        this.nodeSourceWindow.setNodeSourceWindowLabelWithError(errorMessage, additionalLogMessage, e);
+    public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
+        this.nodeSourceWindow.setNodeSourceWindowLabelWithError(errorMessage, e);
     }
 
     void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
