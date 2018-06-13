@@ -37,14 +37,22 @@ public class CatalogUrlBuilder {
     public String getCatalogUrl() {
         if (this.catalogUrl == null) {
             String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
-            String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
+
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-                this.catalogUrl = defaultCatalogUrl;
+                this.catalogUrl = getDefaultCatalogUrl();
             } else {
                 this.catalogUrl = catalogUrlFromConfig;
             }
         }
         return this.catalogUrl;
+    }
+
+    /**
+     * The conventional URL of the catalog. We take the current URL and
+     * replace the RM target by the catalog target.
+     */
+    private String getDefaultCatalogUrl() {
+        return GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
     }
 
 }

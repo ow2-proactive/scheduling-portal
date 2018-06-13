@@ -111,8 +111,8 @@ public class CatalogRequestBuilder {
                     JSONObject nodeSource = nodeSources.get(i).isObject();
                     String nodeSourceName = nodeSource.get(NAME_KEY).isString().stringValue();
                     CatalogRequestBuilder.this.importFromCatalogPanel.addItemToNodeSourceListBox(bucketName + " - " +
-                                                                                            nodeSourceName,
-                                                                                            nodeSourceName);
+                                                                                                 nodeSourceName,
+                                                                                                 nodeSourceName);
                 }
             }
 

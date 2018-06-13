@@ -150,6 +150,10 @@ public abstract class NodeSourceWindow {
         this.window.destroy();
     }
 
+    public Label getNodeSourceWindowLabel() {
+        return this.nodeSourceWindowLabel;
+    }
+
     public List<FormItem> getFormItemsOfPlugin(String pluginName) {
         return this.allFormItemsPerPlugin.get(pluginName);
     }
@@ -411,18 +415,6 @@ public abstract class NodeSourceWindow {
         this.window.centerInPage();
     }
 
-    protected DynamicForm getNodeSourcePluginsForm() {
-        return this.nodeSourcePluginsForm;
-    }
-
-    protected CheckboxItem getNodesRecoverableCheckbox() {
-        return this.nodesRecoverableCheckbox;
-    }
-
-    protected Label getNodeSourceWindowLabel() {
-        return this.nodeSourceWindowLabel;
-    }
-
     /**
      * Allow sub classes to rework the form items that have been added to the
      * form.
@@ -657,11 +649,16 @@ public abstract class NodeSourceWindow {
             this.nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
             this.nodeSourcePluginsForm.show();
         } catch (ImportException e) {
-            this.nodeSourceWindowLabel.setContents("<span style='color:red'>Failed to import Node Source :<br>" +
-                                                   e.getMessage() + "</span>");
+            setNodeSourceWindowLabelWithError("Failed to import Node Source", "", e);
         } finally {
             NodeSourceWindow.this.createdFromImport = false;
         }
+    }
+
+    public void setNodeSourceWindowLabelWithError(String errorMessage, String additionalLogMessage, Throwable e) {
+        GWT.log(errorMessage, e);
+        this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + " :<br>" + e.getMessage() +
+                                               "</span>");
     }
 
 }

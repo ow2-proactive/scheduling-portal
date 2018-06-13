@@ -90,7 +90,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
             try {
                 nodeSourceConfigurationRequest.send();
             } catch (RequestException e) {
-                GWT.log("Request to catalog failed", e);
+                setNodeSourceWindowLabelWithError("Request sent to catalog failed", "", e);
             }
         }
     }
@@ -104,9 +104,15 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
             @Override
             public void onError(Request request, Throwable t) {
-                GWT.log("Import node source from catalog failed. Request was " + request.toString(), t);
+                setNodeSourceWindowLabelWithError("Import node source from catalog failed",
+                                                  "Request was: " + request.toString(),
+                                                  t);
             }
         };
+    }
+
+    private void setNodeSourceWindowLabelWithError(String userMessage, String additionalLogMessage, Throwable e) {
+        this.importNodeSourcePanel.setNodeSourceWindowLabelWithError(userMessage, additionalLogMessage, e);
     }
 
 }
