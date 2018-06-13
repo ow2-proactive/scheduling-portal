@@ -68,11 +68,11 @@ public class ImportNodeSourceLayout extends VLayout {
     }
 
     private void createImportPanel() {
-        setGroupTitle("Import Node Source");
+        setGroupTitle("or Import Node Source");
         setIsGroup(true);
         this.importPanel = new VerticalPanel();
         this.importPanel.setSpacing(10);
-        this.importPanel.setHeight("68px");
+        this.importPanel.setHeight("70px");
         this.importPanel.setWidth("240px");
         addMember(this.importPanel);
     }

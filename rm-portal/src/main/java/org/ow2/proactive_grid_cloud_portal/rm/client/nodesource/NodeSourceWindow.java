@@ -150,10 +150,6 @@ public abstract class NodeSourceWindow {
         this.window.destroy();
     }
 
-    public Label getNodeSourceWindowLabel() {
-        return this.nodeSourceWindowLabel;
-    }
-
     public List<FormItem> getFormItemsOfPlugin(String pluginName) {
         return this.allFormItemsPerPlugin.get(pluginName);
     }
@@ -296,7 +292,7 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowLayout.setMargin(5);
         nodeSourceWindowLayout.setMembersMargin(5);
 
-        HLayout nodeSourceWindowSubLayoutTop = new HLayout();
+        HLayout nodeSourceWindowSubLayoutTop = new HLayout(5);
         HLayout nodeSourceWindowSubLayoutBottom = new HLayout();
 
         VStack nodeSourcePluginsLayout = new VStack();
@@ -321,6 +317,10 @@ public abstract class NodeSourceWindow {
                                                " will be acquired, and a Policy, that dictates when resources can be acquired.");
         this.nodeSourceWindowLabel.setHeight(40);
 
+        VLayout createNodeSourceLayout = new VLayout();
+        createNodeSourceLayout.setGroupTitle("Create Node Source");
+        createNodeSourceLayout.setIsGroup(true);
+        createNodeSourceLayout.setPadding(10);
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
@@ -329,6 +329,7 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowForm.setWidth100();
         nodeSourceWindowForm.setFields(this.nodeSourceNameText, this.nodesRecoverableCheckbox);
         nodeSourceWindowForm.setTitleSuffix("");
+        createNodeSourceLayout.addMember(nodeSourceWindowForm);
 
         this.populateFormValues();
 
@@ -388,7 +389,7 @@ public abstract class NodeSourceWindow {
         scrollLayout.setBackgroundColor("#fafafa");
 
         nodeSourceWindowLayout.addMember(this.nodeSourceWindowLabel);
-        nodeSourceWindowSubLayoutTop.addMember(nodeSourceWindowForm);
+        nodeSourceWindowSubLayoutTop.addMember(createNodeSourceLayout);
         nodeSourceWindowSubLayoutTop.addMember(importNodeSourceLayout);
         nodeSourceWindowLayout.addMember(nodeSourceWindowSubLayoutTop);
         nodeSourceWindowSubLayoutBottom.setHeight100();
