@@ -116,6 +116,9 @@ public class RMConfig extends Config {
 
     public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
 
+    /** Workflow Catalog URL **/
+    public static final String CATALOG_URL = "sched.catalog.url";
+
     private static RMConfig instance = null;
 
     /**
@@ -249,4 +252,12 @@ public class RMConfig extends Config {
     public String getRMUrl() {
         return properties.get(RM_URL);
     }
+
+    /**
+     * @return the catalog url or null if none has been defined
+     */
+    public String getCatalogUrl() {
+        return properties.get(CATALOG_URL);
+    }
+
 }

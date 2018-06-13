@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
  * content is expected to be in JSON format, containing the configuration of a
  * node source.
  */
-public class ExportNodeSourceServlet extends HttpServlet {
+public class ExportNodeSourceToFileServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceServlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceToFileServlet.class);
 
     private static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
 

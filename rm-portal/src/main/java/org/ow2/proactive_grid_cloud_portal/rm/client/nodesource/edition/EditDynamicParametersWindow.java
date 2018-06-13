@@ -23,9 +23,9 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -62,9 +62,8 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem) {
-        fetchNodeSourceConfigurationWithCallback(windowLabel, windowForm, nodeSourceNameItem, nodesRecoverableItem);
+    protected void populateFormValues() {
+        fetchNodeSourceConfigurationWithCallback();
     }
 
     @Override
@@ -159,9 +158,9 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void manageNodeSourceWindowItems(TextItem nodeSourceNameItem, CheckboxItem nodesRecoverableItem) {
-        super.manageNodeSourceWindowItems(nodeSourceNameItem, nodesRecoverableItem);
-        nodesRecoverableItem.disable();
+    public void manageNodeSourceWindowItems() {
+        super.manageNodeSourceWindowItems();
+        this.nodesRecoverableCheckbox.disable();
     }
 
     private void disableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {

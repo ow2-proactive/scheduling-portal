@@ -48,11 +48,11 @@ import org.slf4j.LoggerFactory;
  * content is expected to be in JSON format, containing the configuration of a
  * node source.
  */
-public class ImportNodeSourceServlet extends HttpServlet {
+public class ImportNodeSourceFromFileServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportNodeSourceServlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImportNodeSourceFromFileServlet.class);
 
-    public static final String SERVLET_MAPPING = "importnodesource";
+    public static final String SERVLET_MAPPING_NAME = "importnodesource";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
