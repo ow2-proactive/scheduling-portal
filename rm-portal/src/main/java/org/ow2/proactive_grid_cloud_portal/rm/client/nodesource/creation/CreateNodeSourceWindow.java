@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.window;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.creation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +35,8 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.InlineItemModificationCreator;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator;
 
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -67,10 +68,9 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues(Label windowLabel, DynamicForm windowForm, TextItem nodeSourceNameItem,
-            CheckboxItem nodesRecoverableItem) {
+    protected void populateFormValues() {
 
-        nodesRecoverableItem.setValue(true);
+        this.nodesRecoverableCheckbox.setValue(true);
 
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
 
@@ -94,9 +94,9 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            windowForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            windowLabel.hide();
-            windowForm.show();
+            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            this.nodeSourcePluginsWaitingLabel.hide();
+            this.nodeSourcePluginsForm.show();
 
             hideAllFormItems();
 

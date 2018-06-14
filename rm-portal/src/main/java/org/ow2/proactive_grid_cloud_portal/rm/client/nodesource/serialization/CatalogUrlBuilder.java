@@ -23,12 +23,36 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
-public class ImportException extends Exception {
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
-    public ImportException(String s, Exception e) {
-        super(s, e);
+import com.google.gwt.core.client.GWT;
+
+
+public class CatalogUrlBuilder {
+
+    private String catalogUrl;
+
+    public String getCatalogUrl() {
+        if (this.catalogUrl == null) {
+            String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+
+            if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
+                this.catalogUrl = getDefaultCatalogUrl();
+            } else {
+                this.catalogUrl = catalogUrlFromConfig;
+            }
+        }
+        return this.catalogUrl;
+    }
+
+    /**
+     * The conventional URL of the catalog. We take the current URL and
+     * replace the RM target by the catalog target.
+     */
+    private String getDefaultCatalogUrl() {
+        return GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
     }
 
 }
