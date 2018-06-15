@@ -50,7 +50,7 @@ public class ExportNodeSourceToFileServlet extends HttpServlet {
 
     private static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
 
-    public static final String SERVLET_MAPPING = "exportnodesource";
+    public static final String SERVLET_MAPPING = "exportnodesourcetofile";
 
     public static final String MAIN_FORM_ITEM_NAME = "nodeSourceJson";
 

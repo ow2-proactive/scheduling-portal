@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToCatalogServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -1044,6 +1045,39 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                       });
     }
 
+    public void exportNodeSourceToCatalog(String nodeSourceName) {
+        FormPanel nodeSourceJsonForm = new FormPanel();
+        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
+        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceToCatalogServlet.SERVLET_MAPPING);
+
+        Hidden nodeSourceJsonItem = new Hidden("sessionId");
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.add(nodeSourceJsonItem);
+        nodeSourceJsonForm.setWidget(panel);
+
+        Window window = new Window();
+        window.addChild(nodeSourceJsonForm);
+        window.show();
+
+        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                      nodeSourceName,
+                                      new AsyncCallback<String>() {
+                                          public void onSuccess(String result) {
+                                              nodeSourceJsonItem.setValue(LoginModel.getInstance().getSessionId());
+                                              nodeSourceJsonForm.submit();
+                                              window.hide();
+                                          }
+
+                                          public void onFailure(Throwable caught) {
+                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
+                                                      ":<br>" + msg);
+                                          }
+                                      });
+    }
+
     /**
      * Remove nodes according to the current selection:
      * if a host is selected, multiple nodes will be removed
@@ -1339,4 +1373,5 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
                              });
     }
+
 }

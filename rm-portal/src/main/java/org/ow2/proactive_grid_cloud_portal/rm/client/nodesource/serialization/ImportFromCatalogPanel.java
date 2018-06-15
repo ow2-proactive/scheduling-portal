@@ -50,7 +50,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
         this.importNodeSourceLayout = importNodeSourceLayout;
         configureSize();
         createListBox();
-        new CatalogRequestBuilder(this).requestNodeSourcesFromAllBuckets();
+        new ImportFromCatalogPanelFeeder(this).requestNodeSourcesFromAllBuckets();
     }
 
     public void addItemToNodeSourceListBox(String displayName, String valueName) {
