@@ -121,7 +121,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
 
             this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            this.nodeSourceWindowLabel.hide();
+            this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
 
         }, this.window::hide);
