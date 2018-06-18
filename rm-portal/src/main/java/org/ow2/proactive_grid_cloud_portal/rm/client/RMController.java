@@ -48,8 +48,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToCatalogServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
@@ -1013,10 +1013,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new FormPanel();
-        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceToFileServlet.SERVLET_MAPPING);
+        FormPanel nodeSourceJsonForm = createNodeSourceSerializationForm(ExportNodeSourceToFileServlet.SERVLET_MAPPING);
 
         Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
 
@@ -1046,28 +1043,50 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new FormPanel();
-        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceToCatalogServlet.SERVLET_MAPPING);
+        FormPanel exportNodeSourceToCatalogForm = createNodeSourceSerializationForm(ExportNodeSourceToCatalogServlet.SERVLET_MAPPING);
 
-        Hidden nodeSourceJsonItem = new Hidden("sessionId");
+        Hidden sessionIdFormField = new Hidden("sessionId");
+        Hidden bucketNameFormField = new Hidden("bucketName");
+        Hidden nodeSourceNameFormField = new Hidden("name");
+        Hidden nodeSourceJsonFormField = new Hidden("nodeSourceJson");
+        Hidden catalogObjectKindFormField = new Hidden("kind");
+        Hidden catalogObjectCommitMessageFormField = new Hidden("commitMessage");
+        Hidden catalogObjectContentTypeFormField = new Hidden("objectContentType");
 
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(nodeSourceJsonItem);
-        nodeSourceJsonForm.setWidget(panel);
+        VerticalPanel formPanel = new VerticalPanel();
+        formPanel.add(sessionIdFormField);
+        formPanel.add(bucketNameFormField);
+        formPanel.add(nodeSourceNameFormField);
+        formPanel.add(nodeSourceJsonFormField);
+        formPanel.add(catalogObjectKindFormField);
+        formPanel.add(catalogObjectCommitMessageFormField);
+        formPanel.add(catalogObjectContentTypeFormField);
+        exportNodeSourceToCatalogForm.setWidget(formPanel);
 
-        Window window = new Window();
-        window.addChild(nodeSourceJsonForm);
-        window.show();
+        Window formWindow = new Window();
+        formWindow.addChild(exportNodeSourceToCatalogForm);
+        formWindow.show();
 
         rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
                                       nodeSourceName,
                                       new AsyncCallback<String>() {
                                           public void onSuccess(String result) {
-                                              nodeSourceJsonItem.setValue(LoginModel.getInstance().getSessionId());
-                                              nodeSourceJsonForm.submit();
-                                              window.hide();
+                                              try {
+                                                  NodeSourceConfiguration nodeSourceConfiguration = nodeSourceConfigurationParser.parseNodeSourceConfiguration(result);
+                                                  sessionIdFormField.setValue(LoginModel.getInstance().getSessionId());
+                                                  bucketNameFormField.setValue("node-sources");
+                                                  nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
+                                                  nodeSourceJsonFormField.setValue(result);
+                                                  catalogObjectKindFormField.setValue("NodeSource");
+                                                  catalogObjectCommitMessageFormField.setValue("commitmessage");
+                                                  catalogObjectContentTypeFormField.setValue("application/json");
+                                                  exportNodeSourceToCatalogForm.submit();
+                                              } catch (ImportException e) {
+                                                  String msg = JSONUtils.getJsonErrorMessage(e);
+                                                  SC.warn("Failed to export node source to catalog:<br>" + msg);
+                                              } finally {
+                                                  formWindow.hide();
+                                              }
                                           }
 
                                           public void onFailure(Throwable caught) {
@@ -1076,6 +1095,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                       ":<br>" + msg);
                                           }
                                       });
+    }
+
+    private FormPanel createNodeSourceSerializationForm(String servletName) {
+        FormPanel nodeSourceJsonForm = new FormPanel();
+        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
+        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + servletName);
+        return nodeSourceJsonForm;
     }
 
     /**

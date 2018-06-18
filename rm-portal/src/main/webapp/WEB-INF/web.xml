@@ -40,7 +40,7 @@
 
 	<servlet>
 		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToCatalogServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet</servlet-class>
 	</servlet>
 
 	<servlet>

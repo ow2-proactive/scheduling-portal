@@ -1,0 +1,93 @@
+/*
+ * ProActive Parallel Suite(TM):
+ * The Open Source library for parallel and distributed
+ * Workflows & Scheduling, Orchestration, Cloud Automation
+ * and Big Data Analysis on Enterprise Grids & Clouds.
+ *
+ * Copyright (c) 2007 - 2017 ActiveEon
+ * Contact: contact@activeeon.com
+ *
+ * This library is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation: version 3 of
+ * the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * If needed, contact us to obtain a release under GPL Version 2 or 3
+ * or a different license than the AGPL.
+ */
+package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+
+import java.io.File;
+
+
+public class CatalogObject {
+
+    private String bucketName;
+
+    private String nodeSourceName;
+
+    private File nodeSourceJsonFile;
+
+    private String kind;
+
+    private String commitMessage;
+
+    private String objectContentType;
+
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
+    }
+
+    public String getNodeSourceName() {
+        return nodeSourceName;
+    }
+
+    public void setNodeSourceName(String nodeSourceName) {
+        this.nodeSourceName = nodeSourceName;
+    }
+
+    public File getNodeSourceJsonFile() {
+        return nodeSourceJsonFile;
+    }
+
+    public void setNodeSourceJsonFile(File nodeSourceJsonFile) {
+        this.nodeSourceJsonFile = nodeSourceJsonFile;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    public void setCommitMessage(String commitMessage) {
+        this.commitMessage = commitMessage;
+    }
+
+    public String getObjectContentType() {
+        return objectContentType;
+    }
+
+    public void setObjectContentType(String objectContentType) {
+        this.objectContentType = objectContentType;
+    }
+
+}
