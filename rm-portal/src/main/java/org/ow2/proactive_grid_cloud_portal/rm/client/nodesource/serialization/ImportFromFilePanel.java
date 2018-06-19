@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
-import org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceFromFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -39,7 +39,7 @@ public class ImportFromFilePanel extends FormPanel {
     ImportFromFilePanel(ImportNodeSourceLayout importNodeSourceLayout) {
         setEncoding(FormPanel.ENCODING_MULTIPART);
         setMethod(FormPanel.METHOD_POST);
-        setAction(GWT.getModuleBaseURL() + ImportNodeSourceFromFileServlet.SERVLET_MAPPING_NAME);
+        setAction(GWT.getModuleBaseURL() + ServletMappings.IMPORT_NODE_SOURCE_FROM_FILE);
         add(getFileUploadItem());
         addSubmitCompleteHandler(importNodeSourceLayout::handleNodeSourceImport);
     }

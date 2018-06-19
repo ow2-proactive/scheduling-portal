@@ -23,22 +23,14 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public class CatalogRequestConstants {
+public class ServletMappings {
 
-    public static final String URL_CATALOG = "http://localhost:8080/catalog";
+    public static final String EXPORT_NODE_SOURCE_TO_FILE = "exportnodesourcetofile";
 
-    public static final String BUCKET_NAME_PARAM = "bucketName";
+    public static final String EXPORT_NODE_SOURCE_TO_CATALOG = "exportnodesourcetocatalog";
 
-    public static final String NAME_PARAM = "name";
-
-    public static final String NODE_SOURCE_JSON_PARAM = "nodeSourceJson";
-
-    public static final String KIND_PARAM = "kind";
-
-    public static final String COMMIT_MESSAGE_PARAM = "commitMessage";
-
-    public static final String OBJECT_CONTENT_TYPE_PARAM = "objectContentType";
+    public static final String IMPORT_NODE_SOURCE_FROM_FILE = "importnodesourcefromfile";
 
 }

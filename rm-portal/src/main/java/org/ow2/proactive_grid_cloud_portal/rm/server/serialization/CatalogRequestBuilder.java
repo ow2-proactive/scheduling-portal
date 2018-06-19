@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.serialization.CatalogRequestConstants.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams.*;
 
 import java.io.IOException;
 import java.security.KeyManagementException;

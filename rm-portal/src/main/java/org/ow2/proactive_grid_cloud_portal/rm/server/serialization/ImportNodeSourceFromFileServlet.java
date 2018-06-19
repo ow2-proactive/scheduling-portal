@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server;
+package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,6 +39,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONWriter;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,6 @@ import org.slf4j.LoggerFactory;
 public class ImportNodeSourceFromFileServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportNodeSourceFromFileServlet.class);
-
-    public static final String SERVLET_MAPPING_NAME = "importnodesource";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {

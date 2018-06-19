@@ -48,9 +48,10 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet;
-import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -1013,7 +1014,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = createNodeSourceSerializationForm(ExportNodeSourceToFileServlet.SERVLET_MAPPING);
+        FormPanel nodeSourceJsonForm = createNodeSourceSerializationForm(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
 
         Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
 
@@ -1043,15 +1044,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        FormPanel exportNodeSourceToCatalogForm = createNodeSourceSerializationForm(ExportNodeSourceToCatalogServlet.SERVLET_MAPPING);
+        FormPanel exportNodeSourceToCatalogForm = createNodeSourceSerializationForm(ServletMappings.EXPORT_NODE_SOURCE_TO_CATALOG);
 
         Hidden sessionIdFormField = new Hidden("sessionId");
-        Hidden bucketNameFormField = new Hidden("bucketName");
-        Hidden nodeSourceNameFormField = new Hidden("name");
-        Hidden nodeSourceJsonFormField = new Hidden("nodeSourceJson");
-        Hidden catalogObjectKindFormField = new Hidden("kind");
-        Hidden catalogObjectCommitMessageFormField = new Hidden("commitMessage");
-        Hidden catalogObjectContentTypeFormField = new Hidden("objectContentType");
+        Hidden bucketNameFormField = new Hidden(CatalogRequestParams.BUCKET_NAME_PARAM);
+        Hidden nodeSourceNameFormField = new Hidden(CatalogRequestParams.NAME_PARAM);
+        Hidden nodeSourceJsonFormField = new Hidden(CatalogRequestParams.FILE_CONTENT_PARAM);
+        Hidden catalogObjectKindFormField = new Hidden(CatalogRequestParams.KIND_PARAM);
+        Hidden catalogObjectCommitMessageFormField = new Hidden(CatalogRequestParams.COMMIT_MESSAGE_PARAM);
+        Hidden catalogObjectContentTypeFormField = new Hidden(CatalogRequestParams.OBJECT_CONTENT_TYPE_PARAM);
 
         VerticalPanel formPanel = new VerticalPanel();
         formPanel.add(sessionIdFormField);

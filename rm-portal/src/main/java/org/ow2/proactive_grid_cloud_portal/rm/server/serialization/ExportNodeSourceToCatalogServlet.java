@@ -25,21 +25,18 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.server.serialization.CatalogRequestConstants.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +49,6 @@ import org.slf4j.LoggerFactory;
 public class ExportNodeSourceToCatalogServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceToCatalogServlet.class);
-
-    public static final String SERVLET_MAPPING = "exportnodesourcetocatalog";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -69,41 +64,30 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
         response.setContentType("text/html");
         File nodeSourceJsonFile = null;
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(4096);
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(1000000);
-
-            List<?> fileItems = upload.parseRequest(request);
-            Iterator<?> i = fileItems.iterator();
-
             String sessionId = null;
             CatalogObject catalogObject = new CatalogObject();
-            while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
-                if (fi.isFormField()) {
-                    if (fi.getFieldName().equals("sessionId")) {
-                        sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals(BUCKET_NAME_PARAM)) {
-                        catalogObject.setBucketName(fi.getString());
-                    } else if (fi.getFieldName().equals(NAME_PARAM)) {
-                        catalogObject.setNodeSourceName(fi.getString());
-                    } else if (fi.getFieldName().equals(NODE_SOURCE_JSON_PARAM)) {
+            for (FileItem formItem : new ServletRequestTransformer().getFormItems(request)) {
+                if (formItem.isFormField()) {
+                    if (formItem.getFieldName().equals("sessionId")) {
+                        sessionId = formItem.getString();
+                    } else if (formItem.getFieldName().equals(BUCKET_NAME_PARAM)) {
+                        catalogObject.setBucketName(formItem.getString());
+                    } else if (formItem.getFieldName().equals(NAME_PARAM)) {
+                        catalogObject.setNodeSourceName(formItem.getString());
+                    } else if (formItem.getFieldName().equals(FILE_CONTENT_PARAM)) {
                         nodeSourceJsonFile = File.createTempFile("node-source-configuration", ".json");
-                        new PrintWriter(nodeSourceJsonFile).write(fi.getString());
-                        fi.write(nodeSourceJsonFile);
+                        new PrintWriter(nodeSourceJsonFile).write(formItem.getString());
+                        formItem.write(nodeSourceJsonFile);
                         catalogObject.setNodeSourceJsonFile(nodeSourceJsonFile);
-                    } else if (fi.getFieldName().equals(KIND_PARAM)) {
-                        catalogObject.setKind(fi.getString());
-                    } else if (fi.getFieldName().equals(COMMIT_MESSAGE_PARAM)) {
-                        catalogObject.setCommitMessage(fi.getString());
-                    } else if (fi.getFieldName().equals(OBJECT_CONTENT_TYPE_PARAM)) {
-                        catalogObject.setObjectContentType(fi.getString());
+                    } else if (formItem.getFieldName().equals(KIND_PARAM)) {
+                        catalogObject.setKind(formItem.getString());
+                    } else if (formItem.getFieldName().equals(COMMIT_MESSAGE_PARAM)) {
+                        catalogObject.setCommitMessage(formItem.getString());
+                    } else if (formItem.getFieldName().equals(OBJECT_CONTENT_TYPE_PARAM)) {
+                        catalogObject.setObjectContentType(formItem.getString());
                     }
                 }
-                fi.delete();
+                formItem.delete();
             }
             CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObject);
             String requestUri = catalogRequestBuilder.build();
