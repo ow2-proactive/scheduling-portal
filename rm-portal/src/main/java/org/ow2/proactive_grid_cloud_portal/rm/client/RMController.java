@@ -46,10 +46,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ExportToCatalogConfirmWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
@@ -101,6 +102,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
+
+    private ExportToCatalogConfirmWindow exportNodeSourceToCatalogWindow;
 
     @Override
     public String getLoginSettingKey() {
@@ -1014,7 +1017,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = createNodeSourceSerializationForm(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
+        FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
 
         Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
 
@@ -1033,6 +1036,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               nodeSourceJsonItem.setValue(result);
                                               nodeSourceJsonForm.submit();
                                               window.hide();
+                                              window.destroy();
                                           }
 
                                           public void onFailure(Throwable caught) {
@@ -1044,66 +1048,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        FormPanel exportNodeSourceToCatalogForm = createNodeSourceSerializationForm(ServletMappings.EXPORT_NODE_SOURCE_TO_CATALOG);
-
-        Hidden sessionIdFormField = new Hidden("sessionId");
-        Hidden bucketNameFormField = new Hidden(CatalogRequestParams.BUCKET_NAME_PARAM);
-        Hidden nodeSourceNameFormField = new Hidden(CatalogRequestParams.NAME_PARAM);
-        Hidden nodeSourceJsonFormField = new Hidden(CatalogRequestParams.FILE_CONTENT_PARAM);
-        Hidden catalogObjectKindFormField = new Hidden(CatalogRequestParams.KIND_PARAM);
-        Hidden catalogObjectCommitMessageFormField = new Hidden(CatalogRequestParams.COMMIT_MESSAGE_PARAM);
-        Hidden catalogObjectContentTypeFormField = new Hidden(CatalogRequestParams.OBJECT_CONTENT_TYPE_PARAM);
-
-        VerticalPanel formPanel = new VerticalPanel();
-        formPanel.add(sessionIdFormField);
-        formPanel.add(bucketNameFormField);
-        formPanel.add(nodeSourceNameFormField);
-        formPanel.add(nodeSourceJsonFormField);
-        formPanel.add(catalogObjectKindFormField);
-        formPanel.add(catalogObjectCommitMessageFormField);
-        formPanel.add(catalogObjectContentTypeFormField);
-        exportNodeSourceToCatalogForm.setWidget(formPanel);
-
-        Window formWindow = new Window();
-        formWindow.addChild(exportNodeSourceToCatalogForm);
-        formWindow.show();
-
-        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                      nodeSourceName,
-                                      new AsyncCallback<String>() {
-                                          public void onSuccess(String result) {
-                                              try {
-                                                  NodeSourceConfiguration nodeSourceConfiguration = nodeSourceConfigurationParser.parseNodeSourceConfiguration(result);
-                                                  sessionIdFormField.setValue(LoginModel.getInstance().getSessionId());
-                                                  bucketNameFormField.setValue("node-sources");
-                                                  nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
-                                                  nodeSourceJsonFormField.setValue(result);
-                                                  catalogObjectKindFormField.setValue("NodeSource");
-                                                  catalogObjectCommitMessageFormField.setValue("commitmessage");
-                                                  catalogObjectContentTypeFormField.setValue("application/json");
-                                                  exportNodeSourceToCatalogForm.submit();
-                                              } catch (ImportException e) {
-                                                  String msg = JSONUtils.getJsonErrorMessage(e);
-                                                  SC.warn("Failed to export node source to catalog:<br>" + msg);
-                                              } finally {
-                                                  formWindow.hide();
-                                              }
-                                          }
-
-                                          public void onFailure(Throwable caught) {
-                                              String msg = JSONUtils.getJsonErrorMessage(caught);
-                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
-                                                      ":<br>" + msg);
-                                          }
-                                      });
-    }
-
-    private FormPanel createNodeSourceSerializationForm(String servletName) {
-        FormPanel nodeSourceJsonForm = new FormPanel();
-        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + servletName);
-        return nodeSourceJsonForm;
+        this.exportNodeSourceToCatalogWindow = new ExportToCatalogConfirmWindow(nodeSourceName, this);
+        this.exportNodeSourceToCatalogWindow.show();
     }
 
     /**

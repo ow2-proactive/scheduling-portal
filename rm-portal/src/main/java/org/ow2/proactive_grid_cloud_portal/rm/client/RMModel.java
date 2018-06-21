@@ -80,6 +80,11 @@ public abstract class RMModel implements Model {
     public abstract NodeSourceConfiguration getEditedNodeSourceConfiguration();
 
     /**
+     * @param editedNodeSourceConfiguration the configuration of the node source that is being manipulated
+     */
+    public abstract void setEditedNodeSourceConfiguration(NodeSourceConfiguration editedNodeSourceConfiguration);
+
+    /**
      * @return number of deploying nodes
      */
     public abstract int getNumDeploying();

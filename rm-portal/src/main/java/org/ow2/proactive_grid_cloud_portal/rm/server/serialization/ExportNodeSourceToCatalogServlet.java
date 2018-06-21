@@ -52,6 +52,7 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        LOGGER.info("Calling POST");
         upload(request, response);
     }
 
