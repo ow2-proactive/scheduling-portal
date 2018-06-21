@@ -25,15 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -43,19 +34,32 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.*;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.*;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
 public class ExportToCatalogConfirmWindow extends Window {
+
+    public static final String WINDOW_TITLE = "Export Node Source to Catalog";
+
+    public static final int WINDOW_WIDTH = 380;
+
+    public static final int WINDOW_HEIGHT = 180;
 
     private String nodeSourceName;
 
@@ -77,10 +81,12 @@ public class ExportToCatalogConfirmWindow extends Window {
     }
 
     private void configureWindow() {
-        setTitle("Export Node Source to Catalog");
+        setTitle(WINDOW_TITLE);
         setShowMinimizeButton(false);
         setIsModal(true);
         setShowModalMask(true);
+        setWidth(WINDOW_WIDTH);
+        setHeight(WINDOW_HEIGHT);
         setCanDragResize(false);
         setCanDragReposition(false);
         centerInPage();
@@ -91,12 +97,17 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.exportNodeSourceToCatalogForm.setWidget(this.hiddenFormItemsPanel);
 
         Label label = new Label("You are about to publish the Node Source " + nodeSourceName +
-                                " to the node-sources bucket.");
+                                " to the catalog. Please choose the catalog bucket in which you want to export the Node Source.");
+        label.setHeight(40);
 
+        HorizontalPanel bucketListPanel = new HorizontalPanel();
+        bucketListPanel.setHeight("40px");
         ListBox bucketList = new ListBox();
         fillBucketList(label, bucketList);
+        bucketListPanel.add(bucketList);
 
         HLayout buttons = new HLayout();
+        buttons.setHeight(40);
         buttons.setMembersMargin(5);
         buttons.setAlign(Alignment.RIGHT);
 
@@ -107,10 +118,10 @@ public class ExportToCatalogConfirmWindow extends Window {
         buttons.setMembers(ok, cancel);
 
         VLayout layout = new VLayout();
-        layout.setMembersMargin(5);
-        layout.setMargin(5);
+        layout.setAlign(VerticalAlignment.TOP);
+        layout.setMargin(10);
         layout.addMember(label);
-        layout.addMember(bucketList);
+        layout.addMember(bucketListPanel);
         layout.addMember(buttons);
 
         addItem(layout);
