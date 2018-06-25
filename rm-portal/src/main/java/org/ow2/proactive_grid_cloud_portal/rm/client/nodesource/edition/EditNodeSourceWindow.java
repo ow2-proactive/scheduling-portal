@@ -100,12 +100,11 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
 
+            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+            this.allFormItems = prepareFormItems();
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
-
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-            this.allFormItems = prepareFormItems();
 
             PluginDescriptor focusedInfrastructurePlugin = prepareInfrastructureFormItems(nodeSourceConfiguration,
                                                                                           selectItemValues);

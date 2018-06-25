@@ -70,13 +70,12 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     @Override
     protected void populateFormValues() {
 
-        this.nodesRecoverableCheckbox.setValue(true);
-
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
             this.allFormItems = prepareFormItems();
+            this.nodesRecoverableCheckbox.setValue(true);
 
             this.allFormItems.add(this.infrastructureSelectItem);
             addAllPluginValuesToAllFormItems(selectItemValues,
