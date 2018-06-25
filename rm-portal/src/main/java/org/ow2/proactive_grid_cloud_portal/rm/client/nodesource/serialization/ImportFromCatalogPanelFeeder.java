@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -41,13 +44,24 @@ public class ImportFromCatalogPanelFeeder {
 
     private CatalogRequestBuilder catalogRequestBuilder;
 
+    private Map<String, String> bucketNamePerNodeSourceName;
+
     public ImportFromCatalogPanelFeeder(ImportFromCatalogPanel importFromCatalogPanel) {
         this.importFromCatalogPanel = importFromCatalogPanel;
         this.catalogRequestBuilder = new CatalogRequestBuilder(this);
+        this.bucketNamePerNodeSourceName = new HashMap<>();
     }
 
     public void requestNodeSourcesFromAllBuckets() {
         this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack());
+    }
+
+    public void setNodeSourceWindowLabelWithError(String userMessage, Throwable e) {
+        this.importFromCatalogPanel.setNodeSourceWindowLabelWithError(userMessage, e);
+    }
+
+    public String getBucketNameForNodeSource(String nodeSourceName) {
+        return this.bucketNamePerNodeSourceName.get(nodeSourceName);
     }
 
     private RequestCallback getBucketsRequestCallBack() {
@@ -84,6 +98,7 @@ public class ImportFromCatalogPanelFeeder {
                 for (int i = 0; i < nodeSources.size(); i++) {
                     JSONObject nodeSource = nodeSources.get(i).isObject();
                     String nodeSourceName = nodeSource.get(NAME_KEY).isString().stringValue();
+                    ImportFromCatalogPanelFeeder.this.bucketNamePerNodeSourceName.put(nodeSourceName, bucketName);
                     ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.addItemToNodeSourceListBox(bucketName +
                                                                                                         " - " +
                                                                                                         nodeSourceName,
@@ -99,7 +114,4 @@ public class ImportFromCatalogPanelFeeder {
         };
     }
 
-    public void setNodeSourceWindowLabelWithError(String userMessage, Throwable e) {
-        this.importFromCatalogPanel.setNodeSourceWindowLabelWithError(userMessage, e);
-    }
 }

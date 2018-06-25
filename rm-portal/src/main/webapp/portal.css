@@ -14,6 +14,11 @@
     color: #003168
 }
 
+.generalParametersStyleDisabled {
+    font-weight: bold;
+    color: #AAAAAA
+}
+
 .paddingLeftAndRight {
 	padding-left: 10px;
 	padding-right: 10px;

@@ -95,6 +95,8 @@ public abstract class NodeSourceWindow {
 
     protected TextItem nodeSourceNameText;
 
+    protected Label generalParametersLabel;
+
     protected SelectItem infrastructureSelectItem;
 
     protected SelectItem policySelectItem;
@@ -295,10 +297,10 @@ public abstract class NodeSourceWindow {
 
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
-        Label generalParametersLabel = new Label("General Parameters :");
-        generalParametersLabel.setStyleName("generalParametersStyle");
-        generalParametersLabel.setHeight("20px");
-        generalParametersLabel.setMargin(5);
+        this.generalParametersLabel = new Label("General Parameters :");
+        this.generalParametersLabel.setStyleName("generalParametersStyle");
+        this.generalParametersLabel.setHeight("20px");
+        this.generalParametersLabel.setMargin(5);
 
         this.nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
         this.nodeSourcePluginsWaitingLabel.setIcon("loading.gif");

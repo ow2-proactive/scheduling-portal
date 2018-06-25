@@ -42,15 +42,18 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
 
+    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
+
     private ImportNodeSourceLayout importNodeSourceLayout;
 
     private ListBox nodeSourceListBox;
 
     ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourceLayout) {
         this.importNodeSourceLayout = importNodeSourceLayout;
+        this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();
         createListBox();
-        new ImportFromCatalogPanelFeeder(this).requestNodeSourcesFromAllBuckets();
+        this.importFromCatalogPanelFeeder.requestNodeSourcesFromAllBuckets();
     }
 
     public void addItemToNodeSourceListBox(String displayName, String valueName) {
@@ -82,9 +85,9 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void requestNodeSourceConfiguration() {
         String selectedNodeSourceInList = this.nodeSourceListBox.getSelectedValue();
         if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
-            String nodeSourceConfigurationRequestUrl = new CatalogUrlBuilder().getCatalogUrl() +
-                                                       "/buckets/node-sources/resources/" + selectedNodeSourceInList +
-                                                       "/raw";
+            String nodeSourceConfigurationRequestUrl = new CatalogUrlBuilder().getCatalogUrl() + "/buckets/" +
+                                                       this.importFromCatalogPanelFeeder.getBucketNameForNodeSource(selectedNodeSourceInList) +
+                                                       "/resources/" + selectedNodeSourceInList + "/raw";
             RequestBuilder nodeSourceConfigurationRequest = new RequestBuilder(RequestBuilder.GET,
                                                                                nodeSourceConfigurationRequestUrl);
             nodeSourceConfigurationRequest.setHeader(CatalogRequestBuilder.SESSION_ID_PARAMETER_NAME,
