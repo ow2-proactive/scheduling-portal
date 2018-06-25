@@ -63,44 +63,60 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
 
     private void upload(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("text/html");
-        File nodeSourceJsonFile = null;
+        CatalogObjectAction catalogObjectAction = null;
         try {
-            String sessionId = null;
-            CatalogObject catalogObject = new CatalogObject();
-            for (FileItem formItem : new ServletRequestTransformer().getFormItems(request)) {
-                if (formItem.isFormField()) {
-                    if (formItem.getFieldName().equals("sessionId")) {
-                        sessionId = formItem.getString();
-                    } else if (formItem.getFieldName().equals(BUCKET_NAME_PARAM)) {
-                        catalogObject.setBucketName(formItem.getString());
-                    } else if (formItem.getFieldName().equals(NAME_PARAM)) {
-                        catalogObject.setNodeSourceName(formItem.getString());
-                    } else if (formItem.getFieldName().equals(FILE_CONTENT_PARAM)) {
-                        nodeSourceJsonFile = File.createTempFile("node-source-configuration", ".json");
-                        new PrintWriter(nodeSourceJsonFile).write(formItem.getString());
-                        formItem.write(nodeSourceJsonFile);
-                        catalogObject.setNodeSourceJsonFile(nodeSourceJsonFile);
-                    } else if (formItem.getFieldName().equals(KIND_PARAM)) {
-                        catalogObject.setKind(formItem.getString());
-                    } else if (formItem.getFieldName().equals(COMMIT_MESSAGE_PARAM)) {
-                        catalogObject.setCommitMessage(formItem.getString());
-                    } else if (formItem.getFieldName().equals(OBJECT_CONTENT_TYPE_PARAM)) {
-                        catalogObject.setObjectContentType(formItem.getString());
-                    }
-                }
-                formItem.delete();
-            }
-            CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObject);
+            catalogObjectAction = buildCatalogObjetAction(request);
+            CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObjectAction);
             String requestUri = catalogRequestBuilder.build();
             LOGGER.info("Node Source exported to catalog using resource URI: " + requestUri);
-            catalogRequestBuilder.postNodeSourceRequestToCatalog(sessionId, requestUri, response);
+            catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
+                                                                 requestUri,
+                                                                 response);
         } catch (Exception e) {
             logErrorAndWriteResponseToClient(e, response);
         } finally {
-            if (nodeSourceJsonFile != null) {
-                nodeSourceJsonFile.delete();
+            if (catalogObjectAction != null && catalogObjectAction.getNodeSourceJsonFile() != null) {
+                catalogObjectAction.getNodeSourceJsonFile().delete();
             }
         }
+    }
+
+    private CatalogObjectAction buildCatalogObjetAction(HttpServletRequest request) throws Exception {
+        CatalogObjectAction catalogObjectAction = new CatalogObjectAction();
+        for (FileItem formItem : new ServletRequestTransformer().getFormItems(request)) {
+            if (formItem.isFormField()) {
+                String fieldValue = formItem.getString();
+                switch (formItem.getFieldName()) {
+                    case SESSION_ID:
+                        catalogObjectAction.setSessionId(fieldValue);
+                        break;
+                    case BUCKET_NAME_PARAM:
+                        catalogObjectAction.setBucketName(fieldValue);
+                        break;
+                    case NAME_PARAM:
+                        catalogObjectAction.setNodeSourceName(fieldValue);
+                        break;
+                    case FILE_CONTENT_PARAM:
+                        File nodeSourceJsonFile = File.createTempFile("node-source-configuration", ".json");
+                        new PrintWriter(nodeSourceJsonFile).write(fieldValue);
+                        formItem.write(nodeSourceJsonFile);
+                        catalogObjectAction.setNodeSourceJsonFile(nodeSourceJsonFile);
+                        break;
+                    case KIND_PARAM:
+                        catalogObjectAction.setKind(fieldValue);
+                        break;
+                    case COMMIT_MESSAGE_PARAM:
+                        catalogObjectAction.setCommitMessage(fieldValue);
+                        break;
+                    case OBJECT_CONTENT_TYPE_PARAM:
+                        catalogObjectAction.setObjectContentType(fieldValue);
+                        break;
+                    default:
+                }
+            }
+            formItem.delete();
+        }
+        return catalogObjectAction;
     }
 
     private void logErrorAndWriteResponseToClient(Exception e, HttpServletResponse response) {

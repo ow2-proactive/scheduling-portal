@@ -28,7 +28,9 @@ package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 import java.io.File;
 
 
-public class CatalogObject {
+public class CatalogObjectAction {
+
+    private String sessionId;
 
     private String bucketName;
 
@@ -41,6 +43,14 @@ public class CatalogObject {
     private String commitMessage;
 
     private String objectContentType;
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     public String getBucketName() {
         return bucketName;

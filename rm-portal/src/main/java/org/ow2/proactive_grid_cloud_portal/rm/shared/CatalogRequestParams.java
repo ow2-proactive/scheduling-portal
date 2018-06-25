@@ -27,6 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
 public class CatalogRequestParams {
 
+    public static final String SESSION_ID = "sessionId";
+
     public static final String URL_CATALOG = "http://localhost:8080/catalog";
 
     public static final String BUCKET_NAME_PARAM = "bucketName";

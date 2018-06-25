@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,26 +48,28 @@ import org.apache.http.impl.client.HttpClients;
 
 public class CatalogRequestBuilder {
 
-    private final CatalogObject catalogObject;
+    private final CatalogObjectAction catalogObjectAction;
 
-    public CatalogRequestBuilder(CatalogObject catalogObject) {
-        this.catalogObject = catalogObject;
+    public CatalogRequestBuilder(CatalogObjectAction catalogObjectAction) {
+        this.catalogObjectAction = catalogObjectAction;
     }
 
     public String build() {
-        return new StringBuilder(URL_CATALOG).append("/buckets/")
-                                             .append(this.catalogObject.getBucketName())
-                                             .append("/resources?")
-                                             .append(paramPair(NAME_PARAM, this.catalogObject.getNodeSourceName()))
-                                             .append("&")
-                                             .append(paramPair(KIND_PARAM, this.catalogObject.getKind()))
-                                             .append("&")
-                                             .append(paramPair(COMMIT_MESSAGE_PARAM,
-                                                               this.catalogObject.getCommitMessage()))
-                                             .append("&")
-                                             .append(paramPair(OBJECT_CONTENT_TYPE_PARAM,
-                                                               this.catalogObject.getObjectContentType()))
-                                             .toString();
+        StringBuilder builder = new StringBuilder(URL_CATALOG).append("/buckets/")
+                                                              .append(this.catalogObjectAction.getBucketName())
+                                                              .append("/resources?");
+        return appendParameters(builder,
+                                paramPair(NAME_PARAM, this.catalogObjectAction.getNodeSourceName()),
+                                paramPair(KIND_PARAM, this.catalogObjectAction.getKind()),
+                                paramPair(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage()),
+                                paramPair(OBJECT_CONTENT_TYPE_PARAM,
+                                          this.catalogObjectAction.getObjectContentType())).toString();
+    }
+
+    private StringBuilder appendParameters(StringBuilder builder, String... paramPairs) {
+        Arrays.stream(paramPairs).forEach(paramPair -> builder.append(paramPair).append("&"));
+        builder.deleteCharAt(builder.lastIndexOf("&"));
+        return builder;
     }
 
     public void postNodeSourceRequestToCatalog(String sessionId, String fullUri, HttpServletResponse response)
@@ -90,7 +93,7 @@ public class CatalogRequestBuilder {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setBoundary(boundary);
         builder.setMode(org.apache.http.entity.mime.HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addPart("file", new FileBody(this.catalogObject.getNodeSourceJsonFile()));
+        builder.addPart("file", new FileBody(this.catalogObjectAction.getNodeSourceJsonFile()));
         post.setEntity(builder.build());
         return post;
     }

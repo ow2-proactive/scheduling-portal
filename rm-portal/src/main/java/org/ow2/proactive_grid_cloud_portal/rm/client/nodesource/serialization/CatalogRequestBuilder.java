@@ -46,12 +46,7 @@ public class CatalogRequestBuilder {
     }
 
     public void sendRequestToCatalog(String endpoint, RequestCallback callback) {
-        String endpointToAddToCatalogUrl = endpoint;
-        if (endpoint.startsWith("/")) {
-            endpointToAddToCatalogUrl = endpoint.substring(1);
-        }
-        RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
-                                                    this.catalogUrl + "/" + endpointToAddToCatalogUrl);
+        RequestBuilder request = new RequestBuilder(RequestBuilder.GET, this.catalogUrl + "/" + endpoint);
         request.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         request.setCallback(callback);
         try {
