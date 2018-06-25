@@ -1048,8 +1048,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        this.exportNodeSourceToCatalogWindow = new ExportToCatalogConfirmWindow(nodeSourceName, this);
-        this.exportNodeSourceToCatalogWindow.show();
+        new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
     }
 
     /**

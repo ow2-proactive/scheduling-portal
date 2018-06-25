@@ -301,8 +301,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         return this.editedNodeSourceConfiguration;
     }
 
-    @Override
-    public void setEditedNodeSourceConfiguration(NodeSourceConfiguration editedNodeSourceConfiguration) {
+    void setEditedNodeSourceConfiguration(NodeSourceConfiguration editedNodeSourceConfiguration) {
         this.editedNodeSourceConfiguration = editedNodeSourceConfiguration;
     }
 

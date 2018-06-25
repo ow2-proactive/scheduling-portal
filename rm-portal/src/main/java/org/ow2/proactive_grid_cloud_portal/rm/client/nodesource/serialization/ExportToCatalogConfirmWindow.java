@@ -43,12 +43,16 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.*;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -210,30 +214,21 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private class ExportToCatalogHiddenPanel extends VerticalPanel {
 
-        private Hidden sessionIdFormField;
+        private Hidden sessionIdFormField = new Hidden("sessionId");
 
-        private Hidden bucketNameFormField;
+        private Hidden bucketNameFormField = new Hidden(CatalogRequestParams.BUCKET_NAME_PARAM);
 
-        private Hidden nodeSourceNameFormField;
+        private Hidden nodeSourceNameFormField = new Hidden(CatalogRequestParams.NAME_PARAM);
 
-        private Hidden nodeSourceJsonFormField;
+        private Hidden nodeSourceJsonFormField = new Hidden(CatalogRequestParams.FILE_CONTENT_PARAM);
 
-        private Hidden catalogObjectKindFormField;
+        private Hidden catalogObjectKindFormField = new Hidden(CatalogRequestParams.KIND_PARAM);
 
-        private Hidden catalogObjectCommitMessageFormField;
+        private Hidden catalogObjectCommitMessageFormField = new Hidden(CatalogRequestParams.COMMIT_MESSAGE_PARAM);
 
-        private Hidden catalogObjectContentTypeFormField;
+        private Hidden catalogObjectContentTypeFormField = new Hidden(CatalogRequestParams.OBJECT_CONTENT_TYPE_PARAM);
 
         private ExportToCatalogHiddenPanel() {
-
-            this.sessionIdFormField = new Hidden("sessionId");
-            this.bucketNameFormField = new Hidden(CatalogRequestParams.BUCKET_NAME_PARAM);
-            this.nodeSourceNameFormField = new Hidden(CatalogRequestParams.NAME_PARAM);
-            this.nodeSourceJsonFormField = new Hidden(CatalogRequestParams.FILE_CONTENT_PARAM);
-            this.catalogObjectKindFormField = new Hidden(CatalogRequestParams.KIND_PARAM);
-            this.catalogObjectCommitMessageFormField = new Hidden(CatalogRequestParams.COMMIT_MESSAGE_PARAM);
-            this.catalogObjectContentTypeFormField = new Hidden(CatalogRequestParams.OBJECT_CONTENT_TYPE_PARAM);
-
             add(this.sessionIdFormField);
             add(this.bucketNameFormField);
             add(this.nodeSourceNameFormField);
