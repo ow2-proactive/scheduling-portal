@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
@@ -72,10 +73,11 @@ public class CatalogRequestBuilder {
         return builder;
     }
 
-    public void postNodeSourceRequestToCatalog(String sessionId, String fullUri, HttpServletResponse response)
+    public CloseableHttpResponse postNodeSourceRequestToCatalog(String sessionId, String fullUri,
+            HttpServletResponse response)
             throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         HttpPost postNodeSource = buildCatalogRequest(sessionId, fullUri);
-        getHttpClientBuilder().build().execute(postNodeSource);
+        return getHttpClientBuilder().build().execute(postNodeSource);
     }
 
     private String paramPair(String param, String value) {

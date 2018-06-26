@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogMessages.EXPORT_FAILED;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams.*;
 
 import java.io.File;
@@ -36,6 +37,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +56,6 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        LOGGER.info("Calling POST");
         upload(request, response);
     }
 
@@ -63,21 +66,19 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
 
     private void upload(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("text/html");
-        CatalogObjectAction catalogObjectAction = null;
-        try {
-            catalogObjectAction = buildCatalogObjetAction(request);
+        try (CatalogObjectAction catalogObjectAction = buildCatalogObjetAction(request)) {
             CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObjectAction);
             String requestUri = catalogRequestBuilder.build();
-            LOGGER.info("Node Source exported to catalog using resource URI: " + requestUri);
-            catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
-                                                                 requestUri,
-                                                                 response);
+            LOGGER.info("Post node source to catalog with URI: " + requestUri);
+            try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
+                                                                                                           requestUri,
+                                                                                                           response)) {
+                new BasicResponseHandler().handleResponse(httpResponse);
+            } catch (HttpResponseException e) {
+                logErrorAndWriteResponseToClient(e, response);
+            }
         } catch (Exception e) {
             logErrorAndWriteResponseToClient(e, response);
-        } finally {
-            if (catalogObjectAction != null && catalogObjectAction.getNodeSourceJsonFile() != null) {
-                catalogObjectAction.getNodeSourceJsonFile().delete();
-            }
         }
     }
 
@@ -122,8 +123,8 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
     private void logErrorAndWriteResponseToClient(Exception e, HttpServletResponse response) {
         try {
             String errorMessage = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-            LOGGER.warn("Export node source failed", e);
-            response.getWriter().write(errorMessage);
+            LOGGER.warn(EXPORT_FAILED, e);
+            response.getWriter().write(EXPORT_FAILED + ": " + errorMessage);
         } catch (IOException ioe) {
             LOGGER.warn("Failed to return node source export error to client", ioe);
         }

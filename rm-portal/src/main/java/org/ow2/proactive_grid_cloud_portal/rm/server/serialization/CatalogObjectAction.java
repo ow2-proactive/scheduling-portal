@@ -28,7 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 import java.io.File;
 
 
-public class CatalogObjectAction {
+public class CatalogObjectAction implements AutoCloseable {
 
     private String sessionId;
 
@@ -98,6 +98,13 @@ public class CatalogObjectAction {
 
     public void setObjectContentType(String objectContentType) {
         this.objectContentType = objectContentType;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (this.nodeSourceJsonFile != null) {
+            this.nodeSourceJsonFile.delete();
+        }
     }
 
 }

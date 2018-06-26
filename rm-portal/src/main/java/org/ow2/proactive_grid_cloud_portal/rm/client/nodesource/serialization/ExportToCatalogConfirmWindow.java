@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogMessages.EXPORT_FAILED;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -75,6 +77,8 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private NodeSourceSerializationFormPanel exportNodeSourceToCatalogForm;
 
+    private Label windowLabel;
+
     public ExportToCatalogConfirmWindow(String nodeSourceName, RMController rmController) {
         this.nodeSourceName = nodeSourceName;
         this.rmController = rmController;
@@ -100,14 +104,13 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.hiddenFormItemsPanel = new ExportToCatalogHiddenPanel();
         this.exportNodeSourceToCatalogForm.setWidget(this.hiddenFormItemsPanel);
 
-        Label label = new Label("You are about to publish the Node Source " + nodeSourceName +
-                                " to the catalog. Please choose the catalog bucket in which you want to export the Node Source.");
-        label.setHeight(40);
+        this.windowLabel = new Label("Choose the catalog bucket in which to publish the Node Source " + nodeSourceName);
+        this.windowLabel.setHeight(40);
 
         HorizontalPanel bucketListPanel = new HorizontalPanel();
         bucketListPanel.setHeight("40px");
         ListBox bucketList = new ListBox();
-        fillBucketList(label, bucketList);
+        fillBucketList(bucketList);
         bucketListPanel.add(bucketList);
 
         HLayout buttons = new HLayout();
@@ -124,31 +127,39 @@ public class ExportToCatalogConfirmWindow extends Window {
         VLayout layout = new VLayout();
         layout.setAlign(VerticalAlignment.TOP);
         layout.setMargin(10);
-        layout.addMember(label);
+        layout.addMember(this.windowLabel);
         layout.addMember(bucketListPanel);
         layout.addMember(buttons);
 
         addItem(layout);
     }
 
-    private void fillBucketList(Label label, ListBox bucketList) {
+    private void fillBucketList(ListBox bucketList) {
         bucketList.setEnabled(false);
         RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
                                                     new CatalogUrlBuilder().getCatalogUrl() + "/buckets");
         request.setHeader("sessionId", LoginModel.getInstance().getSessionId());
-        request.setCallback(fillBucketListWithRequestCallback(bucketList, label));
+        request.setCallback(fillBucketListWithRequestCallback(bucketList));
         try {
             request.send();
         } catch (RequestException e) {
             String errorMessage = "Request sent to catalog failed";
             GWT.log(errorMessage, e);
-            label.setContents(errorMessage);
+            this.windowLabel.setContents(errorMessage);
         }
     }
 
     private void submitNodeSourceConfiguration(ListBox bucketList) {
         Window window = new Window();
-        window.addChild(exportNodeSourceToCatalogForm);
+        window.addChild(this.exportNodeSourceToCatalogForm);
+        this.exportNodeSourceToCatalogForm.addSubmitCompleteHandler(event -> {
+            if (event.getResults().contains(EXPORT_FAILED)) {
+                ExportToCatalogConfirmWindow.this.windowLabel.setContents("<span style='color:red'>" +
+                                                                          event.getResults() + "</span>");
+            } else {
+                hideAndDestroy(this);
+            }
+        });
         window.show();
         this.rmController.getRMService().getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
                                                                     this.nodeSourceName,
@@ -156,15 +167,15 @@ public class ExportToCatalogConfirmWindow extends Window {
                                                                         public void onSuccess(String result) {
                                                                             try {
                                                                                 NodeSourceConfiguration nodeSourceConfiguration = ExportToCatalogConfirmWindow.this.parser.parseNodeSourceConfiguration(result);
-                                                                                hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance()
-                                                                                                                                           .getSessionId());
-                                                                                hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
-                                                                                hiddenFormItemsPanel.nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
-                                                                                hiddenFormItemsPanel.nodeSourceJsonFormField.setValue(result);
-                                                                                hiddenFormItemsPanel.catalogObjectKindFormField.setValue("NodeSource");
-                                                                                hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue("commitmessage");
-                                                                                hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue("application/json");
-                                                                                exportNodeSourceToCatalogForm.submit();
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance()
+                                                                                                                                                                             .getSessionId());
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceJsonFormField.setValue(result);
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectKindFormField.setValue("NodeSource");
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue("commitmessage");
+                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue("application/json");
+                                                                                ExportToCatalogConfirmWindow.this.exportNodeSourceToCatalogForm.submit();
                                                                             } catch (ImportException e) {
                                                                                 String msg = JSONUtils.getJsonErrorMessage(e);
                                                                                 SC.warn("Failed to export node source to catalog:<br>" +
@@ -182,11 +193,9 @@ public class ExportToCatalogConfirmWindow extends Window {
                                                                             hideAndDestroy(window);
                                                                         }
                                                                     });
-
-        hideAndDestroy(this);
     }
 
-    private RequestCallback fillBucketListWithRequestCallback(ListBox bucketList, Label label) {
+    private RequestCallback fillBucketListWithRequestCallback(ListBox bucketList) {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -202,7 +211,7 @@ public class ExportToCatalogConfirmWindow extends Window {
             public void onError(Request request, Throwable t) {
                 String errorMessage = "List buckets from catalog failed";
                 GWT.log(errorMessage, t);
-                label.setContents(errorMessage);
+                ExportToCatalogConfirmWindow.this.windowLabel.setContents(errorMessage);
             }
         };
     }
