@@ -45,6 +45,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -152,47 +153,51 @@ public class ExportToCatalogConfirmWindow extends Window {
     private void submitNodeSourceConfiguration(ListBox bucketList) {
         Window window = new Window();
         window.addChild(this.exportNodeSourceToCatalogForm);
-        this.exportNodeSourceToCatalogForm.addSubmitCompleteHandler(event -> {
-            if (event.getResults().contains(EXPORT_FAILED)) {
-                ExportToCatalogConfirmWindow.this.windowLabel.setContents("<span style='color:red'>" +
-                                                                          event.getResults() + "</span>");
-            } else {
-                hideAndDestroy(this);
-            }
-        });
+        this.exportNodeSourceToCatalogForm.addSubmitCompleteHandler(this::displayErrorToUserIfExportFailed);
         window.show();
         this.rmController.getRMService().getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
                                                                     this.nodeSourceName,
-                                                                    new AsyncCallback<String>() {
-                                                                        public void onSuccess(String result) {
-                                                                            try {
-                                                                                NodeSourceConfiguration nodeSourceConfiguration = ExportToCatalogConfirmWindow.this.parser.parseNodeSourceConfiguration(result);
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance()
-                                                                                                                                                                             .getSessionId());
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceJsonFormField.setValue(result);
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectKindFormField.setValue("NodeSource");
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue("commitmessage");
-                                                                                ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue("application/json");
-                                                                                ExportToCatalogConfirmWindow.this.exportNodeSourceToCatalogForm.submit();
-                                                                            } catch (ImportException e) {
-                                                                                String msg = JSONUtils.getJsonErrorMessage(e);
-                                                                                SC.warn("Failed to export node source to catalog:<br>" +
-                                                                                        msg);
-                                                                            } finally {
-                                                                                hideAndDestroy(window);
-                                                                            }
-                                                                        }
+                                                                    submitExportParametersCallback(window, bucketList));
+    }
 
-                                                                        public void onFailure(Throwable caught) {
-                                                                            String msg = JSONUtils.getJsonErrorMessage(caught);
-                                                                            SC.warn("Failed to fetch configuration of node source " +
-                                                                                    ExportToCatalogConfirmWindow.this.nodeSourceName +
-                                                                                    ":<br>" + msg);
-                                                                            hideAndDestroy(window);
-                                                                        }
-                                                                    });
+    private void displayErrorToUserIfExportFailed(FormPanel.SubmitCompleteEvent event) {
+        if (event.getResults().contains(EXPORT_FAILED)) {
+            ExportToCatalogConfirmWindow.this.windowLabel.setContents("<span style='color:red'>" + event.getResults() +
+                                                                      "</span>");
+        } else {
+            hideAndDestroy(this);
+        }
+    }
+
+    private AsyncCallback<String> submitExportParametersCallback(Window window, ListBox bucketList) {
+        return new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                try {
+                    NodeSourceConfiguration nodeSourceConfiguration = ExportToCatalogConfirmWindow.this.parser.parseNodeSourceConfiguration(result);
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance()
+                                                                                                                 .getSessionId());
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.nodeSourceJsonFormField.setValue(result);
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectKindFormField.setValue("NodeSource");
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue("commitmessage");
+                    ExportToCatalogConfirmWindow.this.hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue("application/json");
+                    ExportToCatalogConfirmWindow.this.exportNodeSourceToCatalogForm.submit();
+                } catch (ImportException e) {
+                    String msg = JSONUtils.getJsonErrorMessage(e);
+                    SC.warn("Failed to export node source to catalog:<br>" + msg);
+                } finally {
+                    hideAndDestroy(window);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                SC.warn("Failed to fetch configuration of node source " +
+                        ExportToCatalogConfirmWindow.this.nodeSourceName + ":<br>" + msg);
+                hideAndDestroy(window);
+            }
+        };
     }
 
     private RequestCallback fillBucketListWithRequestCallback(ListBox bucketList) {
