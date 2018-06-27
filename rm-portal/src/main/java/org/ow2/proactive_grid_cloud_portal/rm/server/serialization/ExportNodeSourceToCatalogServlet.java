@@ -111,8 +111,8 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
                     case OBJECT_CONTENT_TYPE_PARAM:
                         catalogObjectAction.setObjectContentType(fieldValue);
                         break;
-                    case IS_REVISION_PARAM:
-                        catalogObjectAction.setIsRevision(Boolean.parseBoolean(fieldValue));
+                    case REVISED_PARAM:
+                        catalogObjectAction.setRevised(Boolean.parseBoolean(fieldValue));
                         break;
                     default:
                 }

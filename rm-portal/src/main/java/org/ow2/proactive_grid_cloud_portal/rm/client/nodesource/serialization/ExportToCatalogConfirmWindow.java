@@ -93,10 +93,10 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private Label revisionLabel;
 
-    private boolean isRevision;
+    private boolean nodeSourceRevised;
 
     public ExportToCatalogConfirmWindow(String nodeSourceName, RMController rmController) {
-        this.isRevision = false;
+        this.nodeSourceRevised = false;
         this.nodeSourceName = nodeSourceName;
         this.rmController = rmController;
         this.parser = new NodeSourceConfigurationParser(rmController);
@@ -192,13 +192,13 @@ public class ExportToCatalogConfirmWindow extends Window {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     JSONArray nodeSources = JSONParser.parseStrict(response.getText()).isArray();
-                    isRevision = false;
+                    nodeSourceRevised = false;
                     revisionLabel.setContents("(Initial commit)");
                     for (int i = 0; i < nodeSources.size(); i++) {
                         JSONObject nodeSource = nodeSources.get(i).isObject();
                         String nodeSourceName = nodeSource.get("name").isString().stringValue();
                         if (nodeSourceName.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
-                            isRevision = true;
+                            nodeSourceRevised = true;
                             catalogRequestBuilder.sendRequestToCatalog("buckets/" + bucketName + "/resources/" +
                                                                        nodeSourceName + "/revisions",
                                                                        new RequestCallback() {
@@ -238,7 +238,7 @@ public class ExportToCatalogConfirmWindow extends Window {
                 }
             });
         } else {
-            this.isRevision = false;
+            this.nodeSourceRevised = false;
             this.revisionLabel.setContents(INITIAL_COMMIT_MESSAGE);
             this.revisionLabel.redraw();
         }
@@ -278,7 +278,7 @@ public class ExportToCatalogConfirmWindow extends Window {
                     hiddenFormItemsPanel.catalogObjectKindFormField.setValue(NODE_SOURCE_KIND);
                     hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue(commitMessage.getText());
                     hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue(NODE_SOURCE_CONTENT_TYPE);
-                    hiddenFormItemsPanel.isRevision.setValue(Boolean.toString(isRevision));
+                    hiddenFormItemsPanel.revised.setValue(Boolean.toString(nodeSourceRevised));
                     exportNodeSourceToCatalogForm.submit();
                 } catch (ImportException e) {
                     String msg = JSONUtils.getJsonErrorMessage(e);
@@ -338,7 +338,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
         private Hidden catalogObjectContentTypeFormField = new Hidden(CatalogConstants.OBJECT_CONTENT_TYPE_PARAM);
 
-        private Hidden isRevision = new Hidden(CatalogConstants.IS_REVISION_PARAM);
+        private Hidden revised = new Hidden(CatalogConstants.REVISED_PARAM);
 
         private ExportToCatalogHiddenPanel() {
             add(this.sessionIdFormField);
@@ -348,7 +348,7 @@ public class ExportToCatalogConfirmWindow extends Window {
             add(this.catalogObjectKindFormField);
             add(this.catalogObjectCommitMessageFormField);
             add(this.catalogObjectContentTypeFormField);
-            add(this.isRevision);
+            add(this.revised);
         }
 
     }

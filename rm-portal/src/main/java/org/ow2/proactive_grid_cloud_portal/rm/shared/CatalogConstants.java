@@ -51,6 +51,6 @@ public class CatalogConstants {
 
     public static final String OBJECT_CONTENT_TYPE_PARAM = "objectContentType";
 
-    public static final String IS_REVISION_PARAM = "isRevision";
+    public static final String REVISED_PARAM = "revised";
 
 }
