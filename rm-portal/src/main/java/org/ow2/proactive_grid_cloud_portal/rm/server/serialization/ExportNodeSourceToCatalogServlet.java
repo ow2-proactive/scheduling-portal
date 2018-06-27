@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
-import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogMessages.EXPORT_FAILED;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,8 +125,8 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
     private void logErrorAndWriteResponseToClient(Exception e, HttpServletResponse response) {
         try {
             String errorMessage = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-            LOGGER.warn(EXPORT_FAILED, e);
-            response.getWriter().write(EXPORT_FAILED + ": " + errorMessage);
+            LOGGER.warn(EXPORT_FAILED_MESSAGE, e);
+            response.getWriter().write(EXPORT_FAILED_MESSAGE + ": " + errorMessage);
         } catch (IOException ioe) {
             LOGGER.warn("Failed to return node source export error to client", ioe);
         }

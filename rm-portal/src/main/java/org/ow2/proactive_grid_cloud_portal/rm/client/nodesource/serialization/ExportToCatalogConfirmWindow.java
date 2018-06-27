@@ -25,10 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.EXPORT_FAILED_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.INITIAL_COMMIT_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.NODE_SOURCE_CONTENT_TYPE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.NODE_SOURCE_KIND;
-import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogMessages.EXPORT_FAILED;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -259,7 +259,7 @@ public class ExportToCatalogConfirmWindow extends Window {
     }
 
     private void displayErrorToUserIfExportFailed(FormPanel.SubmitCompleteEvent event) {
-        if (event.getResults().contains(EXPORT_FAILED)) {
+        if (event.getResults().contains(EXPORT_FAILED_MESSAGE)) {
             windowLabel.setContents("<span style='color:red'>" + event.getResults() + "</span>");
         } else {
             hideAndDestroy(this);

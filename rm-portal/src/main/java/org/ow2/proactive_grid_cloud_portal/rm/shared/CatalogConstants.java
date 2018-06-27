@@ -35,6 +35,8 @@ public class CatalogConstants {
 
     public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";
 
+    public static final String EXPORT_FAILED_MESSAGE = "Export node source failed";
+
     public static final String SESSION_ID_PARAM = "sessionId";
 
     public static final String BUCKET_NAME_PARAM = "bucketName";
