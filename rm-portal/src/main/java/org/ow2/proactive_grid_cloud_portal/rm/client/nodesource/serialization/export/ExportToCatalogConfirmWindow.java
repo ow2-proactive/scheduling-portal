@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.EXPORT_FAILED_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.INITIAL_COMMIT_MESSAGE;
@@ -35,6 +35,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
