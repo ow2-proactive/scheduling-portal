@@ -9,6 +9,15 @@
 	white-space: nowrap;
 }
 
+.generalParametersStyle {
+    font-weight: bold;
+    color: #003168
+}
+
+.generalParametersStyleDisabled {
+    font-weight: bold;
+    color: #AAAAAA
+}
 
 .paddingLeftAndRight {
 	padding-left: 10px;

@@ -46,13 +46,15 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ExportToCatalogConfirmWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
@@ -1012,10 +1014,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new FormPanel();
-        nodeSourceJsonForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        nodeSourceJsonForm.setMethod(FormPanel.METHOD_POST);
-        nodeSourceJsonForm.setAction(GWT.getModuleBaseURL() + ExportNodeSourceToFileServlet.SERVLET_MAPPING);
+        FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
 
         Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
 
@@ -1034,6 +1033,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               nodeSourceJsonItem.setValue(result);
                                               nodeSourceJsonForm.submit();
                                               window.hide();
+                                              window.destroy();
                                           }
 
                                           public void onFailure(Throwable caught) {
@@ -1042,6 +1042,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                       ":<br>" + msg);
                                           }
                                       });
+    }
+
+    public void exportNodeSourceToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
     }
 
     /**
@@ -1339,4 +1343,5 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
                              });
     }
+
 }

@@ -63,6 +63,7 @@ import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.PickerIcon;
+import com.smartgwt.client.widgets.form.fields.RowSpacerItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -101,6 +102,8 @@ public abstract class NodeSourceWindow {
     protected CheckboxItem nodesRecoverableCheckbox;
 
     protected TextItem nodeSourceNameText;
+
+    protected Label generalParametersLabel;
 
     protected SelectItem infrastructureSelectItem;
 
@@ -193,6 +196,11 @@ public abstract class NodeSourceWindow {
         formItems.add(nodeSourceAction);
         formItems.add(callback);
         formItems.add(session);
+
+        this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
+        this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
+        formItems.add(this.nodesRecoverableCheckbox);
+        formItems.add(new RowSpacerItem());
 
         return formItems;
     }
@@ -297,6 +305,10 @@ public abstract class NodeSourceWindow {
 
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
+        this.generalParametersLabel = new Label("General Parameters :");
+        this.generalParametersLabel.setStyleName("generalParametersStyle");
+        this.generalParametersLabel.setHeight("20px");
+        this.generalParametersLabel.setMargin(5);
 
         this.nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
         this.nodeSourcePluginsWaitingLabel.setIcon("loading.gif");
@@ -322,12 +334,11 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.setIsGroup(true);
         createNodeSourceLayout.setPadding(10);
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
-        this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
-        this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this);
         DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setWidth100();
-        nodeSourceWindowForm.setFields(this.nodeSourceNameText, this.nodesRecoverableCheckbox);
+        nodeSourceWindowForm.setHeight("50px");
+        nodeSourceWindowForm.setFields(this.nodeSourceNameText);
         nodeSourceWindowForm.setTitleSuffix("");
         createNodeSourceLayout.addMember(nodeSourceWindowForm);
 
@@ -383,7 +394,7 @@ public abstract class NodeSourceWindow {
         VLayout scrollLayout = new VLayout();
         scrollLayout.setHeight100();
         scrollLayout.setWidth100();
-        scrollLayout.setMembers(nodeSourcePluginsLayout);
+        scrollLayout.setMembers(generalParametersLabel, nodeSourcePluginsLayout);
         scrollLayout.setOverflow(Overflow.AUTO);
         scrollLayout.setBorder("1px solid #ddd");
         scrollLayout.setBackgroundColor("#fafafa");
@@ -613,12 +624,12 @@ public abstract class NodeSourceWindow {
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
             nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
-            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
-            manageNodeSourceWindowItems();
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
             NodeSourceWindow.this.allFormItems = prepareFormItems();
+            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
+            manageNodeSourceWindowItems();
 
             PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
             NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();

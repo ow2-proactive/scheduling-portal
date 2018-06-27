@@ -35,12 +35,17 @@
 
 	<servlet>
 		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ExportNodeSourceToFileServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.ImportNodeSourceFromFileServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ImportNodeSourceFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->
@@ -72,12 +77,17 @@
 
 	<servlet-mapping>
 		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<url-pattern>/portal/exportnodesource</url-pattern>
+		<url-pattern>/portal/exportnodesourcetofile</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
+		<url-pattern>/portal/exportnodesourcetocatalog</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<url-pattern>/portal/importnodesource</url-pattern>
+		<url-pattern>/portal/importnodesourcefromfile</url-pattern>
 	</servlet-mapping>
 
 	<mime-mapping>

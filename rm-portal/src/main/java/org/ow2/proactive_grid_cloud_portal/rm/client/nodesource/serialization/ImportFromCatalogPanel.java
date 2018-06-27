@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -42,15 +43,18 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
 
+    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
+
     private ImportNodeSourceLayout importNodeSourceLayout;
 
     private ListBox nodeSourceListBox;
 
     ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourceLayout) {
         this.importNodeSourceLayout = importNodeSourceLayout;
+        this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();
         createListBox();
-        new CatalogRequestBuilder(this).requestNodeSourcesFromAllBuckets();
+        this.importFromCatalogPanelFeeder.requestNodeSourcesFromAllBuckets();
     }
 
     public void addItemToNodeSourceListBox(String displayName, String valueName) {
@@ -82,12 +86,12 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void requestNodeSourceConfiguration() {
         String selectedNodeSourceInList = this.nodeSourceListBox.getSelectedValue();
         if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
-            String nodeSourceConfigurationRequestUrl = new CatalogUrlBuilder().getCatalogUrl() +
-                                                       "/buckets/node-sources/resources/" + selectedNodeSourceInList +
-                                                       "/raw";
+            String nodeSourceConfigurationRequestUrl = new CatalogUrlBuilder().getCatalogUrl() + "/buckets/" +
+                                                       this.importFromCatalogPanelFeeder.getBucketNameForNodeSource(selectedNodeSourceInList) +
+                                                       "/resources/" + selectedNodeSourceInList + "/raw";
             RequestBuilder nodeSourceConfigurationRequest = new RequestBuilder(RequestBuilder.GET,
                                                                                nodeSourceConfigurationRequestUrl);
-            nodeSourceConfigurationRequest.setHeader(CatalogRequestBuilder.SESSION_ID_PARAMETER_NAME,
+            nodeSourceConfigurationRequest.setHeader(CatalogConstants.SESSION_ID_PARAM,
                                                      LoginModel.getInstance().getSessionId());
             nodeSourceConfigurationRequest.setCallback(getNodeSourceConfigurationRequestCallback());
             try {

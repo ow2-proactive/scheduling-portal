@@ -161,6 +161,8 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     public void manageNodeSourceWindowItems() {
         super.manageNodeSourceWindowItems();
         this.nodesRecoverableCheckbox.disable();
+        this.generalParametersLabel.setStyleName("generalParametersStyleDisabled");
+        this.generalParametersLabel.redraw();
     }
 
     private void disableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {
