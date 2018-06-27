@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
 import java.io.File;
+import java.nio.file.Files;
 
 
 public class CatalogObjectAction implements AutoCloseable {
@@ -113,7 +114,7 @@ public class CatalogObjectAction implements AutoCloseable {
     @Override
     public void close() throws Exception {
         if (this.nodeSourceJsonFile != null) {
-            this.nodeSourceJsonFile.delete();
+            Files.delete(this.nodeSourceJsonFile.toPath());
         }
     }
 

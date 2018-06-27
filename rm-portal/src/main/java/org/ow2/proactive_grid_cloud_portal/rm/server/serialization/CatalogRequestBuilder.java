@@ -89,8 +89,7 @@ public class CatalogRequestBuilder {
         builder.append(Arrays.stream(paramPairs).collect(Collectors.joining("&")));
     }
 
-    public CloseableHttpResponse postNodeSourceRequestToCatalog(String sessionId, String fullUri,
-            HttpServletResponse response)
+    public CloseableHttpResponse postNodeSourceRequestToCatalog(String sessionId, String fullUri)
             throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         HttpPost postNodeSource = buildCatalogRequest(sessionId, fullUri);
         return getHttpClientBuilder().build().execute(postNodeSource);

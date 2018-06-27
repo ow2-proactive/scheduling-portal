@@ -30,6 +30,9 @@ import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -69,14 +72,19 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
             CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObjectAction);
             String requestUri = catalogRequestBuilder.build();
             LOGGER.info("Post node source to catalog with URI: " + requestUri);
-            try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
-                                                                                                           requestUri,
-                                                                                                           response)) {
-                new BasicResponseHandler().handleResponse(httpResponse);
-            } catch (HttpResponseException e) {
-                logErrorAndWriteResponseToClient(e, response);
-            }
+            postRequestAndHandleResponse(response, catalogObjectAction, catalogRequestBuilder, requestUri);
         } catch (Exception e) {
+            logErrorAndWriteResponseToClient(e, response);
+        }
+    }
+
+    private void postRequestAndHandleResponse(HttpServletResponse response, CatalogObjectAction catalogObjectAction,
+            CatalogRequestBuilder catalogRequestBuilder, String requestUri)
+            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
+                                                                                                       requestUri)) {
+            new BasicResponseHandler().handleResponse(httpResponse);
+        } catch (HttpResponseException e) {
             logErrorAndWriteResponseToClient(e, response);
         }
     }
@@ -98,7 +106,9 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
                         break;
                     case FILE_CONTENT_PARAM:
                         File nodeSourceJsonFile = File.createTempFile("node-source-configuration", ".json");
-                        new PrintWriter(nodeSourceJsonFile).write(fieldValue);
+                        try (PrintWriter writer = new PrintWriter(nodeSourceJsonFile)) {
+                            writer.write(fieldValue);
+                        }
                         formItem.write(nodeSourceJsonFile);
                         catalogObjectAction.setNodeSourceJsonFile(nodeSourceJsonFile);
                         break;

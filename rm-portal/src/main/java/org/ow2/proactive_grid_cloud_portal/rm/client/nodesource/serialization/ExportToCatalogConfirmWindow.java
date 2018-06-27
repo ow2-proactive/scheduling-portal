@@ -196,11 +196,11 @@ public class ExportToCatalogConfirmWindow extends Window {
                     revisionLabel.setContents("(Initial commit)");
                     for (int i = 0; i < nodeSources.size(); i++) {
                         JSONObject nodeSource = nodeSources.get(i).isObject();
-                        String nodeSourceName = nodeSource.get("name").isString().stringValue();
-                        if (nodeSourceName.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
+                        String nodeSourceNameInBucket = nodeSource.get("name").isString().stringValue();
+                        if (nodeSourceNameInBucket.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
                             nodeSourceRevised = true;
                             catalogRequestBuilder.sendRequestToCatalog("buckets/" + bucketName + "/resources/" +
-                                                                       nodeSourceName + "/revisions",
+                                                                       nodeSourceNameInBucket + "/revisions",
                                                                        new RequestCallback() {
                                                                            @Override
                                                                            public void onResponseReceived(
@@ -223,7 +223,7 @@ public class ExportToCatalogConfirmWindow extends Window {
                                                                            @Override
                                                                            public void onError(Request request,
                                                                                    Throwable exception) {
-
+                                                                               revisionLabel.setContents("<span style='color:red'>Last revision of this node source could not be retrieved</span>");
                                                                            }
                                                                        });
                             break;
@@ -234,7 +234,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-
+                    revisionLabel.setContents("<span style='color:red'>Could not check whether a revision exists for this node source</span>");
                 }
             });
         } else {

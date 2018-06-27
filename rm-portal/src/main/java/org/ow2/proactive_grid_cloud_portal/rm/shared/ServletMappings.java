@@ -27,6 +27,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
 public class ServletMappings {
 
+    private ServletMappings() {
+        // this class is not meant to be instantiated
+    }
+
     public static final String EXPORT_NODE_SOURCE_TO_FILE = "exportnodesourcetofile";
 
     public static final String EXPORT_NODE_SOURCE_TO_CATALOG = "exportnodesourcetocatalog";

@@ -55,7 +55,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.JSONArray;
@@ -102,8 +101,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     static final String LOCAL_SESSION_COOKIE = "pa.sched.local_session";
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
-
-    private ExportToCatalogConfirmWindow exportNodeSourceToCatalogWindow;
 
     @Override
     public String getLoginSettingKey() {
