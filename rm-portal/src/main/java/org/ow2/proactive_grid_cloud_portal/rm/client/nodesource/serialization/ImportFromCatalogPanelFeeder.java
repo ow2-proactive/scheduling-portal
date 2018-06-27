@@ -72,7 +72,8 @@ public class ImportFromCatalogPanelFeeder {
                 for (int i = 0; i < bucketsArray.size(); i++) {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
                     String bucketName = bucketObject.get(NAME_KEY).isString().stringValue();
-                    requestNodeSourcesForBucket(bucketName);
+                    ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestNodeSourcesForBucket(bucketName,
+                                                                                                        fillBucketInImportPanel(bucketName));
                 }
                 ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.enableNodeSourceListBox();
             }
@@ -85,12 +86,7 @@ public class ImportFromCatalogPanelFeeder {
         };
     }
 
-    private void requestNodeSourcesForBucket(String bucketName) {
-        this.catalogRequestBuilder.sendRequestToCatalog("buckets/" + bucketName + "/resources?kind=nodesource",
-                                                        getNodeSourcesRequestCallback(bucketName));
-    }
-
-    private RequestCallback getNodeSourcesRequestCallback(String bucketName) {
+    private RequestCallback fillBucketInImportPanel(String bucketName) {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {

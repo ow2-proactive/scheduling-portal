@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -90,7 +91,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
                                                        "/resources/" + selectedNodeSourceInList + "/raw";
             RequestBuilder nodeSourceConfigurationRequest = new RequestBuilder(RequestBuilder.GET,
                                                                                nodeSourceConfigurationRequestUrl);
-            nodeSourceConfigurationRequest.setHeader(CatalogRequestBuilder.SESSION_ID_PARAMETER_NAME,
+            nodeSourceConfigurationRequest.setHeader(CatalogConstants.SESSION_ID_PARAM,
                                                      LoginModel.getInstance().getSessionId());
             nodeSourceConfigurationRequest.setCallback(getNodeSourceConfigurationRequestCallback());
             try {

@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -33,8 +34,6 @@ import com.google.gwt.http.client.RequestException;
 
 
 public class CatalogRequestBuilder {
-
-    public static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
     private String catalogUrl;
 
@@ -47,13 +46,18 @@ public class CatalogRequestBuilder {
 
     public void sendRequestToCatalog(String endpoint, RequestCallback callback) {
         RequestBuilder request = new RequestBuilder(RequestBuilder.GET, this.catalogUrl + "/" + endpoint);
-        request.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+        request.setHeader(CatalogConstants.SESSION_ID_PARAM, LoginModel.getInstance().getSessionId());
         request.setCallback(callback);
         try {
             request.send();
         } catch (RequestException e) {
             this.importFromCatalogPanelFeeder.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
         }
+    }
+
+    public void requestNodeSourcesForBucket(String bucketName, RequestCallback callback) {
+        sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" +
+                             CatalogConstants.NODE_SOURCE_KIND, callback);
     }
 
 }

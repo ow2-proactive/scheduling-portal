@@ -25,8 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogMessages.EXPORT_FAILED;
-import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
             if (formItem.isFormField()) {
                 String fieldValue = formItem.getString();
                 switch (formItem.getFieldName()) {
-                    case SESSION_ID:
+                    case SESSION_ID_PARAM:
                         catalogObjectAction.setSessionId(fieldValue);
                         break;
                     case BUCKET_NAME_PARAM:
@@ -111,6 +111,9 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
                         break;
                     case OBJECT_CONTENT_TYPE_PARAM:
                         catalogObjectAction.setObjectContentType(fieldValue);
+                        break;
+                    case IS_REVISION_PARAM:
+                        catalogObjectAction.setIsRevision(Boolean.parseBoolean(fieldValue));
                         break;
                     default:
                 }

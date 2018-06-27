@@ -44,6 +44,8 @@ public class CatalogObjectAction implements AutoCloseable {
 
     private String objectContentType;
 
+    private boolean isRevision;
+
     public String getSessionId() {
         return sessionId;
     }
@@ -98,6 +100,14 @@ public class CatalogObjectAction implements AutoCloseable {
 
     public void setObjectContentType(String objectContentType) {
         this.objectContentType = objectContentType;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setIsRevision(boolean isRevision) {
+        this.isRevision = isRevision;
     }
 
     @Override

@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogRequestParams.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -41,6 +41,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -57,20 +58,25 @@ public class CatalogRequestBuilder {
 
     public String build() {
         StringBuilder builder = new StringBuilder(URL_CATALOG).append("/buckets/")
-                                                              .append(this.catalogObjectAction.getBucketName())
-                                                              .append("/resources?");
-        return appendParameters(builder,
-                                paramPair(NAME_PARAM, this.catalogObjectAction.getNodeSourceName()),
-                                paramPair(KIND_PARAM, this.catalogObjectAction.getKind()),
-                                paramPair(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage()),
-                                paramPair(OBJECT_CONTENT_TYPE_PARAM,
-                                          this.catalogObjectAction.getObjectContentType())).toString();
+                                                              .append(this.catalogObjectAction.getBucketName());
+
+        if (this.catalogObjectAction.isRevision()) {
+            builder.append("/resources/").append(this.catalogObjectAction.getNodeSourceName()).append("/revisions?");
+            appendParameters(builder, paramPair(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage()));
+        } else {
+            builder.append("/resources?");
+            appendParameters(builder,
+                             paramPair(NAME_PARAM, this.catalogObjectAction.getNodeSourceName()),
+                             paramPair(KIND_PARAM, this.catalogObjectAction.getKind()),
+                             paramPair(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage()),
+                             paramPair(OBJECT_CONTENT_TYPE_PARAM, this.catalogObjectAction.getObjectContentType()));
+        }
+        return builder.toString();
     }
 
-    private StringBuilder appendParameters(StringBuilder builder, String... paramPairs) {
+    private void appendParameters(StringBuilder builder, String... paramPairs) {
         Arrays.stream(paramPairs).forEach(paramPair -> builder.append(paramPair).append("&"));
         builder.deleteCharAt(builder.lastIndexOf("&"));
-        return builder;
     }
 
     public CloseableHttpResponse postNodeSourceRequestToCatalog(String sessionId, String fullUri,
@@ -94,7 +100,7 @@ public class CatalogRequestBuilder {
 
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setBoundary(boundary);
-        builder.setMode(org.apache.http.entity.mime.HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         builder.addPart("file", new FileBody(this.catalogObjectAction.getNodeSourceJsonFile()));
         post.setEntity(builder.build());
         return post;

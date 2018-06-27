@@ -25,11 +25,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public class CatalogRequestParams {
-
-    public static final String SESSION_ID = "sessionId";
+public class CatalogConstants {
 
     public static final String URL_CATALOG = "http://localhost:8080/catalog";
+
+    public static final String NODE_SOURCE_KIND = "NodeSource";
+
+    public static final String NODE_SOURCE_CONTENT_TYPE = "application/json";
+
+    public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";
+
+    public static final String SESSION_ID_PARAM = "sessionId";
 
     public static final String BUCKET_NAME_PARAM = "bucketName";
 
@@ -42,5 +48,7 @@ public class CatalogRequestParams {
     public static final String COMMIT_MESSAGE_PARAM = "commitMessage";
 
     public static final String OBJECT_CONTENT_TYPE_PARAM = "objectContentType";
+
+    public static final String IS_REVISION_PARAM = "isRevision";
 
 }
