@@ -60,38 +60,23 @@ public class CatalogRequestBuilder {
     }
 
     public String build() {
-        String urlEncodedCommitMessage = getUrlEncodedCommitMessageOrFail();
         StringBuilder builder = new StringBuilder(URL_CATALOG).append("/buckets/")
                                                               .append(this.catalogObjectAction.getBucketName());
         if (this.catalogObjectAction.isRevised()) {
             builder.append("/resources/").append(this.catalogObjectAction.getNodeSourceName()).append("/revisions?");
-            appendParameters(builder, paramPair(COMMIT_MESSAGE_PARAM, urlEncodedCommitMessage));
         } else {
             builder.append("/resources?");
-            appendParameters(builder,
-                             paramPair(NAME_PARAM, this.catalogObjectAction.getNodeSourceName()),
-                             paramPair(KIND_PARAM, this.catalogObjectAction.getKind()),
-                             paramPair(COMMIT_MESSAGE_PARAM, urlEncodedCommitMessage),
-                             paramPair(OBJECT_CONTENT_TYPE_PARAM, this.catalogObjectAction.getObjectContentType()));
         }
         return builder.toString();
-    }
-
-    private String getUrlEncodedCommitMessageOrFail() {
-        try {
-            return URLEncoder.encode(this.catalogObjectAction.getCommitMessage(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Commit message cannot be encoded properly", e);
-        }
     }
 
     private void appendParameters(StringBuilder builder, String... paramPairs) {
         builder.append(Arrays.stream(paramPairs).collect(Collectors.joining("&")));
     }
 
-    public CloseableHttpResponse postNodeSourceRequestToCatalog(String sessionId, String fullUri)
+    public CloseableHttpResponse postNodeSourceRequestToCatalog(CatalogObjectAction catalogObjectAction, String fullUri)
             throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
-        HttpPost postNodeSource = buildCatalogRequest(sessionId, fullUri);
+        HttpPost postNodeSource = buildCatalogRequest(catalogObjectAction, fullUri);
         return getHttpClientBuilder().build().execute(postNodeSource);
     }
 
@@ -99,18 +84,24 @@ public class CatalogRequestBuilder {
         return param + "=" + value;
     }
 
-    private HttpPost buildCatalogRequest(String sessionId, String fullUri) {
+    private HttpPost buildCatalogRequest(CatalogObjectAction catalogObjectActio, String fullUri) {
         String boundary = "---------------" + UUID.randomUUID().toString();
         HttpPost post = new HttpPost(fullUri);
         post.addHeader("Accept", "application/json");
         post.addHeader("Content-Type",
                        org.apache.http.entity.ContentType.MULTIPART_FORM_DATA.getMimeType() + ";boundary=" + boundary);
-        post.addHeader("sessionId", sessionId);
+        post.addHeader("sessionId", this.catalogObjectAction.getSessionId());
 
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setBoundary(boundary);
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         builder.addPart("file", new FileBody(this.catalogObjectAction.getNodeSourceJsonFile()));
+        builder.addTextBody(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage());
+        if (this.catalogObjectAction.isRevised()) {
+            builder.addTextBody(NAME_PARAM, this.catalogObjectAction.getNodeSourceName());
+            builder.addTextBody(KIND_PARAM, this.catalogObjectAction.getKind());
+            builder.addTextBody(OBJECT_CONTENT_TYPE_PARAM, this.catalogObjectAction.getObjectContentType());
+        }
         post.setEntity(builder.build());
         return post;
     }
