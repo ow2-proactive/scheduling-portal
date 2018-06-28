@@ -28,16 +28,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -68,10 +62,6 @@ public class CatalogRequestBuilder {
             builder.append("/resources?");
         }
         return builder.toString();
-    }
-
-    private void appendParameters(StringBuilder builder, String... paramPairs) {
-        builder.append(Arrays.stream(paramPairs).collect(Collectors.joining("&")));
     }
 
     public CloseableHttpResponse postNodeSourceRequestToCatalog(CatalogObjectAction catalogObjectAction, String fullUri)
