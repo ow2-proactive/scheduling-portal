@@ -64,17 +64,13 @@ public class CatalogRequestBuilder {
         return builder.toString();
     }
 
-    public CloseableHttpResponse postNodeSourceRequestToCatalog(CatalogObjectAction catalogObjectAction, String fullUri)
+    public CloseableHttpResponse postNodeSourceRequestToCatalog(String fullUri)
             throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
-        HttpPost postNodeSource = buildCatalogRequest(catalogObjectAction, fullUri);
+        HttpPost postNodeSource = buildCatalogRequest(fullUri);
         return getHttpClientBuilder().build().execute(postNodeSource);
     }
 
-    private String paramPair(String param, String value) {
-        return param + "=" + value;
-    }
-
-    private HttpPost buildCatalogRequest(CatalogObjectAction catalogObjectActio, String fullUri) {
+    private HttpPost buildCatalogRequest(String fullUri) {
         String boundary = "---------------" + UUID.randomUUID().toString();
         HttpPost post = new HttpPost(fullUri);
         post.addHeader("Accept", "application/json");
