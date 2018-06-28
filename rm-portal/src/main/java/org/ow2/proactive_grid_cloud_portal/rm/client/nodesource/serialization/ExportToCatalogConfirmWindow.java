@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
@@ -71,7 +72,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     public static final int WINDOW_WIDTH = 680;
 
-    public static final int WINDOW_HEIGHT = 200;
+    public static final int WINDOW_HEIGHT = 210;
 
     public static final String SELECT_A_BUCKET_OPTION = "Select a bucket";
 
@@ -123,7 +124,6 @@ public class ExportToCatalogConfirmWindow extends Window {
 
         this.windowLabel = new Label("Choose the catalog bucket in which to publish the Node Source " + nodeSourceName);
         this.windowLabel.setHeight(30);
-        this.windowLabel.setMargin(5);
 
         HorizontalPanel exportInfoPanel = new HorizontalPanel();
         exportInfoPanel.setHeight("80px");
@@ -139,12 +139,14 @@ public class ExportToCatalogConfirmWindow extends Window {
         exportInfoPanel.add(commitLabel);
         this.commitMessage = new TextBox();
         exportInfoPanel.add(this.commitMessage);
-
         this.revisionLabel = new Label(INITIAL_COMMIT_MESSAGE);
         this.revisionLabel.setHeight("80px");
         this.revisionLabel.setValign(VerticalAlignment.TOP);
         this.revisionLabel.setAlign(Alignment.LEFT);
-        exportInfoPanel.add(this.revisionLabel);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        scrollPanel.setHeight("80px");
+        scrollPanel.add(this.revisionLabel);
+        exportInfoPanel.add(scrollPanel);
 
         HLayout buttons = new HLayout();
         buttons.setHeight(40);
@@ -161,6 +163,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         VLayout layout = new VLayout();
         layout.setAlign(VerticalAlignment.TOP);
         layout.setMargin(10);
+        layout.setMembersMargin(10);
         layout.addMember(this.windowLabel);
         layout.addMember(exportInfoPanel);
         layout.addMember(buttons);
