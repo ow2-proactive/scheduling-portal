@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 

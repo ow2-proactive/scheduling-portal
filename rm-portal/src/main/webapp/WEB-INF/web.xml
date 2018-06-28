@@ -30,22 +30,22 @@
 
 	<servlet>
 		<servlet-name>NSCreationServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.NSCreationServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.NSCreationServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToCatalogServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ImportNodeSourceFromFileServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.ImportNodeSourceFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->

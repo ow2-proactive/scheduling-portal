@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 
@@ -43,6 +43,8 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
+import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogObjectAction;
+import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +54,9 @@ import org.slf4j.LoggerFactory;
  * content is expected to be in JSON format, containing the configuration of a
  * node source.
  */
-public class ExportNodeSourceToCatalogServlet extends HttpServlet {
+public class ExportToCatalogServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceToCatalogServlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExportToCatalogServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {

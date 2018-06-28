@@ -46,11 +46,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.ExportToCatalogConfirmWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.ExportToCatalogConfirmWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
@@ -1016,7 +1016,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     public void exportNodeSourceToFile(String nodeSourceName) {
         FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
 
-        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
+        Hidden nodeSourceJsonItem = new Hidden(ExportToFileServlet.MAIN_FORM_ITEM_NAME);
 
         VerticalPanel panel = new VerticalPanel();
         panel.add(nodeSourceJsonItem);
