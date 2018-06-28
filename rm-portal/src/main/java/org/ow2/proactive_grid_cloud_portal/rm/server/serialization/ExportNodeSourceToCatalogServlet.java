@@ -81,8 +81,7 @@ public class ExportNodeSourceToCatalogServlet extends HttpServlet {
     private void postRequestAndHandleResponse(HttpServletResponse response, CatalogObjectAction catalogObjectAction,
             CatalogRequestBuilder catalogRequestBuilder, String requestUri)
             throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(catalogObjectAction.getSessionId(),
-                                                                                                       requestUri)) {
+        try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(requestUri)) {
             new BasicResponseHandler().handleResponse(httpResponse);
         } catch (HttpResponseException e) {
             logErrorAndWriteResponseToClient(e, response);
