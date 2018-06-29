@@ -83,7 +83,7 @@ public class CatalogRequestBuilder {
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         builder.addPart("file", new FileBody(this.catalogObjectAction.getNodeSourceJsonFile()));
         builder.addTextBody(COMMIT_MESSAGE_PARAM, this.catalogObjectAction.getCommitMessage());
-        if (this.catalogObjectAction.isRevised()) {
+        if (!this.catalogObjectAction.isRevised()) {
             builder.addTextBody(NAME_PARAM, this.catalogObjectAction.getNodeSourceName());
             builder.addTextBody(KIND_PARAM, this.catalogObjectAction.getKind());
             builder.addTextBody(OBJECT_CONTENT_TYPE_PARAM, this.catalogObjectAction.getObjectContentType());
