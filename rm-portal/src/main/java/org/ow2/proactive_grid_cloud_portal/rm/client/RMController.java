@@ -48,11 +48,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.ExportToCatalogConfirmWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog.ExportToCatalogConfirmWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -68,9 +66,6 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -1014,38 +1009,25 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
-
-        Hidden nodeSourceJsonItem = new Hidden(ExportToFileServlet.MAIN_FORM_ITEM_NAME);
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(nodeSourceJsonItem);
-        nodeSourceJsonForm.setWidget(panel);
-
-        Window window = new Window();
-        window.addChild(nodeSourceJsonForm);
-        window.show();
-
-        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                      nodeSourceName,
-                                      new AsyncCallback<String>() {
-                                          public void onSuccess(String result) {
-                                              nodeSourceJsonItem.setValue(result);
-                                              nodeSourceJsonForm.submit();
-                                              window.hide();
-                                              window.destroy();
-                                          }
-
-                                          public void onFailure(Throwable caught) {
-                                              String msg = JSONUtils.getJsonErrorMessage(caught);
-                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
-                                                      ":<br>" + msg);
-                                          }
-                                      });
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportNodeSourceToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
         new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
+    }
+
+    public void exportInfrastructureToFile(String nodeSourceName) {
+    }
+
+    public void exportInfrastructureToCatalog(String nodeSourceName) {
+    }
+
+    public void exportPolicyToFile(String nodeSourceName) {
+    }
+
+    public void exportPolicyToCatalog(String nodeSourceName) {
     }
 
     /**

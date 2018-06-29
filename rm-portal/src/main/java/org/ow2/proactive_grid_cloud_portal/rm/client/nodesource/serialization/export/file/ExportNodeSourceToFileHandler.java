@@ -23,18 +23,25 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.shared;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file;
 
-public class ServletMappings {
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 
-    private ServletMappings() {
-        // this class is not meant to be instantiated
+
+public class ExportNodeSourceToFileHandler extends ExportToFileHandler {
+
+    public ExportNodeSourceToFileHandler(String nodeSourceName) {
+        super(nodeSourceName);
     }
 
-    public static final String EXPORT_NODE_SOURCE_TO_FILE = "exportnodesourcetofile";
+    @Override
+    protected String getFormTarget() {
+        return SerializationType.EXPORT_NODE_SOURCE_TO_FILE.getFormTarget();
+    }
 
-    public static final String EXPORT_NODE_SOURCE_TO_CATALOG = "exportnodesourcetocatalog";
-
-    public static final String IMPORT_NODE_SOURCE_FROM_FILE = "importnodesourcefromfile";
+    @Override
+    protected void handleNodeSourceConfigurationResult(String result) {
+        nodeSourceJsonContent.setValue(result);
+    }
 
 }

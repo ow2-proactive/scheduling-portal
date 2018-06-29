@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.EXPORT_FAILED_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.INITIAL_COMMIT_MESSAGE;
@@ -39,9 +39,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.Ca
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -89,7 +88,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private ExportToCatalogHiddenPanel hiddenFormItemsPanel;
 
-    private NodeSourceSerializationFormPanel exportNodeSourceToCatalogForm;
+    private FormPanel exportNodeSourceToCatalogForm;
 
     private Label windowLabel;
 
@@ -106,7 +105,11 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.nodeSourceName = nodeSourceName;
         this.rmController = rmController;
         this.parser = new NodeSourceConfigurationParser(rmController);
-        this.exportNodeSourceToCatalogForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_CATALOG);
+        this.exportNodeSourceToCatalogForm = new FormPanel();
+        this.exportNodeSourceToCatalogForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        this.exportNodeSourceToCatalogForm.setMethod(FormPanel.METHOD_POST);
+        this.exportNodeSourceToCatalogForm.setAction(GWT.getModuleBaseURL() +
+                                                     SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG);
         configureWindow();
         addContent();
     }

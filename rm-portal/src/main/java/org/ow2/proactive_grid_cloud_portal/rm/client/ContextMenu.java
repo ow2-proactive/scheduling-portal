@@ -131,6 +131,24 @@ public class ContextMenu extends Menu {
         exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem, exportNodeSourceToCatalogItem);
         exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
 
+        MenuItem exportInfrastructureItem = new MenuItem("Export Infrastructure", menu.exportItemImageResource);
+        Menu exportInfrastructureSubItems = new Menu();
+        MenuItem exportInfrastructureToFileItem = new MenuItem("To File", menu.exportItemImageResource);
+        MenuItem exportInfrastructureToCatalogItem = new MenuItem("To Catalog", menu.exportItemImageResource);
+        exportInfrastructureToFileItem.addClickHandler(onClick -> controller.exportInfrastructureToFile(nodeSourceName));
+        exportInfrastructureToCatalogItem.addClickHandler(onClick -> controller.exportInfrastructureToCatalog(nodeSourceName));
+        exportInfrastructureSubItems.setItems(exportInfrastructureToFileItem, exportInfrastructureToCatalogItem);
+        exportInfrastructureItem.setSubmenu(exportInfrastructureSubItems);
+
+        MenuItem exportPolicyItem = new MenuItem("Export Policy", menu.exportItemImageResource);
+        Menu exportPolicySubItems = new Menu();
+        MenuItem exportPolicyToFileItem = new MenuItem("To File", menu.exportItemImageResource);
+        MenuItem exportPolicyToCatalogItem = new MenuItem("To Catalog", menu.exportItemImageResource);
+        exportPolicyToFileItem.addClickHandler(onClick -> controller.exportPolicyToFile(nodeSourceName));
+        exportPolicyToCatalogItem.addClickHandler(onClick -> controller.exportPolicyToCatalog(nodeSourceName));
+        exportPolicySubItems.setItems(exportPolicyToFileItem, exportPolicyToCatalogItem);
+        exportPolicyItem.setSubmenu(exportPolicySubItems);
+
         if (menu.node != null) {
             if (menu.node.isLocked()) {
                 lockItem.setEnabled(false);

@@ -25,16 +25,22 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.FormPanel;
+public enum SerializationType {
 
+    EXPORT_NODE_SOURCE_TO_FILE("exportnodesourcetofile"),
 
-public class NodeSourceSerializationFormPanel extends FormPanel {
+    EXPORT_NODE_SOURCE_TO_CATALOG("exportnodesourcetocatalog"),
 
-    public NodeSourceSerializationFormPanel(String servletName) {
-        setEncoding(FormPanel.ENCODING_MULTIPART);
-        setMethod(FormPanel.METHOD_POST);
-        setAction(GWT.getModuleBaseURL() + servletName);
+    IMPORT_NODE_SOURCE_FROM_FILE("importnodesourcefromfile");
+
+    private String formTarget;
+
+    SerializationType(String formTarget) {
+        this.formTarget = formTarget;
+    }
+
+    public String getFormTarget() {
+        return formTarget;
     }
 
 }
