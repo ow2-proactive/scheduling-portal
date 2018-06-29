@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import org.apache.http.client.methods.HttpPost;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,31 +67,32 @@ public class CatalogRequestBuilderTest {
     public void testParametersAreSetForRevisedNodeSourceRequest() throws IOException {
         when(this.catalogObjectAction.isRevised()).thenReturn(true);
         HttpPost httpPost = this.catalogRequestBuilder.buildCatalogRequest("http://localhost:8080/catalog");
-        String string = getMultipartEntityString(httpPost);
-        checkThatRequestContainsRegularParameters(string);
+        String entityStringContent = getMultipartEntityString(httpPost);
+        checkThatRequestContainsRegularParameters(entityStringContent);
         assertThat("Request contains the " + CatalogConstants.KIND_PARAM + " parameter whereas it shouldn't",
-                   !string.contains(CatalogConstants.KIND_PARAM));
+                   CoreMatchers.not(entityStringContent.contains(CatalogConstants.KIND_PARAM)));
         assertThat("Request contains the " + CatalogConstants.OBJECT_CONTENT_TYPE_PARAM +
-                   " parameter whereas it shouldn't", !string.contains(CatalogConstants.OBJECT_CONTENT_TYPE_PARAM));
+                   " parameter whereas it shouldn't",
+                   CoreMatchers.not(entityStringContent.contains(CatalogConstants.OBJECT_CONTENT_TYPE_PARAM)));
     }
 
     @Test
     public void testParametersAreSetForNewNodeSourceRequest() throws IOException {
         when(this.catalogObjectAction.isRevised()).thenReturn(false);
         HttpPost httpPost = this.catalogRequestBuilder.buildCatalogRequest("http://localhost:8080/catalog");
-        String string = getMultipartEntityString(httpPost);
-        checkThatRequestContainsRegularParameters(string);
+        String entityStringContent = getMultipartEntityString(httpPost);
+        checkThatRequestContainsRegularParameters(entityStringContent);
         assertThat("Request does not contain the " + CatalogConstants.KIND_PARAM + " parameter",
-                   string.contains(CatalogConstants.KIND_PARAM));
+                   entityStringContent.contains(CatalogConstants.KIND_PARAM));
         assertThat("Request does not contain the " + CatalogConstants.OBJECT_CONTENT_TYPE_PARAM + " parameter",
-                   string.contains(CatalogConstants.OBJECT_CONTENT_TYPE_PARAM));
+                   entityStringContent.contains(CatalogConstants.OBJECT_CONTENT_TYPE_PARAM));
     }
 
-    private void checkThatRequestContainsRegularParameters(String string) {
+    private void checkThatRequestContainsRegularParameters(String entityStringContent) {
         assertThat("Request does not contain the " + CatalogConstants.FILE_CONTENT_PARAM + " parameter",
-                   string.contains(CatalogConstants.FILE_CONTENT_PARAM));
+                   entityStringContent.contains(CatalogConstants.FILE_CONTENT_PARAM));
         assertThat("Request does not contain the " + CatalogConstants.COMMIT_MESSAGE_PARAM + " parameter",
-                   string.contains(CatalogConstants.COMMIT_MESSAGE_PARAM));
+                   entityStringContent.contains(CatalogConstants.COMMIT_MESSAGE_PARAM));
     }
 
     private String getMultipartEntityString(HttpPost httpPost) throws IOException {
