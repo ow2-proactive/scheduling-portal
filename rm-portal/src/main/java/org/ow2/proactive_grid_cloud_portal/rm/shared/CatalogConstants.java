@@ -47,7 +47,7 @@ public class CatalogConstants {
 
     public static final String NAME_PARAM = "name";
 
-    public static final String FILE_CONTENT_PARAM = "fileContent";
+    public static final String FILE_CONTENT_PARAM = "file";
 
     public static final String KIND_PARAM = "kind";
 

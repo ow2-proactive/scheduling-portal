@@ -70,7 +70,7 @@ public class CatalogRequestBuilder {
         return getHttpClientBuilder().build().execute(postNodeSource);
     }
 
-    private HttpPost buildCatalogRequest(String fullUri) {
+    protected HttpPost buildCatalogRequest(String fullUri) {
         String boundary = "---------------" + UUID.randomUUID().toString();
         HttpPost post = new HttpPost(fullUri);
         post.addHeader("Accept", "application/json");
