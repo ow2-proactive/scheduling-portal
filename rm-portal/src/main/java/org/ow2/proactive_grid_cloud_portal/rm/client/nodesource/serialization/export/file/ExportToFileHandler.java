@@ -78,6 +78,7 @@ public abstract class ExportToFileHandler {
         this.nodeSourceNameItem = new Hidden(NODE_SOURCE_NAME_PARAM);
 
         panel.add(this.fileContentItem);
+        panel.add(this.fileSuffixItem);
         this.exportToFileFormPanel.setWidget(panel);
         this.exportToFileWindow.addChild(this.exportToFileFormPanel);
         this.exportToFileWindow.show();
