@@ -49,6 +49,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog.ExportToCatalogConfirmWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -146,7 +147,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     RMController(RMServiceAsync rm) {
         this.rm = rm;
         this.model = new RMModelImpl();
-        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser(this);
+        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
         this.init();
     }
 
@@ -845,7 +846,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               try {
                                                   model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
                                                   success.run();
-                                              } catch (ImportException e) {
+                                              } catch (RuntimeException e) {
                                                   runFailure(e);
                                               }
                                           }
@@ -1019,6 +1020,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportInfrastructureToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportInfrastructureToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
     }
 
     public void exportInfrastructureToCatalog(String nodeSourceName) {

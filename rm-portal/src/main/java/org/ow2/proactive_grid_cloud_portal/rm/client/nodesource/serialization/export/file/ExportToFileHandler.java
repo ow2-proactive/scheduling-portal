@@ -25,8 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants.FILE_CONTENT_PARAM;
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants.FILE_SUFFIX_PARAM;
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants.NODE_SOURCE_NAME_PARAM;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
-import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -45,7 +48,11 @@ public abstract class ExportToFileHandler {
 
     private FormPanel exportToFileFormPanel;
 
-    protected Hidden nodeSourceJsonContent;
+    protected Hidden fileContentItem;
+
+    protected Hidden fileSuffixItem;
+
+    protected Hidden nodeSourceNameItem;
 
     public ExportToFileHandler(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
@@ -58,7 +65,7 @@ public abstract class ExportToFileHandler {
 
     protected abstract String getFormTarget();
 
-    protected abstract void handleNodeSourceConfigurationResult(String result);
+    protected abstract void handleNodeSourceConfigurationResponse(String fileContentJson);
 
     private void createSubmitWindow() {
         this.exportToFileWindow = new Window();
@@ -66,9 +73,11 @@ public abstract class ExportToFileHandler {
         configureFormPanel(this.exportToFileFormPanel);
         VerticalPanel panel = new VerticalPanel();
 
-        this.nodeSourceJsonContent = new Hidden(ExportToFileServlet.MAIN_FORM_ITEM_NAME);
+        this.fileContentItem = new Hidden(FILE_CONTENT_PARAM);
+        this.fileSuffixItem = new Hidden(FILE_SUFFIX_PARAM);
+        this.nodeSourceNameItem = new Hidden(NODE_SOURCE_NAME_PARAM);
 
-        panel.add(this.nodeSourceJsonContent);
+        panel.add(this.fileContentItem);
         this.exportToFileFormPanel.setWidget(panel);
         this.exportToFileWindow.addChild(this.exportToFileFormPanel);
         this.exportToFileWindow.show();
@@ -83,8 +92,8 @@ public abstract class ExportToFileHandler {
     private class ExportFromNodeSourceConfigurationCallback implements AsyncCallback<String> {
 
         @Override
-        public void onSuccess(String result) {
-            handleNodeSourceConfigurationResult(result);
+        public void onSuccess(String nodeSourceJsonContent) {
+            handleNodeSourceConfigurationResponse(nodeSourceJsonContent);
             exportToFileFormPanel.submit();
             exportToFileWindow.hide();
             exportToFileWindow.destroy();

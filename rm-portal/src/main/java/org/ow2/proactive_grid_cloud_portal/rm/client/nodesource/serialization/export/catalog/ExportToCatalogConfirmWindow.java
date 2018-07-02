@@ -37,7 +37,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
@@ -72,13 +71,13 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 public class ExportToCatalogConfirmWindow extends Window {
 
-    public static final String WINDOW_TITLE = "Export Node Source to Catalog";
+    private static final String WINDOW_TITLE = "Export Node Source to Catalog";
 
-    public static final int WINDOW_WIDTH = 680;
+    private static final int WINDOW_WIDTH = 680;
 
-    public static final int WINDOW_HEIGHT = 210;
+    private static final int WINDOW_HEIGHT = 210;
 
-    public static final String SELECT_A_BUCKET_OPTION = "Select a bucket";
+    private static final String SELECT_A_BUCKET_OPTION = "Select a bucket";
 
     private String nodeSourceName;
 
@@ -104,7 +103,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.nodeSourceRevised = false;
         this.nodeSourceName = nodeSourceName;
         this.rmController = rmController;
-        this.parser = new NodeSourceConfigurationParser(rmController);
+        this.parser = new NodeSourceConfigurationParser();
         this.exportNodeSourceToCatalogForm = new FormPanel();
         this.exportNodeSourceToCatalogForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.exportNodeSourceToCatalogForm.setMethod(FormPanel.METHOD_POST);
@@ -291,7 +290,7 @@ public class ExportToCatalogConfirmWindow extends Window {
                     hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue(NODE_SOURCE_CONTENT_TYPE);
                     hiddenFormItemsPanel.revised.setValue(Boolean.toString(nodeSourceRevised));
                     exportNodeSourceToCatalogForm.submit();
-                } catch (ImportException e) {
+                } catch (RuntimeException e) {
                     String msg = JSONUtils.getJsonErrorMessage(e);
                     SC.warn("Failed to export node source to catalog:<br>" + msg);
                 } finally {

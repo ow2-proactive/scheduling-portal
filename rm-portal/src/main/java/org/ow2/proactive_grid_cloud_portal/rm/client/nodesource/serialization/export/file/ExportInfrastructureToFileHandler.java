@@ -30,10 +30,12 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.No
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants;
 
+import com.google.gwt.json.client.JSONObject;
 
-public class ExportNodeSourceToFileHandler extends ExportToFileHandler {
 
-    public ExportNodeSourceToFileHandler(String nodeSourceName) {
+public class ExportInfrastructureToFileHandler extends ExportToFileHandler {
+
+    public ExportInfrastructureToFileHandler(String nodeSourceName) {
         super(nodeSourceName);
     }
 
@@ -44,9 +46,14 @@ public class ExportNodeSourceToFileHandler extends ExportToFileHandler {
 
     @Override
     protected void handleNodeSourceConfigurationResponse(String fileContentJson) {
-        NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(fileContentJson);
-        this.fileContentItem.setValue(fileContentJson);
-        this.fileSuffixItem.setValue(ExportToFileConstants.NODE_SOURCE_FILE_NAME_SUFFIX);
+        NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
+        NodeSourceConfiguration nodeSourceConfiguration = nodeSourceConfigurationParser.parseNodeSourceConfiguration(fileContentJson);
+        JSONObject jsonObject = nodeSourceConfigurationParser.parseJSON(fileContentJson).isObject();
+        String infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor")
+                                                              .isObject()
+                                                              .toString();
+        this.fileContentItem.setValue(infrastructurePluginDescriptorJson);
+        this.fileSuffixItem.setValue(ExportToFileConstants.INFRASTRUCTURE_FILE_NAME_SUFFIX);
         this.nodeSourceNameItem.setValue(nodeSourceConfiguration.getNodeSourceName());
     }
 

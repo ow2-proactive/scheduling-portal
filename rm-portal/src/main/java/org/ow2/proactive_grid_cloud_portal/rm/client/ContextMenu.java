@@ -175,7 +175,12 @@ public class ContextMenu extends Menu {
                     menu.disableItems(deployItem, undeployItem, editItem);
             }
         } else {
-            menu.disableItems(deployItem, undeployItem, editItem, exportNodeSourceItem);
+            menu.disableItems(deployItem,
+                              undeployItem,
+                              editItem,
+                              exportNodeSourceItem,
+                              exportInfrastructureItem,
+                              exportPolicyItem);
         }
 
         menu.setItems(deployItem,
@@ -186,7 +191,9 @@ public class ContextMenu extends Menu {
                       unlockItem,
                       removeItem,
                       new MenuItemSeparator(),
-                      exportNodeSourceItem);
+                      exportNodeSourceItem,
+                      exportInfrastructureItem,
+                      exportPolicyItem);
 
         return menu;
     }

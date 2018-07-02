@@ -623,7 +623,7 @@ public abstract class NodeSourceWindow {
         NodeSourceWindow.this.createdFromImport = true;
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
-            nodeSourceConfiguration = new NodeSourceConfigurationParser(NodeSourceWindow.this.controller).parseNodeSourceConfiguration(importedNodeSourceJsonString);
+            nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
             NodeSourceWindow.this.allFormItems = prepareFormItems();
@@ -660,7 +660,7 @@ public abstract class NodeSourceWindow {
 
             this.nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
             this.nodeSourcePluginsForm.show();
-        } catch (ImportException e) {
+        } catch (RuntimeException e) {
             setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         } finally {
             NodeSourceWindow.this.createdFromImport = false;

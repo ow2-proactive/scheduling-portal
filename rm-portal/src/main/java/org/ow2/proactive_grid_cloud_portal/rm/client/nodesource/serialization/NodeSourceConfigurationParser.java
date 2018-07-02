@@ -27,31 +27,38 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import java.util.HashMap;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 
 
 public class NodeSourceConfigurationParser {
 
-    private RMController controller;
-
-    public NodeSourceConfigurationParser(RMController controller) {
-        this.controller = controller;
+    public JSONValue parseJSON(String jsonStr) {
+        try {
+            return JSONParser.parseStrict(jsonStr);
+        } catch (Throwable t) {
+            LogModel logger = LogModel.getInstance();
+            logger.logCriticalMessage("JSON Parser failed with " + t.getClass().getName() + ": " + t.getMessage());
+            logger.logCriticalMessage("Raw input was: " + jsonStr);
+            return new JSONObject();
+        }
     }
 
-    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) throws ImportException {
+    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
 
         JSONObject jsonObject;
 
         try {
-            jsonObject = this.controller.parseJSON(json).isObject();
+            jsonObject = parseJSON(json).isObject();
         } catch (JSONException e) {
-            throw new ImportException("The imported node source is not a valid JSON file", e);
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
         }
 
         try {
@@ -74,13 +81,13 @@ public class NodeSourceConfigurationParser {
                                                infrastructurePluginDescriptor,
                                                policyPluginDescriptor);
         } catch (RuntimeException e) {
-            throw new ImportException("The imported node source has incorrect parameters.", e);
+            throw new IllegalArgumentException("The imported node source has incorrect parameters.", e);
         }
     }
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
 
-        JSONArray arr = this.controller.parseJSON(json).isArray();
+        JSONArray arr = parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<>();
 
         for (int i = 0; i < arr.size(); i++) {
