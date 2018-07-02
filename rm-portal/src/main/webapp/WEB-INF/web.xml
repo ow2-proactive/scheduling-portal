@@ -34,7 +34,7 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
+		<servlet-name>ExportToFileServlet</servlet-name>
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet</servlet-class>
 	</servlet>
 
@@ -76,8 +76,8 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<url-pattern>/portal/exportnodesourcetofile</url-pattern>
+		<servlet-name>ExportToFileServlet</servlet-name>
+		<url-pattern>/portal/file</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

@@ -41,7 +41,7 @@ public class ExportInfrastructureToFileHandler extends ExportToFileHandler {
 
     @Override
     protected String getFormTarget() {
-        return SerializationType.EXPORT_NODE_SOURCE_TO_FILE.getFormTarget();
+        return SerializationType.EXPORT_TO_FILE.getFormTarget();
     }
 
     @Override
@@ -52,6 +52,7 @@ public class ExportInfrastructureToFileHandler extends ExportToFileHandler {
         String infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor")
                                                               .isObject()
                                                               .toString();
+
         this.fileContentItem.setValue(infrastructurePluginDescriptorJson);
         this.fileSuffixItem.setValue(ExportToFileConstants.INFRASTRUCTURE_FILE_NAME_SUFFIX);
         this.nodeSourceNameItem.setValue(nodeSourceConfiguration.getNodeSourceName());

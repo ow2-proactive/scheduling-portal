@@ -27,7 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 public enum SerializationType {
 
-    EXPORT_NODE_SOURCE_TO_FILE("exportnodesourcetofile"),
+    EXPORT_TO_FILE("file"),
 
     EXPORT_NODE_SOURCE_TO_CATALOG("exportnodesourcetocatalog"),
 

@@ -51,6 +51,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.No
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog.ExportToCatalogConfirmWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportPolicyToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
@@ -1029,6 +1030,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportPolicyToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportPolicyToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
     }
 
     public void exportPolicyToCatalog(String nodeSourceName) {

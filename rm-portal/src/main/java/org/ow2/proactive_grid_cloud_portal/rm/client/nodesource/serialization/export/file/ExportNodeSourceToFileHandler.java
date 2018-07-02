@@ -39,12 +39,13 @@ public class ExportNodeSourceToFileHandler extends ExportToFileHandler {
 
     @Override
     protected String getFormTarget() {
-        return SerializationType.EXPORT_NODE_SOURCE_TO_FILE.getFormTarget();
+        return SerializationType.EXPORT_TO_FILE.getFormTarget();
     }
 
     @Override
     protected void handleNodeSourceConfigurationResponse(String fileContentJson) {
         NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(fileContentJson);
+
         this.fileContentItem.setValue(fileContentJson);
         this.fileSuffixItem.setValue(ExportToFileConstants.NODE_SOURCE_FILE_NAME_SUFFIX);
         this.nodeSourceNameItem.setValue(nodeSourceConfiguration.getNodeSourceName());
