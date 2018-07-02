@@ -108,7 +108,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.exportNodeSourceToCatalogForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.exportNodeSourceToCatalogForm.setMethod(FormPanel.METHOD_POST);
         this.exportNodeSourceToCatalogForm.setAction(GWT.getModuleBaseURL() +
-                                                     SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG);
+                                                     SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG.getFormTarget());
         configureWindow();
         addContent();
     }

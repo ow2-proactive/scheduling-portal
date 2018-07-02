@@ -37,7 +37,7 @@ public class ImportFromFilePanel extends FormPanel {
     ImportFromFilePanel(ImportNodeSourceLayout importNodeSourceLayout) {
         setEncoding(FormPanel.ENCODING_MULTIPART);
         setMethod(FormPanel.METHOD_POST);
-        setAction(GWT.getModuleBaseURL() + SerializationType.IMPORT_NODE_SOURCE_FROM_FILE);
+        setAction(GWT.getModuleBaseURL() + SerializationType.IMPORT_NODE_SOURCE_FROM_FILE.getFormTarget());
         add(getFileUploadItem());
         addSubmitCompleteHandler(importNodeSourceLayout::handleNodeSourceImport);
     }
