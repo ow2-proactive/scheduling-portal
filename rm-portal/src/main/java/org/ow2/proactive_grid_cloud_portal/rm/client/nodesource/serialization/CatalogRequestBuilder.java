@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanelFeeder;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.http.client.RequestBuilder;

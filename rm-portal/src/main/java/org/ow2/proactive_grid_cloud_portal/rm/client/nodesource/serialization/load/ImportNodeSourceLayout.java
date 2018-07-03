@@ -23,9 +23,11 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -59,11 +61,11 @@ public class ImportNodeSourceLayout extends VLayout {
         this.nodeSourceWindow.setNodeSourceWindowLabelWithError(errorMessage, e);
     }
 
-    void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
+    public void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
         this.nodeSourceWindow.importNodeSourceFromJson(importCompleteEvent.getResults());
     }
 
-    void handleNodeSourceImport(String importedNodeSourceJsonString) {
+    public void handleNodeSourceImport(String importedNodeSourceJsonString) {
         this.nodeSourceWindow.importNodeSourceFromJson(importedNodeSourceJsonString);
     }
 

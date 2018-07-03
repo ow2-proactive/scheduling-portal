@@ -23,7 +23,10 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -32,9 +35,9 @@ import com.google.gwt.user.client.ui.FormPanel;
 
 public class ImportFromFilePanel extends FormPanel {
 
-    static final String FILE_OPTION_NAME = "Import from File";
+    public static final String FILE_OPTION_NAME = "Import from File";
 
-    ImportFromFilePanel(ImportNodeSourceLayout importNodeSourceLayout) {
+    public ImportFromFilePanel(ImportNodeSourceLayout importNodeSourceLayout) {
         setEncoding(FormPanel.ENCODING_MULTIPART);
         setMethod(FormPanel.METHOD_POST);
         setAction(GWT.getModuleBaseURL() + SerializationType.IMPORT_NODE_SOURCE_FROM_FILE.getFormTarget());

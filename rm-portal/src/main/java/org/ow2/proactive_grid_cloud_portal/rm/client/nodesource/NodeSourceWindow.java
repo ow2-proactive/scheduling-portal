@@ -44,9 +44,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportNodeSourceLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;

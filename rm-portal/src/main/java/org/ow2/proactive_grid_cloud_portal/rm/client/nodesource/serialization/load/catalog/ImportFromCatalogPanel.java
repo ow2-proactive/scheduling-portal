@@ -23,9 +23,11 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.http.client.Request;
@@ -39,7 +41,7 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class ImportFromCatalogPanel extends HorizontalPanel {
 
-    static final String CATALOG_OPTION_NAME = "Import from Catalog";
+    public static final String CATALOG_OPTION_NAME = "Import from Catalog";
 
     private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
 
@@ -49,7 +51,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private ListBox nodeSourceListBox;
 
-    ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourceLayout) {
+    public ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourceLayout) {
         this.importNodeSourceLayout = importNodeSourceLayout;
         this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();

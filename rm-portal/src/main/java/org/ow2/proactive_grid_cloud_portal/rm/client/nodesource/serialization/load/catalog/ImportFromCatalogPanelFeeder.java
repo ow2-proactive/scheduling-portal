@@ -23,10 +23,12 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
