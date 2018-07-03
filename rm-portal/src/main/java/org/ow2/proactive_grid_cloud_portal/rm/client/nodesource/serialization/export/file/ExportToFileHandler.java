@@ -79,6 +79,7 @@ public abstract class ExportToFileHandler {
 
         panel.add(this.fileContentItem);
         panel.add(this.fileSuffixItem);
+        panel.add(this.nodeSourceNameItem);
         this.exportToFileFormPanel.setWidget(panel);
         this.exportToFileWindow.addChild(this.exportToFileFormPanel);
         this.exportToFileWindow.show();
