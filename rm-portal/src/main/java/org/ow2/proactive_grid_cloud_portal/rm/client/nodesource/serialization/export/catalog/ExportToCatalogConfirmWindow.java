@@ -38,8 +38,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;

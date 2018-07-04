@@ -27,15 +27,13 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import java.util.HashMap;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.json.client.*;
 
 
 public class NodeSourceConfigurationParser {
@@ -65,16 +63,8 @@ public class NodeSourceConfigurationParser {
             String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
             boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
-            JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
-            String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
-                                                                                .isString()
-                                                                                .stringValue();
-            PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
-                                                                                  infrastructurePluginName);
-
-            JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
-            String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
-            PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
+            PluginDescriptor infrastructurePluginDescriptor = getInfrastructurePluginDescriptor(jsonObject);
+            PluginDescriptor policyPluginDescriptor = getPolicyPluginDescriptor(jsonObject);
 
             return new NodeSourceConfiguration(nodeSourceName,
                                                nodesRecoverable,
@@ -83,6 +73,18 @@ public class NodeSourceConfigurationParser {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("The imported node source has incorrect parameters.", e);
         }
+    }
+
+    private PluginDescriptor getInfrastructurePluginDescriptor(JSONObject jsonObject) {
+        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
+        return getPluginDescriptor(infrastructurePluginDescriptorJson, infrastructurePluginName);
+    }
+
+    private PluginDescriptor getPolicyPluginDescriptor(JSONObject jsonObject) {
+        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
+        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+        return getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
     }
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
@@ -142,6 +144,61 @@ public class NodeSourceConfigurationParser {
             desc.getConfigurableFields().add(f);
         }
         return desc;
+    }
+
+    public String wrapInfrastructureJsonString(String infrastructureJsonString) {
+
+        JSONObject nodeSourceJsonObject = new JSONObject();
+
+        // general parameters
+        nodeSourceJsonObject.put("nodeSourceName", new JSONString(""));
+        nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
+
+        // infrastructure
+        JSONObject infrastructureJsonObject;
+        try {
+            infrastructureJsonObject = parseJSON(infrastructureJsonString).isObject();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+        }
+        nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
+
+        // policy
+        JSONObject policyJsonObject = new JSONObject();
+        policyJsonObject.put("pluginName", new JSONString(""));
+        policyJsonObject.put("pluginDescription", new JSONString(""));
+        policyJsonObject.put("configurableFields", new JSONArray());
+        policyJsonObject.put("defaultValues", new JSONObject());
+        nodeSourceJsonObject.put("policyPluginDescriptor", policyJsonObject);
+
+        return nodeSourceJsonObject.toString();
+    }
+
+    public String wrapPolicyJsonString(String importedPolicyJsonString) {
+        JSONObject nodeSourceJsonObject = new JSONObject();
+
+        // general parameters
+        nodeSourceJsonObject.put("nodeSourceName", new JSONString(""));
+        nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
+
+        // infrastructure
+        JSONObject policyJsonObject = new JSONObject();
+        policyJsonObject.put("pluginName", new JSONString(""));
+        policyJsonObject.put("pluginDescription", new JSONString(""));
+        policyJsonObject.put("configurableFields", new JSONArray());
+        policyJsonObject.put("defaultValues", new JSONObject());
+        nodeSourceJsonObject.put("infrastructurePluginDescriptor", policyJsonObject);
+
+        // infrastructure
+        JSONObject infrastructureJsonObject;
+        try {
+            infrastructureJsonObject = parseJSON(importedPolicyJsonString).isObject();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+        }
+        nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
+
+        return nodeSourceJsonObject.toString();
     }
 
 }

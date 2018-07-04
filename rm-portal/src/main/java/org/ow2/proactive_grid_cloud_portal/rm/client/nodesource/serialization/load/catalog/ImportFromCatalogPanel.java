@@ -108,7 +108,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                ImportFromCatalogPanel.this.importNodeSourceLayout.handleNodeSourceImport(response.getText());
+                ImportFromCatalogPanel.this.importNodeSourceLayout.handleImport(response.getText());
             }
 
             @Override

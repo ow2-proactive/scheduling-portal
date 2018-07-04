@@ -27,8 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.e
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 import com.google.gwt.json.client.JSONObject;
 

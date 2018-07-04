@@ -23,24 +23,22 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
-public enum SerializationType {
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 
-    EXPORT_TO_FILE("file"),
 
-    EXPORT_NODE_SOURCE_TO_CATALOG("exportnodesourcetocatalog"),
+public class ImportInfrastructureLayout extends ImportLayout {
 
-    IMPORT_NODE_SOURCE_FROM_FILE("importnodesourcefromfile");
-
-    private String formTarget;
-
-    SerializationType(String formTarget) {
-        this.formTarget = formTarget;
+    public ImportInfrastructureLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
+        super(nodeSourceWindow, layoutTitle);
     }
 
-    public String getFormTarget() {
-        return formTarget;
+    @Override
+    public void handleImport(String submitResult) {
+        String importedNodeSourceJsonString = new NodeSourceConfigurationParser().wrapInfrastructureJsonString(submitResult);
+        this.nodeSourceWindow.importNodeSourceFromJson(importedNodeSourceJsonString);
     }
 
 }

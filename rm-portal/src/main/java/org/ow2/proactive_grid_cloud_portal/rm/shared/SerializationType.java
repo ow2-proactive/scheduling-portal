@@ -23,28 +23,24 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
+public enum SerializationType {
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.smartgwt.client.widgets.layout.VLayout;
+    EXPORT_TO_FILE("file"),
 
+    EXPORT_NODE_SOURCE_TO_CATALOG("exportnodesourcetocatalog"),
 
-public class ImportNodeSourceLayout extends ImportLayout {
+    IMPORT_FROM_FILE("importnodesourcefromfile");
 
-    public ImportNodeSourceLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
-        super(nodeSourceWindow, layoutTitle);
+    private String formTarget;
+
+    SerializationType(String formTarget) {
+        this.formTarget = formTarget;
     }
 
-    @Override
-    public void handleImport(String submitResult) {
-        this.nodeSourceWindow.importNodeSourceFromJson(submitResult);
+    public String getFormTarget() {
+        return formTarget;
     }
 
 }

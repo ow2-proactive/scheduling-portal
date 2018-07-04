@@ -45,10 +45,13 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportInfrastructureLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportPolicyLayout;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.ListBox;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
@@ -66,10 +69,7 @@ import com.smartgwt.client.widgets.form.fields.RowSpacerItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
-import com.smartgwt.client.widgets.layout.VStack;
+import com.smartgwt.client.widgets.layout.*;
 
 
 public abstract class NodeSourceWindow {
@@ -300,7 +300,7 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowLayout.setMembersMargin(5);
 
         HLayout nodeSourceWindowSubLayoutTop = new HLayout(5);
-        HLayout nodeSourceWindowSubLayoutBottom = new HLayout();
+        HLayout nodeSourceWindowSubLayoutBottom = new HLayout(5);
 
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
@@ -332,8 +332,9 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.setGroupTitle("Create Node Source");
         createNodeSourceLayout.setIsGroup(true);
         createNodeSourceLayout.setPadding(10);
+        createNodeSourceLayout.setWidth("75%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
-        Layout importNodeSourceLayout = new ImportNodeSourceLayout(this);
+        Layout importNodeSourceLayout = new ImportNodeSourceLayout(this, "or Import Node Source");
         DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setWidth100();
         nodeSourceWindowForm.setHeight("50px");
@@ -397,16 +398,23 @@ public abstract class NodeSourceWindow {
         scrollLayout.setOverflow(Overflow.AUTO);
         scrollLayout.setBorder("1px solid #ddd");
         scrollLayout.setBackgroundColor("#fafafa");
+        VLayout importLayout = new VLayout();
+        importLayout.setMembers(new LayoutSpacer("100%", "15%"),
+                                new ImportInfrastructureLayout(this, "Import Infrastructure"),
+                                new LayoutSpacer("100%", "20%"),
+                                new ImportPolicyLayout(this, "Import Policy"),
+                                new LayoutSpacer("100%", "45%"));
 
         nodeSourceWindowLayout.addMember(this.nodeSourceWindowLabel);
-        nodeSourceWindowSubLayoutTop.addMember(createNodeSourceLayout);
-        nodeSourceWindowSubLayoutTop.addMember(importNodeSourceLayout);
-        nodeSourceWindowLayout.addMember(nodeSourceWindowSubLayoutTop);
+        nodeSourceWindowSubLayoutTop.setMembers(createNodeSourceLayout, importNodeSourceLayout);
         nodeSourceWindowSubLayoutBottom.setHeight100();
         nodeSourceWindowSubLayoutBottom.setWidth100();
-        nodeSourceWindowSubLayoutBottom.addMember(scrollLayout);
-        nodeSourceWindowLayout.addMember(nodeSourceWindowSubLayoutBottom);
-        nodeSourceWindowLayout.addMember(buttonsLayout);
+        nodeSourceWindowSubLayoutBottom.setMembers(scrollLayout, importLayout);
+
+        nodeSourceWindowLayout.setMembers(this.nodeSourceWindowLabel,
+                                          nodeSourceWindowSubLayoutTop,
+                                          nodeSourceWindowSubLayoutBottom,
+                                          buttonsLayout);
 
         int winWidth = com.google.gwt.user.client.Window.getClientWidth() * 80 / 100;
         int winHeight = com.google.gwt.user.client.Window.getClientHeight() * 80 / 100;
@@ -630,26 +638,14 @@ public abstract class NodeSourceWindow {
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
 
-            PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-            NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-            handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-            NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
-            NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
-            NodeSourceWindow.this.infrastructureSelectItem.setValue(NodeSourceWindow.this.previousSelectedInfrastructure);
+            PluginDescriptor focusedInfrastructurePlugin = getInfrastructurePluginFromNodeSourceConfiguration(nodeSourceConfiguration,
+                                                                                                              selectItemValues);
 
             NodeSourceWindow.this.allFormItems.add(new SpacerItem());
             selectItemValues.clear();
 
-            PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-            NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-            NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
-            fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-            handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-            NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
-            NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
-            NodeSourceWindow.this.policySelectItem.setValue(NodeSourceWindow.this.previousSelectedPolicy);
+            PluginDescriptor focusedPolicyPlugin = getPolicyPluginFromNodeSourceConfiguration(nodeSourceConfiguration,
+                                                                                              selectItemValues);
 
             NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
@@ -664,6 +660,32 @@ public abstract class NodeSourceWindow {
         } finally {
             NodeSourceWindow.this.createdFromImport = false;
         }
+    }
+
+    private PluginDescriptor getPolicyPluginFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration,
+            LinkedHashMap<String, String> selectItemValues) {
+        PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+        NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
+        NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
+        fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
+        handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+        NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
+        NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+        NodeSourceWindow.this.policySelectItem.setValue(NodeSourceWindow.this.previousSelectedPolicy);
+        return focusedPolicyPlugin;
+    }
+
+    private PluginDescriptor getInfrastructurePluginFromNodeSourceConfiguration(
+            NodeSourceConfiguration nodeSourceConfiguration, LinkedHashMap<String, String> selectItemValues) {
+        PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+        NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
+        NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
+        fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
+        handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+        NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
+        NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+        NodeSourceWindow.this.infrastructureSelectItem.setValue(NodeSourceWindow.this.previousSelectedInfrastructure);
+        return focusedInfrastructurePlugin;
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {

@@ -25,24 +25,32 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.SerializationType;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.layout.VLayout;
 
 
 public class ImportFromFilePanel extends FormPanel {
 
     public static final String FILE_OPTION_NAME = "Import from File";
 
-    public ImportFromFilePanel(ImportNodeSourceLayout importNodeSourceLayout) {
+    public ImportFromFilePanel(SubmitCompleteHandler handler) {
         setEncoding(FormPanel.ENCODING_MULTIPART);
         setMethod(FormPanel.METHOD_POST);
-        setAction(GWT.getModuleBaseURL() + SerializationType.IMPORT_NODE_SOURCE_FROM_FILE.getFormTarget());
-        add(getFileUploadItem());
-        addSubmitCompleteHandler(importNodeSourceLayout::handleNodeSourceImport);
+        setAction(GWT.getModuleBaseURL() + SerializationType.IMPORT_FROM_FILE.getFormTarget());
+        add(getFileUploadLayout());
+        addSubmitCompleteHandler(handler);
+    }
+
+    private VLayout getFileUploadLayout() {
+        VLayout fileUploadLayout = new VLayout();
+        fileUploadLayout.setAlign(Alignment.LEFT);
+        fileUploadLayout.addMember(getFileUploadItem());
+        return fileUploadLayout;
     }
 
     private FileUpload getFileUploadItem() {

@@ -44,8 +44,8 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.ImportNodeSourceFromFileServlet</servlet-class>
+		<servlet-name>ImportFromFileServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.ImportFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->
@@ -86,7 +86,7 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
+		<servlet-name>ImportFromFileServlet</servlet-name>
 		<url-pattern>/portal/importnodesourcefromfile</url-pattern>
 	</servlet-mapping>
 

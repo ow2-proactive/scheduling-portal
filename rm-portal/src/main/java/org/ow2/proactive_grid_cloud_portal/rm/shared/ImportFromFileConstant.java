@@ -23,28 +23,12 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
+public class ImportFromFileConstant {
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.smartgwt.client.widgets.layout.VLayout;
+    public static final String IMPORT_TYPE_PARAM = "importType";
 
-
-public class ImportNodeSourceLayout extends ImportLayout {
-
-    public ImportNodeSourceLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
-        super(nodeSourceWindow, layoutTitle);
-    }
-
-    @Override
-    public void handleImport(String submitResult) {
-        this.nodeSourceWindow.importNodeSourceFromJson(submitResult);
-    }
+    public static final String UPLOADED_FILE_PARAM = "uploadedFile";
 
 }

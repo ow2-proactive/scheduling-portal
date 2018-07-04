@@ -23,32 +23,22 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 
-public class ExportNodeSourceToFileHandler extends ExportToFileHandler {
+public class ImportPolicyLayout extends ImportLayout {
 
-    public ExportNodeSourceToFileHandler(String nodeSourceName) {
-        super(nodeSourceName);
+    public ImportPolicyLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
+        super(nodeSourceWindow, layoutTitle);
     }
 
     @Override
-    protected String getFormTarget() {
-        return SerializationType.EXPORT_TO_FILE.getFormTarget();
-    }
-
-    @Override
-    protected void handleNodeSourceConfigurationResponse(String fileContentJson) {
-        NodeSourceConfiguration nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(fileContentJson);
-
-        this.fileContentItem.setValue(fileContentJson);
-        this.fileSuffixItem.setValue(ExportToFileConstants.NODE_SOURCE_FILE_NAME_SUFFIX);
-        this.nodeSourceNameItem.setValue(nodeSourceConfiguration.getNodeSourceName());
+    public void handleImport(String submitResult) {
+        String importedNodeSourceJsonString = new NodeSourceConfigurationParser().wrapPolicyJsonString(submitResult);
+        this.nodeSourceWindow.importNodeSourceFromJson(importedNodeSourceJsonString);
     }
 
 }
