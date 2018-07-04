@@ -30,7 +30,16 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.jboss.resteasy.annotations.GZIP;
 
@@ -52,7 +61,8 @@ public interface RestClient {
     @GZIP
     @Path("/rm/monitoring")
     @Produces("application/json")
-    InputStream monitoring(@HeaderParam("sessionid") String sessionId);
+    InputStream monitoring(@HeaderParam("sessionid") String sessionId,
+            @HeaderParam("clientCounter") @DefaultValue("-1") String counter);
 
     @GET
     @GZIP
@@ -66,10 +76,17 @@ public interface RestClient {
     @Produces("application/json")
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
-    @POST
-    @Path("/rm/nodesource/create/recovery")
+    @GET
+    @GZIP
+    @Path("/rm/nodesource/configuration")
     @Produces("application/json")
-    InputStream createnodeSource(@HeaderParam("sessionId") String sessionId,
+    InputStream getNodeSourceConfiguration(@HeaderParam("sessionid") String sessionId,
+            @QueryParam("nodeSourceName") String nodeSourceName);
+
+    @POST
+    @Path("/rm/nodesource")
+    @Produces("application/json")
+    InputStream defineNodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
             @FormParam("infrastructureParameters") String[] infrastructureParameters,
@@ -77,6 +94,41 @@ public interface RestClient {
             @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
             @FormParam("policyFileParameters") String[] policyFileParameters,
             @FormParam("nodesRecoverable") String nodesRecoverable);
+
+    @PUT
+    @Path("/rm/nodesource/edit")
+    @Produces("application/json")
+    InputStream editNodeSource(@HeaderParam("sessionId") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName,
+            @FormParam("infrastructureType") String infrastructureType,
+            @FormParam("infrastructureParameters") String[] infrastructureParameters,
+            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
+            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
+            @FormParam("policyFileParameters") String[] policyFileParameters,
+            @FormParam("nodesRecoverable") String nodesRecoverable);
+
+    @PUT
+    @Path("/rm/nodesource/parameter")
+    @Produces("application/json")
+    InputStream updateDynamicParameters(@HeaderParam("sessionId") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName,
+            @FormParam("infrastructureType") String infrastructureType,
+            @FormParam("infrastructureParameters") String[] infrastructureParameters,
+            @FormParam("infrastructureFileParameters") String[] infrastructureFileParameters,
+            @FormParam("policyType") String policyType, @FormParam("policyParameters") String[] policyParameters,
+            @FormParam("policyFileParameters") String[] policyFileParameters);
+
+    @PUT
+    @Path("/rm/nodesource/deploy")
+    @Produces("application/json")
+    InputStream deployNodeSource(@HeaderParam("sessionid") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName);
+
+    @PUT
+    @Path("/rm/nodesource/undeploy")
+    @Produces("application/json")
+    InputStream undeployNodeSource(@HeaderParam("sessionid") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName, @FormParam("preempt") boolean preempt);
 
     @POST
     @Path("/rm/node/lock")

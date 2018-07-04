@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
@@ -65,6 +66,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     private Host selectedHost = null;
 
     private NodeSource selectedNodeSource = null;
+
+    private NodeSourceConfiguration editedNodeSourceConfiguration = null;
 
     private HashMap<String, PluginDescriptor> infrastructures = null;
 
@@ -110,6 +113,12 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private long maxNumberOfNodes = -1;
 
+    private int numDeployedNodeSources = 0;
+
+    private int numUndeployedNodeSources = 0;
+
+    private long maxCounter = -1;
+
     RMModelImpl() {
         super();
 
@@ -126,14 +135,23 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
-    public Map<String, NodeSource> getNodes() {
+    public Map<String, NodeSource> getNodeSources() {
         return this.nodes;
     }
 
     void setNodes(HashMap<String, NodeSource> nodes) {
         this.nodes = nodes;
+    }
+
+    void nodesUpdate(Map<String, NodeSource> nodes) {
         for (NodesListener list : this.nodesListeners) {
             list.nodesUpdated(nodes);
+        }
+    }
+
+    void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        for (NodesListener list : this.nodesListeners) {
+            list.updateByDelta(nodeSources, nodes);
         }
     }
 
@@ -279,6 +297,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
+    public NodeSourceConfiguration getEditedNodeSourceConfiguration() {
+        return this.editedNodeSourceConfiguration;
+    }
+
+    void setEditedNodeSourceConfiguration(NodeSourceConfiguration editedNodeSourceConfiguration) {
+        this.editedNodeSourceConfiguration = editedNodeSourceConfiguration;
+    }
+
+    @Override
     public StatHistory getStatHistory(String source) {
         return this.statistics.get(source);
     }
@@ -393,6 +420,16 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     }
 
     @Override
+    public int getNumDeployedNodeSources() {
+        return this.numDeployedNodeSources;
+    }
+
+    @Override
+    public int getNumUndeployedNodeSources() {
+        return this.numUndeployedNodeSources;
+    }
+
+    @Override
     public int getNumNodes() {
         return numFree + numBusy + numDown;
     }
@@ -458,4 +495,19 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.numVirtualHosts = num;
     }
 
+    void setNumDeployedNodeSources(int num) {
+        this.numDeployedNodeSources = num;
+    }
+
+    void setNumUndeployedNodeSources(int num) {
+        this.numUndeployedNodeSources = num;
+    }
+
+    public long getMaxCounter() {
+        return maxCounter;
+    }
+
+    public void setMaxCounter(long maxCounter) {
+        this.maxCounter = maxCounter;
+    }
 }

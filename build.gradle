@@ -11,10 +11,12 @@ buildscript {
     dependencies {
         classpath "com.diffplug.gradle.spotless:spotless:2.4.0"
         classpath "org.ow2.proactive:coding-rules:1.0.0"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
         delete "gradle/ext"
         ant.unjar src: configurations.classpath.find { it.name.startsWith("coding-rules") }, dest: 'gradle/ext'
     }
 }
+
 
 subprojects {
     apply plugin: 'java'
@@ -55,7 +57,7 @@ subprojects {
 
     dependencies {
 
-        def jacksonVersion = "2.8.7"
+        def jacksonVersion = "2.7.9"
 
         providedCompile 'com.google.gwt:gwt-user:2.8.0'
         providedCompile 'com.google.gwt:gwt-dev:2.8.0'
@@ -171,6 +173,8 @@ project(':scheduler-portal') {
 
 configure([project(':scheduler-portal'), project(':rm-portal')]) {
     apply plugin: 'war'
+    apply plugin: 'org.sonarqube'
+
     task compileGwt(dependsOn: classes, type: JavaExec) {
         standardOutput = System.out
         errorOutput = System.err

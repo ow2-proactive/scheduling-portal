@@ -104,11 +104,7 @@ public class RMServiceImpl extends Service implements RMService {
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getProperties()
-     */
+    @Override
     public Map<String, String> getProperties() {
         return RMConfig.get().getProperties();
     }
@@ -121,11 +117,7 @@ public class RMServiceImpl extends Service implements RMService {
         ConfigUtils.loadSystemProperties(RMConfig.get());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#logout(java.lang.String)
-     */
+    @Override
     public void logout(String sessionId) throws ServiceException {
         RestClient restClientProxy = getRestClientProxy();
 
@@ -136,11 +128,7 @@ public class RMServiceImpl extends Service implements RMService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see Service#login(java.lang.String, java.lang.String, java.io.File, java.lang.String)
-     */
+    @Override
     public String login(String login, String pass, File cred, String ssh) throws RestServerException, ServiceException {
         HttpPost httpPost = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
 
@@ -197,32 +185,14 @@ public class RMServiceImpl extends Service implements RMService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getState(java.lang.String)
-     */
-    public String getState(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.state(sessionId);
-            }
-        });
+    @Override
+    public String getState(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.state(sessionId));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getMonitoring(java.lang.String)
-     */
-    public String getMonitoring(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.monitoring(sessionId);
-            }
-        });
+    @Override
+    public String getMonitoring(String sessionId, Long counter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.monitoring(sessionId, counter.toString()));
     }
 
     /**
@@ -271,19 +241,12 @@ public class RMServiceImpl extends Service implements RMService {
         return entity;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.rm.client.RMService#createNodeSource(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String[], java.lang.String[], java.lang.String,
-     * java.lang.String[], java.lang.String[])
-     */
-    public String createNodeSource(final String sessionId, final String nodeSourceName, final String infrastructureType,
-            final String[] infrastructureParameters, final String[] infrastructureFileParameters,
-            final String policyType, final String[] policyParameters, final String[] policyFileParameters,
-            final String nodesRecoverable) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.createnodeSource(sessionId,
+    @Override
+    public String defineNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.defineNodeSource(sessionId,
                                                                                              nodeSourceName,
                                                                                              infrastructureType,
                                                                                              infrastructureParameters,
@@ -294,208 +257,161 @@ public class RMServiceImpl extends Service implements RMService {
                                                                                              nodesRecoverable));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getInfrastructures(java.lang.String)
-     */
-    public String getInfrastructures(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.infrastructures(sessionId);
-            }
-        });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#getPolicies(java.lang.String)
-     */
-    public String getPolicies(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.policies(sessionId);
-            }
-        });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#lockNodes(java.lang.String,
-     * java.util.Set)
-     */
-    public String lockNodes(final String sessionId, Set<String> urls) throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Set<String>, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient, Set<String> strings) {
-                return restClient.lockNodes(sessionId, strings);
-            }
-        }, urls, "lock");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#unlockNodes(java.lang.String,
-     * java.util.Set)
-     */
-    public String unlockNodes(final String sessionId, Set<String> urls) throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Set<String>, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient, Set<String> strings) {
-                return restClient.unlockNodes(sessionId, strings);
-            }
-        }, urls, "unlock");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#removeNode(java.lang.String,
-     * java.lang.String)
-     */
-    public String removeNode(final String sessionId, final String url, final boolean force)
+    @Override
+    public String editNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.removeNode(sessionId, url, force);
-            }
-        });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.rm.client.RMService#removeNodesource(java.lang.String,
-     * java.lang.String)
-     */
-    public String removeNodesource(final String sessionId, final String name, final boolean preempt)
-            throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.removeNodesource(sessionId, name, preempt);
-            }
-        });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.rm.client.RMService#releaseNode(java.lang.String,
-     * java.lang.String)
-     */
-    public String releaseNode(final String sessionId, final String url) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.releaseNode(sessionId, url);
-            }
-        });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see Service#getVersion()
-     */
-    public String getVersion() throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getVersion();
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.editNodeSource(sessionId,
+                                                                                           nodeSourceName,
+                                                                                           infrastructureType,
+                                                                                           infrastructureParameters,
+                                                                                           infrastructureFileParameters,
+                                                                                           policyType,
+                                                                                           policyParameters,
+                                                                                           policyFileParameters,
+                                                                                           nodesRecoverable));
     }
 
     @Override
-    public String getMBeanInfo(final String sessionId, String name, final List<String> attrs)
+    public String updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.updateDynamicParameters(sessionId,
+                                                                                                    nodeSourceName,
+                                                                                                    infrastructureType,
+                                                                                                    infrastructureParameters,
+                                                                                                    infrastructureFileParameters,
+                                                                                                    policyType,
+                                                                                                    policyParameters,
+                                                                                                    policyFileParameters));
+    }
+
+    @Override
+    public String deployNodeSource(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.deployNodeSource(sessionId,
+                                                                                             nodeSourceName));
+    }
+
+    @Override
+    public String undeployNodeSource(String sessionId, String nodeSourceName, boolean force)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.undeployNodeSource(sessionId,
+                                                                                               nodeSourceName,
+                                                                                               force));
+    }
+
+    @Override
+    public String getInfrastructures(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.infrastructures(sessionId));
+    }
+
+    @Override
+    public String getPolicies(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.policies(sessionId));
+    }
+
+    @Override
+    public String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeSourceConfiguration(sessionId,
+                                                                                                       nodeSourceName));
+    }
+
+    @Override
+    public String lockNodes(String sessionId, Set<String> urls) throws RestServerException, ServiceException {
+        return executeFunction((restClient, strings) -> restClient.lockNodes(sessionId, strings), urls, "lock");
+    }
+
+    @Override
+    public String unlockNodes(String sessionId, Set<String> urls) throws RestServerException, ServiceException {
+        return executeFunction((restClient, strings) -> restClient.unlockNodes(sessionId, strings), urls, "unlock");
+    }
+
+    @Override
+    public String removeNode(String sessionId, String url, boolean force) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.removeNode(sessionId, url, force));
+    }
+
+    @Override
+    public String removeNodesource(String sessionId, String name, boolean preempt)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.removeNodesource(sessionId, name, preempt));
+    }
+
+    @Override
+    public String releaseNode(String sessionId, String url) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.releaseNode(sessionId, url));
+    }
+
+    @Override
+    public String getVersion() throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(RestClient::getVersion);
+    }
+
+    @Override
+    public String getMBeanInfo(String sessionId, String name, List<String> attrs)
             throws RestServerException, ServiceException {
         try {
             final ObjectName obj = new ObjectName(name);
 
-            return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-                @Override
-                public InputStream apply(RestClient restClient) {
-                    return restClient.getMBeanInfo(sessionId, obj, attrs);
-                }
-            });
+            return executeFunctionReturnStreamAsString(restClient -> restClient.getMBeanInfo(sessionId, obj, attrs));
         } catch (MalformedObjectNameException e) {
             throw new ServiceException("Malformed MBean name", e);
         }
     }
 
     @Override
-    public String getNodeMBeanInfo(final String sessionId, final String nodeJmxUrl, final String objectName,
-            final List<String> attrs) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getNodeMBeanInfo(sessionId, nodeJmxUrl, objectName, attrs);
-            }
-        });
-    }
-
-    @Override
-    public String getNodeMBeanHistory(final String sessionId, final String nodeJmxUrl, final String objectName,
-            final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getNodeMBeanHistory(sessionId, nodeJmxUrl, objectName, attrs, timeRange);
-            }
-        });
-    }
-
-    @Override
-    public String getNodeMBeansInfo(final String sessionId, final String nodeJmxUrl, final String objectNames,
-            final List<String> attrs) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getNodeMBeansInfo(sessionId, nodeJmxUrl, objectNames, attrs);
-            }
-        });
-    }
-
-    @Override
-    public String getNodeMBeansHistory(final String sessionId, final String nodeJmxUrl, final String objectNames,
-            final List<String> attrs, final String timeRange) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getNodeMBeansHistory(sessionId, nodeJmxUrl, objectNames, attrs, timeRange);
-            }
-        });
-    }
-
-    @Override
-    public String getStatHistory(final String sessionId, final String range)
+    public String getNodeMBeanInfo(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getStatHistory(sessionId, range);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeMBeanInfo(sessionId,
+                                                                                             nodeJmxUrl,
+                                                                                             objectName,
+                                                                                             attrs));
     }
 
     @Override
-    public String executeNodeScript(final String sessionId, final String script, final String engine,
-            final String nodeUrl) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.executeNodeScript(sessionId, nodeUrl, script, engine);
-            }
-        });
+    public String getNodeMBeanHistory(String sessionId, String nodeJmxUrl, String objectName, List<String> attrs,
+            String timeRange) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeMBeanHistory(sessionId,
+                                                                                                nodeJmxUrl,
+                                                                                                objectName,
+                                                                                                attrs,
+                                                                                                timeRange));
+    }
+
+    @Override
+    public String getNodeMBeansInfo(String sessionId, String nodeJmxUrl, String objectNames, List<String> attrs)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeMBeansInfo(sessionId,
+                                                                                              nodeJmxUrl,
+                                                                                              objectNames,
+                                                                                              attrs));
+    }
+
+    @Override
+    public String getNodeMBeansHistory(String sessionId, String nodeJmxUrl, String objectNames, List<String> attrs,
+            String timeRange) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeMBeansHistory(sessionId,
+                                                                                                 nodeJmxUrl,
+                                                                                                 objectNames,
+                                                                                                 attrs,
+                                                                                                 timeRange));
+    }
+
+    @Override
+    public String getStatHistory(String sessionId, String range) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getStatHistory(sessionId, range));
+    }
+
+    @Override
+    public String executeNodeScript(String sessionId, String script, String engine, String nodeUrl)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.executeNodeScript(sessionId,
+                                                                                              nodeUrl,
+                                                                                              script,
+                                                                                              engine));
     }
 
     private RestClient getRestClientProxy() {
