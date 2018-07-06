@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
+import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 
@@ -37,8 +38,11 @@ public class ImportPolicyLayout extends ImportLayout {
 
     @Override
     public void handleImport(String submitResult) {
-        String importedNodeSourceJsonString = new NodeSourceConfigurationParser().wrapPolicyJsonString(submitResult);
-        this.nodeSourceWindow.importNodeSourceFromJson(importedNodeSourceJsonString);
+        NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
+        String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapPolicyJsonString(submitResult);
+        PluginDescriptor policyPluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
+                                                                               .getPolicyPluginDescriptor();
+        this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
     }
 
 }

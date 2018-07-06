@@ -29,11 +29,13 @@ import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.I
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -51,11 +53,11 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.lo
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.ui.ListBox;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -181,7 +183,6 @@ public abstract class NodeSourceWindow {
         this.policySelectItem.setWidth(300);
 
         HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
-        HiddenItem nodesRecoverable = new HiddenItem(NODES_RECOVERABLE_FORM_KEY);
         HiddenItem deploy = new HiddenItem(DEPLOY_FORM_KEY);
         HiddenItem nodeSourceAction = new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY);
         HiddenItem callback = new HiddenItem(NS_CALLBACK_FORM_KEY);
@@ -190,7 +191,6 @@ public abstract class NodeSourceWindow {
         ArrayList<FormItem> formItems = new ArrayList<>();
 
         formItems.add(name);
-        formItems.add(nodesRecoverable);
         formItems.add(deploy);
         formItems.add(nodeSourceAction);
         formItems.add(callback);
@@ -244,53 +244,29 @@ public abstract class NodeSourceWindow {
     }
 
     protected void resetFormForPolicySelectChange() {
-
-        if (this.infrastructureSelectItem.getValueAsString() == null) {
-            return;
-        }
-
         String policyPluginName = this.policySelectItem.getValueAsString();
         if (this.previousSelectedPolicy != null) {
             for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedPolicy)) {
                 formItem.hide();
             }
         }
-
         for (FormItem formItem : this.allFormItemsPerPlugin.get(policyPluginName)) {
             formItem.show();
         }
-
-        if (this.previousSelectedPolicy == null) {
-            this.previousSelectedPolicy = policyPluginName;
-            resetFormForInfrastructureSelectChange();
-        } else {
-            this.previousSelectedPolicy = policyPluginName;
-        }
+        this.previousSelectedPolicy = policyPluginName;
     }
 
     protected void resetFormForInfrastructureSelectChange() {
-
-        if (this.policySelectItem.getValueAsString() == null) {
-            return;
-        }
-
         String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
         if (this.previousSelectedInfrastructure != null) {
             for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedInfrastructure)) {
                 formItem.hide();
             }
         }
-
         for (FormItem formItem : this.allFormItemsPerPlugin.get(infrastructurePluginName)) {
             formItem.show();
         }
-
-        if (this.previousSelectedInfrastructure == null) {
-            this.previousSelectedInfrastructure = infrastructurePluginName;
-            resetFormForPolicySelectChange();
-        } else {
-            this.previousSelectedInfrastructure = infrastructurePluginName;
-        }
+        this.previousSelectedInfrastructure = infrastructurePluginName;
     }
 
     protected void buildForm() {
@@ -694,4 +670,39 @@ public abstract class NodeSourceWindow {
                                                "</span>");
     }
 
+    public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
+        this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
+
+        List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
+                                                             .collect(Collectors.toList());
+        allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
+                                                                   .startsWith(policyPluginDescriptor.getPluginName()));
+
+        int indexOfPolicyItem = allNodeSourcePluginsFormItems.indexOf(this.policySelectItem);
+        allNodeSourcePluginsFormItems.addAll(indexOfPolicyItem + 1, prefilledFormItems);
+
+        this.allFormItemsPerPlugin.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
+        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[allNodeSourcePluginsFormItems.size()]));
+
+        resetFormForPolicySelectChange();
+    }
+
+    public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
+
+        this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
+
+        List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
+                                                             .collect(Collectors.toList());
+        allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
+                                                                   .startsWith(infrastructurePluginDescriptor.getPluginName()));
+        int indexOfInfrastructureItem = allNodeSourcePluginsFormItems.indexOf(this.infrastructureSelectItem);
+        allNodeSourcePluginsFormItems.addAll(indexOfInfrastructureItem + 1, prefilledFormItems);
+
+        this.allFormItemsPerPlugin.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
+        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[allNodeSourcePluginsFormItems.size()]));
+
+        resetFormForInfrastructureSelectChange();
+    }
 }
