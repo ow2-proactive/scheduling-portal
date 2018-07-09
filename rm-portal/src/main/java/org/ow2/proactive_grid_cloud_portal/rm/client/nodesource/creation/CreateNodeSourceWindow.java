@@ -27,10 +27,12 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.creation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
@@ -38,12 +40,8 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator;
 
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
@@ -74,18 +72,18 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
 
             LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
 
-            this.allFormItems = prepareFormItems();
+            prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
 
-            this.allFormItems.add(this.infrastructureSelectItem);
+            this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
             addAllPluginValuesToAllFormItems(selectItemValues,
                                              this.controller.getModel().getSupportedInfrastructures().values());
             this.infrastructureSelectItem.setValueMap(selectItemValues);
 
-            this.allFormItems.add(new SpacerItem());
+            this.formItemsByName.put("spacer3", Collections.singletonList(new SpacerItem()));
             selectItemValues.clear();
 
-            this.allFormItems.add(this.policySelectItem);
+            this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
             addAllPluginValuesToAllFormItems(selectItemValues,
                                              this.controller.getModel().getSupportedPolicies().values());
             this.policySelectItem.setValueMap(selectItemValues);
@@ -93,11 +91,16 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            long allFormItemsNumber = this.formItemsByName.values().stream().mapToLong(Collection::size).sum();
+            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
+                                                                     .stream()
+                                                                     .flatMap(Collection::stream)
+                                                                     .collect(Collectors.toList())
+                                                                     .toArray(new FormItem[(int) allFormItemsNumber]));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
 
-            hideAllFormItems();
+            hideAllPluginFormItems();
 
         }, this.window::hide);
     }
@@ -122,27 +125,13 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
         buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
     }
 
-    private void hideAllFormItems() {
-
-        for (List<FormItem> li : this.allFormItemsPerPlugin.values()) {
-
-            for (FormItem it : li) {
-                it.hide();
-            }
-        }
-    }
-
     private void addAllPluginValuesToAllFormItems(Map<String, String> selectItemValues,
             Collection<PluginDescriptor> allPluginDescriptors) {
-
         for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
-
             String shortName = getPluginShortName(pluginDescriptor);
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
-
             ArrayList<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
-            this.allFormItems.addAll(currentPluginFormItems);
-            this.allFormItemsPerPlugin.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+            this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
         }
     }
 

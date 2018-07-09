@@ -25,8 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
@@ -52,6 +55,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     protected String nodeSourceName;
 
+    protected PluginDescriptor focusedPolicyPlugin;
+
+    protected PluginDescriptor focusedInfrastructurePlugin;
+
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
         super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
         this.nodeSourceName = nodeSourceName;
@@ -73,7 +80,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     @Override
     protected void populateFormValues() {
-        this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(),
+        this.controller.fetchSupportedInfrastructuresAndPolicies(this::fetchNodeSourceConfigurationWithCallback,
                                                                  this.window::hide);
     }
 
@@ -94,62 +101,53 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     protected void fetchNodeSourceConfigurationWithCallback() {
-
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
-
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
-
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-            this.allFormItems = prepareFormItems();
+            prepareFormItems();
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
 
-            PluginDescriptor focusedInfrastructurePlugin = prepareInfrastructureFormItems(nodeSourceConfiguration,
-                                                                                          selectItemValues);
-
-            this.allFormItems.add(new SpacerItem());
-            selectItemValues.clear();
-
-            PluginDescriptor focusedPolicyPlugin = preparePolicyFormItems(nodeSourceConfiguration, selectItemValues);
+            prepareInfrastructureFormItems(nodeSourceConfiguration);
+            this.formItemsByName.put("spacer4", Collections.singletonList(new SpacerItem()));
+            preparePolicyFormItems(nodeSourceConfiguration);
 
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
+            resetFormForInfrastructureSelectChange();
+            resetFormForPolicySelectChange();
 
-            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
+            long allFormItemsNumber = this.formItemsByName.values().stream().mapToLong(Collection::size).sum();
+            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
+                                                                     .stream()
+                                                                     .flatMap(Collection::stream)
+                                                                     .collect(Collectors.toList())
+                                                                     .toArray(new FormItem[(int) allFormItemsNumber]));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
-
         }, this.window::hide);
     }
 
-    private PluginDescriptor preparePolicyFormItems(NodeSourceConfiguration nodeSourceConfiguration,
-            LinkedHashMap<String, String> selectItemValues) {
-        PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-        this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-        this.allFormItems.add(this.policySelectItem);
-        fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-        handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
+    private void preparePolicyFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+        this.focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+        fillFocusedPluginValues(selectItemValues, this.focusedPolicyPlugin);
+        handleAdditionalPolicyFormItems(selectItemValues, this.focusedPolicyPlugin);
         this.policySelectItem.setValueMap(selectItemValues);
         this.policySelectItem.setDefaultToFirstOption(true);
-        this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
-        return focusedPolicyPlugin;
+        this.previousSelectedPolicy = this.focusedPolicyPlugin.getPluginName();
     }
 
-    private PluginDescriptor prepareInfrastructureFormItems(NodeSourceConfiguration nodeSourceConfiguration,
-            LinkedHashMap<String, String> selectItemValues) {
-        PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-        this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-        this.allFormItems.add(this.infrastructureSelectItem);
-        fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-        handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
+    private void prepareInfrastructureFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+        this.focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+        fillFocusedPluginValues(selectItemValues, this.focusedInfrastructurePlugin);
+        handleAdditionalInfrastructureFormItems(selectItemValues, this.focusedInfrastructurePlugin);
         this.infrastructureSelectItem.setValueMap(selectItemValues);
         this.infrastructureSelectItem.setDefaultToFirstOption(true);
-        this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
-        return focusedInfrastructurePlugin;
+        this.previousSelectedInfrastructure = this.focusedInfrastructurePlugin.getPluginName();
     }
 
 }

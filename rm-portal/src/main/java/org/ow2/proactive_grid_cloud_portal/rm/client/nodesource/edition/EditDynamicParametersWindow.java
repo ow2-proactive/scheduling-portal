@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +37,10 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -54,6 +51,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     public EditDynamicParametersWindow(RMController controller, String nodeSourceName) {
         super(controller, nodeSourceName, WINDOW_TITLE);
         buildForm();
+        modifyFormItemsAfterCreation(this.focusedInfrastructurePlugin, this.focusedPolicyPlugin);
     }
 
     @Override
@@ -99,8 +97,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         // do nothing
     }
 
-    @Override
-    protected List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
+    private List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
             PluginDescriptor focusedPolicyPlugin) {
 
         List<String> infrastructureDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
@@ -126,7 +123,10 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         // ordering is preserved while inserting hidden items.
         List<FormItem> allFormItemsWithHiddenFields = new LinkedList<>();
 
-        for (FormItem formItem : this.allFormItems) {
+        for (FormItem formItem : this.formItemsByName.values()
+                                                     .stream()
+                                                     .flatMap(Collection::stream)
+                                                     .collect(Collectors.toList())) {
             allFormItemsWithHiddenFields.add(formItem);
             if (allDynamicFieldFullNames.stream()
                                         .noneMatch(fieldFullName -> isItemEqualToDynamicField(formItem,
@@ -139,9 +139,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     private void filterAndDisableNonDynamicItem(List<FormItem> allFormItemsWithHiddenFields, FormItem formItem) {
-        if (this.allFormItemsPerPlugin.keySet()
-                                      .stream()
-                                      .anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
+        if (this.formItemsByName.keySet().stream().anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
             formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
             disableNonDynamicItem(allFormItemsWithHiddenFields, formItem);
         }

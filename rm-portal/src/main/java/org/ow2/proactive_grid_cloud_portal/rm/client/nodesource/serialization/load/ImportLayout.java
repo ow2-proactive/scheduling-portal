@@ -33,6 +33,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -63,12 +64,14 @@ public abstract class ImportLayout extends VLayout {
     }
 
     private void createImportPanel(String layoutTitle) {
-        setGroupTitle(layoutTitle);
-        setIsGroup(true);
         this.importPanel = new VerticalPanel();
         this.importPanel.setSpacing(10);
         this.importPanel.setHeight("70px");
-        this.importPanel.setWidth("280px");
+        this.importPanel.setWidth("270px");
+        Label importLabel = new Label(layoutTitle);
+        importLabel.setHeight("15px");
+        importLabel.setWidth("200px");
+        this.importPanel.add(importLabel);
         addMember(this.importPanel);
     }
 

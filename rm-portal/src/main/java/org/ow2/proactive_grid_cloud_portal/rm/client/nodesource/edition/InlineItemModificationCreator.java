@@ -59,19 +59,17 @@ public class InlineItemModificationCreator {
         FormItem chooseCredentialsFormItem;
         List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<FormItem>();
 
-        if (plugin.getPluginName().equals(nodeSourceWindow.getFocusedInfrastructurePluginName()) ||
-            plugin.getPluginName().equals(nodeSourceWindow.getFocusedPolicyPluginName())) {
-
+        if ((nodeSourceWindow.infrastructureSelectItem != null &&
+             plugin.getPluginName().equals(nodeSourceWindow.infrastructureSelectItem.getValueAsString()) ||
+             (nodeSourceWindow.policySelectItem != null &&
+              plugin.getPluginName().equals(nodeSourceWindow.policySelectItem.getValueAsString())))) {
             RadioGroupItem editOrUploadFormItem = createRadioItemToModifyPluginField(plugin, pluginField);
             formItemsReplacingNonTextualFormItems.add(editOrUploadFormItem);
 
             TextAreaItem previousValueItem = createTextItemPrefilledWithFileContent(plugin, pluginField);
             formItemsReplacingNonTextualFormItems.add(previousValueItem);
-
             chooseCredentialsFormItem = createUploadItemDisabled(plugin, pluginField);
-
         } else {
-
             chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName());
         }
@@ -139,7 +137,6 @@ public class InlineItemModificationCreator {
     private void enableOrDisableUploadNewFile(String pluginFieldName, FormItem formItem) {
         if (formItem.getName().equals(pluginFieldName)) {
             formItem.enable();
-
         } else if (formItem.getName().startsWith(pluginFieldName) &&
                    formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
             formItem.disable();
@@ -147,17 +144,14 @@ public class InlineItemModificationCreator {
     }
 
     private void enableOrDisableEditInLine(String pluginFieldName, List<FormItem> formItemsForPlugin) {
-
         formItemsForPlugin.stream()
                           .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
                           .forEach(formItem -> enableOrDisableEditInLine(pluginFieldName, formItem));
     }
 
     private void enableOrDisableEditInLine(String pluginFieldName, FormItem formItem) {
-
         if (formItem.getName().equals(pluginFieldName)) {
             formItem.disable();
-
         } else if (formItem.getName().startsWith(pluginFieldName) &&
                    formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
             formItem.enable();

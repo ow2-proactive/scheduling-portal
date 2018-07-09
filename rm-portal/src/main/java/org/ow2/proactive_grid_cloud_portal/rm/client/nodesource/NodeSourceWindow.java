@@ -30,7 +30,8 @@ import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.I
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportInfrastructureLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
@@ -57,7 +59,6 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -71,7 +72,11 @@ import com.smartgwt.client.widgets.form.fields.RowSpacerItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.layout.*;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.LayoutSpacer;
+import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.layout.VStack;
 
 
 public abstract class NodeSourceWindow {
@@ -106,21 +111,22 @@ public abstract class NodeSourceWindow {
 
     protected Label generalParametersLabel;
 
-    protected SelectItem infrastructureSelectItem;
+    public SelectItem infrastructureSelectItem;
 
-    protected SelectItem policySelectItem;
+    public SelectItem policySelectItem;
 
     protected String previousSelectedInfrastructure;
 
     protected String previousSelectedPolicy;
 
-    protected List<FormItem> allFormItems;
-
-    protected Map<String, List<FormItem>> allFormItemsPerPlugin;
-
-    protected String focusedInfrastructurePluginName;
-
-    protected String focusedPolicyPluginName;
+    /**
+     * All items of the node source form are held in this map. The key is
+     * either the name of the FormItem if there is only one element in the
+     * list, or the name of the plugin to which the form items belong, given
+     * by PluginDescriptor#getPluginName. Note that this map must be ordered
+     * to achieve a correct display.
+     */
+    protected Map<String, List<FormItem>> formItemsByName;
 
     protected boolean createdFromImport;
 
@@ -143,7 +149,7 @@ public abstract class NodeSourceWindow {
         this.windowTitle = windowTitle;
         this.createdFromImport = false;
         this.waitingMessage = waitingMessage;
-        this.allFormItemsPerPlugin = new HashMap<>();
+        this.formItemsByName = new LinkedHashMap<>();
     }
 
     public void show() {
@@ -155,7 +161,7 @@ public abstract class NodeSourceWindow {
     }
 
     public List<FormItem> getFormItemsOfPlugin(String pluginName) {
-        return this.allFormItemsPerPlugin.get(pluginName);
+        return this.formItemsByName.get(pluginName);
     }
 
     protected abstract NodeSourceAction getNodeSourceAction();
@@ -172,7 +178,7 @@ public abstract class NodeSourceWindow {
         return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
     }
 
-    protected List<FormItem> prepareFormItems() {
+    protected void prepareFormItems() {
 
         this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
@@ -188,20 +194,16 @@ public abstract class NodeSourceWindow {
         HiddenItem callback = new HiddenItem(NS_CALLBACK_FORM_KEY);
         HiddenItem session = new HiddenItem(SESSION_ID_FORM_KEY);
 
-        ArrayList<FormItem> formItems = new ArrayList<>();
-
-        formItems.add(name);
-        formItems.add(deploy);
-        formItems.add(nodeSourceAction);
-        formItems.add(callback);
-        formItems.add(session);
+        this.formItemsByName.put(NS_NAME_FORM_KEY, Collections.singletonList(name));
+        this.formItemsByName.put(DEPLOY_FORM_KEY, Collections.singletonList(deploy));
+        this.formItemsByName.put(NODE_SOURCE_ACTION_FORM_KEY, Collections.singletonList(nodeSourceAction));
+        this.formItemsByName.put(NS_CALLBACK_FORM_KEY, Collections.singletonList(callback));
+        this.formItemsByName.put(SESSION_ID_FORM_KEY, Collections.singletonList(session));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
-        formItems.add(this.nodesRecoverableCheckbox);
-        formItems.add(new RowSpacerItem());
-
-        return formItems;
+        this.formItemsByName.put(NODES_RECOVERABLE_FORM_KEY, Collections.singletonList(this.nodesRecoverableCheckbox));
+        this.formItemsByName.put("generalParametersSpacer", Collections.singletonList(new RowSpacerItem()));
     }
 
     protected ArrayList<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
@@ -213,16 +215,13 @@ public abstract class NodeSourceWindow {
         for (PluginDescriptor.Field pluginField : pluginFields) {
 
             if (pluginField.isPassword()) {
-
                 formItemsForField.add(new PasswordItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()));
 
             } else if (pluginField.isFile() || pluginField.isCredential()) {
-
                 formItemsForField.addAll(handleNonTextualPluginField(plugin, pluginField));
 
             } else {
-
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
             }
@@ -246,27 +245,39 @@ public abstract class NodeSourceWindow {
     protected void resetFormForPolicySelectChange() {
         String policyPluginName = this.policySelectItem.getValueAsString();
         if (this.previousSelectedPolicy != null) {
-            for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedPolicy)) {
+            for (FormItem formItem : this.formItemsByName.get(this.previousSelectedPolicy)) {
                 formItem.hide();
             }
         }
-        for (FormItem formItem : this.allFormItemsPerPlugin.get(policyPluginName)) {
+        for (FormItem formItem : this.formItemsByName.get(policyPluginName)) {
             formItem.show();
         }
         this.previousSelectedPolicy = policyPluginName;
     }
 
     protected void resetFormForInfrastructureSelectChange() {
-        String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
         if (this.previousSelectedInfrastructure != null) {
-            for (FormItem formItem : this.allFormItemsPerPlugin.get(this.previousSelectedInfrastructure)) {
+            for (FormItem formItem : this.formItemsByName.get(this.previousSelectedInfrastructure)) {
                 formItem.hide();
             }
         }
-        for (FormItem formItem : this.allFormItemsPerPlugin.get(infrastructurePluginName)) {
+        String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
+        for (FormItem formItem : this.formItemsByName.get(infrastructurePluginName)) {
             formItem.show();
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
+    }
+
+    protected void hideAllPluginFormItems() {
+        for (List<FormItem> li : this.formItemsByName.values()) {
+            // if there are more than one element in the list, it means that
+            // those form items belong to a specific plugin
+            if (li.size() > 1) {
+                for (FormItem it : li) {
+                    it.hide();
+                }
+            }
+        }
     }
 
     protected void buildForm() {
@@ -305,8 +316,9 @@ public abstract class NodeSourceWindow {
         this.nodeSourceWindowLabel.setHeight(40);
 
         VLayout createNodeSourceLayout = new VLayout();
-        createNodeSourceLayout.setGroupTitle("Create Node Source");
-        createNodeSourceLayout.setIsGroup(true);
+        Label createNodeSourceLabel = new Label("Create Node Source");
+        createNodeSourceLabel.setHeight("20px");
+        createNodeSourceLayout.addMember(createNodeSourceLabel);
         createNodeSourceLayout.setPadding(10);
         createNodeSourceLayout.setWidth("75%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
@@ -411,33 +423,6 @@ public abstract class NodeSourceWindow {
     }
 
     /**
-     * Allow sub classes to rework the form items that have been added to the
-     * form.
-     */
-    protected List<FormItem> modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
-            PluginDescriptor focusedPolicyPlugin) {
-
-        for (Map.Entry<String, List<FormItem>> entry : this.allFormItemsPerPlugin.entrySet()) {
-
-            hideNotFocusedFormItem(focusedInfrastructurePlugin, focusedPolicyPlugin, entry.getKey(), entry.getValue());
-        }
-
-        return this.allFormItems;
-    }
-
-    private void hideNotFocusedFormItem(PluginDescriptor focusedInfrastructurePlugin,
-            PluginDescriptor focusedPolicyPlugin, String pluginName, List<FormItem> formItemsForPlugin) {
-
-        if (!pluginName.equals(focusedInfrastructurePlugin.getPluginName()) &&
-            !pluginName.equals(focusedPolicyPlugin.getPluginName())) {
-
-            for (FormItem formItem : formItemsForPlugin) {
-                formItem.hide();
-            }
-        }
-    }
-
-    /**
      * Allow sub classes to alter the node source name and recoverable items.
      */
     public void manageNodeSourceWindowItems() {
@@ -472,10 +457,8 @@ public abstract class NodeSourceWindow {
             PluginDescriptor focusedPlugin) {
         String pluginShortName = getPluginShortName(focusedPlugin);
         selectItemValues.put(focusedPlugin.getPluginName(), pluginShortName);
-
         List<FormItem> pluginFormItems = getPrefilledFormItems(focusedPlugin);
-        this.allFormItems.addAll(pluginFormItems);
-        this.allFormItemsPerPlugin.put(focusedPlugin.getPluginName(), pluginFormItems);
+        this.formItemsByName.put(focusedPlugin.getPluginName(), pluginFormItems);
     }
 
     protected void addPluginValuesToAllFormItemOtherThanFocused(Map<String, String> selectItemValues,
@@ -483,28 +466,22 @@ public abstract class NodeSourceWindow {
         for (Map.Entry<String, PluginDescriptor> entry : allPluginDescriptors.entrySet()) {
             PluginDescriptor plugin = entry.getValue();
             if (!plugin.getPluginName().equals(focusedPlugin.getPluginName())) {
-
                 selectItemValues.put(plugin.getPluginName(), getPluginShortName(plugin));
                 List<FormItem> currentPluginFormItems = getPrefilledFormItems(plugin);
-                this.allFormItems.addAll(currentPluginFormItems);
-                this.allFormItemsPerPlugin.put(plugin.getPluginName(), currentPluginFormItems);
+                this.formItemsByName.put(plugin.getPluginName(), currentPluginFormItems);
             }
         }
     }
 
     private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, List<IButton> buttonList,
             NodeSourceAction nodeSourceAction) {
-
         this.nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.FALSE.toString());
-
         saveNodeSource(nodeSourceWindowLayout, buttonList, nodeSourceAction);
     }
 
     private void saveAndDeployNodeSource(VLayout nodeSourceWindowLayout, List<IButton> buttonList,
             NodeSourceAction nodeSourceAction) {
-
         this.nodeSourcePluginsForm.setValue(DEPLOY_FORM_KEY, Boolean.TRUE.toString());
-
         saveNodeSource(nodeSourceWindowLayout, buttonList, nodeSourceAction);
     }
 
@@ -593,75 +570,61 @@ public abstract class NodeSourceWindow {
         formItems.add(formItem);
     }
 
-    public String getFocusedInfrastructurePluginName() {
-        return focusedInfrastructurePluginName;
-    }
-
-    public String getFocusedPolicyPluginName() {
-        return focusedPolicyPluginName;
-    }
-
     public void importNodeSourceFromJson(String importedNodeSourceJsonString) {
         this.nodeSourcePluginsForm.reset();
-        NodeSourceWindow.this.createdFromImport = true;
+        this.createdFromImport = true;
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
             nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
 
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-            NodeSourceWindow.this.allFormItems = prepareFormItems();
+            prepareFormItems();
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
 
-            PluginDescriptor focusedInfrastructurePlugin = getInfrastructurePluginFromNodeSourceConfiguration(nodeSourceConfiguration,
-                                                                                                              selectItemValues);
+            fillInfrastructureSelecItemFromNodeSourceConfiguration(nodeSourceConfiguration);
+            this.formItemsByName.put("pluginSpacer", Collections.singletonList(new SpacerItem()));
+            fillPolicySelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
 
-            NodeSourceWindow.this.allFormItems.add(new SpacerItem());
-            selectItemValues.clear();
+            this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
+            this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            PluginDescriptor focusedPolicyPlugin = getPolicyPluginFromNodeSourceConfiguration(nodeSourceConfiguration,
-                                                                                              selectItemValues);
-
-            NodeSourceWindow.this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            NodeSourceWindow.this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
-
-            NodeSourceWindow.this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin,
-                                                                              focusedPolicyPlugin);
-
-            this.nodeSourcePluginsForm.setFields(NodeSourceWindow.this.allFormItems.toArray(new FormItem[NodeSourceWindow.this.allFormItems.size()]));
+            long allFormItemsNumber = this.formItemsByName.values().stream().mapToLong(Collection::size).sum();
+            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
+                                                                     .stream()
+                                                                     .flatMap(Collection::stream)
+                                                                     .collect(Collectors.toList())
+                                                                     .toArray(new FormItem[(int) allFormItemsNumber]));
             this.nodeSourcePluginsForm.show();
+            hideAllPluginFormItems();
+            resetFormForInfrastructureSelectChange();
+            resetFormForPolicySelectChange();
         } catch (RuntimeException e) {
             setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         } finally {
-            NodeSourceWindow.this.createdFromImport = false;
+            this.createdFromImport = false;
         }
     }
 
-    private PluginDescriptor getPolicyPluginFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration,
-            LinkedHashMap<String, String> selectItemValues) {
+    private void fillPolicySelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-        NodeSourceWindow.this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-        NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.policySelectItem);
         fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
         handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-        NodeSourceWindow.this.policySelectItem.setValueMap(selectItemValues);
-        NodeSourceWindow.this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
-        NodeSourceWindow.this.policySelectItem.setValue(NodeSourceWindow.this.previousSelectedPolicy);
-        return focusedPolicyPlugin;
+        this.policySelectItem.setValueMap(selectItemValues);
+        this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
+        this.policySelectItem.setValue(this.previousSelectedPolicy);
     }
 
-    private PluginDescriptor getInfrastructurePluginFromNodeSourceConfiguration(
-            NodeSourceConfiguration nodeSourceConfiguration, LinkedHashMap<String, String> selectItemValues) {
+    private void
+            fillInfrastructureSelecItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-        NodeSourceWindow.this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-        NodeSourceWindow.this.allFormItems.add(NodeSourceWindow.this.infrastructureSelectItem);
         fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
         handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-        NodeSourceWindow.this.infrastructureSelectItem.setValueMap(selectItemValues);
-        NodeSourceWindow.this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
-        NodeSourceWindow.this.infrastructureSelectItem.setValue(NodeSourceWindow.this.previousSelectedInfrastructure);
-        return focusedInfrastructurePlugin;
+        this.infrastructureSelectItem.setValueMap(selectItemValues);
+        this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
+        this.infrastructureSelectItem.setValue(this.previousSelectedInfrastructure);
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
@@ -672,26 +635,24 @@ public abstract class NodeSourceWindow {
 
     public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
         this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
-        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItemsWithEditableFields(policyPluginDescriptor);
 
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
                                                                    .startsWith(policyPluginDescriptor.getPluginName()));
-
         int indexOfPolicyItem = allNodeSourcePluginsFormItems.indexOf(this.policySelectItem);
         allNodeSourcePluginsFormItems.addAll(indexOfPolicyItem + 1, prefilledFormItems);
 
-        this.allFormItemsPerPlugin.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
+        this.formItemsByName.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[allNodeSourcePluginsFormItems.size()]));
 
         resetFormForPolicySelectChange();
     }
 
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
-
         this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
-        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItemsWithEditableFields(infrastructurePluginDescriptor);
 
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
@@ -700,9 +661,33 @@ public abstract class NodeSourceWindow {
         int indexOfInfrastructureItem = allNodeSourcePluginsFormItems.indexOf(this.infrastructureSelectItem);
         allNodeSourcePluginsFormItems.addAll(indexOfInfrastructureItem + 1, prefilledFormItems);
 
-        this.allFormItemsPerPlugin.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
+        this.formItemsByName.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[allNodeSourcePluginsFormItems.size()]));
 
         resetFormForInfrastructureSelectChange();
     }
+
+    private ArrayList<FormItem> getPrefilledFormItemsWithEditableFields(PluginDescriptor plugin) {
+        InlineItemModificationCreator inlineItemModificationCreator = new InlineItemModificationCreator(this);
+        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
+        ArrayList<FormItem> formItems = new ArrayList<>(pluginFields.size());
+        List<FormItem> formItemsForField = new LinkedList<>();
+        for (PluginDescriptor.Field pluginField : pluginFields) {
+            if (pluginField.isPassword()) {
+                formItemsForField.add(new PasswordItem(plugin.getPluginName() + pluginField.getName(),
+                                                       pluginField.getName()));
+            } else if (pluginField.isFile() || pluginField.isCredential()) {
+                formItemsForField.addAll(inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                                     pluginField));
+            } else {
+                TextItem textItem = new TextItem(plugin.getPluginName() + pluginField.getName(), pluginField.getName());
+                textItem.setValue(pluginField.getValue());
+                formItemsForField.add(textItem);
+            }
+            formItems.addAll(formItemsForField);
+            formItemsForField.clear();
+        }
+        return formItems;
+    }
+
 }
