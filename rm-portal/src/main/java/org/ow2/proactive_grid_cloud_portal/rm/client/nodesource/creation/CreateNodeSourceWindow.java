@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
@@ -68,24 +67,16 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     protected void populateFormValues() {
 
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
-
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-
             prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
 
             this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
-            addAllPluginValuesToAllFormItems(selectItemValues,
-                                             this.controller.getModel().getSupportedInfrastructures().values());
-            this.infrastructureSelectItem.setValueMap(selectItemValues);
-
+            addInfrastructurePluginValuesToAllFormItems(this.controller.getModel()
+                                                                       .getSupportedInfrastructures()
+                                                                       .values());
             this.formItemsByName.put("spacer3", Collections.singletonList(new SpacerItem()));
-            selectItemValues.clear();
-
             this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
-            addAllPluginValuesToAllFormItems(selectItemValues,
-                                             this.controller.getModel().getSupportedPolicies().values());
-            this.policySelectItem.setValueMap(selectItemValues);
+            addPolicyPluginValuesToAllFormItems(this.controller.getModel().getSupportedPolicies().values());
 
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
@@ -122,8 +113,20 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
         buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
     }
 
-    private void addAllPluginValuesToAllFormItems(Map<String, String> selectItemValues,
-            Collection<PluginDescriptor> allPluginDescriptors) {
+    private void addInfrastructurePluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+        addAllPluginValuesToAllFormItems(allPluginDescriptors, selectItemValues);
+        this.infrastructureSelectItem.setValueMap(selectItemValues);
+    }
+
+    private void addPolicyPluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors) {
+        LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
+        addAllPluginValuesToAllFormItems(allPluginDescriptors, selectItemValues);
+        this.policySelectItem.setValueMap(selectItemValues);
+    }
+
+    private void addAllPluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors,
+            LinkedHashMap<String, String> selectItemValues) {
         for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
             String shortName = getPluginShortName(pluginDescriptor);
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);

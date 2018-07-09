@@ -588,19 +588,7 @@ public abstract class NodeSourceWindow {
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
 
-            fillInfrastructureSelecItemFromNodeSourceConfiguration(nodeSourceConfiguration);
-            this.formItemsByName.put("pluginSpacer", Collections.singletonList(new SpacerItem()));
-            fillPolicySelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
-
-            this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
-
-            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
-                                                                     .stream()
-                                                                     .flatMap(Collection::stream)
-                                                                     .toArray(FormItem[]::new));
-            this.nodeSourcePluginsForm.show();
-            hideAllPluginFormItems();
+            preparePluginFormItems(nodeSourceConfiguration);
             resetFormForInfrastructureSelectChange();
             resetFormForPolicySelectChange();
         } catch (RuntimeException e) {
@@ -608,7 +596,26 @@ public abstract class NodeSourceWindow {
         }
     }
 
-    private void fillPolicySelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
+    protected void preparePluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
+        this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
+        fillInfrastructureSelecItemFromNodeSourceConfiguration(nodeSourceConfiguration);
+        this.formItemsByName.put("pluginSpacer", Collections.singletonList(new SpacerItem()));
+        this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
+        fillPolicySelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
+
+        this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
+        this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
+
+        this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
+                                                                 .stream()
+                                                                 .flatMap(Collection::stream)
+                                                                 .toArray(FormItem[]::new));
+        this.nodeSourcePluginsWaitingLabel.hide();
+        this.nodeSourcePluginsForm.show();
+        hideAllPluginFormItems();
+    }
+
+    protected void fillPolicySelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
         LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
         fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
@@ -618,7 +625,7 @@ public abstract class NodeSourceWindow {
         this.policySelectItem.setValue(this.previousSelectedPolicy);
     }
 
-    private void
+    protected void
             fillInfrastructureSelecItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
         LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
