@@ -44,7 +44,9 @@ public class ImportNodeSourceLayout extends ImportLayout {
 
     @Override
     public void handleImport(String submitResult) {
+        this.nodeSourceWindow.setCreatedFromImport();
         this.nodeSourceWindow.importNodeSourceFromJson(submitResult);
+        this.nodeSourceWindow.resetCreatedFromImport();
     }
 
 }

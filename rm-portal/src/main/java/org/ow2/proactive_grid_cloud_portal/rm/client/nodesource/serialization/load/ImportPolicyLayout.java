@@ -42,7 +42,9 @@ public class ImportPolicyLayout extends ImportLayout {
         String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapPolicyJsonString(submitResult);
         PluginDescriptor policyPluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
                                                                                .getPolicyPluginDescriptor();
+        this.nodeSourceWindow.setCreatedFromImport();
         this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
+        this.nodeSourceWindow.resetCreatedFromImport();
     }
 
 }

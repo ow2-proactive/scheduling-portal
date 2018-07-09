@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
@@ -91,12 +90,10 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            long allFormItemsNumber = this.formItemsByName.values().stream().mapToLong(Collection::size).sum();
             this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
                                                                      .stream()
                                                                      .flatMap(Collection::stream)
-                                                                     .collect(Collectors.toList())
-                                                                     .toArray(new FormItem[(int) allFormItemsNumber]));
+                                                                     .toArray(FormItem[]::new));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
 

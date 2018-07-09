@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
@@ -49,6 +48,8 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class EditNodeSourceWindow extends NodeSourceWindow {
 
+    private static final String WAITING_MESSAGE = "Retrieving current node source configuration";
+
     public static final String WINDOW_TITLE = "Edit Node Source";
 
     private InlineItemModificationCreator inlineItemModificationCreator;
@@ -60,14 +61,16 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     protected PluginDescriptor focusedInfrastructurePlugin;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
-        super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
-        this.nodeSourceName = nodeSourceName;
-        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
-        buildForm();
+        super(controller, WINDOW_TITLE, WAITING_MESSAGE);
+        setAttributesAndBuildForm(nodeSourceName);
     }
 
     protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
-        super(controller, windowTitle, "Retrieving current node source configuration");
+        super(controller, windowTitle, WAITING_MESSAGE);
+        setAttributesAndBuildForm(nodeSourceName);
+    }
+
+    private void setAttributesAndBuildForm(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
         this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
@@ -119,12 +122,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             resetFormForInfrastructureSelectChange();
             resetFormForPolicySelectChange();
 
-            long allFormItemsNumber = this.formItemsByName.values().stream().mapToLong(Collection::size).sum();
             this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
                                                                      .stream()
                                                                      .flatMap(Collection::stream)
-                                                                     .collect(Collectors.toList())
-                                                                     .toArray(new FormItem[(int) allFormItemsNumber]));
+                                                                     .toArray(FormItem[]::new));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
         }, this.window::hide);

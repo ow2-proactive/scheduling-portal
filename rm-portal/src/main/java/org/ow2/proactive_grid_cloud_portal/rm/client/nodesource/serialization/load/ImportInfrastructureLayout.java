@@ -42,7 +42,9 @@ public class ImportInfrastructureLayout extends ImportLayout {
         String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapInfrastructureJsonString(infrastructureJsonString);
         PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
                                                                                        .getInfrastructurePluginDescriptor();
+        this.nodeSourceWindow.setCreatedFromImport();
         this.nodeSourceWindow.replaceInfrastructureItems(infrastructurePluginDescriptor);
+        this.nodeSourceWindow.resetCreatedFromImport();
     }
 
 }
