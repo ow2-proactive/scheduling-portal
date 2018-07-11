@@ -38,11 +38,8 @@ public class CatalogRequestBuilder {
 
     private String catalogUrl;
 
-    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
-
-    public CatalogRequestBuilder(ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder) {
+    public CatalogRequestBuilder() {
         this.catalogUrl = new CatalogUrlBuilder().getCatalogUrl();
-        this.importFromCatalogPanelFeeder = importFromCatalogPanelFeeder;
     }
 
     public void sendRequestToCatalog(String endpoint, RequestCallback callback) {
@@ -52,7 +49,7 @@ public class CatalogRequestBuilder {
         try {
             request.send();
         } catch (RequestException e) {
-            this.importFromCatalogPanelFeeder.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
+            throw new IllegalStateException("Request sent to catalog failed", e);
         }
     }
 

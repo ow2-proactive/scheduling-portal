@@ -27,14 +27,11 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
-import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 
@@ -45,30 +42,27 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
 
-    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
-
-    private ImportNodeSourceLayout importNodeSourceLayout;
-
     private ListBox nodeSourceListBox;
 
-    public ImportFromCatalogPanel(ImportNodeSourceLayout importNodeSourceLayout) {
-        this.importNodeSourceLayout = importNodeSourceLayout;
+    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
+
+    private final RequestCallback nodeSourceConfigurationRequestCallback;
+
+    public ImportFromCatalogPanel(RequestCallback nodeSourceConfigurationRequestCallback) {
+
+        this.nodeSourceConfigurationRequestCallback = nodeSourceConfigurationRequestCallback;
         this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();
         createListBox();
         this.importFromCatalogPanelFeeder.requestNodeSourcesFromAllBuckets();
     }
 
-    public void addItemToNodeSourceListBox(String displayName, String valueName) {
+    void addItemToNodeSourceListBox(String displayName, String valueName) {
         this.nodeSourceListBox.addItem(displayName, valueName);
     }
 
-    public void enableNodeSourceListBox() {
+    void enableNodeSourceListBox() {
         this.nodeSourceListBox.setEnabled(true);
-    }
-
-    public void setNodeSourceWindowLabelWithError(String userMessage, Throwable e) {
-        this.importNodeSourceLayout.setNodeSourceWindowLabelWithError(userMessage, e);
     }
 
     private void configureSize() {
@@ -95,27 +89,13 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
                                                                                nodeSourceConfigurationRequestUrl);
             nodeSourceConfigurationRequest.setHeader(CatalogConstants.SESSION_ID_PARAM,
                                                      LoginModel.getInstance().getSessionId());
-            nodeSourceConfigurationRequest.setCallback(getNodeSourceConfigurationRequestCallback());
+            nodeSourceConfigurationRequest.setCallback(nodeSourceConfigurationRequestCallback);
             try {
                 nodeSourceConfigurationRequest.send();
             } catch (RequestException e) {
-                setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
+                throw new IllegalStateException("GET " + nodeSourceConfigurationRequestUrl + " failed", e);
             }
         }
-    }
-
-    private RequestCallback getNodeSourceConfigurationRequestCallback() {
-        return new RequestCallback() {
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                ImportFromCatalogPanel.this.importNodeSourceLayout.handleImport(response.getText());
-            }
-
-            @Override
-            public void onError(Request request, Throwable t) {
-                setNodeSourceWindowLabelWithError("Import node source from catalog failed", t);
-            }
-        };
     }
 
 }

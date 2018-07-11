@@ -197,7 +197,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private void requestNodeSourceInBucket(String bucketName) {
         if (!bucketName.equals(SELECT_A_BUCKET_OPTION)) {
-            CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(null);
+            CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder();
             catalogRequestBuilder.requestNodeSourcesForBucket(bucketName, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {

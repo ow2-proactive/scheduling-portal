@@ -30,6 +30,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.lo
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -49,7 +52,7 @@ public abstract class ImportLayout extends VLayout {
 
     private ListBox importMethodList;
 
-    public ImportLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
+    ImportLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
         this.nodeSourceWindow = nodeSourceWindow;
         createImportPanel(layoutTitle);
         createImportMethodList();
@@ -58,10 +61,6 @@ public abstract class ImportLayout extends VLayout {
     }
 
     public abstract void handleImport(String submitResult);
-
-    public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
-        this.nodeSourceWindow.setNodeSourceWindowLabelWithError(errorMessage, e);
-    }
 
     private void createImportPanel(String layoutTitle) {
         this.importPanel = new VerticalPanel();
@@ -90,7 +89,25 @@ public abstract class ImportLayout extends VLayout {
         if (selectedOption.equals(ImportFromFilePanel.FILE_OPTION_NAME)) {
             this.selectedImportMethodPanel.add(new ImportFromFilePanel(importCompleteEvent -> handleImport(importCompleteEvent.getResults())));
         } else if (selectedOption.equals(ImportFromCatalogPanel.CATALOG_OPTION_NAME)) {
-            //this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(this));
+            addImportFromCatalogPanelOrFail();
+        }
+    }
+
+    private void addImportFromCatalogPanelOrFail() {
+        try {
+            this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    handleImport(response.getText());
+                }
+
+                @Override
+                public void onError(Request request, Throwable t) {
+                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import node source from catalog failed", t);
+                }
+            }));
+        } catch (Exception e) {
+            this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
         }
     }
 
