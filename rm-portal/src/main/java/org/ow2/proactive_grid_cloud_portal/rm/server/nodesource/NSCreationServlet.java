@@ -42,9 +42,9 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONWriter;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.server.RMServiceImpl;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
