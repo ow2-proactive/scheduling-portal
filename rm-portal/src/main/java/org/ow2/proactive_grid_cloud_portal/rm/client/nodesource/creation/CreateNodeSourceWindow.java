@@ -65,11 +65,9 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
 
     @Override
     protected void populateFormValues() {
-
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
             prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
-
             this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
             addInfrastructurePluginValuesToAllFormItems(this.controller.getModel()
                                                                        .getSupportedInfrastructures()
@@ -77,7 +75,6 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
             this.formItemsByName.put("spacer3", Collections.singletonList(new SpacerItem()));
             this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
             addPolicyPluginValuesToAllFormItems(this.controller.getModel().getSupportedPolicies().values());
-
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
@@ -87,9 +84,7 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
                                                                      .toArray(FormItem[]::new));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
-
             hideAllPluginFormItems();
-
         }, this.window::hide);
     }
 

@@ -96,9 +96,11 @@ public abstract class NodeSourceWindow {
 
     private static final String NS_CALLBACK_FORM_KEY = "nsCallback";
 
-    protected RMController controller;
+    public SelectItem infrastructureSelectItem;
 
-    protected Label nodeSourceWindowLabel;
+    public SelectItem policySelectItem;
+
+    protected RMController controller;
 
     protected DynamicForm nodeSourcePluginsForm;
 
@@ -110,13 +112,11 @@ public abstract class NodeSourceWindow {
 
     protected Label generalParametersLabel;
 
-    public SelectItem infrastructureSelectItem;
+    private Label nodeSourceWindowLabel;
 
-    public SelectItem policySelectItem;
+    private String previousSelectedInfrastructure;
 
-    protected String previousSelectedInfrastructure;
-
-    protected String previousSelectedPolicy;
+    private String previousSelectedPolicy;
 
     /**
      * All items of the node source form are held in this map. The key is
@@ -181,10 +181,9 @@ public abstract class NodeSourceWindow {
 
         this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
+        this.infrastructureSelectItem.setWidth(300);
         this.policySelectItem = new SelectItem(POLICY_FORM_KEY, "Policy");
         this.policySelectItem.setRequired(true);
-
-        this.infrastructureSelectItem.setWidth(300);
         this.policySelectItem.setWidth(300);
 
         HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
@@ -452,7 +451,7 @@ public abstract class NodeSourceWindow {
                                                      allSupportedInfrastructures);
     }
 
-    protected void fillFocusedPluginValues(LinkedHashMap<String, String> selectItemValues,
+    private void fillFocusedPluginValues(LinkedHashMap<String, String> selectItemValues,
             PluginDescriptor focusedPlugin) {
         String pluginShortName = getPluginShortName(focusedPlugin);
         selectItemValues.put(focusedPlugin.getPluginName(), pluginShortName);
@@ -460,7 +459,7 @@ public abstract class NodeSourceWindow {
         this.formItemsByName.put(focusedPlugin.getPluginName(), pluginFormItems);
     }
 
-    protected void addPluginValuesToAllFormItemOtherThanFocused(Map<String, String> selectItemValues,
+    private void addPluginValuesToAllFormItemOtherThanFocused(Map<String, String> selectItemValues,
             PluginDescriptor focusedPlugin, Map<String, PluginDescriptor> allPluginDescriptors) {
         for (Map.Entry<String, PluginDescriptor> entry : allPluginDescriptors.entrySet()) {
             PluginDescriptor plugin = entry.getValue();
@@ -486,39 +485,33 @@ public abstract class NodeSourceWindow {
 
     private void saveNodeSource(VLayout nodeSourceWindowLayout, List<IButton> buttonList,
             NodeSourceAction nodeSourceAction) {
+        String nodeSourceName = this.nodeSourceNameText.getValueAsString();
+        String actionDescription = nodeSourceAction.getActionDescription();
 
         this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
-        this.nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, this.nodeSourceNameText.getValueAsString());
+        this.nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, nodeSourceName);
         this.nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY,
                                             this.nodesRecoverableCheckbox.getValueAsBoolean().toString());
         this.nodeSourcePluginsForm.setValue(POLICY_FORM_KEY, this.policySelectItem.getValueAsString());
         this.nodeSourcePluginsForm.setValue(SESSION_ID_FORM_KEY, LoginModel.getInstance().getSessionId());
-        this.nodeSourcePluginsForm.setValue(NODE_SOURCE_ACTION_FORM_KEY, nodeSourceAction.getActionDescription());
-        this.nodeSourcePluginsForm.setCanSubmit(true);
-
+        this.nodeSourcePluginsForm.setValue(NODE_SOURCE_ACTION_FORM_KEY, actionDescription);
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
-
             JSONObject jsonCallback = new JSONObject(javascriptObject);
-
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
-
                 this.window.hide();
-                LogModel.getInstance().logMessage("Successfully applied action to Node Source: " +
-                                                  this.nodeSourceNameText.getValueAsString());
-
+                LogModel.getInstance().logImportantMessage("Successfully applied '" + actionDescription +
+                                                           "' action to Node Source: " + nodeSourceName);
             } else {
-
                 handleNodeSourceCreationError(nodeSourceWindowLayout, this.nodeSourceNameText, jsonCallback);
             }
-
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
-
             for (IButton button : buttonList) {
                 button.setDisabled(false);
             }
         }));
 
+        this.nodeSourcePluginsForm.setCanSubmit(true);
         this.nodeSourcePluginsForm.submitForm();
 
         for (IButton button : buttonList) {
@@ -582,23 +575,20 @@ public abstract class NodeSourceWindow {
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
             nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
-
             prepareFormItems();
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
+            fillPluginFormItems(nodeSourceConfiguration);
             manageNodeSourceWindowItems();
-
-            preparePluginFormItems(nodeSourceConfiguration);
-            resetFormForInfrastructureSelectChange();
-            resetFormForPolicySelectChange();
         } catch (RuntimeException e) {
+            LogModel.getInstance().logCriticalMessage("Failed to import Node Source: " + e.getMessage());
             setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         }
     }
 
-    protected void preparePluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
+    protected void fillPluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
         this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
-        fillInfrastructureSelecItemFromNodeSourceConfiguration(nodeSourceConfiguration);
+        fillInfrastructureSelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
         this.formItemsByName.put("pluginSpacer", Collections.singletonList(new SpacerItem()));
         this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
         fillPolicySelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
@@ -613,11 +603,14 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsWaitingLabel.hide();
         this.nodeSourcePluginsForm.show();
         hideAllPluginFormItems();
+        resetFormForInfrastructureSelectChange();
+        resetFormForPolicySelectChange();
     }
 
-    protected void fillPolicySelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
+    private void fillPolicySelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
         LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
+        this.policySelectItem.setValue(focusedPolicyPlugin.getPluginName());
         fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
         handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
         this.policySelectItem.setValueMap(selectItemValues);
@@ -625,10 +618,11 @@ public abstract class NodeSourceWindow {
         this.policySelectItem.setValue(this.previousSelectedPolicy);
     }
 
-    protected void
-            fillInfrastructureSelecItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
+    private void
+            fillInfrastructureSelectItemFromNodeSourceConfiguration(NodeSourceConfiguration nodeSourceConfiguration) {
         LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+        this.infrastructureSelectItem.setValue(focusedInfrastructurePlugin.getPluginName());
         fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
         handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
         this.infrastructureSelectItem.setValueMap(selectItemValues);
@@ -637,7 +631,7 @@ public abstract class NodeSourceWindow {
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
-        GWT.log(errorMessage, e);
+        LogModel.getInstance().logCriticalMessage(errorMessage + ": " + e.getMessage());
         this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + " :<br>" + e.getMessage() +
                                                "</span>");
     }

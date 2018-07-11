@@ -25,8 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
@@ -36,7 +34,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -54,10 +51,6 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     private InlineItemModificationCreator inlineItemModificationCreator;
 
     protected String nodeSourceName;
-
-    protected PluginDescriptor focusedPolicyPlugin;
-
-    protected PluginDescriptor focusedInfrastructurePlugin;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
         super(controller, WINDOW_TITLE, WAITING_MESSAGE);
@@ -102,6 +95,10 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         this.nodeSourceNameText.disable();
     }
 
+    protected void modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
+            PluginDescriptor focusedPolicyPlugin) {
+    }
+
     protected void fetchNodeSourceConfigurationWithCallback() {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
@@ -110,23 +107,13 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             manageNodeSourceWindowItems();
-
-            fillInfrastructureSelecItemFromNodeSourceConfiguration(nodeSourceConfiguration);
-            this.formItemsByName.put("spacer4", Collections.singletonList(new SpacerItem()));
-            fillPolicySelectItemFromNodeSourceConfiguration(nodeSourceConfiguration);
-
-            this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
-
-            resetFormForInfrastructureSelectChange();
-            resetFormForPolicySelectChange();
-
-            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
-                                                                     .stream()
-                                                                     .flatMap(Collection::stream)
-                                                                     .toArray(FormItem[]::new));
-            this.nodeSourcePluginsWaitingLabel.hide();
-            this.nodeSourcePluginsForm.show();
+            fillPluginFormItems(nodeSourceConfiguration);
+            modifyFormItemsAfterCreation(this.controller.getModel()
+                                                        .getEditedNodeSourceConfiguration()
+                                                        .getInfrastructurePluginDescriptor(),
+                                         this.controller.getModel()
+                                                        .getEditedNodeSourceConfiguration()
+                                                        .getPolicyPluginDescriptor());
         }, this.window::hide);
     }
 
