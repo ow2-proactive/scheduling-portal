@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -40,6 +41,11 @@ public class ImportNodeSourceLayout extends ImportLayout {
 
     public ImportNodeSourceLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
         super(nodeSourceWindow, layoutTitle);
+    }
+
+    @Override
+    public String getKind() {
+        return CatalogConstants.NODE_SOURCE_KIND;
     }
 
     @Override

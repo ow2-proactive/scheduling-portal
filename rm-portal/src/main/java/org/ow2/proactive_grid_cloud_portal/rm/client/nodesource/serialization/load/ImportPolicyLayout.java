@@ -28,12 +28,18 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 
 
 public class ImportPolicyLayout extends ImportLayout {
 
     public ImportPolicyLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
         super(nodeSourceWindow, layoutTitle);
+    }
+
+    @Override
+    public String getKind() {
+        return CatalogConstants.POLICY_KIND;
     }
 
     @Override

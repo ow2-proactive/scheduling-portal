@@ -54,15 +54,15 @@ public class ImportFromCatalogPanelFeeder {
         this.bucketNamePerNodeSourceName = new HashMap<>();
     }
 
-    void requestNodeSourcesFromAllBuckets() {
-        this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack());
+    void requestCatalogObjectsFromAllBuckets(String kind) {
+        this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack(kind));
     }
 
     String getBucketNameForNodeSource(String nodeSourceName) {
         return this.bucketNamePerNodeSourceName.get(nodeSourceName);
     }
 
-    private RequestCallback getBucketsRequestCallBack() {
+    private RequestCallback getBucketsRequestCallBack(String kind) {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -71,6 +71,7 @@ public class ImportFromCatalogPanelFeeder {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
                     String bucketName = bucketObject.get(NAME_KEY).isString().stringValue();
                     ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestNodeSourcesForBucket(bucketName,
+                                                                                                        kind,
                                                                                                         fillBucketInImportPanel(bucketName));
                 }
                 ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.enableNodeSourceListBox();

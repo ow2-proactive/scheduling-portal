@@ -35,6 +35,10 @@ public class CatalogConstants {
 
     public static final String NODE_SOURCE_KIND = "NodeSource";
 
+    public static final String INFRASTRUCTURE_KIND = "InfrastructureNodeSource";
+
+    public static final String POLICY_KIND = "PolicyNodeSource";
+
     public static final String NODE_SOURCE_CONTENT_TYPE = "application/json";
 
     public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";

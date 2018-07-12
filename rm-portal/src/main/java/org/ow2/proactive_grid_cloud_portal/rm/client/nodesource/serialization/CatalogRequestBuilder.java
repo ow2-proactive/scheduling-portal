@@ -53,9 +53,9 @@ public class CatalogRequestBuilder {
         }
     }
 
-    public void requestNodeSourcesForBucket(String bucketName, RequestCallback callback) {
-        sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" +
-                             CatalogConstants.NODE_SOURCE_KIND, callback);
+    public void requestNodeSourcesForBucket(String bucketName, String kind, RequestCallback callback) {
+        sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" + kind,
+                             callback);
     }
 
 }

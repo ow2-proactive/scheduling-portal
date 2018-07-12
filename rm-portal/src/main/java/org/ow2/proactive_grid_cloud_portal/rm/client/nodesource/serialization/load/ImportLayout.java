@@ -60,6 +60,8 @@ public abstract class ImportLayout extends VLayout {
         addSelectedImportMethodPanel();
     }
 
+    public abstract String getKind();
+
     public abstract void handleImport(String submitResult);
 
     private void createImportPanel(String layoutTitle) {
@@ -95,7 +97,7 @@ public abstract class ImportLayout extends VLayout {
 
     private void addImportFromCatalogPanelOrFail() {
         try {
-            this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(new RequestCallback() {
+            this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(getKind(), new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     handleImport(response.getText());
@@ -103,7 +105,8 @@ public abstract class ImportLayout extends VLayout {
 
                 @Override
                 public void onError(Request request, Throwable t) {
-                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import node source from catalog failed", t);
+                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import node source from catalog failed",
+                                                                                         t);
                 }
             }));
         } catch (Exception e) {

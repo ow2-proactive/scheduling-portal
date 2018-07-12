@@ -48,13 +48,12 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private final RequestCallback nodeSourceConfigurationRequestCallback;
 
-    public ImportFromCatalogPanel(RequestCallback nodeSourceConfigurationRequestCallback) {
-
+    public ImportFromCatalogPanel(String kind, RequestCallback nodeSourceConfigurationRequestCallback) {
         this.nodeSourceConfigurationRequestCallback = nodeSourceConfigurationRequestCallback;
         this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();
         createListBox();
-        this.importFromCatalogPanelFeeder.requestNodeSourcesFromAllBuckets();
+        this.importFromCatalogPanelFeeder.requestCatalogObjectsFromAllBuckets(kind);
     }
 
     void addItemToNodeSourceListBox(String displayName, String valueName) {

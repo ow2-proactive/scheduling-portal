@@ -51,6 +51,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ex
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportPolicyToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
@@ -1016,7 +1017,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogConstants.NODE_SOURCE_KIND, this).show();
     }
 
     public void exportInfrastructureToFile(String nodeSourceName) {
@@ -1026,6 +1027,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportInfrastructureToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogConstants.INFRASTRUCTURE_KIND, this).show();
     }
 
     public void exportPolicyToFile(String nodeSourceName) {
@@ -1035,6 +1037,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportPolicyToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogConstants.POLICY_KIND, this).show();
     }
 
     /**

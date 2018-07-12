@@ -99,7 +99,7 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private boolean nodeSourceRevised;
 
-    public ExportToCatalogConfirmWindow(String nodeSourceName, RMController rmController) {
+    public ExportToCatalogConfirmWindow(String nodeSourceName, String kind, RMController rmController) {
         this.nodeSourceRevised = false;
         this.nodeSourceName = nodeSourceName;
         this.rmController = rmController;
@@ -110,7 +110,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.exportNodeSourceToCatalogForm.setAction(GWT.getModuleBaseURL() +
                                                      SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG.getFormTarget());
         configureWindow();
-        addContent();
+        addContent(kind);
     }
 
     private void configureWindow() {
@@ -125,7 +125,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         centerInPage();
     }
 
-    private void addContent() {
+    private void addContent(String kind) {
         this.hiddenFormItemsPanel = new ExportToCatalogHiddenPanel();
         this.exportNodeSourceToCatalogForm.setWidget(this.hiddenFormItemsPanel);
 
@@ -137,7 +137,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         exportInfoPanel.setWidth("640px");
         exportInfoPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
         this.bucketList = new ListBox();
-        fillBucketList();
+        fillBucketList(kind);
         exportInfoPanel.add(this.bucketList);
         Label commitLabel = new Label("Commit message:");
         commitLabel.setHeight("80px");
@@ -178,10 +178,10 @@ public class ExportToCatalogConfirmWindow extends Window {
         addItem(layout);
     }
 
-    private void fillBucketList() {
+    private void fillBucketList(String kind) {
         this.bucketList.setEnabled(false);
         this.bucketList.addItem(SELECT_A_BUCKET_OPTION);
-        this.bucketList.addChangeHandler(event -> requestNodeSourceInBucket(this.bucketList.getSelectedValue()));
+        this.bucketList.addChangeHandler(event -> requestNodeSourceInBucket(this.bucketList.getSelectedValue(), kind));
         RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
                                                     new CatalogUrlBuilder().getCatalogUrl() + "/buckets");
         request.setHeader("sessionId", LoginModel.getInstance().getSessionId());
@@ -195,10 +195,10 @@ public class ExportToCatalogConfirmWindow extends Window {
         }
     }
 
-    private void requestNodeSourceInBucket(String bucketName) {
+    private void requestNodeSourceInBucket(String bucketName, String kind) {
         if (!bucketName.equals(SELECT_A_BUCKET_OPTION)) {
             CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder();
-            catalogRequestBuilder.requestNodeSourcesForBucket(bucketName, new RequestCallback() {
+            catalogRequestBuilder.requestNodeSourcesForBucket(bucketName, kind, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     JSONArray nodeSources = JSONParser.parseStrict(response.getText()).isArray();
