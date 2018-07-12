@@ -29,6 +29,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -44,8 +45,8 @@ public class ImportNodeSourceLayout extends ImportLayout {
     }
 
     @Override
-    public String getKind() {
-        return CatalogConstants.NODE_SOURCE_KIND;
+    public CatalogKind getKind() {
+        return CatalogKind.NODE_SOURCE;
     }
 
     @Override

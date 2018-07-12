@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -48,7 +49,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private final RequestCallback nodeSourceConfigurationRequestCallback;
 
-    public ImportFromCatalogPanel(String kind, RequestCallback nodeSourceConfigurationRequestCallback) {
+    public ImportFromCatalogPanel(CatalogKind kind, RequestCallback nodeSourceConfigurationRequestCallback) {
         this.nodeSourceConfigurationRequestCallback = nodeSourceConfigurationRequestCallback;
         this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();

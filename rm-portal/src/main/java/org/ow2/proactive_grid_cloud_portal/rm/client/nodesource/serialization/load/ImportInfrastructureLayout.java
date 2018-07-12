@@ -29,6 +29,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 
 public class ImportInfrastructureLayout extends ImportLayout {
@@ -38,8 +39,8 @@ public class ImportInfrastructureLayout extends ImportLayout {
     }
 
     @Override
-    public String getKind() {
-        return CatalogConstants.INFRASTRUCTURE_KIND;
+    public CatalogKind getKind() {
+        return CatalogKind.INFRASTRUCTURE;
     }
 
     @Override

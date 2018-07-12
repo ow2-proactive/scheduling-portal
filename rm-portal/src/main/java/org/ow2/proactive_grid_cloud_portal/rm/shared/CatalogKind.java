@@ -25,34 +25,22 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public class CatalogConstants {
+public enum CatalogKind {
 
-    private CatalogConstants() {
-        // this class is not meant to be instantiated
+    NODE_SOURCE("NodeSource"),
+
+    INFRASTRUCTURE("InfrastructureNodeSource"),
+
+    POLICY("PolicyNodeSource");
+
+    private final String identifier;
+
+    CatalogKind(String identifier) {
+        this.identifier = identifier;
     }
 
-    public static final String URL_CATALOG = "http://localhost:8080/catalog";
-
-    public static final String NODE_SOURCE_CONTENT_TYPE = "application/json";
-
-    public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";
-
-    public static final String EXPORT_FAILED_MESSAGE = "Export node source failed";
-
-    public static final String SESSION_ID_PARAM = "sessionId";
-
-    public static final String BUCKET_NAME_PARAM = "bucketName";
-
-    public static final String NAME_PARAM = "name";
-
-    public static final String FILE_CONTENT_PARAM = "file";
-
-    public static final String KIND_PARAM = "kind";
-
-    public static final String COMMIT_MESSAGE_PARAM = "commitMessage";
-
-    public static final String OBJECT_CONTENT_TYPE_PARAM = "objectContentType";
-
-    public static final String REVISED_PARAM = "revised";
+    public String getIdentifier() {
+        return this.identifier;
+    }
 
 }

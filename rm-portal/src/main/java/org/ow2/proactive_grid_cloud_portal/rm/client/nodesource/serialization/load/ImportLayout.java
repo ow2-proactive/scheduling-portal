@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.http.client.Request;
@@ -60,7 +61,7 @@ public abstract class ImportLayout extends VLayout {
         addSelectedImportMethodPanel();
     }
 
-    public abstract String getKind();
+    public abstract CatalogKind getKind();
 
     public abstract void handleImport(String submitResult);
 

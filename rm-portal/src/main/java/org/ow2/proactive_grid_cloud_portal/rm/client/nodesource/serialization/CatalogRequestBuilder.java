@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanelFeeder;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -53,9 +54,9 @@ public class CatalogRequestBuilder {
         }
     }
 
-    public void requestNodeSourcesForBucket(String bucketName, String kind, RequestCallback callback) {
-        sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" + kind,
-                             callback);
+    public void requestCatalogObjects(String bucketName, CatalogKind kind, RequestCallback callback) {
+        sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" +
+                             kind.getIdentifier(), callback);
     }
 
 }

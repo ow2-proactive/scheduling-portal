@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -54,7 +55,7 @@ public class ImportFromCatalogPanelFeeder {
         this.bucketNamePerNodeSourceName = new HashMap<>();
     }
 
-    void requestCatalogObjectsFromAllBuckets(String kind) {
+    void requestCatalogObjectsFromAllBuckets(CatalogKind kind) {
         this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack(kind));
     }
 
@@ -62,7 +63,7 @@ public class ImportFromCatalogPanelFeeder {
         return this.bucketNamePerNodeSourceName.get(nodeSourceName);
     }
 
-    private RequestCallback getBucketsRequestCallBack(String kind) {
+    private RequestCallback getBucketsRequestCallBack(CatalogKind kind) {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -70,9 +71,9 @@ public class ImportFromCatalogPanelFeeder {
                 for (int i = 0; i < bucketsArray.size(); i++) {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
                     String bucketName = bucketObject.get(NAME_KEY).isString().stringValue();
-                    ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestNodeSourcesForBucket(bucketName,
-                                                                                                        kind,
-                                                                                                        fillBucketInImportPanel(bucketName));
+                    ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestCatalogObjects(bucketName,
+                                                                                                  kind,
+                                                                                                  fillBucketInImportPanel(bucketName));
                 }
                 ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.enableNodeSourceListBox();
             }

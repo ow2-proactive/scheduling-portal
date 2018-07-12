@@ -28,17 +28,17 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.e
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.EXPORT_FAILED_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.INITIAL_COMMIT_MESSAGE;
 import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.NODE_SOURCE_CONTENT_TYPE;
-import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.NODE_SOURCE_KIND;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 import com.google.gwt.core.client.GWT;
@@ -61,7 +61,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -81,13 +80,13 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private String nodeSourceName;
 
+    private CatalogKind kind;
+
     private RMController rmController;
 
     private NodeSourceConfigurationParser parser;
 
     private ExportToCatalogHiddenPanel hiddenFormItemsPanel;
-
-    private FormPanel exportNodeSourceToCatalogForm;
 
     private Label windowLabel;
 
@@ -97,20 +96,23 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private Label revisionLabel;
 
-    private boolean nodeSourceRevised;
+    private boolean catalogObjectRevised;
 
-    public ExportToCatalogConfirmWindow(String nodeSourceName, String kind, RMController rmController) {
-        this.nodeSourceRevised = false;
+    private FormPanel exportToCatalogForm;
+
+    public ExportToCatalogConfirmWindow(String nodeSourceName, CatalogKind kind, RMController rmController) {
         this.nodeSourceName = nodeSourceName;
+        this.kind = kind;
         this.rmController = rmController;
         this.parser = new NodeSourceConfigurationParser();
-        this.exportNodeSourceToCatalogForm = new FormPanel();
-        this.exportNodeSourceToCatalogForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-        this.exportNodeSourceToCatalogForm.setMethod(FormPanel.METHOD_POST);
-        this.exportNodeSourceToCatalogForm.setAction(GWT.getModuleBaseURL() +
-                                                     SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG.getFormTarget());
+        this.catalogObjectRevised = false;
+        this.exportToCatalogForm = new FormPanel();
+        this.exportToCatalogForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        this.exportToCatalogForm.setMethod(FormPanel.METHOD_POST);
+        this.exportToCatalogForm.setAction(GWT.getModuleBaseURL() +
+                                           SerializationType.EXPORT_NODE_SOURCE_TO_CATALOG.getFormTarget());
         configureWindow();
-        addContent(kind);
+        addContent();
     }
 
     private void configureWindow() {
@@ -125,9 +127,9 @@ public class ExportToCatalogConfirmWindow extends Window {
         centerInPage();
     }
 
-    private void addContent(String kind) {
+    private void addContent() {
         this.hiddenFormItemsPanel = new ExportToCatalogHiddenPanel();
-        this.exportNodeSourceToCatalogForm.setWidget(this.hiddenFormItemsPanel);
+        this.exportToCatalogForm.setWidget(this.hiddenFormItemsPanel);
 
         this.windowLabel = new Label("Choose the catalog bucket in which to publish the Node Source " + nodeSourceName);
         this.windowLabel.setHeight(30);
@@ -137,7 +139,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         exportInfoPanel.setWidth("640px");
         exportInfoPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
         this.bucketList = new ListBox();
-        fillBucketList(kind);
+        fillBucketList();
         exportInfoPanel.add(this.bucketList);
         Label commitLabel = new Label("Commit message:");
         commitLabel.setHeight("80px");
@@ -178,10 +180,10 @@ public class ExportToCatalogConfirmWindow extends Window {
         addItem(layout);
     }
 
-    private void fillBucketList(String kind) {
+    private void fillBucketList() {
         this.bucketList.setEnabled(false);
         this.bucketList.addItem(SELECT_A_BUCKET_OPTION);
-        this.bucketList.addChangeHandler(event -> requestNodeSourceInBucket(this.bucketList.getSelectedValue(), kind));
+        this.bucketList.addChangeHandler(event -> requestCatalogObjectsAndRevisions(this.bucketList.getSelectedValue()));
         RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
                                                     new CatalogUrlBuilder().getCatalogUrl() + "/buckets");
         request.setHeader("sessionId", LoginModel.getInstance().getSessionId());
@@ -190,50 +192,50 @@ public class ExportToCatalogConfirmWindow extends Window {
             request.send();
         } catch (RequestException e) {
             String errorMessage = "Request sent to catalog failed";
-            GWT.log(errorMessage, e);
+            LogModel.getInstance().logCriticalMessage(errorMessage);
             this.windowLabel.setContents(errorMessage);
         }
     }
 
-    private void requestNodeSourceInBucket(String bucketName, String kind) {
+    private void requestCatalogObjectsAndRevisions(String bucketName) {
         if (!bucketName.equals(SELECT_A_BUCKET_OPTION)) {
             CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder();
-            catalogRequestBuilder.requestNodeSourcesForBucket(bucketName, kind, new RequestCallback() {
+            catalogRequestBuilder.requestCatalogObjects(bucketName, this.kind, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    JSONArray nodeSources = JSONParser.parseStrict(response.getText()).isArray();
-                    nodeSourceRevised = false;
+                    JSONArray catalogObjects = JSONParser.parseStrict(response.getText()).isArray();
+                    catalogObjectRevised = false;
                     revisionLabel.setContents("(Initial commit)");
-                    for (int i = 0; i < nodeSources.size(); i++) {
-                        JSONObject nodeSource = nodeSources.get(i).isObject();
-                        String nodeSourceNameInBucket = nodeSource.get("name").isString().stringValue();
-                        if (nodeSourceNameInBucket.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
-                            nodeSourceRevised = true;
+                    for (int i = 0; i < catalogObjects.size(); i++) {
+                        JSONObject catalogObject = catalogObjects.get(i).isObject();
+                        String catalogObjectName = catalogObject.get("name").isString().stringValue();
+                        if (catalogObjectName.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
+                            catalogObjectRevised = true;
                             catalogRequestBuilder.sendRequestToCatalog("buckets/" + bucketName + "/resources/" +
-                                                                       nodeSourceNameInBucket + "/revisions",
+                                                                       catalogObjectName + "/revisions",
                                                                        new RequestCallback() {
                                                                            @Override
                                                                            public void onResponseReceived(
                                                                                    Request request, Response response) {
-                                                                               JSONArray nodeSourceRevisions = JSONParser.parseStrict(response.getText())
-                                                                                                                         .isArray();
-                                                                               JSONObject lastNodeSourceRevision = nodeSourceRevisions.get(0)
-                                                                                                                                      .isObject();
+                                                                               JSONArray catalogObjectRevisions = JSONParser.parseStrict(response.getText())
+                                                                                                                            .isArray();
+                                                                               JSONObject lastCatalogObjectRevision = catalogObjectRevisions.get(0)
+                                                                                                                                            .isObject();
                                                                                revisionLabel.setContents("(Last Revision: " +
-                                                                                                         lastNodeSourceRevision.get("commit_time")
-                                                                                                                               .isString()
-                                                                                                                               .stringValue() +
+                                                                                                         lastCatalogObjectRevision.get("commit_time")
+                                                                                                                                  .isString()
+                                                                                                                                  .stringValue() +
                                                                                                          " \"" +
-                                                                                                         lastNodeSourceRevision.get("commit_message")
-                                                                                                                               .isString()
-                                                                                                                               .stringValue() +
+                                                                                                         lastCatalogObjectRevision.get("commit_message")
+                                                                                                                                  .isString()
+                                                                                                                                  .stringValue() +
                                                                                                          "\")");
                                                                            }
 
                                                                            @Override
                                                                            public void onError(Request request,
                                                                                    Throwable exception) {
-                                                                               revisionLabel.setContents("<span style='color:red'>Last revision of this node source could not be retrieved</span>");
+                                                                               revisionLabel.setContents("<span style='color:red'>Last revision in catalog could not be retrieved</span>");
                                                                            }
                                                                        });
                             break;
@@ -244,11 +246,11 @@ public class ExportToCatalogConfirmWindow extends Window {
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    revisionLabel.setContents("<span style='color:red'>Could not check whether a revision exists for this node source</span>");
+                    revisionLabel.setContents("<span style='color:red'>Could not check whether a revision exists in the catalog</span>");
                 }
             });
         } else {
-            this.nodeSourceRevised = false;
+            this.catalogObjectRevised = false;
             this.revisionLabel.setContents(INITIAL_COMMIT_MESSAGE);
             this.revisionLabel.redraw();
         }
@@ -257,8 +259,8 @@ public class ExportToCatalogConfirmWindow extends Window {
     private void submitNodeSourceConfiguration() {
         if (!this.bucketList.getSelectedValue().equals(SELECT_A_BUCKET_OPTION)) {
             Window window = new Window();
-            window.addChild(this.exportNodeSourceToCatalogForm);
-            this.exportNodeSourceToCatalogForm.addSubmitCompleteHandler(this::displayErrorToUserIfExportFailed);
+            window.addChild(this.exportToCatalogForm);
+            this.exportToCatalogForm.addSubmitCompleteHandler(this::displayErrorToUserIfExportFailed);
             window.show();
             this.rmController.getRMService().getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
                                                                         this.nodeSourceName,
@@ -278,21 +280,21 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private AsyncCallback<String> submitExportParametersCallback(Window window) {
         return new AsyncCallback<String>() {
-            public void onSuccess(String result) {
+            public void onSuccess(String nodeSourceConfigurationJson) {
                 try {
-                    NodeSourceConfiguration nodeSourceConfiguration = parser.parseNodeSourceConfiguration(result);
                     hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance().getSessionId());
                     hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
-                    hiddenFormItemsPanel.nodeSourceNameFormField.setValue(nodeSourceConfiguration.getNodeSourceName());
-                    hiddenFormItemsPanel.nodeSourceJsonFormField.setValue(result);
-                    hiddenFormItemsPanel.catalogObjectKindFormField.setValue(NODE_SOURCE_KIND);
+                    hiddenFormItemsPanel.catalogObjectNameFormField.setValue(parser.parseNodeSourceConfiguration(nodeSourceConfigurationJson)
+                                                                                   .getNodeSourceName());
+                    hiddenFormItemsPanel.catalogObjectJsonFormField.setValue(getJsonFormFieldContent(nodeSourceConfigurationJson));
+                    hiddenFormItemsPanel.catalogObjectKindFormField.setValue(kind.getIdentifier());
                     hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue(commitMessage.getText());
                     hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue(NODE_SOURCE_CONTENT_TYPE);
-                    hiddenFormItemsPanel.revised.setValue(Boolean.toString(nodeSourceRevised));
-                    exportNodeSourceToCatalogForm.submit();
+                    hiddenFormItemsPanel.revised.setValue(Boolean.toString(catalogObjectRevised));
+                    exportToCatalogForm.submit();
                 } catch (RuntimeException e) {
                     String msg = JSONUtils.getJsonErrorMessage(e);
-                    SC.warn("Failed to export node source to catalog:<br>" + msg);
+                    LogModel.getInstance().logCriticalMessage("Failed to export node source to catalog:<br>" + msg);
                 } finally {
                     hideAndDestroy(window);
                 }
@@ -300,10 +302,28 @@ public class ExportToCatalogConfirmWindow extends Window {
 
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
-                SC.warn("Failed to fetch configuration of node source " + nodeSourceName + ":<br>" + msg);
+                LogModel.getInstance().logCriticalMessage("Failed to fetch configuration of node source " +
+                                                          nodeSourceName + ":<br>" + msg);
                 hideAndDestroy(window);
             }
         };
+    }
+
+    private String getJsonFormFieldContent(String nodeSourceConfigurationJson) {
+        switch (this.kind) {
+            case NODE_SOURCE:
+                return nodeSourceConfigurationJson;
+            case INFRASTRUCTURE:
+                return extractInJson(nodeSourceConfigurationJson, "infrastructurePluginDescriptor");
+            case POLICY:
+                return extractInJson(nodeSourceConfigurationJson, "policyPluginDescriptor");
+            default:
+                throw new IllegalStateException("Cannot export to catalog because the kind is not set");
+        }
+    }
+
+    private String extractInJson(String nodeSourceConfigurationJson, String identifier) {
+        return this.parser.parseJSON(nodeSourceConfigurationJson).isObject().get(identifier).isObject().toString();
     }
 
     private RequestCallback fillBucketListWithRequestCallback() {
@@ -338,9 +358,9 @@ public class ExportToCatalogConfirmWindow extends Window {
 
         private Hidden bucketNameFormField = new Hidden(CatalogConstants.BUCKET_NAME_PARAM);
 
-        private Hidden nodeSourceNameFormField = new Hidden(CatalogConstants.NAME_PARAM);
+        private Hidden catalogObjectNameFormField = new Hidden(CatalogConstants.NAME_PARAM);
 
-        private Hidden nodeSourceJsonFormField = new Hidden(CatalogConstants.FILE_CONTENT_PARAM);
+        private Hidden catalogObjectJsonFormField = new Hidden(CatalogConstants.FILE_CONTENT_PARAM);
 
         private Hidden catalogObjectKindFormField = new Hidden(CatalogConstants.KIND_PARAM);
 
@@ -353,8 +373,8 @@ public class ExportToCatalogConfirmWindow extends Window {
         private ExportToCatalogHiddenPanel() {
             add(this.sessionIdFormField);
             add(this.bucketNameFormField);
-            add(this.nodeSourceNameFormField);
-            add(this.nodeSourceJsonFormField);
+            add(this.catalogObjectNameFormField);
+            add(this.catalogObjectJsonFormField);
             add(this.catalogObjectKindFormField);
             add(this.catalogObjectCommitMessageFormField);
             add(this.catalogObjectContentTypeFormField);

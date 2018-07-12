@@ -29,6 +29,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 
 public class ImportPolicyLayout extends ImportLayout {
@@ -38,8 +39,8 @@ public class ImportPolicyLayout extends ImportLayout {
     }
 
     @Override
-    public String getKind() {
-        return CatalogConstants.POLICY_KIND;
+    public CatalogKind getKind() {
+        return CatalogKind.POLICY;
     }
 
     @Override
