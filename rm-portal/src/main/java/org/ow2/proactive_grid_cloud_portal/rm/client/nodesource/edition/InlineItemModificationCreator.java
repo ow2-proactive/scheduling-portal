@@ -44,9 +44,9 @@ public class InlineItemModificationCreator {
 
     public static final String EDIT_FORM_ITEM_SUFFIX = ".edit";
 
-    public static final String EDIT_RADIO_OPTION_NAME = "edit";
+    private static final String EDIT_RADIO_OPTION_NAME = "edit";
 
-    public static final String UPLOAD_RADIO_OPTION_NAME = "upload";
+    private static final String UPLOAD_RADIO_OPTION_NAME = "upload";
 
     private final NodeSourceWindow nodeSourceWindow;
 
@@ -59,10 +59,8 @@ public class InlineItemModificationCreator {
         FormItem chooseCredentialsFormItem;
         List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<FormItem>();
 
-        if ((nodeSourceWindow.infrastructureSelectItem != null &&
-             plugin.getPluginName().equals(nodeSourceWindow.infrastructureSelectItem.getValueAsString()) ||
-             (nodeSourceWindow.policySelectItem != null &&
-              plugin.getPluginName().equals(nodeSourceWindow.policySelectItem.getValueAsString())))) {
+        if (plugin.getPluginName().equals(nodeSourceWindow.infrastructureSelectItem.getValueAsString()) ||
+            plugin.getPluginName().equals(nodeSourceWindow.policySelectItem.getValueAsString())) {
             RadioGroupItem editOrUploadFormItem = createRadioItemToModifyPluginField(plugin, pluginField);
             formItemsReplacingNonTextualFormItems.add(editOrUploadFormItem);
 

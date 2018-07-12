@@ -638,7 +638,6 @@ public abstract class NodeSourceWindow {
     }
 
     public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
-        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         allNodeSourcePluginsFormItems.stream()
@@ -647,9 +646,10 @@ public abstract class NodeSourceWindow {
                                      .forEach(FormItem::clearValue);
         allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
                                                                    .startsWith(policyPluginDescriptor.getPluginName()));
-        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY) + 1, prefilledFormItems);
 
         this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
+        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY) + 1, prefilledFormItems);
         this.formItemsByName.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
 
@@ -657,7 +657,6 @@ public abstract class NodeSourceWindow {
     }
 
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
-        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         allNodeSourcePluginsFormItems.stream()
@@ -666,9 +665,10 @@ public abstract class NodeSourceWindow {
                                      .forEach(FormItem::clearValue);
         allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
                                                                    .startsWith(infrastructurePluginDescriptor.getPluginName()));
-        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(INFRASTRUCTURE_FORM_KEY) + 1, prefilledFormItems);
 
         this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
+        ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
+        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(INFRASTRUCTURE_FORM_KEY) + 1, prefilledFormItems);
         this.formItemsByName.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
 
