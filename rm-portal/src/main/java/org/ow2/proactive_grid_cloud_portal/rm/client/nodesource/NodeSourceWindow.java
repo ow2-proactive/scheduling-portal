@@ -58,6 +58,7 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -571,7 +572,7 @@ public abstract class NodeSourceWindow {
     }
 
     public void importNodeSourceFromJson(String importedNodeSourceJsonString) {
-        this.nodeSourcePluginsForm.reset();
+        this.nodeSourcePluginsForm.clearValues();
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
             nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
@@ -637,15 +638,18 @@ public abstract class NodeSourceWindow {
     }
 
     public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
-        this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
         ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
-
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
+        allNodeSourcePluginsFormItems.stream()
+                                     .filter(formItem -> formItem.getName()
+                                                                 .startsWith(policyPluginDescriptor.getPluginName()))
+                                     .forEach(FormItem::clearValue);
         allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
                                                                    .startsWith(policyPluginDescriptor.getPluginName()));
         allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY) + 1, prefilledFormItems);
 
+        this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
         this.formItemsByName.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
 
@@ -653,14 +657,18 @@ public abstract class NodeSourceWindow {
     }
 
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
-        this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
         ArrayList<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
+        allNodeSourcePluginsFormItems.stream()
+                                     .filter(formItem -> formItem.getName()
+                                                                 .startsWith(infrastructurePluginDescriptor.getPluginName()))
+                                     .forEach(FormItem::clearValue);
         allNodeSourcePluginsFormItems.removeIf(formItem -> formItem.getName()
                                                                    .startsWith(infrastructurePluginDescriptor.getPluginName()));
         allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(INFRASTRUCTURE_FORM_KEY) + 1, prefilledFormItems);
 
+        this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
         this.formItemsByName.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
 
