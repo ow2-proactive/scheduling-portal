@@ -48,8 +48,6 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     public static final String WINDOW_TITLE = "Edit Node Source";
 
-    private InlineItemModificationCreator inlineItemModificationCreator;
-
     protected String nodeSourceName;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
@@ -64,7 +62,6 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     private void setAttributesAndBuildForm(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
-        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
@@ -75,7 +72,8 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-        return inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin, pluginField);
+        return new InlineItemModificationCreator(this).getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                     pluginField);
     }
 
     @Override
@@ -83,7 +81,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
-            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodeSourceNameText.disable();
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             fillPluginFormItems(nodeSourceConfiguration);

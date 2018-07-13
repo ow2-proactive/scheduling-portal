@@ -537,13 +537,24 @@ public abstract class NodeSourceWindow {
     }
 
     protected void fillPluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
-        replaceInfrastructureItems(nodeSourceConfiguration.getInfrastructurePluginDescriptor());
-        replacePolicyItems(nodeSourceConfiguration.getPolicyPluginDescriptor());
+        List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
+                                                             .collect(Collectors.toList());
+        replaceInfrastructureItemsInItemList(nodeSourceConfiguration.getInfrastructurePluginDescriptor(),
+                                             allNodeSourcePluginsFormItems);
+        replacePolicyItemsInItemList(nodeSourceConfiguration.getPolicyPluginDescriptor(),
+                                     allNodeSourcePluginsFormItems);
+        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
     }
 
     public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
+        replacePolicyItemsInItemList(policyPluginDescriptor, allNodeSourcePluginsFormItems);
+        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+    }
+
+    private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
+            List<FormItem> allNodeSourcePluginsFormItems) {
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
                                                                  .startsWith(policyPluginDescriptor.getPluginName()))
@@ -554,16 +565,21 @@ public abstract class NodeSourceWindow {
         this.previousSelectedPolicy = this.policySelectItem.getValueAsString();
         this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
         List<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
-        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY) + 1, prefilledFormItems);
+        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY, allNodeSourcePluginsFormItems) +
+                                             1, prefilledFormItems);
         this.formItemsByName.put(policyPluginDescriptor.getPluginName(), prefilledFormItems);
-        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
-
         resetFormForPolicySelectChange();
     }
 
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
+        replaceInfrastructureItemsInItemList(infrastructurePluginDescriptor, allNodeSourcePluginsFormItems);
+        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+    }
+
+    private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
+            List<FormItem> allNodeSourcePluginsFormItems) {
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
                                                                  .startsWith(infrastructurePluginDescriptor.getPluginName()))
@@ -574,25 +590,20 @@ public abstract class NodeSourceWindow {
         this.previousSelectedInfrastructure = this.infrastructureSelectItem.getValueAsString();
         this.infrastructureSelectItem.setValue(infrastructurePluginDescriptor.getPluginName());
         List<FormItem> prefilledFormItems = getPrefilledFormItems(infrastructurePluginDescriptor);
-        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(INFRASTRUCTURE_FORM_KEY) + 1, prefilledFormItems);
+        allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(INFRASTRUCTURE_FORM_KEY,
+                                                                     allNodeSourcePluginsFormItems) +
+                                             1, prefilledFormItems);
         this.formItemsByName.put(infrastructurePluginDescriptor.getPluginName(), prefilledFormItems);
-        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
-
         resetFormForInfrastructureSelectChange();
     }
 
-    private int findFormItemIndexByName(String formItemName) {
-        FormItem[] fields = this.nodeSourcePluginsForm.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].getName().equals(formItemName)) {
+    private int findFormItemIndexByName(String formItemName, List<FormItem> allNodeSourcePluginsFormItems) {
+        for (int i = 0; i < allNodeSourcePluginsFormItems.size(); i++) {
+            if (allNodeSourcePluginsFormItems.get(i).getName().equals(formItemName)) {
                 return i;
             }
         }
         throw new IllegalArgumentException("Form item with name " + formItemName + " does not exist");
-    }
-
-    public List<FormItem> getFormItemsOfPlugin(String pluginName) {
-        return this.formItemsByName.get(pluginName);
     }
 
     private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, TextItem nodeSourceNameItem,

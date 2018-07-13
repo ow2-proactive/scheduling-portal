@@ -45,11 +45,8 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class CreateNodeSourceWindow extends NodeSourceWindow {
 
-    private final InlineItemModificationCreator inlineItemModificationCreator;
-
     public CreateNodeSourceWindow(RMController controller) {
         super(controller, "Add Node Source", "Updating Available Infrastructures and Policies");
-        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
@@ -61,8 +58,8 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
         if (this.createdFromImport) {
-            return this.inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin,
-                                                                                                    pluginField);
+            return new InlineItemModificationCreator(this).getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                         pluginField);
         } else {
             List<FormItem> formItems = new LinkedList<>();
             FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
