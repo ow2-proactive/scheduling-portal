@@ -31,9 +31,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
@@ -60,46 +60,43 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues() {
-        fetchNodeSourceConfigurationWithCallback();
-    }
-
-    @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-
         List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<>();
-
         TextAreaItem previousValueItem = createTextItemPrefilledWithFileContent(plugin, pluginField);
         formItemsReplacingNonTextualFormItems.add(previousValueItem);
-
         return formItemsReplacingNonTextualFormItems;
     }
 
     private TextAreaItem createTextItemPrefilledWithFileContent(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField) {
-
         TextAreaItem itemWithFileContent = new TextAreaItem(plugin.getPluginName() + pluginField.getName() +
                                                             EDIT_FORM_ITEM_SUFFIX, pluginField.getName());
-
         itemWithFileContent.setDefaultValue(pluginField.getValue());
         return itemWithFileContent;
     }
 
     @Override
-    protected void handleAdditionalPolicyFormItems(Map<String, String> selectItemValues,
-            PluginDescriptor focusedPolicyPlugin) {
-        // do nothing
+    protected void modifyFormItemsAfterCreation() {
+        this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
+            NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
+                                                                             .getEditedNodeSourceConfiguration();
+            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodeSourceNameText.disable();
+            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
+            this.nodesRecoverableCheckbox.disable();
+
+            fillPluginFormItems(nodeSourceConfiguration);
+            disablePluginFormItems(nodeSourceConfiguration);
+
+            this.generalParametersLabel.setStyleName("generalParametersStyleDisabled");
+            this.generalParametersLabel.redraw();
+        }, this.window::hide);
     }
 
-    @Override
-    protected void handleAdditionalInfrastructureFormItems(Map<String, String> selectItemValues,
-            PluginDescriptor focusedInfrastructurePlugin) {
-        // do nothing
-    }
+    private void disablePluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
+        PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
+        PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
 
-    @Override
-    protected void modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
-            PluginDescriptor focusedPolicyPlugin) {
         List<String> allDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
                                                                            .stream()
                                                                            .filter(PluginDescriptor.Field::isDynamic)
@@ -112,6 +109,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
                                                            .map(field -> focusedPolicyPlugin.getPluginName() +
                                                                          field.getName())
                                                            .collect(Collectors.toList()));
+
         for (FormItem formItem : this.formItemsByName.values()
                                                      .stream()
                                                      .flatMap(Collection::stream)
@@ -124,6 +122,11 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         }
     }
 
+    private boolean isItemEqualToDynamicField(FormItem formItem, String fieldFullName) {
+        return formItem.getName().equals(fieldFullName) ||
+               formItem.getName().equals(fieldFullName + EDIT_FORM_ITEM_SUFFIX);
+    }
+
     private void filterAndDisableNonDynamicItem(FormItem formItem) {
         if (this.formItemsByName.keySet().stream().anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
             formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
@@ -131,28 +134,8 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         }
     }
 
-    private boolean isItemEqualToDynamicField(FormItem formItem, String fieldFullName) {
-        return formItem.getName().equals(fieldFullName) ||
-               formItem.getName().equals(fieldFullName + EDIT_FORM_ITEM_SUFFIX);
-    }
-
-    @Override
-    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
-        buttonsLayout.setMembers(this.applyModificationsButton, this.cancelButton);
-    }
-
-    @Override
-    public void manageNodeSourceWindowItems() {
-        super.manageNodeSourceWindowItems();
-        this.nodesRecoverableCheckbox.disable();
-        this.generalParametersLabel.setStyleName("generalParametersStyleDisabled");
-        this.generalParametersLabel.redraw();
-    }
-
     private void disableNonDynamicItem(FormItem formItem) {
-
         formItem.disable();
-
         // when a form item is disabled, it will not be given as parameter of
         // the submitted form, so we need to add the item content in a hidden
         // item for it to be submitted with the form. This is true for all
@@ -163,6 +146,11 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
             hiddenItem.setValue(formItem.getValue());
             this.formItemsByName.put(formItem.getName(), Collections.singletonList(hiddenItem));
         }
+    }
+
+    @Override
+    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
+        buttonsLayout.setMembers(this.applyModificationsButton, this.cancelButton);
     }
 
 }

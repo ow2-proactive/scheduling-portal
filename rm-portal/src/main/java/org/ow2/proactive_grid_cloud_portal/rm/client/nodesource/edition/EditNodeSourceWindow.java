@@ -74,47 +74,25 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues() {
-        this.controller.fetchSupportedInfrastructuresAndPolicies(this::fetchNodeSourceConfigurationWithCallback,
-                                                                 this.window::hide);
-    }
-
-    @Override
     protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
         return inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin, pluginField);
     }
 
     @Override
-    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
-        buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
-    }
-
-    @Override
-    public void manageNodeSourceWindowItems() {
-        // we never allow the node source name to be modified
-        this.nodeSourceNameText.disable();
-    }
-
-    protected void modifyFormItemsAfterCreation(PluginDescriptor focusedInfrastructurePlugin,
-            PluginDescriptor focusedPolicyPlugin) {
-    }
-
-    protected void fetchNodeSourceConfigurationWithCallback() {
+    protected void modifyFormItemsAfterCreation() {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
-            prepareFormItems();
             this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodeSourceNameText.disable();
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
-            manageNodeSourceWindowItems();
             fillPluginFormItems(nodeSourceConfiguration);
-            modifyFormItemsAfterCreation(this.controller.getModel()
-                                                        .getEditedNodeSourceConfiguration()
-                                                        .getInfrastructurePluginDescriptor(),
-                                         this.controller.getModel()
-                                                        .getEditedNodeSourceConfiguration()
-                                                        .getPolicyPluginDescriptor());
         }, this.window::hide);
+    }
+
+    @Override
+    protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
+        buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
     }
 
 }
