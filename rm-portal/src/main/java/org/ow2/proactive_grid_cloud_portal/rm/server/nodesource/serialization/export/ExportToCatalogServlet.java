@@ -71,18 +71,14 @@ public class ExportToCatalogServlet extends HttpServlet {
         try (CatalogObjectAction catalogObjectAction = buildCatalogObjetAction(request)) {
             ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(CatalogConstants.URL_CATALOG);
-            String catalogObjectName = catalogObjectAction.getCatalogObjectNameBase() +
-                                       (catalogObjectAction.getKind()
-                                                           .equals(CatalogKind.NODE_SOURCE.getIdentifier()) ? ""
-                                                                                                            : catalogObjectAction.getKind());
             if (catalogObjectAction.isRevised()) {
                 CatalogObjectRevisionControllerApi catalogObjectController = new CatalogObjectRevisionControllerApi(apiClient);
                 catalogObjectController.createUsingPOST2(catalogObjectAction.getBucketName(),
-                                                         catalogObjectName,
+                                                         catalogObjectAction.getCatalogObjectName(),
                                                          catalogObjectAction.getCommitMessage(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
                                                          catalogObjectAction.getSessionId());
-                LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectNameBase() +
+                LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectName() +
                             " in bucket " + catalogObjectAction.getBucketName());
             } else {
                 CatalogObjectControllerApi catalogObjectController = new CatalogObjectControllerApi(apiClient);
@@ -92,9 +88,9 @@ public class ExportToCatalogServlet extends HttpServlet {
                                                          catalogObjectAction.getObjectContentType(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
                                                          catalogObjectAction.getSessionId(),
-                                                         catalogObjectName);
-                LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectNameBase() +
-                            " in bucket " + catalogObjectAction.getBucketName());
+                                                         catalogObjectAction.getCatalogObjectName());
+                LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectName() + " in bucket " +
+                            catalogObjectAction.getBucketName());
             }
         } catch (Exception e) {
             logErrorAndWriteResponseToClient(e, response);

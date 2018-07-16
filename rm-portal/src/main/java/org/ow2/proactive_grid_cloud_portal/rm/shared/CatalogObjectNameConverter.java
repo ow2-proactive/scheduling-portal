@@ -25,29 +25,20 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public enum CatalogKind {
+public class CatalogObjectNameConverter {
 
-    NODE_SOURCE("NodeSource", ""),
+    private final String nodeSourceName;
 
-    INFRASTRUCTURE("InfrastructureNodeSource", "_Infrastructure"),
-
-    POLICY("PolicyNodeSource", "_Policy");
-
-    private final String kind;
-
-    private final String suffix;
-
-    CatalogKind(String kind, String suffix) {
-        this.kind = kind;
-        this.suffix = suffix;
+    public CatalogObjectNameConverter(String nodeSourceName) {
+        this.nodeSourceName = nodeSourceName;
     }
 
-    public String getKindString() {
-        return this.kind;
+    public String convertFromKind(CatalogKind kind) {
+        return this.nodeSourceName + (kind.equals(CatalogKind.NODE_SOURCE) ? "" : kind.getSuffix());
     }
 
-    public String getSuffix() {
-        return this.suffix;
+    public String getNodeSourceName() {
+        return this.nodeSourceName;
     }
 
 }

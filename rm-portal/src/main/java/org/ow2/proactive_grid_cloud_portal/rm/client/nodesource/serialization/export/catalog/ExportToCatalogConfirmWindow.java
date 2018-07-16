@@ -39,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.Ca
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogObjectNameConverter;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.SerializationType;
 
 import com.google.gwt.core.client.GWT;
@@ -70,15 +71,13 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 public class ExportToCatalogConfirmWindow extends Window {
 
-    private static final String WINDOW_TITLE = "Export Node Source to Catalog";
-
     private static final int WINDOW_WIDTH = 680;
 
     private static final int WINDOW_HEIGHT = 210;
 
     private static final String SELECT_A_BUCKET_OPTION = "Select a bucket";
 
-    private String nodeSourceName;
+    private String catalogObjectName;
 
     private CatalogKind kind;
 
@@ -100,8 +99,11 @@ public class ExportToCatalogConfirmWindow extends Window {
 
     private FormPanel exportToCatalogForm;
 
+    private CatalogObjectNameConverter catalogObjectNameConverter;
+
     public ExportToCatalogConfirmWindow(String nodeSourceName, CatalogKind kind, RMController rmController) {
-        this.nodeSourceName = nodeSourceName;
+        this.catalogObjectNameConverter = new CatalogObjectNameConverter(nodeSourceName);
+        this.catalogObjectName = this.catalogObjectNameConverter.convertFromKind(kind);
         this.kind = kind;
         this.rmController = rmController;
         this.parser = new NodeSourceConfigurationParser();
@@ -116,7 +118,7 @@ public class ExportToCatalogConfirmWindow extends Window {
     }
 
     private void configureWindow() {
-        setTitle(WINDOW_TITLE);
+        setTitle("Export " + this.kind.getKindString() + " to Catalog");
         setShowMinimizeButton(false);
         setIsModal(true);
         setShowModalMask(true);
@@ -131,7 +133,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.hiddenFormItemsPanel = new ExportToCatalogHiddenPanel();
         this.exportToCatalogForm.setWidget(this.hiddenFormItemsPanel);
 
-        this.windowLabel = new Label("Choose the catalog bucket in which to publish the Node Source " + nodeSourceName);
+        this.windowLabel = new Label("Choose the catalog bucket in which to publish " + this.catalogObjectName);
         this.windowLabel.setHeight(30);
 
         HorizontalPanel exportInfoPanel = new HorizontalPanel();
@@ -209,7 +211,7 @@ public class ExportToCatalogConfirmWindow extends Window {
                     for (int i = 0; i < catalogObjects.size(); i++) {
                         JSONObject catalogObject = catalogObjects.get(i).isObject();
                         String catalogObjectName = catalogObject.get("name").isString().stringValue();
-                        if (catalogObjectName.equals(ExportToCatalogConfirmWindow.this.nodeSourceName)) {
+                        if (catalogObjectName.equals(ExportToCatalogConfirmWindow.this.catalogObjectName)) {
                             catalogObjectRevised = true;
                             catalogRequestBuilder.sendRequestToCatalog("buckets/" + bucketName + "/resources/" +
                                                                        catalogObjectName + "/revisions",
@@ -263,7 +265,7 @@ public class ExportToCatalogConfirmWindow extends Window {
             this.exportToCatalogForm.addSubmitCompleteHandler(this::displayErrorToUserIfExportFailed);
             window.show();
             this.rmController.getRMService().getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                                                        this.nodeSourceName,
+                                                                        this.catalogObjectNameConverter.getNodeSourceName(),
                                                                         submitExportParametersCallback(window));
         } else {
             this.windowLabel.setContents("<span style='color:red'>Please select a bucket</span>");
@@ -284,10 +286,9 @@ public class ExportToCatalogConfirmWindow extends Window {
                 try {
                     hiddenFormItemsPanel.sessionIdFormField.setValue(LoginModel.getInstance().getSessionId());
                     hiddenFormItemsPanel.bucketNameFormField.setValue(bucketList.getSelectedValue());
-                    hiddenFormItemsPanel.catalogObjectNameFormField.setValue(parser.parseNodeSourceConfiguration(nodeSourceConfigurationJson)
-                                                                                   .getNodeSourceName());
+                    hiddenFormItemsPanel.catalogObjectNameFormField.setValue(catalogObjectName);
                     hiddenFormItemsPanel.catalogObjectJsonFormField.setValue(getJsonFormFieldContent(nodeSourceConfigurationJson));
-                    hiddenFormItemsPanel.catalogObjectKindFormField.setValue(kind.getIdentifier());
+                    hiddenFormItemsPanel.catalogObjectKindFormField.setValue(kind.getKindString());
                     hiddenFormItemsPanel.catalogObjectCommitMessageFormField.setValue(commitMessage.getText());
                     hiddenFormItemsPanel.catalogObjectContentTypeFormField.setValue(NODE_SOURCE_CONTENT_TYPE);
                     hiddenFormItemsPanel.revised.setValue(Boolean.toString(catalogObjectRevised));
@@ -303,7 +304,7 @@ public class ExportToCatalogConfirmWindow extends Window {
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logCriticalMessage("Failed to fetch configuration of node source " +
-                                                          nodeSourceName + ":<br>" + msg);
+                                                          catalogObjectName + ":<br>" + msg);
                 hideAndDestroy(window);
             }
         };

@@ -63,7 +63,7 @@ public class CatalogObjectAction implements AutoCloseable {
         this.bucketName = bucketName;
     }
 
-    public String getCatalogObjectNameBase() {
+    public String getCatalogObjectName() {
         return catalogObjectName;
     }
 
