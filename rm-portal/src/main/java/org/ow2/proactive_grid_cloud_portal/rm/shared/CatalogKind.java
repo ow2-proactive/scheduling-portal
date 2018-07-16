@@ -33,14 +33,14 @@ public enum CatalogKind {
 
     POLICY("PolicyNodeSource");
 
-    private final String identifier;
+    private final String kindIdentifier;
 
-    CatalogKind(String identifier) {
-        this.identifier = identifier;
+    CatalogKind(String kindIdentifier) {
+        this.kindIdentifier = kindIdentifier;
     }
 
     public String getIdentifier() {
-        return this.identifier;
+        return this.kindIdentifier;
     }
 
 }

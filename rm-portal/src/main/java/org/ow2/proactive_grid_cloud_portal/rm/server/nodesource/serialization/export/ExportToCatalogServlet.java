@@ -30,29 +30,27 @@ import static org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.BasicResponseHandler;
+import org.ow2.proactive.catalog.client.ApiClient;
+import org.ow2.proactive.catalog.client.api.CatalogObjectControllerApi;
+import org.ow2.proactive.catalog.client.api.CatalogObjectRevisionControllerApi;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogObjectAction;
-import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogRequestBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Servlet invoked when a node source is exported to the catalog. The request
- * content is expected to be in JSON format, containing the configuration of a
- * node source.
+ * Servlet invoked when a node source, an infrastructure, or a policy is
+ * exported to the catalog. The request content is expected to be in JSON
+ * format, containing the configuration of a node source.
  */
 public class ExportToCatalogServlet extends HttpServlet {
 
@@ -71,21 +69,34 @@ public class ExportToCatalogServlet extends HttpServlet {
     private void upload(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("text/html");
         try (CatalogObjectAction catalogObjectAction = buildCatalogObjetAction(request)) {
-            CatalogRequestBuilder catalogRequestBuilder = new CatalogRequestBuilder(catalogObjectAction);
-            String requestUri = catalogRequestBuilder.build();
-            LOGGER.info("Post node source to catalog with URI: " + requestUri);
-            postRequestAndHandleResponse(response, catalogObjectAction, catalogRequestBuilder, requestUri);
+            ApiClient apiClient = new ApiClient();
+            apiClient.setBasePath(CatalogConstants.URL_CATALOG);
+            String catalogObjectName = catalogObjectAction.getCatalogObjectNameBase() +
+                                       (catalogObjectAction.getKind()
+                                                           .equals(CatalogKind.NODE_SOURCE.getIdentifier()) ? ""
+                                                                                                            : catalogObjectAction.getKind());
+            if (catalogObjectAction.isRevised()) {
+                CatalogObjectRevisionControllerApi catalogObjectController = new CatalogObjectRevisionControllerApi(apiClient);
+                catalogObjectController.createUsingPOST2(catalogObjectAction.getBucketName(),
+                                                         catalogObjectName,
+                                                         catalogObjectAction.getCommitMessage(),
+                                                         catalogObjectAction.getCatalogObjectJsonFile(),
+                                                         catalogObjectAction.getSessionId());
+                LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectNameBase() +
+                            " in bucket " + catalogObjectAction.getBucketName());
+            } else {
+                CatalogObjectControllerApi catalogObjectController = new CatalogObjectControllerApi(apiClient);
+                catalogObjectController.createUsingPOST1(catalogObjectAction.getBucketName(),
+                                                         catalogObjectAction.getKind(),
+                                                         catalogObjectAction.getCommitMessage(),
+                                                         catalogObjectAction.getObjectContentType(),
+                                                         catalogObjectAction.getCatalogObjectJsonFile(),
+                                                         catalogObjectAction.getSessionId(),
+                                                         catalogObjectName);
+                LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectNameBase() +
+                            " in bucket " + catalogObjectAction.getBucketName());
+            }
         } catch (Exception e) {
-            logErrorAndWriteResponseToClient(e, response);
-        }
-    }
-
-    private void postRequestAndHandleResponse(HttpServletResponse response, CatalogObjectAction catalogObjectAction,
-            CatalogRequestBuilder catalogRequestBuilder, String requestUri)
-            throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        try (CloseableHttpResponse httpResponse = catalogRequestBuilder.postNodeSourceRequestToCatalog(requestUri)) {
-            new BasicResponseHandler().handleResponse(httpResponse);
-        } catch (HttpResponseException e) {
             logErrorAndWriteResponseToClient(e, response);
         }
     }
@@ -103,15 +114,15 @@ public class ExportToCatalogServlet extends HttpServlet {
                         catalogObjectAction.setBucketName(fieldValue);
                         break;
                     case NAME_PARAM:
-                        catalogObjectAction.setNodeSourceName(fieldValue);
+                        catalogObjectAction.setCatalogObjectName(fieldValue);
                         break;
                     case FILE_CONTENT_PARAM:
-                        File nodeSourceJsonFile = File.createTempFile("node-source-configuration", ".json");
-                        try (PrintWriter writer = new PrintWriter(nodeSourceJsonFile)) {
+                        File catalogObjectJsonFile = File.createTempFile("catalog-object-configuration", ".json");
+                        try (PrintWriter writer = new PrintWriter(catalogObjectJsonFile)) {
                             writer.write(fieldValue);
                         }
-                        formItem.write(nodeSourceJsonFile);
-                        catalogObjectAction.setNodeSourceJsonFile(nodeSourceJsonFile);
+                        formItem.write(catalogObjectJsonFile);
+                        catalogObjectAction.setCatalogObjectJsonFile(catalogObjectJsonFile);
                         break;
                     case KIND_PARAM:
                         catalogObjectAction.setKind(fieldValue);
@@ -139,7 +150,7 @@ public class ExportToCatalogServlet extends HttpServlet {
             LOGGER.warn(EXPORT_FAILED_MESSAGE, e);
             response.getWriter().write(EXPORT_FAILED_MESSAGE + ": " + errorMessage);
         } catch (IOException ioe) {
-            LOGGER.warn("Failed to return node source export error to client", ioe);
+            LOGGER.warn("Failed to return catalog object export error to client", ioe);
         }
     }
 
