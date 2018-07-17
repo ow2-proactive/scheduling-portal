@@ -32,7 +32,6 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
@@ -99,7 +98,6 @@ public class InlineItemModificationCreator {
     }
 
     private void enableRightItem() {
-        SC.say(String.valueOf(this.editOrUploadFormItem.getValueAsString()));
         if (this.editOrUploadFormItem.getValueAsString().equals(EDIT_RADIO_OPTION_NAME)) {
             this.inlineEditingFormItem.enable();
             this.chooseCredentialsFormItem.disable();

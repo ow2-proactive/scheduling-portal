@@ -39,7 +39,7 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
+		<servlet-name>ExportToCatalogServlet</servlet-name>
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToCatalogServlet</servlet-class>
 	</servlet>
 
@@ -81,13 +81,13 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
-		<url-pattern>/portal/exportnodesourcetocatalog</url-pattern>
+		<servlet-name>ExportToCatalogServlet</servlet-name>
+		<url-pattern>/portal/catalog</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>ImportFromFileServlet</servlet-name>
-		<url-pattern>/portal/importnodesourcefromfile</url-pattern>
+		<url-pattern>/portal/import</url-pattern>
 	</servlet-mapping>
 
 	<mime-mapping>

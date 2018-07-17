@@ -42,7 +42,6 @@ import org.ow2.proactive.catalog.client.api.CatalogObjectRevisionControllerApi;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogObjectAction;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +62,7 @@ public class ExportToCatalogServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        upload(request, response);
+        LOGGER.error("Unsupported request: " + request.getRequestURI());
     }
 
     private void upload(HttpServletRequest request, HttpServletResponse response) {

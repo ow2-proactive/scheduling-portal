@@ -525,7 +525,7 @@ public abstract class NodeSourceWindow {
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             fillPluginFormItems(nodeSourceConfiguration);
             modifyFormItemsAfterCreation();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         }
     }

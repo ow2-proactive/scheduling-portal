@@ -849,7 +849,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               try {
                                                   model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
                                                   success.run();
-                                              } catch (RuntimeException e) {
+                                              } catch (Exception e) {
                                                   runFailure(e);
                                               }
                                           }

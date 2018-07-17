@@ -29,9 +29,9 @@ public enum SerializationType {
 
     EXPORT_TO_FILE("file"),
 
-    EXPORT_NODE_SOURCE_TO_CATALOG("exportnodesourcetocatalog"),
+    EXPORT_TO_CATALOG("catalog"),
 
-    IMPORT_FROM_FILE("importnodesourcefromfile");
+    IMPORT_FROM_FILE("import");
 
     private String formTarget;
 
