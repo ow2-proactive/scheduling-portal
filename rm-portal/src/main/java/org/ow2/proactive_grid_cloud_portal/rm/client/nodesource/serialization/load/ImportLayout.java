@@ -29,6 +29,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.http.client.Request;
@@ -53,12 +54,14 @@ public abstract class ImportLayout extends VLayout {
 
     private ListBox importMethodList;
 
-    ImportLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
+    private boolean disabled;
+
+    ImportLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle, NodeSourceAction nodeSourceAction) {
         this.nodeSourceWindow = nodeSourceWindow;
+        this.disabled = !nodeSourceAction.isFullEditAllowed();
         createImportPanel(layoutTitle);
         createImportMethodList();
-        addSelectImportMethodPanel();
-        addSelectedImportMethodPanel();
+        addImportMethodsIfEnabled();
     }
 
     public abstract CatalogKind getKind();
@@ -81,9 +84,18 @@ public abstract class ImportLayout extends VLayout {
         this.importMethodList = new ListBox();
         this.importMethodList.setWidth("190px");
         this.importMethodList.addItem(GENERIC_OPTION_NAME);
-        this.importMethodList.addItem(ImportFromFilePanel.FILE_OPTION_NAME);
-        this.importMethodList.addItem(ImportFromCatalogPanel.CATALOG_OPTION_NAME);
-        this.importMethodList.addChangeHandler(this::replaceSelectedImportMethodPanelContent);
+    }
+
+    private void addImportMethodsIfEnabled() {
+        if (disabled) {
+            this.importMethodList.setEnabled(false);
+        } else {
+            this.importMethodList.addItem(ImportFromFilePanel.FILE_OPTION_NAME);
+            this.importMethodList.addItem(ImportFromCatalogPanel.CATALOG_OPTION_NAME);
+            this.importMethodList.addChangeHandler(this::replaceSelectedImportMethodPanelContent);
+        }
+        addSelectImportMethodPanel();
+        addSelectedImportMethodPanel();
     }
 
     private void replaceSelectedImportMethodPanelContent(ChangeEvent changeEvent) {

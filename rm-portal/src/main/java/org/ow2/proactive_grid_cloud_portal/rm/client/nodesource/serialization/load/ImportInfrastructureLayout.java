@@ -30,12 +30,14 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 
 public class ImportInfrastructureLayout extends ImportLayout {
 
-    public ImportInfrastructureLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle) {
-        super(nodeSourceWindow, layoutTitle);
+    public ImportInfrastructureLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle,
+            NodeSourceAction nodeSourceAction) {
+        super(nodeSourceWindow, layoutTitle, nodeSourceAction);
     }
 
     @Override

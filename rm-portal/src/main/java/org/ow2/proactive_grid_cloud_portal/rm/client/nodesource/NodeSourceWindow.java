@@ -200,7 +200,9 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.setPadding(10);
         createNodeSourceLayout.setWidth("75%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
-        Layout importNodeSourceLayout = new ImportNodeSourceLayout(this, "or Import Node Source");
+        Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
+                                                                   "or Import Node Source",
+                                                                   getNodeSourceAction());
         DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setWidth100();
         nodeSourceWindowForm.setHeight("50px");
@@ -266,9 +268,9 @@ public abstract class NodeSourceWindow {
         scrollLayout.setBackgroundColor("#fafafa");
         VLayout importLayout = new VLayout();
         importLayout.setMembers(new LayoutSpacer("100%", "15%"),
-                                new ImportInfrastructureLayout(this, "Import Infrastructure"),
+                                new ImportInfrastructureLayout(this, "Import Infrastructure", getNodeSourceAction()),
                                 new LayoutSpacer("100%", "20%"),
-                                new ImportPolicyLayout(this, "Import Policy"),
+                                new ImportPolicyLayout(this, "Import Policy", getNodeSourceAction()),
                                 new LayoutSpacer("100%", "45%"));
 
         nodeSourceWindowLayout.addMember(this.nodeSourceWindowLabel);

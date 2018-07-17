@@ -30,22 +30,29 @@ import java.util.Arrays;
 
 public enum NodeSourceAction {
 
-    CREATE("create"),
+    CREATE("create", true),
 
-    EDIT("edit"),
+    EDIT("edit", true),
 
-    UPDATE("update"),
+    UPDATE("update", false),
 
-    UNKNOWN("unknown");
+    UNKNOWN("unknown", false);
 
     private final String actionDescription;
 
-    NodeSourceAction(String actionDescription) {
+    private final boolean fullEditAllowed;
+
+    NodeSourceAction(String actionDescription, boolean fullEditAllowed) {
         this.actionDescription = actionDescription;
+        this.fullEditAllowed = fullEditAllowed;
     }
 
     public String getActionDescription() {
         return actionDescription;
+    }
+
+    public boolean isFullEditAllowed() {
+        return this.fullEditAllowed;
     }
 
     public static NodeSourceAction getEnum(String actionDescription) {
