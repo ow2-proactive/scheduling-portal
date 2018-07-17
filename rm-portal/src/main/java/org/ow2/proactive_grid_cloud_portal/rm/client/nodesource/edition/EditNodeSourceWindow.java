@@ -44,7 +44,7 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class EditNodeSourceWindow extends NodeSourceWindow {
 
-    private static final String WAITING_MESSAGE = "Retrieving current node source configuration";
+    private static final String WAITING_MESSAGE = "Retrieving current Node Source configuration";
 
     public static final String WINDOW_TITLE = "Edit Node Source";
 

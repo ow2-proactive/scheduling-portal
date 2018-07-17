@@ -102,52 +102,22 @@ public class ContextMenu extends Menu {
         menu.setShowShadow(true);
         menu.setShadowDepth(10);
 
-        MenuItem removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
-        removeItem.addClickHandler(onClick -> controller.removeNodes());
+        LockMenu lockMenu = new LockMenu(controller, menu).build();
+        MenuItem lockItem = lockMenu.getLockItem();
+        MenuItem unlockItem = lockMenu.getUnlockItem();
+        MenuItem removeItem = lockMenu.getRemoveItem();
 
-        MenuItem lockItem = new MenuItem("Lock", menu.lockItemImageResource);
-        lockItem.addClickHandler(onClick -> controller.lockNodes());
-
-        MenuItem unlockItem = new MenuItem("Unlock", menu.unlockItemImageResource);
-        unlockItem.addClickHandler(onClick -> controller.unlockNodes());
-
-        MenuItem deployItem = new MenuItem("Deploy", menu.deployItemImageResource);
-        deployItem.addClickHandler(onClick -> controller.deployNodeSource());
-
-        MenuItem undeployItem = new MenuItem("Undeploy", menu.undeployItemImageResource);
-        undeployItem.addClickHandler(onClick -> controller.undeployNodeSource());
-
-        MenuItem editItem = new MenuItem("Edit", menu.editItemImageResource);
         String nodeSourceName = menu.nodesource == null ? "" : menu.nodesource.getSourceName();
-        NodeSourceStatus nodeSourceStatus = menu.nodesource == null ? null : menu.nodesource.getNodeSourceStatus();
-        editItem.addClickHandler(onClick -> controller.editNodeSource(nodeSourceName, nodeSourceStatus));
 
-        MenuItem exportNodeSourceItem = new MenuItem("Export Node Source", menu.exportItemImageResource);
-        Menu exportNodeSourceSubItems = new Menu();
-        MenuItem exportNodeSourceToFileItem = new MenuItem("To File", menu.exportItemImageResource);
-        MenuItem exportNodeSourceToCatalogItem = new MenuItem("To Catalog", menu.exportItemImageResource);
-        exportNodeSourceToFileItem.addClickHandler(onClick -> controller.exportNodeSourceToFile(nodeSourceName));
-        exportNodeSourceToCatalogItem.addClickHandler(onClick -> controller.exportNodeSourceToCatalog(nodeSourceName));
-        exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem, exportNodeSourceToCatalogItem);
-        exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
+        NodeSourceMenu nodeSourceMenu = new NodeSourceMenu(controller, menu, nodeSourceName).build();
+        MenuItem editItem = nodeSourceMenu.getEditItem();
+        MenuItem undeployItem = nodeSourceMenu.getUndeployItem();
+        MenuItem deployItem = nodeSourceMenu.getDeployItem();
 
-        MenuItem exportInfrastructureItem = new MenuItem("Export Infrastructure", menu.exportItemImageResource);
-        Menu exportInfrastructureSubItems = new Menu();
-        MenuItem exportInfrastructureToFileItem = new MenuItem("To File", menu.exportItemImageResource);
-        MenuItem exportInfrastructureToCatalogItem = new MenuItem("To Catalog", menu.exportItemImageResource);
-        exportInfrastructureToFileItem.addClickHandler(onClick -> controller.exportInfrastructureToFile(nodeSourceName));
-        exportInfrastructureToCatalogItem.addClickHandler(onClick -> controller.exportInfrastructureToCatalog(nodeSourceName));
-        exportInfrastructureSubItems.setItems(exportInfrastructureToFileItem, exportInfrastructureToCatalogItem);
-        exportInfrastructureItem.setSubmenu(exportInfrastructureSubItems);
-
-        MenuItem exportPolicyItem = new MenuItem("Export Policy", menu.exportItemImageResource);
-        Menu exportPolicySubItems = new Menu();
-        MenuItem exportPolicyToFileItem = new MenuItem("To File", menu.exportItemImageResource);
-        MenuItem exportPolicyToCatalogItem = new MenuItem("To Catalog", menu.exportItemImageResource);
-        exportPolicyToFileItem.addClickHandler(onClick -> controller.exportPolicyToFile(nodeSourceName));
-        exportPolicyToCatalogItem.addClickHandler(onClick -> controller.exportPolicyToCatalog(nodeSourceName));
-        exportPolicySubItems.setItems(exportPolicyToFileItem, exportPolicyToCatalogItem);
-        exportPolicyItem.setSubmenu(exportPolicySubItems);
+        ExportMenu exportMenu = new ExportMenu(controller, menu, nodeSourceName).build();
+        MenuItem exportNodeSourceItem = exportMenu.getExportNodeSourceItem();
+        MenuItem exportInfrastructureItem = exportMenu.getExportInfrastructureItem();
+        MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
 
         if (menu.node != null) {
             if (menu.node.isLocked()) {
@@ -224,4 +194,159 @@ public class ContextMenu extends Menu {
             item.setEnabled(true);
         }
     }
+
+    private static class LockMenu {
+        private RMController controller;
+
+        private ContextMenu menu;
+
+        private MenuItem removeItem;
+
+        private MenuItem lockItem;
+
+        private MenuItem unlockItem;
+
+        private LockMenu(RMController controller, ContextMenu menu) {
+            this.controller = controller;
+            this.menu = menu;
+        }
+
+        private MenuItem getRemoveItem() {
+            return this.removeItem;
+        }
+
+        private MenuItem getLockItem() {
+            return this.lockItem;
+        }
+
+        private MenuItem getUnlockItem() {
+            return this.unlockItem;
+        }
+
+        private LockMenu build() {
+            this.removeItem = new MenuItem("Remove", RMImages.instance.node_remove_16().getSafeUri().asString());
+            this.removeItem.addClickHandler(onClick -> this.controller.removeNodes());
+
+            this.lockItem = new MenuItem("Lock", this.menu.lockItemImageResource);
+            this.lockItem.addClickHandler(onClick -> this.controller.lockNodes());
+
+            this.unlockItem = new MenuItem("Unlock", this.menu.unlockItemImageResource);
+            this.unlockItem.addClickHandler(onClick -> this.controller.unlockNodes());
+            return this;
+        }
+
+    }
+
+    private static class NodeSourceMenu {
+        private RMController controller;
+
+        private ContextMenu menu;
+
+        private String nodeSourceName;
+
+        private MenuItem deployItem;
+
+        private MenuItem undeployItem;
+
+        private MenuItem editItem;
+
+        private NodeSourceMenu(RMController controller, ContextMenu menu, String nodeSourceName) {
+            this.controller = controller;
+            this.menu = menu;
+            this.nodeSourceName = nodeSourceName;
+        }
+
+        private MenuItem getDeployItem() {
+            return this.deployItem;
+        }
+
+        private MenuItem getUndeployItem() {
+            return this.undeployItem;
+        }
+
+        private MenuItem getEditItem() {
+            return this.editItem;
+        }
+
+        private NodeSourceMenu build() {
+            this.deployItem = new MenuItem("Deploy", this.menu.deployItemImageResource);
+            this.deployItem.addClickHandler(onClick -> this.controller.deployNodeSource());
+
+            this.undeployItem = new MenuItem("Undeploy", this.menu.undeployItemImageResource);
+            this.undeployItem.addClickHandler(onClick -> this.controller.undeployNodeSource());
+
+            this.editItem = new MenuItem("Edit", this.menu.editItemImageResource);
+            NodeSourceStatus nodeSourceStatus = this.menu.nodesource == null ? null
+                                                                             : this.menu.nodesource.getNodeSourceStatus();
+            this.editItem.addClickHandler(onClick -> this.controller.editNodeSource(this.nodeSourceName,
+                                                                                    nodeSourceStatus));
+            return this;
+        }
+
+    }
+
+    private static class ExportMenu {
+
+        private RMController controller;
+
+        private ContextMenu menu;
+
+        private String nodeSourceName;
+
+        private MenuItem exportNodeSourceItem;
+
+        private MenuItem exportInfrastructureItem;
+
+        private MenuItem exportPolicyItem;
+
+        private ExportMenu(RMController controller, ContextMenu menu, String nodeSourceName) {
+            this.controller = controller;
+            this.menu = menu;
+            this.nodeSourceName = nodeSourceName;
+        }
+
+        private MenuItem getExportNodeSourceItem() {
+            return this.exportNodeSourceItem;
+        }
+
+        private MenuItem getExportInfrastructureItem() {
+            return this.exportInfrastructureItem;
+        }
+
+        private MenuItem getExportPolicyItem() {
+            return this.exportPolicyItem;
+        }
+
+        private ExportMenu build() {
+            this.exportNodeSourceItem = new MenuItem("Export Node Source", this.menu.exportItemImageResource);
+            Menu exportNodeSourceSubItems = new Menu();
+            MenuItem exportNodeSourceToFileItem = new MenuItem("To File", this.menu.exportItemImageResource);
+            MenuItem exportNodeSourceToCatalogItem = new MenuItem("To Catalog", this.menu.exportItemImageResource);
+            exportNodeSourceToFileItem.addClickHandler(onClick -> this.controller.exportNodeSourceToFile(this.nodeSourceName));
+            exportNodeSourceToCatalogItem.addClickHandler(onClick -> this.controller.exportNodeSourceToCatalog(this.nodeSourceName));
+            exportNodeSourceSubItems.setItems(exportNodeSourceToFileItem, exportNodeSourceToCatalogItem);
+            this.exportNodeSourceItem.setSubmenu(exportNodeSourceSubItems);
+
+            this.exportInfrastructureItem = new MenuItem("Export Infrastructure", this.menu.exportItemImageResource);
+            Menu exportInfrastructureSubItems = new Menu();
+            MenuItem exportInfrastructureToFileItem = new MenuItem("To File", this.menu.exportItemImageResource);
+            MenuItem exportInfrastructureToCatalogItem = new MenuItem("To Catalog", this.menu.exportItemImageResource);
+            exportInfrastructureToFileItem.addClickHandler(onClick -> this.controller.exportInfrastructureToFile(this.nodeSourceName));
+            exportInfrastructureToCatalogItem.addClickHandler(onClick -> this.controller.exportInfrastructureToCatalog(this.nodeSourceName));
+            exportInfrastructureSubItems.setItems(exportInfrastructureToFileItem, exportInfrastructureToCatalogItem);
+            this.exportInfrastructureItem.setSubmenu(exportInfrastructureSubItems);
+
+            this.exportPolicyItem = new MenuItem("Export Policy", this.menu.exportItemImageResource);
+            Menu exportPolicySubItems = new Menu();
+            MenuItem exportPolicyToFileItem = new MenuItem("To File", this.menu.exportItemImageResource);
+            MenuItem exportPolicyToCatalogItem = new MenuItem("To Catalog", this.menu.exportItemImageResource);
+            exportPolicyToFileItem.addClickHandler(onClick -> this.controller.exportPolicyToFile(this.nodeSourceName));
+            exportPolicyToCatalogItem.addClickHandler(onClick -> this.controller.exportPolicyToCatalog(this.nodeSourceName));
+            exportPolicySubItems.setItems(exportPolicyToFileItem, exportPolicyToCatalogItem);
+            this.exportPolicyItem.setSubmenu(exportPolicySubItems);
+            return this;
+        }
+
+    }
+
 }
