@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,9 +49,9 @@ import org.slf4j.LoggerFactory;
  * content is expected to be in JSON format, containing the configuration of a
  * node source.
  */
-public class ImportNodeSourceFromFileServlet extends HttpServlet {
+public class ImportFromFileServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportNodeSourceFromFileServlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImportFromFileServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {

@@ -27,60 +27,73 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import java.util.HashMap;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 
 public class NodeSourceConfigurationParser {
 
-    private RMController controller;
-
-    public NodeSourceConfigurationParser(RMController controller) {
-        this.controller = controller;
+    public JSONValue parseJSON(String jsonStr) {
+        try {
+            return JSONParser.parseStrict(jsonStr);
+        } catch (Throwable t) {
+            LogModel logger = LogModel.getInstance();
+            logger.logCriticalMessage("JSON Parser failed with " + t.getClass().getName() + ": " + t.getMessage());
+            logger.logCriticalMessage("Raw input was: " + jsonStr);
+            return new JSONObject();
+        }
     }
 
-    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) throws ImportException {
+    public NodeSourceConfiguration parseNodeSourceConfiguration(String json) {
 
         JSONObject jsonObject;
 
         try {
-            jsonObject = this.controller.parseJSON(json).isObject();
+            jsonObject = parseJSON(json).isObject();
         } catch (JSONException e) {
-            throw new ImportException("The imported node source is not a valid JSON file", e);
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
         }
 
         try {
             String nodeSourceName = jsonObject.get("nodeSourceName").isString().stringValue();
             boolean nodesRecoverable = jsonObject.get("nodesRecoverable").isBoolean().booleanValue();
 
-            JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
-            String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName")
-                                                                                .isString()
-                                                                                .stringValue();
-            PluginDescriptor infrastructurePluginDescriptor = getPluginDescriptor(infrastructurePluginDescriptorJson,
-                                                                                  infrastructurePluginName);
-
-            JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
-            String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
-            PluginDescriptor policyPluginDescriptor = getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
+            PluginDescriptor infrastructurePluginDescriptor = getInfrastructurePluginDescriptor(jsonObject);
+            PluginDescriptor policyPluginDescriptor = getPolicyPluginDescriptor(jsonObject);
 
             return new NodeSourceConfiguration(nodeSourceName,
                                                nodesRecoverable,
                                                infrastructurePluginDescriptor,
                                                policyPluginDescriptor);
         } catch (RuntimeException e) {
-            throw new ImportException("The imported node source has incorrect parameters.", e);
+            throw new IllegalArgumentException("The imported node source has incorrect parameters.", e);
         }
+    }
+
+    private PluginDescriptor getInfrastructurePluginDescriptor(JSONObject jsonObject) {
+        JSONObject infrastructurePluginDescriptorJson = jsonObject.get("infrastructurePluginDescriptor").isObject();
+        String infrastructurePluginName = infrastructurePluginDescriptorJson.get("pluginName").isString().stringValue();
+        return getPluginDescriptor(infrastructurePluginDescriptorJson, infrastructurePluginName);
+    }
+
+    private PluginDescriptor getPolicyPluginDescriptor(JSONObject jsonObject) {
+        JSONObject policyPluginDescriptorJson = jsonObject.get("policyPluginDescriptor").isObject();
+        String policyPluginName = policyPluginDescriptorJson.get("pluginName").isString().stringValue();
+        return getPluginDescriptor(policyPluginDescriptorJson, policyPluginName);
     }
 
     public HashMap<String, PluginDescriptor> parsePluginDescriptors(String json) {
 
-        JSONArray arr = this.controller.parseJSON(json).isArray();
+        JSONArray arr = parseJSON(json).isArray();
         HashMap<String, PluginDescriptor> plugins = new HashMap<>();
 
         for (int i = 0; i < arr.size(); i++) {
@@ -135,6 +148,61 @@ public class NodeSourceConfigurationParser {
             desc.getConfigurableFields().add(f);
         }
         return desc;
+    }
+
+    public String wrapInfrastructureJsonString(String infrastructureJsonString) {
+
+        JSONObject nodeSourceJsonObject = new JSONObject();
+
+        // general parameters
+        nodeSourceJsonObject.put("nodeSourceName", new JSONString(""));
+        nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
+
+        // infrastructure
+        JSONObject infrastructureJsonObject;
+        try {
+            infrastructureJsonObject = parseJSON(infrastructureJsonString).isObject();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+        }
+        nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
+
+        // policy
+        JSONObject policyJsonObject = new JSONObject();
+        policyJsonObject.put("pluginName", new JSONString(""));
+        policyJsonObject.put("pluginDescription", new JSONString(""));
+        policyJsonObject.put("configurableFields", new JSONArray());
+        policyJsonObject.put("defaultValues", new JSONObject());
+        nodeSourceJsonObject.put("policyPluginDescriptor", policyJsonObject);
+
+        return nodeSourceJsonObject.toString();
+    }
+
+    public String wrapPolicyJsonString(String importedPolicyJsonString) {
+        JSONObject nodeSourceJsonObject = new JSONObject();
+
+        // general parameters
+        nodeSourceJsonObject.put("nodeSourceName", new JSONString(""));
+        nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
+
+        // infrastructure
+        JSONObject policyJsonObject = new JSONObject();
+        policyJsonObject.put("pluginName", new JSONString(""));
+        policyJsonObject.put("pluginDescription", new JSONString(""));
+        policyJsonObject.put("configurableFields", new JSONArray());
+        policyJsonObject.put("defaultValues", new JSONObject());
+        nodeSourceJsonObject.put("infrastructurePluginDescriptor", policyJsonObject);
+
+        // infrastructure
+        JSONObject infrastructureJsonObject;
+        try {
+            infrastructureJsonObject = parseJSON(importedPolicyJsonString).isObject();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+        }
+        nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
+
+        return nodeSourceJsonObject.toString();
     }
 
 }

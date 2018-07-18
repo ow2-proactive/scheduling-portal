@@ -23,23 +23,30 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
-public class ImportNodeSourceLayout extends VLayout {
+public abstract class ImportLayout extends VLayout {
 
     private static final String GENERIC_OPTION_NAME = "Choose Import Method";
 
-    private NodeSourceWindow nodeSourceWindow;
+    protected NodeSourceWindow nodeSourceWindow;
 
     private VerticalPanel importPanel;
 
@@ -47,33 +54,29 @@ public class ImportNodeSourceLayout extends VLayout {
 
     private ListBox importMethodList;
 
-    public ImportNodeSourceLayout(NodeSourceWindow nodeSourceWindow) {
+    private boolean disabled;
+
+    ImportLayout(NodeSourceWindow nodeSourceWindow, String layoutTitle, NodeSourceAction nodeSourceAction) {
         this.nodeSourceWindow = nodeSourceWindow;
-        createImportPanel();
+        this.disabled = !nodeSourceAction.isFullEditAllowed();
+        createImportPanel(layoutTitle);
         createImportMethodList();
-        addSelectImportMethodPanel();
-        addSelectedImportMethodPanel();
+        addImportMethodsIfEnabled();
     }
 
-    public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
-        this.nodeSourceWindow.setNodeSourceWindowLabelWithError(errorMessage, e);
-    }
+    public abstract CatalogKind getKind();
 
-    void handleNodeSourceImport(FormPanel.SubmitCompleteEvent importCompleteEvent) {
-        this.nodeSourceWindow.importNodeSourceFromJson(importCompleteEvent.getResults());
-    }
+    public abstract void handleImport(String submitResult);
 
-    void handleNodeSourceImport(String importedNodeSourceJsonString) {
-        this.nodeSourceWindow.importNodeSourceFromJson(importedNodeSourceJsonString);
-    }
-
-    private void createImportPanel() {
-        setGroupTitle("or Import Node Source");
-        setIsGroup(true);
+    private void createImportPanel(String layoutTitle) {
         this.importPanel = new VerticalPanel();
         this.importPanel.setSpacing(10);
         this.importPanel.setHeight("70px");
-        this.importPanel.setWidth("240px");
+        this.importPanel.setWidth("272px");
+        Label importLabel = new Label(layoutTitle);
+        importLabel.setHeight("15px");
+        importLabel.setWidth("200px");
+        this.importPanel.add(importLabel);
         addMember(this.importPanel);
     }
 
@@ -81,18 +84,46 @@ public class ImportNodeSourceLayout extends VLayout {
         this.importMethodList = new ListBox();
         this.importMethodList.setWidth("190px");
         this.importMethodList.addItem(GENERIC_OPTION_NAME);
-        this.importMethodList.addItem(ImportFromFilePanel.FILE_OPTION_NAME);
-        this.importMethodList.addItem(ImportFromCatalogPanel.CATALOG_OPTION_NAME);
-        this.importMethodList.addChangeHandler(this::replaceSelectedImportMethodPanelContent);
+    }
+
+    private void addImportMethodsIfEnabled() {
+        if (disabled) {
+            this.importMethodList.setEnabled(false);
+        } else {
+            this.importMethodList.addItem(ImportFromFilePanel.FILE_OPTION_NAME);
+            this.importMethodList.addItem(ImportFromCatalogPanel.CATALOG_OPTION_NAME);
+            this.importMethodList.addChangeHandler(this::replaceSelectedImportMethodPanelContent);
+        }
+        addSelectImportMethodPanel();
+        addSelectedImportMethodPanel();
     }
 
     private void replaceSelectedImportMethodPanelContent(ChangeEvent changeEvent) {
         this.selectedImportMethodPanel.clear();
         String selectedOption = this.importMethodList.getSelectedValue();
         if (selectedOption.equals(ImportFromFilePanel.FILE_OPTION_NAME)) {
-            this.selectedImportMethodPanel.add(new ImportFromFilePanel(this));
+            this.selectedImportMethodPanel.add(new ImportFromFilePanel(importCompleteEvent -> handleImport(importCompleteEvent.getResults())));
         } else if (selectedOption.equals(ImportFromCatalogPanel.CATALOG_OPTION_NAME)) {
-            this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(this));
+            addImportFromCatalogPanelOrFail();
+        }
+    }
+
+    private void addImportFromCatalogPanelOrFail() {
+        try {
+            this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(getKind(), new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    handleImport(response.getText());
+                }
+
+                @Override
+                public void onError(Request request, Throwable t) {
+                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import node source from catalog failed",
+                                                                                         t);
+                }
+            }));
+        } catch (Exception e) {
+            this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
         }
     }
 
