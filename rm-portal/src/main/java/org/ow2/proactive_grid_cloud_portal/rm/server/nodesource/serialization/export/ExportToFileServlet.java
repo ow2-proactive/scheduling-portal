@@ -23,18 +23,19 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export;
+
+import static org.ow2.proactive_grid_cloud_portal.rm.shared.ExportToFileConstants.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +46,9 @@ import org.slf4j.LoggerFactory;
  * content is expected to be in JSON format, containing the configuration of a
  * node source.
  */
-public class ExportNodeSourceToFileServlet extends HttpServlet {
+public class ExportToFileServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExportNodeSourceToFileServlet.class);
-
-    private static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-configuration.json";
-
-    public static final String MAIN_FORM_ITEM_NAME = "nodeSourceJson";
-
-    public static final String NODE_SOURCE_NAME_KEY = "nodeSourceName";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExportToFileServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -68,12 +63,29 @@ public class ExportNodeSourceToFileServlet extends HttpServlet {
     private void downloadJsonFile(HttpServletRequest request, HttpServletResponse response) {
         try {
             response.setContentType("application/json");
-            String jsonContent = extractJsonStringFromRequest(request);
-            String nodeSourceName = extractNodeSourceName(jsonContent);
+
+            Map<String, String> exportParameters = new HashMap<>();
+            for (FileItem requestItem : new ServletRequestTransformer().getFormItems(request)) {
+                if (requestItem.isFormField()) {
+                    String name = requestItem.getFieldName();
+                    String value = requestItem.getString();
+                    if (name.equalsIgnoreCase(FILE_CONTENT_PARAM)) {
+                        exportParameters.put(FILE_CONTENT_PARAM, value);
+                    } else if (name.equalsIgnoreCase(FILE_SUFFIX_PARAM)) {
+                        exportParameters.put(FILE_SUFFIX_PARAM, value);
+                    } else if (name.equalsIgnoreCase(NODE_SOURCE_NAME_PARAM)) {
+                        exportParameters.put(NODE_SOURCE_NAME_PARAM, value);
+                    }
+                }
+                requestItem.delete();
+            }
+
             response.setHeader("Content-disposition",
-                               "attachment; filename=" + nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
-            response.setHeader("Location", nodeSourceName + NODE_SOURCE_FILE_NAME_SUFFIX);
-            response.getWriter().write(jsonContent);
+                               "attachment; filename=" + exportParameters.get(NODE_SOURCE_NAME_PARAM) +
+                                                      exportParameters.get(FILE_SUFFIX_PARAM));
+            response.setHeader("Location",
+                               exportParameters.get(NODE_SOURCE_NAME_PARAM) + exportParameters.get(FILE_SUFFIX_PARAM));
+            response.getWriter().write(exportParameters.get(FILE_CONTENT_PARAM));
         } catch (Exception e) {
             try {
                 LOGGER.warn("Export node source failed", e);
@@ -82,26 +94,6 @@ public class ExportNodeSourceToFileServlet extends HttpServlet {
                 LOGGER.warn("Failed to return node source export error to client", ioe);
             }
         }
-    }
-
-    private String extractJsonStringFromRequest(HttpServletRequest request) throws FileUploadException {
-        String jsonContent = "";
-        for (FileItem requestItem : new ServletRequestTransformer().getFormItems(request)) {
-            if (requestItem.isFormField()) {
-                String name = requestItem.getFieldName();
-                String value = requestItem.getString();
-                if (name.equalsIgnoreCase(MAIN_FORM_ITEM_NAME)) {
-                    jsonContent = value;
-                }
-            }
-            requestItem.delete();
-        }
-        return jsonContent;
-    }
-
-    private String extractNodeSourceName(String jsonContent) throws JSONException {
-        JSONObject jsonObject = new JSONObject(jsonContent);
-        return jsonObject.getString(NODE_SOURCE_NAME_KEY);
     }
 
 }

@@ -23,18 +23,22 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.FormPanel;
+public class CatalogObjectNameConverter {
 
+    private final String nodeSourceName;
 
-public class NodeSourceSerializationFormPanel extends FormPanel {
+    public CatalogObjectNameConverter(String nodeSourceName) {
+        this.nodeSourceName = nodeSourceName;
+    }
 
-    public NodeSourceSerializationFormPanel(String servletName) {
-        setEncoding(FormPanel.ENCODING_MULTIPART);
-        setMethod(FormPanel.METHOD_POST);
-        setAction(GWT.getModuleBaseURL() + servletName);
+    public String convertFromKind(CatalogKind kind) {
+        return this.nodeSourceName + (kind.equals(CatalogKind.NODE_SOURCE) ? "" : kind.getSuffix());
+    }
+
+    public String getNodeSourceName() {
+        return this.nodeSourceName;
     }
 
 }

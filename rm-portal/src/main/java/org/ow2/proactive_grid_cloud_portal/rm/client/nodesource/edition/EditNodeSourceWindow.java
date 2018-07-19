@@ -25,17 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceAction;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.SpacerItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 
@@ -46,23 +44,24 @@ import com.smartgwt.client.widgets.layout.HLayout;
  */
 public class EditNodeSourceWindow extends NodeSourceWindow {
 
-    public static final String WINDOW_TITLE = "Edit Node Source";
+    private static final String WAITING_MESSAGE = "Retrieving current Node Source configuration";
 
-    private InlineItemModificationCreator inlineItemModificationCreator;
+    public static final String WINDOW_TITLE = "Edit Node Source";
 
     protected String nodeSourceName;
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
-        super(controller, WINDOW_TITLE, "Retrieving current node source configuration");
-        this.nodeSourceName = nodeSourceName;
-        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
-        buildForm();
+        super(controller, WINDOW_TITLE, WAITING_MESSAGE);
+        setAttributesAndBuildForm(nodeSourceName);
     }
 
     protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
-        super(controller, windowTitle, "Retrieving current node source configuration");
+        super(controller, windowTitle, WAITING_MESSAGE);
+        setAttributesAndBuildForm(nodeSourceName);
+    }
+
+    private void setAttributesAndBuildForm(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
-        this.inlineItemModificationCreator = new InlineItemModificationCreator(this);
         buildForm();
     }
 
@@ -72,84 +71,26 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void populateFormValues() {
-        this.controller.fetchSupportedInfrastructuresAndPolicies(() -> fetchNodeSourceConfigurationWithCallback(),
-                                                                 this.window::hide);
+    protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
+        return new InlineItemModificationCreator(this).getModificationChoiceItemsForNonTextualFields(plugin,
+                                                                                                     pluginField);
     }
 
     @Override
-    protected List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-        return inlineItemModificationCreator.getModificationChoiceItemsForNonTextualFields(plugin, pluginField);
+    protected void modifyFormItemsAfterCreation() {
+        this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
+            NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
+                                                                             .getEditedNodeSourceConfiguration();
+            this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodeSourceNameText.disable();
+            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
+            fillPluginFormItems(nodeSourceConfiguration);
+        }, this.window::hide);
     }
 
     @Override
     protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
         buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
-    }
-
-    @Override
-    public void manageNodeSourceWindowItems() {
-        // we never allow the node source name to be modified
-        this.nodeSourceNameText.disable();
-    }
-
-    protected void fetchNodeSourceConfigurationWithCallback() {
-
-        this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
-
-            NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
-                                                                             .getEditedNodeSourceConfiguration();
-
-            LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
-            this.allFormItems = prepareFormItems();
-            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
-            this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
-            manageNodeSourceWindowItems();
-
-            PluginDescriptor focusedInfrastructurePlugin = prepareInfrastructureFormItems(nodeSourceConfiguration,
-                                                                                          selectItemValues);
-
-            this.allFormItems.add(new SpacerItem());
-            selectItemValues.clear();
-
-            PluginDescriptor focusedPolicyPlugin = preparePolicyFormItems(nodeSourceConfiguration, selectItemValues);
-
-            this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
-            this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
-
-            this.allFormItems = modifyFormItemsAfterCreation(focusedInfrastructurePlugin, focusedPolicyPlugin);
-
-            this.nodeSourcePluginsForm.setFields(this.allFormItems.toArray(new FormItem[this.allFormItems.size()]));
-            this.nodeSourcePluginsWaitingLabel.hide();
-            this.nodeSourcePluginsForm.show();
-
-        }, this.window::hide);
-    }
-
-    private PluginDescriptor preparePolicyFormItems(NodeSourceConfiguration nodeSourceConfiguration,
-            LinkedHashMap<String, String> selectItemValues) {
-        PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-        this.focusedPolicyPluginName = focusedPolicyPlugin.getPluginName();
-        this.allFormItems.add(this.policySelectItem);
-        fillFocusedPluginValues(selectItemValues, focusedPolicyPlugin);
-        handleAdditionalPolicyFormItems(selectItemValues, focusedPolicyPlugin);
-        this.policySelectItem.setValueMap(selectItemValues);
-        this.policySelectItem.setDefaultToFirstOption(true);
-        this.previousSelectedPolicy = focusedPolicyPlugin.getPluginName();
-        return focusedPolicyPlugin;
-    }
-
-    private PluginDescriptor prepareInfrastructureFormItems(NodeSourceConfiguration nodeSourceConfiguration,
-            LinkedHashMap<String, String> selectItemValues) {
-        PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
-        this.focusedInfrastructurePluginName = focusedInfrastructurePlugin.getPluginName();
-        this.allFormItems.add(this.infrastructureSelectItem);
-        fillFocusedPluginValues(selectItemValues, focusedInfrastructurePlugin);
-        handleAdditionalInfrastructureFormItems(selectItemValues, focusedInfrastructurePlugin);
-        this.infrastructureSelectItem.setValueMap(selectItemValues);
-        this.infrastructureSelectItem.setDefaultToFirstOption(true);
-        this.previousSelectedInfrastructure = focusedInfrastructurePlugin.getPluginName();
-        return focusedInfrastructurePlugin;
     }
 
 }

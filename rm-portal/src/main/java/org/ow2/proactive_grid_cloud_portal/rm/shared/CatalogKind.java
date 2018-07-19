@@ -23,36 +23,31 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-import java.util.Arrays;
+public enum CatalogKind {
 
+    NODE_SOURCE("NodeSource", ""),
 
-public enum NodeSourceAction {
+    INFRASTRUCTURE("InfrastructureNodeSource", "_Infrastructure"),
 
-    CREATE("create"),
+    POLICY("PolicyNodeSource", "_Policy");
 
-    EDIT("edit"),
+    private final String kind;
 
-    UPDATE("update"),
+    private final String suffix;
 
-    UNKNOWN("unknown");
-
-    private final String actionDescription;
-
-    NodeSourceAction(String actionDescription) {
-        this.actionDescription = actionDescription;
+    CatalogKind(String kind, String suffix) {
+        this.kind = kind;
+        this.suffix = suffix;
     }
 
-    public String getActionDescription() {
-        return actionDescription;
+    public String getKindString() {
+        return this.kind;
     }
 
-    public static NodeSourceAction getEnum(String actionDescription) {
-        return Arrays.stream(NodeSourceAction.values())
-                     .filter(status -> status.actionDescription.equals(actionDescription))
-                     .findAny()
-                     .orElseThrow(IllegalArgumentException::new);
+    public String getSuffix() {
+        return this.suffix;
     }
 
 }
