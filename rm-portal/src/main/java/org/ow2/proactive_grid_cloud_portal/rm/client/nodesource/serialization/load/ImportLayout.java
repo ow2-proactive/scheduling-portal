@@ -118,7 +118,7 @@ public abstract class ImportLayout extends VLayout {
 
                 @Override
                 public void onError(Request request, Throwable t) {
-                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import node source from catalog failed",
+                    ImportLayout.this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import from catalog failed",
                                                                                          t);
                 }
             }));

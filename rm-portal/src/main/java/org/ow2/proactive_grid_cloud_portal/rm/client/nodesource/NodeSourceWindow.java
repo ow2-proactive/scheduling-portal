@@ -472,7 +472,7 @@ public abstract class NodeSourceWindow {
                 LogModel.getInstance().logImportantMessage("Successfully applied '" + actionDescription +
                                                            "' action to Node Source: " + nodeSourceName);
             } else {
-                handleNodeSourceCreationError(nodeSourceWindowLayout, this.nodeSourceNameText, jsonCallback);
+                handleNodeSourceCreationError(nodeSourceWindowLayout, jsonCallback);
             }
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
@@ -553,6 +553,7 @@ public abstract class NodeSourceWindow {
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+        validatePolicyNameOrFail(policyPluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
                                                                  .startsWith(policyPluginDescriptor.getPluginName()))
@@ -569,6 +570,16 @@ public abstract class NodeSourceWindow {
         resetFormForPolicySelectChange();
     }
 
+    private void validatePolicyNameOrFail(String policyPluginName) {
+        if (this.controller.getModel()
+                           .getSupportedPolicies()
+                           .values()
+                           .stream()
+                           .noneMatch(pluginDescriptor -> pluginDescriptor.getPluginName().equals(policyPluginName))) {
+            throw new IllegalArgumentException("Policy " + policyPluginName + " does not exist");
+        }
+    }
+
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
@@ -578,6 +589,7 @@ public abstract class NodeSourceWindow {
 
     private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+        validateInfrastructureNameOrFail(infrastructurePluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
                                                                  .startsWith(infrastructurePluginDescriptor.getPluginName()))
@@ -595,6 +607,17 @@ public abstract class NodeSourceWindow {
         resetFormForInfrastructureSelectChange();
     }
 
+    private void validateInfrastructureNameOrFail(String infrastructurePluginName) {
+        if (this.controller.getModel()
+                           .getSupportedInfrastructures()
+                           .values()
+                           .stream()
+                           .noneMatch(pluginDescriptor -> pluginDescriptor.getPluginName()
+                                                                          .equals(infrastructurePluginName))) {
+            throw new IllegalArgumentException("Infrastructure " + infrastructurePluginName + " does not exist");
+        }
+    }
+
     private int findFormItemIndexByName(String formItemName, List<FormItem> allNodeSourcePluginsFormItems) {
         for (int i = 0; i < allNodeSourcePluginsFormItems.size(); i++) {
             if (allNodeSourcePluginsFormItems.get(i).getName().equals(formItemName)) {
@@ -604,8 +627,7 @@ public abstract class NodeSourceWindow {
         throw new IllegalArgumentException("Form item with name " + formItemName + " does not exist");
     }
 
-    private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, TextItem nodeSourceNameItem,
-            JSONObject jsonCallback) {
+    private void handleNodeSourceCreationError(VLayout nodeSourceWindowLayout, JSONObject jsonCallback) {
         String msg;
         if (jsonCallback.get("errorMessage").isString() != null) {
             msg = jsonCallback.get("errorMessage").isString().stringValue();

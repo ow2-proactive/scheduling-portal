@@ -47,13 +47,17 @@ public class ImportInfrastructureLayout extends ImportLayout {
 
     @Override
     public void handleImport(String infrastructureJsonString) {
-        NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
-        String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapInfrastructureJsonString(infrastructureJsonString);
-        PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
-                                                                                       .getInfrastructurePluginDescriptor();
-        this.nodeSourceWindow.setCreatedFromImport();
-        this.nodeSourceWindow.replaceInfrastructureItems(infrastructurePluginDescriptor);
-        this.nodeSourceWindow.resetCreatedFromImport();
+        try {
+            NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
+            String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapInfrastructureJsonString(infrastructureJsonString);
+            PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
+                                                                                           .getInfrastructurePluginDescriptor();
+            this.nodeSourceWindow.setCreatedFromImport();
+            this.nodeSourceWindow.replaceInfrastructureItems(infrastructurePluginDescriptor);
+            this.nodeSourceWindow.resetCreatedFromImport();
+        } catch (Exception e) {
+            this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import Infrastructure failed", e);
+        }
     }
 
 }
