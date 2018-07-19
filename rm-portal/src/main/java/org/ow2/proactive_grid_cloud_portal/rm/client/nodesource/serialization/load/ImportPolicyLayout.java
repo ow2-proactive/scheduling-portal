@@ -47,13 +47,17 @@ public class ImportPolicyLayout extends ImportLayout {
 
     @Override
     public void handleImport(String submitResult) {
-        NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
-        String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapPolicyJsonString(submitResult);
-        PluginDescriptor policyPluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
-                                                                               .getPolicyPluginDescriptor();
-        this.nodeSourceWindow.setCreatedFromImport();
-        this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
-        this.nodeSourceWindow.resetCreatedFromImport();
+        try {
+            NodeSourceConfigurationParser nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
+            String importedNodeSourceJsonString = nodeSourceConfigurationParser.wrapPolicyJsonString(submitResult);
+            PluginDescriptor policyPluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
+                                                                                   .getPolicyPluginDescriptor();
+            this.nodeSourceWindow.setCreatedFromImport();
+            this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
+            this.nodeSourceWindow.resetCreatedFromImport();
+        } catch (Exception e) {
+            this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import Policy failed", e);
+        }
     }
 
 }
