@@ -296,6 +296,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         });
 
         loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
+        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
         loadHeaderLabel.setHeight(24);
 
         filler = new Canvas();
