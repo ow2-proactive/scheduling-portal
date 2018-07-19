@@ -213,50 +213,12 @@ public abstract class NodeSourceWindow {
         this.populateFormValues();
 
         HLayout buttonsLayout = new HLayout();
-
         buttonsLayout.setWidth100();
         buttonsLayout.setHeight(22);
         buttonsLayout.setMargin(5);
         buttonsLayout.setAlign(Alignment.RIGHT);
         buttonsLayout.setMembersMargin(5);
-
-        this.applyModificationsButton = new IButton("Apply Modifications");
-        this.applyModificationsButton.setWidth(this.applyModificationsButton.getWidth() * 2);
-        this.applyModificationsButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        this.applyModificationsButton.setShowDisabledIcon(false);
-
-        this.deployNowButton = new IButton("Deploy Now");
-        this.deployNowButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        this.deployNowButton.setShowDisabledIcon(false);
-
-        this.saveAndKeepUndeployedButton = new IButton("Save and Keep Undeployed");
-        this.saveAndKeepUndeployedButton.setWidth(this.deployNowButton.getWidth() * 2);
-        this.saveAndKeepUndeployedButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        this.saveAndKeepUndeployedButton.setShowDisabledIcon(false);
-
-        this.cancelButton = new IButton("Cancel");
-        this.cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        this.cancelButton.setShowDisabledIcon(false);
-
-        List<IButton> buttonList = new LinkedList<>();
-        buttonList.add(this.applyModificationsButton);
-        buttonList.add(this.deployNowButton);
-        buttonList.add(this.saveAndKeepUndeployedButton);
-        buttonList.add(this.cancelButton);
-
-        applyModificationsButton.addClickHandler(clickEvent -> applyModificationsToNodeSource(nodeSourceWindowLayout,
-                                                                                              buttonList,
-                                                                                              getNodeSourceAction()));
-
-        this.deployNowButton.addClickHandler(clickEvent -> saveAndDeployNodeSource(nodeSourceWindowLayout,
-                                                                                   buttonList,
-                                                                                   getNodeSourceAction()));
-
-        this.saveAndKeepUndeployedButton.addClickHandler(clickEvent -> saveNodeSource(nodeSourceWindowLayout,
-                                                                                      buttonList,
-                                                                                      getNodeSourceAction()));
-        this.cancelButton.addClickHandler(clickEvent -> window.hide());
-
+        createButtons(nodeSourceWindowLayout);
         addButtonsToButtonsLayout(buttonsLayout);
 
         VLayout scrollLayout = new VLayout();
@@ -300,6 +262,39 @@ public abstract class NodeSourceWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    private void createButtons(VLayout nodeSourceWindowLayout) {
+        this.applyModificationsButton = new IButton("Apply Modifications");
+        this.applyModificationsButton.setWidth(this.applyModificationsButton.getWidth() * 2);
+        this.applyModificationsButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.applyModificationsButton.setShowDisabledIcon(false);
+        this.deployNowButton = new IButton("Deploy Now");
+        this.deployNowButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.deployNowButton.setShowDisabledIcon(false);
+        this.saveAndKeepUndeployedButton = new IButton("Save and Keep Undeployed");
+        this.saveAndKeepUndeployedButton.setWidth(this.deployNowButton.getWidth() * 2);
+        this.saveAndKeepUndeployedButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        this.saveAndKeepUndeployedButton.setShowDisabledIcon(false);
+        this.cancelButton = new IButton("Cancel");
+        this.cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        this.cancelButton.setShowDisabledIcon(false);
+
+        List<IButton> buttonList = new LinkedList<>();
+        buttonList.add(this.applyModificationsButton);
+        buttonList.add(this.deployNowButton);
+        buttonList.add(this.saveAndKeepUndeployedButton);
+        buttonList.add(this.cancelButton);
+        this.applyModificationsButton.addClickHandler(clickEvent -> applyModificationsToNodeSource(nodeSourceWindowLayout,
+                                                                                                   buttonList,
+                                                                                                   getNodeSourceAction()));
+        this.deployNowButton.addClickHandler(clickEvent -> saveAndDeployNodeSource(nodeSourceWindowLayout,
+                                                                                   buttonList,
+                                                                                   getNodeSourceAction()));
+        this.saveAndKeepUndeployedButton.addClickHandler(clickEvent -> saveNodeSource(nodeSourceWindowLayout,
+                                                                                      buttonList,
+                                                                                      getNodeSourceAction()));
+        this.cancelButton.addClickHandler(clickEvent -> window.hide());
     }
 
     private void populateFormValues() {
@@ -461,12 +456,12 @@ public abstract class NodeSourceWindow {
     private void saveNodeSource(VLayout nodeSourceWindowLayout, List<IButton> buttonList,
             NodeSourceAction nodeSourceAction) {
         String nodeSourceName = this.nodeSourceNameText.getValueAsString();
+        Boolean nodesRecoverable = this.nodesRecoverableCheckbox.getValueAsBoolean();
         String actionDescription = nodeSourceAction.getActionDescription();
 
         this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_FORM_KEY, this.infrastructureSelectItem.getValueAsString());
         this.nodeSourcePluginsForm.setValue(NS_NAME_FORM_KEY, nodeSourceName);
-        this.nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY,
-                                            this.nodesRecoverableCheckbox.getValueAsBoolean().toString());
+        this.nodeSourcePluginsForm.setValue(NODES_RECOVERABLE_FORM_KEY, nodesRecoverable.toString());
         this.nodeSourcePluginsForm.setValue(POLICY_FORM_KEY, this.policySelectItem.getValueAsString());
         this.nodeSourcePluginsForm.setValue(SESSION_ID_FORM_KEY, LoginModel.getInstance().getSessionId());
         this.nodeSourcePluginsForm.setValue(NODE_SOURCE_ACTION_FORM_KEY, actionDescription);
@@ -481,6 +476,7 @@ public abstract class NodeSourceWindow {
             }
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
+            this.nodesRecoverableCheckbox.setValue(nodesRecoverable);
             for (IButton button : buttonList) {
                 button.setDisabled(false);
             }
