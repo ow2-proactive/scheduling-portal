@@ -114,6 +114,7 @@ public abstract class ImportLayout extends VLayout {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     handleImport(response.getText());
+                    ImportLayout.this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
                 }
 
                 @Override

@@ -45,7 +45,7 @@
 
 	<servlet>
 		<servlet-name>ImportFromFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.ImportFromFileServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.load.ImportFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->
