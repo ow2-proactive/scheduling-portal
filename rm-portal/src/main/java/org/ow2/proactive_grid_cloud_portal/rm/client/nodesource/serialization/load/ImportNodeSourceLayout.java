@@ -57,6 +57,7 @@ public class ImportNodeSourceLayout extends ImportLayout {
             this.nodeSourceWindow.setCreatedFromImport();
             this.nodeSourceWindow.importNodeSourceFromJson(submitResult);
             this.nodeSourceWindow.resetCreatedFromImport();
+            this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
         } catch (Exception e) {
             this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import Node Source failed", e);
         }

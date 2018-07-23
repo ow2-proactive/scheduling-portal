@@ -80,6 +80,9 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 public abstract class NodeSourceWindow {
 
+    private static final String WINDOW_HEADER = "A Node Source is a combination of an Infrastructure, which defines how resources" +
+                                                " will be acquired, and a Policy, that dictates when resources can be acquired.";
+
     protected static final String INFRASTRUCTURE_FORM_KEY = "infra";
 
     protected static final String POLICY_FORM_KEY = "policy";
@@ -189,8 +192,7 @@ public abstract class NodeSourceWindow {
 
         nodeSourcePluginsLayout.addMember(this.nodeSourcePluginsForm);
 
-        this.nodeSourceWindowLabel = new Label("A Node Source is a combination of an Infrastructure, which defines how resources" +
-                                               " will be acquired, and a Policy, that dictates when resources can be acquired.");
+        this.nodeSourceWindowLabel = new Label(WINDOW_HEADER);
         this.nodeSourceWindowLabel.setHeight(40);
 
         VLayout createNodeSourceLayout = new VLayout();
@@ -636,6 +638,10 @@ public abstract class NodeSourceWindow {
         }
         setNodeSourceWindowLabelWithError("Failed to apply action to Node Source", new IllegalStateException(msg));
         nodeSourceWindowLayout.scrollToTop();
+    }
+
+    public void setNormalNodeSourceWindowLabel() {
+        this.nodeSourceWindowLabel.setContents(WINDOW_HEADER);
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {

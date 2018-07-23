@@ -55,6 +55,7 @@ public class ImportPolicyLayout extends ImportLayout {
             this.nodeSourceWindow.setCreatedFromImport();
             this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
             this.nodeSourceWindow.resetCreatedFromImport();
+            this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
         } catch (Exception e) {
             this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import Policy failed", e);
         }

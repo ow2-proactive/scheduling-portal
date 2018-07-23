@@ -55,6 +55,7 @@ public class ImportInfrastructureLayout extends ImportLayout {
             this.nodeSourceWindow.setCreatedFromImport();
             this.nodeSourceWindow.replaceInfrastructureItems(infrastructurePluginDescriptor);
             this.nodeSourceWindow.resetCreatedFromImport();
+            this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
         } catch (Exception e) {
             this.nodeSourceWindow.setNodeSourceWindowLabelWithError("Import Infrastructure failed", e);
         }
