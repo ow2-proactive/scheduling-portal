@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,13 +97,10 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         List<String> dynamicParametersName = Stream.concat(getDynamicParametersName(focusedInfrastructurePlugin),
                                                            getDynamicParametersName(focusedPolicyPlugin))
                                                    .collect(Collectors.toList());
-
-        for (FormItem formItem : this.nodeSourcePluginsForm.getFields()) {
-            if (isNotDynamic(formItem, dynamicParametersName) &&
-                isFocusedPluginItem(focusedInfrastructurePlugin, focusedPolicyPlugin, formItem)) {
-                formItem.disable();
-            }
-        }
+        Arrays.stream(this.nodeSourcePluginsForm.getFields())
+              .filter(formItem -> isNotDynamic(formItem.getName(), dynamicParametersName) &&
+                                  isFocusedPluginItem(focusedInfrastructurePlugin, focusedPolicyPlugin, formItem))
+              .forEach(FormItem::disable);
     }
 
     private Stream<String> getDynamicParametersName(PluginDescriptor focusedInfrastructurePlugin) {
@@ -119,13 +117,12 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
                formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY);
     }
 
-    private boolean isNotDynamic(FormItem formItem, List<String> dynamicParametersName) {
-        return dynamicParametersName.stream().noneMatch(fieldFullName -> isDynamic(formItem, fieldFullName));
+    private boolean isNotDynamic(String formItemName, List<String> dynamicParametersName) {
+        return dynamicParametersName.stream().noneMatch(dynamicItemName -> areEqual(formItemName, dynamicItemName));
     }
 
-    private boolean isDynamic(FormItem formItem, String fieldFullName) {
-        return formItem.getName().equals(fieldFullName) ||
-               formItem.getName().equals(fieldFullName + EDIT_FORM_ITEM_SUFFIX);
+    private boolean areEqual(String formItemName, String otherFormItemName) {
+        return formItemName.equals(otherFormItemName) || formItemName.equals(otherFormItemName + EDIT_FORM_ITEM_SUFFIX);
     }
 
     @Override
