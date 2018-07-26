@@ -27,11 +27,11 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition;
 
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
@@ -39,8 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
@@ -80,7 +78,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
-            this.nodeSourceNameText.setDefaultValue(nodeSourceConfiguration.getNodeSourceName());
+            this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodeSourceNameText.disable();
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             this.nodesRecoverableCheckbox.disable();
@@ -96,56 +94,35 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     private void disablePluginFormItems(NodeSourceConfiguration nodeSourceConfiguration) {
         PluginDescriptor focusedInfrastructurePlugin = nodeSourceConfiguration.getInfrastructurePluginDescriptor();
         PluginDescriptor focusedPolicyPlugin = nodeSourceConfiguration.getPolicyPluginDescriptor();
-
-        List<String> allDynamicFieldFullNames = focusedInfrastructurePlugin.getConfigurableFields()
-                                                                           .stream()
-                                                                           .filter(PluginDescriptor.Field::isDynamic)
-                                                                           .map(field -> focusedInfrastructurePlugin.getPluginName() +
-                                                                                         field.getName())
-                                                                           .collect(Collectors.toList());
-        allDynamicFieldFullNames.addAll(focusedPolicyPlugin.getConfigurableFields()
-                                                           .stream()
-                                                           .filter(PluginDescriptor.Field::isDynamic)
-                                                           .map(field -> focusedPolicyPlugin.getPluginName() +
-                                                                         field.getName())
-                                                           .collect(Collectors.toList()));
-
-        for (FormItem formItem : this.formItemsByName.values()
-                                                     .stream()
-                                                     .flatMap(Collection::stream)
-                                                     .collect(Collectors.toList())) {
-            if (allDynamicFieldFullNames.stream()
-                                        .noneMatch(fieldFullName -> isItemEqualToDynamicField(formItem,
-                                                                                              fieldFullName))) {
-                filterAndDisableNonDynamicItem(formItem);
-            }
-        }
+        List<String> dynamicParametersName = Stream.concat(getDynamicParametersName(focusedInfrastructurePlugin),
+                                                           getDynamicParametersName(focusedPolicyPlugin))
+                                                   .collect(Collectors.toList());
+        Arrays.stream(this.nodeSourcePluginsForm.getFields())
+              .filter(formItem -> isNotDynamic(formItem.getName(), dynamicParametersName) &&
+                                  isFocusedPluginItem(focusedInfrastructurePlugin, focusedPolicyPlugin, formItem))
+              .forEach(FormItem::disable);
     }
 
-    private boolean isItemEqualToDynamicField(FormItem formItem, String fieldFullName) {
-        return formItem.getName().equals(fieldFullName) ||
-               formItem.getName().equals(fieldFullName + EDIT_FORM_ITEM_SUFFIX);
+    private Stream<String> getDynamicParametersName(PluginDescriptor focusedInfrastructurePlugin) {
+        return focusedInfrastructurePlugin.getConfigurableFields()
+                                          .stream()
+                                          .filter(PluginDescriptor.Field::isDynamic)
+                                          .map(field -> focusedInfrastructurePlugin.getPluginName() + field.getName());
     }
 
-    private void filterAndDisableNonDynamicItem(FormItem formItem) {
-        if (this.formItemsByName.keySet().stream().anyMatch(pluginName -> formItem.getName().startsWith(pluginName)) ||
-            formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY)) {
-            disableNonDynamicItem(formItem);
-        }
+    private boolean isFocusedPluginItem(PluginDescriptor focusedInfrastructurePlugin,
+            PluginDescriptor focusedPolicyPlugin, FormItem formItem) {
+        return formItem.getName().startsWith(focusedInfrastructurePlugin.getPluginName()) ||
+               formItem.getName().startsWith(focusedPolicyPlugin.getPluginName()) ||
+               formItem.getName().equals(INFRASTRUCTURE_FORM_KEY) || formItem.getName().equals(POLICY_FORM_KEY);
     }
 
-    private void disableNonDynamicItem(FormItem formItem) {
-        formItem.disable();
-        // when a form item is disabled, it will not be given as parameter of
-        // the submitted form, so we need to add the item content in a hidden
-        // item for it to be submitted with the form. This is true for all
-        // form items but the SelectItem (they are submitted as part of the
-        // form even if disabled), this is why we make a special case.
-        if (!(formItem instanceof SelectItem)) {
-            HiddenItem hiddenItem = new HiddenItem(formItem.getName());
-            hiddenItem.setValue(formItem.getValue());
-            this.formItemsByName.put(formItem.getName(), Collections.singletonList(hiddenItem));
-        }
+    private boolean isNotDynamic(String formItemName, List<String> dynamicParametersName) {
+        return dynamicParametersName.stream().noneMatch(dynamicItemName -> areEqual(formItemName, dynamicItemName));
+    }
+
+    private boolean areEqual(String formItemName, String otherFormItemName) {
+        return formItemName.equals(otherFormItemName) || formItemName.equals(otherFormItemName + EDIT_FORM_ITEM_SUFFIX);
     }
 
     @Override
