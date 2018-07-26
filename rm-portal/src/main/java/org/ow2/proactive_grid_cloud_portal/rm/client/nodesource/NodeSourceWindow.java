@@ -123,6 +123,8 @@ public abstract class NodeSourceWindow {
 
     protected Window window;
 
+    protected DynamicForm nodeSourcePluginsForm;
+
     /**
      * All items of the node source form are held in this map. The key is
      * either the name of the FormItem if there is only one element in the
@@ -130,13 +132,11 @@ public abstract class NodeSourceWindow {
      * by PluginDescriptor#getPluginName. Note that this map must be ordered
      * to achieve a correct display.
      */
-    protected Map<String, List<FormItem>> formItemsByName;
+    private Map<String, List<FormItem>> formItemsByName;
 
     private Label nodeSourceWindowLabel;
 
     private Label nodeSourcePluginsWaitingLabel;
-
-    private DynamicForm nodeSourcePluginsForm;
 
     private String previousSelectedInfrastructure;
 
@@ -474,6 +474,7 @@ public abstract class NodeSourceWindow {
                 LogModel.getInstance().logImportantMessage("Successfully applied '" + actionDescription +
                                                            "' action to Node Source: " + nodeSourceName);
             } else {
+                modifyFormItemsAfterCreation();
                 handleNodeSourceCreationError(nodeSourceWindowLayout, jsonCallback);
             }
             this.nodeSourcePluginsWaitingLabel.hide();
@@ -484,6 +485,7 @@ public abstract class NodeSourceWindow {
             }
         }));
 
+        Arrays.stream(this.nodeSourcePluginsForm.getFields()).forEach(FormItem::enable);
         this.nodeSourcePluginsForm.setCanSubmit(true);
         this.nodeSourcePluginsForm.submitForm();
 
