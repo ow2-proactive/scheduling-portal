@@ -41,15 +41,16 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     public static final String CATALOG_OPTION_NAME = "Import from Catalog";
 
-    private static final String SELECT_NODE_SOURCE_GENERIC_ENTRY = "Choose a Node Source";
+    private String selectItemGenericEntry;
 
     private ListBox nodeSourceListBox;
 
     private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
 
-    private final RequestCallback nodeSourceConfigurationRequestCallback;
+    private RequestCallback nodeSourceConfigurationRequestCallback;
 
     public ImportFromCatalogPanel(CatalogKind kind, RequestCallback nodeSourceConfigurationRequestCallback) {
+        this.selectItemGenericEntry = "Choose " + kind.getDescription();
         this.nodeSourceConfigurationRequestCallback = nodeSourceConfigurationRequestCallback;
         this.importFromCatalogPanelFeeder = new ImportFromCatalogPanelFeeder(this);
         configureSize();
@@ -73,7 +74,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void createListBox() {
         this.nodeSourceListBox = new ListBox();
         this.nodeSourceListBox.setEnabled(false);
-        this.nodeSourceListBox.addItem(SELECT_NODE_SOURCE_GENERIC_ENTRY);
+        this.nodeSourceListBox.addItem(this.selectItemGenericEntry);
         this.nodeSourceListBox.setWidth("190px");
         this.nodeSourceListBox.addChangeHandler(onNodeSourceSelected -> requestNodeSourceConfiguration());
         add(this.nodeSourceListBox);
@@ -81,7 +82,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
 
     private void requestNodeSourceConfiguration() {
         String selectedNodeSourceInList = this.nodeSourceListBox.getSelectedValue();
-        if (!selectedNodeSourceInList.equals(SELECT_NODE_SOURCE_GENERIC_ENTRY)) {
+        if (!selectedNodeSourceInList.equals(this.selectItemGenericEntry)) {
             String nodeSourceConfigurationRequestUrl = new CatalogUrlBuilder().getCatalogUrl() + "/buckets/" +
                                                        this.importFromCatalogPanelFeeder.getBucketNameForNodeSource(selectedNodeSourceInList) +
                                                        "/resources/" + selectedNodeSourceInList + "/raw";
