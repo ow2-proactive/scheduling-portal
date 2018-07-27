@@ -210,7 +210,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         downIt.addChangedHandler(seriesChanged);
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
-        totalIt.setValue(false);
+        totalIt.setValue(true);
         totalIt.addChangedHandler(seriesChanged);
         nodeLineSeriesForm.setItems(freeIt, busyIt, downIt, totalIt);
 
