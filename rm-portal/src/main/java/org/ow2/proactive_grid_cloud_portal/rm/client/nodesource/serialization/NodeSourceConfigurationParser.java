@@ -42,6 +42,8 @@ import com.google.gwt.json.client.JSONValue;
 
 public class NodeSourceConfigurationParser {
 
+    private static final String JSON_FILE_ERROR_MESSAGE = "The imported file is not a valid JSON file";
+
     public JSONValue parseJSON(String jsonStr) {
         try {
             return JSONParser.parseStrict(jsonStr);
@@ -60,7 +62,7 @@ public class NodeSourceConfigurationParser {
         try {
             jsonObject = parseJSON(json).isObject();
         } catch (JSONException e) {
-            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+            throw new IllegalArgumentException(JSON_FILE_ERROR_MESSAGE, e);
         }
 
         try {
@@ -75,7 +77,7 @@ public class NodeSourceConfigurationParser {
                                                infrastructurePluginDescriptor,
                                                policyPluginDescriptor);
         } catch (RuntimeException e) {
-            throw new IllegalArgumentException("The imported node source has incorrect parameters.", e);
+            throw new IllegalArgumentException("The imported file has incorrect parameters.", e);
         }
     }
 
@@ -163,7 +165,7 @@ public class NodeSourceConfigurationParser {
         try {
             infrastructureJsonObject = parseJSON(infrastructureJsonString).isObject();
         } catch (JSONException e) {
-            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+            throw new IllegalArgumentException(JSON_FILE_ERROR_MESSAGE, e);
         }
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
 
@@ -198,7 +200,7 @@ public class NodeSourceConfigurationParser {
         try {
             infrastructureJsonObject = parseJSON(importedPolicyJsonString).isObject();
         } catch (JSONException e) {
-            throw new IllegalArgumentException("The imported node source is not a valid JSON file", e);
+            throw new IllegalArgumentException(JSON_FILE_ERROR_MESSAGE, e);
         }
         nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
 

@@ -27,27 +27,34 @@ package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
 public enum CatalogKind {
 
-    NODE_SOURCE("NodeSource", ""),
+    NODE_SOURCE("NodeSource", "", "Node Source"),
 
-    INFRASTRUCTURE("InfrastructureNodeSource", "_Infrastructure"),
+    INFRASTRUCTURE("InfrastructureNodeSource", "_Infrastructure", "Infrastructure"),
 
-    POLICY("PolicyNodeSource", "_Policy");
+    POLICY("PolicyNodeSource", "_Policy", "Policy");
 
-    private final String kind;
+    private final String kindString;
 
     private final String suffix;
 
-    CatalogKind(String kind, String suffix) {
-        this.kind = kind;
+    private final String description;
+
+    CatalogKind(String kindString, String suffix, String description) {
+        this.kindString = kindString;
         this.suffix = suffix;
+        this.description = description;
     }
 
     public String getKindString() {
-        return this.kind;
+        return this.kindString;
     }
 
     public String getSuffix() {
         return this.suffix;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
 }
