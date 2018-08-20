@@ -203,7 +203,7 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.setWidth("75%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
-                                                                   "or Import Node Source",
+                                                                   "or Import Node Source (Infrastructure+Policy)",
                                                                    getNodeSourceAction());
         DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setWidth100();

@@ -75,7 +75,7 @@ public abstract class ImportLayout extends VLayout {
         this.importPanel.setWidth("272px");
         Label importLabel = new Label(layoutTitle);
         importLabel.setHeight("15px");
-        importLabel.setWidth("200px");
+        importLabel.setWidth("250px");
         this.importPanel.add(importLabel);
         addMember(this.importPanel);
     }
