@@ -60,8 +60,17 @@ public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, S
         this.refreshButtonTooltip = "Request fetching the Output for this job";
         this.noOutputMessage = "No logs available<br><br>" +
                                "Click <strong>Fetch logs</strong> to retrieve logs for tasks<br>";
-
+        this.notAuthorized = "You are not authorized to retrieve this job's log.";
         controller.getModel().addServerlogsListener(this);
+    }
+
+    public void goToNotAuthorized() {
+        this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
+        this.text.hide();
+
+        this.label.setContents(this.notAuthorized);
+        this.label.setIcon(null);
+        this.label.show();
     }
 
     /**
