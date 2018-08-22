@@ -123,6 +123,7 @@ public class ContextMenu extends Menu {
         MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
 
         if (menu.node != null) {
+            copyItem.setEnabled(true);
             if (menu.node.isLocked()) {
                 lockItem.setEnabled(false);
                 unlockItem.setEnabled(true);
