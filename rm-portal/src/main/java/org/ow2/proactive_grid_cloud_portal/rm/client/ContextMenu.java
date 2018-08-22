@@ -130,6 +130,8 @@ public class ContextMenu extends Menu {
                 lockItem.setEnabled(true);
                 unlockItem.setEnabled(false);
             }
+        } else {
+            copyItem.setEnabled(false);
         }
 
         if (menu.nodesource != null) {
