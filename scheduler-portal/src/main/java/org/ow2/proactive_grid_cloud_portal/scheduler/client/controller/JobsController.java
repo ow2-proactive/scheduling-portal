@@ -327,6 +327,7 @@ public class JobsController {
     public void addSubmittingJob(int jobId, String name) {
         Job j = new Job(jobId,
                         name,
+                        "",
                         JobStatus.PENDING,
                         JobPriority.NORMAL,
                         LoginModel.getInstance().getLogin(),

@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -44,11 +45,27 @@ public class RMListeners {
     public interface NodesListener {
 
         /**
-         * The list of nodesources, hosts and nodes has changed
-         * 
-         * @param nodes nodesources, hosts and nodes stored hierarchically
+         * This method called when any node/nodesource was add/removed/updated
+         *
+         * @param nodeSources map of nodesources which represents SNAPSHOT of current state, where nodesource stores hosts, host stores nodes.
          */
-        public void nodesUpdated(Map<String, NodeSource> nodes);
+        default void nodesUpdated(Map<String, NodeSource> nodeSources) {
+        }
+
+        /**
+         * This method called when any node/nodesource was add/removed/updated
+         * However, this method provides only change of state (delta).
+         * For example, since latest request to server, one node was removed,
+         * than this method will be called with empty nodeSources and list of one node
+         * with eventType::NODE_REMOVED
+         *
+         * For now, only CompactView is update by deltas, all other view take whole SNAPSHOTS of the state.
+         *
+         * @param nodeSources list of nodesources which represents state delta
+         * @param nodes list of nodes which represents state delta
+         */
+        default void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
+        }
 
     }
 

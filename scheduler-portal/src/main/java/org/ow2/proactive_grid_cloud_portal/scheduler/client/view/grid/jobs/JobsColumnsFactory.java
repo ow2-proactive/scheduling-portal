@@ -57,11 +57,13 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns DURATION_ATTR = new GridColumns("duration", "Duration", 120, true, false);
 
-    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", -1, true, false);
+    public static final GridColumns NAME_ATTR = new GridColumns("name", "Name", 200, true, false);
+
+    public static final GridColumns PROJECT_NAME_ATTR = new GridColumns("project", "Project", -1, true, false);
 
     private static final GridColumns[] COLUMNS = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
                                                                      PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR,
-                                                                     NAME_ATTR };
+                                                                     NAME_ATTR, PROJECT_NAME_ATTR };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
@@ -102,6 +104,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         record.setAttribute(USER_ATTR.getName(), item.getUser());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
+        record.setAttribute(PROJECT_NAME_ATTR.getName(), item.getProjectName());
 
         if (item.getStatus() != JobStatus.IN_ERROR) {
             if (item.getFinishTime() > 0 && item.getStartTime() > 0) {

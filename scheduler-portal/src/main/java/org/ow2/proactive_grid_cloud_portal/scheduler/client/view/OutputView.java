@@ -73,7 +73,9 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.refreshButtonLabel = "Finished Tasks Output";
         this.refreshButtonTooltip = "Request fetching the logs for finished tasks of the entire Job, or for a selected Task";
+
         this.notAuthorized = "You are not authorized to retrieve this job's output";
+
     }
 
     /**
