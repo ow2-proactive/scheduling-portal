@@ -102,6 +102,9 @@ public class ContextMenu extends Menu {
         menu.setShowShadow(true);
         menu.setShadowDepth(10);
 
+        CopyMenu copyMenu = new CopyMenu(menu).build();
+        MenuItem copyItem = copyMenu.getCopyItem();
+
         LockMenu lockMenu = new LockMenu(controller, menu).build();
         MenuItem lockItem = lockMenu.getLockItem();
         MenuItem unlockItem = lockMenu.getUnlockItem();
@@ -120,6 +123,7 @@ public class ContextMenu extends Menu {
         MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
 
         if (menu.node != null) {
+            copyItem.setEnabled(true);
             if (menu.node.isLocked()) {
                 lockItem.setEnabled(false);
                 unlockItem.setEnabled(true);
@@ -127,6 +131,8 @@ public class ContextMenu extends Menu {
                 lockItem.setEnabled(true);
                 unlockItem.setEnabled(false);
             }
+        } else {
+            copyItem.setEnabled(false);
         }
 
         if (menu.nodesource != null) {
@@ -153,7 +159,9 @@ public class ContextMenu extends Menu {
                               exportPolicyItem);
         }
 
-        menu.setItems(deployItem,
+        menu.setItems(copyItem,
+                      new MenuItemSeparator(),
+                      deployItem,
                       undeployItem,
                       editItem,
                       new MenuItemSeparator(),
@@ -193,6 +201,40 @@ public class ContextMenu extends Menu {
         for (MenuItem item : items) {
             item.setEnabled(true);
         }
+    }
+
+    /*
+     * The only way to copy to clipboard in GWT is to do it through native Javascript.
+     */
+    public static native void copyToClipboard(String nodeUrl) /*-{
+                                                              var el = $doc.createElement('textarea');
+                                                              el.value = nodeUrl;
+                                                              $doc.body.appendChild(el);
+                                                              el.select();
+                                                              $doc.execCommand('copy');
+                                                              $doc.body.removeChild(el);
+                                                              }-*/;
+
+    private static class CopyMenu {
+
+        private ContextMenu menu;
+
+        private MenuItem copyItem;
+
+        private CopyMenu(ContextMenu menu) {
+            this.menu = menu;
+        }
+
+        private MenuItem getCopyItem() {
+            return this.copyItem;
+        }
+
+        private CopyMenu build() {
+            this.copyItem = new MenuItem("Copy Node URL", Images.instance.close_16().getSafeUri().asString());
+            this.copyItem.addClickHandler(click -> copyToClipboard(menu.node.getNodeUrl()));
+            return this;
+        }
+
     }
 
     private static class LockMenu {
