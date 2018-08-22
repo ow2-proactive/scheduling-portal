@@ -55,6 +55,8 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
 
     protected String refreshButtonTooltip;
 
+    protected String notAuthorized;
+
     public AbstractOutputDisplayView(C controller) {
         super(controller);
     }
@@ -84,6 +86,7 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
     protected void buildRefreshButton() {
         this.refreshButton = new IButton(this.refreshButtonLabel);
         this.refreshButton.setTooltip(this.refreshButtonTooltip);
+        this.refreshButton.setAutoFit(true);
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 refreshButtonHandler();
@@ -91,12 +94,18 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
         });
     }
 
+    native void consoleLog(String message) /*-{
+                                           console.log( "me:" + message );
+                                           }-*/;
+
     /**
      * Called when the user click on the refresh button.
      */
     protected void refreshButtonHandler() {
         this.goToLoadingState();
+        consoleLog("I am before refreshOutput");
         this.controller.refreshOutput();
+        consoleLog("I am after refreshOutput");
     }
 
     protected VLayout buildOutputPane() {
