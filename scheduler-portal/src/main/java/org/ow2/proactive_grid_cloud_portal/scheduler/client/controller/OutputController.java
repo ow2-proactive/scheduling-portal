@@ -104,10 +104,6 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
         }
     }
 
-    native void consoleLog(String message) /*-{
-                                           console.log( "me:" + message );
-                                           }-*/;
-
     /**
      * Fetch the output for the currently selected job
      * store the result (or error msg) in the model
@@ -126,11 +122,9 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
-                consoleLog("The failure message is: " + msg);
                 if (msg.equals("HTTP 403 Forbidden")) {
                     view.goToNotAuthorized();
                 }
-                consoleLog(String.valueOf(currentOutput.getLines().isEmpty()));
             }
 
             @Override

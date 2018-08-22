@@ -94,18 +94,12 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
         });
     }
 
-    native void consoleLog(String message) /*-{
-                                           console.log( "me:" + message );
-                                           }-*/;
-
     /**
      * Called when the user click on the refresh button.
      */
     protected void refreshButtonHandler() {
         this.goToLoadingState();
-        consoleLog("I am before refreshOutput");
         this.controller.refreshOutput();
-        consoleLog("I am after refreshOutput");
     }
 
     protected VLayout buildOutputPane() {
