@@ -137,6 +137,9 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         return root;
     }
 
+    /**
+     * The view when a user is not authorized to fetch the job's output
+     */
     public void goToNotAuthorized() {
         this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
         this.text.hide();

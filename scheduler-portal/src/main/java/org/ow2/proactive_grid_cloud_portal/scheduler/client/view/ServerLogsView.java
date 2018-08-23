@@ -64,6 +64,9 @@ public class ServerLogsView extends AbstractOutputDisplayView<ServerLogsModel, S
         controller.getModel().addServerlogsListener(this);
     }
 
+    /**
+     * The view when a user is not authorized to fetch the job's log
+     */
     public void goToNotAuthorized() {
         this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
         this.text.hide();
