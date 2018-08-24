@@ -1317,6 +1317,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         return scriptResultStr.toString();
     }
 
+    native void consoleLog(String message) /*-{
+                                           console.log( "me:" + message );
+                                           }-*/;
+
     public void executeScript(final String script, final String engine, final String nodeUrl,
             final Callback<String, String> syncCallBack) {
         rm.executeNodeScript(LoginModel.getInstance().getSessionId(),
@@ -1325,11 +1329,17 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              nodeUrl,
                              new AsyncCallback<String>() {
                                  public void onFailure(Throwable caught) {
-                                     LogModel.getInstance()
-                                             .logImportantMessage("Failed to execute a script " + script + " on " +
-                                                                  nodeUrl + " : " +
-                                                                  JSONUtils.getJsonErrorMessage(caught));
-                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                                     String msg = JSONUtils.getJsonErrorMessage(caught);
+                                     consoleLog("The failure message is: " + msg);
+                                     LogModel.getInstance().logImportantMessage("Failed to execute a script " + script +
+                                                                                " on " + nodeUrl + " : " + msg);
+                                     if (msg.equals("HTTP 500 Internal Server Error")) {
+                                         consoleLog("We are inside if");
+                                         syncCallBack.onFailure("You are not authorized to execute scripts on this node. Please contact the administrator of the node.");
+                                     } else {
+                                         syncCallBack.onFailure(msg);
+                                     }
+
                                  }
 
                                  public void onSuccess(String result) {
