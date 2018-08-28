@@ -73,6 +73,9 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
         this.refreshButtonLabel = "Finished Tasks Output";
         this.refreshButtonTooltip = "Request fetching the logs for finished tasks of the entire Job, or for a selected Task";
+
+        this.notAuthorized = "You are not authorized to retrieve this job's output";
+
     }
 
     /**
@@ -132,6 +135,18 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         this.goToNoTargetState();
 
         return root;
+    }
+
+    /**
+     * The view when a user is not authorized to fetch the job's output
+     */
+    public void goToNotAuthorized() {
+        this.text.setContents(" "); // whitespace otherwise it logs are empty, they won't be replaced in text panel
+        this.text.hide();
+
+        this.label.setContents(this.notAuthorized);
+        this.label.setIcon(null);
+        this.label.show();
     }
 
     /**

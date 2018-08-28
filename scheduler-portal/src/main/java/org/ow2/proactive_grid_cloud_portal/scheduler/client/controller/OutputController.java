@@ -114,22 +114,40 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
         JobOutput currentOutput = this.model.getCurrentOutput();
         String jobId = currentOutput.getJobId();
 
-        List<Task> tasks = this.model.getParentModel().getTasksModel().getTasks();
+        String sessionId = LoginModel.getInstance().getSessionId();
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-        for (Task t : tasks) {
-            switch (t.getStatus()) {
-                case SKIPPED:
-                case PENDING:
-                case SUBMITTED:
-                case NOT_STARTED:
-                    break;
-                default:
-                    this.fetchTaskOutput(jobId, t, logMode);
-                    break;
+        scheduler.getJobInfo(sessionId, jobId, new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                if (msg.equals("HTTP 403 Forbidden")) {
+                    view.goToNotAuthorized();
+                }
             }
-        }
 
-        currentOutput.setComplete(true);
+            @Override
+            public void onSuccess(String result) {
+                List<Task> tasks = model.getParentModel().getTasksModel().getTasks();
+
+                for (Task t : tasks) {
+                    switch (t.getStatus()) {
+                        case SKIPPED:
+                        case PENDING:
+                        case SUBMITTED:
+                        case NOT_STARTED:
+                            break;
+                        default:
+                            fetchTaskOutput(jobId, t, logMode);
+                            break;
+                    }
+                }
+
+                currentOutput.setComplete(true);
+            }
+        });
+
     }
 
     /**
