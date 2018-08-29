@@ -210,7 +210,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         downIt.addChangedHandler(seriesChanged);
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
-        totalIt.setValue(false);
+        totalIt.setValue(true);
         totalIt.addChangedHandler(seriesChanged);
         nodeLineSeriesForm.setItems(freeIt, busyIt, downIt, totalIt);
 
@@ -296,6 +296,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         });
 
         loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
+        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
         loadHeaderLabel.setHeight(24);
 
         filler = new Canvas();

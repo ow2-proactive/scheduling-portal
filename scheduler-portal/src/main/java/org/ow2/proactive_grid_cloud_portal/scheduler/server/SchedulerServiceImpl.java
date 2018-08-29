@@ -31,10 +31,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +42,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -50,7 +53,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
@@ -63,6 +69,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -75,6 +83,11 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 
 
 /**
@@ -97,6 +110,21 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     private ExecutorService threadPool;
 
+    /**
+     * GraphQL Client
+     */
+    private SchedulingApiClientGwt graphQLClient;
+
+    /**
+     * JSON Mapper
+     */
+    private final static ObjectMapper JSON_MAPPER = new ObjectMapper();
+
+    /**
+     * LOGGER
+     */
+    private final static Logger LOGGER = Logger.getLogger(SchedulerServiceImpl.class.getName());
+
     @Override
     public void init() {
         loadProperties();
@@ -110,13 +138,15 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                             .build();
 
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+        graphQLClient = new SchedulingApiClientGwt(SchedulerConfig.get().getSchedulingApiUrl(), httpClient, threadPool);
     }
 
     /**
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
-        final HashMap<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
+        final Map<String, String> props = ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(SchedulerConfig.CONFIG_PATH));
         SchedulerConfig.get().load(props);
         ConfigUtils.loadSystemProperties(SchedulerConfig.get());
     }
@@ -150,6 +180,86 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String ret = convertToString(is);
 
             if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
+                return ret;
+            } else {
+                throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException("Failed to read response: " + e.getMessage());
+        } finally {
+            method.releaseConnection();
+            if (file != null) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * Validate a XML file to the REST part by using an HTTP client.
+     *
+     * @param sessionId the id of the client which submits the job
+     * @param file      the XML file that is submitted
+     * @return an error message upon failure, "id=<jobId>" upon success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String validateXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/validate");
+        method.addHeader("sessionId", sessionId);
+
+        boolean isJar = isJarFile(file);
+
+        try {
+            String name = isJar ? "jar" : "file";
+            String mime = isJar ? "application/java-archive" : "application/xml";
+            String charset = "ISO-8859-1";
+
+            MultipartEntity entity = new MultipartEntity();
+            entity.addPart("file", new FileBody(file, name, mime, charset));
+            method.setEntity(entity);
+
+            HttpResponse execute = httpClient.execute(method);
+            InputStream is = execute.getEntity().getContent();
+            String ret = convertToString(is);
+
+            if (execute.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
+                return ret;
+            } else {
+                throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
+            }
+        } catch (IOException e) {
+            throw new ServiceException("Failed to read response: " + e.getMessage());
+        } finally {
+            method.releaseConnection();
+            if (file != null) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * Submits an XML file to the job-planner REST using an HTTP client.
+     *
+     * @param sessionId the id of the client which submits the job
+     * @param file      the XML file that is submitted
+     * @return an error message upon failure, "id=<jobId>" upon success
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    public String planXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
+        HttpPost method = new HttpPost(SchedulerConfig.get().getJobplannerUrl());
+        method.addHeader("sessionId", sessionId);
+        method.addHeader("Content-type", ContentType.APPLICATION_XML.toString());
+
+        try {
+            StringEntity entity = new StringEntity(Files.toString(file, Charset.forName("ISO-8859-1")),
+                                                   ContentType.APPLICATION_XML);
+            method.setEntity(entity);
+
+            HttpResponse execute = httpClient.execute(method);
+            InputStream is = execute.getEntity().getContent();
+            String ret = convertToString(is);
+            if (execute.getStatusLine().getStatusCode() == Status.CREATED.getStatusCode()) {
                 return ret;
             } else {
                 throw new RestServerException(execute.getStatusLine().getStatusCode(), ret);
@@ -334,12 +444,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public void setPriorityByName(final String sessionId, List<Integer> jobIdList, final String priorityName)
             throws ServiceException, RestServerException {
-        executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
+        executeVoidFunction(new BiFunction<RestClient, Integer, Void>() {
             @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.schedulerChangeJobPriorityByName(sessionId,
-                                                                        Integer.toString(jobId),
-                                                                        priorityName);
+            public Void apply(RestClient restClientProxy, Integer jobId) {
+                restClientProxy.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId), priorityName);
+                return null;
             }
         }, jobIdList, "job set to priority " + priorityName);
     }
@@ -369,17 +478,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
             HttpResponse response = httpClient.execute(method);
             String responseAsString = convertToString(response.getEntity().getContent());
-            switch (response.getStatusLine().getStatusCode()) {
-                case 200:
-                    break;
-                default:
-                    String message = responseAsString;
-                    if (message.trim().length() == 0) {
-                        message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
-                                  "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
-                    }
-                    throw new RestServerException(response.getStatusLine().getStatusCode(), message);
-            }
+            handleResponseStatus(response, responseAsString);
             return responseAsString;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
@@ -388,6 +487,35 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             if (cred != null) {
                 cred.delete();
             }
+        }
+    }
+
+    private void handleResponseStatus(HttpResponse response, String responseAsString) throws RestServerException {
+        switch (response.getStatusLine().getStatusCode()) {
+            case 200:
+                break;
+            default:
+                String message = responseAsString;
+                if (message.trim().length() == 0) {
+                    message = "{ \"httpErrorCode\": " + response.getStatusLine().getStatusCode() + "," +
+                              "\"errorMessage\": \"" + response.getStatusLine().getReasonPhrase() + "\" }";
+                }
+                throw new RestServerException(response.getStatusLine().getStatusCode(), message);
+        }
+    }
+
+    @Override
+    public String getLoginFromSessionId(String sessionId) throws RestServerException, ServiceException {
+        HttpGet method = new HttpGet(SchedulerConfig.get().getRestUrl() + "/scheduler/logins/sessionid/" + sessionId);
+        try {
+            HttpResponse response = httpClient.execute(method);
+            String responseAsString = convertToString(response.getEntity().getContent());
+            handleResponseStatus(response, responseAsString);
+            return responseAsString;
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            method.releaseConnection();
         }
     }
 
@@ -528,8 +656,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *
      * @see
      * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#getTasksByTag(java.
-     * lang.
-     * String, java.lang.String, java.lang.String)
+     * lang. String, java.lang.String, java.lang.String)
      */
     @Override
     public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset,
@@ -604,6 +731,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public Map<String, String> getProperties() {
         return SchedulerConfig.get().getProperties();
+    }
+
+    @Override
+    public Map<String, String> getSchedulerPortalDisplayProperties(final String sessionId) {
+        RestClient restClientProxy = getRestClientProxy();
+        return restClientProxy.getSchedulerPortalDisplayProperties(sessionId)
+                              .entrySet()
+                              .stream()
+                              .collect(Collectors.toMap(entry -> (String) entry.getKey(),
+                                                        entry -> (String) entry.getValue()));
     }
 
     /*
@@ -860,10 +997,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#
-     * getStatisticsOnMyAccount
-     * (java.lang.String)
+     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#
+     * getStatisticsOnMyAccount (java.lang.String)
      */
     @Override
     public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException {
@@ -946,15 +1081,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * (java.lang.String, int, int, boolean, boolean, boolean, boolean)
      */
     @Override
-    public String revisionAndjobsinfo(final String sessionId, final int index, final int limit,
-            final boolean myJobsOnly, final boolean pending, final boolean running, final boolean finished)
-            throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.revisionAndjobsinfo(sessionId, index, limit, myJobsOnly, pending, running, finished);
-            }
-        });
+    public String revisionAndjobsinfo(final String sessionId, final String startCursor, final String endCursor,
+            int pageSize, boolean first, final String user, final boolean pending, final boolean running,
+            final boolean finished, FilterModel filterModel) throws RestServerException, ServiceException {
+        Query query = GraphQLQueries.get().getRevisionAndjobsInfoQuery(user,
+                                                                       pending,
+                                                                       running,
+                                                                       finished,
+                                                                       startCursor,
+                                                                       endCursor,
+                                                                       pageSize,
+                                                                       first,
+                                                                       filterModel);
+        String response = executeGraphQLQuery(sessionId, query);
+        return response;
     }
 
     /*
@@ -1144,6 +1284,30 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    /**
+     * Execute a graphQL query. The queries should be built using the GraphQLQueries class
+     * @param sessionId
+     * @param query
+     * @return
+     * @throws ServiceException
+     * @throws RestServerException
+     */
+    private String executeGraphQLQuery(String sessionId, Query query) throws ServiceException, RestServerException {
+
+        if (sessionId == null || query == null)
+            return null;
+
+        Map<String, Object> result = graphQLClient.execute(sessionId, query);
+        try {
+            String data = JSON_MAPPER.writeValueAsString(result);
+            return data;
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            return "{\"error\": \"Cannot process JSON\"}";
+        }
+
+    }
+
     private boolean executeFunction(Function<RestClient, InputStream> function)
             throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
@@ -1186,6 +1350,31 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 throw new ServiceException("Error while reading InputStream response: " + e.getMessage());
             } finally {
                 IOUtils.closeQuietly(inputStream);
+            }
+        }
+
+        if (failures > 0) {
+            throw new RestServerException("Requested " + jobIdList.size() + " " + actionName + ": " + success +
+                                          " succeeded, " + failures + " failed.");
+        }
+
+        return success;
+    }
+
+    private int executeVoidFunction(BiFunction<RestClient, Integer, Void> action, List<Integer> jobIdList,
+            String actionName) throws ServiceException, RestServerException {
+
+        RestClient restClientProxy = getRestClientProxy();
+
+        int failures = 0;
+        int success = 0;
+
+        for (Integer jobId : jobIdList) {
+            try {
+                action.apply(restClientProxy, jobId);
+                success++;
+            } catch (WebApplicationException e) {
+                failures++;
             }
         }
 

@@ -122,3 +122,16 @@
 .executionView .itemViewNav {
 	left: 5px !important;
 }
+
+.errorMessage {
+	color: red;
+}
+
+.infoMessage {
+	color: green;
+}
+
+.gwt-FileUpload {
+                font-size : 11px;
+                margin-left : 60px;
+}

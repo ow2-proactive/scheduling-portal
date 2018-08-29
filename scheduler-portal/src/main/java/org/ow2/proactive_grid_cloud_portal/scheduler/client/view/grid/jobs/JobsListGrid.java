@@ -32,6 +32,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
@@ -57,6 +58,7 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.SortNormalizer;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.events.ClickHandler;
@@ -94,6 +96,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         this.setSort(DEFAULT_SORT);
     }
 
+    @Override
     protected void selectionChangedHandler(SelectionEvent event) {
         if (event.getState() && !fetchingData) {
             ListGridRecord record = event.getRecord();
@@ -103,8 +106,18 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
-        Job selectedJob = this.controller.getModel().getSelectedJob();
+    protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
+        ListGridRecord[] selectedRecords = this.getSelectedRecords();
+        List<Integer> selectedJobsIds = new ArrayList<>(selectedRecords.length);
+        for (ListGridRecord selectedRecord : selectedRecords) {
+            selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
+        }
+        controller.getModel().setSelectedJobsIds(selectedJobsIds);
+    }
+
+    @Override
+    public void jobsUpdated(Map<Integer, Job> jobs) {
+        List<Integer> selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
 
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
@@ -112,7 +125,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             this.columnsFactory.buildRecord(j, jobRecord);
             data.add(jobRecord);
 
-            if (j.equals(selectedJob)) {
+            if (selectedJobsIds != null && selectedJobsIds.contains(j.getId())) {
                 jobRecord.setAttribute("isSelected", true);
             }
         }

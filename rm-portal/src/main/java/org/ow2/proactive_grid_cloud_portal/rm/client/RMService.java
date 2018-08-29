@@ -74,12 +74,13 @@ public interface RMService extends RemoteService {
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others
      * @param sessionId current session
+     * @param clientCounter latest counter client is aware of
      * @return a JSON object containing two arrays named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
      * @throws RestServerException 
      * @throws ServiceException
      */
-    String getMonitoring(String sessionId) throws RestServerException, ServiceException;
+    String getMonitoring(String sessionId, Long clientCounter) throws RestServerException, ServiceException;
 
     /**
      * List of all supported Infrastructure Managers, and their parameters
@@ -99,21 +100,96 @@ public interface RMService extends RemoteService {
     String getPolicies(String sessionId) throws RestServerException, ServiceException;
 
     /**
-     * Creates a NodeSource 
+     * Retrieve the configuration of a given node source, in other words, a
+     * representation of all the parameters with which a node source was
+     * configured.
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to get the configuration from
+     * @return a JSON object containing the current node source configuration
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Defines a NodeSource
      * @param sessionId current session
      * @param nodeSourceName name of the new NS
      * @param infrastructureType infrastructure manager full class name
      * @param infrastructureParameters IM String parameters, null value for files
-     * @param infrastructureFileParamaters file parameters
+     * @param infrastructureFileParameters file parameters
      * @param policyType policy full class name
      * @param policyParameters String parameters, null value for files
      * @param policyFileParameters file parameters
-     * @throws RestServerException 
+     * @param nodesRecoverable whether nodes can be recovered after a crash
+     * @throws RestServerException
      * @throws ServiceException
      */
-    String createNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+    String defineNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Edit a NodeSource
+     * @param sessionId current session
+     * @param nodeSourceName name of the NS to edit
+     * @param infrastructureType infrastructure manager full class name
+     * @param infrastructureParameters IM String parameters, null value for files
+     * @param infrastructureFileParameters file parameters
+     * @param policyType policy full class name
+     * @param policyParameters String parameters, null value for files
+     * @param policyFileParameters file parameters
+     * @param nodesRecoverable whether nodes can be recovered after a crash
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String editNodeSource(String sessionId, String nodeSourceName, String infrastructureType,
+            String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
+            String[] policyParameters, String[] policyFileParameters, String nodesRecoverable)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Override the dynamic parameters of a NodeSource
+     * @param sessionId current session
+     * @param nodeSourceName name of the NS to edit
+     * @param infrastructureType infrastructure manager full class name
+     * @param infrastructureParameters IM String parameters, null value for files
+     * @param infrastructureFileParameters file parameters
+     * @param policyType policy full class name
+     * @param policyParameters String parameters, null value for files
+     * @param policyFileParameters file parameters
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String updateDynamicParameters(String sessionId, String nodeSourceName, String infrastructureType,
             String[] infrastructureParameters, String[] infrastructureFileParameters, String policyType,
             String[] policyParameters, String[] policyFileParameters) throws RestServerException, ServiceException;
+
+    /**
+     * Deploys a node source and starts acquiring its nodes
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to deploy
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String deployNodeSource(String sessionId, String nodeSourceName) throws RestServerException, ServiceException;
+
+    /**
+     * Undeploys a node source and removes its nodes
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to undeploy
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String undeployNodeSource(String sessionId, String nodeSourceName, boolean force)
+            throws RestServerException, ServiceException;
 
     /**
      * lock a set of nodes

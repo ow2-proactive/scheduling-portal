@@ -28,6 +28,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -72,7 +74,7 @@ public class UploadServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadServlet.class);
 
-    private static final String URL_CATALOG = "http://localhost:8080/workflow-catalog";
+    private static final String URL_CATALOG = "http://localhost:8080/catalog";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -100,18 +102,18 @@ public class UploadServlet extends HttpServlet {
             Iterator<?> i = fileItems.iterator();
 
             String sessionId = null;
-            String bucketId = null;
-            String workflowId = null;
+            String bucketName = null;
+            String workflowName = null;
 
             while (i.hasNext()) {
                 FileItem fi = (FileItem) i.next();
                 if (fi.isFormField()) {
                     if (fi.getFieldName().equals("sessionId")) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("bucketId")) {
-                        bucketId = fi.getString();
-                    } else if (fi.getFieldName().equals("workflowId")) {
-                        workflowId = fi.getString();
+                    } else if (fi.getFieldName().equals("bucketName")) {
+                        bucketName = fi.getString();
+                    } else if (fi.getFieldName().equals("workflowName")) {
+                        workflowName = fi.getString();
                     }
                 } else {
                     job = File.createTempFile("job_upload", ".xml");
@@ -121,12 +123,12 @@ public class UploadServlet extends HttpServlet {
             }
 
             LOGGER.warn("sessionId=" + sessionId);
-            LOGGER.warn("bucketId=" + bucketId);
-            LOGGER.warn("workflowId=" + workflowId);
+            LOGGER.warn("bucketName=" + bucketName);
+            LOGGER.warn("workflowName=" + workflowName);
             LOGGER.warn("job=" + job);
 
-            if (bucketId != null && workflowId != null) {
-                fetchFromCatalogAndWriteResponse(bucketId, workflowId, response);
+            if (bucketName != null && workflowName != null) {
+                fetchFromCatalogAndWriteResponse(bucketName, workflowName, sessionId, response);
             } else {
                 writeResponse(job, response);
             }
@@ -143,11 +145,19 @@ public class UploadServlet extends HttpServlet {
         }
     }
 
-    private void fetchFromCatalogAndWriteResponse(String bucketId, String workflowId, HttpServletResponse response) {
-        String url = URL_CATALOG + "/buckets/" + bucketId + "/workflows/" + workflowId + "?alt=xml";
+    private void fetchFromCatalogAndWriteResponse(String bucketName, String workflowName, String sessionId,
+            HttpServletResponse response) {
+        String encodedWorkflowName;
+        try {
+            encodedWorkflowName = URLEncoder.encode(workflowName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            encodedWorkflowName = workflowName;
+        }
+        String url = URL_CATALOG + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
         LOGGER.info("Sending request to catalog: " + url);
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet(url);
+        httpget.addHeader("sessionID", sessionId);
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpclient.execute(httpget);

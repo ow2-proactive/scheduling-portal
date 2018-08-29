@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.AbstractSelectedTargetController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.AbstractSelectedTargetModel;
 
@@ -56,6 +55,8 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
 
     protected String refreshButtonTooltip;
 
+    protected String notAuthorized;
+
     public AbstractOutputDisplayView(C controller) {
         super(controller);
     }
@@ -85,6 +86,7 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
     protected void buildRefreshButton() {
         this.refreshButton = new IButton(this.refreshButtonLabel);
         this.refreshButton.setTooltip(this.refreshButtonTooltip);
+        this.refreshButton.setAutoFit(true);
         this.refreshButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 refreshButtonHandler();

@@ -79,6 +79,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/job_submit_16.png")
     ImageResource job_submit_16();
 
+    @Source("images/job_plan_16.png")
+    ImageResource job_plan_16();
+
     @Source("images/monitoring_16.png")
     ImageResource monitoring_16();
 
@@ -111,5 +114,11 @@ public interface SchedulerImages extends ClientBundle {
 
     @Source("images/calendar.png")
     ImageResource calendar();
+
+    @Source("images/add.png")
+    ImageResource add();
+
+    @Source("images/remove.png")
+    ImageResource remove();
 
 }

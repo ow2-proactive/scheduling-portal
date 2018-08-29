@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -54,8 +56,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.gwt.core.client.GWT;
-
 
 /**
  * Custom job submission servlet
@@ -77,6 +77,8 @@ public class SubmitEditServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubmitEditServlet.class);
 
+    public static final String ERROR = "SubmitEditServletError:";
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         upload(request, response);
@@ -93,6 +95,8 @@ public class SubmitEditServlet extends HttpServlet {
         String sessionId = null;
         String job = null;
         String startAt = null;
+        boolean validate = false;
+        boolean plan = false;
         HashMap<String, String> varMap = new HashMap<String, String>();
         File editedJob = null;
         File jobDesc = null;
@@ -111,8 +115,12 @@ public class SubmitEditServlet extends HttpServlet {
             } else if (key.startsWith("var_")) {
                 String name = key.substring(4);
                 varMap.put(name, val);
-            } else if (key.toUpperCase().equals("START_AT")) {
+            } else if (key.equalsIgnoreCase("START_AT")) {
                 startAt = val;
+            } else if (key.equalsIgnoreCase("PLAN")) {
+                plan = Boolean.parseBoolean(val);
+            } else if (key.equals("validate")) {
+                validate = Boolean.parseBoolean(val);
             }
         }
 
@@ -123,11 +131,11 @@ public class SubmitEditServlet extends HttpServlet {
 
         try {
             if (job == null) {
-                response.getWriter().write("Parameter 'job' is null");
+                response.getWriter().write(ERROR + "Parameter 'job' is null");
                 return;
             }
             if (sessionId == null) {
-                response.getWriter().write("Parameter 'sessionId' is null");
+                response.getWriter().write(ERROR + "Parameter 'sessionId' is null");
                 return;
             }
 
@@ -140,20 +148,19 @@ public class SubmitEditServlet extends HttpServlet {
                 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(jobDesc);
 
-                Node vars = doc.getElementsByTagName("variables").item(0);
+                NodeList variablesNodeList = doc.getElementsByTagName("variable");
 
                 /* edit the job variables using XML DOM */
-                if (vars != null) {
-                    NodeList varChildren = vars.getChildNodes();
-                    for (int i = 0; i < varChildren.getLength(); i++) {
-                        Node var = varChildren.item(i);
-                        if (var != null) {
-                            if (var.getAttributes() != null) {
+                if (variablesNodeList != null) {
+                    for (int i = 0; i < variablesNodeList.getLength(); i++) {
+                        Node variableNode = variablesNodeList.item(i);
+                        if (variableNode != null && !isTaskVariableElement(variableNode)) {
+                            if (variableNode.getAttributes() != null) {
 
                                 String name = null;
                                 Node nodeVal = null;
-                                for (int j = 0; j < var.getAttributes().getLength(); j++) {
-                                    Node attr = var.getAttributes().item(j);
+                                for (int j = 0; j < variableNode.getAttributes().getLength(); j++) {
+                                    Node attr = variableNode.getAttributes().item(j);
 
                                     if (attr.getNodeName().equals("name")) {
                                         name = attr.getNodeValue();
@@ -162,8 +169,8 @@ public class SubmitEditServlet extends HttpServlet {
                                         nodeVal = attr;
                                     }
                                 }
-
                                 String match = varMap.get(name);
+
                                 if (match != null && nodeVal != null) {
                                     nodeVal.setNodeValue(match);
                                 }
@@ -206,31 +213,41 @@ public class SubmitEditServlet extends HttpServlet {
                     DOMSource source = new DOMSource(doc);
                     transformer.transform(source, result);
                 } catch (Exception e1) {
-                    response.getWriter().write("Error while writing the job descriptor's DOM: " + e1.getMessage());
+                    response.getWriter()
+                            .write(ERROR + "Error while writing the job descriptor's DOM: " + e1.getMessage());
                 }
 
             } catch (ParserConfigurationException e1) {
-                response.getWriter().write("Error initializing DOM parser " + e1.getMessage());
+                response.getWriter().write(ERROR + "Error initializing DOM parser " + e1.getMessage());
             } catch (SAXException e1) {
-                response.getWriter().write("Error parsing job descriptor: " + e1.getMessage());
+                response.getWriter().write(ERROR + "Error parsing job descriptor: " + e1.getMessage());
             }
 
             // submission at last....
             try {
                 LOGGER.info("editedJob that will be sent:");
                 LOGGER.info(FileUtils.readFileToString(editedJob));
-                String responseS = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
-                if (responseS == null || responseS.length() == 0) {
-                    response.getWriter().write("Job submission returned without a value!");
+
+                String responseFromService = null;
+
+                if (validate) {
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).validateXMLFile(sessionId, editedJob);
+                } else if (plan) {
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).planXMLFile(sessionId, editedJob);
                 } else {
-                    response.getWriter().write(responseS);
+                    responseFromService = ((SchedulerServiceImpl) Service.get()).submitXMLFile(sessionId, editedJob);
+                }
+                if (responseFromService == null || responseFromService.length() == 0) {
+                    response.getWriter().write(ERROR + "Job submission returned without a value!");
+                } else {
+                    response.getWriter().write(responseFromService);
                 }
             } catch (RestServerException e1) {
                 String msg = e1.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-                response.getWriter().print(msg);
+                response.getWriter().print(ERROR + msg);
             } catch (ServiceException e2) {
                 String msg = e2.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-                response.getWriter().print(msg);
+                response.getWriter().print(ERROR + msg);
             }
 
         } catch (IOException e1) {
@@ -241,6 +258,16 @@ public class SubmitEditServlet extends HttpServlet {
             if (editedJob != null)
                 editedJob.delete();
         }
+    }
+
+    private boolean isTaskVariableElement(Node node) {
+        if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
+            Node grandparentNode = node.getParentNode().getParentNode();
+            if (grandparentNode.getNodeName().equals("task")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

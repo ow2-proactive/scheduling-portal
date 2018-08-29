@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -42,9 +40,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.PaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridItemsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
@@ -62,7 +60,7 @@ public class TasksController {
 
     protected TasksModel model;
 
-    protected AbstractGridItemsView view;
+    protected AbstractGridItemsView<Task> view;
 
     protected SchedulerController parentController;
 
@@ -110,8 +108,12 @@ public class TasksController {
 
                 public void onFailure(Throwable caught) {
                     String msg = JSONUtils.getJsonErrorMessage(caught);
+                    if (msg.equals("HTTP 403 Forbidden")) {
+                        model.taskUpdateError("You are not authorized to see this job's tasks.");
+                    } else {
+                        model.taskUpdateError(msg);
+                    }
 
-                    model.taskUpdateError(msg);
                     LogModel.getInstance().logImportantMessage("Failed to update tasks for job " + jobId + ": " + msg);
                 }
 
@@ -130,7 +132,7 @@ public class TasksController {
             TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
             String tagFilter = navigationModel.getCurrentTagFilter();
 
-            PaginationModel paginationModel = navigationModel.getPaginationModel();
+            TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
             int limit = paginationModel.getPageSize();
             String sessionId = LoginModel.getInstance().getSessionId();
@@ -148,8 +150,7 @@ public class TasksController {
      * Kill a task within a job 
      * @param taskName task name
      */
-    public void killTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+    public void killTask(final String taskName, final Integer jobId) {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -168,18 +169,15 @@ public class TasksController {
         });
     }
 
-    public void restartInErrorTask(final String taskName) {
-        restartTask(taskName, RestartType.IN_ERROR_TASK);
+    public void restartInErrorTask(final String taskName, final Integer jobId) {
+        restartTask(taskName, jobId, RestartType.IN_ERROR_TASK);
     }
 
-    public void restartRunningTask(final String taskName) {
-        restartTask(taskName, RestartType.RUNNING_TASK);
+    public void restartRunningTask(final String taskName, final Integer jobId) {
+        restartTask(taskName, jobId, RestartType.RUNNING_TASK);
     }
 
-    protected void restartTask(String taskName, RestartType restartType) {
-        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
-        Job selectedJob = executionsModel.getSelectedJob();
-        Integer jobId = selectedJob.getId();
+    protected void restartTask(String taskName, Integer jobId, RestartType restartType) {
 
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
@@ -229,8 +227,7 @@ public class TasksController {
      * Preempt a task within a job 
      * @param taskName task name
      */
-    public void preemptTask(final String taskName) {
-        final Integer jobId = this.model.getParentModel().getExecutionsModel().getJobsModel().getSelectedJob().getId();
+    public void preemptTask(final String taskName, final Integer jobId) {
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.preemptTask(sessionId, jobId, taskName, new AsyncCallback<Boolean>() {
@@ -251,10 +248,7 @@ public class TasksController {
      * Mark in-error task as finished and resume job
      * @param taskName task name
      */
-    public void markAsFinishedAndResume(final String taskName) {
-        ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
-        Job selectedJob = executionsModel.getSelectedJob();
-        final Integer jobId = selectedJob.getId();
+    public void markAsFinishedAndResume(final String taskName, final Integer jobId) {
 
         String sessionId = LoginModel.getInstance().getSessionId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();

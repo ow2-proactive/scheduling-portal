@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
@@ -37,11 +39,16 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Location;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
@@ -274,13 +281,30 @@ public class LoginPage {
         errorLabel.setHeight(30);
         errorLabel.setAlign(Alignment.CENTER);
 
+        HLayout accountCreationLayout = new HLayout();
+        accountCreationLayout.setWidth100();
+        accountCreationLayout.setHeight(15);
+        accountCreationLayout.setAlign(Alignment.CENTER);
+        Anchor accountCreationLink = new Anchor("Or create an account",
+                                                "https://www.activeeon.com/register/web-download",
+                                                "_blank");
+        accountCreationLink.setWidth("103px");
+        accountCreationLink.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        accountCreationLayout.addMember(accountCreationLink);
+
         // contains the logo and the forms
         VLayout vlayout = new VLayout();
         vlayout.setMembersMargin(15);
         // 350(auth) + 2*10(padding) = 370
         vlayout.setWidth(370);
+        String hostName = Window.Location.getHostName();
+        boolean shouldDisplayLink = "try.activeeon.com".equals(hostName) || "azure-try.activeeon.com".equals(hostName);
+        if (shouldDisplayLink)
+            vlayout.setHeight(278);
+        // 140(auth) + 15(membersMargin) + 88(logo) + 2*10(padding) + 15 (anchor) = 278
+        else
+            vlayout.setHeight(263);
         // 140(auth) + 15(membersMargin) + 88(logo) + 2*10(padding) = 263
-        vlayout.setHeight(263);
         vlayout.setPadding(10);
         vlayout.setBackgroundColor("#fafafa");
         vlayout.setBorder("1px solid #ccc");
@@ -291,6 +315,8 @@ public class LoginPage {
         vlayout.addMember(logo);
         vlayout.addMember(errorLabel);
         vlayout.addMember(auth);
+        if (shouldDisplayLink)
+            vlayout.addMember(accountCreationLayout);
 
         vlayout.hideMember(errorLabel);
 
@@ -337,6 +363,7 @@ public class LoginPage {
         // in the other form with it
         final DynamicForm form = new DynamicForm();
         form.setFields(loginField, passwordField, moreField);
+
         form.hideItem("useSSH");
 
         // pure GWT form for uploading, will be used to contact the servlet
@@ -433,8 +460,14 @@ public class LoginPage {
         });
 
         String cacheLogin = Settings.get().getSetting(controller.getLoginSettingKey());
-        if (cacheLogin != null) {
-            form.setValue("login", cacheLogin);
+        // check if username cookie variable is set
+        // if not, the login input text is set to the cacheLogin
+        if (getCookieUserName() == null) {
+            if (cacheLogin != null) {
+                form.setValue("login", cacheLogin);
+            }
+        } else {
+            form.setValue("login", cacheLogin != null ? cacheLogin : "");
         }
 
         final IButton okButton = new IButton();
@@ -484,7 +517,11 @@ public class LoginPage {
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        controller.login(sess, form.getValueAsString("login"));
+                        String userName = null;
+                        if (obj.containsKey("username")) {
+                            userName = obj.isObject().get("username").isString().stringValue();
+                        }
+                        controller.login(sess, userName);
                     } else {
                         fail = true;
                     }
@@ -580,21 +617,30 @@ public class LoginPage {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String res = event.getResults();
                 boolean fail = false;
+                String internalErrorMessage = null;
                 try {
                     JSONValue val = controller.parseJSON(res);
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        controller.login(sess, null);
+                        String userName = null;
+                        if (obj.containsKey("username")) {
+                            userName = obj.isObject().get("username").isString().stringValue();
+                        }
+                        controller.login(sess, userName);
                     } else {
                         fail = true;
                     }
                 } catch (Throwable t) {
                     fail = true;
+                    internalErrorMessage = t.getMessage();
                 }
 
                 if (fail) {
                     String err = JSONUtils.getJsonErrorMessage(res);
+                    if (err == null) {
+                        err = internalErrorMessage;
+                    }
                     errorLabel.setContents("<span style='color:red;'>Could not login: " + err + "</span>");
                     errorLabel.animateShow(AnimationEffect.FLY);
 
@@ -643,5 +689,10 @@ public class LoginPage {
         this.layout.destroy();
         this.layout = null;
         this.controller = null;
+    }
+
+    private String getCookieUserName() {
+        String userName = Cookies.getCookie("username");
+        return userName;
     }
 }

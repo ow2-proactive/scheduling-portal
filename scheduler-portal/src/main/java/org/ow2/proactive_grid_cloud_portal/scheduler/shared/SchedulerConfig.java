@@ -45,6 +45,9 @@ public class SchedulerConfig extends Config {
 
     private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
 
+    /** URL of the remote job-planner REST service */
+    public static final String JOBPLANNER_URL = "jobplanner.rest.url";
+
     public static final String REST_PUBLIC_URL = "sched.rest.public.url";
 
     /** URL of the remote noVNC proxy */
@@ -106,22 +109,12 @@ public class SchedulerConfig extends Config {
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
 
-    /** Calendar Server port */
-    public static final String CS_SERVER_HTTP_PORT = "pa.calendar.http.port";
-
-    private static final String DEFAULT_CS_SERVER_HTTP_PORT = "4242";
-
-    /** Calendar Server port */
-    public static final String CS_SERVER_HTTPS_PORT = "pa.calendar.https.port";
-
-    private static final String DEFAULT_CS_SERVER_HTTPS_PORT = "443";
-
-    /** Calendar Server port */
-    public static final String CS_SERVER_PROTOCOL = "pa.calendar.protocol";
-
-    private static final String DEFAULT_CS_SERVER_PROTOCOL = "https";
-
     private static SchedulerConfig instance = null;
+
+    /** URL of the scheduler graphql API */
+    private static final String DEFAULT_SCHEDULING_API_URL = "http://localhost:8080/scheduling-api";
+
+    public static final String SCHEDULING_API_URL = "pa.scheduling.api";
 
     /**
      * @return current static config instance, cannot be null
@@ -145,9 +138,7 @@ public class SchedulerConfig extends Config {
         properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
-        properties.put(CS_SERVER_HTTP_PORT, DEFAULT_CS_SERVER_HTTP_PORT);
-        properties.put(CS_SERVER_HTTPS_PORT, DEFAULT_CS_SERVER_HTTPS_PORT);
-        properties.put(CS_SERVER_PROTOCOL, DEFAULT_CS_SERVER_PROTOCOL);
+        properties.put(SCHEDULING_API_URL, DEFAULT_SCHEDULING_API_URL);
     }
 
     @Override
@@ -165,6 +156,21 @@ public class SchedulerConfig extends Config {
             return restUrl;
         }
         return restUrlFromProperties;
+    }
+
+    /**
+     * Returns the job-planner url from shceduler.conf if it exists or the default local URL otherwise.
+     * @return job-planner url
+     */
+    public String getJobplannerUrl() {
+        String jpUrlFromProperties = properties.get(JOBPLANNER_URL);
+        if (jpUrlFromProperties == null) {
+            String protocol = com.google.gwt.user.client.Window.Location.getProtocol();
+            String port = com.google.gwt.user.client.Window.Location.getPort();
+            String jobplannerUrl = protocol + "://localhost:" + port + "/job-planner/planned_jobs";
+            return jobplannerUrl;
+        }
+        return jpUrlFromProperties;
     }
 
     /**
@@ -289,23 +295,9 @@ public class SchedulerConfig extends Config {
     }
 
     /**
-     * @return calendar server port
+     * @return Scheduling API URL
      */
-    public String getCalendarServerHttpPort() {
-        return properties.get(CS_SERVER_HTTP_PORT);
-    }
-
-    /**
-     * @return calendar server port
-     */
-    public String getCalendarServerHttpsPort() {
-        return properties.get(CS_SERVER_HTTPS_PORT);
-    }
-
-    /**
-     * @return calendar server port
-     */
-    public String getCalendarServerProtocol() {
-        return properties.get(CS_SERVER_PROTOCOL);
+    public String getSchedulingApiUrl() {
+        return properties.get(SCHEDULING_API_URL);
     }
 }

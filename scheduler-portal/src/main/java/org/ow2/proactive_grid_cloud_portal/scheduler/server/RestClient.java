@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -372,7 +373,7 @@ public interface RestClient {
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")
-    InputStream schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
+    void schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
     final String sessionId, @PathParam("jobid")
     final String jobId, @PathParam("name") String priorityName);
 
@@ -630,30 +631,6 @@ public interface RestClient {
     String schedulerStateRevision(@HeaderParam("sessionid") String sessionId);
 
     /**
-     * Returns a map containing one entry with the revision id as key and the
-     * list of UserJobInfo as value.
-     * each jobs is described using
-     *   - its id
-     *   - its owner
-     *   - the JobInfo class
-     * @param sessionId a valid session id
-     * @param myJobs only my jobs when true, all jobs when false
-     * @param pending fetch pending jobs
-     * @param running fetch running jobs
-     * @param finished fetch finished jobs
-     * @return a map containing one entry with the revision id as key and the 
-     * list of UserJobInfo as value.
-     */
-    @GET
-    @GZIP
-    @Path("revisionjobsinfo")
-    @Produces({ "application/json", "application/xml" })
-    InputStream revisionAndjobsinfo(@HeaderParam("sessionid") String sessionId, @QueryParam("index") int index,
-            @QueryParam("limit") int limit, @QueryParam("myjobs") boolean myJobs,
-            @QueryParam("pending") boolean pending, @QueryParam("running") boolean running,
-            @QueryParam("finished") boolean finished);
-
-    /**
      * Returns an html visualization corresponding of a jobid
      * @param sessionId a valid session id
      * @param jobId the job id
@@ -725,5 +702,10 @@ public interface RestClient {
     @Path("/credentials/")
     @Produces("application/json")
     InputStream thirdPartyCredentialsKeySet(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @Path("configuration/portal")
+    @Produces("application/json")
+    Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
 
 }

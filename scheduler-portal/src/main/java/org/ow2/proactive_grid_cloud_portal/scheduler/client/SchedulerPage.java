@@ -46,7 +46,11 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.VisibilityMode;
@@ -73,6 +77,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -192,6 +197,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         Canvas tools = buildTools();
 
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
+
         SectionStackSection executionsSections = this.controller.buildExecutionsView();
 
         Layout botPane = buildBotPane();
@@ -207,10 +218,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         stack.setVisibilityMode(VisibilityMode.MULTIPLE);
         stack.setAnimateSections(true);
         stack.setOverflow(Overflow.HIDDEN);
+
         stack.setSections(executionsSections, detailsSection);
 
         contentLayout.addMember(buildLogoStrip());
         contentLayout.addMember(tools);
+        contentLayout.addMember(panel);
         contentLayout.addMember(stack);
         this.logWindow = new LogWindow(controller);
 
@@ -222,28 +235,41 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             schedKillButton;
 
     private ToolStrip buildLogoStrip() {
-        ToolStrip logoStrip = new ToolStrip();
-
         final Label schedulerLabel = new Label("ProActive Scheduling & Orchestration");
         schedulerLabel.setStyleName("schedulerHeadline");
         schedulerLabel.setHeight100();
         schedulerLabel.setAutoWidth();
 
-        logoStrip.setStyleName("paddingLeftAndRight");
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
+        ToolStrip logoPA = new ToolStrip();
+        logoPA.setHeight(logoStripHeight);
+        logoPA.setWidth("33%");
+        logoPA.setBackgroundImage("");
+        logoPA.setBackgroundColor(logoStripBackgroundColor);
+        logoPA.setMargin(0);
+        logoPA.setBorder(logoStripBorder);
+        logoPA.setAlign(Alignment.LEFT);
+        logoPA.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
+        logoPA.addMember(schedulerLabel);
 
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addMember(schedulerLabel);
-        logoStrip.addFill();
-        logoStrip.addMember(new Img(SchedulerImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addFill();
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("33%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.CENTER);
+        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        additionalLogoCenter.addMember(logoAzureImg);
 
-        //by click on logo - open home activeeon page in new tab
+        ToolStrip logoAE = new ToolStrip();
+        logoAE.setHeight(logoStripHeight);
+        logoAE.setWidth("33%");
+        logoAE.setBackgroundImage("");
+        logoAE.setBackgroundColor(logoStripBackgroundColor);
+        logoAE.setMargin(0);
+        logoAE.setBorder(logoStripBorder);
+        logoAE.setAlign(Alignment.RIGHT);
         Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(new ClickHandler() {
             @Override
@@ -251,7 +277,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 Window.open("http://activeeon.com/", "", "");
             }
         });
-        logoStrip.addMember(logoImg);
+        logoAE.addMember(logoImg);
+
+        ToolStrip logoStrip = new ToolStrip();
+        logoStrip.setStyleName("paddingLeftAndRight");
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+        logoStrip.addMember(logoPA);
+        logoStrip.addMember(additionalLogoCenter);
+        logoStrip.addMember(logoAE);
 
         return logoStrip;
     }
@@ -393,6 +431,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
+        ToolStripButton planButton = new ToolStripButton("Plan job");
+        planButton.setIcon(SchedulerImages.instance.job_plan_16().getSafeUri().asString());
+        planButton.setIconSize(20);
+        planButton.setTooltip("Plan a job");
+        planButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                PlanWindow w = new PlanWindow(SchedulerPage.this.controller);
+                w.show();
+            }
+        });
+
         schedStartButton = new MenuItem("Start");
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedStartButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
@@ -475,21 +524,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
-        ToolStripButton calendarButton = new ToolStripButton("Calendar");
-        calendarButton.setIcon(SchedulerImages.instance.calendar().getSafeUri().asString());
-        calendarButton.setIconSize(20);
-        calendarButton.setTooltip("Import Workflows scheduled at a given date & time in your favorite Calendar, Re-schedule Jobs, and Add Periodicity.");
-        calendarButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                CalendarInfoWindow w = new CalendarInfoWindow();
-                w.show();
-            }
-        });
-
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
-        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
-        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -498,16 +536,18 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addSeparator();
         tools.addButton(submitButton);
         tools.addSeparator();
-        tools.addButton(calendarButton);
+        tools.addButton(planButton);
+        tools.addSeparator();
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(12);
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
+        tools.addButton(schedulerLinkButton);
+        tools.addSpacer(12);
         tools.addButton(resourceManagerLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(cloudAutomationLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(notificationPortalLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);

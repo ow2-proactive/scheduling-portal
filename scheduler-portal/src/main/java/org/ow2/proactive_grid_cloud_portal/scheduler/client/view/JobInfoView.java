@@ -37,6 +37,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
+
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VStack;
 
 
 /**
@@ -50,6 +54,18 @@ public class JobInfoView extends InfoView<Job>
         implements JobSelectedListener, JobsUpdatedListener, ExecutionDisplayModeListener {
 
     protected SchedulerController controller;
+
+    /** Generic information label text */
+    private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic Information";
+
+    /** Variables label text */
+    private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
+
+    /** Generic information grid */
+    private KeyValueGrid genericInformationGrid;
+
+    /** Variables grid */
+    private KeyValueGrid variablesGrid;
 
     /**
      * @param controller the Controller that created this View
@@ -78,7 +94,7 @@ public class JobInfoView extends InfoView<Job>
     }
 
     @Override
-    public void jobsUpdated(Map<Integer, Job> jobs, long totalJobs) {
+    public void jobsUpdated(Map<Integer, Job> jobs) {
         if (this.displayedItem == null)
             return;
 
@@ -107,6 +123,59 @@ public class JobInfoView extends InfoView<Job>
         } else {
             jobSelected(job);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#addRootExtraMembers(com.
+     * smartgwt.client.widgets.layout.Layout)
+     */
+    @Override
+    protected Layout getLayout() {
+
+        VStack root = new VStack();
+        root.setWidth100();
+
+        this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
+        this.genericInformationGrid.setWidth100();
+        this.genericInformationGrid.hide();
+
+        this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        this.variablesGrid.setWidth100();
+        this.variablesGrid.hide();
+
+        root.addMember(super.getLayout());
+        root.addMember(genericInformationGrid);
+        root.addMember(variablesGrid);
+        return root;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#displayExtraMembers(
+     * boolean)
+     */
+    @Override
+    protected void displayExtraMembers(Job job) {
+        genericInformationGrid.buildEntries(job.getGenericInformation());
+        variablesGrid.buildEntries(job.getVariables());
+
+        this.genericInformationGrid.show();
+        this.variablesGrid.show();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#hideExtraMembers()
+     */
+    @Override
+    protected void hideExtraMembers() {
+        this.genericInformationGrid.hide();
+        this.variablesGrid.hide();
     }
 
 }

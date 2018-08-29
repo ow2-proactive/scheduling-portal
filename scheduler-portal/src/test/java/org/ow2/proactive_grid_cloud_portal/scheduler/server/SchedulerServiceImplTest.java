@@ -56,12 +56,6 @@ public class SchedulerServiceImplTest {
     }
 
     @Test
-    public void testLoadingFromConfigurationFile() throws Exception {
-        setUp();
-        assertEquals("test", SchedulerConfig.get().getRestUrl());
-    }
-
-    @Test
     public void testPrecedenceBetweenSystemPropertiesAndConfigurationFile() throws ServletException {
         System.setProperty(SchedulerConfig.REST_URL, "unknown");
         System.setProperty(SchedulerConfig.VERSION, "x.x.x");

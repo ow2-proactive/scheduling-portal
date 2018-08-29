@@ -26,12 +26,13 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
@@ -39,12 +40,37 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.json.client.*;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -60,7 +86,10 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.BlurbItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.TimeItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -74,6 +103,12 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * @author mschnoor
  */
 public class SubmitWindow {
+
+    private static final String KEY_OF_MODEL = "model";
+
+    private static final String KEY_OF_NAME = "name";
+
+    private static final String KEY_OF_VALUE = "value";
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
 
@@ -91,9 +126,17 @@ public class SubmitWindow {
 
     private static final String METHOD_FROM_CATALOG = "import from Catalog";
 
-    private static final int width = 420;
+    private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
-    private static final int height = 500;
+    private static final String ERROR_MESSAGE = "errorMessage";
+
+    private static final String JSON_ERROR = "JSON parse ERROR";
+
+    private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
+
+    private final int widthWindows = 600;
+
+    private final int heightWindows = 600;
 
     private Window window;
 
@@ -107,38 +150,56 @@ public class SubmitWindow {
 
     private HandlerRegistration gridClickHR = null;
 
-    private VLayout rootPage; // ------------------------ the main layout of the window
+    private VLayout rootPage; // ------------------------ the main layout of the
+    // window
 
     private VLayout selectWfLayout; // ----------------- Select Workflow Panel
 
-    private ListBox wfMethodsListBox; // ------------- Methods to select a workflow
+    private ListBox wfMethodsListBox; // ------------- Methods to select a
+    // workflow
 
-    private VLayout fromFilePanel; // ------------------- The panel to select wf from disk
+    private VLayout fromFilePanel; // ------------------- The panel to select wf
+    // from disk
 
     private FileUpload fileUpload; // ------------------- FileUpload button
 
-    private VerticalPanel selectWorkflowButtonsPanel; //  Panel that holds the strategic items to get a wf
+    private VerticalPanel selectWorkflowButtonsPanel; // Panel that holds the
+    // strategic items to
+    // get a wf
 
-    private Button sendFromFileButton; // --------------- Send the file to servlet from disk
+    private Button sendFromFileButton; // --------------- Send the file to
+    // servlet from disk
 
-    private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf from catalog
+    private HorizontalPanel fromCatalogPanel; // -------- The panel to select wf
+    // from catalog
 
     private ListBox bucketsListBox; // ------------------ Buckets dropdown list
 
-    private ListBox workflowsListBox; // ---------------- Workflows dropdown list
+    private ListBox workflowsListBox; // ---------------- Workflows dropdown
+    // list
 
-    private Button sendFromCatalogButton; // ------------ Send the file to servlet from catalog
+    private Button sendFromCatalogButton; // ------------ Send the file to
+    // servlet from catalog
 
     // -------------------------------------------------- Variables Part
     private VLayout varsLayout; // --------------------- Variables Panel
 
-    private VerticalPanel hiddenPane; // ---------------- Holds the parameters to submit along with the job
+    private VerticalPanel hiddenPane; // ---------------- Holds the parameters
+    // to submit along with the job
 
-    private FormItem[] fields; // ----------------------- (visual) Variables to submit along with the job
+    private Hidden validate = new Hidden("validate", "true");
 
-    private Hidden[] _fields; // ------------------------ (hidden) Variables to submit along with the job
+    private FormItem[] fields; // ----------------------- (visual) Variables to
+    // submit along with the job
 
-    private Hidden startAtParameter; // ----------------- START_AT value to send along with the job
+    private Hidden[] _fields; // ------------------------ (hidden) Variables to
+    // submit along with the job
+
+    private Hidden startAtParameter; // ----------------- START_AT value to send
+    // along with the job
+
+    private Hidden planParameter; // ----------------- PLAN value to send
+    // along with the job
 
     private FormPanel variablesActualForm; // ----------- Actual form to send
 
@@ -147,24 +208,49 @@ public class SubmitWindow {
 
     private VerticalPanel startAtRadioGroupPanel; // ---- Now or Later
 
-    private RadioButton startNowRB; // ------------------ As soon as possible radio button
+    private RadioButton startAccordingPlanningRadioButton; // ------------------ According to the defined EXECUTION_CALENDAR Generic Information of the Job
 
-    private RadioButton startAtRB; // ------------------- at scheduled time radio button
+    private RadioButton startNowRadioButton; // ------------------ As soon as possible
+    // radio button
+
+    private RadioButton startAtRadioButton; // ------------------- at scheduled time
+    // radio button
 
     private DateChooser dateChooser; // ----------------- DateChooser
 
-    private HLayout submitCancelButtons; // ---------- -- Cancel and Submit buttons
+    private HLayout submitCancelButtons; // ---------- -- Cancel and Submit
+    // buttons
 
     private IButton submitButton;
 
-    private VLayout loadingPanel; // -------------------- Loading Panel when uploading
+    private IButton checkButton;
 
-    // ----- Catalog temp maps
-    private HashMap<String, Integer> catalogBucketsMap;
+    private VLayout messagePanel; // -------------------- Loading Panel when
+    // uploading
 
-    private HashMap<String, Integer> catalogWorkflowsMap;
+    private Label waitLabel;
+
+    private Label errorLabel;
 
     private String CATALOG_URL = null;
+
+    private Map<String, JobVariable> variables;
+
+    private String job;
+
+    private String documentation = null;
+
+    private String icon = null;
+
+    private String bucketNameGI = null;
+
+    private Boolean existBucketName = false;
+
+    private Boolean existDocumentation = false;
+
+    private Boolean existIcon = false;
+
+    private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
 
     /**
      * Default constructor
@@ -177,31 +263,31 @@ public class SubmitWindow {
     }
 
     /**
-     * Shows the window created by the constructor,
-     * calling this after destroy will throw an NPE,
-     * you must create a new SubmitWindow for each job submission
+     * Shows the window created by the constructor, calling this after destroy
+     * will throw an NPE, you must create a new SubmitWindow for each job
+     * submission
      */
     public void show() {
         this.window.show();
     }
 
     /**
-     * Destroy the window, you may null the reference after this as it will not be usable again
+     * Destroy the window, you may null the reference after this as it will not
+     * be usable again
      */
     public void destroy() {
         this.window.destroy();
     }
 
     /**
-     * Builds the catalog URL. If none is configured in the settings file, sets the URL to the bundled Catalog
+     * Builds the catalog URL. If none is configured in the settings file, sets
+     * the URL to the bundled Catalog
      *
      */
     private void buildCatalogUrl() {
         String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "workflow-catalog";
-        if (catalogUrlFromConfig == null) {
-            CATALOG_URL = defaultCatalogUrl;
-        } else if (catalogUrlFromConfig.isEmpty()) {
+        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "catalog";
+        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
             CATALOG_URL = defaultCatalogUrl;
         } else {
             CATALOG_URL = catalogUrlFromConfig;
@@ -221,8 +307,11 @@ public class SubmitWindow {
         selectWfLayout.setIsGroup(true);
         selectWfLayout.setHeight("130px");
 
-        // This panel changes depending on the selected method of getting a workflow
+        // This panel changes depending on the selected method of getting a
+        // workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
+        selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         selectWorkflowButtonsPanel.setSpacing(5);
         selectWorkflowButtonsPanel.setHeight("50px");
 
@@ -267,11 +356,14 @@ public class SubmitWindow {
 
             private void initFooter() {
                 rootPage.removeMember(startAtLayout);
+                rootPage.removeMember(messagePanel);
                 rootPage.removeMember(submitCancelButtons);
                 initSubmitAtPart();
+                rootPage.addMember(messagePanel);
                 rootPage.addMember(submitCancelButtons);
-                startNowRB.setValue(true);
-                startAtRB.setValue(false);
+                startAccordingPlanningRadioButton.setValue(false);
+                startNowRadioButton.setValue(false);
+                startAtRadioButton.setValue(false);
                 setEnabledStartAtPart(false);
             }
         });
@@ -286,55 +378,226 @@ public class SubmitWindow {
         rootPage.addMember(selectWfLayout);
     }
 
-    private void initVarsPart(Widget varsContent, Widget hiddenContent) {
+    private void fillVarsPart(String jobDescriptor) {
+        DynamicForm variablesVisualForm = initVariablesVisualForm();
+        Layout hiddenVarsLayout = initVariablesActualForm();
+        initVarsLayout();
+        getGenericInformationAttributes(jobDescriptor);
+        Widget worfklowMetaDataWidget = prepareWorlflowInformationWidget();
+        varsLayout.addMember(worfklowMetaDataWidget);
+        varsLayout.addMember(variablesVisualForm);
+        varsLayout.addMember(hiddenVarsLayout);
+        rootPage.addMember(varsLayout);
+        rootPage.reflow();
+    }
+
+    private Widget prepareWorlflowInformationWidget() {
+
+        String widgetIcon = "No icone <br>";
+        String widgetDocumentation = "No documentation <br>";
+        String widgetBucketName = "No bucket name";
+
+        if (icon != null) {
+            widgetIcon = "<img src=" + icon + " height=40px width=40px> <br>";
+        }
+
+        if (documentation != null) {
+            widgetDocumentation = "<b>Documentation :</b> <a href=" + documentation + " target=_blank>" +
+                                  documentation + " </a><br>";
+        }
+
+        if (bucketNameGI != null) {
+            widgetBucketName = "<b> Bucket name :</b> " + bucketNameGI;
+        }
+
+        return new HTML("<center> " + widgetIcon + widgetDocumentation + widgetBucketName + " </center>");
+
+    }
+
+    private void getGenericInformationAttributes(String jobDescriptor) {
+        Document dom = XMLParser.parse(jobDescriptor);
+        NodeList genericInfo = dom.getElementsByTagName("genericInformation");
+        // check if the job has genericInformation or not
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            // get the first item
+            Node root = genericInfo.item(0);
+            NodeList genericInfoMetaDataList = root.getChildNodes();
+            for (int i = 0; i < genericInfoMetaDataList.getLength(); i++) {
+                Node genericInfoMetadata = genericInfoMetaDataList.item(i);
+                if (genericInfoMetadata.getNodeName().equals("info") && genericInfoMetadata.hasAttributes()) {
+                    NamedNodeMap attributes = genericInfoMetadata.getAttributes();
+                    getGenericInformationName(attributes);
+                }
+            }
+        }
+    }
+
+    private void getGenericInformationName(NamedNodeMap attributes) {
+        for (int j = 0; j < attributes.getLength(); j++) {
+            Node attribute = attributes.item(j);
+            if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_NAME)) {
+                if (attribute.getNodeValue().equalsIgnoreCase("bucketName"))
+                    existBucketName = true;
+                if (attribute.getNodeValue().equalsIgnoreCase("documentation"))
+                    existDocumentation = true;
+                if (attribute.getNodeValue().equalsIgnoreCase("workflow.icon"))
+                    existIcon = true;
+            }
+            getGenericInformationValue(attribute);
+        }
+    }
+
+    private void getGenericInformationValue(Node attribute) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_VALUE)) {
+            if (existBucketName) {
+                bucketNameGI = attribute.getNodeValue();
+                existBucketName = false;
+            }
+            if (existDocumentation) {
+                documentation = attribute.getNodeValue();
+                existDocumentation = false;
+            }
+            if (existIcon) {
+                icon = attribute.getNodeValue();
+                existIcon = false;
+            }
+        }
+    }
+
+    private DynamicForm initVariablesVisualForm() {
+        // presentation form
+        DynamicForm variablesVisualForm;
+        variablesVisualForm = new DynamicForm();
+        variablesVisualForm.setNumCols(3);
+        variablesVisualForm.setColWidths("25%", "50%", "25%");
+
+        fields = new FormItem[variables.size() * 2];
+
+        int i = 0;
+
+        for (Entry<String, JobVariable> var : variables.entrySet()) {
+            TextItem variableItem = createVariableItem(var);
+            fields[i++] = variableItem;
+            String model = var.getValue().getModel();
+            BlurbItem modelItem = createModelItem(model);
+            fields[i++] = modelItem;
+        }
+
+        variablesVisualForm.setFields(fields);
+        return variablesVisualForm;
+    }
+
+    private Layout initVariablesActualForm() {
+        // actual form used to POST
+        variablesActualForm = new FormPanel();
+        variablesActualForm.setMethod(FormPanel.METHOD_POST);
+        variablesActualForm.setAction(URL_SUBMIT_XML);
+        hiddenPane = new VerticalPanel();
+        _fields = new Hidden[variables.size()];
+
+        int i = 0;
+        for (Entry<String, JobVariable> var : variables.entrySet()) {
+            _fields[i] = new Hidden("var_" + var.getKey());
+            hiddenPane.add(_fields[i]);
+            i++;
+        }
+
+        hiddenPane.add(new Hidden("job", job));
+        hiddenPane.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
+        hiddenPane.add(validate);
+        variablesActualForm.setWidget(hiddenPane);
+        Layout fpanelWra = new Layout();
+        fpanelWra.addMember(variablesActualForm);
+        return fpanelWra;
+    }
+
+    private void initVarsLayout() {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle("2. Fill workflow variables");
         varsLayout.setWidth100();
-        varsLayout.setHeight("100px");
-        varsLayout.setMaxHeight(100);
+        varsLayout.setHeight("150px");
+        varsLayout.setMaxHeight(150);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
-        varsLayout.addMember(varsContent);
-        varsLayout.addMember(hiddenContent);
-        rootPage.addMember(varsLayout);
-        rootPage.reflow();
+    }
+
+    private BlurbItem createModelItem(String model) {
+        BlurbItem modelLabel = null;
+        if (model != null) {
+            modelLabel = new BlurbItem();
+            modelLabel.setDefaultValue(model);
+        } else {
+            modelLabel = new BlurbItem();
+        }
+        modelLabel.setStartRow(false);
+        modelLabel.setEndRow(true);
+        return modelLabel;
+    }
+
+    private TextItem createVariableItem(Entry<String, JobVariable> var) {
+        TextItem t = new TextItem(var.getKey(), var.getKey());
+        t.setValue(var.getValue().getValue());
+        t.setWidth("100%");
+        t.setStartRow(true);
+        t.setEndRow(false);
+        return t;
     }
 
     private void initVarsPart() {
-        varsLayout = new VLayout();
-        varsLayout.setIsGroup(true);
-        varsLayout.setGroupTitle("2. Fill workflow variables");
-        varsLayout.setWidth100();
-        varsLayout.setHeight("100px");
-        varsLayout.setMaxHeight(100);
-        varsLayout.setPadding(5);
-        varsLayout.setOverflow(Overflow.AUTO);
+        initVarsLayout();
         rootPage.addMember(varsLayout);
         rootPage.reflow();
     }
 
+    private void setStartAccordingPlanningRadioButtonState(String job) {
+        if (job != null && isExecutionCalendarGIDefined(job)) {
+            startAccordingPlanningRadioButton.setVisible(true);
+            startAccordingPlanningRadioButton.setValue(true);
+        } else {
+            startAccordingPlanningRadioButton.setVisible(false);
+        }
+    }
+
     private void initSubmitAtPart() {
+        String startButton = "startAtRadioGroup";
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
         startAtLayout.setGroupTitle("3. Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
+        planParameter = new Hidden("PLAN");
 
-        startNowRB = new RadioButton("startAtRadioGroup", "As soon as possible");
-        startAtRB = new RadioButton("startAtRadioGroup", "At");
-        startNowRB.setValue(true);
-        startAtRB.setValue(false);
+        startAccordingPlanningRadioButton = new RadioButton(startButton,
+                                                            "Planned according to embedded Execution Calendar defintion");
+        startNowRadioButton = new RadioButton(startButton, "As soon as possible");
+        startAtRadioButton = new RadioButton(startButton, "At");
 
-        startNowRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startAccordingPlanningRadioButton.setVisible(true);
+
+        startNowRadioButton.setValue(true);
+        startAtRadioButton.setValue(false);
+
+        startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                startAtRB.setText("At");
+                if (isExecCalendarValueNull) {
+                    displayErrorMessage("EXECUTION_CALENDAR value is empty.");
+                }
+
                 startAtLayout.removeMember(dateChooser);
             }
         });
 
-        startAtRB.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+        startNowRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
+            @Override
+            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
+                startAtRadioButton.setText("At");
+                startAtLayout.removeMember(dateChooser);
+            }
+        });
+
+        startAtRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
             @Override
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 startAtLayout.addMember(dateChooser);
@@ -351,18 +614,35 @@ public class SubmitWindow {
         dateChooser.setUse24HourTime(true);
         dateChooser.setShowTodayButton(true);
         dateChooser.setShowApplyButton(false);
-        dateChooser.setWidth(width / 2);
+        dateChooser.setWidth(widthWindows / 2);
         dateChooser.setLayoutAlign(Alignment.CENTER);
         dateChooser.setMargin(10);
 
         startAtRadioGroupPanel = new VerticalPanel();
         startAtRadioGroupPanel.setSpacing(10);
-        startAtRadioGroupPanel.add(startNowRB);
-        startAtRadioGroupPanel.add(startAtRB);
+
+        startAtRadioGroupPanel.add(startAccordingPlanningRadioButton);
+
+        startAtRadioGroupPanel.add(startNowRadioButton);
+        startAtRadioGroupPanel.add(startAtRadioButton);
         startAtRadioGroupPanel.setHeight("30px");
 
         startAtLayout.addMember(startAtRadioGroupPanel);
+
+        FlowPanel planJobPanel = new FlowPanel();
+        InlineLabel firstPart = new InlineLabel("Or use the ");
+        firstPart.getElement().getStyle().setProperty("margin-left", "15px");
+        planJobPanel.add(firstPart);
+        Anchor jobPlannerPortalLink = new Anchor("Job Planner Portal",
+                                                 "/automation-dashboard/#/portal/job-planner-calendar-def-workflows",
+                                                 "_blank");
+        planJobPanel.add(jobPlannerPortalLink);
+        planJobPanel.add(new InlineLabel(" to schedule the workflow execution periodically"));
+        planJobPanel.setHeight("20px");
+        startAtLayout.addMember(planJobPanel);
+
         rootPage.addMember(startAtLayout);
+
     }
 
     private void updateScheduledTimeAt() {
@@ -372,7 +652,7 @@ public class SubmitWindow {
         Date newDateTime = DateUtil.createLogicalTime(selectedHour, selectedMinute, 0, 0);
         Date updatedDate = DateUtil.combineLogicalDateAndTime(dateChooser.getData(), newDateTime);
         dateChooser.setData(updatedDate);
-        startAtRB.setText("At " + updatedDate.toString());
+        startAtRadioButton.setText("At " + updatedDate.toString());
     }
 
     private void updateScheduledTimeForToday() {
@@ -380,7 +660,14 @@ public class SubmitWindow {
         dateChooser.setData(newDate);
         dateChooser.getTimeItem().setHours(Integer.parseInt(DateTimeFormat.getFormat("HH").format(newDate)));
         dateChooser.getTimeItem().setMinutes(Integer.parseInt(DateTimeFormat.getFormat("mm").format(newDate)));
-        startAtRB.setText("At " + newDate.toString());
+        startAtRadioButton.setText("At " + newDate.toString());
+    }
+
+    private void initMessagesPart() {
+        messagePanel = new VLayout();
+        messagePanel.setIsGroup(true);
+        messagePanel.setGroupTitle("Messages");
+        rootPage.addMember(messagePanel);
     }
 
     private void initButtonsPart() {
@@ -397,6 +684,12 @@ public class SubmitWindow {
         submitButton.setTooltip("A workflow must be selected first");
         submitButton.addClickHandler(clickHandlerForSubmitButton());
 
+        checkButton = new IButton("Check");
+        checkButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        checkButton.setShowDisabledIcon(false);
+        checkButton.setTooltip("Validate current workflow and variables");
+        checkButton.addClickHandler(clickHandlerForCheckButton());
+
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setShowDisabledIcon(false);
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
@@ -407,25 +700,63 @@ public class SubmitWindow {
                 SubmitWindow.this.destroy();
             }
         });
-        submitCancelButtons.setMembers(cancelButton, submitButton);
+        submitCancelButtons.setMembers(cancelButton, checkButton, submitButton);
         rootPage.addMember(submitCancelButtons);
+    }
+
+    private void clearMessagePanel() {
+        if (messagePanel.contains(waitLabel)) {
+            messagePanel.removeMember(waitLabel);
+        }
+        if (messagePanel.contains(errorLabel)) {
+            messagePanel.removeMember(errorLabel);
+        }
     }
 
     private void displayLoadingMessage() {
 
-        loadingPanel = new VLayout();
+        clearMessagePanel();
 
-        final Label waitLabel = new Label("Please wait...");
+        waitLabel = new Label("Please wait...");
         waitLabel.setHeight(30);
         waitLabel.setIcon("loading.gif");
         waitLabel.setWidth100();
+        waitLabel.setMargin(10);
         waitLabel.setAlign(Alignment.CENTER);
 
-        loadingPanel.addMember(waitLabel);
-        rootPage.removeMember(varsLayout);
-        rootPage.removeMember(startAtLayout);
-        rootPage.removeMember(submitCancelButtons);
-        rootPage.addMember(loadingPanel);
+        messagePanel.addMember(waitLabel);
+
+        rootPage.reflow();
+    }
+
+    private void displayInfoMessage(String message) {
+        clearMessagePanel();
+
+        errorLabel = new Label(message);
+        errorLabel.setHeight(30);
+        errorLabel.setWidth100();
+        errorLabel.setMargin(10);
+        errorLabel.setAlign(Alignment.CENTER);
+        errorLabel.setStyleName("infoMessage");
+
+        messagePanel.addMember(errorLabel);
+
+        rootPage.reflow();
+    }
+
+    private void displayErrorMessage(String message) {
+
+        clearMessagePanel();
+
+        errorLabel = new Label(message);
+        errorLabel.setHeight(30);
+        errorLabel.setWidth100();
+        errorLabel.setMargin(10);
+        errorLabel.setAlign(Alignment.CENTER);
+        errorLabel.setStyleName(ERROR_MESSAGE);
+
+        messagePanel.addMember(errorLabel);
+
         rootPage.reflow();
     }
 
@@ -440,7 +771,7 @@ public class SubmitWindow {
         formContent.setHeight("30px");
 
         Hidden hiddenField = new Hidden();
-        hiddenField.setName("sessionId");
+        hiddenField.setName(SESSION_ID_PARAMETER_NAME);
         hiddenField.setValue(LoginModel.getInstance().getSessionId());
         formContent.add(hiddenField);
         formContent.add(fileUpload);
@@ -464,6 +795,8 @@ public class SubmitWindow {
         fromCatalogPanel.setHeight("30px");
         fromCatalogPanel.setWidth("100%");
         fromCatalogPanel.setSpacing(2);
+        fromCatalogPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         bucketsListBox = new ListBox();
         workflowsListBox = new ListBox();
 
@@ -478,29 +811,21 @@ public class SubmitWindow {
             public void onChange(ChangeEvent event) {
                 String selectedBucket = bucketsListBox.getSelectedValue();
                 if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" + catalogBucketsMap.get(selectedBucket) +
-                                         "/workflows";
+                    String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
                     RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
+                    req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                     req.setCallback(new RequestCallback() {
                         @Override
                         public void onResponseReceived(Request request, Response response) {
-                            JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                            JSONArray workflows = jsonObjectResponse.get("_embedded")
-                                                                    .isObject()
-                                                                    .get("workflowMetadataList")
-                                                                    .isArray();
+                            JSONArray workflows = JSONParser.parseStrict(response.getText()).isArray();
                             int workflowsSize = workflows.size();
-                            catalogWorkflowsMap = new HashMap<>(workflowsSize);
                             workflowsListBox.setEnabled(false);
                             workflowsListBox.clear();
                             workflowsListBox.addItem(CATALOG_SELECT_WF);
                             for (int i = 0; i < workflowsSize; i++) {
                                 JSONObject workflow = workflows.get(i).isObject();
-                                String workflowName = workflow.get("name").isString().stringValue();
-                                String workflowId = workflow.get("id").isNumber().toString();
-                                String dropdownListItemLabel = workflowName + " (" + workflowId + ")";
-                                workflowsListBox.addItem(dropdownListItemLabel);
-                                catalogWorkflowsMap.put(dropdownListItemLabel, Integer.parseInt(workflowId));
+                                String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
+                                workflowsListBox.addItem(workflowName);
                             }
                             workflowsListBox.setEnabled(true);
                         }
@@ -521,21 +846,17 @@ public class SubmitWindow {
             }
         });
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
+        req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                JSONObject jsonObjectResponse = JSONParser.parseStrict(response.getText()).isObject();
-                JSONArray buckets = jsonObjectResponse.get("_embedded").isObject().get("bucketMetadataList").isArray();
+                JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
-                catalogBucketsMap = new HashMap<>(bucketSize);
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
-                    String bucketName = bucket.get("name").isString().stringValue();
-                    String bucketId = bucket.get("id").isNumber().toString();
-                    String dropdownListItemLabel = bucketName + " (" + bucketId + ")";
-                    bucketsListBox.addItem(bucketName + " (" + bucketId + ")");
-                    catalogBucketsMap.put(dropdownListItemLabel, Integer.parseInt(bucketId));
+                    String bucketName = bucket.get(KEY_OF_NAME).isString().stringValue();
+                    bucketsListBox.addItem(bucketName);
                 }
                 bucketsListBox.setEnabled(true);
             }
@@ -561,7 +882,7 @@ public class SubmitWindow {
 
         final VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
-        formContent.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
+        formContent.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
 
         final FormPanel importFromCatalogformPanel = new FormPanel();
         importFromCatalogformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
@@ -577,34 +898,194 @@ public class SubmitWindow {
                                                                                      importFromCatalogformPanel));
     }
 
-    private ClickHandler clickHandlerForSubmitButton() {
+    private ClickHandler clickHandlerForCheckButton() {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (int i = 0; i < fields.length; i++) {
-                    String val = "";
-                    if (fields[i].getValue() != null) {
-                        val = fields[i].getValue().toString();
+                setAllValuesAsString();
+                handleStartAt();
+                enableValidation(true);
+                handleCompletedSubmission();
+                variablesActualForm.submit();
+                displayLoadingMessage();
+
+            }
+
+            private void handleCompletedSubmission() {
+                variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+                    @Override
+                    public void onSubmitComplete(SubmitCompleteEvent event) {
+                        String result = event.getResults();
+                        if (isResultNull(result) || ifResultIsAnError(result)) {
+                            return;
+                        }
+
+                        try {
+                            JSONValue json = JSONParser.parseStrict(result);
+                            JSONObject obj = json.isObject();
+                            handleVariables(obj);
+                        } catch (Throwable t) {
+                            handleParsingError(result);
+                        }
                     }
-                    _fields[i].setValue(val);
-                }
-                if (startAtRB.getValue()) {
+
+                    private void handleParsingError(String result) {
+                        // JSON parsing error workaround to force extract error message
+                        MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
+                        if (errorMessageMatcher != null) {
+                            GWT.log(errorMessageMatcher.getGroup(1));
+                            displayErrorMessage(errorMessageMatcher.getGroup(1));
+                        } else {
+                            GWT.log(JSON_ERROR);
+                            displayErrorMessage(JSON_ERROR);
+                        }
+                    }
+
+                    private void handleVariables(JSONObject obj) {
+
+                        if (obj != null && obj.containsKey("valid")) {
+                            if (((JSONBoolean) obj.get("valid")).booleanValue()) {
+                                if (obj.containsKey("updatedVariables")) {
+                                    updateVariables(obj.get("updatedVariables"));
+                                    redrawVariables(job);
+                                }
+                                GWT.log("Job validated");
+                                displayInfoMessage("Job is valid");
+                            } else if (obj.containsKey(ERROR_MESSAGE)) {
+                                String errorMessage = obj.get(ERROR_MESSAGE).toString();
+                                if (errorMessage.contains("JobValidationException")) {
+                                    errorMessage = errorMessage.substring(errorMessage.indexOf(':') + 2);
+                                }
+                                displayErrorMessage(errorMessage);
+                            }
+                        }
+
+                    }
+
+                    private boolean ifResultIsAnError(String result) {
+                        if (result.startsWith(SubmitEditServlet.ERROR)) {
+                            displayErrorMessage(result.substring(SubmitEditServlet.ERROR.length()));
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    private boolean isResultNull(String result) {
+                        if (result == null) {
+                            GWT.log("Unexpected empty result");
+                            displayErrorMessage("Unexpected empty result");
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+
+            private void handleStartAt() {
+                if (startAtRadioButton.getValue()) {
                     DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
                     String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
                     startAtParameter.setValue(iso8601DateStr);
                     hiddenPane.add(startAtParameter);
                 }
+            }
+
+            private void setAllValuesAsString() {
+                for (int i = 0; i < _fields.length; i++) {
+                    String val = "";
+                    if (fields[2 * i].getValue() != null) {
+                        val = fields[2 * i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
+            }
+        };
+    }
+
+    private void updateVariables(JSONValue updatedVariablesJsonValue) {
+        JSONObject obj = updatedVariablesJsonValue.isObject();
+        if (obj != null) {
+            for (String varName : obj.keySet()) {
+                JobVariable variable = variables.get(varName);
+                if (variable != null) {
+                    JSONValue variableJsonValue = obj.get(varName);
+                    JSONString variableJsonString = variableJsonValue.isString();
+                    if (variableJsonString != null) {
+                        variable.setValue(variableJsonString.stringValue());
+                    }
+
+                }
+            }
+        }
+    }
+
+    private ClickHandler clickHandlerForSubmitButton() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setAllValuesAsString();
+                enableValidation(false);
+                handleRadioButton();
+                submitWithVariables();
+                displayLoadingMessage();
+            }
+
+            private void submitWithVariables() {
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
-                        GWT.log("Job submitted to the scheduler");
+                        handleJobSubmission(event);
+                    }
+
+                    private void handleJobSubmission(SubmitCompleteEvent event) {
+                        checkEventResults(event);
                     }
                 });
                 variablesActualForm.submit();
-                displayLoadingMessage();
-                SubmitWindow.this.window.removeMember(rootPage);
-                SubmitWindow.this.window.hide();
-                SubmitWindow.this.destroy();
+            }
+
+            private void checkEventResults(SubmitCompleteEvent event) {
+                if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
+                    GWT.log("Job submitted to the scheduler");
+                    SubmitWindow.this.window.removeMember(rootPage);
+                    SubmitWindow.this.window.hide();
+                    SubmitWindow.this.destroy();
+                } else {
+                    String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
+                    JSONValue json = controller.parseJSON(jsonError);
+                    JSONObject obj = json.isObject();
+                    if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
+                        String errorMessage = obj.get(ERROR_MESSAGE).toString();
+                        if (errorMessage.contains("JobValidationException")) {
+                            errorMessage = errorMessage.substring(errorMessage.indexOf(':') + 2);
+                        }
+                        displayErrorMessage(errorMessage);
+                    } else {
+                        displayErrorMessage(jsonError);
+                    }
+                }
+            }
+
+            private void handleRadioButton() {
+                if (startAtRadioButton.getValue()) {
+                    DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+                    String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+                    startAtParameter.setValue(iso8601DateStr);
+                    hiddenPane.add(startAtParameter);
+                } else if (startAccordingPlanningRadioButton.getValue() && !isExecCalendarValueNull) {
+                    planParameter.setValue("true");
+                    hiddenPane.add(planParameter);
+                }
+            }
+
+            private void setAllValuesAsString() {
+                for (int i = 0; i < _fields.length; i++) {
+                    String val = "";
+                    if (fields[2 * i].getValue() != null) {
+                        val = fields[2 * i].getValue().toString();
+                    }
+                    _fields[i].setValue(val);
+                }
             }
         };
     }
@@ -617,7 +1098,8 @@ public class SubmitWindow {
                 if ("".compareTo(fileName) != 0) {
                     displayLoadingMessage();
                     toSubmit.submit();
-
+                } else {
+                    displayErrorMessage("Nothing to upload. Please select a file.");
                 }
 
             }
@@ -631,12 +1113,10 @@ public class SubmitWindow {
             public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
                 // filter only valid items
                 if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedBucketLabel = bucketsListBox.getSelectedValue();
                     String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketId = String.valueOf(catalogBucketsMap.get(selectedBucketLabel));
-                    String selectedWorkflowId = String.valueOf(catalogWorkflowsMap.get(selectedWorkflowLabel));
-                    formContent.add(new Hidden("bucketId", selectedBucketId));
-                    formContent.add(new Hidden("workflowId", selectedWorkflowId));
+                    String selectedBucketName = bucketsListBox.getSelectedValue();
+                    formContent.add(new Hidden("bucketName", selectedBucketName));
+                    formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
                     displayLoadingMessage();
                     importFromCatalogformPanel.submit();
                 }
@@ -648,64 +1128,61 @@ public class SubmitWindow {
         return new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-
-                String fn = fileUpload.getFilename();
-
-                // chrome workaround
-                final String fileName = fn.replace("C:\\fakepath\\", "");
+                String jobEditKey = "jobEdit";
                 String res = event.getResults();
-                DynamicForm variablesVisualForm = null;
-                Layout fpanelWra = null;
-                variablesActualForm = null;
 
                 try {
                     JSONValue js = JSONParser.parseStrict(res);
                     JSONObject obj = js.isObject();
 
-                    if (obj.get("jobEdit") != null && obj.get("jobEdit").isString() != null) {
-                        String val = obj.get("jobEdit").isString().stringValue();
-                        String job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
-                        final Map<String, String> variables = readVars(job);
-
-                        // presentation form
-                        variablesVisualForm = new DynamicForm();
-                        fields = new FormItem[variables.size()];
-                        _fields = new Hidden[variables.size()];
-                        int i = 0;
-                        hiddenPane = new VerticalPanel();
-                        for (Entry<String, String> var : variables.entrySet()) {
-                            TextItem t = new TextItem(var.getKey(), var.getKey());
-                            t.setValue(var.getValue());
-                            t.setWidth(240);
-
-                            _fields[i] = new Hidden("var_" + var.getKey());
-                            hiddenPane.add(_fields[i]);
-                            fields[i] = t;
-                            i++;
-                        }
-                        variablesVisualForm.setFields(fields);
-
-                        // actual form used to POST
-                        variablesActualForm = new FormPanel();
-                        variablesActualForm.setMethod(FormPanel.METHOD_POST);
-                        variablesActualForm.setAction(URL_SUBMIT_XML);
-                        hiddenPane.add(new Hidden("job", job));
-                        hiddenPane.add(new Hidden("sessionId", LoginModel.getInstance().getSessionId()));
-                        variablesActualForm.setWidget(hiddenPane);
-                        fpanelWra = new Layout();
-                        fpanelWra.addMember(variablesActualForm);
+                    if (obj.get(jobEditKey) != null && obj.get(jobEditKey).isString() != null) {
+                        String val = obj.get(jobEditKey).isString().stringValue();
+                        job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
+                        // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
+                        setStartAccordingPlanningRadioButtonState(job);
+                        variables = readVars(job);
+                    } else {
+                        GWT.log(JSON_ERROR);
+                        displayErrorMessage(res);
+                        //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                        setEnabledStartAtPart(false);
+                        startAccordingPlanningRadioButton.setVisible(false);
+                        return;
                     }
+
                 } catch (JSONException t) {
-                    GWT.log("JSON parse ERROR");
+                    GWT.log(JSON_ERROR);
+                    displayErrorMessage(res);
+                    //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                    setEnabledStartAtPart(false);
+                    startAccordingPlanningRadioButton.setVisible(false);
+                    return;
                 }
-                setEnabledStartAtPart(true);
-                rootPage.removeMember(loadingPanel);
-                initVarsPart(variablesVisualForm, fpanelWra);
-                rootPage.addMember(startAtLayout);
-                rootPage.addMember(submitCancelButtons);
-                rootPage.reflow();
+                redrawVariables(job);
             }
         };
+    }
+
+    private void redrawVariables(String job) {
+        removeBottomMembers();
+        setEnabledStartAtPart(true);
+        fillVarsPart(job);
+        rootPage.addMember(startAtLayout);
+        clearMessagePanel();
+        rootPage.addMember(messagePanel);
+        rootPage.addMember(submitCancelButtons);
+        rootPage.reflow();
+    }
+
+    private void removeBottomMembers() {
+        rootPage.removeMember(varsLayout);
+        rootPage.removeMember(startAtLayout);
+        rootPage.removeMember(messagePanel);
+        rootPage.removeMember(submitCancelButtons);
+    }
+
+    private void enableValidation(boolean enable) {
+        validate.setValue(Boolean.toString(enable));
     }
 
     private void resetAllHandlers() {
@@ -764,16 +1241,18 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                startAtRB.setText("At " + dateChooser.getData().toString());
+                startAtRadioButton.setText("At " + dateChooser.getData().toString());
                 resetAllHandlers();
             }
         };
     }
 
     private void setEnabledStartAtPart(boolean state) {
-        startNowRB.setEnabled(state);
-        startAtRB.setEnabled(state);
+        setStartAccordingPlanningRadioButtonState(job);
+        startNowRadioButton.setEnabled(state);
+        startAtRadioButton.setEnabled(state);
         submitButton.setDisabled(!state);
+        checkButton.setDisabled(!state);
         if (!state) {
             submitButton.setTooltip("A workflow must be selected first");
         } else {
@@ -789,6 +1268,7 @@ public class SubmitWindow {
         initSelectWfPart(); // -------- Select workflow Panel
         initVarsPart(); // ------------ Fill workflow variables Panel
         initSubmitAtPart(); // -------- Submit at given time Panel
+        initMessagesPart(); // --------- loading and error messages
         initButtonsPart(); // --------- Close and Submit buttons
 
         setEnabledStartAtPart(false);
@@ -799,8 +1279,8 @@ public class SubmitWindow {
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(rootPage);
-        this.window.setWidth(this.width);
-        this.window.setHeight(this.height);
+        this.window.setWidth(this.widthWindows);
+        this.window.setHeight(this.heightWindows);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
     }
@@ -809,48 +1289,161 @@ public class SubmitWindow {
      * @param jobDescriptor an XML job descriptor as a string
      * @return the name/value of all <variables><variable name value> elements
      */
-    private Map<String, String> readVars(String jobDescriptor) {
-        /* this will fail if someday the XML schema gets another <variable> tag elsewhere */
-
-        Document dom = XMLParser.parse(jobDescriptor);
-        NodeList variables = dom.getElementsByTagName("variable");
-        Map<String, String> ret = new HashMap<String, String>();
+    private Map<String, JobVariable> readVars(String jobDescriptor) {
+        /*
+         * this will fail if someday the XML schema gets another <variable> tag
+         * elsewhere
+         */
+        NodeList variables = XMLParser.parse(jobDescriptor).getElementsByTagName("variable");
+        Map<String, JobVariable> ret = new LinkedHashMap<>();
 
         if (variables.getLength() > 0) {
             for (int i = 0; i < variables.getLength(); i++) {
-                Node n = variables.item(i);
+                Node variableNode = variables.item(i);
 
-                if (n != null) {
-                    NamedNodeMap attrs = n.getAttributes();
+                if (variableNode != null && !isTaskVariableElement(variableNode)) {
+                    NamedNodeMap attrs = variableNode.getAttributes();
                     try {
-                        if (attrs != null && n.hasAttributes()) {
-                            String name = null;
-                            String value = null;
-                            for (int j = 0; j < attrs.getLength(); j++) {
-                                Node attr = attrs.item(j);
-                                if (attr.getNodeName().equals("name")) {
-                                    name = attr.getNodeValue();
-                                }
-                                if (attr.getNodeName().equals("value")) {
-                                    value = attr.getNodeValue();
-                                }
-                            }
-                            if (name != null && value != null) {
-                                if (!name.matches("[A-Za-z0-9._]+")) {
-                                    // this won't necessarily be a problem at job submission,
-                                    // but it definitely will be here in the client; don't bother
-                                    continue;
-                                }
-
-                                ret.put(name, value);
-                            }
-                        }
+                        checkIfAttributes(ret, variableNode, attrs);
                     } catch (JavaScriptException t) {
-                        // Node.hasAttributes() throws if there are no attributes... (GWT 2.1.0)
+                        // Node.hasAttributes() throws if there are no
+                        // attributes... (GWT 2.1.0)
                     }
                 }
             }
         }
         return ret;
+    }
+
+    private void checkIfAttributes(Map<String, JobVariable> ret, Node variableNode, NamedNodeMap attrs) {
+        if (attrs != null && variableNode.hasAttributes()) {
+            String name = extractNodeValue(attrs, KEY_OF_NAME);
+            String value = extractNodeValue(attrs, KEY_OF_VALUE);
+            String model = extractNodeValue(attrs, KEY_OF_MODEL);
+            createJobVariable(ret, name, value, model);
+        }
+    }
+
+    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
+        if (name != null && value != null) {
+            if (name.matches("[A-Za-z0-9._]+")) {
+                // this won't necessarily be a problem at
+                // job submission,
+                // but it definitely will be here in the
+                // client; don't bother
+                ret.put(name, new JobVariable(name, value, model));
+            }
+
+        }
+    }
+
+    private String extractNodeValue(NamedNodeMap attrs, String keyOf) {
+
+        for (int j = 0; j < attrs.getLength(); j++) {
+            Node attr = attrs.item(j);
+            if (attr.getNodeName().equals(keyOf)) {
+                return attr.getNodeValue();
+            }
+
+        }
+        return null;
+    }
+
+    private Boolean isExecutionCalendarGIDefined(String jobDescriptor) {
+        Document dom = XMLParser.parse(jobDescriptor);
+
+        NodeList genericInfo = dom.getElementsByTagName("genericInformation");
+        // check if the job has genericInformation or not
+        if (genericInfo != null && genericInfo.getLength() > 0) {
+            // search calendar GI in the first item
+            return searchCalendarGI(genericInfo.item(0));
+        } else
+            return false;
+    }
+
+    private Boolean searchCalendarGI(Node genericInfoNode) {
+        Boolean exists = false;
+        NodeList list = genericInfoNode.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeName().equals("info") && node.hasAttributes()) {
+                NamedNodeMap attributes = node.getAttributes();
+                for (int j = 0; j < attributes.getLength(); j++) {
+                    Node attribute = attributes.item(j);
+                    exists = checkExecutionCalendarName(exists, attribute);
+                    if (checkExecutionCalendarValue(exists, attribute)) {
+                        return true;
+                    }
+
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkExecutionCalendarValue(Boolean exists, Node attribute) {
+        if (isAttributeExecCalendarValueDefined(attribute, KEY_OF_VALUE) && exists) {
+            if (!attribute.getNodeValue().isEmpty()) {
+                isExecCalendarValueNull = false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkExecutionCalendarName(Boolean exists, Node attribute) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(KEY_OF_NAME) &&
+            attribute.getNodeValue().equalsIgnoreCase("execution_calendars")) {
+            exists = true;
+        }
+        return exists;
+    }
+
+    private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
+        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(name)) {
+            return true;
+        } else
+            return false;
+    }
+
+    private boolean isTaskVariableElement(Node node) {
+        if (node.getParentNode() != null && node.getParentNode().getParentNode() != null) {
+            Node grandparentNode = node.getParentNode().getParentNode();
+            if (grandparentNode.getNodeName().equals("task")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    class JobVariable {
+        private String name;
+
+        private String value;
+
+        private String model;
+
+        public JobVariable(String name, String value, String model) {
+            this.name = name;
+            this.value = value;
+            this.model = model;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
     }
 }

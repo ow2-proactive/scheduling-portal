@@ -57,6 +57,10 @@ public class RMConfig extends Config {
 
     private static final String d_CLIENT_REFRESH_TIME = "3000";
 
+    public static final String CLIENT_BURST_REFRESH_TIME = "rm.client.burst.refresh.time";
+
+    private static final String d_CLIENT_BURST_REFRESH_TIME = "10";
+
     /** release version string */
     public static final String VERSION = "rm.version";
 
@@ -75,7 +79,7 @@ public class RMConfig extends Config {
     /** stat history refresh rate in millis */
     public static final String STATISTICS_REFRESH_TIME = "rm.client.stats.time";
 
-    private static final String d_STATISTICS_REFRESH_TIME = "5000";
+    private static final String d_STATISTICS_REFRESH_TIME = "3000";
 
     /** message of the day */
     public static final String MOTD_URL = "rm.motd.url";
@@ -112,6 +116,9 @@ public class RMConfig extends Config {
 
     public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
 
+    /** Workflow Catalog URL **/
+    public static final String CATALOG_URL = "sched.catalog.url";
+
     private static RMConfig instance = null;
 
     /**
@@ -129,6 +136,7 @@ public class RMConfig extends Config {
         properties.put(REST_URL, d_REST_URL);
         properties.put(RM_URL, d_RM_URL);
         properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
+        properties.put(CLIENT_BURST_REFRESH_TIME, d_CLIENT_BURST_REFRESH_TIME);
         properties.put(VERSION, d_VERSION);
         properties.put(RM_VERSION, d_RM_VERSION);
         properties.put(REST_VERSION, d_REST_VERSION);
@@ -188,6 +196,10 @@ public class RMConfig extends Config {
         return Integer.parseInt(properties.get(CLIENT_REFRESH_TIME));
     }
 
+    public int getClientBurstRefreshTime() {
+        return Integer.parseInt(properties.get(CLIENT_BURST_REFRESH_TIME));
+    }
+
     /**
      * @return refresh rate in millis for the Statistics History
      */
@@ -240,4 +252,12 @@ public class RMConfig extends Config {
     public String getRMUrl() {
         return properties.get(RM_URL);
     }
+
+    /**
+     * @return the catalog url or null if none has been defined
+     */
+    public String getCatalogUrl() {
+        return properties.get(CATALOG_URL);
+    }
+
 }

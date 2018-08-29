@@ -30,6 +30,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tas
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListG
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
@@ -65,6 +65,7 @@ import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
@@ -113,7 +114,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         super.build();
         this.setSelectionType(SelectionStyle.SINGLE);
         this.setSelectionProperty("isSelected");
-        this.sort(TasksColumnsFactory.ID_ATTR.getName(), SortDirection.ASCENDING);
+        this.sort(TasksCentricColumnsFactory.JOB_ID_ATTR.getName(), SortDirection.DESCENDING);
         this.setShowRecordComponents(true);
         this.setShowRecordComponentsByCell(true);
     }
@@ -171,7 +172,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         Task selectedTask = this.controller.getModel().getSelectedTask();
 
         RecordList data = new RecordList();
-        TaskRecord selectedRecord = null;
         for (Task t : tasks) {
             TaskRecord record = new TaskRecord(t);
             this.columnsFactory.buildRecord(t, record);
@@ -179,7 +179,6 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
             if (t.equals(selectedTask)) {
                 record.setAttribute("isSelected", true);
-                selectedRecord = record;
             }
         }
 
@@ -360,12 +359,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(NAME_ATTR.getName());
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(STATUS_ATTR.getName());
+        final Integer jobId = (int) TaskRecord.getTask(this.getSelectedRecord()).getJobId();
 
         MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
         restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartInErrorTask(taskName);
+                controller.restartInErrorTask(taskName, jobId);
             }
         });
 
@@ -373,7 +373,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         restartRunningTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.restartRunningTask(taskName);
+                controller.restartRunningTask(taskName, jobId);
             }
         });
 
@@ -381,21 +381,21 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         preempt.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.preemptTask(taskName);
+                controller.preemptTask(taskName, jobId);
             }
         });
         MenuItem kill = new MenuItem("Kill");
         kill.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.killTask(taskName);
+                controller.killTask(taskName, jobId);
             }
         });
         MenuItem markAsFinishedAndResume = new MenuItem("Mark as finished and Resume");
         markAsFinishedAndResume.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             @Override
             public void onClick(MenuItemClickEvent event) {
-                controller.markAsFinishedAndResume(taskName);
+                controller.markAsFinishedAndResume(taskName, jobId);
             }
         });
 
@@ -453,10 +453,15 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     @Override
     protected void selectionChangedHandler(SelectionEvent event) {
         if (event.getState() && !fetchingData) {
-            Record record = event.getRecord();
+            ListGridRecord record = event.getRecord();
             Task task = TaskRecord.getTask(record);
             controller.selectTask(task);
         }
+    }
+
+    @Override
+    protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
+
     }
 
 }

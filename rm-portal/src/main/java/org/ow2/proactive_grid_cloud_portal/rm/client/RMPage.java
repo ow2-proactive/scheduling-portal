@@ -35,9 +35,16 @@ import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.creation.CreateNodeSourceWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditDynamicParametersWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditNodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.smartgwt.client.types.Alignment;
@@ -106,8 +113,8 @@ public class RMPage implements LogListener {
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
 
-    /** create node sources */
-    private NSCreationWindow nsWindow = null;
+    /** manage node sources */
+    private NodeSourceWindow nsWindow = null;
 
     /** node launcher window */
     private AddNodeWindow addNodeWindow = null;
@@ -166,6 +173,11 @@ public class RMPage implements LogListener {
         this.credentialsWindow = new CredentialsWindow();
 
         final Canvas header = buildTools();
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setWidth("100%");
+        panel.setHeight("3px");
+        panel.getElement().getStyle().setBackgroundColor("#f47930");
+        panel.getElement().getStyle().setPadding(-1, Unit.PX);
 
         Canvas topPane = buildTopPane();
         topPane.setWidth100();
@@ -265,6 +277,7 @@ public class RMPage implements LogListener {
 
         rl.addMember(buildLogoStrip());
         rl.addMember(header);
+        rl.addMember(panel);
         rl.addMember(stack);
 
         this.logWindow = new LogWindow(controller);
@@ -273,28 +286,41 @@ public class RMPage implements LogListener {
     }
 
     private ToolStrip buildLogoStrip() {
-        ToolStrip logoStrip = new ToolStrip();
-
         final Label resourcesLabel = new Label("Proactive Resource Manager");
         resourcesLabel.setStyleName("rmHeadline");
         resourcesLabel.setHeight100();
         resourcesLabel.setAutoWidth();
 
-        logoStrip.setStyleName("paddingLeftAndRight");
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
+        ToolStrip logoPA = new ToolStrip();
+        logoPA.setHeight(logoStripHeight);
+        logoPA.setWidth("33%");
+        logoPA.setBackgroundImage("");
+        logoPA.setBackgroundColor(logoStripBackgroundColor);
+        logoPA.setMargin(0);
+        logoPA.setBorder(logoStripBorder);
+        logoPA.setAlign(Alignment.LEFT);
+        logoPA.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
+        logoPA.addMember(resourcesLabel);
 
-        logoStrip.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addMember(resourcesLabel);
-        logoStrip.addFill();
-        logoStrip.addMember(new Img(RMImagesUnbundled.COMPANY_ICON, logoStripHeight, logoStripHeight));
-        logoStrip.addFill();
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("33%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.CENTER);
+        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        additionalLogoCenter.addMember(logoAzureImg);
 
-        //by click on logo - open home activeeon page in new tab
+        ToolStrip logoAE = new ToolStrip();
+        logoAE.setHeight(logoStripHeight);
+        logoAE.setWidth("33%");
+        logoAE.setBackgroundImage("");
+        logoAE.setBackgroundColor(logoStripBackgroundColor);
+        logoAE.setMargin(0);
+        logoAE.setBorder(logoStripBorder);
+        logoAE.setAlign(Alignment.RIGHT);
         Img logoImg = new Img(RMImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(new ClickHandler() {
             @Override
@@ -302,7 +328,19 @@ public class RMPage implements LogListener {
                 Window.open("http://activeeon.com/", "", "");
             }
         });
-        logoStrip.addMember(logoImg);
+        logoAE.addMember(logoImg);
+
+        ToolStrip logoStrip = new ToolStrip();
+        logoStrip.setStyleName("paddingLeftAndRight");
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+        logoStrip.addMember(logoPA);
+        logoStrip.addMember(additionalLogoCenter);
+        logoStrip.addMember(logoAE);
 
         return logoStrip;
     }
@@ -356,12 +394,7 @@ public class RMPage implements LogListener {
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
-        logMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        logMenuItem.addClickHandler(e -> showLogWindow());
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
@@ -389,34 +422,21 @@ public class RMPage implements LogListener {
         else
             login = "";
 
-        ToolStripButton nsButton = new ToolStripButton("Add Nodes");
-        nsButton.setIcon(RMImages.instance.nodesource_16().getSafeUri().asString());
+        ToolStripButton nsButton = new ToolStripButton("Add Node Source");
+        nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
-        nsButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (RMPage.this.nsWindow != null)
-                    RMPage.this.nsWindow.destroy();
-                RMPage.this.nsWindow = new NSCreationWindow(controller);
-                RMPage.this.nsWindow.show();
-            }
-        });
+        nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 
         errorButton = new ToolStripButton("<strong>Error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
-        errorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RMPage.this.logWindow.show();
-                errorButton.hide();
-            }
-        });
+        errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
-        ToolStripButton cloudAutomationLinkButton = toolButtonsRender.getCloudAutomationLinkButton();
-        ToolStripButton notificationPortalLinkButton = toolButtonsRender.getNotificationPortalLinkButton();
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
+        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerHighlightedLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
 
         tools.addMenuButton(portalMenuButton);
@@ -425,13 +445,14 @@ public class RMPage implements LogListener {
         tools.addButton(nsButton);
         tools.addButton(errorButton);
         tools.addFill();
+        tools.addButton(automationDashboardLinkButton);
+        tools.addSpacer(12);
         tools.addButton(studioLinkButton);
         tools.addSpacer(12);
         tools.addButton(schedulerLinkButton);
         tools.addSpacer(12);
-        tools.addButton(cloudAutomationLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(notificationPortalLinkButton);
+        tools.addButton(resourceManagerLinkButton);
+        tools.addSpacer(2);
         tools.addSeparator();
         tools.addSpacer(2);
         tools.addButton(logoutButton);
@@ -515,8 +536,7 @@ public class RMPage implements LogListener {
         this.settingsWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
-        if (this.nsWindow != null)
-            this.nsWindow.destroy();
+        this.destroyNodeSourceWindow();
     }
 
     @Override
@@ -540,4 +560,34 @@ public class RMPage implements LogListener {
         this.lastCriticalMessage = System.currentTimeMillis();
         this.errorButton.show();
     }
+
+    public void showNodeSourceCreationWindow() {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new CreateNodeSourceWindow(controller);
+        RMPage.this.nsWindow.show();
+    }
+
+    public void showEditNodeSourceWindow(String nodeSourceName) {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new EditNodeSourceWindow(controller, nodeSourceName);
+        RMPage.this.nsWindow.show();
+    }
+
+    public void showEditDynamicParametersWindow(String nodeSourceName) {
+        destroyNodeSourceWindow();
+        RMPage.this.nsWindow = new EditDynamicParametersWindow(controller, nodeSourceName);
+        RMPage.this.nsWindow.show();
+    }
+
+    private void destroyNodeSourceWindow() {
+        if (RMPage.this.nsWindow != null) {
+            RMPage.this.nsWindow.destroy();
+        }
+    }
+
+    private void showLogWindow() {
+        RMPage.this.logWindow.show();
+        errorButton.hide();
+    }
+
 }
