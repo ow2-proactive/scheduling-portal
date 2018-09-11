@@ -330,4 +330,12 @@ public interface RMService extends RemoteService {
     String executeNodeScript(String sessionId, String script, String engine, String nodeUrl)
             throws RestServerException, ServiceException;
 
+    /**
+     * Retrieves the thread dump of the node identified by the given URL
+     *
+     * @param sessionId current session
+     * @param nodeUrl node to ask the thread dump from
+     */
+    String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException;
+
 }
