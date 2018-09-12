@@ -148,7 +148,7 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
 
     private void createThreadDumpButton() {
         this.threadDumpButton = new IButton("Fetch Node's Thread Dump");
-        this.threadDumpButton.setWidth("180px");
+        this.threadDumpButton.setWidth("220px");
         this.threadDumpButton.addClickHandler(event -> {
             if (this.nodeUrl != null) {
                 String nodeUrl = this.nodeUrl;
