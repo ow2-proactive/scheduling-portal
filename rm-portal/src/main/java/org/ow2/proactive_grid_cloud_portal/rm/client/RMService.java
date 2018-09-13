@@ -331,6 +331,13 @@ public interface RMService extends RemoteService {
             throws RestServerException, ServiceException;
 
     /**
+     * Retrieves the thread dump of the Resource Manager
+     *
+     * @param sessionId current session
+     */
+    String getRMThreadDump(String sessionId) throws ServiceException, RestServerException;
+
+    /**
      * Retrieves the thread dump of the node identified by the given URL
      *
      * @param sessionId current session

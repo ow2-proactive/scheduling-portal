@@ -423,6 +423,11 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String getRMThreadDump(String sessionId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getRMThreadDump(sessionId));
+    }
+
+    @Override
     public String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeThreadDump(sessionId, nodeUrl));
     }

@@ -32,9 +32,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
 
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.TextArea;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
@@ -53,7 +51,9 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
 
     private Label loadingLabel;
 
-    private IButton threadDumpButton;
+    private IButton nodeThreadDumpButton;
+
+    private IButton rmThreadDumpButton;
 
     private TextArea threadDumpArea;
 
@@ -79,13 +79,14 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         canvas.setOverflow(Overflow.AUTO);
 
         createThreadDumpArea();
-        createThreadDumpButton();
+        createThreadDumpButtons();
         createLabels();
 
         HLayout fetchThreadDumpLayout = new HLayout();
         fetchThreadDumpLayout.setHeight("20px");
-        fetchThreadDumpLayout.setMembersMargin(5);
-        fetchThreadDumpLayout.addMember(this.threadDumpButton);
+        fetchThreadDumpLayout.setMembersMargin(10);
+        fetchThreadDumpLayout.addMember(this.nodeThreadDumpButton);
+        fetchThreadDumpLayout.addMember(this.rmThreadDumpButton);
         fetchThreadDumpLayout.addMember(this.loadingLabel);
         createLayout(fetchThreadDumpLayout);
 
@@ -146,10 +147,10 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         this.layout.hide();
     }
 
-    private void createThreadDumpButton() {
-        this.threadDumpButton = new IButton("Fetch Node's Thread Dump");
-        this.threadDumpButton.setWidth("220px");
-        this.threadDumpButton.addClickHandler(event -> {
+    private void createThreadDumpButtons() {
+        this.nodeThreadDumpButton = new IButton("Fetch Node's Thread Dump");
+        this.nodeThreadDumpButton.setWidth("220px");
+        this.nodeThreadDumpButton.addClickHandler(event -> {
             if (this.nodeUrl != null) {
                 String nodeUrl = this.nodeUrl;
                 this.loadingLabel.show();
@@ -171,6 +172,28 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
                                                                      }
                                                                  });
             }
+        });
+
+        this.rmThreadDumpButton = new IButton("Fetch Resource Manager Thread Dump");
+        this.rmThreadDumpButton.setWidth("220px");
+        this.rmThreadDumpButton.addClickHandler(event -> {
+            this.loadingLabel.show();
+            this.controller.getRMService().getRMThreadDump(LoginModel.getInstance().getSessionId(),
+                                                           new AsyncCallback<String>() {
+                                                               @Override
+                                                               public void onFailure(Throwable caught) {
+                                                                   LogModel.getInstance()
+                                                                           .logCriticalMessage(caught.getMessage());
+                                                                   ThreadDumpView.this.loadingLabel.hide();
+                                                                   ThreadDumpView.this.threadDumpArea.setText("Thread dump could not be fetched. See Help -> Display logs for more details.");
+                                                               }
+
+                                                               @Override
+                                                               public void onSuccess(String result) {
+                                                                   ThreadDumpView.this.loadingLabel.hide();
+                                                                   ThreadDumpView.this.threadDumpArea.setText(result);
+                                                               }
+                                                           });
         });
     }
 

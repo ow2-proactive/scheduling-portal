@@ -311,6 +311,14 @@ public interface RMServiceAsync {
             AsyncCallback<String> callback);
 
     /**
+     * Retrieves the thread dump of the Resource Manager
+     *
+     * @param sessionId current session
+     * @param callback a handler to define what to do with the retrieved thread dump
+     */
+    void getRMThreadDump(String sessionId, AsyncCallback<String> callback);
+
+    /**
      * Retrieves the thread dump of the node identified by the given URL
      *
      * @param sessionId current session

@@ -211,6 +211,12 @@ public interface RestClient {
 
     @GET
     @GZIP
+    @Path("/rm/threaddump")
+    @Produces("application/json")
+    InputStream getRMThreadDump(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @GZIP
     @Path("/rm/node/threaddump")
     @Produces("application/json")
     InputStream getNodeThreadDump(@HeaderParam("sessionid") String sessionId, @QueryParam("nodeurl") String nodeUrl);
