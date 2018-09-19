@@ -34,7 +34,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextArea;
-import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
@@ -45,7 +44,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.NodeSelectedListener {
 
-    private Label noNodeLabel;
+    private static final String NO_NODE_SELECTED_MESSAGE = "<h3>No node selected</h3>";
 
     private Label nodeLabel;
 
@@ -56,8 +55,6 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
     private IButton rmThreadDumpButton;
 
     private TextArea threadDumpArea;
-
-    private VLayout layout;
 
     private String nodeUrl;
 
@@ -75,59 +72,56 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
     }
 
     public Canvas build() {
-        VLayout canvas = new VLayout();
-        canvas.setOverflow(Overflow.AUTO);
-
-        createThreadDumpArea();
-        createThreadDumpButtons();
-        createLabels();
-
-        HLayout fetchThreadDumpLayout = new HLayout();
-        fetchThreadDumpLayout.setHeight("20px");
-        fetchThreadDumpLayout.setMembersMargin(10);
-        fetchThreadDumpLayout.addMember(this.nodeThreadDumpButton);
-        fetchThreadDumpLayout.addMember(this.rmThreadDumpButton);
-        fetchThreadDumpLayout.addMember(this.loadingLabel);
-        createLayout(fetchThreadDumpLayout);
-
-        canvas.setMembers(this.noNodeLabel, this.layout);
-        return canvas;
+        initLabels();
+        initThreadDumpButtons();
+        initThreadDumpArea();
+        return getCanvas();
     }
 
+    @Override
     public void nodeUnselected() {
-        this.noNodeLabel.setContents("No node selected");
-        this.noNodeLabel.setAlign(Alignment.CENTER);
-        this.noNodeLabel.show();
-        this.layout.hide();
         this.nodeUrl = null;
         this.nodeSourceName = null;
         this.nodeHostName = null;
+
+        this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
+        this.nodeLabel.setIcon("");
+        this.nodeThreadDumpButton.disable();
+        resetThreadDumpArea();
     }
 
+    @Override
     public void nodeSelected(NodeSource.Host.Node node) {
-        this.nodeLabel.setIcon(node.getIcon());
-
-        this.noNodeLabel.hide();
-
         this.nodeUrl = node.getNodeUrl();
         this.nodeSourceName = node.getSourceName();
         this.nodeHostName = node.getHostName();
-        this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
-        resetThreadDumpArea();
 
-        this.layout.show();
+        this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
+        this.nodeLabel.setIcon(node.getIcon());
+        this.nodeThreadDumpButton.enable();
+        resetThreadDumpArea();
     }
 
+    @Override
     public void nodeSourceSelected(NodeSource ns) {
         this.nodeUrl = null;
-        this.layout.hide();
-        this.noNodeLabel.show();
+        this.nodeHostName = null;
+
+        this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
+        this.nodeLabel.setIcon("");
+        this.nodeThreadDumpButton.disable();
+        resetThreadDumpArea();
     }
 
+    @Override
     public void hostSelected(NodeSource.Host h) {
         this.nodeUrl = null;
-        this.layout.hide();
-        this.noNodeLabel.show();
+        this.nodeSourceName = null;
+
+        this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
+        this.nodeLabel.setIcon("");
+        this.nodeThreadDumpButton.disable();
+        resetThreadDumpArea();
     }
 
     @Override
@@ -135,84 +129,40 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         NodeLabel.update(nodes, this.nodeLabel, this.nodeSourceName, this.nodeHostName, this.nodeUrl);
     }
 
-    private void createLayout(HLayout executeAndLoading) {
-        this.layout = new VLayout(7);
-        this.layout.setWidth100();
-        this.layout.setHeight100();
+    private void initLabels() {
+        this.nodeLabel = new Label();
+        this.nodeLabel.setHeight(25);
+        this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
 
-        this.layout.addMember(this.nodeLabel);
-        this.layout.addMember(executeAndLoading);
-        this.layout.addMember(this.threadDumpArea);
-
-        this.layout.hide();
+        this.loadingLabel = new Label();
+        this.loadingLabel.setHeight(25);
+        this.loadingLabel.setIcon("loading.gif");
+        this.loadingLabel.hide();
     }
 
-    private void createThreadDumpButtons() {
+    private void initThreadDumpButtons() {
         this.nodeThreadDumpButton = new IButton("Fetch Node's Thread Dump");
-        this.nodeThreadDumpButton.setWidth("220px");
+        this.nodeThreadDumpButton.setWidth("160px");
         this.nodeThreadDumpButton.addClickHandler(event -> {
             if (this.nodeUrl != null) {
-                String nodeUrl = this.nodeUrl;
                 this.loadingLabel.show();
                 this.controller.getRMService().getNodeThreadDump(LoginModel.getInstance().getSessionId(),
-                                                                 nodeUrl,
-                                                                 new AsyncCallback<String>() {
-                                                                     @Override
-                                                                     public void onFailure(Throwable caught) {
-                                                                         LogModel.getInstance()
-                                                                                 .logCriticalMessage(caught.getMessage());
-                                                                         ThreadDumpView.this.loadingLabel.hide();
-                                                                         ThreadDumpView.this.threadDumpArea.setText("Thread dump could not be fetched. See Help -> Display logs for more details.");
-                                                                     }
-
-                                                                     @Override
-                                                                     public void onSuccess(String result) {
-                                                                         ThreadDumpView.this.loadingLabel.hide();
-                                                                         ThreadDumpView.this.threadDumpArea.setText(result);
-                                                                     }
-                                                                 });
+                                                                 this.nodeUrl,
+                                                                 getThreadDumpCallback());
             }
         });
+        this.nodeThreadDumpButton.disable();
 
         this.rmThreadDumpButton = new IButton("Fetch Resource Manager Thread Dump");
         this.rmThreadDumpButton.setWidth("220px");
         this.rmThreadDumpButton.addClickHandler(event -> {
             this.loadingLabel.show();
             this.controller.getRMService().getRMThreadDump(LoginModel.getInstance().getSessionId(),
-                                                           new AsyncCallback<String>() {
-                                                               @Override
-                                                               public void onFailure(Throwable caught) {
-                                                                   LogModel.getInstance()
-                                                                           .logCriticalMessage(caught.getMessage());
-                                                                   ThreadDumpView.this.loadingLabel.hide();
-                                                                   ThreadDumpView.this.threadDumpArea.setText("Thread dump could not be fetched. See Help -> Display logs for more details.");
-                                                               }
-
-                                                               @Override
-                                                               public void onSuccess(String result) {
-                                                                   ThreadDumpView.this.loadingLabel.hide();
-                                                                   ThreadDumpView.this.threadDumpArea.setText(result);
-                                                               }
-                                                           });
+                                                           getThreadDumpCallback());
         });
     }
 
-    private void createLabels() {
-        this.noNodeLabel = new Label("No node selected");
-        this.noNodeLabel.setWidth100();
-        this.noNodeLabel.setAlign(Alignment.CENTER);
-
-        this.nodeLabel = new Label();
-        this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
-        this.nodeLabel.setHeight(16);
-
-        this.loadingLabel = new Label();
-        this.loadingLabel.setIcon("loading.gif");
-        this.loadingLabel.setHeight(25);
-        this.loadingLabel.hide();
-    }
-
-    private void createThreadDumpArea() {
+    private void initThreadDumpArea() {
         this.threadDumpArea = new TextArea();
         this.threadDumpArea.setWidth("95%");
         this.threadDumpArea.setHeight("95%");
@@ -223,6 +173,41 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
                 this.threadDumpArea.selectAll();
             }
         });
+    }
+
+    private Canvas getCanvas() {
+        HLayout fetchThreadDumpLayout = new HLayout();
+        fetchThreadDumpLayout.setHeight("20px");
+        fetchThreadDumpLayout.setMembersMargin(10);
+        fetchThreadDumpLayout.addMember(this.nodeThreadDumpButton);
+        fetchThreadDumpLayout.addMember(this.rmThreadDumpButton);
+        fetchThreadDumpLayout.addMember(this.loadingLabel);
+
+        VLayout threadDumpLayout = new VLayout(7);
+        threadDumpLayout.setWidth100();
+        threadDumpLayout.setHeight100();
+        threadDumpLayout.setOverflow(Overflow.AUTO);
+        threadDumpLayout.addMember(this.nodeLabel);
+        threadDumpLayout.addMember(fetchThreadDumpLayout);
+        threadDumpLayout.addMember(this.threadDumpArea);
+        return threadDumpLayout;
+    }
+
+    private AsyncCallback<String> getThreadDumpCallback() {
+        return new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage("Thread dump could not be fetched: " + caught.getMessage());
+                ThreadDumpView.this.loadingLabel.hide();
+                ThreadDumpView.this.threadDumpArea.setText("Thread dump could not be fetched. See Help -> Display logs for more details.");
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                ThreadDumpView.this.loadingLabel.hide();
+                ThreadDumpView.this.threadDumpArea.setText(result);
+            }
+        };
     }
 
     private void resetThreadDumpArea() {
