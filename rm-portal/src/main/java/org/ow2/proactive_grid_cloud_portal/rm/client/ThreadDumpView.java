@@ -141,7 +141,7 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
     }
 
     private void initThreadDumpButtons() {
-        this.nodeThreadDumpButton = new IButton("Fetch Node's Thread Dump");
+        this.nodeThreadDumpButton = new IButton("Fetch Node Thread Dump");
         this.nodeThreadDumpButton.setWidth("160px");
         this.nodeThreadDumpButton.addClickHandler(event -> {
             if (this.nodeUrl != null) {
@@ -153,7 +153,7 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         });
         this.nodeThreadDumpButton.disable();
 
-        this.rmThreadDumpButton = new IButton("Fetch Resource Manager Thread Dump");
+        this.rmThreadDumpButton = new IButton("Fetch Server Thread Dump");
         this.rmThreadDumpButton.setWidth("220px");
         this.rmThreadDumpButton.addClickHandler(event -> {
             this.loadingLabel.show();
