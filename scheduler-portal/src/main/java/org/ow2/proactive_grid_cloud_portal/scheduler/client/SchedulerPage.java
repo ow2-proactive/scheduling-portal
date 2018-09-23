@@ -25,13 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
-import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -48,7 +43,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
@@ -61,11 +55,10 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.SectionStack;
-import com.smartgwt.client.widgets.layout.SectionStackSection;
-import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.grid.HoverCustomizer;
+import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.layout.*;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
@@ -77,7 +70,6 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
-import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -504,6 +496,25 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                 schedResumeButton,
                                 schedPauseButton,
                                 schedKillButton);
+        // Adding tooltips on Admin actions
+        ListGridField titleFieldDefaults = adminMenu.getTitleFieldDefaults();
+        titleFieldDefaults.setShowHover(true);
+        titleFieldDefaults.setHoverCustomizer(new HoverCustomizer() {
+            @Override
+            public String hoverHTML(Object value, ListGridRecord record, int rowNum, int colNum) {
+
+                if (value.toString().equalsIgnoreCase("Freeze"))
+                    return "Running tasks terminate";
+
+                if (value.toString().equalsIgnoreCase("Pause"))
+                    return "Running jobs terminate";
+
+                if (value.toString().equalsIgnoreCase("Stop"))
+                    return "Submitted jobs terminate";
+
+                return null;
+            }
+        });
         adminMenuButton.setMenu(adminMenu);
 
         String login = LoginModel.getInstance().getLogin();
