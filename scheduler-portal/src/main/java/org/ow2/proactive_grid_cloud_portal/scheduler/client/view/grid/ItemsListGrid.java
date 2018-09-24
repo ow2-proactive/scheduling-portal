@@ -233,7 +233,9 @@ public abstract class ItemsListGrid<I> extends ListGrid {
         dataSource.fetchData(this.filter, new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {
-                setData(new RecordList(response.getData()));
+                RecordList recordList = new RecordList(response.getData());
+                setData(recordList);
+                recordList.destroy();
             }
 
         }, request);

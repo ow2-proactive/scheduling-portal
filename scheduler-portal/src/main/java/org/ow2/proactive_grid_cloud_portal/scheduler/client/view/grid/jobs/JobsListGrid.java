@@ -131,6 +131,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
 
         this.ds.setTestData(data.toArray());
+        data.destroy();
         applyCurrentLocalFilter();
     }
 
