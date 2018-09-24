@@ -83,17 +83,17 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
 public class SchedulerPage implements SchedulerStatusListener, LogListener, ExecutionDisplayModeListener {
 
     /** Actions on the scheduler */
-    private final String START = "Start";
+    private final static String START = "Start";
 
-    private final String STOP = "Stop";
+    private final static String STOP = "Stop";
 
-    private final String FREEZE = "Freeze";
+    private final static String FREEZE = "Freeze";
 
-    private final String RESUME = "Resume";
+    private final static String RESUME = "Resume";
 
-    private final String PAUSE = "Pause";
+    private final static String PAUSE = "Pause";
 
-    private final String KILL = "Kill";
+    private final static String KILL = "Kill";
 
     static SchedulerPage inst;
 
