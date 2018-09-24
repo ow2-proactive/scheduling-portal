@@ -23,7 +23,7 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.server.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -35,9 +35,9 @@ public class CatalogObjectAction implements AutoCloseable {
 
     private String bucketName;
 
-    private String nodeSourceName;
+    private String catalogObjectName;
 
-    private File nodeSourceJsonFile;
+    private File catalogObjectJsonFile;
 
     private String kind;
 
@@ -63,20 +63,20 @@ public class CatalogObjectAction implements AutoCloseable {
         this.bucketName = bucketName;
     }
 
-    public String getNodeSourceName() {
-        return nodeSourceName;
+    public String getCatalogObjectName() {
+        return catalogObjectName;
     }
 
-    public void setNodeSourceName(String nodeSourceName) {
-        this.nodeSourceName = nodeSourceName;
+    public void setCatalogObjectName(String catalogObjectName) {
+        this.catalogObjectName = catalogObjectName;
     }
 
-    public File getNodeSourceJsonFile() {
-        return nodeSourceJsonFile;
+    public File getCatalogObjectJsonFile() {
+        return catalogObjectJsonFile;
     }
 
-    public void setNodeSourceJsonFile(File nodeSourceJsonFile) {
-        this.nodeSourceJsonFile = nodeSourceJsonFile;
+    public void setCatalogObjectJsonFile(File catalogObjectJsonFile) {
+        this.catalogObjectJsonFile = catalogObjectJsonFile;
     }
 
     public String getKind() {
@@ -113,8 +113,8 @@ public class CatalogObjectAction implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if (this.nodeSourceJsonFile != null) {
-            Files.delete(this.nodeSourceJsonFile.toPath());
+        if (this.catalogObjectJsonFile != null) {
+            Files.delete(this.catalogObjectJsonFile.toPath());
         }
     }
 

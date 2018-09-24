@@ -30,22 +30,22 @@
 
 	<servlet>
 		<servlet-name>NSCreationServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.NSCreationServlet</servlet-class>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.NSCreationServlet</servlet-class>
 	</servlet>
 
 	<servlet>
-		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet</servlet-class>
+		<servlet-name>ExportToFileServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToFileServlet</servlet-class>
 	</servlet>
 
 	<servlet>
-		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToCatalogServlet</servlet-class>
+		<servlet-name>ExportToCatalogServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.export.ExportToCatalogServlet</servlet-class>
 	</servlet>
 
 	<servlet>
-		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ImportNodeSourceFromFileServlet</servlet-class>
+		<servlet-name>ImportFromFileServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.load.ImportFromFileServlet</servlet-class>
 	</servlet>
 
 	<!-- common -->
@@ -76,18 +76,18 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ExportNodeSourceToFileServlet</servlet-name>
-		<url-pattern>/portal/exportnodesourcetofile</url-pattern>
+		<servlet-name>ExportToFileServlet</servlet-name>
+		<url-pattern>/portal/file</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ExportNodeSourceToCatalogServlet</servlet-name>
-		<url-pattern>/portal/exportnodesourcetocatalog</url-pattern>
+		<servlet-name>ExportToCatalogServlet</servlet-name>
+		<url-pattern>/portal/catalog</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ImportNodeSourceFromFileServlet</servlet-name>
-		<url-pattern>/portal/importnodesourcefromfile</url-pattern>
+		<servlet-name>ImportFromFileServlet</servlet-name>
+		<url-pattern>/portal/import</url-pattern>
 	</servlet-mapping>
 
 	<mime-mapping>

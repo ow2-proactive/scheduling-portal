@@ -209,4 +209,16 @@ public interface RestClient {
     InputStream executeNodeScript(@HeaderParam("sessionid") String sessionId, @FormParam("nodeurl") String nodeUrl,
             @FormParam("script") String script, @FormParam("scriptEngine") String scriptEngine);
 
+    @GET
+    @GZIP
+    @Path("/rm/threaddump")
+    @Produces("application/json")
+    InputStream getRMThreadDump(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @GZIP
+    @Path("/rm/node/threaddump")
+    @Produces("application/json")
+    InputStream getNodeThreadDump(@HeaderParam("sessionid") String sessionId, @QueryParam("nodeurl") String nodeUrl);
+
 }

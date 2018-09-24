@@ -23,12 +23,20 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public class ImportException extends Exception {
+public class ExportToFileConstants {
 
-    public ImportException(String s, Exception e) {
-        super(s, e);
-    }
+    public static final String NODE_SOURCE_FILE_NAME_SUFFIX = "-NodeSource.json";
+
+    public static final String INFRASTRUCTURE_FILE_NAME_SUFFIX = "-InfrastructureNodeSource.json";
+
+    public static final String POLICY_FILE_NAME_SUFFIX = "-PolicyNodeSource.json";
+
+    public static final String FILE_CONTENT_PARAM = "fileContent";
+
+    public static final String FILE_SUFFIX_PARAM = "fileSuffix";
+
+    public static final String NODE_SOURCE_NAME_PARAM = "nodeSourceName";
 
 }

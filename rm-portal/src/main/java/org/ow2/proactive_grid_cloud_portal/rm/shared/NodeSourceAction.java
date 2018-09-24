@@ -25,16 +25,41 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
-public class ServletMappings {
+import java.util.Arrays;
 
-    private ServletMappings() {
-        // this class is not meant to be instantiated
+
+public enum NodeSourceAction {
+
+    CREATE("create", true),
+
+    EDIT("edit", true),
+
+    UPDATE("update", false),
+
+    UNKNOWN("unknown", false);
+
+    private final String actionDescription;
+
+    private final boolean fullEditAllowed;
+
+    NodeSourceAction(String actionDescription, boolean fullEditAllowed) {
+        this.actionDescription = actionDescription;
+        this.fullEditAllowed = fullEditAllowed;
     }
 
-    public static final String EXPORT_NODE_SOURCE_TO_FILE = "exportnodesourcetofile";
+    public String getActionDescription() {
+        return actionDescription;
+    }
 
-    public static final String EXPORT_NODE_SOURCE_TO_CATALOG = "exportnodesourcetocatalog";
+    public boolean isFullEditAllowed() {
+        return this.fullEditAllowed;
+    }
 
-    public static final String IMPORT_NODE_SOURCE_FROM_FILE = "importnodesourcefromfile";
+    public static NodeSourceAction getEnum(String actionDescription) {
+        return Arrays.stream(NodeSourceAction.values())
+                     .filter(status -> status.actionDescription.equals(actionDescription))
+                     .findAny()
+                     .orElseThrow(IllegalArgumentException::new);
+    }
 
 }

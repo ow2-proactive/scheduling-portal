@@ -46,13 +46,15 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ExportToCatalogConfirmWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog.ExportToCatalogConfirmWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportPolicyToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogObjectNameConverter;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -68,9 +70,6 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -151,7 +150,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     RMController(RMServiceAsync rm) {
         this.rm = rm;
         this.model = new RMModelImpl();
-        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser(this);
+        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
         this.init();
     }
 
@@ -850,7 +849,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               try {
                                                   model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
                                                   success.run();
-                                              } catch (ImportException e) {
+                                              } catch (Exception e) {
                                                   runFailure(e);
                                               }
                                           }
@@ -1014,38 +1013,33 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
-
-        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(nodeSourceJsonItem);
-        nodeSourceJsonForm.setWidget(panel);
-
-        Window window = new Window();
-        window.addChild(nodeSourceJsonForm);
-        window.show();
-
-        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                      nodeSourceName,
-                                      new AsyncCallback<String>() {
-                                          public void onSuccess(String result) {
-                                              nodeSourceJsonItem.setValue(result);
-                                              nodeSourceJsonForm.submit();
-                                              window.hide();
-                                              window.destroy();
-                                          }
-
-                                          public void onFailure(Throwable caught) {
-                                              String msg = JSONUtils.getJsonErrorMessage(caught);
-                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
-                                                      ":<br>" + msg);
-                                          }
-                                      });
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportNodeSourceToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.NODE_SOURCE, this).show();
+    }
+
+    public void exportInfrastructureToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportInfrastructureToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
+    }
+
+    public void exportInfrastructureToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.INFRASTRUCTURE, this).show();
+    }
+
+    public void exportPolicyToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportPolicyToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
+    }
+
+    public void exportPolicyToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.POLICY, this).show();
     }
 
     /**
@@ -1331,11 +1325,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              nodeUrl,
                              new AsyncCallback<String>() {
                                  public void onFailure(Throwable caught) {
-                                     LogModel.getInstance()
-                                             .logImportantMessage("Failed to execute a script " + script + " on " +
-                                                                  nodeUrl + " : " +
-                                                                  JSONUtils.getJsonErrorMessage(caught));
-                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                                     String msg = JSONUtils.getJsonErrorMessage(caught);
+                                     LogModel.getInstance().logImportantMessage("Failed to execute a script " + script +
+                                                                                " on " + nodeUrl + " : " + msg);
+                                     if (msg.equals("HTTP 500 Internal Server Error")) {
+                                         syncCallBack.onFailure("You are not authorized to execute scripts on this node. Please contact the administrator of the node.");
+                                     } else {
+                                         syncCallBack.onFailure(msg);
+                                     }
+
                                  }
 
                                  public void onSuccess(String result) {

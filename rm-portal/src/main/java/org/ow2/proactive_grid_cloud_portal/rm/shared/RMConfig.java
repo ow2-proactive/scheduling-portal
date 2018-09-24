@@ -79,7 +79,7 @@ public class RMConfig extends Config {
     /** stat history refresh rate in millis */
     public static final String STATISTICS_REFRESH_TIME = "rm.client.stats.time";
 
-    private static final String d_STATISTICS_REFRESH_TIME = "5000";
+    private static final String d_STATISTICS_REFRESH_TIME = "3000";
 
     /** message of the day */
     public static final String MOTD_URL = "rm.motd.url";
