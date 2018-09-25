@@ -69,12 +69,12 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
             PluginDescriptor.Field pluginField) {
         TextAreaItem itemWithFileContent = new TextAreaItem(plugin.getPluginName() + pluginField.getName() +
                                                             EDIT_FORM_ITEM_SUFFIX, pluginField.getName());
-        itemWithFileContent.setDefaultValue(pluginField.getValue());
+        itemWithFileContent.setValue(pluginField.getValue());
         return itemWithFileContent;
     }
 
     @Override
-    protected void modifyFormItemsAfterCreation() {
+    protected void afterItemsCreation() {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
@@ -128,6 +128,14 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     @Override
     protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
         buttonsLayout.setMembers(this.applyModificationsButton, this.cancelButton);
+    }
+
+    @Override
+    protected void beforeSubmit() {
+        // All disabled items (that the user cannot modify) need to be
+        // re-enabled before being submitted, otherwise they won't be part of
+        // the form data
+        Arrays.stream(this.nodeSourcePluginsForm.getFields()).forEach(FormItem::enable);
     }
 
 }

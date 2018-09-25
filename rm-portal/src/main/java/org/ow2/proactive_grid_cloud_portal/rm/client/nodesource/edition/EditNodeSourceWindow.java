@@ -77,7 +77,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void modifyFormItemsAfterCreation() {
+    protected void afterItemsCreation() {
         this.controller.fetchNodeSourceConfiguration(this.nodeSourceName, () -> {
             NodeSourceConfiguration nodeSourceConfiguration = this.controller.getModel()
                                                                              .getEditedNodeSourceConfiguration();
@@ -91,6 +91,11 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     @Override
     protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
         buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
+    }
+
+    @Override
+    protected void beforeSubmit() {
+        // nothing to do
     }
 
 }
