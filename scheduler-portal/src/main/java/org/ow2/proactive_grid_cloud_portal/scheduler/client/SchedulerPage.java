@@ -842,8 +842,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 leftTabSet.removeTab(tasksTab);
                 leftTabSet.updateTab(visuTab, null);
                 leftTabSet.removeTab(visuTab);
+                break;
             default:
-                LOGGER.warning("Unexpected scheduler status");
+                LOGGER.warning("Unexpected mode");
                 break;
         }
         leftTabSet.markForRedraw();
