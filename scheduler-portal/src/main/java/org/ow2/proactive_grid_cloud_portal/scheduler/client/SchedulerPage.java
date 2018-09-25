@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -93,6 +96,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     protected Tab visuTab;
 
     protected Canvas visuPane;
+
+    private static Logger LOGGER = Logger.getLogger(SchedulerPage.class.getName());
 
     /** Actions on the scheduler */
     private final static String START = "Start";
@@ -655,7 +660,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
             default:
-                // Will NOT execute
+                LOGGER.warning("Unexpected scheduler status");
+                break;
         }
         // Update the scheduler status label
         schedulerStatusLabel.setContents("Status:" + status.name());
@@ -837,7 +843,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 leftTabSet.updateTab(visuTab, null);
                 leftTabSet.removeTab(visuTab);
             default:
-                // Will NOT execute
+                LOGGER.warning("Unexpected scheduler status");
+                break;
         }
         leftTabSet.markForRedraw();
     }
