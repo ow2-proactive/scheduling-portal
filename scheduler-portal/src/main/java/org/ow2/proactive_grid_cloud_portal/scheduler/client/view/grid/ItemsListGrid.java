@@ -101,6 +101,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
             DataSourceField[] fields = buildDatasourceFields();
             setFields(fields);
             setClientOnly(true);
+            setCacheAllData(true);
         }
     }
 
@@ -230,14 +231,10 @@ public abstract class ItemsListGrid<I> extends ListGrid {
         request.setEndRow(nbOfItems + visibleRows[1]);
         request.setSortBy(this.getSort());
 
-        dataSource.fetchData(this.filter, new DSCallback() {
-            @Override
-            public void execute(DSResponse response, Object rawData, DSRequest request) {
-                RecordList recordList = new RecordList(response.getData());
-                setData(recordList);
-                recordList.destroy();
-            }
-
+        dataSource.fetchData(this.filter, (response, rawData, request1) -> {
+            RecordList recordList = new RecordList(response.getData());
+            setData(recordList);
+            recordList.destroy();
         }, request);
     }
 }

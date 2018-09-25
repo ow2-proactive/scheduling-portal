@@ -119,6 +119,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     public void jobsUpdated(Map<Integer, Job> jobs) {
         List<Integer> selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
 
+        this.ds.invalidateCache();
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
             JobRecord jobRecord = new JobRecord(j);

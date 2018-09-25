@@ -171,6 +171,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.visuButtons.clear();
         Task selectedTask = this.controller.getModel().getSelectedTask();
 
+        this.ds.invalidateCache();
         RecordList data = new RecordList();
         for (Task t : tasks) {
             TaskRecord record = new TaskRecord(t);
