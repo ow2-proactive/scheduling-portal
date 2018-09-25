@@ -154,14 +154,35 @@ public abstract class NodeSourceWindow {
         this.formItemsByName = new LinkedHashMap<>();
     }
 
+    /**
+     * Implementations must identify their purpose
+     */
     protected abstract NodeSourceAction getNodeSourceAction();
 
+    /**
+     * Implementations must define what to do when fields that are not text
+     * are added to the form
+     */
     protected abstract List<FormItem> handleNonTextualPluginField(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField);
 
-    protected abstract void modifyFormItemsAfterCreation();
+    /**
+     * Implementations can rework the form items after they have been created
+     * through this method
+     */
+    protected abstract void afterItemsCreation();
 
+    /*
+     * Implementations can choose which buttons to add to the form through
+     * this method
+     */
     protected abstract void addButtonsToButtonsLayout(HLayout buttonsLayout);
+
+    /*
+     * Implementations can define something to do before the form is submitted
+     * through this method
+     */
+    protected abstract void beforeSubmit();
 
     protected void buildForm() {
         VLayout nodeSourceWindowLayout = new VLayout();
@@ -313,7 +334,7 @@ public abstract class NodeSourceWindow {
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
-            modifyFormItemsAfterCreation();
+            afterItemsCreation();
 
             this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
                                                                      .stream()
@@ -474,7 +495,7 @@ public abstract class NodeSourceWindow {
                 LogModel.getInstance().logImportantMessage("Successfully applied '" + actionDescription +
                                                            "' action to Node Source: " + nodeSourceName);
             } else {
-                modifyFormItemsAfterCreation();
+                afterItemsCreation();
                 handleNodeSourceCreationError(nodeSourceWindowLayout, jsonCallback);
             }
             this.nodeSourcePluginsWaitingLabel.hide();
@@ -485,7 +506,7 @@ public abstract class NodeSourceWindow {
             }
         }));
 
-        Arrays.stream(this.nodeSourcePluginsForm.getFields()).forEach(FormItem::enable);
+        beforeSubmit();
         this.nodeSourcePluginsForm.setCanSubmit(true);
         this.nodeSourcePluginsForm.submitForm();
 
@@ -524,7 +545,7 @@ public abstract class NodeSourceWindow {
             this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             fillPluginFormItems(nodeSourceConfiguration);
-            modifyFormItemsAfterCreation();
+            afterItemsCreation();
         } catch (Exception e) {
             setNodeSourceWindowLabelWithError("Failed to import Node Source", e);
         }
