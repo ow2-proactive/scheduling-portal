@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.*;
@@ -97,7 +96,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     protected Canvas visuPane;
 
-    private static Logger LOGGER = Logger.getLogger(SchedulerPage.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SchedulerPage.class.getName());
 
     /** Actions on the scheduler */
     private final static String START = "Start";
