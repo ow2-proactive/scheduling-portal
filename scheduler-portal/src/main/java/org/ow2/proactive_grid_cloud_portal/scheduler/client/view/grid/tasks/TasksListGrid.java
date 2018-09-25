@@ -183,6 +183,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         }
 
         this.ds.setTestData(data.toArray());
+        data.destroy();
         applyCurrentLocalFilter();
     }
 
