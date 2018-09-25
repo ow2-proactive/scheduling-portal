@@ -82,6 +82,18 @@ import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
  */
 public class SchedulerPage implements SchedulerStatusListener, LogListener, ExecutionDisplayModeListener {
 
+    static SchedulerPage inst;
+
+    protected TabSet leftTabSet;
+
+    protected Tab tasksTab;
+
+    protected Layout tasksPane;
+
+    protected Tab visuTab;
+
+    protected Canvas visuPane;
+
     /** Actions on the scheduler */
     private final static String START = "Start";
 
@@ -94,18 +106,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private final static String PAUSE = "Pause";
 
     private final static String KILL = "Kill";
-
-    static SchedulerPage inst;
-
-    protected TabSet leftTabSet;
-
-    protected Tab tasksTab;
-
-    protected Layout tasksPane;
-
-    protected Tab visuTab;
-
-    protected Canvas visuPane;
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -140,8 +140,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private ToolStripButton errorButton = null;
 
     /** displays the scheduler status */
-    private HLayout schedulerStatusLabelLayout = null;
-
     private Label schedulerStatusLabel = null;
 
     private long lastCriticalMessage = 0;
@@ -566,7 +564,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedulerStatusLabel.setIconSize(20);
         schedulerStatusLabel.setSize("105%", "105%");
-        schedulerStatusLabelLayout = new HLayout();
+        HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
@@ -656,6 +654,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedKillButton.setEnabled(true);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
+            default:
+                // Will NOT execute
         }
         // Update the scheduler status label
         schedulerStatusLabel.setContents("Status:" + status.name());
@@ -836,6 +836,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 leftTabSet.removeTab(tasksTab);
                 leftTabSet.updateTab(visuTab, null);
                 leftTabSet.removeTab(visuTab);
+            default:
+                // Will NOT execute
         }
         leftTabSet.markForRedraw();
     }
