@@ -78,6 +78,11 @@ public class JobColumnsUtil {
     public static final String START_AT = "START_AT";
 
     /**
+     * Documentation key
+     */
+    public static final String DOCUMENTATION = "Documentation";
+
+    /**
      * Get the value associated to one of the possible columns definition
      * @param columnName the name of the column
      * @param genericInformationMap the map of all generic information

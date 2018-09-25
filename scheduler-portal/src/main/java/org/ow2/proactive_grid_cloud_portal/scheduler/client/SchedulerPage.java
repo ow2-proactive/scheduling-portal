@@ -25,13 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import java.util.logging.Logger;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
-import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -48,7 +45,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
@@ -61,11 +57,10 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.SectionStack;
-import com.smartgwt.client.widgets.layout.SectionStackSection;
-import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.grid.HoverCustomizer;
+import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.layout.*;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
@@ -77,7 +72,6 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
-import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -101,6 +95,21 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     protected Tab visuTab;
 
     protected Canvas visuPane;
+
+    private static final Logger LOGGER = Logger.getLogger(SchedulerPage.class.getName());
+
+    /** Actions on the scheduler */
+    private final static String START = "Start";
+
+    private final static String STOP = "Stop";
+
+    private final static String FREEZE = "Freeze";
+
+    private final static String RESUME = "Resume";
+
+    private final static String PAUSE = "Pause";
+
+    private final static String KILL = "Kill";
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -133,6 +142,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
+
+    /** displays the scheduler status */
+    private Label schedulerStatusLabel = null;
 
     private long lastCriticalMessage = 0;
 
@@ -442,7 +454,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedStartButton = new MenuItem("Start");
+        schedStartButton = new MenuItem(START);
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedStartButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -450,7 +462,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedStopButton = new MenuItem("Stop");
+        schedStopButton = new MenuItem(STOP);
         schedStopButton.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
         schedStopButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -458,7 +470,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedFreezeButton = new MenuItem("Freeze");
+        schedFreezeButton = new MenuItem(FREEZE);
         schedFreezeButton.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
         schedFreezeButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -466,7 +478,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedResumeButton = new MenuItem("Resume");
+        schedResumeButton = new MenuItem(RESUME);
         schedResumeButton.setIcon(SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         schedResumeButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -474,7 +486,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedPauseButton = new MenuItem("Pause");
+        schedPauseButton = new MenuItem(PAUSE);
         schedPauseButton.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
         schedPauseButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -483,7 +495,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        schedKillButton = new MenuItem("Kill");
+        schedKillButton = new MenuItem(KILL);
         schedKillButton.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         schedKillButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
             public void onClick(MenuItemClickEvent event) {
@@ -504,6 +516,34 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                 schedResumeButton,
                                 schedPauseButton,
                                 schedKillButton);
+        // Adding tooltips on Admin actions
+        ListGridField titleFieldDefaults = adminMenu.getTitleFieldDefaults();
+        titleFieldDefaults.setShowHover(true);
+        titleFieldDefaults.setHoverCustomizer(new HoverCustomizer() {
+            @Override
+            public String hoverHTML(Object value, ListGridRecord record, int rowNum, int colNum) {
+
+                if (value.toString().equalsIgnoreCase(START))
+                    return "Start Scheduler Server from Stopped status";
+
+                else if (value.toString().equalsIgnoreCase(STOP))
+                    return "Stop Scheduler Server (Submitted Jobs terminate)";
+
+                else if (value.toString().equalsIgnoreCase(FREEZE))
+                    return "Freeze Scheduler Server (Running Tasks terminate)";
+
+                else if (value.toString().equalsIgnoreCase(RESUME))
+                    return "Resume Scheduler Server from Paused status";
+
+                else if (value.toString().equalsIgnoreCase(PAUSE))
+                    return "Pause Scheduler Server (Running Jobs terminate)";
+
+                else if (value.toString().equalsIgnoreCase(KILL))
+                    return "Kill Scheduler Server";
+
+                return null;
+            }
+        });
         adminMenuButton.setMenu(adminMenu);
 
         String login = LoginModel.getInstance().getLogin();
@@ -524,6 +564,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         errorButton.hide();
 
+        schedulerStatusLabel = new Label(SchedulerStatus.STARTED.name());
+        schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
+        schedulerStatusLabel.setIconSize(20);
+        schedulerStatusLabel.setSize("105%", "105%");
+        HLayout schedulerStatusLabelLayout = new HLayout();
+        schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
+
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
         ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
         ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
@@ -539,6 +586,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(planButton);
         tools.addSeparator();
         tools.addButton(errorButton);
+        tools.addFill();
+        tools.addMember(schedulerStatusLabelLayout);
         tools.addFill();
         tools.addButton(automationDashboardLinkButton);
         tools.addSpacer(12);
@@ -578,6 +627,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(false);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
                 break;
             case FROZEN:
             case PAUSED:
@@ -587,6 +637,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(true);
                 schedKillButton.setEnabled(true);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
                 break;
             case STARTED:
             case UNLINKED:
@@ -596,6 +647,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(true);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(true);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
                 break;
             case STOPPED:
                 schedStartButton.setEnabled(true);
@@ -604,8 +656,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(true);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
+                break;
+            default:
+                LOGGER.warning("Unexpected scheduler status");
                 break;
         }
+        // Update the scheduler status label
+        schedulerStatusLabel.setContents("Status:" + status.name());
         this.adminMenu.redraw();
     }
 
@@ -783,6 +841,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 leftTabSet.removeTab(tasksTab);
                 leftTabSet.updateTab(visuTab, null);
                 leftTabSet.removeTab(visuTab);
+                break;
+            default:
+                LOGGER.warning("Unexpected mode");
+                break;
         }
         leftTabSet.markForRedraw();
     }
