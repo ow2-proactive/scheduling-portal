@@ -71,13 +71,18 @@ public class CreateNodeSourceWindow extends NodeSourceWindow {
     }
 
     @Override
-    protected void modifyFormItemsAfterCreation() {
+    protected void afterItemsCreation() {
         // do nothing
     }
 
     @Override
     protected void addButtonsToButtonsLayout(HLayout buttonsLayout) {
         buttonsLayout.setMembers(this.deployNowButton, this.saveAndKeepUndeployedButton, this.cancelButton);
+    }
+
+    @Override
+    protected void beforeSubmit() {
+        // nothing to do
     }
 
 }
