@@ -630,6 +630,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
                 break;
             case FROZEN:
+                schedStartButton.setEnabled(false);
+                schedStopButton.setEnabled(true);
+                schedFreezeButton.setEnabled(false);
+                schedPauseButton.setEnabled(false);
+                schedResumeButton.setEnabled(true);
+                schedKillButton.setEnabled(true);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
+                break;
             case PAUSED:
                 schedStartButton.setEnabled(false);
                 schedStopButton.setEnabled(true);
