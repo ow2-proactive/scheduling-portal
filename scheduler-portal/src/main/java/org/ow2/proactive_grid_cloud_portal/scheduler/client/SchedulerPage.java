@@ -533,7 +533,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                     return "Freeze Scheduler Server (Running Tasks terminate)";
 
                 else if (value.toString().equalsIgnoreCase(RESUME))
-                    return "Resume Scheduler Server from Paused status";
+                    return "Resume Scheduler Server from Paused or Frozen status";
 
                 else if (value.toString().equalsIgnoreCase(PAUSE))
                     return "Pause Scheduler Server (Running Jobs terminate)";
