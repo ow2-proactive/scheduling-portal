@@ -119,6 +119,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     public void jobsUpdated(Map<Integer, Job> jobs) {
         List<Integer> selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
 
+        this.ds.invalidateCache();
         RecordList data = new RecordList();
         for (Job j : jobs.values()) {
             JobRecord jobRecord = new JobRecord(j);
@@ -130,7 +131,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         }
 
-        this.ds.setTestData(data.toArray());
+        this.ds.setCacheData(data.toArray());
         data.destroy();
         applyCurrentLocalFilter();
     }
@@ -188,6 +189,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                     case PAUSED:
                         return "font-weight:bold;" + base;
                     case FINISHED:
+                        return base;
+                    default:
                         return base;
                 }
             } catch (NullPointerException npe) {
