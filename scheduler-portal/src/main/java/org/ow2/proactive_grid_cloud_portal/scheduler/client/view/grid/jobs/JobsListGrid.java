@@ -190,6 +190,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                         return "font-weight:bold;" + base;
                     case FINISHED:
                         return base;
+                    default:
+                        return base;
                 }
             } catch (NullPointerException npe) {
                 return base;

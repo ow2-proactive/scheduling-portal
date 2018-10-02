@@ -190,10 +190,12 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     @Override
     public void tasksUpdating() {
+        //Nothing to do
     }
 
     @Override
     public void tasksUpdatedFailure(String message) {
+        //Nothing to do
     }
 
     @Override
@@ -403,11 +405,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
         TaskStatus status = TaskStatus.from(taskStatusName);
 
-        boolean enableKill = false;
-        boolean enablePreempt = false;
-        boolean enableRestartRunningTask = false;
-        boolean enableRestartInErrorTask = false;
-        boolean enableMarkAsFinishedAndResume = false;
+        boolean enableKill;
+        boolean enablePreempt;
+        boolean enableRestartRunningTask;
+        boolean enableRestartInErrorTask;
+        boolean enableMarkAsFinishedAndResume;
 
         switch (status) {
             case FAILED:
@@ -441,6 +443,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 enableRestartInErrorTask = true;
                 enableRestartRunningTask = false;
                 enableMarkAsFinishedAndResume = true;
+                break;
+            default:
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = false;
+                enableMarkAsFinishedAndResume = false;
         }
 
         kill.setEnabled(enableKill);
@@ -463,7 +472,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     @Override
     protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
-
+        // Nothing to do
     }
 
 }
