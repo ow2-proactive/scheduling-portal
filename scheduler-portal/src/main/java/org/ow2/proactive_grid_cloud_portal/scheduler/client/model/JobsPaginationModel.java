@@ -37,6 +37,13 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.PaginatedItemType;
 public class JobsPaginationModel extends PaginationModel {
 
     /**
+     * The current displayed page.
+     */
+    private int currentPage = 0;
+
+    private int maxPage = 0;
+
+    /**
      * The first displayed job cursor.
      */
     private String currentStartCursor;
@@ -103,6 +110,41 @@ public class JobsPaginationModel extends PaginationModel {
         for (PaginationListener listener : this.paginationListeners) {
             listener.pageChanged();
         }
+    }
+
+    /**
+     * Gets the number of the last page.
+     * @return the number of the last page.
+     */
+    public int getMaxPage() {
+        return maxPage;
+    }
+
+    /**
+     * Sets the total number of items without pagination.
+     * @param totalItems the total number of items without pagination.
+     */
+    public void setTotalItems(long totalItems) {
+        this.totalItems = totalItems;
+        int pageSize = this.getPageSize();
+        this.maxPage = ((int) this.totalItems / pageSize) - 1;
+        if (this.totalItems % pageSize != 0) {
+            this.maxPage++;
+        }
+        doActionOnListeners(listener -> listener.totalItemChanged());
+    }
+
+    public void setPage(int page) {
+        this.currentPage = page;
+        doActionOnListeners(listener -> listener.pageChanged());
+    }
+
+    /**
+     * Gets the current displayed page.
+     * @return the current displayed page.
+     */
+    public int getPage() {
+        return this.currentPage;
     }
 
     public String getCurrentEndCursor() {
