@@ -71,21 +71,14 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void nextPage() {
-        consoleLog("Total Items: " + model.getTotalItems());
-        consoleLog("Page Size: " + model.getPageSize());
         model.setPage(model.getPage() + 1);
         model.setFetchData(null, model.getCurrentStartCursor(), false);
         this.fetch(false);
     }
 
-    native void consoleLog(String message) /*-{
-                                           console.log( "me:" + message );
-                                           }-*/;
-
     @Override
     public void previousPage() {
         int curPage = model.getPage();
-        consoleLog("currentPage: " + curPage);
         if (curPage == 0)
             return;
         model.setPage(Math.max(0, curPage - 1));
