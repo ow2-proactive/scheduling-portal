@@ -343,7 +343,8 @@ public class JobsController {
                         -1,
                         -1,
                         -1,
-                        -1);
+                        -1,
+                        "");
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }

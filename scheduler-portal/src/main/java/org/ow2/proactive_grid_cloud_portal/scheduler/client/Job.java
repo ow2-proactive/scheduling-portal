@@ -56,6 +56,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String user;
 
+    private String description;
+
     private int pendingTasks;
 
     private int runningTasks;
@@ -120,11 +122,12 @@ public class Job implements Serializable, Comparable<Job> {
      * @param startTime start time
      * @param inErrorTime in error time
      * @param finishTime finish time
+     * @param description job description
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
             Map<String, String> genericInformation, Map<String, String> variables, int pending, int running,
             int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime) {
+            long inErrorTime, long finishTime, String description) {
         this.id = id;
         this.name = name;
         this.projectName = projectName;
@@ -146,6 +149,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
         this.variables = ImmutableMap.copyOf(variables);
+        this.description = description;
     }
 
     /**
@@ -154,6 +158,14 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public void setID(int id) {
         this.id = id;
+    }
+
+    /**
+     * Getter of the job description.
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -182,7 +194,7 @@ public class Job implements Serializable, Comparable<Job> {
 
     /**
      * Setter of the job projectName.
-     * @param name the project of the job.
+     * @param projectName the project of the job.
      */
     public void setProjectName(String projectName) {
         this.projectName = projectName;
@@ -383,6 +395,7 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
+        String description = jsonJobInfo.get("description").isString().stringValue();
 
         Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
         Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
@@ -409,7 +422,8 @@ public class Job implements Serializable, Comparable<Job> {
                        submittedTime,
                        startTime,
                        inErrorTime,
-                       finishedTime);
+                       finishedTime,
+                       description);
     }
 
     private static Map<String, String> extractMap(JSONValue mapValue) {
