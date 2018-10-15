@@ -54,6 +54,11 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>JobXMLServlet</servlet-name>
+		<servlet-class>org.ow2.proactive_grid_cloud_portal.scheduler.server.DownloadJobXMLServlet</servlet-class>
+	</servlet>
+
+	<servlet>
 		<servlet-name>RemoteVisuServlet</servlet-name>
 		<servlet-class>org.ow2.proactive_grid_cloud_portal.scheduler.server.RemoteVisuServlet</servlet-class>
 	</servlet>
@@ -108,6 +113,11 @@
 	<servlet-mapping>
 		<servlet-name>DownloadServlet</servlet-name>
 		<url-pattern>/portal/downloader</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>JobXMLServlet</servlet-name>
+		<url-pattern>/portal/downloadjobxml</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

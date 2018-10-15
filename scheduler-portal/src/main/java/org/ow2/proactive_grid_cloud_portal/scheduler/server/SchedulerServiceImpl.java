@@ -770,6 +770,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         });
     }
 
+    public String getJobXML(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobXML(sessionId, jobId));
+    }
+
     /*
      * (non-Javadoc)
      *

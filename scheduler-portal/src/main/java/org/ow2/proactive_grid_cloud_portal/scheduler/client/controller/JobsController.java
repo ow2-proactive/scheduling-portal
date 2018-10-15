@@ -45,7 +45,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsMode
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -78,6 +80,8 @@ public class JobsController {
     protected JobsView view;
 
     private static Logger LOGGER = Logger.getLogger(JobsController.class.getName());
+
+    private static final String STR_JOB = " jobs";
 
     /**
      * Builds a jobs controller from a parent scheduler controller.
@@ -152,7 +156,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.pauseJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -211,7 +215,7 @@ public class JobsController {
         scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance()
-                        .logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + " jobs");
+                        .logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -235,7 +239,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.removeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -259,7 +263,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -289,7 +293,7 @@ public class JobsController {
                                         public void onSuccess(Void result) {
                                             LogModel.getInstance()
                                                     .logMessage("Successfully set priority to " + priority.name() +
-                                                                " for " + l.size() + " jobs");
+                                                                " for " + l.size() + STR_JOB);
                                         }
 
                                         public void onFailure(Throwable caught) {
@@ -299,6 +303,16 @@ public class JobsController {
                                                                          priority.name() + " : " + message);
                                         }
                                     });
+    }
+
+    /**
+     * Export the original Workflow of a job as an XML
+     *
+     * @param jobId id of the job
+     */
+    public void exportJobXML(String jobId) {
+        Window.open(GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
+                    LoginModel.getInstance().getSessionId(), "Download Job XML", "");
     }
 
     /**
