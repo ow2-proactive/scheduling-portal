@@ -36,6 +36,7 @@ import com.google.gwt.resources.client.ImageResource;
  * @author mschnoor
  *
  */
+@SuppressWarnings("squid:S1214")
 public interface SchedulerImages extends ClientBundle {
 
     public static final SchedulerImages instance = GWT.create(SchedulerImages.class);
@@ -69,6 +70,9 @@ public interface SchedulerImages extends ClientBundle {
 
     @Source("images/job_kill_16.png")
     ImageResource job_kill_16();
+
+    @Source("images/job_export_32.png")
+    ImageResource scheduler_export_32();
 
     @Source("images/job_output_16.png")
     ImageResource job_output_16();

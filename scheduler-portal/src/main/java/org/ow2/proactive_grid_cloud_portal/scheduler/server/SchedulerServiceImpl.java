@@ -275,8 +275,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private boolean isJarFile(File file) {
-        try {
-            new JarFile(file);
+        try (JarFile ignored = new JarFile(file)) {
             return true;
         } catch (IOException e1) {
             return false;
@@ -768,6 +767,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                 return restClient.jobInfo(sessionId, jobId);
             }
         });
+    }
+
+    public String getJobXML(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobXML(sessionId, jobId));
     }
 
     /*

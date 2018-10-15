@@ -365,6 +365,18 @@ public interface RestClient {
     InputStream jobInfo(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
+     * Returns the job's original workflow as XML.
+     * id <code>jobid</code>
+     * @param sessionId a valid session id
+     * @return  a ClientResponse containing the Workflow's XML of the corresponding job
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/xml")
+    @Produces("application/xml")
+    InputStream getJobXML(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
+
+    /**
      * Changes the priority of a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
