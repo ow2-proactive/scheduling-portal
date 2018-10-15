@@ -49,6 +49,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -306,13 +308,31 @@ public class JobsController {
     }
 
     /**
-     * Export the original Workflow of a job as an XML
+     * Export the original Workflow of a job as an XML.
+     * Sends a head request first to check if XML is downloadable before downloading.
      *
      * @param jobId id of the job
      */
     public void exportJobXML(String jobId) {
-        Window.open(GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
-                    LoginModel.getInstance().getSessionId(), "Download Job XML", "");
+        String jobXmlUrl = GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
+                           LoginModel.getInstance().getSessionId();
+
+        // Create a head-only request to check if XML is downloadable
+        XMLHttpRequest req = XMLHttpRequest.create();
+        req.open("HEAD", jobXmlUrl);
+        req.setOnReadyStateChange(xhr -> {
+            if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                if (xhr.getStatus() == Response.SC_OK) {
+                    LogModel.getInstance().logMessage("Downloading XML for job: " + jobId);
+                    Window.open(jobXmlUrl, "Download Job XML", "");
+                } else {
+                    LogModel.getInstance()
+                            .logMessage("Could not download Job XML. Got HTTP response code: " + xhr.getStatus());
+                    SC.warn("Could not export job's XML:\n Got HTTP response with error code " + xhr.getStatus());
+                }
+            }
+        });
+        req.send();
     }
 
     /**
