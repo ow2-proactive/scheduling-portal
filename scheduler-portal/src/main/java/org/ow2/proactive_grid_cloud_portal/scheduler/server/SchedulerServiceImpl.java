@@ -275,8 +275,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private boolean isJarFile(File file) {
-        try {
-            new JarFile(file);
+        try (JarFile ignored = new JarFile(file)){
             return true;
         } catch (IOException e1) {
             return false;
