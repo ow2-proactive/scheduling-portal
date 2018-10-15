@@ -36,6 +36,7 @@ import com.google.gwt.resources.client.ImageResource;
  * @author mschnoor
  *
  */
+@SuppressWarnings("squid:S1214")
 public interface SchedulerImages extends ClientBundle {
 
     public static final SchedulerImages instance = GWT.create(SchedulerImages.class);
