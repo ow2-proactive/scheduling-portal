@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * The servlet which is called when the result of a task is wanted to be downloaded
+ * The servlet which is called when the XML of a job is to be downloaded
  * @author ahagea
  *
  */
