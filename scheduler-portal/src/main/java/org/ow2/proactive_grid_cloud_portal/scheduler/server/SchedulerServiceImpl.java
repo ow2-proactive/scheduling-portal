@@ -770,7 +770,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     public String getJobXML(final String sessionId, final String jobId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobXML(sessionId, jobId));
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobXML(sessionId, jobId), true);
     }
 
     /*
@@ -1391,6 +1391,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function)
             throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(function, false);
+    }
+
+    private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function, boolean keepNewLines)
+            throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         InputStream inputStream = null;
@@ -1399,7 +1404,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             inputStream = function.apply(restClientProxy);
 
             try {
-                return convertToString(inputStream);
+                return convertToString(inputStream, keepNewLines);
             } catch (IOException e) {
                 throw new ServiceException(e.getMessage());
             }

@@ -39,24 +39,18 @@ public final class HttpUtils {
     public static String convertToString(InputStream inputStream, boolean keepNewLines) throws IOException {
         StringBuilder sb = new StringBuilder();
 
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
+        try (InputStreamReader isr = new InputStreamReader(inputStream);
+                BufferedReader reader = new BufferedReader(isr)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
                 if (keepNewLines) {
-                    sb.append("\n");
+                    sb.append(System.lineSeparator());
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
         return sb.toString();
     }
