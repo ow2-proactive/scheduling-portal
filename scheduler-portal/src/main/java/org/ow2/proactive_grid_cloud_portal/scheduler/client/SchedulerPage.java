@@ -202,7 +202,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.rootLayout = contentLayout;
         contentLayout.setWidth100();
         contentLayout.setHeight100();
-        contentLayout.setBackgroundColor("#fafafa");
+        contentLayout.setBackgroundColor(logoStripBackgroundColor);
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
@@ -321,75 +321,60 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
      *                +-----------+
      * </pre>
      */
+    @SuppressWarnings("squid:S3776")
     private ToolStrip buildTools() {
         ToolStrip tools = new ToolStrip();
         tools.setHeight(50);
         tools.setWidth100();
         tools.setBackgroundImage("");
-        tools.setBackgroundColor("#fafafa");
+        tools.setBackgroundColor(logoStripBackgroundColor);
         tools.setBorder("0px");
 
         MenuItem submitMenuItem = new MenuItem("Submit job",
                                                SchedulerImages.instance.job_submit_16().getSafeUri().asString());
-        submitMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SubmitWindow w = new SubmitWindow(SchedulerPage.this.controller);
-                w.show();
-            }
+        submitMenuItem.addClickHandler(event -> {
+            SubmitWindow w = new SubmitWindow();
+            w.show();
         });
         MenuItem flatSubmitMenuItem = new MenuItem("Submit command file",
                                                    SchedulerImages.instance.script_16().getSafeUri().asString());
-        flatSubmitMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                FlatSubmitWindow w = new FlatSubmitWindow(SchedulerPage.this.controller);
-                w.show();
-            }
+        flatSubmitMenuItem.addClickHandler(event -> {
+            FlatSubmitWindow w = new FlatSubmitWindow(SchedulerPage.this.controller);
+            w.show();
         });
 
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
-        settingsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.settingsWindow.show();
-            }
-        });
+        settingsMenuItem.addClickHandler(event -> SchedulerPage.this.settingsWindow.show());
 
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
-        credMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                CredentialsWindow credentialsWindow = new CredentialsWindow();
-                credentialsWindow.show();
-            }
+        credMenuItem.addClickHandler(event -> {
+            CredentialsWindow credentialsWindow = new CredentialsWindow();
+            credentialsWindow.show();
         });
 
         MenuItem thirdPartyCredentialsMenuItem = new MenuItem("Manage third-party credentials",
                                                               Images.instance.key_16().getSafeUri().asString());
-        thirdPartyCredentialsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(SchedulerPage.this.controller);
-                credentialsWindow.show();
-            }
+        thirdPartyCredentialsMenuItem.addClickHandler(event -> {
+            ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(SchedulerPage.this.controller);
+            credentialsWindow.show();
         });
 
         MenuItem serversMenuItem = new MenuItem("Data servers", Images.instance.server_16().getSafeUri().asString());
-        serversMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                String url = GWT.getModuleBaseURL() + "servers?codebase=" + GWT.getHostPageBaseURL();
-                Window.open(url, "_blank", "");
-            }
+        serversMenuItem.addClickHandler(event -> {
+            String url = GWT.getModuleBaseURL() + "servers?codebase=" + GWT.getHostPageBaseURL();
+            Window.open(url, "_blank", "");
         });
 
         MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_18().getSafeUri().asString());
-        logoutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value) {
-                            SchedulerPage.this.controller.logout();
-                        }
-                    }
-                });
-            }
-        });
+        logoutMenuItem.addClickHandler(event -> SC.confirm("Logout",
+                                                           "Are you sure you want to exit?",
+                                                           new BooleanCallback() {
+                                                               public void execute(Boolean value) {
+                                                                   if (value) {
+                                                                       SchedulerPage.this.controller.logout();
+                                                                   }
+                                                               }
+                                                           }));
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
@@ -405,28 +390,20 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
-        logMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.logWindow.show();
-                errorButton.hide();
-            }
+        logMenuItem.addClickHandler(event -> {
+            SchedulerPage.this.logWindow.show();
+            errorButton.hide();
         });
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
-                Window.open("http://doc.activeeon.com/" + docVersion, "", "");
-            }
+        documentationMenuItem.addClickHandler(event -> {
+            String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
+            Window.open("http://doc.activeeon.com/" + docVersion, "", "");
         });
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
-        aboutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.aboutWindow.show();
-            }
-        });
+        aboutMenuItem.addClickHandler(event -> SchedulerPage.this.aboutWindow.show());
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
         helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
@@ -436,77 +413,47 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         submitButton.setIcon(SchedulerImages.instance.job_submit_16().getSafeUri().asString());
         submitButton.setIconSize(20);
         submitButton.setTooltip("Submit a new job");
-        submitButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                SubmitWindow w = new SubmitWindow(SchedulerPage.this.controller);
-                w.show();
-            }
+        submitButton.addClickHandler(event -> {
+            SubmitWindow w = new SubmitWindow();
+            w.show();
         });
 
         ToolStripButton planButton = new ToolStripButton("Plan job");
         planButton.setIcon(SchedulerImages.instance.job_plan_16().getSafeUri().asString());
         planButton.setIconSize(20);
         planButton.setTooltip("Plan a job");
-        planButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                PlanWindow w = new PlanWindow(SchedulerPage.this.controller);
-                w.show();
-            }
+        planButton.addClickHandler(event -> {
+            PlanWindow w = new PlanWindow(SchedulerPage.this.controller);
+            w.show();
         });
 
         schedStartButton = new MenuItem(START);
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
-        schedStartButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.controller.startScheduler();
-            }
-        });
+        schedStartButton.addClickHandler(event -> SchedulerPage.this.controller.startScheduler());
 
         schedStopButton = new MenuItem(STOP);
         schedStopButton.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
-        schedStopButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.controller.stopScheduler();
-            }
-        });
+        schedStopButton.addClickHandler(event -> SchedulerPage.this.controller.stopScheduler());
 
         schedFreezeButton = new MenuItem(FREEZE);
         schedFreezeButton.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
-        schedFreezeButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.controller.freezeScheduler();
-            }
-        });
+        schedFreezeButton.addClickHandler(event -> SchedulerPage.this.controller.freezeScheduler());
 
         schedResumeButton = new MenuItem(RESUME);
         schedResumeButton.setIcon(SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
-        schedResumeButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.controller.resumeScheduler();
-            }
-        });
+        schedResumeButton.addClickHandler(event -> SchedulerPage.this.controller.resumeScheduler());
 
         schedPauseButton = new MenuItem(PAUSE);
         schedPauseButton.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
-        schedPauseButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SchedulerPage.this.controller.pauseScheduler();
-
-            }
-        });
+        schedPauseButton.addClickHandler(event -> SchedulerPage.this.controller.pauseScheduler());
 
         schedKillButton = new MenuItem(KILL);
         schedKillButton.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
-        schedKillButton.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SC.confirm("Do you really want to <strong>kill</strong> the Scheduler?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value)
-                            SchedulerPage.this.controller.killScheduler();
-                    }
-                });
-            }
-        });
+        schedKillButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>kill</strong> the Scheduler?",
+                                                            value -> {
+                                                                if (value)
+                                                                    SchedulerPage.this.controller.killScheduler();
+                                                            }));
 
         ToolStripMenuButton adminMenuButton = new ToolStripMenuButton("Admin");
         this.adminMenu = new Menu();
@@ -555,12 +502,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         errorButton = new ToolStripButton("<strong>Network error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
-        errorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SchedulerPage.this.logWindow.show();
-                errorButton.hide();
-            }
+        errorButton.addClickHandler(event -> {
+            SchedulerPage.this.logWindow.show();
+            errorButton.hide();
         });
         errorButton.hide();
 

@@ -84,15 +84,15 @@ public abstract class Controller {
      * @return a java representation of the JSON object hierarchy,
      *     or a JSONObject representing {} if parsing fails
      */
-    public JSONValue parseJSON(String jsonStr) {
+    public static JSONValue parseJSON(String jsonStr) {
         try {
             return JSONParser.parseStrict(jsonStr);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // only shows up in eclipse dev mode
-            t.printStackTrace();
+            e.printStackTrace();
 
-            LogModel.getInstance().logCriticalMessage("JSON Parser failed " + t.getClass().getName() + ": " +
-                                                      t.getLocalizedMessage());
+            LogModel.getInstance().logCriticalMessage("JSON Parser failed " + e.getClass().getName() + ": " +
+                                                      e.getLocalizedMessage());
             LogModel.getInstance().logCriticalMessage("input was: " + jsonStr);
             return new JSONObject();
         }
