@@ -383,10 +383,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         MenuItem resubmitItem = new MenuItem("Re-submit",
                                              SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
         // Allow re-submitting a job only & only if a single job is selected.
-        resubmitItem.addClickHandler(event -> {
-            SubmitWindow w = new SubmitWindow(ids.get(0));
-            w.show();
-        });
+        resubmitItem.addClickHandler(event -> new SubmitWindow(ids.get(0)).show());
         resubmitItem.setEnabled(selSingleSelected);
 
         MenuItem exportXmlItem = new MenuItem("Export XML",

@@ -27,8 +27,13 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.logging.Logger;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.*;
+import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
+import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -50,25 +55,23 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.VisibilityMode;
-import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.grid.HoverCustomizer;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
-import com.smartgwt.client.widgets.layout.*;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.SectionStack;
+import com.smartgwt.client.widgets.layout.SectionStackSection;
+import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
-import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
-import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
-import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
@@ -99,17 +102,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private static final Logger LOGGER = Logger.getLogger(SchedulerPage.class.getName());
 
     /** Actions on the scheduler */
-    private final static String START = "Start";
+    private static final String START = "Start";
 
-    private final static String STOP = "Stop";
+    private static final String STOP = "Stop";
 
-    private final static String FREEZE = "Freeze";
+    private static final String FREEZE = "Freeze";
 
-    private final static String RESUME = "Resume";
+    private static final String RESUME = "Resume";
 
-    private final static String PAUSE = "Pause";
+    private static final String PAUSE = "Pause";
 
-    private final static String KILL = "Kill";
+    private static final String KILL = "Kill";
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -170,6 +173,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.controller.getEventDispatcher().addSchedulerStatusListener(this);
         LogModel.getInstance().addLogListener(this);
         this.controller.getExecutionController().getModel().addExecutionsDisplayModeListener(this);
+        // very ugly, only way to control the scroll viewport in VisualizationViewImage.java
         inst = this;
     }
 
@@ -283,12 +287,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoAE.setBorder(logoStripBorder);
         logoAE.setAlign(Alignment.RIGHT);
         Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
-        logoImg.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                Window.open("http://activeeon.com/", "", "");
-            }
-        });
+        logoImg.addClickHandler(clickEvent -> Window.open("http://activeeon.com/", "", ""));
         logoAE.addMember(logoImg);
 
         ToolStrip logoStrip = new ToolStrip();
@@ -332,32 +331,20 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         MenuItem submitMenuItem = new MenuItem("Submit job",
                                                SchedulerImages.instance.job_submit_16().getSafeUri().asString());
-        submitMenuItem.addClickHandler(event -> {
-            SubmitWindow w = new SubmitWindow();
-            w.show();
-        });
+        submitMenuItem.addClickHandler(event -> new SubmitWindow().show());
         MenuItem flatSubmitMenuItem = new MenuItem("Submit command file",
                                                    SchedulerImages.instance.script_16().getSafeUri().asString());
-        flatSubmitMenuItem.addClickHandler(event -> {
-            FlatSubmitWindow w = new FlatSubmitWindow(SchedulerPage.this.controller);
-            w.show();
-        });
+        flatSubmitMenuItem.addClickHandler(event -> new FlatSubmitWindow(SchedulerPage.this.controller).show());
 
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(event -> SchedulerPage.this.settingsWindow.show());
 
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
-        credMenuItem.addClickHandler(event -> {
-            CredentialsWindow credentialsWindow = new CredentialsWindow();
-            credentialsWindow.show();
-        });
+        credMenuItem.addClickHandler(event -> new CredentialsWindow().show());
 
         MenuItem thirdPartyCredentialsMenuItem = new MenuItem("Manage third-party credentials",
                                                               Images.instance.key_16().getSafeUri().asString());
-        thirdPartyCredentialsMenuItem.addClickHandler(event -> {
-            ThirdPartyCredentialsWindow credentialsWindow = new ThirdPartyCredentialsWindow(SchedulerPage.this.controller);
-            credentialsWindow.show();
-        });
+        thirdPartyCredentialsMenuItem.addClickHandler(event -> new ThirdPartyCredentialsWindow(SchedulerPage.this.controller).show());
 
         MenuItem serversMenuItem = new MenuItem("Data servers", Images.instance.server_16().getSafeUri().asString());
         serversMenuItem.addClickHandler(event -> {
@@ -366,15 +353,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
 
         MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_18().getSafeUri().asString());
-        logoutMenuItem.addClickHandler(event -> SC.confirm("Logout",
-                                                           "Are you sure you want to exit?",
-                                                           new BooleanCallback() {
-                                                               public void execute(Boolean value) {
-                                                                   if (value) {
-                                                                       SchedulerPage.this.controller.logout();
-                                                                   }
-                                                               }
-                                                           }));
+        logoutMenuItem.addClickHandler(event -> SC.confirm("Logout", "Are you sure you want to exit?", value -> {
+            if (value) {
+                SchedulerPage.this.controller.logout();
+            }
+        }));
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
@@ -413,19 +396,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         submitButton.setIcon(SchedulerImages.instance.job_submit_16().getSafeUri().asString());
         submitButton.setIconSize(20);
         submitButton.setTooltip("Submit a new job");
-        submitButton.addClickHandler(event -> {
-            SubmitWindow w = new SubmitWindow();
-            w.show();
-        });
+        submitButton.addClickHandler(event -> new SubmitWindow().show());
 
         ToolStripButton planButton = new ToolStripButton("Plan job");
         planButton.setIcon(SchedulerImages.instance.job_plan_16().getSafeUri().asString());
         planButton.setIconSize(20);
         planButton.setTooltip("Plan a job");
-        planButton.addClickHandler(event -> {
-            PlanWindow w = new PlanWindow(SchedulerPage.this.controller);
-            w.show();
-        });
+        planButton.addClickHandler(event -> new PlanWindow(SchedulerPage.this.controller).show());
 
         schedStartButton = new MenuItem(START);
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
@@ -678,29 +655,26 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         leftTabSet.addTab(statsTab);
         leftTabSet.addTab(usageTab);
 
-        leftTabSet.addTabSelectedHandler(new TabSelectedHandler() {
-            public void onTabSelected(TabSelectedEvent event) {
-                if (leftTabSet.getSelectedTab().equals(tasksTab)) {
-                    controller.setLazyStatsFetch(true);
-                    controller.setLazyUserFetch(true);
-                } else if (leftTabSet.getSelectedTab().equals(usersTab)) {
-                    controller.setLazyStatsFetch(true);
-                    controller.setLazyUserFetch(false);
-                } else if (leftTabSet.getSelectedTab().equals(statsTab)) {
-                    controller.setLazyStatsFetch(false);
-                    controller.setLazyUserFetch(true);
-                }
+        leftTabSet.addTabSelectedHandler(event -> {
+            if (leftTabSet.getSelectedTab().equals(tasksTab)) {
+                controller.setLazyStatsFetch(true);
+                controller.setLazyUserFetch(true);
+            } else if (leftTabSet.getSelectedTab().equals(usersTab)) {
+                controller.setLazyStatsFetch(true);
+                controller.setLazyUserFetch(false);
+            } else if (leftTabSet.getSelectedTab().equals(statsTab)) {
+                controller.setLazyStatsFetch(false);
+                controller.setLazyUserFetch(true);
+            }
 
-                if (leftTabSet.getSelectedTab().equals(visuTab)) {
-                    controller.setVisuFetchEnabled(true);
-                    JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel()
-                                                                                      .getJobsModel();
-                    if (jobsModel.getSelectedJob() != null) {
-                        controller.visuFetch(jobsModel.getSelectedJob().getId().toString());
-                    }
-                } else {
-                    controller.setVisuFetchEnabled(false);
+            if (leftTabSet.getSelectedTab().equals(visuTab)) {
+                controller.setVisuFetchEnabled(true);
+                JobsModel jobsModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel().getJobsModel();
+                if (jobsModel.getSelectedJob() != null) {
+                    controller.visuFetch(jobsModel.getSelectedJob().getId().toString());
                 }
+            } else {
+                controller.setVisuFetchEnabled(false);
             }
         });
 

@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -835,13 +836,13 @@ public class SubmitWindow {
 
                     @Override
                     public void onError(Request request, Throwable exception) {
-                        GWT.log("OOPS:" + request.toString());
+                        LogModel.getInstance().logImportantMessage("OOPS:" + request.toString());
                     }
                 });
                 try {
                     req.send();
                 } catch (RequestException e) {
-                    GWT.log("Error occured when fetching workflows from Catalog");
+                    LogModel.getInstance().logImportantMessage("Error occured when fetching workflows from Catalog");
                     // For Dev debug mode only
                     e.printStackTrace();
                 }
@@ -865,14 +866,14 @@ public class SubmitWindow {
 
             @Override
             public void onError(Request request, Throwable exception) {
-                GWT.log("Error occured when fetching buckets from Catalog");
+                LogModel.getInstance().logImportantMessage("Error occured when fetching buckets from Catalog");
             }
         });
 
         try {
             req.send();
         } catch (RequestException e) {
-            GWT.log("Error occured when fetching buckets from Catalog");
+            LogModel.getInstance().logImportantMessage("Error occured when fetching buckets from Catalog");
             // For Dev debug mode only
             e.printStackTrace();
         }
@@ -937,10 +938,10 @@ public class SubmitWindow {
                         // JSON parsing error workaround to force extract error message
                         MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
                         if (errorMessageMatcher != null) {
-                            GWT.log(errorMessageMatcher.getGroup(1));
+                            LogModel.getInstance().logImportantMessage(errorMessageMatcher.getGroup(1));
                             displayErrorMessage(errorMessageMatcher.getGroup(1));
                         } else {
-                            GWT.log(JSON_ERROR);
+                            LogModel.getInstance().logImportantMessage(JSON_ERROR);
                             displayErrorMessage(JSON_ERROR);
                         }
                     }
@@ -953,7 +954,7 @@ public class SubmitWindow {
                                     updateVariables(obj.get("updatedVariables"));
                                     redrawVariables(job);
                                 }
-                                GWT.log("Job validated");
+                                LogModel.getInstance().logMessage("Job validated");
                                 displayInfoMessage("Job is valid");
                             } else if (obj.containsKey(ERROR_MESSAGE)) {
                                 String errorMessage = obj.get(ERROR_MESSAGE).toString();
@@ -976,7 +977,7 @@ public class SubmitWindow {
 
                     private boolean isResultNull(String result) {
                         if (result == null) {
-                            GWT.log("Unexpected empty result");
+                            LogModel.getInstance().logImportantMessage("Unexpected empty result");
                             displayErrorMessage("Unexpected empty result");
                             return true;
                         }
@@ -1051,7 +1052,7 @@ public class SubmitWindow {
 
             private void checkEventResults(SubmitCompleteEvent event) {
                 if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
-                    GWT.log("Job submitted to the scheduler");
+                    LogModel.getInstance().logMessage("Job submitted to the scheduler");
                     SubmitWindow.this.window.removeMember(rootPage);
                     SubmitWindow.this.window.hide();
                     SubmitWindow.this.destroy();
@@ -1226,7 +1227,7 @@ public class SubmitWindow {
         try {
             req.send();
         } catch (RequestException e) {
-            GWT.log("Error occurred when fetching workflow xml for job " + jobId);
+            LogModel.getInstance().logImportantMessage("Error occurred when fetching workflow xml for job " + jobId);
             // For Dev debug mode only
             e.printStackTrace();
         }
@@ -1246,7 +1247,7 @@ public class SubmitWindow {
                 variables = readVars(job);
                 redrawVariables(job);
             } else {
-                GWT.log(JSON_ERROR);
+                LogModel.getInstance().logImportantMessage(JSON_ERROR);
                 displayErrorMessage(responseText);
                 //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
                 setEnabledStartAtPart(false);
@@ -1254,7 +1255,7 @@ public class SubmitWindow {
             }
 
         } catch (JSONException t) {
-            GWT.log(JSON_ERROR);
+            LogModel.getInstance().logImportantMessage(JSON_ERROR);
             displayErrorMessage(responseText);
             //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
             setEnabledStartAtPart(false);
@@ -1317,8 +1318,7 @@ public class SubmitWindow {
                     try {
                         checkIfAttributes(ret, variableNode, attrs);
                     } catch (JavaScriptException t) {
-                        // Node.hasAttributes() throws if there are no
-                        // attributes... (GWT 2.1.0)
+                        // Node.hasAttributes() throws if there are no attributes... (GWT 2.1.0)
                     }
                 }
             }
