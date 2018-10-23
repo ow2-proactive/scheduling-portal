@@ -40,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
@@ -234,7 +235,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             if (value != null) {
                 progress = Float.parseFloat(value.toString());
             }
-            int bx = new Double(Math.ceil(pw * progress)).intValue() - 601;
+            int bx = Double.valueOf(Math.ceil(pw * progress)).intValue() - 601;
             String progressUrl = SchedulerImages.instance.progressbar().getSafeUri().asString();
 
             String style = "display:block; " + //
@@ -295,7 +296,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         boolean selFinished = true; // ALL selected jobs are finished
         boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
         boolean selInError = false;
-        boolean selExport = true;
+        boolean selSingleSelected = this.getSelectedRecords().length == 1;
 
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
@@ -329,10 +330,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
 
             ids.add(rec.getAttribute(ID_ATTR.getName()));
-        }
-        // Allow export only and only if one job is selected, disable it in case of multiple selection.
-        if (this.getSelectedRecords().length != 1) {
-            selExport = false;
         }
 
         MenuItem pauseItem = new MenuItem("Pause",
@@ -377,19 +374,23 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
         removeItem.addClickHandler(event -> controller.removeJob(ids));
+        removeItem.setEnabled(selFinished);
 
         MenuItem killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(event -> controller.killJob(ids));
-
         killItem.setEnabled(selPauseOrRunning);
-        removeItem.setEnabled(selFinished);
+
+        MenuItem resubmitItem = new MenuItem("Re-submit",
+                                             SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
+        // Allow re-submitting a job only & only if a single job is selected.
+        resubmitItem.addClickHandler(event -> new SubmitWindow(ids.get(0)).show());
+        resubmitItem.setEnabled(selSingleSelected);
 
         MenuItem exportXmlItem = new MenuItem("Export XML",
-                                              SchedulerImages.instance.scheduler_export_32().getSafeUri().asString());
-
-        // Exporting XML works only & only if a single job is selected.
+                                              SchedulerImages.instance.job_export_32().getSafeUri().asString());
+        // Allow exporting job's XML only & only if a single job is selected.
         exportXmlItem.addClickHandler(event -> controller.exportJobXML(ids.get(0)));
-        exportXmlItem.setEnabled(selExport);
+        exportXmlItem.setEnabled(selSingleSelected);
 
         menu.setItems(pauseItem,
                       restartInErrorTaskItem,
@@ -398,6 +399,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                       priorityItem,
                       removeItem,
                       killItem,
+                      resubmitItem,
                       exportXmlItem);
     }
 
