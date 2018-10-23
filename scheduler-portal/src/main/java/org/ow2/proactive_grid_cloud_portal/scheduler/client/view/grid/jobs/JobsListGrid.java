@@ -296,7 +296,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         boolean selFinished = true; // ALL selected jobs are finished
         boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
         boolean selInError = false;
-        boolean selSingleSelected = this.getSelectedRecords().length == 1 ? true : false;
+        boolean selSingleSelected = this.getSelectedRecords().length == 1;
 
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
