@@ -78,14 +78,18 @@ public class DownloadJobXMLServlet extends HttpServlet {
             int buffer;
             while ((buffer = is.read()) != -1) {
                 out.write(buffer);
-                out.flush();
             }
+            out.flush();
             LOGGER.debug("Successfully downloaded job XML for job: {}", jobId);
 
         } catch (RestServerException e) {
-            LOGGER.debug("Failed to download workflow. User permission not granted: ", e);
-            response.addHeader("proactive_error", "User permission not granted: HTTP status code " + e.getStatus());
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            if (e.getStatus() == HttpServletResponse.SC_FORBIDDEN) {
+                LOGGER.debug("Failed to download workflow. User permission not granted: ", e);
+                response.addHeader("proactive_error", "User permission not granted: HTTP status code " + e.getStatus());
+            } else {
+                LOGGER.warn("Failed to download workflow", e);
+            }
+            response.sendError(e.getStatus(), e.getMessage());
         } catch (IOException | ServiceException e) {
             LOGGER.warn("Failed to download workflow", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

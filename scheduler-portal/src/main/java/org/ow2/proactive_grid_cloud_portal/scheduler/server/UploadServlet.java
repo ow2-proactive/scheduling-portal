@@ -170,11 +170,11 @@ public class UploadServlet extends HttpServlet {
         String url = URL_CATALOG + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
         LOGGER.info("Sending request to catalog: {}", url);
 
-        HttpGet httpget = new HttpGet(url);
-        httpget.addHeader(PARAMS_SESSION_ID, sessionId);
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.addHeader(PARAMS_SESSION_ID, sessionId);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
-                CloseableHttpResponse httpResponse = httpClient.execute(httpget);) {
+                CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
             HttpEntity responseBody = httpResponse.getEntity();
             File job = File.createTempFile("job_upload", ".xml");
             FileUtils.copyInputStreamToFile(responseBody.getContent(), job);

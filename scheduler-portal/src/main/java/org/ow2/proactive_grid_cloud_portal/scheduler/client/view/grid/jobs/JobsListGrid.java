@@ -375,7 +375,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         killItem.addClickHandler(event -> controller.killJobs(ids));
         killItem.setEnabled(selPauseOrRunning);
 
-        MenuItem killAndResubmitItem = new MenuItem("Kill & Re-submit",
+        MenuItem killAndResubmitItem = new MenuItem("Kill & Re-Submit",
                                                     SchedulerImages.instance.job_kill_resubmit_22()
                                                                             .getSafeUri()
                                                                             .asString());
@@ -383,7 +383,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         killAndResubmitItem.addClickHandler(event -> controller.killAndResubmit(ids.get(0)));
         killAndResubmitItem.setEnabled(selSingleSelected && selPauseOrRunning);
 
-        MenuItem resubmitItem = new MenuItem("Re-submit",
+        MenuItem resubmitItem = new MenuItem("Re-Submit",
                                              SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
         // Allow re-submitting a job only & only if a single job is selected.
         resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
