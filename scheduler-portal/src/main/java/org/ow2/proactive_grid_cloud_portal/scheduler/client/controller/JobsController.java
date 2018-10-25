@@ -349,7 +349,7 @@ public class JobsController {
                 } else {
                     // Check if it's a user-permission related error.
                     String error = xhr.getResponseHeader(HEADER_PA_ERROR);
-                    if (xhr.getResponseHeader(HEADER_PA_ERROR) != null) {
+                    if (error != null) {
                         SC.warn("Could not export job's XML:\n" + error);
                     } else {
                         LogModel.getInstance()
