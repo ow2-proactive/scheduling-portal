@@ -34,6 +34,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -246,6 +247,8 @@ public class SubmitWindow {
 
     private boolean isResubmit;
 
+    private JobsController jobsController;
+
     private String documentation = null;
 
     private String icon = null;
@@ -270,12 +273,23 @@ public class SubmitWindow {
     }
 
     /**
-     * Used for re-submit jobs window.
+     * Used for re-submitting a job. Has a slightly different layout
      *
      */
     public SubmitWindow(String jobId) {
         this.jobId = jobId;
         this.isResubmit = true;
+        this.build();
+    }
+
+    /**
+     * Used for kill & re-submit a job action. Has a slightly different layout
+     *
+     */
+    public SubmitWindow(String jobId, JobsController controller) {
+        this.jobId = jobId;
+        this.isResubmit = true;
+        this.jobsController = controller;
         this.build();
     }
 
@@ -1053,6 +1067,10 @@ public class SubmitWindow {
             private void checkEventResults(SubmitCompleteEvent event) {
                 if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
                     LogModel.getInstance().logMessage("Job submitted to the scheduler");
+                    // If Submit Window was created for Kill & Re-submit then kill job
+                    if (SubmitWindow.this.isResubmit && SubmitWindow.this.jobsController != null) {
+                        jobsController.killJob(SubmitWindow.this.jobId);
+                    }
                     SubmitWindow.this.window.removeMember(rootPage);
                     SubmitWindow.this.window.hide();
                     SubmitWindow.this.destroy();

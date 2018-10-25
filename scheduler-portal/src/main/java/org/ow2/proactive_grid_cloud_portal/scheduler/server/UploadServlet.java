@@ -54,6 +54,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,8 +173,8 @@ public class UploadServlet extends HttpServlet {
         HttpGet httpget = new HttpGet(url);
         httpget.addHeader(PARAMS_SESSION_ID, sessionId);
 
-        try (CloseableHttpClient httpclient = HttpClients.createDefault();
-                CloseableHttpResponse httpResponse = httpclient.execute(httpget);) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse httpResponse = httpClient.execute(httpget);) {
             HttpEntity responseBody = httpResponse.getEntity();
             File job = File.createTempFile("job_upload", ".xml");
             FileUtils.copyInputStreamToFile(responseBody.getContent(), job);
@@ -195,7 +197,10 @@ public class UploadServlet extends HttpServlet {
             FileUtils.copyInputStreamToFile(is, job);
             writeResponse(job, response);
 
-        } catch (Exception t) {
+        } catch (RestServerException e) {
+            LOGGER.warn("Failed to download workflow xml for job {} . Got response from Scheduler REST API with HTTP Status Code {}. {}" +
+                        jobId, e.getStatus(), e);
+        } catch (IOException | ServiceException t) {
             LOGGER.warn("Failed to download workflow xml for job " + jobId, t);
         }
     }
