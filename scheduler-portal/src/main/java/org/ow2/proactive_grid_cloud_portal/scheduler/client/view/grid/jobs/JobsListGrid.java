@@ -40,7 +40,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
@@ -372,18 +371,22 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         priorityItem.setSubmenu(priorityMenu);
 
-        MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
-        removeItem.addClickHandler(event -> controller.removeJob(ids));
-        removeItem.setEnabled(selFinished);
-
         MenuItem killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
-        killItem.addClickHandler(event -> controller.killJob(ids));
+        killItem.addClickHandler(event -> controller.killJobs(ids));
         killItem.setEnabled(selPauseOrRunning);
 
-        MenuItem resubmitItem = new MenuItem("Re-submit",
+        MenuItem killAndResubmitItem = new MenuItem("Kill & Re-Submit",
+                                                    SchedulerImages.instance.job_kill_resubmit_22()
+                                                                            .getSafeUri()
+                                                                            .asString());
+        // Allow killing & re-submitting a job only & only if a single job is selected.
+        killAndResubmitItem.addClickHandler(event -> controller.killAndResubmit(ids.get(0)));
+        killAndResubmitItem.setEnabled(selSingleSelected && selPauseOrRunning);
+
+        MenuItem resubmitItem = new MenuItem("Re-Submit",
                                              SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
         // Allow re-submitting a job only & only if a single job is selected.
-        resubmitItem.addClickHandler(event -> new SubmitWindow(ids.get(0)).show());
+        resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
         resubmitItem.setEnabled(selSingleSelected);
 
         MenuItem exportXmlItem = new MenuItem("Export XML",
@@ -392,15 +395,20 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         exportXmlItem.addClickHandler(event -> controller.exportJobXML(ids.get(0)));
         exportXmlItem.setEnabled(selSingleSelected);
 
+        MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
+        removeItem.addClickHandler(event -> controller.removeJob(ids));
+        removeItem.setEnabled(selFinished);
+
         menu.setItems(pauseItem,
                       restartInErrorTaskItem,
                       resumeItem,
                       resumeAndRestartItemTask,
                       priorityItem,
-                      removeItem,
                       killItem,
+                      killAndResubmitItem,
                       resubmitItem,
-                      exportXmlItem);
+                      exportXmlItem,
+                      removeItem);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {

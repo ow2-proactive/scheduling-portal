@@ -89,6 +89,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/job_resubmit_22.png")
     ImageResource job_resubmit_22();
 
+    @Source("images/job_kill_resubmit_22.png")
+    ImageResource job_kill_resubmit_22();
+
     @Source("images/monitoring_16.png")
     ImageResource monitoring_16();
 

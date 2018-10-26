@@ -34,6 +34,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -246,6 +247,10 @@ public class SubmitWindow {
 
     private boolean isResubmit;
 
+    private boolean isKillAndResubmit;
+
+    private JobsController jobsController;
+
     private String documentation = null;
 
     private String icon = null;
@@ -266,16 +271,28 @@ public class SubmitWindow {
      */
     public SubmitWindow() {
         this.isResubmit = false;
+        this.isKillAndResubmit = false;
         this.build();
     }
 
     /**
-     * Used for re-submit jobs window.
+     * Used for re-submitting a job. Has a slightly different layout
      *
      */
     public SubmitWindow(String jobId) {
         this.jobId = jobId;
         this.isResubmit = true;
+        this.build();
+    }
+
+    /**
+     * Used for kill & re-submit a job action. Has a slightly different layout
+     *
+     */
+    public SubmitWindow(String jobId, JobsController controller) {
+        this.jobId = jobId;
+        this.isKillAndResubmit = true;
+        this.jobsController = controller;
         this.build();
     }
 
@@ -531,17 +548,17 @@ public class SubmitWindow {
     private void initVarsLayout() {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
-        varsLayout.setGroupTitle((isResubmit ? 1 : 2) + ". Fill workflow variables");
+        varsLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 1 : 2) + ". Fill workflow variables");
         varsLayout.setWidth100();
         // In case of re-submit, give more height to Variables Panel.
-        varsLayout.setHeight(isResubmit ? "280px" : "150px");
+        varsLayout.setHeight(isResubmit || isKillAndResubmit ? "280px" : "150px");
         varsLayout.setMaxHeight(150);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
     }
 
     private BlurbItem createModelItem(String model) {
-        BlurbItem modelLabel = null;
+        BlurbItem modelLabel;
         if (model != null) {
             modelLabel = new BlurbItem();
             modelLabel.setDefaultValue(model);
@@ -581,7 +598,7 @@ public class SubmitWindow {
         String startButton = "startAtRadioGroup";
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
-        startAtLayout.setGroupTitle((isResubmit ? 2 : 3) + ". Scheduled time");
+        startAtLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 2 : 3) + ". Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
         planParameter = new Hidden("PLAN");
@@ -687,8 +704,17 @@ public class SubmitWindow {
         submitCancelButtons.setWidth100();
         submitCancelButtons.setAlign(Alignment.RIGHT);
 
-        submitButton = new IButton("Submit");
-        submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        if (isResubmit) {
+            submitButton = new IButton("Re-Submit");
+            submitButton.setIcon(SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
+        } else if (isKillAndResubmit) {
+            submitButton = new IButton("Kill & Re-Submit");
+            submitButton.setWidth(120);
+            submitButton.setIcon(SchedulerImages.instance.job_kill_resubmit_22().getSafeUri().asString());
+        } else {
+            submitButton = new IButton("Submit");
+            submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        }
         submitButton.setShowDisabledIcon(false);
         submitButton.setTooltip("A workflow must be selected first");
         submitButton.addClickHandler(clickHandlerForSubmitButton());
@@ -1053,6 +1079,10 @@ public class SubmitWindow {
             private void checkEventResults(SubmitCompleteEvent event) {
                 if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
                     LogModel.getInstance().logMessage("Job submitted to the scheduler");
+                    // If Submit Window was created for Kill & Re-submit then kill job
+                    if (SubmitWindow.this.isKillAndResubmit) {
+                        jobsController.killJob(SubmitWindow.this.jobId);
+                    }
                     SubmitWindow.this.window.removeMember(rootPage);
                     SubmitWindow.this.window.hide();
                     SubmitWindow.this.destroy();
@@ -1271,7 +1301,7 @@ public class SubmitWindow {
     private void build() {
 
         initRootPage(); // ------------ root page of the window
-        if (!isResubmit) {
+        if (!isResubmit && !isKillAndResubmit) {
             buildCatalogUrl();
             initSelectWfPart(); // -------- Select workflow Panel
         }
@@ -1283,7 +1313,11 @@ public class SubmitWindow {
         setEnabledStartAtPart(false);
 
         this.window = new Window();
-        this.window.setTitle(isResubmit ? "Re-submit job " + jobId : "Submit a new job");
+        if (isResubmit) {
+            this.window.setTitle("Re-submit job " + jobId);
+        } else {
+            this.window.setTitle(isKillAndResubmit ? "Kill & Re-Submit job " + jobId : "Submit a new job");
+        }
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
@@ -1292,7 +1326,7 @@ public class SubmitWindow {
         this.window.setHeight(WINDOW_HEIGHT);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
-        if (isResubmit) {
+        if (isResubmit || isKillAndResubmit) {
             uploadJobXMLForResubmit();
         }
     }

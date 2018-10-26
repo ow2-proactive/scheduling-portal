@@ -29,15 +29,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,31 +66,34 @@ public class DownloadJobXMLServlet extends HttpServlet {
         String jobId = request.getParameter("jobId");
         String sessionId = request.getParameter("sessionId");
         String fileName = "job_" + jobId + ".xml";
-        String location = "job" + jobId + ".result";
 
-        ServletOutputStream out = null;
-        try (InputStream is = new ByteArrayInputStream(((SchedulerServiceImpl) Service.get()).getJobXML(sessionId,
-                                                                                                        jobId)
-                                                                                             .getBytes(StandardCharsets.UTF_8))) {
+        try (ServletOutputStream out = response.getOutputStream();
+                InputStream is = new ByteArrayInputStream(((SchedulerServiceImpl) Service.get()).getJobXML(sessionId,
+                                                                                                           jobId)
+                                                                                                .getBytes(StandardCharsets.UTF_8))) {
             response.setContentType("application/xml");
             response.setHeader("Content-disposition", "attachment; filename=" + fileName);
-            response.setHeader("Location", location);
-
-            out = response.getOutputStream();
+            response.setHeader("Location", fileName);
 
             int buffer;
             while ((buffer = is.read()) != -1) {
                 out.write(buffer);
             }
+            out.flush();
             LOGGER.debug("Successfully downloaded job XML for job: {}", jobId);
 
-        } catch (Exception t) {
-            LOGGER.warn("Failed to download workflow", t);
-            String str = "Failed to download workflow: " + JSONUtils.getJsonErrorMessage(t);
-            Objects.requireNonNull(out).write(str.getBytes());
-        } finally {
-            Objects.requireNonNull(out).flush();
-            out.close();
+        } catch (RestServerException e) {
+            if (e.getStatus() == HttpServletResponse.SC_FORBIDDEN) {
+                LOGGER.debug("Failed to download workflow. User permission not granted: ", e);
+                response.addHeader("proactive_error", "User permission not granted: HTTP status code " + e.getStatus());
+            } else {
+                LOGGER.warn("Failed to download workflow", e);
+            }
+            response.sendError(e.getStatus(), e.getMessage());
+        } catch (IOException | ServiceException e) {
+            LOGGER.warn("Failed to download workflow", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                               "Failed to download workflow: " + e.getMessage());
         }
     }
 }

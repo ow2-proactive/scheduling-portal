@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
@@ -84,6 +86,8 @@ public class JobsController {
     private static Logger LOGGER = Logger.getLogger(JobsController.class.getName());
 
     private static final String STR_JOB = " jobs";
+
+    private static final String HEADER_PA_ERROR = "proactive_error";
 
     /**
      * Builds a jobs controller from a parent scheduler controller.
@@ -252,11 +256,11 @@ public class JobsController {
     }
 
     /**
-     * Kills a job
+     * Kills a list of jobs
      * 
      * @param jobId id of the job
      */
-    public void killJob(List<String> jobId) {
+    public void killJobs(List<String> jobId) {
         final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
@@ -273,6 +277,23 @@ public class JobsController {
                 LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
             }
         });
+    }
+
+    /**
+     * Kills a single job
+     *
+     * @param jobId id of the job
+     */
+    public void killJob(String jobId) {
+        killJobs(Arrays.asList(jobId));
+    }
+
+    /**
+     * Tries to re-submit then kill a job only and only if re-submission is successful
+     * @param jobId
+     */
+    public void killAndResubmit(String jobId) {
+        new SubmitWindow(jobId, this).show();
     }
 
     /**
@@ -310,13 +331,13 @@ public class JobsController {
     /**
      * Export the original Workflow of a job as an XML.
      * Sends a head request first to check if XML is downloadable before downloading.
+     * If the user doesn't have the required permissions (not his job and is not an admin) then pops-up an alert.
      *
      * @param jobId id of the job
      */
     public void exportJobXML(String jobId) {
         String jobXmlUrl = GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
                            LoginModel.getInstance().getSessionId();
-
         // Create a head-only request to check if XML is downloadable
         XMLHttpRequest req = XMLHttpRequest.create();
         req.open("HEAD", jobXmlUrl);
@@ -326,9 +347,46 @@ public class JobsController {
                     LogModel.getInstance().logMessage("Downloading XML for job: " + jobId);
                     Window.open(jobXmlUrl, "Download Job XML", "");
                 } else {
-                    LogModel.getInstance()
-                            .logMessage("Could not download Job XML. Got HTTP response code: " + xhr.getStatus());
-                    SC.warn("Could not export job's XML:\n Got HTTP response with error code " + xhr.getStatus());
+                    // Check if it's a user-permission related error.
+                    String error = xhr.getResponseHeader(HEADER_PA_ERROR);
+                    if (error != null) {
+                        SC.warn("Could not export job's XML:\n" + error);
+                    } else {
+                        LogModel.getInstance()
+                                .logMessage("Could not download Job XML. Got HTTP response code: " + xhr.getStatus());
+                    }
+                }
+            }
+        });
+        req.send();
+    }
+
+    /**
+     * Resubmits a job.
+     * Sends a head request first to check if job XML is accessible before downloading.
+     * If the user doesn't have the required permissions (not his job and is not an admin) then pops-up an alert.
+     *
+     * @param jobId id of the job
+     */
+    public void resubmitJob(String jobId) {
+        String jobXmlUrl = GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
+                           LoginModel.getInstance().getSessionId();
+        // Create a head-only request to check if XML is downloadable
+        XMLHttpRequest req = XMLHttpRequest.create();
+        req.open("HEAD", jobXmlUrl);
+        req.setOnReadyStateChange(xhr -> {
+            if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                if (xhr.getStatus() == Response.SC_OK) {
+                    new SubmitWindow(jobId).show();
+                } else {
+                    // Check if it's a user-permission related error.
+                    String error = xhr.getResponseHeader(HEADER_PA_ERROR);
+                    if (error != null) {
+                        SC.warn("Could not re-submit job:\n" + error);
+                    } else {
+                        LogModel.getInstance()
+                                .logMessage("Could not re-submit job. Got HTTP response code: " + xhr.getStatus());
+                    }
                 }
             }
         });
