@@ -137,7 +137,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
             }
         });
 
-        this.label = new Label("No node selected");
+        this.label = new Label("No selection");
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
