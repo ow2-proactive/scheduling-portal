@@ -311,6 +311,28 @@ public interface RMServiceAsync {
             AsyncCallback<String> callback);
 
     /**
+     * Executes a script on a node source
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param nodeSourceName a target for the script execution
+     */
+    void executeNodeSourceScript(String sessionId, String script, String engine, String nodeSourceName,
+                           AsyncCallback<String> callback);
+
+    /**
+     * Executes a script on a host
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param host a target for the script execution
+     */
+    void executeHostScript(String sessionId, String script, String engine, String host,
+                                 AsyncCallback<String> callback);
+
+    /**
      * Retrieves the thread dump of the Resource Manager
      *
      * @param sessionId current session

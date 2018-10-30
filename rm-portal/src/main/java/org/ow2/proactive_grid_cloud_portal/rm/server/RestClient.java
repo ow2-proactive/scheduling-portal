@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import org.jboss.resteasy.annotations.GZIP;
+import org.ow2.proactive.scripting.ScriptResult;
 
 
 @Path("/")
@@ -208,6 +209,22 @@ public interface RestClient {
     @Produces("application/json")
     InputStream executeNodeScript(@HeaderParam("sessionid") String sessionId, @FormParam("nodeurl") String nodeUrl,
             @FormParam("script") String script, @FormParam("scriptEngine") String scriptEngine);
+
+    @POST
+    @GZIP
+    @Path("/rm/nodesource/script")
+    @Produces("application/json")
+    InputStream executeNodeSourceScript(@HeaderParam("sessionid") String sessionId,
+                                                       @FormParam("nodesource") String nodeSource, @FormParam("script") String script,
+                                                       @FormParam("scriptEngine") String scriptEngine);
+
+    @POST
+    @GZIP
+    @Path("/rm/host/script")
+    @Produces("application/json")
+    InputStream executeHostScript(@HeaderParam("sessionid") String sessionId,
+                                                 @FormParam("host") String host, @FormParam("script") String script,
+                                                 @FormParam("scriptEngine") String scriptEngine);
 
     @GET
     @GZIP
