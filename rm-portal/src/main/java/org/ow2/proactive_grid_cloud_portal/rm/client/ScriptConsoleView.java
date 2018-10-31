@@ -105,12 +105,20 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
 
         IButton execute = new IButton("Execute");
         execute.addClickHandler(event -> {
+            String engine = selectedEngine.getValueAsString();
+            engine = engine.toLowerCase();
             if (nodeUrl != null) {
                 loadingLabel.show();
-                String engine = selectedEngine.getValueAsString();
-                engine = engine.toLowerCase();
-
                 controller.executeScript(codeMirror.getValue(), engine, nodeUrl, executeScriptCallback());
+            } else if (nodeHostName != null) {
+                loadingLabel.show();
+                controller.executeHostScript(codeMirror.getValue(), engine, nodeHostName, executeScriptCallback());
+            } else if (nodeSourceName != null) {
+                loadingLabel.show();
+                controller.executeNodeSourceScript(codeMirror.getValue(),
+                                                   engine,
+                                                   nodeSourceName,
+                                                   executeScriptCallback());
             }
         });
 
@@ -244,22 +252,30 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeUrl = node.getNodeUrl();
         this.nodeSourceName = node.getSourceName();
         this.nodeHostName = node.getHostName();
-        this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
+        this.nodeLabel.setContents("<h3>Node: " + node.getNodeUrl() + "</h3>");
         this.nodeCanvas.show();
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
+        this.nodeLabel.setIcon(ns.getIcon());
+        this.label.hide();
         this.nodeUrl = null;
-        this.nodeCanvas.hide();
-        this.label.show();
+        this.nodeSourceName = ns.getSourceName();
+        this.nodeHostName = null;
+        this.nodeLabel.setContents("<h3>Node Source: " + ns.getSourceName() + "</h3>");
+        this.nodeCanvas.show();
     }
 
     @Override
     public void hostSelected(Host h) {
+        this.nodeLabel.setIcon(h.getIcon());
+        this.label.hide();
         this.nodeUrl = null;
-        this.nodeCanvas.hide();
-        this.label.show();
+        this.nodeSourceName = h.getSourceName();
+        this.nodeHostName = h.getHostName();
+        this.nodeLabel.setContents("<h3>Host: " + h.getHostName() + "</h3>");
+        this.nodeCanvas.show();
     }
 
     @Override

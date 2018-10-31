@@ -426,18 +426,18 @@ public class RMServiceImpl extends Service implements RMService {
     public String executeNodeSourceScript(String sessionId, String script, String engine, String nodeUrl)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.executeNodeSourceScript(sessionId,
-                nodeUrl,
-                script,
-                engine));
+                                                                                                                   nodeUrl,
+                                                                                                                   script,
+                                                                                                                   engine));
     }
 
     @Override
     public String executeHostScript(String sessionId, String script, String engine, String nodeUrl)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.executeHostScript(sessionId,
-                nodeUrl,
-                script,
-                engine));
+                                                                                                             nodeUrl,
+                                                                                                             script,
+                                                                                                             engine));
     }
 
     @Override

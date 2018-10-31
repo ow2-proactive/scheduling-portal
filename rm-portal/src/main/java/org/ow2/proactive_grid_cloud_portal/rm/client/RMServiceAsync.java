@@ -319,7 +319,7 @@ public interface RMServiceAsync {
      * @param nodeSourceName a target for the script execution
      */
     void executeNodeSourceScript(String sessionId, String script, String engine, String nodeSourceName,
-                           AsyncCallback<String> callback);
+            AsyncCallback<String> callback);
 
     /**
      * Executes a script on a host
@@ -329,8 +329,7 @@ public interface RMServiceAsync {
      * @param engine a script engine to use for the script execution
      * @param host a target for the script execution
      */
-    void executeHostScript(String sessionId, String script, String engine, String host,
-                                 AsyncCallback<String> callback);
+    void executeHostScript(String sessionId, String script, String engine, String host, AsyncCallback<String> callback);
 
     /**
      * Retrieves the thread dump of the Resource Manager

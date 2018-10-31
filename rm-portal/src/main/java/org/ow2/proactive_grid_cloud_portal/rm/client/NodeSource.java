@@ -254,6 +254,14 @@ public class NodeSource {
             return sourceName + "-host-" + hostName;
         }
 
+        public String getIcon() {
+            if (this.isVirtual()) {
+                return RMImages.instance.host_virtual_16().getSafeUri().asString();
+            } else {
+                return RMImages.instance.host_16().getSafeUri().asString();
+            }
+        }
+
         public static class Node {
 
             /** deployed node URL */
