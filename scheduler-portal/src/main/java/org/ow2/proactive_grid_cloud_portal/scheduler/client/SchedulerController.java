@@ -383,42 +383,14 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
 
                     public void onFailure(Throwable caught) {
+                        //When a job has no visu
                         String msg = "Failed to fetch html for job " + jobId;
                         String json = JSONUtils.getJsonErrorMessage(caught);
                         if (json != null)
                             msg += " : " + json;
 
                         LogModel.getInstance().logImportantMessage(msg);
-
-                        // trying to load image
-                        String curPath = model.getJobImagePath(jobId);
-                        if (curPath != null) {
-                            // exists already, resetting it will trigger listeners
-                            model.setJobImagePath(jobId, curPath);
-                        } else {
-                            final long t = System.currentTimeMillis();
-                            scheduler.getJobImage(LoginModel.getInstance().getSessionId(),
-                                                  jobId,
-                                                  new AsyncCallback<String>() {
-                                                      public void onSuccess(String result) {
-                                                          model.setJobImagePath(jobId, result);
-                                                          LogModel.getInstance()
-                                                                  .logMessage("Fetched image for job " + jobId +
-                                                                              " in " +
-                                                                              (System.currentTimeMillis() - t) + " ms");
-                                                      }
-
-                                                      public void onFailure(Throwable caught) {
-                                                          String msg = "Failed to fetch image for job " + jobId;
-                                                          String json = JSONUtils.getJsonErrorMessage(caught);
-                                                          if (json != null)
-                                                              msg += " : " + json;
-
-                                                          LogModel.getInstance().logImportantMessage(msg);
-                                                          model.visuUnavailable(jobId);
-                                                      }
-                                                  });
-                        }
+                        model.visuUnavailable(jobId);
                     }
                 });
             }

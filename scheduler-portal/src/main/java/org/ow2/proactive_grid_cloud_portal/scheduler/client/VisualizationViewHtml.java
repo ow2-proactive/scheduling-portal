@@ -58,6 +58,8 @@ public class VisualizationViewHtml implements VisualizationView {
 
     private Label noJobSelectedMessage;
 
+    private Label noVisualizationMessage;
+
     public void imageUpdated(String jobId, String path) {
         hideHtml();
     }
@@ -71,6 +73,7 @@ public class VisualizationViewHtml implements VisualizationView {
 
     public void jobSelected(Job job) {
         noJobSelectedMessage.setVisible(false);
+        noVisualizationMessage.setVisible(false);
     }
 
     public void jobUnselected() {
@@ -78,10 +81,15 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.setWidth100();
         wrapper.setHeight100();
         noJobSelectedMessage.setVisible(true);
+        noVisualizationMessage.setVisible(false);
     }
 
     public void visualizationUnavailable(String jobId) {
-        hideHtml();
+        htmlPanel.setHTML("");
+        wrapper.setWidth100();
+        wrapper.setHeight100();
+        noVisualizationMessage.setVisible(true);
+        noJobSelectedMessage.setVisible(false);
     }
 
     public void tasksUpdating() {
@@ -161,6 +169,11 @@ public class VisualizationViewHtml implements VisualizationView {
         this.noJobSelectedMessage.setAlign(Alignment.CENTER);
         this.noJobSelectedMessage.setWidth100();
         wrapper.addMember(noJobSelectedMessage);
+
+        this.noVisualizationMessage = new Label("The graphical Visualization is not available for this Workflow. To get one for the next execution, please open the Workflow in the Studio, and store it in the Catalog.");
+        this.noVisualizationMessage.setAlign(Alignment.CENTER);
+        this.noVisualizationMessage.setWidth100();
+        wrapper.addMember(noVisualizationMessage);
 
         htmlPanel = new HTML();
         htmlPanel.getElement().setId("html-view");
