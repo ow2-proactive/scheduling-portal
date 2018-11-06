@@ -143,7 +143,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
         this.nodeLabel.setHeight(16);
 
-        String helpMessage = "Type in an arbitrary script and execute it on the node.";
+        String helpMessage = "Type in an arbitrary script and execute it on one node of the selection.";
         helpMessage += " Useful for trouble-shooting and diagnostics.";
         helpMessage += "<br/><br/>Groovy example:<br/><br/>";
         helpMessage += "<div style='padding-left:20px'>println System.getenv(\"PATH\")</div>";
@@ -236,7 +236,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void nodeUnselected() {
-        this.label.setContents("No node selected");
+        this.label.setContents("No selection");
         this.label.setAlign(Alignment.CENTER);
         this.label.show();
         this.nodeCanvas.hide();
