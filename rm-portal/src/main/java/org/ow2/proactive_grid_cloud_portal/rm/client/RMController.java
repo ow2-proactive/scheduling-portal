@@ -1296,9 +1296,27 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         error(e.getMessage());
     }
 
-    private String parseScriptResult(String json) {
+    private String parseListScriptResult(String json) {
+        JSONValue listScriptResultJsonValue = this.parseJSON(json);
+        JSONObject scriptResultJsonObject = listScriptResultJsonValue.isObject();
+        if (scriptResultJsonObject == null) {
+            StringBuilder scriptResultStr = new StringBuilder();
+            JSONArray scriptResultJsonArray = listScriptResultJsonValue.isArray();
+            JSONValue currentScriptResultJsonValue;
+            JSONObject currentScriptResultJsonObject;
+            for (int i = 0; i < scriptResultJsonArray.size(); i++) {
+                currentScriptResultJsonValue = scriptResultJsonArray.get(i);
+                currentScriptResultJsonObject = currentScriptResultJsonValue.isObject();
+                scriptResultStr.append(parseScriptResult(currentScriptResultJsonObject)).append("<br/>");
+            }
+            return scriptResultStr.toString();
+        } else {
+            return parseScriptResult(scriptResultJsonObject);
+        }
+    }
+
+    private String parseScriptResult(JSONObject scriptResult) {
         StringBuilder scriptResultStr = new StringBuilder();
-        JSONObject scriptResult = this.parseJSON(json).isObject();
 
         JSONObject exception = scriptResult.get("exception").isObject();
         while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
@@ -1307,6 +1325,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         if (exception != null && exception.get("message").isString() != null) {
             scriptResultStr.append(exception.get("message").isString().stringValue());
+        }
+
+        JSONString hostname = scriptResult.get("hostname").isString();
+        if (hostname != null) {
+            scriptResultStr.append(hostname.stringValue());
         }
 
         JSONString output = scriptResult.get("output").isString();
@@ -1337,7 +1360,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
 
                                  public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseScriptResult(result));
+                                     syncCallBack.onSuccess(parseListScriptResult(result));
                                  }
                              });
     }
@@ -1364,7 +1387,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                        }
 
                                        public void onSuccess(String result) {
-                                           syncCallBack.onSuccess(parseScriptResult(result));
+                                           syncCallBack.onSuccess(parseListScriptResult(result));
                                        }
                                    });
     }
@@ -1389,7 +1412,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
 
                                  public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseScriptResult(result));
+                                     syncCallBack.onSuccess(parseListScriptResult(result));
                                  }
                              });
     }
