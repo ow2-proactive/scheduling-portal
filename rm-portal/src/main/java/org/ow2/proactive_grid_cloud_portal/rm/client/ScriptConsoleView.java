@@ -56,6 +56,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
 
+    private VLayout vl;
+
     private Label label;
 
     private VLayout nodeCanvas;
@@ -95,7 +97,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
     }
 
     Canvas build() {
-        VLayout vl = new VLayout();
+        vl = new VLayout();
         vl.setOverflow(Overflow.AUTO);
 
         scriptArea = new TextArea();
@@ -253,7 +255,9 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeSourceName = node.getSourceName();
         this.nodeHostName = node.getHostName();
         this.nodeLabel.setContents("<h3>Node: " + node.getNodeUrl() + "</h3>");
+        this.outputText.setContents("");
         this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
     @Override
@@ -264,7 +268,9 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeSourceName = ns.getSourceName();
         this.nodeHostName = null;
         this.nodeLabel.setContents("<h3>Node Source: " + ns.getSourceName() + "</h3>");
+        this.outputText.setContents("");
         this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
     @Override
@@ -275,7 +281,9 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeSourceName = h.getSourceName();
         this.nodeHostName = h.getHostName();
         this.nodeLabel.setContents("<h3>Host: " + h.getHostName() + "</h3>");
+        this.outputText.setContents("");
         this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
     @Override
