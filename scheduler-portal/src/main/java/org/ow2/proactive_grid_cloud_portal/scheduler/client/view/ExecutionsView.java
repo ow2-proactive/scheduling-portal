@@ -101,7 +101,13 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
 
         filter = new IButton("Filter");
         filter.setIcon(Images.instance.filter_32().getSafeUri().asString());
-        filter.addClickHandler(event -> controller.getJobsController().getView().toggleFilterPane());
+        filter.addClickHandler(event -> {
+            if (modeSelect.getValueAsString().equals(ExecutionListMode.JOB_CENTRIC.name)) {
+                controller.getJobsController().getView().toggleFilterPane();
+            } else {
+                controller.getTasksController().getView().toggleFilterPane();
+            }
+        });
 
         chkMy.setWidth(60);
         chkPending.setWidth(60);
