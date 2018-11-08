@@ -25,16 +25,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionsController;
 
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
@@ -56,6 +56,8 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
     protected CheckboxItem chkRunning;
 
     protected CheckboxItem chkFinished;
+
+    protected IButton filter;
 
     public ExecutionsView(ExecutionsController controller) {
         this.controller = controller;
@@ -80,43 +82,26 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
 
         chkMy = new CheckboxItem("myjobs", "My jobs");
         chkMy.setValue(false);
-        chkMy.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.fetchMyExecutionsOnly(chkMy.getValueAsBoolean());
-            }
-        });
+        chkMy.addChangedHandler(event -> controller.fetchMyExecutionsOnly(chkMy.getValueAsBoolean()));
         chkPending = new CheckboxItem("pending", "Pending");
         chkPending.setValue(true);
-        chkPending.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.fetchPending(chkPending.getValueAsBoolean());
-            }
-        });
+        chkPending.addChangedHandler(event -> controller.fetchPending(chkPending.getValueAsBoolean()));
         chkRunning = new CheckboxItem("running", "Running");
         chkRunning.setValue(true);
-        chkRunning.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.fetchRunning(chkRunning.getValueAsBoolean());
-            }
-        });
+        chkRunning.addChangedHandler(event -> controller.fetchRunning(chkRunning.getValueAsBoolean()));
         chkFinished = new CheckboxItem("finished", "Finished");
         chkFinished.setValue(true);
-        chkFinished.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                controller.fetchFinished(chkFinished.getValueAsBoolean());
-            }
-        });
+        chkFinished.addChangedHandler(event -> controller.fetchFinished(chkFinished.getValueAsBoolean()));
 
         final SelectItem modeSelect = new SelectItem();
         modeSelect.setValueMap(ExecutionListMode.JOB_CENTRIC.name, ExecutionListMode.TASK_CENTRIC.name);
         modeSelect.setValue(ExecutionListMode.JOB_CENTRIC.name);
         modeSelect.setShowTitle(false);
-        modeSelect.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                controller.switchMode((String) modeSelect.getValue());
-            }
-        });
+        modeSelect.addChangedHandler(event -> controller.switchMode((String) modeSelect.getValue()));
+
+        filter = new IButton("Filter");
+        filter.setIcon(Images.instance.filter_32().getSafeUri().asString());
+        filter.addClickHandler(event -> controller.getJobsController().getView().toggleFilterPane());
 
         chkMy.setWidth(60);
         chkPending.setWidth(60);
@@ -134,7 +119,7 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
         }
 
         LayoutSpacer space = new LayoutSpacer(1, 10);
-        executionsSection.setControls(checkBoxes, space);
+        executionsSection.setControls(checkBoxes, space, filter);
 
         return executionsSection;
     }
