@@ -113,6 +113,10 @@ public class JobsController {
         this.model = model;
     }
 
+    public JobsView getView() {
+        return view;
+    }
+
     /**
      * Builds the view controlled by this controller.
      * @return a layout that displays the view.
