@@ -51,9 +51,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ex
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportPolicyToFileHandler;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogObjectNameConverter;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
@@ -1318,24 +1316,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private String parseScriptResult(JSONObject scriptResult) {
         StringBuilder scriptResultStr = new StringBuilder();
 
+        JSONValue scriptResultObject = scriptResult.get("hostname");
+        if (scriptResultObject != null) {
+            JSONString hostname = scriptResultObject.isString();
+            if (hostname != null) {
+                scriptResultStr.append("<b>On host ").append(hostname.stringValue()).append(": </b><br/>");
+            }
+        }
+
         JSONObject exception = scriptResult.get("exception").isObject();
+        if (exception != null && exception.get("message").isString() != null) {
+            scriptResultStr.append("Error: ").append(exception.get("message").isString().stringValue());
+        }
         while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
             exception = exception.get("cause").isObject();
-        }
-
-        if (exception != null && exception.get("message").isString() != null) {
-            scriptResultStr.append(exception.get("message").isString().stringValue());
-        }
-
-        JSONString hostname = scriptResult.get("hostname").isString();
-        if (hostname != null) {
-            scriptResultStr.append(hostname.stringValue());
+            if (exception.get("message").isString() != null) {
+                scriptResultStr.append("<br/>Caused by: ").append(exception.get("message").isString().stringValue());
+            }
         }
 
         JSONString output = scriptResult.get("output").isString();
         if (output != null) {
             scriptResultStr.append(output.stringValue());
         }
+
+        scriptResultStr.append("<br/>");
 
         return scriptResultStr.toString();
     }
