@@ -434,6 +434,17 @@ public interface RestClient {
     final String sessionId);
 
     /**
+     * Shutdown the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return a ClientResponse containing the response status and true if the Scheduler was successfully shutdown and false in case of a
+     * failure
+     */
+    @PUT
+    @Path("shutdown")
+    InputStream shutdownScheduler(@HeaderParam("sessionid")
+    final String sessionId);
+
+    /**
      * Starts the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return a ClientResponse containing the response status and true if the Scheduler was successfully started and false in case of a

@@ -56,6 +56,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/scheduler_kill_16.png")
     ImageResource scheduler_kill_16();
 
+    @Source("images/scheduler_shutdown_16.png")
+    ImageResource scheduler_shutdown_16();
+
     @Source("images/scheduler_pause_16.png")
     ImageResource scheduler_pause_16();
 

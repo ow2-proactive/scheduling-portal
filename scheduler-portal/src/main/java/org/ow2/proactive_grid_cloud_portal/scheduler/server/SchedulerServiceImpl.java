@@ -845,6 +845,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * (non-Javadoc)
      *
      * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#shutdownScheduler(java.
+     * lang.String)
+     */
+    @Override
+    public boolean shutdownScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.shutdownScheduler(sessionId);
+            }
+        });
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
      * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#startScheduler(java
      * .lang.String)
      */

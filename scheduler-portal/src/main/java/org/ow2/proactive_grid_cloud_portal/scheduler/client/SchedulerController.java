@@ -500,6 +500,23 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
+    /**
+     * Attempt to kill the scheduler, might fail depending server state/rights
+     */
+    public void shutdownScheduler() {
+        this.scheduler.shutdownScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
+            public void onSuccess(Boolean result) {
+                LogModel.getInstance().logMessage("Scheduler shutdown");
+            }
+
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                warn("Could not shutdown Scheduler:\n" + msg);
+                LogModel.getInstance().logImportantMessage("Failed to shutdown Scheduler: " + msg);
+            }
+        });
+    }
+
     public OutputController getOutputController() {
         return outputController;
     }

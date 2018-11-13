@@ -291,6 +291,15 @@ public interface SchedulerService extends RemoteService {
     boolean killScheduler(final String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * Shutdown the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @return true if the scheduler was successfully shutdown, false otherwise.
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    boolean shutdownScheduler(final String sessionId) throws RestServerException, ServiceException;
+
+    /**
      * Starts the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @return true if the scheduler was successfully started, false otherwise.
