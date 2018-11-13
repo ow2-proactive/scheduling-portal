@@ -501,7 +501,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     /**
-     * Attempt to kill the scheduler, might fail depending server state/rights
+     * Attempt to shutdown the scheduler, might fail depending server state/rights
      */
     public void shutdownScheduler() {
         this.scheduler.shutdownScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
