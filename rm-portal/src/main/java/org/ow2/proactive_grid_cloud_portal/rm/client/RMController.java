@@ -1382,15 +1382,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              nodeUrl,
                              new AsyncCallback<String>() {
                                  public void onFailure(Throwable caught) {
-                                     String msg = JSONUtils.getJsonErrorMessage(caught);
-                                     LogModel.getInstance().logImportantMessage("Failed to execute a script " + script +
-                                                                                " on " + nodeUrl + " : " + msg);
-                                     if (msg.equals("HTTP 500 Internal Server Error")) {
-                                         syncCallBack.onFailure("You are not authorized to execute scripts on this node. Please contact the administrator of the node.");
-                                     } else {
-                                         syncCallBack.onFailure(msg);
-                                     }
-
+                                     reportScriptExecutionFailure(caught, script, nodeUrl, syncCallBack);
                                  }
 
                                  public void onSuccess(String result) {
@@ -1407,17 +1399,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                    nodeSourceName,
                                    new AsyncCallback<String>() {
                                        public void onFailure(Throwable caught) {
-                                           String msg = JSONUtils.getJsonErrorMessage(caught);
-                                           LogModel.getInstance()
-                                                   .logImportantMessage("Failed to execute a script " + script +
-                                                                        " on node source " + nodeSourceName + " : " +
-                                                                        msg);
-                                           if (msg.equals("HTTP 500 Internal Server Error")) {
-                                               syncCallBack.onFailure("You are not authorized to execute scripts on this node source. Please contact the administrator.");
-                                           } else {
-                                               syncCallBack.onFailure(msg);
-                                           }
-
+                                           reportScriptExecutionFailure(caught, script, nodeSourceName, syncCallBack);
                                        }
 
                                        public void onSuccess(String result) {
@@ -1434,21 +1416,25 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              host,
                              new AsyncCallback<String>() {
                                  public void onFailure(Throwable caught) {
-                                     String msg = JSONUtils.getJsonErrorMessage(caught);
-                                     LogModel.getInstance().logImportantMessage("Failed to execute a script " + script +
-                                                                                " on host " + host + " : " + msg);
-                                     if (msg.equals("HTTP 500 Internal Server Error")) {
-                                         syncCallBack.onFailure("You are not authorized to execute scripts on this host. Please contact the administrator.");
-                                     } else {
-                                         syncCallBack.onFailure(msg);
-                                     }
-
+                                     reportScriptExecutionFailure(caught, script, host, syncCallBack);
                                  }
 
                                  public void onSuccess(String result) {
                                      syncCallBack.onSuccess(parseAllScriptResults(result));
                                  }
                              });
+    }
+
+    private void reportScriptExecutionFailure(Throwable caught, String script, String scriptTarget,
+            Callback<String, String> syncCallBack) {
+        String msg = JSONUtils.getJsonErrorMessage(caught);
+        LogModel.getInstance()
+                .logImportantMessage("Failed to execute a script " + script + " on " + scriptTarget + ": " + msg);
+        if (msg.equals("HTTP 500 Internal Server Error")) {
+            syncCallBack.onFailure("You are not authorized to execute scripts on this node source. Please contact the administrator.");
+        } else {
+            syncCallBack.onFailure(msg);
+        }
     }
 
 }
