@@ -1294,53 +1294,84 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         error(e.getMessage());
     }
 
-    private String parseListScriptResult(String json) {
-        JSONValue listScriptResultJsonValue = this.parseJSON(json);
-        JSONObject scriptResultJsonObject = listScriptResultJsonValue.isObject();
-        if (scriptResultJsonObject == null) {
-            StringBuilder scriptResultStr = new StringBuilder();
-            JSONArray scriptResultJsonArray = listScriptResultJsonValue.isArray();
-            JSONValue currentScriptResultJsonValue;
-            JSONObject currentScriptResultJsonObject;
-            for (int i = 0; i < scriptResultJsonArray.size(); i++) {
-                currentScriptResultJsonValue = scriptResultJsonArray.get(i);
-                currentScriptResultJsonObject = currentScriptResultJsonValue.isObject();
-                scriptResultStr.append(parseScriptResult(currentScriptResultJsonObject)).append("<br/>");
-            }
-            return scriptResultStr.toString();
+    private String parseAllScriptResults(String jsonString) {
+        JSONValue allScriptResultsJson = this.parseJSON(jsonString);
+        JSONObject scriptResultJsonObject = allScriptResultsJson.isObject();
+        if (scriptResultJsonObject != null) {
+            return parseScriptResultAsJsonObject(scriptResultJsonObject);
         } else {
-            return parseScriptResult(scriptResultJsonObject);
+            return parseAllScriptResultsAsJsonArray(allScriptResultsJson);
         }
     }
 
-    private String parseScriptResult(JSONObject scriptResult) {
-        StringBuilder scriptResultStr = new StringBuilder();
+    private String parseAllScriptResultsAsJsonArray(JSONValue allScriptResultsJson) {
+        StringBuilder allScriptResultsOutput = new StringBuilder();
+        JSONArray scriptResultJsonArray = allScriptResultsJson.isArray();
 
-        JSONValue scriptResultObject = scriptResult.get("hostname");
-        if (scriptResultObject != null) {
-            JSONString hostname = scriptResultObject.isString();
-            if (hostname != null) {
-                scriptResultStr.append("<b>On host ").append(hostname.stringValue()).append(": </b><br/>");
+        JSONValue scriptResultJson;
+        JSONObject scriptResultJsonObject;
+        for (int i = 0; i < scriptResultJsonArray.size(); i++) {
+            scriptResultJson = scriptResultJsonArray.get(i);
+            scriptResultJsonObject = scriptResultJson.isObject();
+            if (scriptResultJsonObject != null) {
+                allScriptResultsOutput.append(parseScriptResultAsJsonObject(scriptResultJsonObject)).append("<br/>");
             }
         }
 
-        JSONObject exception = scriptResult.get("exception").isObject();
-        if (exception != null && exception.get("message").isString() != null) {
-            scriptResultStr.append("Error: ").append(exception.get("message").isString().stringValue()).append("<br/>");
-        }
-        while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
-            exception = exception.get("cause").isObject();
-            if (exception.get("message").isString() != null) {
-                scriptResultStr.append("Caused by: ").append(exception.get("message").isString().stringValue()).append("<br/>");
+        return allScriptResultsOutput.toString();
+    }
+
+    private String parseScriptResultAsJsonObject(JSONObject scriptResultJsonObject) {
+        StringBuilder scriptResultOutput = new StringBuilder();
+
+        parseHostname(scriptResultJsonObject, scriptResultOutput);
+        parseExceptionAndCause(scriptResultJsonObject, scriptResultOutput);
+        parseOutput(scriptResultJsonObject, scriptResultOutput);
+
+        return scriptResultOutput.toString();
+    }
+
+    private void parseHostname(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue scriptHostnameJson = scriptResultJsonObject.get("hostname");
+        if (scriptHostnameJson != null) {
+            JSONString scriptHostnameJsonString = scriptHostnameJson.isString();
+            if (scriptHostnameJsonString != null) {
+                scriptResultOutput.append("<b>On host ")
+                                  .append(scriptHostnameJsonString.stringValue())
+                                  .append(": </b><br/>");
             }
         }
+    }
 
-        JSONString output = scriptResult.get("output").isString();
-        if (output != null) {
-            scriptResultStr.append(output.stringValue()).append("<br/>");
+    private void parseExceptionAndCause(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue exceptionJson = scriptResultJsonObject.get("exception");
+        if (exceptionJson != null) {
+            JSONObject exceptionJsonObject = exceptionJson.isObject();
+            if (exceptionJsonObject != null && exceptionJsonObject.get("message").isString() != null) {
+                scriptResultOutput.append("<b>Error: </b>")
+                                  .append(exceptionJsonObject.get("message").isString().stringValue())
+                                  .append("<br/>");
+            }
+            while (exceptionJsonObject != null && exceptionJsonObject.get("cause") != null &&
+                   exceptionJsonObject.get("cause").isObject() != null) {
+                exceptionJsonObject = exceptionJsonObject.get("cause").isObject();
+                if (exceptionJsonObject.get("message").isString() != null) {
+                    scriptResultOutput.append("<b>Caused by: <b>")
+                                      .append(exceptionJsonObject.get("message").isString().stringValue())
+                                      .append("<br/>");
+                }
+            }
         }
+    }
 
-        return scriptResultStr.toString();
+    private void parseOutput(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue outputJson = scriptResultJsonObject.get("output");
+        if (outputJson != null) {
+            JSONString outputJsonObject = outputJson.isString();
+            if (outputJsonObject != null) {
+                scriptResultOutput.append("<b>Output: </b>").append(outputJsonObject.stringValue()).append("<br/>");
+            }
+        }
     }
 
     public void executeScript(final String script, final String engine, final String nodeUrl,
@@ -1363,7 +1394,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
 
                                  public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseListScriptResult(result));
+                                     syncCallBack.onSuccess(parseAllScriptResults(result));
                                  }
                              });
     }
@@ -1390,7 +1421,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                        }
 
                                        public void onSuccess(String result) {
-                                           syncCallBack.onSuccess(parseListScriptResult(result));
+                                           syncCallBack.onSuccess(parseAllScriptResults(result));
                                        }
                                    });
     }
@@ -1415,7 +1446,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                  }
 
                                  public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseListScriptResult(result));
+                                     syncCallBack.onSuccess(parseAllScriptResults(result));
                                  }
                              });
     }

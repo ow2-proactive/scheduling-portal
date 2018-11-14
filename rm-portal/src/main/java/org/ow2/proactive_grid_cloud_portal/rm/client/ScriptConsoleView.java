@@ -223,7 +223,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
             public void onSuccess(String result) {
                 loadingLabel.hide();
                 outputLabel.show();
-                outputLabel.setContents("<h3>Output:</h3>");
+                outputLabel.setContents("<h3>Script Execution Output:</h3>");
                 outputText.setContents("<pre>" + result + "</pre>");
             }
 
