@@ -1326,21 +1326,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         JSONObject exception = scriptResult.get("exception").isObject();
         if (exception != null && exception.get("message").isString() != null) {
-            scriptResultStr.append("Error: ").append(exception.get("message").isString().stringValue());
+            scriptResultStr.append("Error: ").append(exception.get("message").isString().stringValue()).append("<br/>");
         }
         while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
             exception = exception.get("cause").isObject();
             if (exception.get("message").isString() != null) {
-                scriptResultStr.append("<br/>Caused by: ").append(exception.get("message").isString().stringValue());
+                scriptResultStr.append("Caused by: ").append(exception.get("message").isString().stringValue()).append("<br/>");
             }
         }
 
         JSONString output = scriptResult.get("output").isString();
         if (output != null) {
-            scriptResultStr.append(output.stringValue());
+            scriptResultStr.append(output.stringValue()).append("<br/>");
         }
-
-        scriptResultStr.append("<br/>");
 
         return scriptResultStr.toString();
     }
