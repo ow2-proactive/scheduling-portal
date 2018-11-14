@@ -477,7 +477,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                     return "Kill Scheduler Server";
 
                 else if (value.toString().equalsIgnoreCase(SHUTDOWN))
-                    return "Shutdown Scheduler Server (Freeze and Kill)";
+                    return "Shutdown Scheduler Server (Running Tasks terminate)";
 
                 return null;
             }
