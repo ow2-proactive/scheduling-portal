@@ -1297,11 +1297,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private String parseAllScriptResults(String jsonString) {
         JSONValue allScriptResultsJson = this.parseJSON(jsonString);
         JSONObject scriptResultJsonObject = allScriptResultsJson.isObject();
-        if (scriptResultJsonObject != null) {
-            return parseScriptResultAsJsonObject(scriptResultJsonObject);
-        } else {
-            return parseAllScriptResultsAsJsonArray(allScriptResultsJson);
-        }
+        return scriptResultJsonObject == null ? parseAllScriptResultsAsJsonArray(allScriptResultsJson)
+                                              : parseScriptResultAsJsonObject(scriptResultJsonObject);
     }
 
     private String parseAllScriptResultsAsJsonArray(JSONValue allScriptResultsJson) {
@@ -1431,10 +1428,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         LogModel.getInstance()
                 .logImportantMessage("Failed to execute a script " + script + " on " + scriptTarget + ": " + msg);
         if (msg.equals("HTTP 500 Internal Server Error")) {
-            syncCallBack.onFailure("You are not authorized to execute scripts on this node source. Please contact the administrator.");
-        } else {
-            syncCallBack.onFailure(msg);
+            msg = "You are not authorized to execute scripts on this node source. Please contact the administrator.";
         }
+        syncCallBack.onFailure(msg);
     }
 
 }
