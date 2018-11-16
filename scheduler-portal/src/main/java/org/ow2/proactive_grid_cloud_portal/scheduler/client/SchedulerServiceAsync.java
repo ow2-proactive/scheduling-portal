@@ -258,6 +258,13 @@ public interface SchedulerServiceAsync {
     void killScheduler(String sessionId, AsyncCallback<Boolean> callback);
 
     /**
+     * Shutdown the Scheduler.
+     * @param sessionId the session id of the user which is logged in
+     * @param callback the object used for notifying the caller when the asynchronous call is completed.
+     */
+    void shutdownScheduler(String sessionId, AsyncCallback<Boolean> callback);
+
+    /**
      * Starts the Scheduler.
      * @param sessionId the session id of the user which is logged in
      * @param callback the object used for notifying the caller when the asynchronous call is completed. 

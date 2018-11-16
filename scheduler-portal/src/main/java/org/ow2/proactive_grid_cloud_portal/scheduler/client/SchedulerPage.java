@@ -114,6 +114,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private static final String KILL = "Kill";
 
+    private static final String SHUTDOWN = "Shutdown";
+
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
 
@@ -248,7 +250,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /** admin scheduler functionalities */
     private MenuItem schedStartButton, schedStopButton, schedFreezeButton, schedResumeButton, schedPauseButton,
-            schedKillButton;
+            schedKillButton, schedShutdownButton;
 
     private ToolStrip buildLogoStrip() {
         final Label schedulerLabel = new Label("ProActive Scheduling & Orchestration");
@@ -432,6 +434,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                                                     SchedulerPage.this.controller.killScheduler();
                                                             }));
 
+        schedShutdownButton = new MenuItem(SHUTDOWN);
+        schedShutdownButton.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
+        schedShutdownButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>shutdown</strong> the Scheduler?",
+                                                                value -> {
+                                                                    if (value)
+                                                                        SchedulerPage.this.controller.shutdownScheduler();
+                                                                }));
+
         ToolStripMenuButton adminMenuButton = new ToolStripMenuButton("Admin");
         this.adminMenu = new Menu();
         this.adminMenu.setItems(schedStartButton,
@@ -439,7 +449,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                 schedFreezeButton,
                                 schedResumeButton,
                                 schedPauseButton,
-                                schedKillButton);
+                                schedKillButton,
+                                schedShutdownButton);
         // Adding tooltips on Admin actions
         ListGridField titleFieldDefaults = adminMenu.getTitleFieldDefaults();
         titleFieldDefaults.setShowHover(true);
@@ -464,6 +475,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
                 else if (value.toString().equalsIgnoreCase(KILL))
                     return "Kill Scheduler Server";
+
+                else if (value.toString().equalsIgnoreCase(SHUTDOWN))
+                    return "Shutdown Scheduler Server (Running Tasks terminate)";
 
                 return null;
             }
@@ -541,6 +555,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         switch (status) {
             case SHUTTING_DOWN:
+                schedStartButton.setEnabled(false);
+                schedStopButton.setEnabled(false);
+                schedFreezeButton.setEnabled(false);
+                schedPauseButton.setEnabled(false);
+                schedResumeButton.setEnabled(false);
+                schedKillButton.setEnabled(false);
+                schedShutdownButton.setEnabled(false);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
             case KILLED:
                 schedStartButton.setEnabled(false);
                 schedStopButton.setEnabled(false);
@@ -548,6 +570,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(false);
+                schedShutdownButton.setEnabled(false);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
                 break;
             case FROZEN:
@@ -557,6 +580,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(true);
                 schedKillButton.setEnabled(true);
+                schedShutdownButton.setEnabled(true);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
                 break;
             case PAUSED:
@@ -566,6 +590,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(true);
                 schedKillButton.setEnabled(true);
+                schedShutdownButton.setEnabled(true);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
                 break;
             case STARTED:
@@ -576,6 +601,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(true);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(true);
+                schedShutdownButton.setEnabled(true);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
                 break;
             case STOPPED:
@@ -585,6 +611,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(true);
+                schedShutdownButton.setEnabled(true);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
             default:
