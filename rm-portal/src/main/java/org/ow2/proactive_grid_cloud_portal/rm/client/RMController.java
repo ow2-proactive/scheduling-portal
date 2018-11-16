@@ -1335,7 +1335,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             if (scriptHostnameJsonString != null) {
                 scriptResultOutput.append("<b>On host ")
                                   .append(scriptHostnameJsonString.stringValue())
-                                  .append(": </b><br/>");
+                                  .append("</b><br/>");
             }
         }
     }
@@ -1353,7 +1353,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                    exceptionJsonObject.get("cause").isObject() != null) {
                 exceptionJsonObject = exceptionJsonObject.get("cause").isObject();
                 if (exceptionJsonObject.get("message").isString() != null) {
-                    scriptResultOutput.append("<b>Caused by: <b>")
+                    scriptResultOutput.append("<b>Caused by: </b>")
                                       .append(exceptionJsonObject.get("message").isString().stringValue())
                                       .append("<br/>");
                 }
@@ -1366,7 +1366,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (outputJson != null) {
             JSONString outputJsonObject = outputJson.isString();
             if (outputJsonObject != null) {
-                scriptResultOutput.append("<b>Output: </b>").append(outputJsonObject.stringValue()).append("<br/>");
+                scriptResultOutput.append("<b>Output: </b><br/>")
+                                  .append(outputJsonObject.stringValue())
+                                  .append("<br/>");
             }
         }
     }
