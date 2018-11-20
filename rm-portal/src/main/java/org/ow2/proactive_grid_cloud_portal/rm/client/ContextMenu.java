@@ -230,8 +230,8 @@ public class ContextMenu extends Menu {
         }
 
         private CopyMenu build() {
-            this.copyItem = new MenuItem("Copy Node URL", Images.instance.close_16().getSafeUri().asString());
-            this.copyItem.addClickHandler(click -> copyToClipboard(menu.node.getNodeUrl()));
+            this.copyItem = new MenuItem("Copy JMX Endpoint", Images.instance.close_16().getSafeUri().asString());
+            this.copyItem.addClickHandler(click -> copyToClipboard(menu.node.getDefaultJMXUrl()));
             return this;
         }
 
