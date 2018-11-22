@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -381,9 +383,9 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     public static Job parseJSONInfo(JSONObject jsonJobInfo) {
-        String user = jsonJobInfo.get("owner").isString().stringValue();
-        String priority = jsonJobInfo.get("priority").isString().stringValue();
-        String status = jsonJobInfo.get("status").isString().stringValue();
+        String user = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("owner"));
+        String priority = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("priority"));
+        String status = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("status"));
         int pending = (int) jsonJobInfo.get("numberOfPendingTasks").isNumber().doubleValue();
         int running = (int) jsonJobInfo.get("numberOfRunningTasks").isNumber().doubleValue();
         int finished = (int) jsonJobInfo.get("numberOfFinishedTasks").isNumber().doubleValue();
@@ -395,13 +397,13 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
-        String description = jsonJobInfo.get("description").isString().stringValue();
+        String description = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("description"));
 
         Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
         Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
 
-        String name = jsonJobInfo.get("name").isString().stringValue();
-        String projectName = jsonJobInfo.get("projectName").isString().stringValue();
+        String name = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("name"));
+        String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
         int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
         return new Job(id,
