@@ -116,6 +116,23 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private static final String SHUTDOWN = "Shutdown";
 
+    /* Actions descriptions */
+    private static final String DESCRIPTION = "description";
+
+    private static final String schedStartButtonDescription = "Start Scheduler Server from Stopped status";
+
+    private static final String schedStopButtonDescription = "Stop Scheduler Server (Submitted Jobs terminate)";
+
+    private static final String schedFreezeButtonDescription = "Freeze Scheduler Server (Running Tasks terminate)";
+
+    private static final String schedResumeButtonDescription = "Resume Scheduler Server from Paused or Frozen status";
+
+    private static final String schedPauseButtonDescription = "Pause Scheduler Server (Running Jobs terminate)";
+
+    private static final String schedKillButtonDescription = "Kill Scheduler Server";
+
+    private static final String schedShutdownButtonDescription = "Shutdown Scheduler Server (Running Tasks terminate)";
+
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
 
@@ -408,26 +425,32 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         schedStartButton = new MenuItem(START);
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
+        schedStartButton.setAttribute(DESCRIPTION, schedStartButtonDescription);
         schedStartButton.addClickHandler(event -> SchedulerPage.this.controller.startScheduler());
 
         schedStopButton = new MenuItem(STOP);
         schedStopButton.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
+        schedStopButton.setAttribute(DESCRIPTION, schedStopButtonDescription);
         schedStopButton.addClickHandler(event -> SchedulerPage.this.controller.stopScheduler());
 
         schedFreezeButton = new MenuItem(FREEZE);
         schedFreezeButton.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
+        schedFreezeButton.setAttribute(DESCRIPTION, schedFreezeButtonDescription);
         schedFreezeButton.addClickHandler(event -> SchedulerPage.this.controller.freezeScheduler());
 
         schedResumeButton = new MenuItem(RESUME);
         schedResumeButton.setIcon(SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+        schedResumeButton.setAttribute(DESCRIPTION, schedResumeButtonDescription);
         schedResumeButton.addClickHandler(event -> SchedulerPage.this.controller.resumeScheduler());
 
         schedPauseButton = new MenuItem(PAUSE);
         schedPauseButton.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
+        schedPauseButton.setAttribute(DESCRIPTION, schedPauseButtonDescription);
         schedPauseButton.addClickHandler(event -> SchedulerPage.this.controller.pauseScheduler());
 
         schedKillButton = new MenuItem(KILL);
         schedKillButton.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
+        schedKillButton.setAttribute(DESCRIPTION, schedKillButtonDescription);
         schedKillButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>kill</strong> the Scheduler?",
                                                             value -> {
                                                                 if (value)
@@ -436,6 +459,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         schedShutdownButton = new MenuItem(SHUTDOWN);
         schedShutdownButton.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
+        schedShutdownButton.setAttribute(DESCRIPTION, schedShutdownButtonDescription);
         schedShutdownButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>shutdown</strong> the Scheduler?",
                                                                 value -> {
                                                                     if (value)
@@ -457,28 +481,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         titleFieldDefaults.setHoverCustomizer(new HoverCustomizer() {
             @Override
             public String hoverHTML(Object value, ListGridRecord record, int rowNum, int colNum) {
-
-                if (value.toString().equalsIgnoreCase(START))
-                    return "Start Scheduler Server from Stopped status";
-
-                else if (value.toString().equalsIgnoreCase(STOP))
-                    return "Stop Scheduler Server (Submitted Jobs terminate)";
-
-                else if (value.toString().equalsIgnoreCase(FREEZE))
-                    return "Freeze Scheduler Server (Running Tasks terminate)";
-
-                else if (value.toString().equalsIgnoreCase(RESUME))
-                    return "Resume Scheduler Server from Paused or Frozen status";
-
-                else if (value.toString().equalsIgnoreCase(PAUSE))
-                    return "Pause Scheduler Server (Running Jobs terminate)";
-
-                else if (value.toString().equalsIgnoreCase(KILL))
-                    return "Kill Scheduler Server";
-
-                else if (value.toString().equalsIgnoreCase(SHUTDOWN))
-                    return "Shutdown Scheduler Server (Running Tasks terminate)";
-
+                String decription = record.getAttribute(DESCRIPTION);
+                if (record.getAttribute(DESCRIPTION) != null)
+                    return decription;
                 return null;
             }
         });
