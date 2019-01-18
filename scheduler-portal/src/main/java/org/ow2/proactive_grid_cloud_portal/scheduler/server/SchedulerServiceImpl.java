@@ -275,8 +275,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private boolean isJarFile(File file) {
-        try {
-            new JarFile(file);
+        try (JarFile ignored = new JarFile(file)) {
             return true;
         } catch (IOException e1) {
             return false;
@@ -770,6 +769,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         });
     }
 
+    public String getJobXML(final String sessionId, final String jobId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobXML(sessionId, jobId), true);
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -834,6 +837,23 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             @Override
             public InputStream apply(RestClient restClient) {
                 return restClient.killScheduler(sessionId);
+            }
+        });
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerService#shutdownScheduler(java.
+     * lang.String)
+     */
+    @Override
+    public boolean shutdownScheduler(final String sessionId) throws RestServerException, ServiceException {
+        return executeFunction(new Function<RestClient, InputStream>() {
+            @Override
+            public InputStream apply(RestClient restClient) {
+                return restClient.shutdownScheduler(sessionId);
             }
         });
     }
@@ -1388,6 +1408,11 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function)
             throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(function, false);
+    }
+
+    private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function, boolean keepNewLines)
+            throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         InputStream inputStream = null;
@@ -1396,7 +1421,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             inputStream = function.apply(restClientProxy);
 
             try {
-                return convertToString(inputStream);
+                return convertToString(inputStream, keepNewLines);
             } catch (IOException e) {
                 throw new ServiceException(e.getMessage());
             }

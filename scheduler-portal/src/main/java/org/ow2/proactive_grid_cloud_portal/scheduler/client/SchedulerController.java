@@ -383,42 +383,14 @@ public class SchedulerController extends Controller implements UncaughtException
                     }
 
                     public void onFailure(Throwable caught) {
+                        //When a job has no visu
                         String msg = "Failed to fetch html for job " + jobId;
                         String json = JSONUtils.getJsonErrorMessage(caught);
                         if (json != null)
                             msg += " : " + json;
 
                         LogModel.getInstance().logImportantMessage(msg);
-
-                        // trying to load image
-                        String curPath = model.getJobImagePath(jobId);
-                        if (curPath != null) {
-                            // exists already, resetting it will trigger listeners
-                            model.setJobImagePath(jobId, curPath);
-                        } else {
-                            final long t = System.currentTimeMillis();
-                            scheduler.getJobImage(LoginModel.getInstance().getSessionId(),
-                                                  jobId,
-                                                  new AsyncCallback<String>() {
-                                                      public void onSuccess(String result) {
-                                                          model.setJobImagePath(jobId, result);
-                                                          LogModel.getInstance()
-                                                                  .logMessage("Fetched image for job " + jobId +
-                                                                              " in " +
-                                                                              (System.currentTimeMillis() - t) + " ms");
-                                                      }
-
-                                                      public void onFailure(Throwable caught) {
-                                                          String msg = "Failed to fetch image for job " + jobId;
-                                                          String json = JSONUtils.getJsonErrorMessage(caught);
-                                                          if (json != null)
-                                                              msg += " : " + json;
-
-                                                          LogModel.getInstance().logImportantMessage(msg);
-                                                          model.visuUnavailable(jobId);
-                                                      }
-                                                  });
-                        }
+                        model.visuUnavailable(jobId);
                     }
                 });
             }
@@ -524,6 +496,23 @@ public class SchedulerController extends Controller implements UncaughtException
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 warn("Could not kill Scheduler:\n" + msg);
                 LogModel.getInstance().logImportantMessage("Failed to kill Scheduler: " + msg);
+            }
+        });
+    }
+
+    /**
+     * Attempt to shutdown the scheduler, might fail depending server state/rights
+     */
+    public void shutdownScheduler() {
+        this.scheduler.shutdownScheduler(LoginModel.getInstance().getSessionId(), new AsyncCallback<Boolean>() {
+            public void onSuccess(Boolean result) {
+                LogModel.getInstance().logMessage("Scheduler shutdown");
+            }
+
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                warn("Could not shutdown Scheduler:\n" + msg);
+                LogModel.getInstance().logImportantMessage("Failed to shutdown Scheduler: " + msg);
             }
         });
     }

@@ -33,8 +33,6 @@ public class CatalogConstants {
 
     public static final String URL_CATALOG = "http://localhost:8080/catalog";
 
-    public static final String NODE_SOURCE_KIND = "NodeSource";
-
     public static final String NODE_SOURCE_CONTENT_TYPE = "application/json";
 
     public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";

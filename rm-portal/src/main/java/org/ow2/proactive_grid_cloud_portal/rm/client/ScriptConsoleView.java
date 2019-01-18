@@ -39,19 +39,14 @@ import com.google.codemirror2_gwt.client.CodeMirrorConfig;
 import com.google.codemirror2_gwt.client.CodeMirrorWrapper;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.ui.TextArea;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -60,6 +55,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Allows to execute a script on a node and see its output.
  */
 public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
+
+    private VLayout vl;
 
     private Label label;
 
@@ -100,7 +97,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
     }
 
     Canvas build() {
-        VLayout vl = new VLayout();
+        vl = new VLayout();
         vl.setOverflow(Overflow.AUTO);
 
         scriptArea = new TextArea();
@@ -109,35 +106,25 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         scriptArea.getElement().setId("highlighted-text-area");
 
         IButton execute = new IButton("Execute");
-        execute.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (nodeUrl != null) {
-                    loadingLabel.show();
-                    String engine = selectedEngine.getValueAsString();
-                    engine = engine.toLowerCase();
-
-                    controller.executeScript(codeMirror.getValue(), engine, nodeUrl, new Callback<String, String>() {
-                        @Override
-                        public void onSuccess(String result) {
-                            loadingLabel.hide();
-                            outputLabel.show();
-                            outputLabel.setContents("<h3>Output:</h3>");
-                            outputText.setContents("<pre>" + result + "</pre>");
-                        }
-
-                        @Override
-                        public void onFailure(String reason) {
-                            loadingLabel.hide();
-                            outputLabel.hide();
-                            outputText.setContents("<pre>" + reason + "</pre>");
-                        }
-                    });
-                }
+        execute.addClickHandler(event -> {
+            String engine = selectedEngine.getValueAsString();
+            engine = engine.toLowerCase();
+            if (nodeUrl != null) {
+                loadingLabel.show();
+                controller.executeScript(codeMirror.getValue(), engine, nodeUrl, executeScriptCallback());
+            } else if (nodeHostName != null) {
+                loadingLabel.show();
+                controller.executeHostScript(codeMirror.getValue(), engine, nodeHostName, executeScriptCallback());
+            } else if (nodeSourceName != null) {
+                loadingLabel.show();
+                controller.executeNodeSourceScript(codeMirror.getValue(),
+                                                   engine,
+                                                   nodeSourceName,
+                                                   executeScriptCallback());
             }
         });
 
-        this.label = new Label("No node selected");
+        this.label = new Label("No selection");
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
@@ -158,7 +145,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
         this.nodeLabel.setHeight(16);
 
-        String helpMessage = "Type in an arbitrary script and execute it on the node.";
+        String helpMessage = "Type in an arbitrary script and execute it on one node of the selection.";
         helpMessage += " Useful for trouble-shooting and diagnostics.";
         helpMessage += "<br/><br/>Groovy example:<br/><br/>";
         helpMessage += "<div style='padding-left:20px'>println System.getenv(\"PATH\")</div>";
@@ -198,21 +185,13 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
 
         this.nodeCanvas.hide();
 
-        scriptArea.addAttachHandler(new com.google.gwt.event.logical.shared.AttachEvent.Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                initCodeMirror();
-            }
-        });
+        scriptArea.addAttachHandler(event -> initCodeMirror());
 
-        selectedEngine.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (codeMirror != null) {
-                    String engine = event.getValue().toString();
-                    String highliter = engineCodeHighliters[Arrays.asList(engineNames).indexOf(engine)];
-                    codeMirror.setOption("mode", highliter);
-                }
+        selectedEngine.addChangeHandler(event -> {
+            if (codeMirror != null) {
+                String engine = event.getValue().toString();
+                String highliter = engineCodeHighliters[Arrays.asList(engineNames).indexOf(engine)];
+                codeMirror.setOption("mode", highliter);
             }
         });
 
@@ -230,8 +209,7 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         return vl;
     }
 
-    public void initCodeMirror() {
-
+    private void initCodeMirror() {
         if (codeMirror == null && Document.get().getElementById("highlighted-text-area") != null) {
             CodeMirrorConfig config = CodeMirrorConfig.makeBuilder();
             config = config.setMode(engineCodeHighliters[0]).setShowLineNumbers(true).setMatchBrackets(true);
@@ -239,8 +217,28 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         }
     }
 
+    private Callback<String, String> executeScriptCallback() {
+        return new Callback<String, String>() {
+            @Override
+            public void onSuccess(String result) {
+                loadingLabel.hide();
+                outputLabel.show();
+                outputLabel.setContents("<h3>Script Execution Output:</h3>");
+                outputText.setContents("<pre>" + result + "</pre>");
+            }
+
+            @Override
+            public void onFailure(String reason) {
+                loadingLabel.hide();
+                outputLabel.hide();
+                outputText.setContents("<pre>" + reason + "</pre>");
+            }
+        };
+    }
+
+    @Override
     public void nodeUnselected() {
-        this.label.setContents("No node selected");
+        this.label.setContents("No selection");
         this.label.setAlign(Alignment.CENTER);
         this.label.show();
         this.nodeCanvas.hide();
@@ -249,28 +247,43 @@ public class ScriptConsoleView implements NodesListener, NodeSelectedListener {
         this.nodeHostName = null;
     }
 
+    @Override
     public void nodeSelected(Node node) {
         this.nodeLabel.setIcon(node.getIcon());
-
         this.label.hide();
-
         this.nodeUrl = node.getNodeUrl();
         this.nodeSourceName = node.getSourceName();
         this.nodeHostName = node.getHostName();
-        this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
+        this.nodeLabel.setContents("<h3>Node: " + node.getNodeUrl() + "</h3>");
+        this.outputText.setContents("");
         this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
+    @Override
     public void nodeSourceSelected(NodeSource ns) {
+        this.nodeLabel.setIcon(ns.getIcon());
+        this.label.hide();
         this.nodeUrl = null;
-        this.nodeCanvas.hide();
-        this.label.show();
+        this.nodeSourceName = ns.getSourceName();
+        this.nodeHostName = null;
+        this.nodeLabel.setContents("<h3>Node Source: " + ns.getSourceName() + "</h3>");
+        this.outputText.setContents("");
+        this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
+    @Override
     public void hostSelected(Host h) {
+        this.nodeLabel.setIcon(h.getIcon());
+        this.label.hide();
         this.nodeUrl = null;
-        this.nodeCanvas.hide();
-        this.label.show();
+        this.nodeSourceName = h.getSourceName();
+        this.nodeHostName = h.getHostName();
+        this.nodeLabel.setContents("<h3>Host: " + h.getHostName() + "</h3>");
+        this.outputText.setContents("");
+        this.nodeCanvas.show();
+        this.vl.scrollToTop();
     }
 
     @Override

@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -37,11 +38,8 @@ public class CatalogRequestBuilder {
 
     private String catalogUrl;
 
-    private ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder;
-
-    public CatalogRequestBuilder(ImportFromCatalogPanelFeeder importFromCatalogPanelFeeder) {
+    public CatalogRequestBuilder() {
         this.catalogUrl = new CatalogUrlBuilder().getCatalogUrl();
-        this.importFromCatalogPanelFeeder = importFromCatalogPanelFeeder;
     }
 
     public void sendRequestToCatalog(String endpoint, RequestCallback callback) {
@@ -51,13 +49,13 @@ public class CatalogRequestBuilder {
         try {
             request.send();
         } catch (RequestException e) {
-            this.importFromCatalogPanelFeeder.setNodeSourceWindowLabelWithError("Request sent to catalog failed", e);
+            throw new IllegalStateException("Request sent to catalog failed", e);
         }
     }
 
-    public void requestNodeSourcesForBucket(String bucketName, RequestCallback callback) {
+    public void requestCatalogObjects(String bucketName, CatalogKind kind, RequestCallback callback) {
         sendRequestToCatalog("buckets/" + bucketName + "/resources?" + CatalogConstants.KIND_PARAM + "=" +
-                             CatalogConstants.NODE_SOURCE_KIND, callback);
+                             kind.getKindString(), callback);
     }
 
 }

@@ -101,6 +101,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
             DataSourceField[] fields = buildDatasourceFields();
             setFields(fields);
             setClientOnly(true);
+            setCacheAllData(true);
         }
     }
 
@@ -221,7 +222,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
 
     // as found in https://isomorphic.atlassian.net/wiki/display/Main/Refresh+ListGrid+Periodically+(Smart+GWT)#RefreshListGridPeriodically(SmartGWT)-Transparentupdate
     protected void applyCurrentLocalFilter() {
-        int nbOfItems = this.ds.getTestData().length + 1;
+        int nbOfItems = this.ds.getCacheData().length + 1;
         DataSource dataSource = this.getDataSource();
         Integer[] visibleRows = this.getVisibleRows();
 
@@ -230,12 +231,10 @@ public abstract class ItemsListGrid<I> extends ListGrid {
         request.setEndRow(nbOfItems + visibleRows[1]);
         request.setSortBy(this.getSort());
 
-        dataSource.fetchData(this.filter, new DSCallback() {
-            @Override
-            public void execute(DSResponse response, Object rawData, DSRequest request) {
-                setData(new RecordList(response.getData()));
-            }
-
+        dataSource.fetchData(this.filter, (response, rawData, fetchRequest) -> {
+            RecordList recordList = new RecordList(response.getData());
+            setData(recordList);
+            recordList.destroy();
         }, request);
     }
 }

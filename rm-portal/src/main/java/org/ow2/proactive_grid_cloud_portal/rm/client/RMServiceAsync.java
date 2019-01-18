@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
@@ -310,4 +309,43 @@ public interface RMServiceAsync {
      */
     void executeNodeScript(String sessionId, String script, String engine, String nodeUrl,
             AsyncCallback<String> callback);
+
+    /**
+     * Executes a script on a node source
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param nodeSourceName a target for the script execution
+     */
+    void executeNodeSourceScript(String sessionId, String script, String engine, String nodeSourceName,
+            AsyncCallback<String> callback);
+
+    /**
+     * Executes a script on a host
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param host a target for the script execution
+     */
+    void executeHostScript(String sessionId, String script, String engine, String host, AsyncCallback<String> callback);
+
+    /**
+     * Retrieves the thread dump of the Resource Manager
+     *
+     * @param sessionId current session
+     * @param callback a handler to define what to do with the retrieved thread dump
+     */
+    void getRMThreadDump(String sessionId, AsyncCallback<String> callback);
+
+    /**
+     * Retrieves the thread dump of the node identified by the given URL
+     *
+     * @param sessionId current session
+     * @param nodeUrl node to ask the thread dump from
+     * @param callback a handler to define what to do with the retrieved thread dump
+     */
+    void getNodeThreadDump(String sessionId, String nodeUrl, AsyncCallback<String> callback);
+
 }

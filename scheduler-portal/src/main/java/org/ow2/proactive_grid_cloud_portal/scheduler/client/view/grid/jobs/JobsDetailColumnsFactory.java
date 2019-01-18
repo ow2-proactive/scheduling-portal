@@ -56,12 +56,14 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
 
     public static GridColumns TOTAL_DURATION_ATTR = new GridColumns("totalDuration", "Total duration", 50, true, false);
 
+    public static final GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", -1, true, false);
+
     @Override
     public GridColumns[] getColumns() {
         return new GridColumns[] { ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, PENDING_TASKS_ATTR,
                                    RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR, SUBMITTED_TIME_ATTR,
                                    STARTED_TIME_ATTR, FINISHED_TIME_ATTR, PENDING_DURATION_ATTR, DURATION_ATTR,
-                                   TOTAL_DURATION_ATTR };
+                                   TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
     }
 
     @Override
@@ -91,7 +93,8 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(STARTED_TIME_ATTR.getName(), (startTime > submitTime) ? JSUtil.getTime(startTime) : "");
         record.setAttribute(FINISHED_TIME_ATTR.getName(), (finishTime > startTime) ? JSUtil.getTime(finishTime) : "");
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
-
+        record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
+        record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
     }
 }

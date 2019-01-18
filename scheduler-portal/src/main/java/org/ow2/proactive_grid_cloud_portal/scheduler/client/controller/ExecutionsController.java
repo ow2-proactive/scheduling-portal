@@ -73,16 +73,8 @@ public class ExecutionsController {
         return jobsController;
     }
 
-    public void setJobsController(JobsController jobsController) {
-        this.jobsController = jobsController;
-    }
-
-    public TasksController getTasksController() {
+    public TasksCentricController getTasksController() {
         return tasksController;
-    }
-
-    public void setTasksController(TasksCentricController tasksController) {
-        this.tasksController = tasksController;
     }
 
     public void switchMode(String mode) {

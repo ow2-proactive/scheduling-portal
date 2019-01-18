@@ -30,8 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
@@ -90,7 +93,6 @@ import com.smartgwt.client.widgets.form.fields.BlurbItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.TimeItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -128,19 +130,19 @@ public class SubmitWindow {
 
     private static final String SESSION_ID_PARAMETER_NAME = "sessionId";
 
+    private static final String JOB_ID_PARAMETER_NAME = "jobId";
+
     private static final String ERROR_MESSAGE = "errorMessage";
 
     private static final String JSON_ERROR = "JSON parse ERROR";
 
     private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
-    private final int widthWindows = 600;
+    private static final int WINDOW_WIDTH = 600;
 
-    private final int heightWindows = 600;
+    private static final int WINDOW_HEIGHT = 600;
 
     private Window window;
-
-    private SchedulerController controller;
 
     private HandlerRegistration todayClickHR = null;
 
@@ -238,6 +240,17 @@ public class SubmitWindow {
 
     private String job;
 
+    /**
+     *  JobId of the workflow to be re-submitted
+     */
+    private String jobId;
+
+    private boolean isResubmit;
+
+    private boolean isKillAndResubmit;
+
+    private JobsController jobsController;
+
     private String documentation = null;
 
     private String icon = null;
@@ -255,10 +268,31 @@ public class SubmitWindow {
     /**
      * Default constructor
      *
-     * @param controller
      */
-    public SubmitWindow(SchedulerController controller) {
-        this.controller = controller;
+    public SubmitWindow() {
+        this.isResubmit = false;
+        this.isKillAndResubmit = false;
+        this.build();
+    }
+
+    /**
+     * Used for re-submitting a job. Has a slightly different layout
+     *
+     */
+    public SubmitWindow(String jobId) {
+        this.jobId = jobId;
+        this.isResubmit = true;
+        this.build();
+    }
+
+    /**
+     * Used for kill & re-submit a job action. Has a slightly different layout
+     *
+     */
+    public SubmitWindow(String jobId, JobsController controller) {
+        this.jobId = jobId;
+        this.isKillAndResubmit = true;
+        this.jobsController = controller;
         this.build();
     }
 
@@ -514,16 +548,17 @@ public class SubmitWindow {
     private void initVarsLayout() {
         varsLayout = new VLayout();
         varsLayout.setIsGroup(true);
-        varsLayout.setGroupTitle("2. Fill workflow variables");
+        varsLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 1 : 2) + ". Fill workflow variables");
         varsLayout.setWidth100();
-        varsLayout.setHeight("150px");
+        // In case of re-submit, give more height to Variables Panel.
+        varsLayout.setHeight(isResubmit || isKillAndResubmit ? "280px" : "150px");
         varsLayout.setMaxHeight(150);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
     }
 
     private BlurbItem createModelItem(String model) {
-        BlurbItem modelLabel = null;
+        BlurbItem modelLabel;
         if (model != null) {
             modelLabel = new BlurbItem();
             modelLabel.setDefaultValue(model);
@@ -563,7 +598,7 @@ public class SubmitWindow {
         String startButton = "startAtRadioGroup";
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
-        startAtLayout.setGroupTitle("3. Scheduled time");
+        startAtLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 2 : 3) + ". Scheduled time");
 
         startAtParameter = new Hidden("START_AT");
         planParameter = new Hidden("PLAN");
@@ -578,35 +613,26 @@ public class SubmitWindow {
         startNowRadioButton.setValue(true);
         startAtRadioButton.setValue(false);
 
-        startAccordingPlanningRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                if (isExecCalendarValueNull) {
-                    displayErrorMessage("EXECUTION_CALENDAR value is empty.");
-                }
-
-                startAtLayout.removeMember(dateChooser);
+        startAccordingPlanningRadioButton.addClickHandler(event -> {
+            if (isExecCalendarValueNull) {
+                displayErrorMessage("EXECUTION_CALENDAR value is empty.");
             }
+
+            startAtLayout.removeMember(dateChooser);
         });
 
-        startNowRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                startAtRadioButton.setText("At");
-                startAtLayout.removeMember(dateChooser);
-            }
+        startNowRadioButton.addClickHandler(event -> {
+            startAtRadioButton.setText("At");
+            startAtLayout.removeMember(dateChooser);
         });
 
-        startAtRadioButton.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                startAtLayout.addMember(dateChooser);
-                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
-                String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
-                startAtParameter.setValue(iso8601DateStr);
-                updateScheduledTimeForToday();
-                resetAllHandlers();
-            }
+        startAtRadioButton.addClickHandler(event -> {
+            startAtLayout.addMember(dateChooser);
+            DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(ISO_8601_FORMAT);
+            String iso8601DateStr = dateTimeFormat.format(dateChooser.getData());
+            startAtParameter.setValue(iso8601DateStr);
+            updateScheduledTimeForToday();
+            resetAllHandlers();
         });
 
         dateChooser = new DateChooser();
@@ -614,7 +640,7 @@ public class SubmitWindow {
         dateChooser.setUse24HourTime(true);
         dateChooser.setShowTodayButton(true);
         dateChooser.setShowApplyButton(false);
-        dateChooser.setWidth(widthWindows / 2);
+        dateChooser.setWidth(WINDOW_WIDTH / 2);
         dateChooser.setLayoutAlign(Alignment.CENTER);
         dateChooser.setMargin(10);
 
@@ -678,8 +704,17 @@ public class SubmitWindow {
         submitCancelButtons.setWidth100();
         submitCancelButtons.setAlign(Alignment.RIGHT);
 
-        submitButton = new IButton("Submit");
-        submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        if (isResubmit) {
+            submitButton = new IButton("Re-Submit");
+            submitButton.setIcon(SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
+        } else if (isKillAndResubmit) {
+            submitButton = new IButton("Kill & Re-Submit");
+            submitButton.setWidth(120);
+            submitButton.setIcon(SchedulerImages.instance.job_kill_resubmit_22().getSafeUri().asString());
+        } else {
+            submitButton = new IButton("Submit");
+            submitButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        }
         submitButton.setShowDisabledIcon(false);
         submitButton.setTooltip("A workflow must be selected first");
         submitButton.addClickHandler(clickHandlerForSubmitButton());
@@ -693,12 +728,9 @@ public class SubmitWindow {
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setShowDisabledIcon(false);
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SubmitWindow.this.window.hide();
-                SubmitWindow.this.destroy();
-            }
+        cancelButton.addClickHandler(event -> {
+            SubmitWindow.this.window.hide();
+            SubmitWindow.this.destroy();
         });
         submitCancelButtons.setMembers(cancelButton, checkButton, submitButton);
         rootPage.addMember(submitCancelButtons);
@@ -776,7 +808,7 @@ public class SubmitWindow {
         formContent.add(hiddenField);
         formContent.add(fileUpload);
 
-        final FormPanel importFromFileformPanel = new FormPanel();
+        FormPanel importFromFileformPanel = new FormPanel();
         importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
         importFromFileformPanel.setAction(URL_UPLOAD_FILE);
@@ -806,42 +838,39 @@ public class SubmitWindow {
         workflowsListBox.setEnabled(false);
         workflowsListBox.addItem(CATALOG_SELECT_WF);
 
-        bucketsListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                String selectedBucket = bucketsListBox.getSelectedValue();
-                if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                    String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
-                    RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
-                    req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
-                    req.setCallback(new RequestCallback() {
-                        @Override
-                        public void onResponseReceived(Request request, Response response) {
-                            JSONArray workflows = JSONParser.parseStrict(response.getText()).isArray();
-                            int workflowsSize = workflows.size();
-                            workflowsListBox.setEnabled(false);
-                            workflowsListBox.clear();
-                            workflowsListBox.addItem(CATALOG_SELECT_WF);
-                            for (int i = 0; i < workflowsSize; i++) {
-                                JSONObject workflow = workflows.get(i).isObject();
-                                String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
-                                workflowsListBox.addItem(workflowName);
-                            }
-                            workflowsListBox.setEnabled(true);
+        bucketsListBox.addChangeHandler(event -> {
+            String selectedBucket = bucketsListBox.getSelectedValue();
+            if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
+                String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
+                RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
+                req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+                req.setCallback(new RequestCallback() {
+                    @Override
+                    public void onResponseReceived(Request request, Response response) {
+                        JSONArray workflows = JSONParser.parseStrict(response.getText()).isArray();
+                        int workflowsSize = workflows.size();
+                        workflowsListBox.setEnabled(false);
+                        workflowsListBox.clear();
+                        workflowsListBox.addItem(CATALOG_SELECT_WF);
+                        for (int i = 0; i < workflowsSize; i++) {
+                            JSONObject workflow = workflows.get(i).isObject();
+                            String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
+                            workflowsListBox.addItem(workflowName);
                         }
-
-                        @Override
-                        public void onError(Request request, Throwable exception) {
-                            GWT.log("OOPS:" + request.toString());
-                        }
-                    });
-                    try {
-                        req.send();
-                    } catch (RequestException e) {
-                        GWT.log("Error occured when fetching workflows from Catalog");
-                        e.printStackTrace();
-
+                        workflowsListBox.setEnabled(true);
                     }
+
+                    @Override
+                    public void onError(Request request, Throwable exception) {
+                        LogModel.getInstance().logImportantMessage("OOPS:" + request.toString());
+                    }
+                });
+                try {
+                    req.send();
+                } catch (RequestException e) {
+                    LogModel.getInstance().logImportantMessage("Error occured when fetching workflows from Catalog");
+                    // For Dev debug mode only
+                    e.printStackTrace();
                 }
             }
         });
@@ -863,14 +892,15 @@ public class SubmitWindow {
 
             @Override
             public void onError(Request request, Throwable exception) {
-                GWT.log("Error occured when fetching buckets from Catalog");
+                LogModel.getInstance().logImportantMessage("Error occured when fetching buckets from Catalog");
             }
         });
 
         try {
             req.send();
         } catch (RequestException e) {
-            GWT.log("Error occured when fetching buckets from Catalog");
+            LogModel.getInstance().logImportantMessage("Error occured when fetching buckets from Catalog");
+            // For Dev debug mode only
             e.printStackTrace();
         }
 
@@ -880,11 +910,11 @@ public class SubmitWindow {
         bucketsListBox.setWidth("130px");
         workflowsListBox.setWidth("230px");
 
-        final VerticalPanel formContent = new VerticalPanel();
+        VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
         formContent.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
 
-        final FormPanel importFromCatalogformPanel = new FormPanel();
+        FormPanel importFromCatalogformPanel = new FormPanel();
         importFromCatalogformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         importFromCatalogformPanel.setMethod(FormPanel.METHOD_POST);
         importFromCatalogformPanel.setAction(URL_UPLOAD_FILE);
@@ -898,6 +928,7 @@ public class SubmitWindow {
                                                                                      importFromCatalogformPanel));
     }
 
+    @SuppressWarnings("squid:S3776")
     private ClickHandler clickHandlerForCheckButton() {
         return new ClickHandler() {
             @Override
@@ -924,7 +955,7 @@ public class SubmitWindow {
                             JSONValue json = JSONParser.parseStrict(result);
                             JSONObject obj = json.isObject();
                             handleVariables(obj);
-                        } catch (Throwable t) {
+                        } catch (Exception e) {
                             handleParsingError(result);
                         }
                     }
@@ -933,10 +964,10 @@ public class SubmitWindow {
                         // JSON parsing error workaround to force extract error message
                         MatchResult errorMessageMatcher = RegExp.compile(ERROR_MESSAGE_REGEX).exec(result);
                         if (errorMessageMatcher != null) {
-                            GWT.log(errorMessageMatcher.getGroup(1));
+                            LogModel.getInstance().logImportantMessage(errorMessageMatcher.getGroup(1));
                             displayErrorMessage(errorMessageMatcher.getGroup(1));
                         } else {
-                            GWT.log(JSON_ERROR);
+                            LogModel.getInstance().logImportantMessage(JSON_ERROR);
                             displayErrorMessage(JSON_ERROR);
                         }
                     }
@@ -949,7 +980,7 @@ public class SubmitWindow {
                                     updateVariables(obj.get("updatedVariables"));
                                     redrawVariables(job);
                                 }
-                                GWT.log("Job validated");
+                                LogModel.getInstance().logMessage("Job validated");
                                 displayInfoMessage("Job is valid");
                             } else if (obj.containsKey(ERROR_MESSAGE)) {
                                 String errorMessage = obj.get(ERROR_MESSAGE).toString();
@@ -972,7 +1003,7 @@ public class SubmitWindow {
 
                     private boolean isResultNull(String result) {
                         if (result == null) {
-                            GWT.log("Unexpected empty result");
+                            LogModel.getInstance().logImportantMessage("Unexpected empty result");
                             displayErrorMessage("Unexpected empty result");
                             return true;
                         }
@@ -1019,6 +1050,7 @@ public class SubmitWindow {
         }
     }
 
+    @SuppressWarnings("squid:S3776")
     private ClickHandler clickHandlerForSubmitButton() {
         return new ClickHandler() {
             @Override
@@ -1046,13 +1078,17 @@ public class SubmitWindow {
 
             private void checkEventResults(SubmitCompleteEvent event) {
                 if (event.getResults() == null || !event.getResults().startsWith(SubmitEditServlet.ERROR)) {
-                    GWT.log("Job submitted to the scheduler");
+                    LogModel.getInstance().logMessage("Job submitted to the scheduler");
+                    // If Submit Window was created for Kill & Re-submit then kill job
+                    if (SubmitWindow.this.isKillAndResubmit) {
+                        jobsController.killJob(SubmitWindow.this.jobId);
+                    }
                     SubmitWindow.this.window.removeMember(rootPage);
                     SubmitWindow.this.window.hide();
                     SubmitWindow.this.destroy();
                 } else {
                     String jsonError = event.getResults().substring(SubmitEditServlet.ERROR.length());
-                    JSONValue json = controller.parseJSON(jsonError);
+                    JSONValue json = Controller.parseJSON(jsonError);
                     JSONObject obj = json.isObject();
                     if (obj != null && obj.containsKey(ERROR_MESSAGE)) {
                         String errorMessage = obj.get(ERROR_MESSAGE).toString();
@@ -1090,75 +1126,30 @@ public class SubmitWindow {
         };
     }
 
-    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromFileButton(final FormPanel toSubmit) {
-        return new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                String fileName = fileUpload.getFilename();
-                if ("".compareTo(fileName) != 0) {
-                    displayLoadingMessage();
-                    toSubmit.submit();
-                } else {
-                    displayErrorMessage("Nothing to upload. Please select a file.");
-                }
-
+    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromFileButton(FormPanel toSubmit) {
+        return event -> {
+            String fileName = fileUpload.getFilename();
+            if ("".compareTo(fileName) != 0) {
+                displayLoadingMessage();
+                toSubmit.submit();
+            } else {
+                displayErrorMessage("Nothing to upload. Please select a file.");
             }
+
         };
     }
 
-    private com.google.gwt.event.dom.client.ClickHandler clickHandlerForUploadFromCatalogButton(
-            final VerticalPanel formContent, final FormPanel importFromCatalogformPanel) {
-        return new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                // filter only valid items
-                if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                    String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
-                    String selectedBucketName = bucketsListBox.getSelectedValue();
-                    formContent.add(new Hidden("bucketName", selectedBucketName));
-                    formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
-                    displayLoadingMessage();
-                    importFromCatalogformPanel.submit();
-                }
-            }
-        };
-    }
-
-    private SubmitCompleteHandler fileUploadCompleteHandler() {
-        return new SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String jobEditKey = "jobEdit";
-                String res = event.getResults();
-
-                try {
-                    JSONValue js = JSONParser.parseStrict(res);
-                    JSONObject obj = js.isObject();
-
-                    if (obj.get(jobEditKey) != null && obj.get(jobEditKey).isString() != null) {
-                        String val = obj.get(jobEditKey).isString().stringValue();
-                        job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
-                        // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
-                        setStartAccordingPlanningRadioButtonState(job);
-                        variables = readVars(job);
-                    } else {
-                        GWT.log(JSON_ERROR);
-                        displayErrorMessage(res);
-                        //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
-                        setEnabledStartAtPart(false);
-                        startAccordingPlanningRadioButton.setVisible(false);
-                        return;
-                    }
-
-                } catch (JSONException t) {
-                    GWT.log(JSON_ERROR);
-                    displayErrorMessage(res);
-                    //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
-                    setEnabledStartAtPart(false);
-                    startAccordingPlanningRadioButton.setVisible(false);
-                    return;
-                }
-                redrawVariables(job);
+    private com.google.gwt.event.dom.client.ClickHandler
+            clickHandlerForUploadFromCatalogButton(VerticalPanel formContent, FormPanel importFromCatalogformPanel) {
+        return event -> {
+            // filter only valid items
+            if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
+                String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
+                String selectedBucketName = bucketsListBox.getSelectedValue();
+                formContent.add(new Hidden("bucketName", selectedBucketName));
+                formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
+                displayLoadingMessage();
+                importFromCatalogformPanel.submit();
             }
         };
     }
@@ -1208,42 +1199,30 @@ public class SubmitWindow {
     }
 
     private ClickHandler newCHForTodayButton() {
-        return new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                updateScheduledTimeForToday();
-                resetAllHandlers();
-            }
+        return clickEvent -> {
+            updateScheduledTimeForToday();
+            resetAllHandlers();
         };
     }
 
     private ChangedHandler newCHForMinuteField() {
-        return new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent changedEvent) {
-                updateScheduledTimeAt();
-                resetAllHandlers();
-            }
+        return changedEvent -> {
+            updateScheduledTimeAt();
+            resetAllHandlers();
         };
     }
 
     private ChangedHandler newCHForHourField() {
-        return new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent changedEvent) {
-                updateScheduledTimeAt();
-                resetAllHandlers();
-            }
+        return changedEvent -> {
+            updateScheduledTimeAt();
+            resetAllHandlers();
         };
     }
 
     private ClickHandler newCHDateGrid() {
-        return new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                startAtRadioButton.setText("At " + dateChooser.getData().toString());
-                resetAllHandlers();
-            }
+        return clickEvent -> {
+            startAtRadioButton.setText("At " + dateChooser.getData().toString());
+            resetAllHandlers();
         };
     }
 
@@ -1260,12 +1239,72 @@ public class SubmitWindow {
         }
     }
 
+    private void uploadJobXMLForResubmit() {
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, URL_UPLOAD_FILE);
+        req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
+        req.setHeader(JOB_ID_PARAMETER_NAME, jobId);
+        req.setCallback(new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                handleUploadDoneResponse(response.getText());
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                // Exception is handled on request.send()
+            }
+        });
+        try {
+            req.send();
+        } catch (RequestException e) {
+            LogModel.getInstance().logImportantMessage("Error occurred when fetching workflow xml for job " + jobId);
+            // For Dev debug mode only
+            e.printStackTrace();
+        }
+    }
+
+    private void handleUploadDoneResponse(String responseText) {
+        String jobEditKey = "jobEdit";
+        try {
+            JSONValue js = JSONParser.parseStrict(responseText);
+            JSONObject obj = js.isObject();
+
+            if (obj.get(jobEditKey) != null && obj.get(jobEditKey).isString() != null) {
+                String val = obj.get(jobEditKey).isString().stringValue();
+                job = new String(org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.fromBase64(val));
+                // if the job has an EXECUTION_CALENDAR Generic Information defined, the startAccordingToPlanningRadioButton becomes visible, and invisible otherwise
+                setStartAccordingPlanningRadioButtonState(job);
+                variables = readVars(job);
+                redrawVariables(job);
+            } else {
+                LogModel.getInstance().logImportantMessage(JSON_ERROR);
+                displayErrorMessage(responseText);
+                //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+                setEnabledStartAtPart(false);
+                startAccordingPlanningRadioButton.setVisible(false);
+            }
+
+        } catch (JSONException t) {
+            LogModel.getInstance().logImportantMessage(JSON_ERROR);
+            displayErrorMessage(responseText);
+            //Force disable check&submit buttons to prevent confusion if a valid job was uploaded first but not submitted
+            setEnabledStartAtPart(false);
+            startAccordingPlanningRadioButton.setVisible(false);
+        }
+
+    }
+
+    private SubmitCompleteHandler fileUploadCompleteHandler() {
+        return event -> handleUploadDoneResponse(event.getResults());
+    }
+
     private void build() {
 
-        buildCatalogUrl();
-
         initRootPage(); // ------------ root page of the window
-        initSelectWfPart(); // -------- Select workflow Panel
+        if (!isResubmit && !isKillAndResubmit) {
+            buildCatalogUrl();
+            initSelectWfPart(); // -------- Select workflow Panel
+        }
         initVarsPart(); // ------------ Fill workflow variables Panel
         initSubmitAtPart(); // -------- Submit at given time Panel
         initMessagesPart(); // --------- loading and error messages
@@ -1274,15 +1313,22 @@ public class SubmitWindow {
         setEnabledStartAtPart(false);
 
         this.window = new Window();
-        this.window.setTitle("Submit a new job");
+        if (isResubmit) {
+            this.window.setTitle("Re-submit job " + jobId);
+        } else {
+            this.window.setTitle(isKillAndResubmit ? "Kill & Re-Submit job " + jobId : "Submit a new job");
+        }
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
         this.window.addItem(rootPage);
-        this.window.setWidth(this.widthWindows);
-        this.window.setHeight(this.heightWindows);
+        this.window.setWidth(WINDOW_WIDTH);
+        this.window.setHeight(WINDOW_HEIGHT);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
+        if (isResubmit || isKillAndResubmit) {
+            uploadJobXMLForResubmit();
+        }
     }
 
     /**
@@ -1294,20 +1340,19 @@ public class SubmitWindow {
          * this will fail if someday the XML schema gets another <variable> tag
          * elsewhere
          */
-        NodeList variables = XMLParser.parse(jobDescriptor).getElementsByTagName("variable");
+        NodeList jobVariables = XMLParser.parse(jobDescriptor).getElementsByTagName("variable");
         Map<String, JobVariable> ret = new LinkedHashMap<>();
 
-        if (variables.getLength() > 0) {
-            for (int i = 0; i < variables.getLength(); i++) {
-                Node variableNode = variables.item(i);
+        if (jobVariables.getLength() > 0) {
+            for (int i = 0; i < jobVariables.getLength(); i++) {
+                Node variableNode = jobVariables.item(i);
 
                 if (variableNode != null && !isTaskVariableElement(variableNode)) {
                     NamedNodeMap attrs = variableNode.getAttributes();
                     try {
                         checkIfAttributes(ret, variableNode, attrs);
                     } catch (JavaScriptException t) {
-                        // Node.hasAttributes() throws if there are no
-                        // attributes... (GWT 2.1.0)
+                        // Node.hasAttributes() throws if there are no attributes... (GWT 2.1.0)
                     }
                 }
             }
@@ -1325,15 +1370,10 @@ public class SubmitWindow {
     }
 
     private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
-        if (name != null && value != null) {
-            if (name.matches("[A-Za-z0-9._]+")) {
-                // this won't necessarily be a problem at
-                // job submission,
-                // but it definitely will be here in the
-                // client; don't bother
-                ret.put(name, new JobVariable(name, value, model));
-            }
-
+        if (name != null && value != null && name.matches("[A-Za-z0-9._]+")) {
+            // this won't necessarily be a problem at job submission,
+            // but it definitely will be here in the client; don't bother
+            ret.put(name, new JobVariable(name, value, model));
         }
     }
 
@@ -1400,10 +1440,7 @@ public class SubmitWindow {
     }
 
     private Boolean isAttributeExecCalendarValueDefined(Node attribute, String name) {
-        if (attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(name)) {
-            return true;
-        } else
-            return false;
+        return attribute.getNodeType() == Node.ATTRIBUTE_NODE && attribute.getNodeName().equals(name);
     }
 
     private boolean isTaskVariableElement(Node node) {

@@ -330,4 +330,45 @@ public interface RMService extends RemoteService {
     String executeNodeScript(String sessionId, String script, String engine, String nodeUrl)
             throws RestServerException, ServiceException;
 
+    /**
+     * Executes a script on a node source
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param nodeSourceName a target for the script execution
+     *
+     * @return script output
+     */
+    String executeNodeSourceScript(String sessionId, String script, String engine, String nodeSourceName)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Executes a script on a host
+     *
+     * @param sessionId current session
+     * @param script to execute
+     * @param engine a script engine to use for the script execution
+     * @param host a target for the script execution
+     *
+     * @return script output
+     */
+    String executeHostScript(String sessionId, String script, String engine, String host)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Retrieves the thread dump of the Resource Manager
+     *
+     * @param sessionId current session
+     */
+    String getRMThreadDump(String sessionId) throws ServiceException, RestServerException;
+
+    /**
+     * Retrieves the thread dump of the node identified by the given URL
+     *
+     * @param sessionId current session
+     * @param nodeUrl node to ask the thread dump from
+     */
+    String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException;
+
 }

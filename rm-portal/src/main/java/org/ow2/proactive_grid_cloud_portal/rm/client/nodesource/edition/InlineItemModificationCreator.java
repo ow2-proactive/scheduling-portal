@@ -44,11 +44,17 @@ public class InlineItemModificationCreator {
 
     public static final String EDIT_FORM_ITEM_SUFFIX = ".edit";
 
-    public static final String EDIT_RADIO_OPTION_NAME = "edit";
+    private static final String EDIT_RADIO_OPTION_NAME = "edit";
 
-    public static final String UPLOAD_RADIO_OPTION_NAME = "upload";
+    private static final String UPLOAD_RADIO_OPTION_NAME = "upload";
 
     private final NodeSourceWindow nodeSourceWindow;
+
+    private FormItem inlineEditingFormItem;
+
+    private FormItem chooseCredentialsFormItem;
+
+    private RadioGroupItem editOrUploadFormItem;
 
     public InlineItemModificationCreator(NodeSourceWindow nodeSourceWindow) {
         this.nodeSourceWindow = nodeSourceWindow;
@@ -56,111 +62,48 @@ public class InlineItemModificationCreator {
 
     public List<FormItem> getModificationChoiceItemsForNonTextualFields(PluginDescriptor plugin,
             PluginDescriptor.Field pluginField) {
-        FormItem chooseCredentialsFormItem;
-        List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<FormItem>();
+        List<FormItem> formItemsReplacingNonTextualFormItems = new LinkedList<>();
+        if (plugin.getPluginName().equals(this.nodeSourceWindow.infrastructureSelectItem.getValueAsString()) ||
+            plugin.getPluginName().equals(this.nodeSourceWindow.policySelectItem.getValueAsString())) {
+            this.inlineEditingFormItem = new TextAreaItem(plugin.getPluginName() + pluginField.getName() +
+                                                          EDIT_FORM_ITEM_SUFFIX, "");
+            this.inlineEditingFormItem.setValue(pluginField.getValue());
+            this.chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
+            this.chooseCredentialsFormItem.disable();
+            createRadioItemToModifyPluginField(plugin, pluginField);
 
-        if (plugin.getPluginName().equals(nodeSourceWindow.getFocusedInfrastructurePluginName()) ||
-            plugin.getPluginName().equals(nodeSourceWindow.getFocusedPolicyPluginName())) {
-
-            RadioGroupItem editOrUploadFormItem = createRadioItemToModifyPluginField(plugin, pluginField);
-            formItemsReplacingNonTextualFormItems.add(editOrUploadFormItem);
-
-            TextAreaItem previousValueItem = createTextItemPrefilledWithFileContent(plugin, pluginField);
-            formItemsReplacingNonTextualFormItems.add(previousValueItem);
-
-            chooseCredentialsFormItem = createUploadItemDisabled(plugin, pluginField);
-
+            formItemsReplacingNonTextualFormItems.add(this.editOrUploadFormItem);
+            formItemsReplacingNonTextualFormItems.add(this.inlineEditingFormItem);
         } else {
-
-            chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
-                                                       pluginField.getName());
+            this.chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(),
+                                                            pluginField.getName());
         }
-
-        nodeSourceWindow.addCredentialsPickerIcon(pluginField,
-                                                  formItemsReplacingNonTextualFormItems,
-                                                  chooseCredentialsFormItem);
-
+        this.nodeSourceWindow.addCredentialsPickerIcon(pluginField,
+                                                       formItemsReplacingNonTextualFormItems,
+                                                       this.chooseCredentialsFormItem);
         return formItemsReplacingNonTextualFormItems;
     }
 
-    private FormItem createUploadItemDisabled(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
-        FormItem chooseCredentialsFormItem = new UploadItem(plugin.getPluginName() + pluginField.getName(), "");
-        chooseCredentialsFormItem.disable();
-        return chooseCredentialsFormItem;
-    }
-
-    private TextAreaItem createTextItemPrefilledWithFileContent(PluginDescriptor plugin,
-            PluginDescriptor.Field pluginField) {
-
-        TextAreaItem previousValueItem = new TextAreaItem(plugin.getPluginName() + pluginField.getName() +
-                                                          EDIT_FORM_ITEM_SUFFIX, "");
-
-        previousValueItem.setDefaultValue(pluginField.getValue());
-
-        return previousValueItem;
-    }
-
-    private RadioGroupItem createRadioItemToModifyPluginField(PluginDescriptor plugin,
-            PluginDescriptor.Field pluginField) {
-
+    private void createRadioItemToModifyPluginField(PluginDescriptor plugin, PluginDescriptor.Field pluginField) {
         String formItemPrefixName = plugin.getPluginName() + pluginField.getName();
-
         LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
         radioOptions.put(EDIT_RADIO_OPTION_NAME, "In-line editing");
         radioOptions.put(UPLOAD_RADIO_OPTION_NAME, "Upload new file");
-
-        RadioGroupItem editOrUploadFormItem = new RadioGroupItem(formItemPrefixName + EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX,
-                                                                 pluginField.getName());
-        editOrUploadFormItem.setValueMap(radioOptions);
-        editOrUploadFormItem.setVertical(false);
-        editOrUploadFormItem.setDefaultValue(EDIT_RADIO_OPTION_NAME);
-
-        editOrUploadFormItem.addChangedHandler(changedEvent -> {
-
-            String radioValue = changedEvent.getValue().toString();
-            List<FormItem> formItemsForPlugin = this.nodeSourceWindow.getFormItemsOfPlugin(plugin.getPluginName());
-
-            if (radioValue.equals(EDIT_RADIO_OPTION_NAME)) {
-                enableOrDisableEditInLine(formItemPrefixName, formItemsForPlugin);
-            } else if (radioValue.equals(UPLOAD_RADIO_OPTION_NAME)) {
-                enableOrDisableUploadNewFile(formItemPrefixName, formItemsForPlugin);
-            }
-        });
-
-        return editOrUploadFormItem;
+        this.editOrUploadFormItem = new RadioGroupItem(formItemPrefixName + EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX,
+                                                       pluginField.getName());
+        this.editOrUploadFormItem.setVertical(false);
+        this.editOrUploadFormItem.setValueMap(radioOptions);
+        this.editOrUploadFormItem.setDefaultValue(EDIT_RADIO_OPTION_NAME);
+        this.editOrUploadFormItem.addChangedHandler(changedEvent -> enableRightItem());
     }
 
-    private void enableOrDisableUploadNewFile(String pluginFieldName, List<FormItem> formItemsForPlugin) {
-        formItemsForPlugin.stream()
-                          .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
-                          .forEach(formItem -> enableOrDisableUploadNewFile(pluginFieldName, formItem));
-    }
-
-    private void enableOrDisableUploadNewFile(String pluginFieldName, FormItem formItem) {
-        if (formItem.getName().equals(pluginFieldName)) {
-            formItem.enable();
-
-        } else if (formItem.getName().startsWith(pluginFieldName) &&
-                   formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-            formItem.disable();
-        }
-    }
-
-    private void enableOrDisableEditInLine(String pluginFieldName, List<FormItem> formItemsForPlugin) {
-
-        formItemsForPlugin.stream()
-                          .filter(formItem -> formItem.getName().startsWith(pluginFieldName))
-                          .forEach(formItem -> enableOrDisableEditInLine(pluginFieldName, formItem));
-    }
-
-    private void enableOrDisableEditInLine(String pluginFieldName, FormItem formItem) {
-
-        if (formItem.getName().equals(pluginFieldName)) {
-            formItem.disable();
-
-        } else if (formItem.getName().startsWith(pluginFieldName) &&
-                   formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-            formItem.enable();
+    private void enableRightItem() {
+        if (this.editOrUploadFormItem.getValueAsString().equals(EDIT_RADIO_OPTION_NAME)) {
+            this.inlineEditingFormItem.enable();
+            this.chooseCredentialsFormItem.disable();
+        } else if (this.editOrUploadFormItem.getValueAsString().equals(UPLOAD_RADIO_OPTION_NAME)) {
+            this.chooseCredentialsFormItem.enable();
+            this.inlineEditingFormItem.disable();
         }
     }
 

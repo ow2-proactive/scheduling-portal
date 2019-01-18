@@ -222,6 +222,15 @@ public class SchedulerJSONUtils extends JSONUtils {
         return jobs;
     }
 
+    public static String getStringOrDefault(JSONValue jsonValue) {
+        return getStringOrDefault(jsonValue, "");
+    }
+
+    public static String getStringOrDefault(JSONValue jsonValue, String defaultValue) {
+        final JSONString jsonString = jsonValue.isString();
+        return jsonString != null ? jsonString.stringValue() : defaultValue;
+    }
+
     public static Job getJobInfoFromJson(String jsonString) throws JSONException {
         JSONValue val = parseJSON(jsonString);
         JSONObject jsonJobInfo = val.isObject();

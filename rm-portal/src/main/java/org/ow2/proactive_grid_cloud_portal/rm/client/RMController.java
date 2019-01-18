@@ -46,13 +46,13 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ExportToCatalogConfirmWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.ImportException;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceSerializationFormPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.server.serialization.ExportNodeSourceToFileServlet;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.catalog.ExportToCatalogConfirmWindow;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportInfrastructureToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportNodeSourceToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.export.file.ExportPolicyToFileHandler;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.ServletMappings;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -68,9 +68,6 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -151,7 +148,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     RMController(RMServiceAsync rm) {
         this.rm = rm;
         this.model = new RMModelImpl();
-        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser(this);
+        this.nodeSourceConfigurationParser = new NodeSourceConfigurationParser();
         this.init();
     }
 
@@ -850,7 +847,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                               try {
                                                   model.setEditedNodeSourceConfiguration(nodeSourceConfigurationParser.parseNodeSourceConfiguration(result));
                                                   success.run();
-                                              } catch (ImportException e) {
+                                              } catch (Exception e) {
                                                   runFailure(e);
                                               }
                                           }
@@ -1014,38 +1011,33 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     public void exportNodeSourceToFile(String nodeSourceName) {
-        FormPanel nodeSourceJsonForm = new NodeSourceSerializationFormPanel(ServletMappings.EXPORT_NODE_SOURCE_TO_FILE);
-
-        Hidden nodeSourceJsonItem = new Hidden(ExportNodeSourceToFileServlet.MAIN_FORM_ITEM_NAME);
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(nodeSourceJsonItem);
-        nodeSourceJsonForm.setWidget(panel);
-
-        Window window = new Window();
-        window.addChild(nodeSourceJsonForm);
-        window.show();
-
-        rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
-                                      nodeSourceName,
-                                      new AsyncCallback<String>() {
-                                          public void onSuccess(String result) {
-                                              nodeSourceJsonItem.setValue(result);
-                                              nodeSourceJsonForm.submit();
-                                              window.hide();
-                                              window.destroy();
-                                          }
-
-                                          public void onFailure(Throwable caught) {
-                                              String msg = JSONUtils.getJsonErrorMessage(caught);
-                                              SC.warn("Failed to fetch configuration of node source " + nodeSourceName +
-                                                      ":<br>" + msg);
-                                          }
-                                      });
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportNodeSourceToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
     }
 
     public void exportNodeSourceToCatalog(String nodeSourceName) {
-        new ExportToCatalogConfirmWindow(nodeSourceName, this).show();
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.NODE_SOURCE, this).show();
+    }
+
+    public void exportInfrastructureToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportInfrastructureToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
+    }
+
+    public void exportInfrastructureToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.INFRASTRUCTURE, this).show();
+    }
+
+    public void exportPolicyToFile(String nodeSourceName) {
+        this.rm.getNodeSourceConfiguration(LoginModel.getInstance().getSessionId(),
+                                           nodeSourceName,
+                                           new ExportPolicyToFileHandler(nodeSourceName).exportFromNodeSourceConfiguration());
+    }
+
+    public void exportPolicyToCatalog(String nodeSourceName) {
+        new ExportToCatalogConfirmWindow(nodeSourceName, CatalogKind.POLICY, this).show();
     }
 
     /**
@@ -1302,25 +1294,83 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         error(e.getMessage());
     }
 
-    private String parseScriptResult(String json) {
-        StringBuilder scriptResultStr = new StringBuilder();
-        JSONObject scriptResult = this.parseJSON(json).isObject();
+    private String parseAllScriptResults(String jsonString) {
+        JSONValue allScriptResultsJson = this.parseJSON(jsonString);
+        JSONObject scriptResultJsonObject = allScriptResultsJson.isObject();
+        return scriptResultJsonObject == null ? parseAllScriptResultsAsJsonArray(allScriptResultsJson)
+                                              : parseScriptResultAsJsonObject(scriptResultJsonObject);
+    }
 
-        JSONObject exception = scriptResult.get("exception").isObject();
-        while (exception != null && exception.get("cause") != null && exception.get("cause").isObject() != null) {
-            exception = exception.get("cause").isObject();
+    private String parseAllScriptResultsAsJsonArray(JSONValue allScriptResultsJson) {
+        StringBuilder allScriptResultsOutput = new StringBuilder();
+        JSONArray scriptResultJsonArray = allScriptResultsJson.isArray();
+
+        JSONValue scriptResultJson;
+        JSONObject scriptResultJsonObject;
+        for (int i = 0; i < scriptResultJsonArray.size(); i++) {
+            scriptResultJson = scriptResultJsonArray.get(i);
+            scriptResultJsonObject = scriptResultJson.isObject();
+            if (scriptResultJsonObject != null) {
+                allScriptResultsOutput.append(parseScriptResultAsJsonObject(scriptResultJsonObject)).append("<br/>");
+            }
         }
 
-        if (exception != null && exception.get("message").isString() != null) {
-            scriptResultStr.append(exception.get("message").isString().stringValue());
-        }
+        return allScriptResultsOutput.toString();
+    }
 
-        JSONString output = scriptResult.get("output").isString();
-        if (output != null) {
-            scriptResultStr.append(output.stringValue());
-        }
+    private String parseScriptResultAsJsonObject(JSONObject scriptResultJsonObject) {
+        StringBuilder scriptResultOutput = new StringBuilder();
 
-        return scriptResultStr.toString();
+        parseHostname(scriptResultJsonObject, scriptResultOutput);
+        parseExceptionAndCause(scriptResultJsonObject, scriptResultOutput);
+        parseOutput(scriptResultJsonObject, scriptResultOutput);
+
+        return scriptResultOutput.toString();
+    }
+
+    private void parseHostname(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue scriptHostnameJson = scriptResultJsonObject.get("hostname");
+        if (scriptHostnameJson != null) {
+            JSONString scriptHostnameJsonString = scriptHostnameJson.isString();
+            if (scriptHostnameJsonString != null) {
+                scriptResultOutput.append("<b>On host ")
+                                  .append(scriptHostnameJsonString.stringValue())
+                                  .append("</b><br/>");
+            }
+        }
+    }
+
+    private void parseExceptionAndCause(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue exceptionJson = scriptResultJsonObject.get("exception");
+        if (exceptionJson != null) {
+            JSONObject exceptionJsonObject = exceptionJson.isObject();
+            if (exceptionJsonObject != null && exceptionJsonObject.get("message").isString() != null) {
+                scriptResultOutput.append("<b>Error: </b>")
+                                  .append(exceptionJsonObject.get("message").isString().stringValue())
+                                  .append("<br/>");
+            }
+            while (exceptionJsonObject != null && exceptionJsonObject.get("cause") != null &&
+                   exceptionJsonObject.get("cause").isObject() != null) {
+                exceptionJsonObject = exceptionJsonObject.get("cause").isObject();
+                if (exceptionJsonObject.get("message").isString() != null) {
+                    scriptResultOutput.append("<b>Caused by: </b>")
+                                      .append(exceptionJsonObject.get("message").isString().stringValue())
+                                      .append("<br/>");
+                }
+            }
+        }
+    }
+
+    private void parseOutput(JSONObject scriptResultJsonObject, StringBuilder scriptResultOutput) {
+        JSONValue outputJson = scriptResultJsonObject.get("output");
+        if (outputJson != null) {
+            JSONString outputJsonObject = outputJson.isString();
+            if (outputJsonObject != null) {
+                scriptResultOutput.append("<b>Output: </b><br/>")
+                                  .append(outputJsonObject.stringValue())
+                                  .append("<br/>");
+            }
+        }
     }
 
     public void executeScript(final String script, final String engine, final String nodeUrl,
@@ -1331,17 +1381,58 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              nodeUrl,
                              new AsyncCallback<String>() {
                                  public void onFailure(Throwable caught) {
-                                     LogModel.getInstance()
-                                             .logImportantMessage("Failed to execute a script " + script + " on " +
-                                                                  nodeUrl + " : " +
-                                                                  JSONUtils.getJsonErrorMessage(caught));
-                                     syncCallBack.onFailure(JSONUtils.getJsonErrorMessage(caught));
+                                     reportScriptExecutionFailure(caught, script, nodeUrl, syncCallBack);
                                  }
 
                                  public void onSuccess(String result) {
-                                     syncCallBack.onSuccess(parseScriptResult(result));
+                                     syncCallBack.onSuccess(parseAllScriptResults(result));
                                  }
                              });
+    }
+
+    public void executeNodeSourceScript(final String script, final String engine, final String nodeSourceName,
+            final Callback<String, String> syncCallBack) {
+        rm.executeNodeSourceScript(LoginModel.getInstance().getSessionId(),
+                                   script,
+                                   engine,
+                                   nodeSourceName,
+                                   new AsyncCallback<String>() {
+                                       public void onFailure(Throwable caught) {
+                                           reportScriptExecutionFailure(caught, script, nodeSourceName, syncCallBack);
+                                       }
+
+                                       public void onSuccess(String result) {
+                                           syncCallBack.onSuccess(parseAllScriptResults(result));
+                                       }
+                                   });
+    }
+
+    public void executeHostScript(final String script, final String engine, final String host,
+            final Callback<String, String> syncCallBack) {
+        rm.executeHostScript(LoginModel.getInstance().getSessionId(),
+                             script,
+                             engine,
+                             host,
+                             new AsyncCallback<String>() {
+                                 public void onFailure(Throwable caught) {
+                                     reportScriptExecutionFailure(caught, script, host, syncCallBack);
+                                 }
+
+                                 public void onSuccess(String result) {
+                                     syncCallBack.onSuccess(parseAllScriptResults(result));
+                                 }
+                             });
+    }
+
+    private void reportScriptExecutionFailure(Throwable caught, String script, String scriptTarget,
+            Callback<String, String> syncCallBack) {
+        String msg = JSONUtils.getJsonErrorMessage(caught);
+        LogModel.getInstance()
+                .logImportantMessage("Failed to execute a script " + script + " on " + scriptTarget + ": " + msg);
+        if (msg.equals("HTTP 500 Internal Server Error")) {
+            msg = "You are not authorized to execute scripts on this node source. Please contact the administrator.";
+        }
+        syncCallBack.onFailure(msg);
     }
 
 }

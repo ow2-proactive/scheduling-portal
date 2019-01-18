@@ -36,9 +36,10 @@ import com.google.gwt.resources.client.ImageResource;
  * @author mschnoor
  *
  */
+@SuppressWarnings("squid:S1214")
 public interface SchedulerImages extends ClientBundle {
 
-    public static final SchedulerImages instance = GWT.create(SchedulerImages.class);
+    SchedulerImages instance = GWT.create(SchedulerImages.class);
 
     @Source("images/cancel_14.png")
     ImageResource cancel_14();
@@ -55,6 +56,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/scheduler_kill_16.png")
     ImageResource scheduler_kill_16();
 
+    @Source("images/scheduler_shutdown_16.png")
+    ImageResource scheduler_shutdown_16();
+
     @Source("images/scheduler_pause_16.png")
     ImageResource scheduler_pause_16();
 
@@ -70,6 +74,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/job_kill_16.png")
     ImageResource job_kill_16();
 
+    @Source("images/job_export_32.png")
+    ImageResource job_export_32();
+
     @Source("images/job_output_16.png")
     ImageResource job_output_16();
 
@@ -81,6 +88,12 @@ public interface SchedulerImages extends ClientBundle {
 
     @Source("images/job_plan_16.png")
     ImageResource job_plan_16();
+
+    @Source("images/job_resubmit_22.png")
+    ImageResource job_resubmit_22();
+
+    @Source("images/job_kill_resubmit_22.png")
+    ImageResource job_kill_resubmit_22();
 
     @Source("images/monitoring_16.png")
     ImageResource monitoring_16();

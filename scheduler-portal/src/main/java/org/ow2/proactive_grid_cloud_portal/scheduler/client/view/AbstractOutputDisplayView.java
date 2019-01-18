@@ -55,6 +55,8 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
 
     protected String refreshButtonTooltip;
 
+    protected String notAuthorized;
+
     public AbstractOutputDisplayView(C controller) {
         super(controller);
     }

@@ -23,10 +23,13 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -46,25 +49,21 @@ public class ImportFromCatalogPanelFeeder {
 
     private Map<String, String> bucketNamePerNodeSourceName;
 
-    public ImportFromCatalogPanelFeeder(ImportFromCatalogPanel importFromCatalogPanel) {
+    ImportFromCatalogPanelFeeder(ImportFromCatalogPanel importFromCatalogPanel) {
         this.importFromCatalogPanel = importFromCatalogPanel;
-        this.catalogRequestBuilder = new CatalogRequestBuilder(this);
+        this.catalogRequestBuilder = new CatalogRequestBuilder();
         this.bucketNamePerNodeSourceName = new HashMap<>();
     }
 
-    public void requestNodeSourcesFromAllBuckets() {
-        this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack());
+    void requestCatalogObjectsFromAllBuckets(CatalogKind kind) {
+        this.catalogRequestBuilder.sendRequestToCatalog("buckets", getBucketsRequestCallBack(kind));
     }
 
-    public void setNodeSourceWindowLabelWithError(String userMessage, Throwable e) {
-        this.importFromCatalogPanel.setNodeSourceWindowLabelWithError(userMessage, e);
-    }
-
-    public String getBucketNameForNodeSource(String nodeSourceName) {
+    String getBucketNameForNodeSource(String nodeSourceName) {
         return this.bucketNamePerNodeSourceName.get(nodeSourceName);
     }
 
-    private RequestCallback getBucketsRequestCallBack() {
+    private RequestCallback getBucketsRequestCallBack(CatalogKind kind) {
         return new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -72,16 +71,16 @@ public class ImportFromCatalogPanelFeeder {
                 for (int i = 0; i < bucketsArray.size(); i++) {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
                     String bucketName = bucketObject.get(NAME_KEY).isString().stringValue();
-                    ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestNodeSourcesForBucket(bucketName,
-                                                                                                        fillBucketInImportPanel(bucketName));
+                    ImportFromCatalogPanelFeeder.this.catalogRequestBuilder.requestCatalogObjects(bucketName,
+                                                                                                  kind,
+                                                                                                  fillBucketInImportPanel(bucketName));
                 }
                 ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.enableNodeSourceListBox();
             }
 
             @Override
             public void onError(Request request, Throwable t) {
-                ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.setNodeSourceWindowLabelWithError("List buckets from catalog failed",
-                                                                                                           t);
+                throw new IllegalStateException("List buckets from catalog failed", t);
             }
         };
     }
@@ -104,8 +103,7 @@ public class ImportFromCatalogPanelFeeder {
 
             @Override
             public void onError(Request request, Throwable t) {
-                ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.setNodeSourceWindowLabelWithError("List node sources from catalog failed",
-                                                                                                           t);
+                throw new IllegalStateException("List node sources from catalog failed", t);
             }
         };
     }

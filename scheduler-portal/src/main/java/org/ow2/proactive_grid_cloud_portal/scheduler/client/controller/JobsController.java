@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +41,18 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -79,6 +85,10 @@ public class JobsController {
 
     private static Logger LOGGER = Logger.getLogger(JobsController.class.getName());
 
+    private static final String STR_JOB = " jobs";
+
+    private static final String HEADER_PA_ERROR = "proactive_error";
+
     /**
      * Builds a jobs controller from a parent scheduler controller.
      * @param parentController the parent controller.
@@ -101,6 +111,10 @@ public class JobsController {
      */
     public void setModel(JobsModel model) {
         this.model = model;
+    }
+
+    public JobsView getView() {
+        return view;
     }
 
     /**
@@ -152,7 +166,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.pauseJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully paused " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -211,7 +225,7 @@ public class JobsController {
         scheduler.resumeJobs(LoginModel.getInstance().getSessionId(), selectedJobs, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
                 LogModel.getInstance()
-                        .logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + " jobs");
+                        .logMessage("Successfully resumed " + result + "/" + selectedJobs.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -235,7 +249,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.removeJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully removed " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -246,11 +260,11 @@ public class JobsController {
     }
 
     /**
-     * Kills a job
+     * Kills a list of jobs
      * 
      * @param jobId id of the job
      */
-    public void killJob(List<String> jobId) {
+    public void killJobs(List<String> jobId) {
         final List<Integer> l = new ArrayList<>(jobId.size());
         for (String id : jobId) {
             l.add(Integer.parseInt(id));
@@ -259,7 +273,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.killJobs(LoginModel.getInstance().getSessionId(), l, new AsyncCallback<Integer>() {
             public void onSuccess(Integer result) {
-                LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + " jobs");
+                LogModel.getInstance().logMessage("Successfully killed " + result + "/" + l.size() + STR_JOB);
             }
 
             public void onFailure(Throwable caught) {
@@ -267,6 +281,23 @@ public class JobsController {
                 LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
             }
         });
+    }
+
+    /**
+     * Kills a single job
+     *
+     * @param jobId id of the job
+     */
+    public void killJob(String jobId) {
+        killJobs(Arrays.asList(jobId));
+    }
+
+    /**
+     * Tries to re-submit then kill a job only and only if re-submission is successful
+     * @param jobId
+     */
+    public void killAndResubmit(String jobId) {
+        new SubmitWindow(jobId, this).show();
     }
 
     /**
@@ -289,7 +320,7 @@ public class JobsController {
                                         public void onSuccess(Void result) {
                                             LogModel.getInstance()
                                                     .logMessage("Successfully set priority to " + priority.name() +
-                                                                " for " + l.size() + " jobs");
+                                                                " for " + l.size() + STR_JOB);
                                         }
 
                                         public void onFailure(Throwable caught) {
@@ -299,6 +330,71 @@ public class JobsController {
                                                                          priority.name() + " : " + message);
                                         }
                                     });
+    }
+
+    /**
+     * Export the original Workflow of a job as an XML.
+     * Sends a head request first to check if XML is downloadable before downloading.
+     * If the user doesn't have the required permissions (not his job and is not an admin) then pops-up an alert.
+     *
+     * @param jobId id of the job
+     */
+    public void exportJobXML(String jobId) {
+        String jobXmlUrl = GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
+                           LoginModel.getInstance().getSessionId();
+        // Create a head-only request to check if XML is downloadable
+        XMLHttpRequest req = XMLHttpRequest.create();
+        req.open("HEAD", jobXmlUrl);
+        req.setOnReadyStateChange(xhr -> {
+            if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                if (xhr.getStatus() == Response.SC_OK) {
+                    LogModel.getInstance().logMessage("Downloading XML for job: " + jobId);
+                    Window.open(jobXmlUrl, "Download Job XML", "");
+                } else {
+                    // Check if it's a user-permission related error.
+                    String error = xhr.getResponseHeader(HEADER_PA_ERROR);
+                    if (error != null) {
+                        SC.warn("Could not export job's XML:\n" + error);
+                    } else {
+                        LogModel.getInstance()
+                                .logMessage("Could not download Job XML. Got HTTP response code: " + xhr.getStatus());
+                    }
+                }
+            }
+        });
+        req.send();
+    }
+
+    /**
+     * Resubmits a job.
+     * Sends a head request first to check if job XML is accessible before downloading.
+     * If the user doesn't have the required permissions (not his job and is not an admin) then pops-up an alert.
+     *
+     * @param jobId id of the job
+     */
+    public void resubmitJob(String jobId) {
+        String jobXmlUrl = GWT.getModuleBaseURL() + "downloadjobxml?jobId=" + jobId + "&sessionId=" +
+                           LoginModel.getInstance().getSessionId();
+        // Create a head-only request to check if XML is downloadable
+        XMLHttpRequest req = XMLHttpRequest.create();
+        req.open("HEAD", jobXmlUrl);
+        req.setOnReadyStateChange(xhr -> {
+            if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                if (xhr.getStatus() == Response.SC_OK) {
+                    new SubmitWindow(jobId).show();
+                } else {
+                    // Check if it's a user-permission related error.
+                    String error = xhr.getResponseHeader(HEADER_PA_ERROR);
+                    if (error != null) {
+                        SC.warn("Could not re-submit job:\n" + error);
+                    } else {
+                        LogModel.getInstance()
+                                .logMessage("Could not re-submit job. Got HTTP response code: " + xhr.getStatus());
+                    }
+                }
+            }
+        });
+        req.send();
     }
 
     /**
@@ -343,7 +439,8 @@ public class JobsController {
                         -1,
                         -1,
                         -1,
-                        -1);
+                        -1,
+                        "");
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }

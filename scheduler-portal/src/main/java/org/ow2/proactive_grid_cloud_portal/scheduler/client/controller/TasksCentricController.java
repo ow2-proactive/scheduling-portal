@@ -57,6 +57,10 @@ public class TasksCentricController extends TasksController {
         tasksCentricSortChangedHandler = new TasksCentricSortChangedHandler(this);
     }
 
+    public TasksCentricView getView() {
+        return (TasksCentricView) this.view;
+    }
+
     @Override
     public Layout buildView() {
         SchedulerModelImpl schedulerModel = (SchedulerModelImpl) this.parentController.getModel();
@@ -81,6 +85,7 @@ public class TasksCentricController extends TasksController {
     /**
      * Updates the current task list depending the current job selection in the model 
      */
+    @Override
     public void updateTasks(boolean showUpdating) {
         if (showUpdating) {
             this.model.notifyTasksChanging(false);
@@ -154,6 +159,7 @@ public class TasksCentricController extends TasksController {
      *
      * @param task of the new task selection. you can use null to cancel the current selection
      */
+    @Override
     public void selectTask(final Task task) {
         super.selectTask(task);
         if (task != null) {
@@ -169,7 +175,7 @@ public class TasksCentricController extends TasksController {
 
     public static class SortSpecifierRestContainer implements Serializable {
 
-        protected List<SortSpecifierRestItem> sortParameters = null;
+        private List<SortSpecifierRestItem> sortParameters;
 
         public SortSpecifierRestContainer() {
             sortParameters = new ArrayList<>();

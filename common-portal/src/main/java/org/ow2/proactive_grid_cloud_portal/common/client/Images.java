@@ -36,9 +36,10 @@ import com.google.gwt.resources.client.ImageResource;
  * @author mschnoor
  *
  */
+@SuppressWarnings("squid:S1214")
 public interface Images extends ClientBundle {
 
-    public static final Images instance = GWT.create(Images.class);
+    Images instance = GWT.create(Images.class);
 
     @Source("images/automation_dashboard_30.png")
     ImageResource automation_dashboard_30();
@@ -111,5 +112,8 @@ public interface Images extends ClientBundle {
 
     @Source("images/icon_manual.png")
     ImageResource icon_manual();
+
+    @Source("images/filter_32.png")
+    ImageResource filter_32();
 
 }

@@ -28,6 +28,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -352,7 +354,7 @@ public class Task implements Serializable, Comparable<Task> {
      * @return the POJO equivalent
      */
     public static Task parseJson(JSONObject jsonTask) {
-        String name = jsonTask.get("name").isString().stringValue();
+        String name = SchedulerJSONUtils.getStringOrDefault(jsonTask.get("name"));
         JSONObject taskInfo = jsonTask.get("taskInfo").isObject();
         String hostName = "";
         if (taskInfo.containsKey("executionHostName")) {
@@ -372,7 +374,7 @@ public class Task implements Serializable, Comparable<Task> {
         JSONObject jobIdInfo = taskInfo.get("jobId").isObject();
 
         long jobId = (long) jobIdInfo.get("id").isNumber().doubleValue();
-        String jobName = jobIdInfo.get("readableName").isString().stringValue();
+        String jobName = SchedulerJSONUtils.getStringOrDefault(jobIdInfo.get("readableName"));
 
         String description = "";
         if (jsonTask.containsKey("description")) {

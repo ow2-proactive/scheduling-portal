@@ -25,11 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -50,9 +53,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.ow2.proactive_grid_cloud_portal.common.server.Service;
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
+import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import com.google.gwt.user.server.Base64Utils;
 
@@ -76,17 +81,34 @@ public class UploadServlet extends HttpServlet {
 
     private static final String URL_CATALOG = "http://localhost:8080/catalog";
 
+    private static final String HEADER_JOB_ID = "jobId";
+
+    private static final String PARAMS_SESSION_ID = "sessionId";
+
+    private static final String PARAMS_BUCKET_NAME = "bucketName";
+
+    private static final String PARAMS_WORKFLOW_NAME = "workflowName";
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        upload(request, response);
+        if (isResubmitUpload(request)) {
+            fetchJobXMLAndWriteResponse(request, response);
+        } else {
+            upload(request, response);
+        }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        upload(request, response);
+        if (isResubmitUpload(request)) {
+            fetchJobXMLAndWriteResponse(request, response);
+        } else {
+            upload(request, response);
+        }
     }
 
     private void upload(HttpServletRequest request, HttpServletResponse response) {
+
         response.setContentType("text/html");
         File job = null;
 
@@ -108,11 +130,11 @@ public class UploadServlet extends HttpServlet {
             while (i.hasNext()) {
                 FileItem fi = (FileItem) i.next();
                 if (fi.isFormField()) {
-                    if (fi.getFieldName().equals("sessionId")) {
+                    if (fi.getFieldName().equals(PARAMS_SESSION_ID)) {
                         sessionId = fi.getString();
-                    } else if (fi.getFieldName().equals("bucketName")) {
+                    } else if (fi.getFieldName().equals(PARAMS_BUCKET_NAME)) {
                         bucketName = fi.getString();
-                    } else if (fi.getFieldName().equals("workflowName")) {
+                    } else if (fi.getFieldName().equals(PARAMS_WORKFLOW_NAME)) {
                         workflowName = fi.getString();
                     }
                 } else {
@@ -122,11 +144,6 @@ public class UploadServlet extends HttpServlet {
                 fi.delete();
             }
 
-            LOGGER.warn("sessionId=" + sessionId);
-            LOGGER.warn("bucketName=" + bucketName);
-            LOGGER.warn("workflowName=" + workflowName);
-            LOGGER.warn("job=" + job);
-
             if (bucketName != null && workflowName != null) {
                 fetchFromCatalogAndWriteResponse(bucketName, workflowName, sessionId, response);
             } else {
@@ -134,11 +151,8 @@ public class UploadServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            try {
-                String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-                response.getWriter().write(msg);
-            } catch (IOException ignored) {
-            }
+            String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
+            writeSilently(response, msg);
         } finally {
             if (job != null)
                 job.delete();
@@ -149,76 +163,101 @@ public class UploadServlet extends HttpServlet {
             HttpServletResponse response) {
         String encodedWorkflowName;
         try {
-            encodedWorkflowName = URLEncoder.encode(workflowName, "UTF-8");
+            encodedWorkflowName = URLEncoder.encode(workflowName, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             encodedWorkflowName = workflowName;
         }
         String url = URL_CATALOG + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
-        LOGGER.info("Sending request to catalog: " + url);
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpget = new HttpGet(url);
-        httpget.addHeader("sessionID", sessionId);
-        CloseableHttpResponse httpResponse = null;
-        try {
-            httpResponse = httpclient.execute(httpget);
+        LOGGER.info("Sending request to catalog: {}", url);
+
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.addHeader(PARAMS_SESSION_ID, sessionId);
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
             HttpEntity responseBody = httpResponse.getEntity();
             File job = File.createTempFile("job_upload", ".xml");
             FileUtils.copyInputStreamToFile(responseBody.getContent(), job);
-            LOGGER.info(job.toString());
+            LOGGER.info("job file={}", job);
             writeResponse(job, response);
         } catch (Exception e) {
             LOGGER.error("Error when sending the request to catalog", e);
-        } finally {
-            try {
-                if (httpResponse != null) {
-                    httpResponse.close();
-                }
-
-            } catch (IOException e) {
-                LOGGER.error("Error when closing the response", e);
-            }
         }
     }
 
+    private void fetchJobXMLAndWriteResponse(HttpServletRequest request, HttpServletResponse response) {
+        String jobId = request.getHeader(HEADER_JOB_ID);
+        String sessionId = request.getHeader(PARAMS_SESSION_ID);
+
+        try (InputStream is = new ByteArrayInputStream(((SchedulerServiceImpl) Service.get()).getJobXML(sessionId,
+                                                                                                        jobId)
+                                                                                             .getBytes(StandardCharsets.UTF_8))) {
+            LOGGER.info("Fetching Job XML for job {}", jobId);
+            File job = File.createTempFile("job_resubmit", ".xml");
+            FileUtils.copyInputStreamToFile(is, job);
+            writeResponse(job, response);
+
+        } catch (RestServerException e) {
+            LOGGER.warn("Failed to download workflow xml for job {} . Got response from Scheduler REST API with HTTP Status Code {}. {}" +
+                        jobId, e.getStatus(), e);
+        } catch (IOException | ServiceException t) {
+            LOGGER.warn("Failed to download workflow xml for job " + jobId, t);
+        }
+    }
+
+    // Ignore Sonar's try-with-resources issue
+    // Lifecycle-management cannot be handled with try-with-resources.
+    @SuppressWarnings("squid:S2093")
     private void writeResponse(File job, HttpServletResponse response) {
         try {
-            boolean isJar = isJarFile(job);
-
-            if (!isJar) {
-                // this _loosely_ checks that the file we got is an XML file
-                try {
-                    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                    Document doc = docBuilder.parse(job);
-                } catch (Throwable e) {
-                    response.getWriter().write("Job descriptor must be valid XML<br>" + e.getMessage());
-                    return;
-                }
+            if (!isJarFile(job)) {
+                checkXmlFile(job, response);
             }
-            String ret = IOUtils.toString(new FileInputStream(job), "UTF-8");
+            String ret = IOUtils.toString(new FileInputStream(job), StandardCharsets.UTF_8);
             response.getWriter().write("{ \"jobEdit\" : \"" + Base64Utils.toBase64(ret.getBytes()) + "\" }");
         } catch (IOException e) {
             LOGGER.error("Error when reading the job content", e);
             String msg = e.getMessage().replace("<", "&lt;").replace(">", "&gt;");
-            try {
-                response.getWriter().write(msg);
-            } catch (IOException ignored) {
-                // to get the error back client-side
-            }
+            writeSilently(response, msg);
         } finally {
             if (job != null)
                 job.delete();
         }
     }
 
-    private boolean isJarFile(File job) {
-        boolean isJar = false;
-        try {
-            new JarFile(job);
-            isJar = true;
-        } catch (IOException e) {
-            // not a jar;
+    private boolean isJarFile(File file) {
+        try (JarFile ignored = new JarFile(file)) {
+            return true;
+        } catch (IOException e1) {
+            return false;
         }
-        return isJar;
+    }
+
+    private void checkXmlFile(File job, HttpServletResponse response) {
+        // this _loosely_ checks that the file we got is an XML file
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            docBuilder.parse(job);
+        } catch (Exception e) {
+            writeSilently(response, "Job descriptor must be valid XML<br>" + e.getMessage());
+        }
+    }
+
+    private void writeSilently(HttpServletResponse response, String msg) {
+        try {
+            response.getWriter().write(msg);
+        } catch (IOException ignored) {
+            LOGGER.warn("Could not write response to HttpServletResponse");
+        }
+    }
+
+    /**
+     * If request contains a "jobId" header
+     * @param request
+     * @return
+     */
+    private boolean isResubmitUpload(HttpServletRequest request) {
+        return request.getHeader(HEADER_JOB_ID) != null;
     }
 }
