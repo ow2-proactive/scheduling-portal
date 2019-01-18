@@ -39,6 +39,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
@@ -223,6 +224,22 @@ public class FilterView extends VStack {
                 }
                 case STATE: {
                     valuePanel.setWidget(stateList);
+                    break;
+                }
+                case SUBMITTED_TIME: {
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+
+                    TextBox year = new TextBox();
+                    TextBox month = new TextBox();
+                    TextBox day = new TextBox();
+
+                    FlowPanel panel = new FlowPanel();
+                    panel.add(year);
+                    panel.add(month);
+                    panel.add(day);
+
+                    valuePanel.setWidget(panel);
                     break;
                 }
                 default:
