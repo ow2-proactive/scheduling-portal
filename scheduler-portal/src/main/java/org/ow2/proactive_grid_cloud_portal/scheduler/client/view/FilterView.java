@@ -233,11 +233,18 @@ public class FilterView extends VStack {
                     TextBox year = new TextBox();
                     TextBox month = new TextBox();
                     TextBox day = new TextBox();
+                    TextBox hour = new TextBox();
+
+                    year.setTitle("Year");
+                    month.setTitle("Month");
+                    day.setTitle("Day");
+                    hour.setTitle("Hour");
 
                     FlowPanel panel = new FlowPanel();
                     panel.add(year);
                     panel.add(month);
                     panel.add(day);
+                    panel.add(hour);
 
                     valuePanel.setWidget(panel);
                     break;

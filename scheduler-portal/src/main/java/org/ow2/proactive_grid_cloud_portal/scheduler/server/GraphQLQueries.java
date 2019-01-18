@@ -142,6 +142,7 @@ public final class GraphQLQueries {
         String name = null;
         String statusString = null;
         String projectName = null;
+        String submittedTime = null;
 
         for (Constraint constraint : constraints) {
             String value = constraint.getValue();
@@ -182,6 +183,19 @@ public final class GraphQLQueries {
                     projectName = getFilteringString(constraint.getAction(), projectName, value);
                     break;
                 }
+                case SUBMITTED_TIME: {
+                    switch (constraint.getAction()) {
+                        case GREATER_THAN_OR_EQUAL_TO:
+                            input.afterSubmittedTime(value);
+                            break;
+                        case LESS_THAN_OR_EQUAL_TO:
+                            input.beforeSubmittedTime(value);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                }
             }
         }
 
@@ -197,6 +211,7 @@ public final class GraphQLQueries {
             input.status(statusString);
         if (projectName != null)
             input.projectName(projectName);
+
 
         return input.build();
     }
