@@ -212,7 +212,6 @@ public final class GraphQLQueries {
         if (projectName != null)
             input.projectName(projectName);
 
-
         return input.build();
     }
 
