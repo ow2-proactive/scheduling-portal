@@ -27,10 +27,12 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.joda.time.format.ISODateTimeFormat;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
@@ -182,6 +184,31 @@ public final class GraphQLQueries {
                     projectName = getFilteringString(constraint.getAction(), projectName, value);
                     break;
                 }
+                case SUBMITTED_TIME: {
+                    Date date = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
+                    long datemillis = date.getTime();
+                    switch (constraint.getAction()) {
+                        case GREATER_THAN_OR_EQUAL_TO:
+                            input.afterSubmittedTime("" + datemillis);
+                            break;
+                        case LESS_THAN_OR_EQUAL_TO:
+                            input.beforeSubmittedTime("" + datemillis);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                }
+                case VARIABLE_NAME: {
+                    String nameFilter = getFilteringStringVariables(constraint.getAction(), null, value);
+                    input.variableName(nameFilter);
+                    break;
+                }
+                case VARIABLE_VALUE: {
+                    String nameFilter = getFilteringStringVariables(constraint.getAction(), null, value);
+                    input.variableValue(nameFilter);
+                    break;
+                }
             }
         }
 
@@ -222,6 +249,24 @@ public final class GraphQLQueries {
                 break;
             case STARTS_WITH:
                 filteringString = getValue(filteringString, newValue + "*");
+                break;
+            default:
+                break;
+        }
+        return filteringString;
+    }
+
+    private String getFilteringStringVariables(Action action, String oldValue, String newValue) {
+        String filteringString = oldValue;
+        switch (action) {
+            case EQUALS:
+                filteringString = getValue(filteringString, newValue);
+                break;
+            case CONTAINS:
+                filteringString = getValue(filteringString, "%" + newValue + "%");
+                break;
+            case STARTS_WITH:
+                filteringString = getValue(filteringString, newValue + "%");
                 break;
             default:
                 break;

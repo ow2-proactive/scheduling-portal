@@ -38,7 +38,10 @@ public enum Field implements IsSerializable {
     NAME("name"),
     USER("user"),
     STATE("state"),
-    PROJECT_NAME("project");
+    PROJECT_NAME("project"),
+    SUBMITTED_TIME("Submitted time"),
+    VARIABLE_NAME("Variable name"),
+    VARIABLE_VALUE("Variable value");
 
     private String name;
 
