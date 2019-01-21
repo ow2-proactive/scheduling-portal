@@ -158,6 +158,8 @@ public class FilterView extends VStack {
 
         private TextBox textBox;
 
+        private TextBox dateTextBox;
+
         private ListBox priorityList;
 
         private ListBox stateList;
@@ -195,6 +197,8 @@ public class FilterView extends VStack {
                 return priorityList.getSelectedValue();
             if (valueWidget == stateList)
                 return stateList.getSelectedValue();
+            if (valueWidget == dateTextBox)
+                return dateTextBox.getText();
             return textBox.getText();
         }
 
@@ -223,6 +227,27 @@ public class FilterView extends VStack {
                 }
                 case STATE: {
                     valuePanel.setWidget(stateList);
+                    break;
+                }
+                case SUBMITTED_TIME: {
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+
+                    dateTextBox.getElement().setPropertyString("placeholder", "ISO 8601 format");
+
+                    valuePanel.setWidget(dateTextBox);
+                    break;
+                }
+                case VARIABLE_NAME: {
+                    actionList.addItem(Action.CONTAINS.getName());
+                    actionList.addItem(Action.STARTS_WITH.getName());
+                    valuePanel.setWidget(textBox);
+                    break;
+                }
+                case VARIABLE_VALUE: {
+                    actionList.addItem(Action.CONTAINS.getName());
+                    actionList.addItem(Action.STARTS_WITH.getName());
+                    valuePanel.setWidget(textBox);
                     break;
                 }
                 default:
@@ -257,6 +282,9 @@ public class FilterView extends VStack {
 
             textBox = new TextBox();
             textBox.setPixelSize(140, 12);
+
+            dateTextBox = new TextBox();
+            dateTextBox.setPixelSize(140, 12);
 
             priorityList = new ListBox();
             priorityList.setPixelSize(140, 20);
