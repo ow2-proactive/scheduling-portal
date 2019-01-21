@@ -185,17 +185,21 @@ public final class GraphQLQueries {
                     break;
                 }
                 case SUBMITTED_TIME: {
-                    Date date = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
-                    long datemillis = date.getTime();
-                    switch (constraint.getAction()) {
-                        case GREATER_THAN_OR_EQUAL_TO:
-                            input.afterSubmittedTime("" + datemillis);
-                            break;
-                        case LESS_THAN_OR_EQUAL_TO:
-                            input.beforeSubmittedTime("" + datemillis);
-                            break;
-                        default:
-                            break;
+                    try {
+                        Date date = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
+                        long datemillis = date.getTime();
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                input.afterSubmittedTime("" + datemillis);
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                input.beforeSubmittedTime("" + datemillis);
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error when parsing date filter \"" + value + "\"", e);
                     }
                     break;
                 }
