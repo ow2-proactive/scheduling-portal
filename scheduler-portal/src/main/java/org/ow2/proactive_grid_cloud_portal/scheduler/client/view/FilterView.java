@@ -238,18 +238,6 @@ public class FilterView extends VStack {
                     valuePanel.setWidget(dateTextBox);
                     break;
                 }
-                case VARIABLE_NAME: {
-                    actionList.addItem(Action.CONTAINS.getName());
-                    actionList.addItem(Action.STARTS_WITH.getName());
-                    valuePanel.setWidget(textBox);
-                    break;
-                }
-                case VARIABLE_VALUE: {
-                    actionList.addItem(Action.CONTAINS.getName());
-                    actionList.addItem(Action.STARTS_WITH.getName());
-                    valuePanel.setWidget(textBox);
-                    break;
-                }
                 default:
                     break;
             }
