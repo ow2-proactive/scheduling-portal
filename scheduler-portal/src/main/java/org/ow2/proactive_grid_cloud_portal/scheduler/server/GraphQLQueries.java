@@ -203,16 +203,6 @@ public final class GraphQLQueries {
                     }
                     break;
                 }
-                case VARIABLE_NAME: {
-                    String nameFilter = getFilteringStringVariables(constraint.getAction(), null, value);
-                    input.variableName(nameFilter);
-                    break;
-                }
-                case VARIABLE_VALUE: {
-                    String nameFilter = getFilteringStringVariables(constraint.getAction(), null, value);
-                    input.variableValue(nameFilter);
-                    break;
-                }
             }
         }
 
@@ -253,24 +243,6 @@ public final class GraphQLQueries {
                 break;
             case STARTS_WITH:
                 filteringString = getValue(filteringString, newValue + "*");
-                break;
-            default:
-                break;
-        }
-        return filteringString;
-    }
-
-    private String getFilteringStringVariables(Action action, String oldValue, String newValue) {
-        String filteringString = oldValue;
-        switch (action) {
-            case EQUALS:
-                filteringString = getValue(filteringString, newValue);
-                break;
-            case CONTAINS:
-                filteringString = getValue(filteringString, "%" + newValue + "%");
-                break;
-            case STARTS_WITH:
-                filteringString = getValue(filteringString, newValue + "%");
                 break;
             default:
                 break;
