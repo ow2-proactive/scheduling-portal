@@ -37,6 +37,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Task
 import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.types.TopOperatorAppearance;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.KeyPressEvent;
+import com.smartgwt.client.widgets.events.KeyPressHandler;
 import com.smartgwt.client.widgets.form.FilterBuilder;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -87,6 +89,15 @@ public class TasksCentricView extends FilteringGridItemView<Task> implements Tas
     protected void buildGrid() {
         TasksCentricColumnsFactory factory = new TasksCentricColumnsFactory();
         this.itemsGrid = new TasksListGrid(this.controller, factory, "tasksCentricDS_", true);
+        this.itemsGrid.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getKeyName().toLowerCase().equals("a") && event.isCtrlKeyDown()) {
+                    event.cancel();
+                    itemsGrid.selectAllRecords();
+                }
+            }
+        });
         this.itemsGrid.build();
     }
 
