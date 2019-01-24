@@ -36,6 +36,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.KeyPressEvent;
+import com.smartgwt.client.widgets.events.KeyPressHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -85,6 +87,15 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
     @Override
     protected void buildGrid() {
         this.itemsGrid = new JobsListGrid(this.controller);
+        this.itemsGrid.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getKeyName().toLowerCase().equals("a") && event.isCtrlKeyDown()) {
+                    event.cancel();
+                    itemsGrid.selectAllRecords();
+                }
+            }
+        });
         this.itemsGrid.build();
     }
 

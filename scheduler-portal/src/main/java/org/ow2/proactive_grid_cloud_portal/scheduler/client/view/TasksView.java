@@ -35,6 +35,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.Expa
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandableTasksColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.ExpandableTasksListGrid;
 
+import com.smartgwt.client.widgets.events.KeyPressEvent;
+import com.smartgwt.client.widgets.events.KeyPressHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -79,6 +81,15 @@ public class TasksView extends AbstractGridItemsView<Task> implements TasksUpdat
         ExpandableTasksColumnsFactory expandableFactory = new ExpandableTasksColumnsFactory();
         ExpandTasksColumnsFactory expandFactory = new ExpandTasksColumnsFactory();
         this.itemsGrid = new ExpandableTasksListGrid(this.controller, expandableFactory, expandFactory, "tasksDS_");
+        this.itemsGrid.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getKeyName().toLowerCase().equals("a") && event.isCtrlKeyDown()) {
+                    event.cancel();
+                    itemsGrid.selectAllRecords();
+                }
+            }
+        });
         this.itemsGrid.build();
     }
 
