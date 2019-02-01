@@ -44,47 +44,47 @@ public class RMConfig extends Config {
     /** URL of the REST service */
     public static final String REST_URL = "rm.rest.url";
 
-    private static final String d_REST_URL = "http://localhost:8080/rest";
+    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
 
     public static final String REST_PUBLIC_URL = "rm.rest.public.url";
 
     public static final String RM_URL = "rm.url";
 
-    private static final String d_RM_URL = "pnp://localhost:64738";
+    private static final String DEFAULT_RM_URL = "pnp://localhost:64738";
 
     /** refresh rate in millis */
     public static final String CLIENT_REFRESH_TIME = "rm.client.refresh.time";
 
-    private static final String d_CLIENT_REFRESH_TIME = "3000";
+    private static final String DEFAULT_CLIENT_REFRESH_TIME = "3000";
 
     public static final String CLIENT_BURST_REFRESH_TIME = "rm.client.burst.refresh.time";
 
-    private static final String d_CLIENT_BURST_REFRESH_TIME = "10";
+    private static final String DEFAULT_CLIENT_BURST_REFRESH_TIME = "10";
 
     /** release version string */
     public static final String VERSION = "rm.version";
 
-    private static final String d_VERSION = "0.0";
+    private static final String DEFAULT_VERSION = "0.0";
 
     /** REST version string */
     public static final String REST_VERSION = "rm.rest.version";
 
-    private static final String d_REST_VERSION = "0.0";
+    private static final String DEFAULT_REST_VERSION = "0.0";
 
     /** RM version string */
     public static final String RM_VERSION = "rm.server.version";
 
-    private static final String d_RM_VERSION = "0.0";
+    private static final String DEFAULT_RM_VERSION = "0.0";
 
     /** stat history refresh rate in millis */
     public static final String STATISTICS_REFRESH_TIME = "rm.client.stats.time";
 
-    private static final String d_STATISTICS_REFRESH_TIME = "3000";
+    private static final String DEFAULT_STATISTICS_REFRESH_TIME = "3000";
 
     /** message of the day */
     public static final String MOTD_URL = "rm.motd.url";
 
-    private static final String d_MOTD_URL = "";
+    private static final String DEFAULT_MOTD_URL = "";
 
     /** the protocol for jmx nodes communication (default or proactive) */
     public static final String MONITORING_PROTOCOL = "rm.monitoring.protocol";
@@ -119,6 +119,8 @@ public class RMConfig extends Config {
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
 
+    public static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
+
     private static RMConfig instance = null;
 
     /**
@@ -133,21 +135,22 @@ public class RMConfig extends Config {
     }
 
     private void setDefaults() {
-        properties.put(REST_URL, d_REST_URL);
-        properties.put(RM_URL, d_RM_URL);
-        properties.put(CLIENT_REFRESH_TIME, d_CLIENT_REFRESH_TIME);
-        properties.put(CLIENT_BURST_REFRESH_TIME, d_CLIENT_BURST_REFRESH_TIME);
-        properties.put(VERSION, d_VERSION);
-        properties.put(RM_VERSION, d_RM_VERSION);
-        properties.put(REST_VERSION, d_REST_VERSION);
-        properties.put(STATISTICS_REFRESH_TIME, d_STATISTICS_REFRESH_TIME);
-        properties.put(MOTD_URL, d_MOTD_URL);
+        properties.put(REST_URL, DEFAULT_REST_URL);
+        properties.put(RM_URL, DEFAULT_RM_URL);
+        properties.put(CLIENT_REFRESH_TIME, DEFAULT_CLIENT_REFRESH_TIME);
+        properties.put(CLIENT_BURST_REFRESH_TIME, DEFAULT_CLIENT_BURST_REFRESH_TIME);
+        properties.put(VERSION, DEFAULT_VERSION);
+        properties.put(RM_VERSION, DEFAULT_RM_VERSION);
+        properties.put(REST_VERSION, DEFAULT_REST_VERSION);
+        properties.put(STATISTICS_REFRESH_TIME, DEFAULT_STATISTICS_REFRESH_TIME);
+        properties.put(MOTD_URL, DEFAULT_MOTD_URL);
         properties.put(MONITORING_PROTOCOL, MONITORING_PROTOCOL_DEFAULT);
         properties.put(MONITORING_PERIOD, MONITORING_PERIOD_DEFAULT);
         properties.put(RM_JMX_HOSTNAME, RM_JMX_HOSTNAME_DEFAULT);
         properties.put(RM_JMX_PORT, RM_JMX_PORT_DEFAULT);
         properties.put(RM_JMX_SERVER_NAME, RM_JMX_SERVER_NAME_DEFAULT);
         properties.put(RM_JMX_PREFIX, RM_JMX_PREFIX_DEFAULT);
+        properties.put(CATALOG_URL, DEFAULT_CATALOG_URL);
     }
 
     @Override
@@ -163,7 +166,7 @@ public class RMConfig extends Config {
     @Override
     protected String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(d_REST_URL)) {
+        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
             return getRestUrl();
         }
         return restPublicUrl;
