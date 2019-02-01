@@ -106,15 +106,17 @@ public class SchedulerConfig extends Config {
 
     private static final String DEFAULT_MOTD_URL = "";
 
-    /** Workflow Catalog URL **/
-    public static final String CATALOG_URL = "sched.catalog.url";
-
-    private static SchedulerConfig instance = null;
-
     /** URL of the scheduler graphql API */
     private static final String DEFAULT_SCHEDULING_API_URL = "http://localhost:8080/scheduling-api";
 
     public static final String SCHEDULING_API_URL = "pa.scheduling.api";
+
+    /** Workflow Catalog URL **/
+    public static final String CATALOG_URL = "sched.catalog.url";
+
+    public static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
+
+    private static SchedulerConfig instance = null;
 
     /**
      * @return current static config instance, cannot be null
@@ -139,6 +141,7 @@ public class SchedulerConfig extends Config {
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
         properties.put(SCHEDULING_API_URL, DEFAULT_SCHEDULING_API_URL);
+        properties.put(CATALOG_URL, DEFAULT_CATALOG_URL);
     }
 
     @Override
