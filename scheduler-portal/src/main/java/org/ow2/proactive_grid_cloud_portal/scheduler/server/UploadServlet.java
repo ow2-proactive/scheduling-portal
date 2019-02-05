@@ -56,7 +56,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.CatalogUrlSchedulerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +144,7 @@ public class UploadServlet extends HttpServlet {
             }
 
             if (bucketName != null && workflowName != null) {
-                fetchFromCatalogAndWriteResponse(SchedulerConfig.get().getCatalogUrl(),
+                fetchFromCatalogAndWriteResponse(new CatalogUrlSchedulerBuilder().getCatalogUrl(),
                                                  bucketName,
                                                  workflowName,
                                                  sessionId,
