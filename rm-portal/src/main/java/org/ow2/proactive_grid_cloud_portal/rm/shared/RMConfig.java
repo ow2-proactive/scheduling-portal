@@ -117,9 +117,7 @@ public class RMConfig extends Config {
     public static final String RM_JMX_PREFIX_DEFAULT = "service:jmx:rmi:///jndi/rmi://";
 
     /** Workflow Catalog URL **/
-    public static final String CATALOG_URL = "sched.catalog.url";
-
-    public static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
+    public static final String CATALOG_URL = "rm.catalog.url";
 
     private static RMConfig instance = null;
 
@@ -150,7 +148,6 @@ public class RMConfig extends Config {
         properties.put(RM_JMX_PORT, RM_JMX_PORT_DEFAULT);
         properties.put(RM_JMX_SERVER_NAME, RM_JMX_SERVER_NAME_DEFAULT);
         properties.put(RM_JMX_PREFIX, RM_JMX_PREFIX_DEFAULT);
-        properties.put(CATALOG_URL, DEFAULT_CATALOG_URL);
     }
 
     @Override

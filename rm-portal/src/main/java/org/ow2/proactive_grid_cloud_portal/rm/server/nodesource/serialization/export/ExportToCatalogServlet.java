@@ -39,9 +39,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.ow2.proactive.catalog.client.ApiClient;
 import org.ow2.proactive.catalog.client.api.CatalogObjectControllerApi;
 import org.ow2.proactive.catalog.client.api.CatalogObjectRevisionControllerApi;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlRmBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.server.ServletRequestTransformer;
 import org.ow2.proactive_grid_cloud_portal.rm.server.nodesource.serialization.CatalogObjectAction;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public class ExportToCatalogServlet extends HttpServlet {
         response.setContentType("text/html");
         try (CatalogObjectAction catalogObjectAction = buildCatalogObjetAction(request)) {
             ApiClient apiClient = new ApiClient();
-            apiClient.setBasePath(RMConfig.get().getCatalogUrl());
+            apiClient.setBasePath(new CatalogUrlRmBuilder().getCatalogUrl());
             if (catalogObjectAction.isRevised()) {
                 CatalogObjectRevisionControllerApi catalogObjectController = new CatalogObjectRevisionControllerApi(apiClient);
                 catalogObjectController.createUsingPOST2(catalogObjectAction.getBucketName(),
