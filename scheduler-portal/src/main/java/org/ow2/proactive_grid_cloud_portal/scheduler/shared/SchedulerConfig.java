@@ -43,8 +43,6 @@ public class SchedulerConfig extends Config {
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
 
-    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
-
     /** URL of the remote job-planner REST service */
     public static final String JOBPLANNER_URL = "jobplanner.rest.url";
 
@@ -114,8 +112,6 @@ public class SchedulerConfig extends Config {
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
 
-    public static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
-
     private static SchedulerConfig instance = null;
 
     /**
@@ -141,7 +137,6 @@ public class SchedulerConfig extends Config {
         properties.put(TAG_SUGGESTIONS_SIZE, DEFAULT_TAG_SUGGESTIONS_SIZE);
         properties.put(TAG_SUGGESTIONS_DELAY, DEFAULT_TAG_SUGGESTIONS_DELAY);
         properties.put(SCHEDULING_API_URL, DEFAULT_SCHEDULING_API_URL);
-        properties.put(CATALOG_URL, DEFAULT_CATALOG_URL);
     }
 
     @Override

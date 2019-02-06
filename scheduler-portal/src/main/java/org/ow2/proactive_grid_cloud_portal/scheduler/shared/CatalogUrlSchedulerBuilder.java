@@ -23,36 +23,24 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
 
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+public class CatalogUrlSchedulerBuilder {
 
-import com.google.gwt.core.client.GWT;
-
-
-public class CatalogUrlBuilder {
+    private static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
 
     private String catalogUrl;
 
     public String getCatalogUrl() {
         if (this.catalogUrl == null) {
-            String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+            String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
 
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-                this.catalogUrl = getDefaultCatalogUrl();
+                this.catalogUrl = DEFAULT_CATALOG_URL;
             } else {
                 this.catalogUrl = catalogUrlFromConfig;
             }
         }
         return this.catalogUrl;
     }
-
-    /**
-     * The conventional URL of the catalog. We take the current URL and
-     * replace the RM target by the catalog target.
-     */
-    private String getDefaultCatalogUrl() {
-        return GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
-    }
-
 }

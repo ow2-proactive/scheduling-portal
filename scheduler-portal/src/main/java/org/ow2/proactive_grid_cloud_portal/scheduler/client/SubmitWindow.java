@@ -36,7 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.CatalogUrlSchedulerBuilder;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -319,13 +319,7 @@ public class SubmitWindow {
      *
      */
     private void buildCatalogUrl() {
-        String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
-        String defaultCatalogUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "/") + "catalog";
-        if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-            CATALOG_URL = defaultCatalogUrl;
-        } else {
-            CATALOG_URL = catalogUrlFromConfig;
-        }
+        CATALOG_URL = new CatalogUrlSchedulerBuilder().getCatalogUrl();
     }
 
     private void initRootPage() {
