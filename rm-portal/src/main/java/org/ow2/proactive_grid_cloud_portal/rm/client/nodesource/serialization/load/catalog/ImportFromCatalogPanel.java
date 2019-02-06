@@ -26,7 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlRmBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlRmClientBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 
@@ -83,7 +83,7 @@ public class ImportFromCatalogPanel extends HorizontalPanel {
     private void requestNodeSourceConfiguration() {
         String selectedNodeSourceInList = this.nodeSourceListBox.getSelectedValue();
         if (!selectedNodeSourceInList.equals(this.selectItemGenericEntry)) {
-            String nodeSourceConfigurationRequestUrl = new CatalogUrlRmBuilder().getCatalogUrl() + "/buckets/" +
+            String nodeSourceConfigurationRequestUrl = new CatalogUrlRmClientBuilder().getCatalogUrl() + "/buckets/" +
                                                        this.importFromCatalogPanelFeeder.getBucketNameForNodeSource(selectedNodeSourceInList) +
                                                        "/resources/" + selectedNodeSourceInList + "/raw";
             RequestBuilder nodeSourceConfigurationRequest = new RequestBuilder(RequestBuilder.GET,
