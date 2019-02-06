@@ -23,12 +23,12 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
+package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 
-public class CatalogUrlRmBuilder {
+public class CatalogUrlSchedulerServerBuilder {
 
     private static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
 
@@ -36,7 +36,7 @@ public class CatalogUrlRmBuilder {
 
     public String getCatalogUrl() {
         if (this.catalogUrl == null) {
-            String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+            String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
 
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
                 this.catalogUrl = DEFAULT_CATALOG_URL;
