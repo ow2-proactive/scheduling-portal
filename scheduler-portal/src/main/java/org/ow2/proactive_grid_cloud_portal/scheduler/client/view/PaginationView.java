@@ -77,7 +77,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
             }
         });
 
-        this.pagePreviousButton = new ToolStripButton("< Later Jobs");
+        this.pagePreviousButton = new ToolStripButton("< Newer Jobs");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
