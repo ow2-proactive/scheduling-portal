@@ -46,7 +46,7 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
      */
     private Label jobsTotalLabel = null;
 
-    private static String JOBS_TOTAL_TEXT = "Total number of jobs: ";
+    private static String JOBS_TOTAL_TEXT = "Jobs (Total or Filtered): ";
 
     public JobsPaginationView(JobsController controller) {
         super(controller.getPaginationController());

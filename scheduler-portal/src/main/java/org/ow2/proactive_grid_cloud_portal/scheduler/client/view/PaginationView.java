@@ -68,7 +68,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
      * @return a layout containing the view content.
      */
     public Layout build() {
-        this.pageFirstButton = new ToolStripButton("<< First");
+        this.pageFirstButton = new ToolStripButton("<< Newest Jobs");
         this.pageFirstButton.disable();
         this.pageFirstButton.addStyleName("navPreviousPaginationButton");
         this.pageFirstButton.addClickHandler(new ClickHandler() {
@@ -77,7 +77,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
             }
         });
 
-        this.pagePreviousButton = new ToolStripButton("< Previous");
+        this.pagePreviousButton = new ToolStripButton("< Newer Jobs");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
         this.pagePreviousButton.addClickHandler(new ClickHandler() {
@@ -86,7 +86,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
             }
         });
 
-        this.pageNextButton = new ToolStripButton("Next >");
+        this.pageNextButton = new ToolStripButton("Older Jobs >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navNextPaginationButton");
         this.pageNextButton.addClickHandler(new ClickHandler() {
@@ -95,7 +95,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
             }
         });
 
-        this.pageLastButton = new ToolStripButton("Last >>");
+        this.pageLastButton = new ToolStripButton("Oldest Jobs >>");
         this.pageLastButton.disable();
         this.pageLastButton.addStyleName("navNextPaginationButton");
         this.pageLastButton.addClickHandler(new ClickHandler() {
