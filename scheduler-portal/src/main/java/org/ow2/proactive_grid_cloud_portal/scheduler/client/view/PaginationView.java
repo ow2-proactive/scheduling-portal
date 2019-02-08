@@ -68,7 +68,7 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
      * @return a layout containing the view content.
      */
     public Layout build() {
-        this.pageFirstButton = new ToolStripButton("<< Latest Jobs");
+        this.pageFirstButton = new ToolStripButton("<< Newest Jobs");
         this.pageFirstButton.disable();
         this.pageFirstButton.addStyleName("navPreviousPaginationButton");
         this.pageFirstButton.addClickHandler(new ClickHandler() {
