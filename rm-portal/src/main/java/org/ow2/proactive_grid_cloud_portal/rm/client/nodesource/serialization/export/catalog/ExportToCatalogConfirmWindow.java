@@ -35,7 +35,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlBuilder;
+import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogUrlRmClientBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
@@ -187,7 +187,7 @@ public class ExportToCatalogConfirmWindow extends Window {
         this.bucketList.addItem(SELECT_A_BUCKET_OPTION);
         this.bucketList.addChangeHandler(event -> requestCatalogObjectsAndRevisions(this.bucketList.getSelectedValue()));
         RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
-                                                    new CatalogUrlBuilder().getCatalogUrl() + "/buckets");
+                                                    new CatalogUrlRmClientBuilder().getCatalogUrl() + "/buckets");
         request.setHeader("sessionId", LoginModel.getInstance().getSessionId());
         request.setCallback(fillBucketListWithRequestCallback());
         try {

@@ -27,10 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
-import com.google.gwt.core.client.GWT;
 
-
-public class CatalogUrlBuilder {
+public class CatalogUrlRmClientBuilder {
 
     private String catalogUrl;
 
@@ -39,20 +37,11 @@ public class CatalogUrlBuilder {
             String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
 
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
-                this.catalogUrl = getDefaultCatalogUrl();
+                this.catalogUrl = com.google.gwt.user.client.Window.Location.getHref().replace("/rm/", "/") + "catalog";
             } else {
                 this.catalogUrl = catalogUrlFromConfig;
             }
         }
         return this.catalogUrl;
     }
-
-    /**
-     * The conventional URL of the catalog. We take the current URL and
-     * replace the RM target by the catalog target.
-     */
-    private String getDefaultCatalogUrl() {
-        return GWT.getHostPageBaseURL().replace("/rm/", "/") + "catalog";
-    }
-
 }

@@ -39,7 +39,7 @@ public class CatalogRequestBuilder {
     private String catalogUrl;
 
     public CatalogRequestBuilder() {
-        this.catalogUrl = new CatalogUrlBuilder().getCatalogUrl();
+        this.catalogUrl = new CatalogUrlRmClientBuilder().getCatalogUrl();
     }
 
     public void sendRequestToCatalog(String endpoint, RequestCallback callback) {

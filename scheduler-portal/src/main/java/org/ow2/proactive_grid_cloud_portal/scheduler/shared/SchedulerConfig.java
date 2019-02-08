@@ -43,8 +43,6 @@ public class SchedulerConfig extends Config {
     /** URL of the remote REST service */
     public static final String REST_URL = "sched.rest.url";
 
-    private static final String DEFAULT_REST_URL = "http://localhost:8080/rest";
-
     /** URL of the remote job-planner REST service */
     public static final String JOBPLANNER_URL = "jobplanner.rest.url";
 
@@ -106,15 +104,15 @@ public class SchedulerConfig extends Config {
 
     private static final String DEFAULT_MOTD_URL = "";
 
-    /** Workflow Catalog URL **/
-    public static final String CATALOG_URL = "sched.catalog.url";
-
-    private static SchedulerConfig instance = null;
-
     /** URL of the scheduler graphql API */
     private static final String DEFAULT_SCHEDULING_API_URL = "http://localhost:8080/scheduling-api";
 
     public static final String SCHEDULING_API_URL = "pa.scheduling.api";
+
+    /** Workflow Catalog URL **/
+    public static final String CATALOG_URL = "sched.catalog.url";
+
+    private static SchedulerConfig instance = null;
 
     /**
      * @return current static config instance, cannot be null
