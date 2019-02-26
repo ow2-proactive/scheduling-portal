@@ -78,6 +78,11 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
 
         ToolStrip paginationLayout = getToolStripPaginationLayout();
 
+        this.pageFirstButton.setTitle("<< Newest Jobs");
+        this.pagePreviousButton.setTitle("< Newer Jobs");
+        this.pageNextButton.setTitle("Older Jobs >");
+        this.pageLastButton.setTitle("Oldest Jobs >>");
+
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
         paginationLayout.addMember(labelLayout);
