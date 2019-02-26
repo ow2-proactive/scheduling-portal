@@ -354,8 +354,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
-                                          "AverageActivity", "NumberPendingTasks" };
+        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DeployingNodesCount", "DownNodesCount",
+                                          "NumberPendingTasks", "AvailableNodesCount", "AverageActivity" };
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
@@ -383,7 +383,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                      @Override
                                                      public void onSuccess(String result) {
 
-                                                         JSONValue val = RMController.this.parseJSON(result);
+                                                         JSONValue val = RMController.parseJSON(result);
                                                          JSONObject obj = val.isObject();
 
                                                          HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
