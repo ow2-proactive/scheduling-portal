@@ -116,8 +116,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.setHeight100();
         root.setOverflow(Overflow.AUTO);
 
-        /**
-         *  Node count/state history
+        /*
+         * Node history graph
          */
         final AbsolutePanel nodeLinePane = new AbsolutePanel();
         nodeLinePane.setWidth("100%");
@@ -133,7 +133,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineOpts.setHAxisOptions(axisOpts);
         nodeLineOpts.setHeight(150);
         nodeLineOpts.setLegend(LegendPosition.NONE);
-        nodeLineOpts.setColors("#35a849", "#fcaf3e", "#24c1ff", "#ef2929", "#EC11E5", "#3a668d");
+        nodeLineOpts.setColors("#35a849", "#fcaf3e", "#24c1ff", "#ef2929", "#ffff00", "#3a668d");
 
         nodeLineTable = DataTable.create();
         nodeLineTimeId = nodeLineTable.addColumn(ColumnType.STRING, "Time");
@@ -149,7 +149,7 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         nodeLineForm = new DynamicForm();
         final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
-        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<String, String>();
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
         for (Range r : StatHistory.Range.values()) {
             nodeLineValues.put("" + r.getChar(), r.getString());
         }
@@ -216,7 +216,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         downIt.addChangedHandler(seriesChanged);
 
         CheckboxItem pendingIt = new CheckboxItem("pending",
-                                                  "<span style='background:#EC11E5;'>&nbsp;&nbsp;&nbsp;</span> Pending tasks");
+                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Pending tasks");
         pendingIt.setValue(false);
         pendingIt.addChangedHandler(seriesChanged);
 
@@ -226,8 +226,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         totalIt.addChangedHandler(seriesChanged);
         nodeLineSeriesForm.setItems(freeIt, busyIt, deployingIt, downIt, pendingIt, totalIt);
 
-        /**
-         * Instantaneous node state
+        /*
+         * Instantaneous node state - Node State histogram
          */
         final AbsolutePanel nodeColPane = new AbsolutePanel();
         nodeColPane.setWidth("100%");
@@ -260,8 +260,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
         nodeColHeaderLabel.setHeight(24);
 
-        /**
-         * Activity graph
+        /*
+         * Activity graph - Load history graph
          */
         final AbsolutePanel loadPane = new AbsolutePanel();
         loadPane.setWidth("100%");
@@ -295,16 +295,13 @@ public class RMStatsView implements StatsListener, NodesListener {
         loadForm.setHeight(24);
         loadForm.setWidth(40);
 
-        loadSelect.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                loadForm.setDisabled(true);
-                loadHeaderLabel.setIcon("loading.gif");
-                nodeLineSeriesForm.setDisabled(true);
+        loadSelect.addChangedHandler(event -> {
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            nodeLineSeriesForm.setDisabled(true);
 
-                Range r = Range.create(loadSelect.getValueAsString().charAt(0));
-                controller.setRuntimeRRDRange(r, "AverageActivity");
-            }
+            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r, "AverageActivity");
         });
 
         loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
