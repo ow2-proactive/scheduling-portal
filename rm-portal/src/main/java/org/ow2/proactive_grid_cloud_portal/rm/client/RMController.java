@@ -355,7 +355,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void fetchStatHistory() {
         String range = "";
         String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DeployingNodesCount", "DownNodesCount",
-                                          "NumberPendingTasks", "AvailableNodesCount", "AverageActivity" };
+                                          "PendingTasksCount", "AvailableNodesCount", "AverageActivity" };
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
