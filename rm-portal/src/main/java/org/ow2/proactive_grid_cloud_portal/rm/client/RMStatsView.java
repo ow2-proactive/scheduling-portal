@@ -141,7 +141,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineBusyId = nodeLineTable.addColumn(ColumnType.NUMBER, "Busy");
         nodeLineDeployingId = nodeLineTable.addColumn(ColumnType.NUMBER, "Deploying");
         nodeLineDownId = nodeLineTable.addColumn(ColumnType.NUMBER, "Down");
-        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Pending tasks");
+        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Nodes needed");
         nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
 
         nodeLineChart = new AreaChart(nodeLineTable, nodeLineOpts);
@@ -216,7 +216,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         downIt.addChangedHandler(seriesChanged);
 
         CheckboxItem pendingIt = new CheckboxItem("pending",
-                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Pending tasks");
+                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Nodes needed");
         pendingIt.setValue(false);
         pendingIt.addChangedHandler(seriesChanged);
 
