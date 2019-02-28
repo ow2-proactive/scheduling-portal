@@ -122,16 +122,16 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     RMModelImpl() {
         super();
 
-        this.nodes = new HashMap<String, NodeSource>();
-        this.infrastructures = new HashMap<String, PluginDescriptor>();
-        this.policies = new HashMap<String, PluginDescriptor>();
-        this.requestedStatHistoryRange = new HashMap<String, Range>();
+        this.nodes = new HashMap<>();
+        this.infrastructures = new HashMap<>();
+        this.policies = new HashMap<>();
+        this.requestedStatHistoryRange = new HashMap<>();
 
-        this.logListeners = new ArrayList<LogListener>();
-        this.nodesListeners = new ArrayList<NodesListener>();
-        this.nodeSelectedListeners = new ArrayList<NodeSelectedListener>();
-        this.statsListeners = new ArrayList<StatsListener>();
-        this.statistics = new HashMap<String, StatHistory>();
+        this.logListeners = new ArrayList<>();
+        this.nodesListeners = new ArrayList<>();
+        this.nodeSelectedListeners = new ArrayList<>();
+        this.statsListeners = new ArrayList<>();
+        this.statistics = new HashMap<>();
     }
 
     @Override
@@ -324,10 +324,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     @Override
     public Range getRequestedStatHistoryRange(String source) {
-        Range r = this.requestedStatHistoryRange.get(source);
-        if (r == null)
-            return Range.MINUTE_10;
-        return r;
+        return this.requestedStatHistoryRange.getOrDefault(source, Range.MINUTE_10);
     }
 
     void setRequestedStatHistoryRange(String source, Range r) {

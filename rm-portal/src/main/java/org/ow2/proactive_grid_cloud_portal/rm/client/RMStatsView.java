@@ -73,7 +73,8 @@ public class RMStatsView implements StatsListener, NodesListener {
 
     private Options nodeLineOpts;
 
-    private int nodeLineTimeId, nodeLineFreeId, nodeLineBusyId, nodeLineDownId, nodeLineTotalId;
+    private int nodeLineTimeId, nodeLineFreeId, nodeLineBusyId, nodeLineDownId, nodeLineTotalId, linePendingTasksId,
+            nodeLineDeployingId;
 
     private DynamicForm nodeLineForm;
 
@@ -115,8 +116,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.setHeight100();
         root.setOverflow(Overflow.AUTO);
 
-        /**
-         *  Node count/state history
+        /*
+         * Node history graph
          */
         final AbsolutePanel nodeLinePane = new AbsolutePanel();
         nodeLinePane.setWidth("100%");
@@ -132,13 +133,15 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineOpts.setHAxisOptions(axisOpts);
         nodeLineOpts.setHeight(150);
         nodeLineOpts.setLegend(LegendPosition.NONE);
-        nodeLineOpts.setColors("#35a849", "#fcaf3e", "#ef2929", "#3a668d");
+        nodeLineOpts.setColors("#35a849", "#fcaf3e", "#24c1ff", "#ef2929", "#ffff00", "#3a668d");
 
         nodeLineTable = DataTable.create();
         nodeLineTimeId = nodeLineTable.addColumn(ColumnType.STRING, "Time");
         nodeLineFreeId = nodeLineTable.addColumn(ColumnType.NUMBER, "Free");
         nodeLineBusyId = nodeLineTable.addColumn(ColumnType.NUMBER, "Busy");
+        nodeLineDeployingId = nodeLineTable.addColumn(ColumnType.NUMBER, "Deploying");
         nodeLineDownId = nodeLineTable.addColumn(ColumnType.NUMBER, "Down");
+        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Nodes needed");
         nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
 
         nodeLineChart = new AreaChart(nodeLineTable, nodeLineOpts);
@@ -146,7 +149,7 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         nodeLineForm = new DynamicForm();
         final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
-        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<String, String>();
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
         for (Range r : StatHistory.Range.values()) {
             nodeLineValues.put("" + r.getChar(), r.getString());
         }
@@ -156,20 +159,19 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineForm.setHeight(24);
         nodeLineForm.setWidth(40);
 
-        nodeLineSelect.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                nodeLineForm.setDisabled(true);
-                nodeLineHeaderLabel.setIcon("loading.gif");
-                nodeLineSeriesForm.setDisabled(true);
+        nodeLineSelect.addChangedHandler(event -> {
+            nodeLineForm.setDisabled(true);
+            nodeLineHeaderLabel.setIcon("loading.gif");
+            nodeLineSeriesForm.setDisabled(true);
 
-                Range r = Range.create(nodeLineSelect.getValueAsString().charAt(0));
-                controller.setRuntimeRRDRange(r,
-                                              "FreeNodesCount",
-                                              "BusyNodesCount",
-                                              "DownNodesCount",
-                                              "AvailableNodesCount");
-            }
+            Range r = Range.create(nodeLineSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r,
+                                          "FreeNodesCount",
+                                          "BusyNodesCount",
+                                          "DeployingNodesCount",
+                                          "DownNodesCount",
+                                          "PendingTasksCount",
+                                          "AvailableNodesCount");
         });
 
         nodeLineHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes History<nobr>");
@@ -182,14 +184,11 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineHeader.setHeight(24);
         nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
 
-        ChangedHandler seriesChanged = new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                nodeLineSeriesForm.setDisabled(true);
-                loadForm.setDisabled(true);
-                loadHeaderLabel.setIcon("loading.gif");
-                RMStatsView.this.statsUpdated(controller.getModel().getStatHistory());
-            }
+        ChangedHandler seriesChanged = event -> {
+            nodeLineSeriesForm.setDisabled(true);
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            RMStatsView.this.statsUpdated(controller.getModel().getStatHistory());
         };
 
         this.nodeLineSeriesForm = new DynamicForm();
@@ -200,22 +199,35 @@ public class RMStatsView implements StatsListener, NodesListener {
                                                "<span style='background:#35a849;'>&nbsp;&nbsp;&nbsp;</span> Free");
         freeIt.setValue(true);
         freeIt.addChangedHandler(seriesChanged);
+
         CheckboxItem busyIt = new CheckboxItem("busy",
                                                "<span style='background:#fcaf3e;'>&nbsp;&nbsp;&nbsp;</span> Busy");
         busyIt.setValue(true);
         busyIt.addChangedHandler(seriesChanged);
+
+        CheckboxItem deployingIt = new CheckboxItem("deploying",
+                                                    "<span style='background:#24c1ff;'>&nbsp;&nbsp;&nbsp;</span> Deploying");
+        deployingIt.setValue(false);
+        deployingIt.addChangedHandler(seriesChanged);
+
         CheckboxItem downIt = new CheckboxItem("down",
                                                "<span style='background:#ef2929;'>&nbsp;&nbsp;&nbsp;</span> Down");
         downIt.setValue(false);
         downIt.addChangedHandler(seriesChanged);
+
+        CheckboxItem pendingIt = new CheckboxItem("pending",
+                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Nodes needed");
+        pendingIt.setValue(false);
+        pendingIt.addChangedHandler(seriesChanged);
+
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
         totalIt.setValue(true);
         totalIt.addChangedHandler(seriesChanged);
-        nodeLineSeriesForm.setItems(freeIt, busyIt, downIt, totalIt);
+        nodeLineSeriesForm.setItems(freeIt, busyIt, deployingIt, downIt, pendingIt, totalIt);
 
-        /**
-         * Instantaneous node state
+        /*
+         * Instantaneous node state - Node State histogram
          */
         final AbsolutePanel nodeColPane = new AbsolutePanel();
         nodeColPane.setWidth("100%");
@@ -229,7 +241,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColHaxis.setMaxAlternation(1);
         nodeColOpts.setHAxisOptions(nodeColHaxis);
         nodeColOpts.setIsStacked(true);
-        nodeColOpts.setColors("#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
+        nodeColOpts.setColors("#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
         //nodeColOpts.set("enableInteractivity", "false");
 
         nodeColTable = DataTable.create();
@@ -248,8 +260,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
         nodeColHeaderLabel.setHeight(24);
 
-        /**
-         * Activity graph
+        /*
+         * Activity graph - Load history graph
          */
         final AbsolutePanel loadPane = new AbsolutePanel();
         loadPane.setWidth("100%");
@@ -283,16 +295,13 @@ public class RMStatsView implements StatsListener, NodesListener {
         loadForm.setHeight(24);
         loadForm.setWidth(40);
 
-        loadSelect.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                loadForm.setDisabled(true);
-                loadHeaderLabel.setIcon("loading.gif");
-                nodeLineSeriesForm.setDisabled(true);
+        loadSelect.addChangedHandler(event -> {
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            nodeLineSeriesForm.setDisabled(true);
 
-                Range r = Range.create(loadSelect.getValueAsString().charAt(0));
-                controller.setRuntimeRRDRange(r, "AverageActivity");
-            }
+            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r, "AverageActivity");
         });
 
         loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
@@ -332,7 +341,9 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         StatHistory freeNodes = values.get("FreeNodesCount");
         StatHistory busyNodes = values.get("BusyNodesCount");
+        StatHistory deployingNodes = values.get("DeployingNodesCount");
         StatHistory downNodes = values.get("DownNodesCount");
+        StatHistory pendingTasks = values.get("PendingTasksCount");
         StatHistory totalNodes = values.get("AvailableNodesCount");
 
         nodeLineTable.removeRows(0, nodeLineTable.getNumberOfRows());
@@ -354,8 +365,14 @@ public class RMStatsView implements StatsListener, NodesListener {
             if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("busy"))) {
                 nodeLineTable.setValue(i, nodeLineBusyId, Math.round(busyNodes.values.get(i)));
             }
+            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("deploying"))) {
+                nodeLineTable.setValue(i, nodeLineDeployingId, Math.round(deployingNodes.values.get(i)));
+            }
             if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("down"))) {
                 nodeLineTable.setValue(i, nodeLineDownId, Math.round(downNodes.values.get(i)));
+            }
+            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("pending"))) {
+                nodeLineTable.setValue(i, linePendingTasksId, Math.round(pendingTasks.values.get(i)));
             }
             if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("total"))) {
                 nodeLineTable.setValue(i, nodeLineTotalId, Math.round(totalNodes.values.get(i)));
