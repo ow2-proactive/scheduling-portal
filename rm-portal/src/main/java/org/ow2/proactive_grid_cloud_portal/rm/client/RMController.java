@@ -390,7 +390,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                          for (String source : obj.keySet()) {
                                                              JSONArray arr = obj.get(source).isArray();
 
-                                                             ArrayList<Double> values = new ArrayList<Double>();
+                                                             List<Double> values = new ArrayList<>();
                                                              for (int i = 0; i < arr.size(); i++) {
                                                                  JSONValue dval = arr.get(i);
                                                                  if (dval.isNumber() != null) {
@@ -400,6 +400,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                                  }
 
                                                              }
+
+                                                             if (source.equals("PendingTasksCount")) {
+                                                                 final Double lastValue = values.get(values.size() - 1);
+                                                                 if (0 <= lastValue && !lastValue.isNaN()) {
+                                                                     model.setNumNeeded(lastValue.intValue());
+                                                                 } else {
+                                                                     model.setNumNeeded(0);
+                                                                 }
+                                                             }
+
                                                              StatHistory st = new StatHistory(source,
                                                                                               values,
                                                                                               model.getRequestedStatHistoryRange(source));

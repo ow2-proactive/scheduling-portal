@@ -119,6 +119,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private long maxCounter = -1;
 
+    private int pendingTasksCount = 0;
+
     RMModelImpl() {
         super();
 
@@ -424,6 +426,16 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     @Override
     public int getNumUndeployedNodeSources() {
         return this.numUndeployedNodeSources;
+    }
+
+    @Override
+    public int getNumNeeded() {
+        return this.pendingTasksCount;
+    }
+
+    @Override
+    public void setNumNeeded(int pendingTasksCount) {
+        this.pendingTasksCount = pendingTasksCount;
     }
 
     @Override
