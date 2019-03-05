@@ -159,4 +159,8 @@ public abstract class RMModel implements Model {
      */
     public abstract int getNumUndeployedNodeSources();
 
+    public abstract int getNumNeeded();
+
+    public abstract void setNumNeeded(int lastValue);
+
 }

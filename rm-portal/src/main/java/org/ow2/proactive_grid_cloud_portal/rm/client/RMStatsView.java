@@ -141,7 +141,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineBusyId = nodeLineTable.addColumn(ColumnType.NUMBER, "Busy");
         nodeLineDeployingId = nodeLineTable.addColumn(ColumnType.NUMBER, "Deploying");
         nodeLineDownId = nodeLineTable.addColumn(ColumnType.NUMBER, "Down");
-        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Nodes needed");
+        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Needed");
         nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
 
         nodeLineChart = new AreaChart(nodeLineTable, nodeLineOpts);
@@ -193,38 +193,45 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         this.nodeLineSeriesForm = new DynamicForm();
         nodeLineSeriesForm.setHeight(24);
-        nodeLineSeriesForm.setNumCols(8);
+        nodeLineSeriesForm.setNumCols(12);
         nodeLineSeriesForm.setWidth(300);
         CheckboxItem freeIt = new CheckboxItem("free",
                                                "<span style='background:#35a849;'>&nbsp;&nbsp;&nbsp;</span> Free");
         freeIt.setValue(true);
+        freeIt.setWidth(120);
         freeIt.addChangedHandler(seriesChanged);
 
         CheckboxItem busyIt = new CheckboxItem("busy",
                                                "<span style='background:#fcaf3e;'>&nbsp;&nbsp;&nbsp;</span> Busy");
         busyIt.setValue(true);
+        busyIt.setWidth(120);
         busyIt.addChangedHandler(seriesChanged);
 
         CheckboxItem deployingIt = new CheckboxItem("deploying",
                                                     "<span style='background:#24c1ff;'>&nbsp;&nbsp;&nbsp;</span> Deploying");
-        deployingIt.setValue(false);
+        deployingIt.setValue(true);
+        deployingIt.setWidth(120);
         deployingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem downIt = new CheckboxItem("down",
                                                "<span style='background:#ef2929;'>&nbsp;&nbsp;&nbsp;</span> Down");
         downIt.setValue(false);
+        downIt.setWidth(120);
         downIt.addChangedHandler(seriesChanged);
 
         CheckboxItem pendingIt = new CheckboxItem("pending",
-                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Nodes needed");
-        pendingIt.setValue(false);
+                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Needed");
+        pendingIt.setValue(true);
+        pendingIt.setWidth(120);
+        pendingIt.setTooltip("Number of total Nodes needed for pending tasks ready to execute and that does not have an appropriate Node(s) to execute.");
         pendingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
         totalIt.setValue(true);
+        totalIt.setWidth(120);
         totalIt.addChangedHandler(seriesChanged);
-        nodeLineSeriesForm.setItems(freeIt, busyIt, deployingIt, downIt, pendingIt, totalIt);
+        nodeLineSeriesForm.setItems(totalIt, freeIt, pendingIt, busyIt, deployingIt, downIt);
 
         /*
          * Instantaneous node state - Node State histogram
@@ -241,13 +248,22 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColHaxis.setMaxAlternation(1);
         nodeColOpts.setHAxisOptions(nodeColHaxis);
         nodeColOpts.setIsStacked(true);
-        nodeColOpts.setColors("#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
+        nodeColOpts.setColors("#3a668d",
+                              "#35a849",
+                              "#ffff00",
+                              "#fcaf3e",
+                              "#24c1ff",
+                              "#24c1ff",
+                              "#1e4ed7",
+                              "#ef2929",
+                              "#000000");
         //nodeColOpts.set("enableInteractivity", "false");
 
         nodeColTable = DataTable.create();
         nodeColTable.addColumn(ColumnType.STRING, "State");
         nodeColTable.addColumn(ColumnType.NUMBER, "Total");
         nodeColTable.addColumn(ColumnType.NUMBER, "Free");
+        nodeColTable.addColumn(ColumnType.NUMBER, "Needed");
         nodeColTable.addColumn(ColumnType.NUMBER, "Busy");
         nodeColTable.addColumn(ColumnType.NUMBER, "Deploying");
         nodeColTable.addColumn(ColumnType.NUMBER, "Configuring");
@@ -411,9 +427,10 @@ public class RMStatsView implements StatsListener, NodesListener {
         int down = controller.getModel().getNumDown();
         int lost = controller.getModel().getNumLost();
         int total = controller.getModel().getNumNodes();
+        int needed = controller.getModel().getNumNeeded();
 
         nodeColTable.removeRows(0, nodeColTable.getNumberOfRows());
-        nodeColTable.addRows(7);
+        nodeColTable.addRows(8);
 
         nodeColTable.setValue(0, 0, "Total");
         nodeColTable.setValue(0, 1, total);
@@ -421,20 +438,23 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColTable.setValue(1, 0, "Free");
         nodeColTable.setValue(1, 2, free);
 
-        nodeColTable.setValue(2, 0, "Busy");
-        nodeColTable.setValue(2, 3, busy);
+        nodeColTable.setValue(2, 0, "Needed");
+        nodeColTable.setValue(2, 3, needed);
 
-        nodeColTable.setValue(3, 0, "Deploying");
-        nodeColTable.setValue(3, 4, depl);
+        nodeColTable.setValue(3, 0, "Busy");
+        nodeColTable.setValue(3, 4, busy);
 
-        nodeColTable.setValue(4, 0, "Configuring");
-        nodeColTable.setValue(4, 5, conf);
+        nodeColTable.setValue(4, 0, "Deploying");
+        nodeColTable.setValue(4, 5, depl);
 
-        nodeColTable.setValue(5, 0, "Down");
-        nodeColTable.setValue(5, 6, down);
+        nodeColTable.setValue(5, 0, "Configuring");
+        nodeColTable.setValue(5, 6, conf);
 
-        nodeColTable.setValue(6, 0, "Lost");
-        nodeColTable.setValue(6, 7, lost);
+        nodeColTable.setValue(6, 0, "Down");
+        nodeColTable.setValue(6, 7, down);
+
+        nodeColTable.setValue(7, 0, "Lost");
+        nodeColTable.setValue(7, 8, lost);
 
         nodeColChart.draw(nodeColTable, nodeColOpts);
 
