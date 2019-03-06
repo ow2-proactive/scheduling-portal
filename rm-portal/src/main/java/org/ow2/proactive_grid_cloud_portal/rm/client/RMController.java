@@ -357,7 +357,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         // this 'sources' set order in which we request the fields,
         // it should be the same as in scheduling RMRest::dataSources
-        // PS: "PendingTasksCount" correspon to "Needed" nodes.
+        // PS: "PendingTasksCount" corresponds to "Needed" nodes.
         String[] sources = new String[] { "AvailableNodesCount", "FreeNodesCount", "PendingTasksCount",
                                           "BusyNodesCount", "DeployingNodesCount", "ConfigNodesCount", "DownNodesCount",
                                           "LostNodesCount", "AverageActivity" };

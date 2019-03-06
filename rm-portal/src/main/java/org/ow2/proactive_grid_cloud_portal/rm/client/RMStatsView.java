@@ -200,53 +200,55 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineSeriesForm.setHeight(24);
         nodeLineSeriesForm.setNumCols(16);
         nodeLineSeriesForm.setWidth(300);
+
+        final int widthOfCheckbox = 90;
         CheckboxItem freeIt = new CheckboxItem("free",
                                                "<span style='background:#35a849;'>&nbsp;&nbsp;&nbsp;</span> Free");
         freeIt.setValue(true);
-        freeIt.setWidth(90);
+        freeIt.setWidth(widthOfCheckbox);
         freeIt.addChangedHandler(seriesChanged);
 
         CheckboxItem busyIt = new CheckboxItem("busy",
                                                "<span style='background:#fcaf3e;'>&nbsp;&nbsp;&nbsp;</span> Busy");
         busyIt.setValue(true);
-        busyIt.setWidth(90);
+        busyIt.setWidth(widthOfCheckbox);
         busyIt.addChangedHandler(seriesChanged);
 
         CheckboxItem deployingIt = new CheckboxItem("deploying",
                                                     "<span style='background:#24c1ff;'>&nbsp;&nbsp;&nbsp;</span> Deploying");
         deployingIt.setValue(true);
-        deployingIt.setWidth(90);
+        deployingIt.setWidth(widthOfCheckbox);
         deployingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem downIt = new CheckboxItem("down",
                                                "<span style='background:#ef2929;'>&nbsp;&nbsp;&nbsp;</span> Down");
         downIt.setValue(false);
-        downIt.setWidth(90);
+        downIt.setWidth(widthOfCheckbox);
         downIt.addChangedHandler(seriesChanged);
 
         CheckboxItem pendingIt = new CheckboxItem("pending",
                                                   "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Needed");
         pendingIt.setValue(true);
-        pendingIt.setWidth(90);
+        pendingIt.setWidth(widthOfCheckbox);
         pendingIt.setTooltip("Number of total Nodes needed for pending tasks ready to execute and that does not have an appropriate Node(s) to execute.");
         pendingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
         totalIt.setValue(true);
-        totalIt.setWidth(90);
+        totalIt.setWidth(widthOfCheckbox);
         totalIt.addChangedHandler(seriesChanged);
 
         CheckboxItem configuringIt = new CheckboxItem("configuring",
                                                       "<span style='background:#1e4ed7;'>&nbsp;&nbsp;&nbsp;</span> Configuring");
         configuringIt.setValue(false);
-        configuringIt.setWidth(90);
+        configuringIt.setWidth(widthOfCheckbox);
         configuringIt.addChangedHandler(seriesChanged);
 
         CheckboxItem lostIt = new CheckboxItem("lost",
                                                "<span style='background:#000000;'>&nbsp;&nbsp;&nbsp;</span> Lost");
         lostIt.setValue(false);
-        lostIt.setWidth(90);
+        lostIt.setWidth(widthOfCheckbox);
         lostIt.addChangedHandler(seriesChanged);
 
         nodeLineSeriesForm.setItems(totalIt, freeIt, pendingIt, busyIt, deployingIt, configuringIt, downIt, lostIt);
