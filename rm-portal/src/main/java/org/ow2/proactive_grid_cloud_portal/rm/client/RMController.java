@@ -354,8 +354,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DeployingNodesCount", "DownNodesCount",
-                                          "PendingTasksCount", "AvailableNodesCount", "AverageActivity" };
+
+        // this 'sources' set order in which we request the fields,
+        // it should be the same as in scheduling RMRest::dataSources
+        // PS: "PendingTasksCount" correspon to "Needed" nodes.
+        String[] sources = new String[] { "AvailableNodesCount", "FreeNodesCount", "PendingTasksCount",
+                                          "BusyNodesCount", "DeployingNodesCount", "ConfigNodesCount", "DownNodesCount",
+                                          "LostNodesCount", "AverageActivity" };
+
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {

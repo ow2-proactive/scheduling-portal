@@ -74,7 +74,7 @@ public class RMStatsView implements StatsListener, NodesListener {
     private Options nodeLineOpts;
 
     private int nodeLineTimeId, nodeLineFreeId, nodeLineBusyId, nodeLineDownId, nodeLineTotalId, linePendingTasksId,
-            nodeLineDeployingId;
+            nodeLineDeployingId, nodeLineConfiguringId, nodeLineLostId;
 
     private DynamicForm nodeLineForm;
 
@@ -133,16 +133,19 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineOpts.setHAxisOptions(axisOpts);
         nodeLineOpts.setHeight(150);
         nodeLineOpts.setLegend(LegendPosition.NONE);
-        nodeLineOpts.setColors("#35a849", "#fcaf3e", "#24c1ff", "#ef2929", "#ffff00", "#3a668d");
+        nodeLineOpts.setColors("#3a668d", "#35a849", "#ffff00", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
 
         nodeLineTable = DataTable.create();
         nodeLineTimeId = nodeLineTable.addColumn(ColumnType.STRING, "Time");
+
+        nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
         nodeLineFreeId = nodeLineTable.addColumn(ColumnType.NUMBER, "Free");
+        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Needed");
         nodeLineBusyId = nodeLineTable.addColumn(ColumnType.NUMBER, "Busy");
         nodeLineDeployingId = nodeLineTable.addColumn(ColumnType.NUMBER, "Deploying");
+        nodeLineConfiguringId = nodeLineTable.addColumn(ColumnType.NUMBER, "Configuting");
         nodeLineDownId = nodeLineTable.addColumn(ColumnType.NUMBER, "Down");
-        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Needed");
-        nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
+        nodeLineLostId = nodeLineTable.addColumn(ColumnType.NUMBER, "Lost");
 
         nodeLineChart = new AreaChart(nodeLineTable, nodeLineOpts);
         nodeLinePane.add(nodeLineChart);
@@ -170,6 +173,8 @@ public class RMStatsView implements StatsListener, NodesListener {
                                           "BusyNodesCount",
                                           "DeployingNodesCount",
                                           "DownNodesCount",
+                                          "LostNodesCount",
+                                          "ConfigNodesCount",
                                           "PendingTasksCount",
                                           "AvailableNodesCount");
         });
@@ -193,45 +198,58 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         this.nodeLineSeriesForm = new DynamicForm();
         nodeLineSeriesForm.setHeight(24);
-        nodeLineSeriesForm.setNumCols(12);
+        nodeLineSeriesForm.setNumCols(16);
         nodeLineSeriesForm.setWidth(300);
         CheckboxItem freeIt = new CheckboxItem("free",
                                                "<span style='background:#35a849;'>&nbsp;&nbsp;&nbsp;</span> Free");
         freeIt.setValue(true);
-        freeIt.setWidth(120);
+        freeIt.setWidth(90);
         freeIt.addChangedHandler(seriesChanged);
 
         CheckboxItem busyIt = new CheckboxItem("busy",
                                                "<span style='background:#fcaf3e;'>&nbsp;&nbsp;&nbsp;</span> Busy");
         busyIt.setValue(true);
-        busyIt.setWidth(120);
+        busyIt.setWidth(90);
         busyIt.addChangedHandler(seriesChanged);
 
         CheckboxItem deployingIt = new CheckboxItem("deploying",
                                                     "<span style='background:#24c1ff;'>&nbsp;&nbsp;&nbsp;</span> Deploying");
         deployingIt.setValue(true);
-        deployingIt.setWidth(120);
+        deployingIt.setWidth(90);
         deployingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem downIt = new CheckboxItem("down",
                                                "<span style='background:#ef2929;'>&nbsp;&nbsp;&nbsp;</span> Down");
         downIt.setValue(false);
-        downIt.setWidth(120);
+        downIt.setWidth(90);
         downIt.addChangedHandler(seriesChanged);
 
         CheckboxItem pendingIt = new CheckboxItem("pending",
                                                   "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Needed");
         pendingIt.setValue(true);
-        pendingIt.setWidth(120);
+        pendingIt.setWidth(90);
         pendingIt.setTooltip("Number of total Nodes needed for pending tasks ready to execute and that does not have an appropriate Node(s) to execute.");
         pendingIt.addChangedHandler(seriesChanged);
 
         CheckboxItem totalIt = new CheckboxItem("total",
                                                 "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
         totalIt.setValue(true);
-        totalIt.setWidth(120);
+        totalIt.setWidth(90);
         totalIt.addChangedHandler(seriesChanged);
-        nodeLineSeriesForm.setItems(totalIt, freeIt, pendingIt, busyIt, deployingIt, downIt);
+
+        CheckboxItem configuringIt = new CheckboxItem("configuring",
+                                                      "<span style='background:#1e4ed7;'>&nbsp;&nbsp;&nbsp;</span> Configuring");
+        configuringIt.setValue(false);
+        configuringIt.setWidth(90);
+        configuringIt.addChangedHandler(seriesChanged);
+
+        CheckboxItem lostIt = new CheckboxItem("lost",
+                                               "<span style='background:#000000;'>&nbsp;&nbsp;&nbsp;</span> Lost");
+        lostIt.setValue(false);
+        lostIt.setWidth(90);
+        lostIt.addChangedHandler(seriesChanged);
+
+        nodeLineSeriesForm.setItems(totalIt, freeIt, pendingIt, busyIt, deployingIt, configuringIt, downIt, lostIt);
 
         /*
          * Instantaneous node state - Node State histogram
@@ -361,6 +379,8 @@ public class RMStatsView implements StatsListener, NodesListener {
         StatHistory downNodes = values.get("DownNodesCount");
         StatHistory pendingTasks = values.get("PendingTasksCount");
         StatHistory totalNodes = values.get("AvailableNodesCount");
+        StatHistory configuringNodes = values.get("ConfigNodesCount");
+        StatHistory lostNodes = values.get("LostNodesCount");
 
         nodeLineTable.removeRows(0, nodeLineTable.getNumberOfRows());
         nodeLineTable.addRows(freeNodes.values.size());
@@ -393,6 +413,13 @@ public class RMStatsView implements StatsListener, NodesListener {
             if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("total"))) {
                 nodeLineTable.setValue(i, nodeLineTotalId, Math.round(totalNodes.values.get(i)));
             }
+            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("configuring"))) {
+                nodeLineTable.setValue(i, nodeLineConfiguringId, Math.round(configuringNodes.values.get(i)));
+            }
+            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("lost"))) {
+                nodeLineTable.setValue(i, nodeLineLostId, Math.round(lostNodes.values.get(i)));
+            }
+
         }
         nodeLineChart.draw(nodeLineTable, nodeLineOpts);
         nodeLineForm.setDisabled(false);
