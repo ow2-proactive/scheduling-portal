@@ -107,7 +107,7 @@ public class StatisticsView implements NodesListener {
         return root;
     }
 
-    private ListGridRecord createListGridRecord(String status, String type, ImageResource icon, int count) {
+    private ListGridRecord createListGridRecord(String status, String type, int count, ImageResource icon) {
         ListGridRecord listGridRecord = createListGridRecord(status, type, count);
         listGridRecord.setAttribute("icon", icon.getSafeUri().asString());
         return listGridRecord;
@@ -128,23 +128,23 @@ public class StatisticsView implements NodesListener {
         int index = 0;
 
         r[index++] = createListGridRecord("Total", "Nodes", controller.getModel().getNumNodes());
-        r[index++] = createListGridRecord("Free", "Nodes", instance.node_free_16(), controller.getModel().getNumFree());
+        r[index++] = createListGridRecord("Free", "Nodes", controller.getModel().getNumFree(), instance.node_free_16());
         r[index++] = createListGridRecord("Needed", "Nodes", controller.getModel().getNumNeeded());
-        r[index++] = createListGridRecord("Busy", "Nodes", instance.node_busy_16(), controller.getModel().getNumBusy());
+        r[index++] = createListGridRecord("Busy", "Nodes", controller.getModel().getNumBusy(), instance.node_busy_16());
         r[index++] = createListGridRecord("To be released",
                                           "Nodes",
-                                          instance.node_torelease_16(),
-                                          controller.getModel().getNumToBeRemoved());
+                                          controller.getModel().getNumToBeRemoved(),
+                                          instance.node_torelease_16());
         r[index++] = createListGridRecord("Deploying",
                                           "Nodes",
-                                          instance.node_deploying_16(),
-                                          controller.getModel().getNumDeploying());
+                                          controller.getModel().getNumDeploying(),
+                                          instance.node_deploying_16());
         r[index++] = createListGridRecord("Configuring",
                                           "Nodes",
-                                          instance.node_configuring_16(),
-                                          controller.getModel().getNumConfiguring());
-        r[index++] = createListGridRecord("Down", "Nodes", instance.node_down_16(), controller.getModel().getNumDown());
-        r[index++] = createListGridRecord("Lost", "Nodes", instance.node_lost_16(), controller.getModel().getNumLost());
+                                          controller.getModel().getNumConfiguring(),
+                                          instance.node_configuring_16());
+        r[index++] = createListGridRecord("Down", "Nodes", controller.getModel().getNumDown(), instance.node_down_16());
+        r[index++] = createListGridRecord("Lost", "Nodes", controller.getModel().getNumLost(), instance.node_lost_16());
 
         ListGridRecord aliveLimit = new ListGridRecord();
         aliveLimit.setAttribute("status", "Node limit");
@@ -158,26 +158,26 @@ public class StatisticsView implements NodesListener {
 
         r[index++] = createListGridRecord("Nodes locked",
                                           "Nodes",
-                                          instance.padlock(),
-                                          controller.getModel().getNumLocked());
+                                          controller.getModel().getNumLocked(),
+                                          instance.padlock());
 
         r[index++] = createListGridRecord("Physical",
                                           "Hosts",
-                                          instance.host_16(),
-                                          controller.getModel().getNumPhysicalHosts());
+                                          controller.getModel().getNumPhysicalHosts(),
+                                          instance.host_16());
         r[index++] = createListGridRecord("Virtual",
                                           "Hosts",
-                                          instance.host_virtual_16(),
-                                          controller.getModel().getNumVirtualHosts());
+                                          controller.getModel().getNumVirtualHosts(),
+                                          instance.host_virtual_16());
 
         r[index++] = createListGridRecord("Deployed",
                                           "Node Sources",
-                                          instance.nodesource_deployed(),
-                                          controller.getModel().getNumDeployedNodeSources());
+                                          controller.getModel().getNumDeployedNodeSources(),
+                                          instance.nodesource_deployed());
         r[index++] = createListGridRecord("Undeployed",
                                           "Node Sources",
-                                          instance.nodesource_undeployed(),
-                                          controller.getModel().getNumUndeployedNodeSources());
+                                          controller.getModel().getNumUndeployedNodeSources(),
+                                          instance.nodesource_undeployed());
 
         this.grid.setData(r);
     }
