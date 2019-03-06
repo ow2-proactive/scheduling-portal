@@ -25,10 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.RMImages.instance;
+
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
+import com.google.gwt.resources.client.ImageResource;
 import com.smartgwt.client.types.GroupStartOpen;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.widgets.Canvas;
@@ -104,64 +107,44 @@ public class StatisticsView implements NodesListener {
         return root;
     }
 
+    private ListGridRecord createListGridRecord(String status, String type, int count, ImageResource icon) {
+        ListGridRecord listGridRecord = createListGridRecord(status, type, count);
+        listGridRecord.setAttribute("icon", icon.getSafeUri().asString());
+        return listGridRecord;
+    }
+
+    private ListGridRecord createListGridRecord(String status, String type, int count) {
+        ListGridRecord listGridRecord = new ListGridRecord();
+        listGridRecord.setAttribute("status", status);
+        listGridRecord.setAttribute("type", type);
+        listGridRecord.setAttribute("count", count);
+        return listGridRecord;
+    }
+
     public void nodesUpdated(Map<String, NodeSource> nodes) {
 
         ListGridRecord[] r = new ListGridRecord[14];
 
-        ListGridRecord r1 = new ListGridRecord();
-        r1.setAttribute("status", "Deploying");
-        r1.setAttribute("type", "Nodes");
-        r1.setAttribute("icon", RMImages.instance.node_deploying_16().getSafeUri().asString());
-        r1.setAttribute("count", controller.getModel().getNumDeploying());
-        r[0] = r1;
+        int index = 0;
 
-        ListGridRecord r2 = new ListGridRecord();
-        r2.setAttribute("status", "Lost");
-        r2.setAttribute("type", "Nodes");
-        r2.setAttribute("icon", RMImages.instance.node_lost_16().getSafeUri().asString());
-        r2.setAttribute("count", controller.getModel().getNumLost());
-        r[1] = r2;
-
-        ListGridRecord r3 = new ListGridRecord();
-        r3.setAttribute("status", "Configuring");
-        r3.setAttribute("type", "Nodes");
-        r3.setAttribute("icon", RMImages.instance.node_configuring_16().getSafeUri().asString());
-        r3.setAttribute("count", controller.getModel().getNumConfiguring());
-        r[2] = r3;
-
-        ListGridRecord r4 = new ListGridRecord();
-        r4.setAttribute("status", "Free");
-        r4.setAttribute("type", "Nodes");
-        r4.setAttribute("icon", RMImages.instance.node_free_16().getSafeUri().asString());
-        r4.setAttribute("count", controller.getModel().getNumFree());
-        r[3] = r4;
-
-        ListGridRecord r5 = new ListGridRecord();
-        r5.setAttribute("status", "Busy");
-        r5.setAttribute("type", "Nodes");
-        r5.setAttribute("icon", RMImages.instance.node_busy_16().getSafeUri().asString());
-        r5.setAttribute("count", controller.getModel().getNumBusy());
-        r[4] = r5;
-
-        ListGridRecord r6 = new ListGridRecord();
-        r6.setAttribute("status", "To be released");
-        r6.setAttribute("type", "Nodes");
-        r6.setAttribute("icon", RMImages.instance.node_torelease_16().getSafeUri().asString());
-        r6.setAttribute("count", controller.getModel().getNumToBeRemoved());
-        r[5] = r6;
-
-        ListGridRecord r7 = new ListGridRecord();
-        r7.setAttribute("status", "Down");
-        r7.setAttribute("type", "Nodes");
-        r7.setAttribute("icon", RMImages.instance.node_down_16().getSafeUri().asString());
-        r7.setAttribute("count", controller.getModel().getNumDown());
-        r[6] = r7;
-
-        ListGridRecord r8 = new ListGridRecord();
-        r8.setAttribute("status", "Total");
-        r8.setAttribute("type", "Nodes");
-        r8.setAttribute("count", controller.getModel().getNumNodes());
-        r[7] = r8;
+        r[index++] = createListGridRecord("Total", "Nodes", controller.getModel().getNumNodes());
+        r[index++] = createListGridRecord("Free", "Nodes", controller.getModel().getNumFree(), instance.node_free_16());
+        r[index++] = createListGridRecord("Needed", "Nodes", controller.getModel().getNumNeeded());
+        r[index++] = createListGridRecord("Busy", "Nodes", controller.getModel().getNumBusy(), instance.node_busy_16());
+        r[index++] = createListGridRecord("To be released",
+                                          "Nodes",
+                                          controller.getModel().getNumToBeRemoved(),
+                                          instance.node_torelease_16());
+        r[index++] = createListGridRecord("Deploying",
+                                          "Nodes",
+                                          controller.getModel().getNumDeploying(),
+                                          instance.node_deploying_16());
+        r[index++] = createListGridRecord("Configuring",
+                                          "Nodes",
+                                          controller.getModel().getNumConfiguring(),
+                                          instance.node_configuring_16());
+        r[index++] = createListGridRecord("Down", "Nodes", controller.getModel().getNumDown(), instance.node_down_16());
+        r[index++] = createListGridRecord("Lost", "Nodes", controller.getModel().getNumLost(), instance.node_lost_16());
 
         ListGridRecord aliveLimit = new ListGridRecord();
         aliveLimit.setAttribute("status", "Node limit");
@@ -171,42 +154,30 @@ public class StatisticsView implements NodesListener {
         } else {
             aliveLimit.setAttribute("count", "None");
         }
-        r[8] = aliveLimit;
+        r[index++] = aliveLimit;
 
-        ListGridRecord nodesLocked = new ListGridRecord();
-        nodesLocked.setAttribute("status", "Nodes locked");
-        nodesLocked.setAttribute("type", "Nodes");
-        nodesLocked.setAttribute("icon", RMImages.instance.padlock().getSafeUri().asString());
-        nodesLocked.setAttribute("count", controller.getModel().getNumLocked());
-        r[9] = nodesLocked;
+        r[index++] = createListGridRecord("Nodes locked",
+                                          "Nodes",
+                                          controller.getModel().getNumLocked(),
+                                          instance.padlock());
 
-        ListGridRecord r10 = new ListGridRecord();
-        r10.setAttribute("status", "Physical");
-        r10.setAttribute("type", "Hosts");
-        r10.setAttribute("icon", RMImages.instance.host_16().getSafeUri().asString());
-        r10.setAttribute("count", controller.getModel().getNumPhysicalHosts());
-        r[10] = r10;
+        r[index++] = createListGridRecord("Physical",
+                                          "Hosts",
+                                          controller.getModel().getNumPhysicalHosts(),
+                                          instance.host_16());
+        r[index++] = createListGridRecord("Virtual",
+                                          "Hosts",
+                                          controller.getModel().getNumVirtualHosts(),
+                                          instance.host_virtual_16());
 
-        ListGridRecord r11 = new ListGridRecord();
-        r11.setAttribute("status", "Virtual");
-        r11.setAttribute("type", "Hosts");
-        r11.setAttribute("icon", RMImages.instance.host_virtual_16().getSafeUri().asString());
-        r11.setAttribute("count", controller.getModel().getNumVirtualHosts());
-        r[11] = r11;
-
-        ListGridRecord r12 = new ListGridRecord();
-        r12.setAttribute("status", "Deployed");
-        r12.setAttribute("type", "Node Sources");
-        r12.setAttribute("icon", RMImages.instance.nodesource_deployed().getSafeUri().asString());
-        r12.setAttribute("count", controller.getModel().getNumDeployedNodeSources());
-        r[12] = r12;
-
-        ListGridRecord r13 = new ListGridRecord();
-        r13.setAttribute("status", "Undeployed");
-        r13.setAttribute("type", "Node Sources");
-        r13.setAttribute("icon", RMImages.instance.nodesource_undeployed().getSafeUri().asString());
-        r13.setAttribute("count", controller.getModel().getNumUndeployedNodeSources());
-        r[13] = r13;
+        r[index++] = createListGridRecord("Deployed",
+                                          "Node Sources",
+                                          controller.getModel().getNumDeployedNodeSources(),
+                                          instance.nodesource_deployed());
+        r[index++] = createListGridRecord("Undeployed",
+                                          "Node Sources",
+                                          controller.getModel().getNumUndeployedNodeSources(),
+                                          instance.nodesource_undeployed());
 
         this.grid.setData(r);
     }

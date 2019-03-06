@@ -440,7 +440,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     @Override
     public int getNumNodes() {
-        return numFree + numBusy + numDown;
+        return numFree + numConfiguring + numDeploying + numLost + numBusy + numDown + numToBeRemoved;
     }
 
     void setNumDeploying(int numDeploying) {
