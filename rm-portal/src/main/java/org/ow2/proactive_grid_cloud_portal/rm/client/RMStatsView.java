@@ -174,7 +174,7 @@ public class RMStatsView implements StatsListener, NodesListener {
                                           "DeployingNodesCount",
                                           "DownNodesCount",
                                           "LostNodesCount",
-                                          "ConfigNodesCount",
+                                          "ConfiguringNodesCount",
                                           "PendingTasksCount",
                                           "AvailableNodesCount");
         });
@@ -381,7 +381,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         StatHistory downNodes = values.get("DownNodesCount");
         StatHistory pendingTasks = values.get("PendingTasksCount");
         StatHistory totalNodes = values.get("AvailableNodesCount");
-        StatHistory configuringNodes = values.get("ConfigNodesCount");
+        StatHistory configuringNodes = values.get("ConfiguringNodesCount");
         StatHistory lostNodes = values.get("LostNodesCount");
 
         nodeLineTable.removeRows(0, nodeLineTable.getNumberOfRows());
