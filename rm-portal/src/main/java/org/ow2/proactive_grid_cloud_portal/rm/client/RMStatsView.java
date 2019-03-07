@@ -199,7 +199,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         this.nodeLineSeriesForm = new DynamicForm();
         nodeLineSeriesForm.setHeight(24);
         nodeLineSeriesForm.setNumCols(16);
-        nodeLineSeriesForm.setWidth(300);
+        nodeLineSeriesForm.setWidth100();
 
         final int widthOfCheckbox = 90;
         CheckboxItem freeIt = new CheckboxItem("free",
