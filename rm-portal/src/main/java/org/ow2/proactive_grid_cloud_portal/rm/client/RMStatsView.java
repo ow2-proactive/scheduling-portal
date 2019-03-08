@@ -268,15 +268,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColHaxis.setMaxAlternation(1);
         nodeColOpts.setHAxisOptions(nodeColHaxis);
         nodeColOpts.setIsStacked(true);
-        nodeColOpts.setColors("#3a668d",
-                              "#35a849",
-                              "#ffff00",
-                              "#fcaf3e",
-                              "#24c1ff",
-                              "#24c1ff",
-                              "#1e4ed7",
-                              "#ef2929",
-                              "#000000");
+        nodeColOpts.setColors("#3a668d", "#35a849", "#ffff00", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
         //nodeColOpts.set("enableInteractivity", "false");
 
         nodeColTable = DataTable.create();
