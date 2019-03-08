@@ -273,7 +273,6 @@ public class RMStatsView implements StatsListener, NodesListener {
                               "#ffff00",
                               "#fcaf3e",
                               "#24c1ff",
-                              "#24c1ff",
                               "#1e4ed7",
                               "#ef2929",
                               "#000000");
