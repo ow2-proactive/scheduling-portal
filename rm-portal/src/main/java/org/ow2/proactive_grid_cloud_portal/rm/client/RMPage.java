@@ -288,7 +288,7 @@ public class RMPage implements LogListener {
     }
 
     private ToolStrip buildLogoStrip() {
-        final Label resourcesLabel = new Label("Proactive Resource Manager");
+        final Label resourcesLabel = new Label("ProActive Resource Manager");
         resourcesLabel.setStyleName("rmHeadline");
         resourcesLabel.setHeight100();
         resourcesLabel.setAutoWidth();
