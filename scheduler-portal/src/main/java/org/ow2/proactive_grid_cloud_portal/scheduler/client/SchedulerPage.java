@@ -623,8 +623,15 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 LOGGER.warning("Unexpected scheduler status");
                 break;
         }
+
         // Update the scheduler status label
-        schedulerStatusLabel.setContents("Status:" + status.name());
+
+        String neededNodes = "0";
+        if (controller.getModel().getSchedulerStatistics() != null) {
+            neededNodes = controller.getModel().getSchedulerStatistics().get("NeededNodes");
+        }
+
+        schedulerStatusLabel.setContents("Status:" + status.name() + " Needed nodes:" + neededNodes);
         this.adminMenu.redraw();
     }
 
