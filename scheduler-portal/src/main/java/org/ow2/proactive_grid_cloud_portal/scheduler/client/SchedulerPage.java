@@ -507,7 +507,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         schedulerStatusLabel = new Label(SchedulerStatus.STARTED.name());
         schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedulerStatusLabel.setIconSize(20);
-        schedulerStatusLabel.setSize("105%", "105%");
+        schedulerStatusLabel.setSize("180%", "105%");
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
@@ -633,8 +633,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             pendingEligibleTasks = controller.getModel().getSchedulerStatistics().get("PendingEligibleTasks");
         }
 
-        schedulerStatusLabel.setContents("Status:" + status.name() + " Needed nodes:" + neededNodes +
-                                         " Pending Eligible Tasls:" + pendingEligibleTasks);
+        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed nodes:" + neededNodes +
+                                         "<br>Pending Eligible Tasls:" + pendingEligibleTasks);
         this.adminMenu.redraw();
     }
 
