@@ -633,8 +633,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             pendingEligibleTasks = controller.getModel().getSchedulerStatistics().get("PendingEligibleTasks");
         }
 
-        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed nodes:" + neededNodes +
-                                         "<br>Pending Eligible Tasls:" + pendingEligibleTasks);
+        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes +
+                                         "<br>Pending Eligible Tasks:" + pendingEligibleTasks);
         this.adminMenu.redraw();
     }
 
