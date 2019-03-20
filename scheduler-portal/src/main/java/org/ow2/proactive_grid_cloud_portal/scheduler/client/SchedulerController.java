@@ -615,6 +615,8 @@ public class SchedulerController extends Controller implements UncaughtException
                             stats.put("TotalJobsCount", json.get("TotalJobsCount").isString().stringValue());
                             stats.put("PendingJobsCount", json.get("PendingJobsCount").isString().stringValue());
                             stats.put("NeededNodes", json.get("NeededNodes").isString().stringValue());
+                            stats.put("PendingEligibleTasks",
+                                      json.get("PendingEligibleTasks").isString().stringValue());
 
                             model.setSchedulerStatistics(stats);
 
