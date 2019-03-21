@@ -358,9 +358,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         // this 'sources' set order in which we request the fields,
         // it should be the same as in scheduling RMRest::dataSources
         // PS: "PendingTasksCount" corresponds to "Needed" nodes.
-        String[] sources = new String[] { "AvailableNodesCount", "FreeNodesCount", "PendingTasksCount",
-                                          "BusyNodesCount", "DeployingNodesCount", "ConfigNodesCount", "DownNodesCount",
-                                          "LostNodesCount", "AverageActivity" };
+        String[] sources = new String[] { "AvailableNodesCount", "FreeNodesCount", "NeededNodesCount", "BusyNodesCount",
+                                          "DeployingNodesCount", "ConfigNodesCount", "DownNodesCount", "LostNodesCount",
+                                          "AverageActivity" };
 
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
@@ -407,12 +407,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                                                              }
 
-                                                             if (source.equals("PendingTasksCount")) {
+                                                             if (source.equals("NeededNodes")) {
                                                                  final Double lastValue = values.get(values.size() - 1);
                                                                  if (0 <= lastValue && !lastValue.isNaN()) {
-                                                                     model.setNumNeeded(lastValue.intValue());
+                                                                     model.setNeededNodes(lastValue.intValue());
                                                                  } else {
-                                                                     model.setNumNeeded(0);
+                                                                     model.setNeededNodes(0);
                                                                  }
                                                              }
 

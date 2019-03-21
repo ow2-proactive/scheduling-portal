@@ -50,7 +50,6 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -175,7 +174,7 @@ public class RMStatsView implements StatsListener, NodesListener {
                                           "DownNodesCount",
                                           "LostNodesCount",
                                           "ConfigNodesCount",
-                                          "PendingTasksCount",
+                                          "NeededNodesCount",
                                           "AvailableNodesCount");
         });
 
@@ -371,7 +370,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         StatHistory busyNodes = values.get("BusyNodesCount");
         StatHistory deployingNodes = values.get("DeployingNodesCount");
         StatHistory downNodes = values.get("DownNodesCount");
-        StatHistory pendingTasks = values.get("PendingTasksCount");
+        StatHistory pendingTasks = values.get("NeededNodesCount");
         StatHistory totalNodes = values.get("AvailableNodesCount");
         StatHistory configuringNodes = values.get("ConfigNodesCount");
         StatHistory lostNodes = values.get("LostNodesCount");
@@ -448,7 +447,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         int down = controller.getModel().getNumDown();
         int lost = controller.getModel().getNumLost();
         int total = controller.getModel().getNumNodes();
-        int needed = controller.getModel().getNumNeeded();
+        int needed = controller.getModel().getNeededNodes();
 
         nodeColTable.removeRows(0, nodeColTable.getNumberOfRows());
         nodeColTable.addRows(8);

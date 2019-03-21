@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
@@ -55,6 +54,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
@@ -615,6 +615,9 @@ public class SchedulerController extends Controller implements UncaughtException
                             stats.put("TotalJobsCount", json.get("TotalJobsCount").isString().stringValue());
                             stats.put("PendingJobsCount", json.get("PendingJobsCount").isString().stringValue());
 
+                            stats.put("NeededNodes", getStringOrElse(json, "NeededNodes", "0"));
+                            stats.put("PendingEligibleTasks", getStringOrElse(json, "PendingEligibleTasks", "0"));
+
                             model.setSchedulerStatistics(stats);
 
                             long t = (System.currentTimeMillis() - t1);
@@ -672,6 +675,15 @@ public class SchedulerController extends Controller implements UncaughtException
             }
         };
         this.schedulerTimerUpdate.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
+    }
+
+    private static String getStringOrElse(JSONObject jsonObject, String attributeName, String defaultValue) {
+        JSONString result = jsonObject.get(attributeName).isString();
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return result.stringValue();
+        }
     }
 
     /**

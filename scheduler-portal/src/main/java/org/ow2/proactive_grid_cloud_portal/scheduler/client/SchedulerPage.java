@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
@@ -507,7 +508,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         schedulerStatusLabel = new Label(SchedulerStatus.STARTED.name());
         schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
         schedulerStatusLabel.setIconSize(20);
-        schedulerStatusLabel.setSize("105%", "105%");
+        schedulerStatusLabel.setSize("180%", "105%");
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
@@ -623,9 +624,33 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 LOGGER.warning("Unexpected scheduler status");
                 break;
         }
+
         // Update the scheduler status label
-        schedulerStatusLabel.setContents("Status:" + status.name());
+
+        String neededNodes = "0";
+        String pendingEligibleTasks = "0";
+
+        HashMap<String, String> statistics = controller.getModel().getSchedulerStatistics();
+        if (statistics != null) {
+            neededNodes = statistics.get("NeededNodes");
+            pendingEligibleTasks = statistics.get("PendingEligibleTasks");
+        }
+
+        if (notOnlyDigits(neededNodes)) {
+            neededNodes = "-";
+        }
+
+        if (notOnlyDigits(pendingEligibleTasks)) {
+            pendingEligibleTasks = "-";
+        }
+
+        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes +
+                                         "<br>Pending Eligible Tasks:" + pendingEligibleTasks);
         this.adminMenu.redraw();
+    }
+
+    private boolean notOnlyDigits(String str) {
+        return !str.matches("\\d+");
     }
 
     /**
