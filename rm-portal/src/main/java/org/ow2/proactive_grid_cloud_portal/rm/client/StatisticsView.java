@@ -129,7 +129,7 @@ public class StatisticsView implements NodesListener {
 
         r[index++] = createListGridRecord("Total", "Nodes", controller.getModel().getNumNodes());
         r[index++] = createListGridRecord("Free", "Nodes", controller.getModel().getNumFree(), instance.node_free_16());
-        r[index++] = createListGridRecord("Needed", "Nodes", controller.getModel().getNumNeeded());
+        r[index++] = createListGridRecord("Needed", "Nodes", controller.getModel().getNeededNodes());
         r[index++] = createListGridRecord("Busy", "Nodes", controller.getModel().getNumBusy(), instance.node_busy_16());
         r[index++] = createListGridRecord("To be released",
                                           "Nodes",
