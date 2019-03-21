@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
@@ -628,21 +629,28 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         String neededNodes = "0";
         String pendingEligibleTasks = "0";
-        if (controller.getModel().getSchedulerStatistics() != null) {
-            neededNodes = controller.getModel().getSchedulerStatistics().get("NeededNodes");
-            pendingEligibleTasks = controller.getModel().getSchedulerStatistics().get("PendingEligibleTasks");
+
+        HashMap<String, String> statistics = controller.getModel().getSchedulerStatistics();
+        if (statistics != null) {
+            neededNodes = statistics.get("NeededNodes");
+            pendingEligibleTasks = statistics.get("PendingEligibleTasks");
         }
 
-        if (!Character.isDigit(neededNodes.charAt(0))) {
+        if (notOnlyDigits(neededNodes)) {
             neededNodes = "-";
         }
-        if (!Character.isDigit(pendingEligibleTasks.charAt(0))) {
+
+        if (notOnlyDigits(pendingEligibleTasks)) {
             pendingEligibleTasks = "-";
         }
 
         schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes +
                                          "<br>Pending Eligible Tasks:" + pendingEligibleTasks);
         this.adminMenu.redraw();
+    }
+
+    private boolean notOnlyDigits(String str) {
+        return !str.matches("\\d+");
     }
 
     /**
