@@ -407,7 +407,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                                                              }
 
-                                                             if (source.equals("NeededNodes")) {
+                                                             if (source.equals("NeededNodesCount")) {
                                                                  final Double lastValue = values.get(values.size() - 1);
                                                                  if (0 <= lastValue && !lastValue.isNaN()) {
                                                                      model.setNeededNodes(lastValue.intValue());
