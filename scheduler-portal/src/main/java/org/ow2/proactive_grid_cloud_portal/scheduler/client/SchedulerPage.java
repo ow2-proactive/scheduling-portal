@@ -627,8 +627,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         // Update the scheduler status label
 
-        String neededNodes = "0";
-        String pendingEligibleTasks = "0";
+        String neededNodes = "-";
+        String pendingEligibleTasks = "-";
 
         HashMap<String, String> statistics = controller.getModel().getSchedulerStatistics();
         if (statistics != null) {
