@@ -628,24 +628,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         // Update the scheduler status label
 
         String neededNodes = "-";
-        String pendingEligibleTasks = "-";
 
         HashMap<String, String> statistics = controller.getModel().getSchedulerStatistics();
         if (statistics != null) {
             neededNodes = statistics.get("NeededNodes");
-            pendingEligibleTasks = statistics.get("PendingEligibleTasks");
         }
 
         if (notOnlyDigits(neededNodes)) {
             neededNodes = "-";
         }
 
-        if (notOnlyDigits(pendingEligibleTasks)) {
-            pendingEligibleTasks = "-";
-        }
-
-        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes +
-                                         "<br>Pending Eligible Tasks:" + pendingEligibleTasks);
+        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes);
         this.adminMenu.redraw();
     }
 
