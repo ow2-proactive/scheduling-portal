@@ -53,8 +53,12 @@ public interface Model {
          */
         public enum Range {
             MINUTE_1("1 minute", 'a', 60, 5, PredefinedFormat.MINUTE_SECOND), //
+            MINUTE_5("5 minutes", 'n', 60 * 5, 10, PredefinedFormat.HOUR24_MINUTE),
             MINUTE_10("10 minutes", 'm', 60 * 10, 20, PredefinedFormat.HOUR24_MINUTE), //
+            MINUTE_30("30 minutes", 't', 60 * 30, 20, PredefinedFormat.HOUR24_MINUTE), //
             HOUR_1("1 hour", 'h', 60 * 60, 60, PredefinedFormat.HOUR24_MINUTE), //
+            HOUR_2("2 hour", 'j', 60 * 60 * 2, 60, PredefinedFormat.HOUR24_MINUTE), //
+            HOUR_4("4 hour", 'k', 60 * 60 * 4, 60, PredefinedFormat.HOUR24_MINUTE), //
             HOUR_8("8 hours", 'H', 60 * 60 * 8, 60 * 10, PredefinedFormat.HOUR24_MINUTE), //
             DAY_1("1 day", 'd', 60 * 60 * 24, 60 * 30, PredefinedFormat.HOUR24_MINUTE), //
             WEEK_1("1 week", 'w', 60 * 60 * 24 * 7, 60 * 60 * 3, PredefinedFormat.MONTH_NUM_DAY), //

@@ -354,8 +354,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void fetchStatHistory() {
         String range = "";
-        String[] sources = new String[] { "BusyNodesCount", "FreeNodesCount", "DownNodesCount", "AvailableNodesCount",
+
+        // this 'sources' set order in which we request the fields,
+        // it should be the same as in scheduling RMRest::dataSources
+        // PS: "PendingTasksCount" corresponds to "Needed" nodes.
+        String[] sources = new String[] { "AvailableNodesCount", "FreeNodesCount", "NeededNodesCount", "BusyNodesCount",
+                                          "DeployingNodesCount", "ConfigNodesCount", "DownNodesCount", "LostNodesCount",
                                           "AverageActivity" };
+
         long updateFreq = Range.YEAR_1.getUpdateFrequency();
         boolean changedRange = false;
         for (String src : sources) {
@@ -383,14 +389,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                      @Override
                                                      public void onSuccess(String result) {
 
-                                                         JSONValue val = RMController.this.parseJSON(result);
+                                                         JSONValue val = RMController.parseJSON(result);
                                                          JSONObject obj = val.isObject();
 
                                                          HashMap<String, StatHistory> stats = new HashMap<String, StatHistory>();
                                                          for (String source : obj.keySet()) {
                                                              JSONArray arr = obj.get(source).isArray();
 
-                                                             ArrayList<Double> values = new ArrayList<Double>();
+                                                             List<Double> values = new ArrayList<>();
                                                              for (int i = 0; i < arr.size(); i++) {
                                                                  JSONValue dval = arr.get(i);
                                                                  if (dval.isNumber() != null) {
@@ -400,6 +406,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                                  }
 
                                                              }
+
+                                                             if (source.equals("NeededNodesCount")) {
+                                                                 final Double lastValue = values.get(values.size() - 1);
+                                                                 if (0 <= lastValue && !lastValue.isNaN()) {
+                                                                     model.setNeededNodes(lastValue.intValue());
+                                                                 } else {
+                                                                     model.setNeededNodes(0);
+                                                                 }
+                                                             }
+
                                                              StatHistory st = new StatHistory(source,
                                                                                               values,
                                                                                               model.getRequestedStatHistoryRange(source));

@@ -23,34 +23,27 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.shared;
+package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-public class CatalogConstants {
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
-    private CatalogConstants() {
-        // this class is not meant to be instantiated
+
+public class CatalogUrlSchedulerServerBuilder {
+
+    private static final String DEFAULT_CATALOG_URL = "http://localhost:8080/catalog";
+
+    private String catalogUrl;
+
+    public String getCatalogUrl() {
+        if (this.catalogUrl == null) {
+            String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
+
+            if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
+                this.catalogUrl = DEFAULT_CATALOG_URL;
+            } else {
+                this.catalogUrl = catalogUrlFromConfig;
+            }
+        }
+        return this.catalogUrl;
     }
-
-    public static final String NODE_SOURCE_CONTENT_TYPE = "application/json";
-
-    public static final String INITIAL_COMMIT_MESSAGE = "(Initial commit)";
-
-    public static final String EXPORT_FAILED_MESSAGE = "Export node source failed";
-
-    public static final String SESSION_ID_PARAM = "sessionId";
-
-    public static final String BUCKET_NAME_PARAM = "bucketName";
-
-    public static final String NAME_PARAM = "name";
-
-    public static final String FILE_CONTENT_PARAM = "file";
-
-    public static final String KIND_PARAM = "kind";
-
-    public static final String COMMIT_MESSAGE_PARAM = "commitMessage";
-
-    public static final String OBJECT_CONTENT_TYPE_PARAM = "objectContentType";
-
-    public static final String REVISED_PARAM = "revised";
-
 }

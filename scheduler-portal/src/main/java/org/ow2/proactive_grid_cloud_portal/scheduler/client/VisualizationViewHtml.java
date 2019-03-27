@@ -99,7 +99,16 @@ public class VisualizationViewHtml implements VisualizationView {
         if (tasks != null) { // received HTML before tasks
             for (Task t : tasks) {
                 if (task2Dom != null) {
-                    Element taskElem = task2Dom.get(t.getName());
+                    String name = t.getName();
+                    int i1 = name.indexOf('#');
+                    if (i1 > -1)
+                        name = name.substring(0, i1);
+
+                    int i2 = name.indexOf('*');
+                    if (i2 > -1)
+                        name = name.substring(0, i2);
+
+                    Element taskElem = task2Dom.get(name);
                     if (taskElem != null) {
                         String classes = taskElem.getClassName();
                         int statusIndex = classes.indexOf(TASK_STATUS_PREFIX);

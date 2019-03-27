@@ -79,8 +79,6 @@ public class UploadServlet extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadServlet.class);
 
-    private static final String URL_CATALOG = "http://localhost:8080/catalog";
-
     private static final String HEADER_JOB_ID = "jobId";
 
     private static final String PARAMS_SESSION_ID = "sessionId";
@@ -145,7 +143,11 @@ public class UploadServlet extends HttpServlet {
             }
 
             if (bucketName != null && workflowName != null) {
-                fetchFromCatalogAndWriteResponse(bucketName, workflowName, sessionId, response);
+                fetchFromCatalogAndWriteResponse(new CatalogUrlSchedulerServerBuilder().getCatalogUrl(),
+                                                 bucketName,
+                                                 workflowName,
+                                                 sessionId,
+                                                 response);
             } else {
                 writeResponse(job, response);
             }
@@ -159,15 +161,15 @@ public class UploadServlet extends HttpServlet {
         }
     }
 
-    private void fetchFromCatalogAndWriteResponse(String bucketName, String workflowName, String sessionId,
-            HttpServletResponse response) {
+    private void fetchFromCatalogAndWriteResponse(String catalogUrl, String bucketName, String workflowName,
+            String sessionId, HttpServletResponse response) {
         String encodedWorkflowName;
         try {
             encodedWorkflowName = URLEncoder.encode(workflowName, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             encodedWorkflowName = workflowName;
         }
-        String url = URL_CATALOG + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
+        String url = catalogUrl + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
         LOGGER.info("Sending request to catalog: {}", url);
 
         HttpGet httpGet = new HttpGet(url);
