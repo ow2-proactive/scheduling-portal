@@ -177,17 +177,9 @@ public class SchedulerJSONUtils extends JSONUtils {
         boolean endCursor = (paginationModel.getEndCursor() != null);
         boolean startCursor = (paginationModel.getStartCursor() != null);
 
-        //If an end cursor was defined then there was a next page
-        if (endCursor)
-            paginationModel.setHasNextPage(true);
-        else
-            paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
+        paginationModel.setHasNextPage(getProperty(jsonPageInfo, "hasNextPage").isBoolean().booleanValue());
 
-        //If a start cursor was defined then there was a previous page
-        if (startCursor)
-            paginationModel.setHasPreviousPage(true);
-        else
-            paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
+        paginationModel.setHasPreviousPage(getProperty(jsonPageInfo, "hasPreviousPage").isBoolean().booleanValue());
 
         //The number of jobs is updated only when there are no start or end cursor otherwise the number is not correct
         if (!startCursor && !endCursor) {
