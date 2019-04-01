@@ -94,19 +94,18 @@ public class JobsPaginationView extends PaginationView<JobsPaginationController>
 
     @Override
     public void pageChanged() {
-        itemsUpdated();
+        this.disableAllControls();
+        this.enablePaginationControls();
     }
 
     @Override
     public void totalItemChanged() {
         setTotalJobsLabel();
-        itemsUpdated();
+        pageChanged();
     }
 
     protected void itemsUpdated() {
-        setTotalJobsLabel();
-        this.disableAllControls();
-        this.enablePaginationControls();
+        totalItemChanged();
     }
 
     @Override
