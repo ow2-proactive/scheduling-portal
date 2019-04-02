@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 
@@ -172,28 +174,31 @@ public class StatisticsView implements StatisticsListener {
      */
     public void schedulerStatsUpdated(HashMap<String, String> stats) {
         DetailViewerRecord r = new DetailViewerRecord();
-        r.setAttribute("JobSubmittingPeriod", stats.get("JobSubmittingPeriod"));
-        r.setAttribute("FormattedJobSubmittingPeriod", stats.get("FormattedJobSubmittingPeriod"));
-        r.setAttribute("MeanJobPendingTime", stats.get("MeanJobPendingTime"));
-        r.setAttribute("ConnectedUsersCount", stats.get("ConnectedUsersCount"));
-        r.setAttribute("FinishedTasksCount", stats.get("FinishedTasksCount"));
-        r.setAttribute("RunningJobsCount", stats.get("RunningJobsCount"));
-        r.setAttribute("RunningTasksCount", stats.get("RunningTasksCount"));
-        r.setAttribute("FormattedMeanJobPendingTime", stats.get("FormattedMeanJobPendingTime"));
-        r.setAttribute("MeanJobExecutionTime", stats.get("MeanJobExecutionTime"));
-        r.setAttribute("PendingTasksCount", stats.get("PendingTasksCount"));
-        r.setAttribute("FinishedJobsCount", stats.get("FinishedJobsCount"));
-        r.setAttribute("TotalTasksCount", stats.get("TotalTasksCount"));
-        r.setAttribute("FormattedMeanJobExecutionTime", stats.get("FormattedMeanJobExecutionTime"));
-        r.setAttribute("TotalJobsCount", stats.get("TotalJobsCount"));
-        r.setAttribute("PendingJobsCount", stats.get("PendingJobsCount"));
+        final List<String> aList = Arrays.asList("JobSubmittingPeriod",
+                                                 "FormattedJobSubmittingPeriod",
+                                                 "MeanJobPendingTime",
+                                                 "ConnectedUsersCount",
+                                                 "FinishedTasksCount",
+                                                 "RunningJobsCount",
+                                                 "RunningTasksCount",
+                                                 "FormattedMeanJobPendingTime",
+                                                 "MeanJobExecutionTime",
+                                                 "PendingTasksCount",
+                                                 "FinishedJobsCount",
+                                                 "TotalTasksCount",
+                                                 "FormattedMeanJobExecutionTime",
+                                                 "TotalJobsCount",
+                                                 "PendingJobsCount",
+                                                 "StalledJobsCount",
+                                                 "PausedJobsCount",
+                                                 "InErrorJobsCount",
+                                                 "KilledJobsCount",
+                                                 "CancelledJobsCount",
+                                                 "FailedJobsCount");
 
-        r.setAttribute("StalledJobsCount", stats.get("StalledJobsCount"));
-        r.setAttribute("PausedJobsCount", stats.get("PausedJobsCount"));
-        r.setAttribute("InErrorJobsCount", stats.get("InErrorJobsCount"));
-        r.setAttribute("KilledJobsCount", stats.get("KilledJobsCount"));
-        r.setAttribute("CancelledJobsCount", stats.get("CancelledJobsCount"));
-        r.setAttribute("FailedJobsCount", stats.get("FailedJobsCount"));
+        for (String propName : aList) {
+            r.setAttribute(propName, stats.get(propName));
+        }
 
         this.statsDetail.setData(new DetailViewerRecord[] { r });
         l1.show();
