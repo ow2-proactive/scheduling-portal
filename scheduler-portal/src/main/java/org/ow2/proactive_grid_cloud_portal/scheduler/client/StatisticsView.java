@@ -91,7 +91,13 @@ public class StatisticsView implements StatisticsListener {
 
         DetailViewerField pendingJobsCount = new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
         DetailViewerField runningJobsCount = new DetailViewerField("RunningJobsCount", "Running Jobs Count");
+        DetailViewerField stalledJobsCount = new DetailViewerField("StalledJobsCount", "Stalled Jobs Count");
+        DetailViewerField pausedJobsCount = new DetailViewerField("PausedJobsCount", "Paused Jobs Count");
         DetailViewerField finishedJobsCount = new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
+        DetailViewerField inErrorJobsCount = new DetailViewerField("InErrorJobsCount", "In-Error Jobs Count");
+        DetailViewerField killedJobsCount = new DetailViewerField("KilledJobsCount", "Killed Jobs Count");
+        DetailViewerField cancelledJobsCount = new DetailViewerField("CancelledJobsCount", "Cancelled Jobs Count");
+        DetailViewerField failedJobsCount = new DetailViewerField("FailedJobsCount", "Failed Jobs Count");
         DetailViewerField totalJobsCount = new DetailViewerField("TotalJobsCount", "Total Jobs Count");
 
         DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
@@ -108,7 +114,13 @@ public class StatisticsView implements StatisticsListener {
                               formattedMeanJobExecutionTime,
                               pendingJobsCount,
                               runningJobsCount,
+                              stalledJobsCount,
+                              pausedJobsCount,
                               finishedJobsCount,
+                              inErrorJobsCount,
+                              killedJobsCount,
+                              cancelledJobsCount,
+                              failedJobsCount,
                               totalJobsCount,
                               pendingTasksCount,
                               runningTasksCount,
@@ -175,6 +187,13 @@ public class StatisticsView implements StatisticsListener {
         r.setAttribute("FormattedMeanJobExecutionTime", stats.get("FormattedMeanJobExecutionTime"));
         r.setAttribute("TotalJobsCount", stats.get("TotalJobsCount"));
         r.setAttribute("PendingJobsCount", stats.get("PendingJobsCount"));
+
+        r.setAttribute("StalledJobsCount", stats.get("StalledJobsCount"));
+        r.setAttribute("PausedJobsCount", stats.get("PausedJobsCount"));
+        r.setAttribute("InErrorJobsCount", stats.get("InErrorJobsCount"));
+        r.setAttribute("KilledJobsCount", stats.get("KilledJobsCount"));
+        r.setAttribute("CancelledJobsCount", stats.get("CancelledJobsCount"));
+        r.setAttribute("FailedJobsCount", stats.get("FailedJobsCount"));
 
         this.statsDetail.setData(new DetailViewerRecord[] { r });
         l1.show();
