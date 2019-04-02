@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -592,30 +593,35 @@ public class SchedulerController extends Controller implements UncaughtException
                             HashMap<String, String> stats = new HashMap<String, String>();
 
                             JSONObject json = parseJSON(result).isObject();
-                            if (json == null)
+                            if (json == null) {
                                 error("Expected JSON Object: " + result);
+                            }
 
-                            stats.put("JobSubmittingPeriod", json.get("JobSubmittingPeriod").isString().stringValue());
-                            stats.put("FormattedJobSubmittingPeriod",
-                                      json.get("FormattedJobSubmittingPeriod").isString().stringValue());
-                            stats.put("MeanJobPendingTime", json.get("MeanJobPendingTime").isString().stringValue());
-                            stats.put("ConnectedUsersCount", json.get("ConnectedUsersCount").isString().stringValue());
-                            stats.put("FinishedTasksCount", json.get("FinishedTasksCount").isString().stringValue());
-                            stats.put("RunningJobsCount", json.get("RunningJobsCount").isString().stringValue());
-                            stats.put("RunningTasksCount", json.get("RunningTasksCount").isString().stringValue());
-                            stats.put("FormattedMeanJobPendingTime",
-                                      json.get("FormattedMeanJobPendingTime").isString().stringValue());
-                            stats.put("MeanJobExecutionTime",
-                                      json.get("MeanJobExecutionTime").isString().stringValue());
-                            stats.put("PendingTasksCount", json.get("PendingTasksCount").isString().stringValue());
-                            stats.put("FinishedJobsCount", json.get("FinishedJobsCount").isString().stringValue());
-                            stats.put("TotalTasksCount", json.get("TotalTasksCount").isString().stringValue());
-                            stats.put("FormattedMeanJobExecutionTime",
-                                      json.get("FormattedMeanJobExecutionTime").isString().stringValue());
-                            stats.put("TotalJobsCount", json.get("TotalJobsCount").isString().stringValue());
-                            stats.put("PendingJobsCount", json.get("PendingJobsCount").isString().stringValue());
-
-                            stats.put("NeededNodes", getStringOrElse(json, "NeededNodes", "0"));
+                            List<String> aList = Arrays.asList("JobSubmittingPeriod",
+                                                               "FormattedJobSubmittingPeriod",
+                                                               "MeanJobPendingTime",
+                                                               "ConnectedUsersCount",
+                                                               "FinishedTasksCount",
+                                                               "RunningJobsCount",
+                                                               "RunningTasksCount",
+                                                               "FormattedMeanJobPendingTime",
+                                                               "MeanJobExecutionTime",
+                                                               "PendingTasksCount",
+                                                               "FinishedJobsCount",
+                                                               "TotalTasksCount",
+                                                               "FormattedMeanJobExecutionTime",
+                                                               "TotalJobsCount",
+                                                               "PendingJobsCount",
+                                                               "StalledJobsCount",
+                                                               "PausedJobsCount",
+                                                               "InErrorJobsCount",
+                                                               "KilledJobsCount",
+                                                               "CancelledJobsCount",
+                                                               "FailedJobsCount",
+                                                               "NeededNodes");
+                            for (String propName : aList) {
+                                stats.put(propName, getStringOrElse(json, propName, "0"));
+                            }
                             model.setSchedulerStatistics(stats);
 
                             long t = (System.currentTimeMillis() - t1);

@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 
@@ -91,7 +93,13 @@ public class StatisticsView implements StatisticsListener {
 
         DetailViewerField pendingJobsCount = new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
         DetailViewerField runningJobsCount = new DetailViewerField("RunningJobsCount", "Running Jobs Count");
+        DetailViewerField stalledJobsCount = new DetailViewerField("StalledJobsCount", "Stalled Jobs Count");
+        DetailViewerField pausedJobsCount = new DetailViewerField("PausedJobsCount", "Paused Jobs Count");
         DetailViewerField finishedJobsCount = new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
+        DetailViewerField inErrorJobsCount = new DetailViewerField("InErrorJobsCount", "In-Error Jobs Count");
+        DetailViewerField killedJobsCount = new DetailViewerField("KilledJobsCount", "Killed Jobs Count");
+        DetailViewerField cancelledJobsCount = new DetailViewerField("CancelledJobsCount", "Cancelled Jobs Count");
+        DetailViewerField failedJobsCount = new DetailViewerField("FailedJobsCount", "Failed Jobs Count");
         DetailViewerField totalJobsCount = new DetailViewerField("TotalJobsCount", "Total Jobs Count");
 
         DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
@@ -108,7 +116,13 @@ public class StatisticsView implements StatisticsListener {
                               formattedMeanJobExecutionTime,
                               pendingJobsCount,
                               runningJobsCount,
+                              stalledJobsCount,
+                              pausedJobsCount,
                               finishedJobsCount,
+                              inErrorJobsCount,
+                              killedJobsCount,
+                              cancelledJobsCount,
+                              failedJobsCount,
                               totalJobsCount,
                               pendingTasksCount,
                               runningTasksCount,
@@ -160,21 +174,31 @@ public class StatisticsView implements StatisticsListener {
      */
     public void schedulerStatsUpdated(HashMap<String, String> stats) {
         DetailViewerRecord r = new DetailViewerRecord();
-        r.setAttribute("JobSubmittingPeriod", stats.get("JobSubmittingPeriod"));
-        r.setAttribute("FormattedJobSubmittingPeriod", stats.get("FormattedJobSubmittingPeriod"));
-        r.setAttribute("MeanJobPendingTime", stats.get("MeanJobPendingTime"));
-        r.setAttribute("ConnectedUsersCount", stats.get("ConnectedUsersCount"));
-        r.setAttribute("FinishedTasksCount", stats.get("FinishedTasksCount"));
-        r.setAttribute("RunningJobsCount", stats.get("RunningJobsCount"));
-        r.setAttribute("RunningTasksCount", stats.get("RunningTasksCount"));
-        r.setAttribute("FormattedMeanJobPendingTime", stats.get("FormattedMeanJobPendingTime"));
-        r.setAttribute("MeanJobExecutionTime", stats.get("MeanJobExecutionTime"));
-        r.setAttribute("PendingTasksCount", stats.get("PendingTasksCount"));
-        r.setAttribute("FinishedJobsCount", stats.get("FinishedJobsCount"));
-        r.setAttribute("TotalTasksCount", stats.get("TotalTasksCount"));
-        r.setAttribute("FormattedMeanJobExecutionTime", stats.get("FormattedMeanJobExecutionTime"));
-        r.setAttribute("TotalJobsCount", stats.get("TotalJobsCount"));
-        r.setAttribute("PendingJobsCount", stats.get("PendingJobsCount"));
+        final List<String> aList = Arrays.asList("JobSubmittingPeriod",
+                                                 "FormattedJobSubmittingPeriod",
+                                                 "MeanJobPendingTime",
+                                                 "ConnectedUsersCount",
+                                                 "FinishedTasksCount",
+                                                 "RunningJobsCount",
+                                                 "RunningTasksCount",
+                                                 "FormattedMeanJobPendingTime",
+                                                 "MeanJobExecutionTime",
+                                                 "PendingTasksCount",
+                                                 "FinishedJobsCount",
+                                                 "TotalTasksCount",
+                                                 "FormattedMeanJobExecutionTime",
+                                                 "TotalJobsCount",
+                                                 "PendingJobsCount",
+                                                 "StalledJobsCount",
+                                                 "PausedJobsCount",
+                                                 "InErrorJobsCount",
+                                                 "KilledJobsCount",
+                                                 "CancelledJobsCount",
+                                                 "FailedJobsCount");
+
+        for (String propName : aList) {
+            r.setAttribute(propName, stats.get(propName));
+        }
 
         this.statsDetail.setData(new DetailViewerRecord[] { r });
         l1.show();
