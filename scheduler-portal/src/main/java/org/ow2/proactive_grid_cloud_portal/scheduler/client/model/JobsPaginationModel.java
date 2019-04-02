@@ -162,7 +162,7 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setHasPreviousPage(boolean hasPreviousPage) {
         this.hasPreviousPage = hasPreviousPage;
-        doActionOnListeners(listener -> listener.pageChanged());
+        doActionOnListeners(listener -> listener.totalItemChanged());
     }
 
     public boolean hasNextPage() {
@@ -171,7 +171,7 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setHasNextPage(boolean hasNextPage) {
         this.hasNextPage = hasNextPage;
-        doActionOnListeners(listener -> listener.pageChanged());
+        doActionOnListeners(listener -> listener.totalItemChanged());
     }
 
     public boolean isFirst() {
