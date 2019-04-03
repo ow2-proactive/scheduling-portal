@@ -79,11 +79,9 @@ public interface RestClient {
     /**
      * Submit a flat command job
      * Each line in the file is a command that will be run on a different node
-     * @param sessionId
      * @param commandFileContent content of the flat command file, one task per line
      * @param jobName name of the job
      * @param selectionScriptContent selection script or null
-     * @return
      */
     @POST
     @Path("submitflat")
@@ -151,10 +149,6 @@ public interface RestClient {
 
     /**
      * Kill a task
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/kill")
@@ -163,10 +157,6 @@ public interface RestClient {
 
     /**
      * Preempt a task
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/preempt")
@@ -175,10 +165,6 @@ public interface RestClient {
 
     /**
      * Mark as finished and resume
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/finishInErrorTask")
@@ -187,10 +173,6 @@ public interface RestClient {
 
     /**
      * Restart a running task.
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/restart")
@@ -199,10 +181,6 @@ public interface RestClient {
 
     /**
      * Restart a task paused on error.
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
@@ -381,7 +359,6 @@ public interface RestClient {
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
      * @param priorityName the new priority of the job 
-     * @return a ClientResponse containing the response status.
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")

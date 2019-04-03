@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
-import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
@@ -108,7 +106,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of the task to kill
-     * @param cb
      */
     void killTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
@@ -117,7 +114,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of the task to preempt
-     * @param cb
      */
     void preemptTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
@@ -126,7 +122,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of the task to preempt
-     * @param cb
      */
     void markAsFinishedAndResume(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
@@ -135,7 +130,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of the task to restart
-     * @param cb
      */
     void restartRunningTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
@@ -144,9 +138,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @param taskName name of a task to restart within that job
-     * @return true on success
-     * @throws RestServerException
-     * @throws ServiceException
      */
     void restartInErrorTask(String sessionId, Integer jobId, String taskName, AsyncCallback<Boolean> cb);
 
@@ -200,7 +191,6 @@ public interface SchedulerServiceAsync {
     /**
      * Get the display properties read by the scheduler
      * @param sessionId the session id of the user which is logged in
-     * @param asyncCallback
      */
     void getSchedulerPortalDisplayProperties(String sessionId, AsyncCallback<Map<String, String>> asyncCallback);
 
@@ -318,7 +308,6 @@ public interface SchedulerServiceAsync {
     /**
      * returns a string containing some data regarding the user's account
      * @param sessionId the session id associated to this new connection
-     * @return a string containing some data regarding the user's account
      */
     public void getStatisticsOnMyAccount(String sessionId, AsyncCallback<String> callBack);
 
@@ -327,11 +316,9 @@ public interface SchedulerServiceAsync {
      * @param sessionId id of the current session
      * @param startCursor start cursor
      * @param endCursor end cursor
-     * @param myJobs true to fetch only the jobs of the user making the request
      * @param pending fetch pending jobs
      * @param running fetch running jobs
      * @param finished fetch finished jobs 
-     * @param callback
      */
     void revisionAndjobsinfo(String sessionId, String startCursor, String endCursor, int pageSize, boolean first,
             String user, boolean pending, boolean running, boolean finished, FilterModel filterModel,
@@ -357,14 +344,12 @@ public interface SchedulerServiceAsync {
     /**
      * Returns the list of users currently connected to the scheduler as a json array 
      * @param sessionId current session id
-     * @param callback
      */
     void getSchedulerUsers(String sessionId, AsyncCallback<String> callback);
 
     /**
      * Returns the list of users having jobs the scheduler as a json array 
      * @param sessionId current session id
-     * @param callback
      */
     void getSchedulerUsersWithJobs(String sessionId, AsyncCallback<String> callback);
 
@@ -380,8 +365,6 @@ public interface SchedulerServiceAsync {
      * @param jobId id of a job
      * @param taskName name of a task to restart within that job
      * @return server task logs
-     * @throws RestServerException
-     * @throws ServiceException
      */
     Request getTaskServerLogs(String sessionId, Integer jobId, String taskName, AsyncCallback<String> callback);
 
@@ -391,8 +374,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId current session
      * @param jobId id of a job
      * @return server job logs
-     * @throws RestServerException
-     * @throws ServiceException
      */
     Request getJobServerLogs(String sessionId, Integer jobId, AsyncCallback<String> callback);
 

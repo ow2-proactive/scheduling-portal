@@ -72,15 +72,19 @@ public final class GraphQLQueries {
         try {
             Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement().excludeRemovedTime();
 
-            if (startCursor != null)
+            if (startCursor != null) {
                 jobsBuilder.after(startCursor);
-            if (endCursor != null)
-                jobsBuilder.before(endCursor);
+            }
 
-            if (first)
+            if (endCursor != null) {
+                jobsBuilder.before(endCursor);
+            }
+
+            if (first) {
                 jobsBuilder.first(pageSize);
-            else
+            } else {
                 jobsBuilder.last(pageSize);
+            }
 
             List<JobInput> input = getJobInputs(user, pending, running, finished, filterModel);
             jobsBuilder.input(input);
