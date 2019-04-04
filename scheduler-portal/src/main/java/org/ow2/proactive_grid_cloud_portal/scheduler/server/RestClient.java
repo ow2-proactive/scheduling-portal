@@ -212,6 +212,14 @@ public interface RestClient {
     InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
 
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/filtered/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
+            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit,
+            @QueryParam("statusFilter") @DefaultValue("") String statusFilter);
+
     /**
      * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
      * @param sessionId the session id of the user which is logged in

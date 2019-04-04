@@ -131,6 +131,7 @@ public class TasksController {
 
             TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
             String tagFilter = navigationModel.getCurrentTagFilter();
+            String statusFilter = navigationModel.getStatusFilter();
 
             TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
@@ -138,11 +139,12 @@ public class TasksController {
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-            if (tagFilter.isEmpty()) {
-                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
-            } else {
-                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
-            }
+            this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, statusFilter, callback);
+            //            if (tagFilter.isEmpty()) {
+            //                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
+            //            } else {
+            //                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
+            //            }
         }
     }
 

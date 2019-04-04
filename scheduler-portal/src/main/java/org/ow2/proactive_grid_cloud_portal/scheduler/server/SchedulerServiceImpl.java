@@ -583,6 +583,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                       limit));
     }
 
+    @Override
+    public String getTasks(final String sessionId, final String jobId, final int offset, final int limit,
+            final String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesPaginated(sessionId,
+                                                                                                      jobId,
+                                                                                                      offset,
+                                                                                                      limit,
+                                                                                                      statusFilter));
+    }
+
     /*
      * (non-Javadoc)
      *

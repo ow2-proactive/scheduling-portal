@@ -25,7 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -63,6 +66,8 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      * Controller for the navigation logic.
      */
     protected TasksNavigationController controller;
+
+    private Map<String, Boolean> filters = new HashMap<>();
 
     /**
      * Build the view for the tasks navigation.
@@ -119,23 +124,27 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         navTools.addMember(btnFilter);
         navTools.addMember(autoRefreshForm);
 
-        Label filters = new Label("Filters: ");
-        filters.setWidth(60);
-        navTools.addMember(filters);
+        Label filterLabel = new Label("Filters: ");
+        filterLabel.setWidth(60);
+        navTools.addMember(filterLabel);
 
         DynamicForm statusesForm = new DynamicForm();
         statusesForm.addStyleName("form");
         statusesForm.setNumCols(8);
-        CheckboxItem[] checkboxItems = Stream.of("Submitted", "Pending", "Running", "Finished").map(status -> {
+        CheckboxItem[] checkboxItems = Stream.of("Pending", "Running", "Finished", "Failed").map(status -> {
             CheckboxItem checkboxItem = new CheckboxItem(status, status);
             checkboxItem.setCellStyle("navBarOption");
             checkboxItem.setTextBoxStyle("navBarOptionTextBox");
             checkboxItem.setTitleStyle("navbarOptionTitle");
             checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
             checkboxItem.setValue(true);
+            setFilterAndReturnAllFilters(status, true);
+            filters.put(status, true);
             checkboxItem.setWidth(60);
             checkboxItem.addChangedHandler(event -> {
-                LogModel.getInstance().logMessage("Status " + status + " changed to: " + event.getValue());
+                final String newStatusFilters = setFilterAndReturnAllFilters(status, (Boolean) event.getValue());
+                controller.getModel().setStatusFilter(newStatusFilters);
+                controller.getPaginationController().fetch(false);
             });
             return checkboxItem;
         }).toArray(CheckboxItem[]::new);
@@ -143,6 +152,15 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         navTools.addMember(statusesForm);
 
         return navTools;
+    }
+
+    private String setFilterAndReturnAllFilters(String status, Boolean value) {
+        filters.put(status, value);
+        return filters.entrySet()
+                      .stream()
+                      .filter(Map.Entry::getValue)
+                      .map(Map.Entry::getKey)
+                      .collect(Collectors.joining(";"));
     }
 
     @Override

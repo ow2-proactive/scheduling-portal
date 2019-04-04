@@ -150,6 +150,9 @@ public interface SchedulerServiceAsync {
      */
     Request getTasks(String sessionId, String jobId, int offset, int limit, AsyncCallback<String> callback);
 
+    Request getTasks(String sessionId, String jobId, int offset, int limit, String statusFilter,
+            AsyncCallback<String> callback);
+
     /**
      * Method used for making an asynchronous call to the server for returning a list of 
      * tasks that correspond to a job and filtered by a given tag.
