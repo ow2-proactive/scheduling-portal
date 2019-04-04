@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,36 +131,61 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
         DynamicForm statusesForm = new DynamicForm();
         statusesForm.addStyleName("form");
-        statusesForm.setNumCols(8);
-        CheckboxItem[] checkboxItems = Stream.of("Pending", "Running", "Finished", "Failed").map(status -> {
-            CheckboxItem checkboxItem = new CheckboxItem(status, status);
-            checkboxItem.setCellStyle("navBarOption");
-            checkboxItem.setTextBoxStyle("navBarOptionTextBox");
-            checkboxItem.setTitleStyle("navbarOptionTitle");
-            checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
-            checkboxItem.setValue(true);
-            controller.getModel().setStatusFilter(setFilterAndReturnAllFilters(status, true));
-            checkboxItem.setWidth(60);
-            checkboxItem.addChangedHandler(event -> {
-                String newStatusFilters = setFilterAndReturnAllFilters(status, (Boolean) event.getValue());
-                controller.getModel().setStatusFilter(newStatusFilters);
-                controller.getPaginationController().fetch(false);
+        statusesForm.setNumCols(12);
+
+        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Running", "Finished", "Error")
+                                               .map(status -> {
+                                                   CheckboxItem checkboxItem = new CheckboxItem(status, status);
+                                                   checkboxItem.setCellStyle("navBarOption");
+                                                   checkboxItem.setTextBoxStyle("navBarOptionTextBox");
+                                                   checkboxItem.setTitleStyle("navbarOptionTitle");
+                                                   checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
+                                                   checkboxItem.setValue(true);
+                                                   checkboxItem.setWidth(60);
+                                                   checkboxItem.addChangedHandler(event -> {
+                                                       setFilterValue(status, (Boolean) event.getValue());
+                                                       controller.getPaginationController().fetch(false);
+                                                   });
+                                                   setFilterValue(status, true);
+
+                                                   return checkboxItem;
+                                               })
+                                               .collect(Collectors.toList());
+
+        CheckboxItem totalCheckbox = new CheckboxItem("total", "Total");
+        totalCheckbox.setCellStyle("navBarOption");
+        totalCheckbox.setTextBoxStyle("navBarOptionTextBox");
+        totalCheckbox.setTitleStyle("navbarOptionTitle");
+        totalCheckbox.setPrintTitleStyle("navBarOptionPrintTitle");
+        totalCheckbox.setValue(true);
+        totalCheckbox.setWidth(60);
+        totalCheckbox.addChangeHandler(event -> {
+            statusBoxes.forEach(checkboxItem -> {
+                checkboxItem.setValue(event.getValue());
             });
-            return checkboxItem;
-        }).toArray(CheckboxItem[]::new);
-        statusesForm.setItems(checkboxItems);
+            for (String key : filters.keySet()) {
+                setFilterValue(key, (Boolean) event.getValue());
+            }
+            controller.getPaginationController().fetch(false);
+        });
+
+        List<CheckboxItem> checkboxItems = new ArrayList<>(statusBoxes);
+        checkboxItems.add(0, totalCheckbox);
+
+        statusesForm.setItems(checkboxItems.toArray(new CheckboxItem[checkboxItems.size()]));
         navTools.addMember(statusesForm);
 
         return navTools;
     }
 
-    private String setFilterAndReturnAllFilters(String status, Boolean value) {
+    private void setFilterValue(String status, Boolean value) {
         filters.put(status, value);
-        return filters.entrySet()
-                      .stream()
-                      .filter(Map.Entry::getValue)
-                      .map(Map.Entry::getKey)
-                      .collect(Collectors.joining(";"));
+        String filtersString = filters.entrySet()
+                                      .stream()
+                                      .filter(Map.Entry::getValue)
+                                      .map(Map.Entry::getKey)
+                                      .collect(Collectors.joining(";"));
+        controller.getModel().setStatusFilter(filtersString);
     }
 
     @Override
