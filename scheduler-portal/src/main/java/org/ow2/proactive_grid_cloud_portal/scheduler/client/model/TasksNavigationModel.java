@@ -50,7 +50,7 @@ public class TasksNavigationModel {
      */
     private String tasksTagFilter = "";
 
-    private String statusFilter = "Pending;Running;Finished;Failed";
+    private String statusFilter = "";
 
     /**
      * Available tags suggestions for filtering.

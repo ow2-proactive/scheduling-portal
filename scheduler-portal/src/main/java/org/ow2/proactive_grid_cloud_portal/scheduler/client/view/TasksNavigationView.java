@@ -138,11 +138,10 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
             checkboxItem.setTitleStyle("navbarOptionTitle");
             checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
             checkboxItem.setValue(true);
-            setFilterAndReturnAllFilters(status, true);
-            filters.put(status, true);
+            controller.getModel().setStatusFilter(setFilterAndReturnAllFilters(status, true));
             checkboxItem.setWidth(60);
             checkboxItem.addChangedHandler(event -> {
-                final String newStatusFilters = setFilterAndReturnAllFilters(status, (Boolean) event.getValue());
+                String newStatusFilters = setFilterAndReturnAllFilters(status, (Boolean) event.getValue());
                 controller.getModel().setStatusFilter(newStatusFilters);
                 controller.getPaginationController().fetch(false);
             });

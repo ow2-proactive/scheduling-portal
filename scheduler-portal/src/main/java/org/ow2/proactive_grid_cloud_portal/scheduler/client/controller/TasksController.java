@@ -139,12 +139,11 @@ public class TasksController {
             String sessionId = LoginModel.getInstance().getSessionId();
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
-            this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, statusFilter, callback);
-            //            if (tagFilter.isEmpty()) {
-            //                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
-            //            } else {
-            //                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
-            //            }
+            if (tagFilter.isEmpty()) {
+                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, statusFilter, callback);
+            } else {
+                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
+            }
         }
     }
 
