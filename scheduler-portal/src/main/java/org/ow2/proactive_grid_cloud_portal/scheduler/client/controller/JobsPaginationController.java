@@ -75,8 +75,9 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void nextPage() {
-        if (!this.hasNext())
+        if (!this.hasNext()) {
             return;
+        }
         model.setPage(model.getPage() + 1);
         model.setFetchData(null, model.getCurrentStartCursor(), false);
         this.fetch(false);
@@ -84,8 +85,9 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void previousPage() {
-        if (!this.hasPrevious())
+        if (!this.hasPrevious()) {
             return;
+        }
         model.setPage(model.getPage() - 1);
         model.setFetchData(model.getCurrentEndCursor(), null, true);
         this.fetch(false);
