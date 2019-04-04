@@ -26,7 +26,9 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
@@ -38,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPagi
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -115,6 +118,29 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
         navTools.addMember(autoRefreshForm);
+
+        Label filters = new Label("Filters: ");
+        filters.setWidth(60);
+        navTools.addMember(filters);
+
+        DynamicForm statusesForm = new DynamicForm();
+        statusesForm.addStyleName("form");
+        statusesForm.setNumCols(8);
+        CheckboxItem[] checkboxItems = Stream.of("Submitted", "Pending", "Running", "Finished").map(status -> {
+            CheckboxItem checkboxItem = new CheckboxItem(status, status);
+            checkboxItem.setCellStyle("navBarOption");
+            checkboxItem.setTextBoxStyle("navBarOptionTextBox");
+            checkboxItem.setTitleStyle("navbarOptionTitle");
+            checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
+            checkboxItem.setValue(true);
+            checkboxItem.setWidth(60);
+            checkboxItem.addChangedHandler(event -> {
+                LogModel.getInstance().logMessage("Status " + status + " changed to: " + event.getValue());
+            });
+            return checkboxItem;
+        }).toArray(CheckboxItem[]::new);
+        statusesForm.setItems(checkboxItems);
+        navTools.addMember(statusesForm);
 
         return navTools;
     }
