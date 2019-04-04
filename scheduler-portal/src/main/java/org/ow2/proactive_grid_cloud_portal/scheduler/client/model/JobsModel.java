@@ -89,8 +89,8 @@ public class JobsModel {
      */
     public JobsModel(ExecutionsModel parentModel) {
         this.parentModel = parentModel;
-        this.jobsUpdatedListeners = new ArrayList<JobsUpdatedListener>();
-        this.jobSelectedListeners = new ArrayList<JobSelectedListener>();
+        this.jobsUpdatedListeners = new ArrayList<>();
+        this.jobSelectedListeners = new ArrayList<>();
         filterModel = new FilterModel();
     }
 
