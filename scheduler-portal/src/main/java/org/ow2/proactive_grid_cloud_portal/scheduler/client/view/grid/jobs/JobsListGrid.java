@@ -138,7 +138,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         //select the job given in the URL if it has not been automatically selected before
         if (!isJobFromUrlAutoSelected && selectJobIdFromUrl()) {
             isJobFromUrlAutoSelected = true;
-            LogModel.getInstance().logImportantMessage("isJobFromUrlAutoSelected = false");
         }
     }
 
