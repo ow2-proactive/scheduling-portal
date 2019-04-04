@@ -28,8 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.PaginationListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.PaginationController;
 
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
@@ -71,38 +69,22 @@ public abstract class PaginationView<T extends PaginationController<?>> implemen
         this.pageFirstButton = new ToolStripButton("<< First");
         this.pageFirstButton.disable();
         this.pageFirstButton.addStyleName("navPreviousPaginationButton");
-        this.pageFirstButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.firstPage();
-            }
-        });
+        this.pageFirstButton.addClickHandler(event -> paginationController.firstPage());
 
         this.pagePreviousButton = new ToolStripButton("< Previous");
         this.pagePreviousButton.disable();
         this.pagePreviousButton.addStyleName("navPreviousPaginationButton");
-        this.pagePreviousButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.previousPage();
-            }
-        });
+        this.pagePreviousButton.addClickHandler(event -> paginationController.previousPage());
 
         this.pageNextButton = new ToolStripButton("Next >");
         this.pageNextButton.disable();
         this.pageNextButton.addStyleName("navNextPaginationButton");
-        this.pageNextButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.nextPage();
-            }
-        });
+        this.pageNextButton.addClickHandler(event -> paginationController.nextPage());
 
         this.pageLastButton = new ToolStripButton("Last >>");
         this.pageLastButton.disable();
         this.pageLastButton.addStyleName("navNextPaginationButton");
-        this.pageLastButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                paginationController.lastPage();
-            }
-        });
+        this.pageLastButton.addClickHandler(event -> paginationController.lastPage());
 
         return buildLayout();
     }

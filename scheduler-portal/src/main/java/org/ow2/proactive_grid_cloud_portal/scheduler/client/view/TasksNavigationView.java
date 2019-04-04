@@ -36,14 +36,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksNavi
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksPaginationController;
 
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -59,16 +55,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
      * Test field to specify the tag filter.
      */
     private SuggestBox tagSearchTextBox;
-
-    /**
-     * Checkbox for enabling auto-refresh.
-     */
-    private CheckboxItem autoRefreshOption;
-
-    /**
-     * The main controller of the application.
-     */
-    //private SchedulerController schedulerController;
 
     /**
      * Controller for the navigation logic.
@@ -100,36 +86,23 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         this.tagSearchTextBox.addStyleName("searchBox");
         this.tagSearchTextBox.getElement().setAttribute("placeholder", "Tag");
         this.tagSearchTextBox.setEnabled(false);
-        this.tagSearchTextBox.addKeyDownHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    changeTagFilterHandler();
-                }
+        this.tagSearchTextBox.addKeyDownHandler(event -> {
+            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                changeTagFilterHandler();
             }
         });
 
         Button btnFilter = new Button("Filter");
         btnFilter.addStyleName("btnBoxCombo");
-        btnFilter.addClickHandler(new com.google.gwt.event.dom.client.ClickHandler() {
-            @Override
-            public void onClick(com.google.gwt.event.dom.client.ClickEvent event) {
-                changeTagFilterHandler();
-            }
-        });
+        btnFilter.addClickHandler(event -> changeTagFilterHandler());
 
-        this.autoRefreshOption = new CheckboxItem("autoRefreshOption", "Auto-refresh");
-        this.autoRefreshOption.setCellStyle("navBarOption");
-        this.autoRefreshOption.setTextBoxStyle("navBarOptionTextBox");
-        this.autoRefreshOption.setTitleStyle("navbarOptionTitle");
-        this.autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
-        this.autoRefreshOption.setValue(true);
-        this.autoRefreshOption.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean());
-            }
-        });
+        CheckboxItem autoRefreshOption = new CheckboxItem("autoRefreshOption", "Auto-refresh");
+        autoRefreshOption.setCellStyle("navBarOption");
+        autoRefreshOption.setTextBoxStyle("navBarOptionTextBox");
+        autoRefreshOption.setTitleStyle("navbarOptionTitle");
+        autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
+        autoRefreshOption.setValue(true);
+        autoRefreshOption.addChangedHandler(event -> controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean()));
 
         DynamicForm autoRefreshForm = new DynamicForm();
         autoRefreshForm.setItems(autoRefreshOption);

@@ -72,18 +72,10 @@ public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> 
 
         IButton ok = new IButton("Apply");
         ok.setHeight(20);
-        ok.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
-            public void onClick(ClickEvent event) {
-                applyAction();
-            }
-        });
+        ok.addClickHandler(event -> applyAction());
         IButton clear = new IButton("Clear");
         clear.setHeight(20);
-        clear.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
-            public void onClick(ClickEvent event) {
-                clearAction();
-            }
-        });
+        clear.addClickHandler(event -> clearAction());
 
         HLayout buttons = new HLayout();
         buttons.setWidth100();
