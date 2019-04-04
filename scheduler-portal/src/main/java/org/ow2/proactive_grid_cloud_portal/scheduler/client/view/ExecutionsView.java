@@ -79,7 +79,7 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
         executionsSection.setItems(panesLayout);
 
         this.tasksPane.hide();
-
+        controller.checkIfJobIdToOpen();
         chkMy = new CheckboxItem("myjobs", "My jobs");
         chkMy.setValue(false);
         chkMy.addChangedHandler(event -> controller.fetchMyExecutionsOnly(chkMy.getValueAsBoolean()));

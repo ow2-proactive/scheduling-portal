@@ -31,6 +31,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.ExecutionsView;
 
+import com.google.gwt.user.client.Window;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.SectionStackSection;
 
@@ -113,6 +114,18 @@ public class ExecutionsController {
             case TASK_CENTRIC:
                 this.tasksController.getPaginationController().firstPage();
                 break;
+        }
+    }
+
+    /**
+     * Checks it there is a jobID to open in the URL
+     * and opens the corresponding page if there is
+     *
+     */
+    public void checkIfJobIdToOpen() {
+        String urlJobId = Window.Location.getParameter("job");
+        if (urlJobId != null) {
+            this.jobsController.getPaginationController().openPageWithId(Integer.valueOf(urlJobId));
         }
     }
 
