@@ -72,15 +72,19 @@ public final class GraphQLQueries {
         try {
             Jobs.Builder jobsBuilder = new Jobs.Builder().excludeDataManagement().excludeRemovedTime();
 
-            if (startCursor != null)
+            if (startCursor != null) {
                 jobsBuilder.after(startCursor);
-            if (endCursor != null)
-                jobsBuilder.before(endCursor);
+            }
 
-            if (first)
+            if (endCursor != null) {
+                jobsBuilder.before(endCursor);
+            }
+
+            if (first) {
                 jobsBuilder.first(pageSize);
-            else
+            } else {
                 jobsBuilder.last(pageSize);
+            }
 
             List<JobInput> input = getJobInputs(user, pending, running, finished, filterModel);
             jobsBuilder.input(input);
@@ -104,40 +108,43 @@ public final class GraphQLQueries {
      */
     private List<JobInput> getJobInputs(final String user, final boolean pending, final boolean running,
             final boolean finished, FilterModel filterModel) {
-        List<JobInput> input = new ArrayList<>();
 
+        // Gather job status to consider
+        ArrayList<String> statusNames = new ArrayList<>(JobStatus.values().length);
         for (JobStatus status : JobStatus.values()) {
-            boolean fetch;
             switch (status) {
                 case PENDING:
-                    fetch = pending;
+                    if (pending)
+                        statusNames.add(status.name().toUpperCase());
                     break;
                 case RUNNING:
-                    fetch = running;
+                    if (running)
+                        statusNames.add(status.name().toUpperCase());
                     break;
                 case FINISHED:
-                    fetch = finished;
+                    if (finished)
+                        statusNames.add(status.name().toUpperCase());
                     break;
                 default:
-                    fetch = true;
-            }
-
-            if (fetch) {
-                if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
-                    for (Constraint constraint : filterModel.getConstraints()) {
-                        input.add(getJobInput(status, user, Collections.singletonList(constraint)));
-                    }
-                } else {
-                    input.add(getJobInput(status, user, filterModel.getConstraints()));
-                }
+                    statusNames.add(status.name().toUpperCase());
             }
         }
-        return input;
+
+        // Create filters
+        List<JobInput> jobInputs = new ArrayList<>();
+        if (filterModel.isMatchAny() && !filterModel.getConstraints().isEmpty()) {
+            for (Constraint constraint : filterModel.getConstraints()) {
+                jobInputs.add(getJobInput(statusNames, user, Collections.singletonList(constraint)));
+            }
+        } else {
+            jobInputs.add(getJobInput(statusNames, user, filterModel.getConstraints()));
+        }
+        return jobInputs;
     }
 
-    private JobInput getJobInput(JobStatus status, String user, List<Constraint> constraints) {
+    private JobInput getJobInput(List<String> statusNames, String user, List<Constraint> constraints) {
         JobInput.Builder input = new JobInput.Builder();
-        input.status(status.name().toUpperCase());
+        input.status(statusNames);
 
         String id = null;
         String priority = null;
@@ -222,32 +229,29 @@ public final class GraphQLQueries {
         return input.build();
     }
 
-    private String getValue(String oldValue, String newValue) {
-        if (oldValue == null)
-            return newValue;
-        if (newValue == null)
-            return oldValue;
-        if (oldValue.equals(newValue))
-            return oldValue;
-        return oldValue + newValue;
+    private String getValue(String previousConstraint, String constraint) {
+        if (previousConstraint == null)
+            return constraint;
+        if (constraint == null)
+            return previousConstraint;
+        return constraint;
     }
 
-    private String getFilteringString(Action action, String oldValue, String newValue) {
-        String filteringString = oldValue;
+    private String getFilteringString(Action action, String previousConstraint, String constraint) {
         switch (action) {
             case EQUALS:
-                filteringString = getValue(filteringString, newValue);
-                break;
+                return getValue(previousConstraint, constraint);
+            case NOT_EQUAL:
+                return getValue(previousConstraint, "!" + constraint);
             case CONTAINS:
-                filteringString = getValue(filteringString, "*" + newValue + "*");
-                break;
+                return getValue(previousConstraint, "*" + constraint + "*");
+            case NOT_CONTAIN:
+                return getValue(previousConstraint, "!*" + constraint + "*");
             case STARTS_WITH:
-                filteringString = getValue(filteringString, newValue + "*");
-                break;
+                return getValue(previousConstraint, constraint + "*");
             default:
-                break;
+                return previousConstraint;
         }
-        return filteringString;
     }
 
 }

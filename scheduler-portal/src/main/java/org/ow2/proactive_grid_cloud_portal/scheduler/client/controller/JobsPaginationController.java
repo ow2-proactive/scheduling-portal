@@ -61,19 +61,24 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void firstPage() {
+        model.setPage(0);
         model.setFetchData(null, null, false);
         this.fetch(false);
     }
 
     @Override
     public void lastPage() {
+        model.setPage(model.getMaxPage());
         model.setFetchData(null, null, true);
         this.fetch(false);
     }
 
     @Override
     public void nextPage() {
-        model.setPage(model.getPage() + 1);
+        int curPage = model.getPage();
+        if (curPage == model.getMaxPage())
+            return;
+        model.setPage(curPage + 1);
         model.setFetchData(null, model.getCurrentStartCursor(), false);
         this.fetch(false);
     }
@@ -83,7 +88,7 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
         int curPage = model.getPage();
         if (curPage == 0)
             return;
-        model.setPage(Math.max(0, curPage - 1));
+        model.setPage(curPage - 1);
         model.setFetchData(model.getCurrentEndCursor(), null, true);
         this.fetch(false);
     }

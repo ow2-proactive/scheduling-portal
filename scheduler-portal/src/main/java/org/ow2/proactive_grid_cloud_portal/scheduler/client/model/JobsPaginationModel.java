@@ -107,9 +107,6 @@ public class JobsPaginationModel extends PaginationModel {
         this.startCursor = startCursor;
         this.endCursor = endCursor;
         this.first = first;
-        for (PaginationListener listener : this.paginationListeners) {
-            listener.pageChanged();
-        }
     }
 
     /**
@@ -165,6 +162,7 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setHasPreviousPage(boolean hasPreviousPage) {
         this.hasPreviousPage = hasPreviousPage;
+        doActionOnListeners(listener -> listener.totalItemChanged());
     }
 
     public boolean hasNextPage() {
@@ -173,6 +171,7 @@ public class JobsPaginationModel extends PaginationModel {
 
     public void setHasNextPage(boolean hasNextPage) {
         this.hasNextPage = hasNextPage;
+        doActionOnListeners(listener -> listener.totalItemChanged());
     }
 
     public boolean isFirst() {
