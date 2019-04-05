@@ -138,12 +138,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
                                                    CheckboxItem checkboxItem = new CheckboxItem(status, status);
                                                    checkboxItem.setValue(true);
                                                    checkboxItem.setWidth(60);
-                                                   checkboxItem.addChangedHandler(event -> {
-                                                       setFilterValue(status, (Boolean) event.getValue());
-                                                       controller.getPaginationController().fetch(false);
-                                                   });
                                                    setFilterValue(status, true);
-
                                                    return checkboxItem;
                                                })
                                                .collect(Collectors.toList());
@@ -165,6 +160,30 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         checkboxItems.add(0, totalCheckbox);
 
         statusesForm.setItems(checkboxItems.toArray(new CheckboxItem[0]));
+
+        statusBoxes.forEach(statusBox -> {
+            statusBox.addChangeHandler(event -> {
+                setFilterValue(statusBox.getName(), (Boolean) event.getValue());
+                controller.getPaginationController().fetch(false);
+
+                if ((Boolean) event.getValue()) {
+                    List<CheckboxItem> nonCheckedBoxes = statusBoxes.stream()
+                                                                    .filter(checkBox -> !(Boolean) checkBox.getValue())
+                                                                    .collect(Collectors.toList());
+                    if (nonCheckedBoxes.size() == 1 && nonCheckedBoxes.get(0).getName().equals(statusBox.getName())) {
+                        totalCheckbox.setValue(false);
+                    }
+                } else {
+                    List<CheckboxItem> checkedBoxes = statusBoxes.stream()
+                                                                 .filter(checkBox -> (Boolean) checkBox.getValue())
+                                                                 .collect(Collectors.toList());
+                    if (checkedBoxes.size() == 1 && checkedBoxes.get(0).getName().equals(statusBox.getName())) {
+                        totalCheckbox.setValue(true);
+                    }
+                }
+            });
+        });
+
         navTools.addMember(statusesForm);
 
         return navTools;
