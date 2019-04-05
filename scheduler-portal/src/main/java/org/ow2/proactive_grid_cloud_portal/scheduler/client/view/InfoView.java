@@ -31,11 +31,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumn
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory;
 
-import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.viewer.DetailFormatter;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
@@ -81,14 +79,11 @@ public class InfoView<T> {
             fields[i] = new DetailViewerField(lines[i].getName(), lines[i].getTitle());
 
             if (lines[i] == TasksColumnsFactory.EXEC_DURATION_ATTR || lines[i] == JobsColumnsFactory.DURATION_ATTR) {
-                fields[i].setDetailFormatter(new DetailFormatter() {
-                    @Override
-                    public String format(Object duration, Record record, DetailViewerField detailViewerField) {
-                        if (duration != null) {
-                            return Job.formatDuration(duration.toString());
-                        } else {
-                            return "";
-                        }
+                fields[i].setDetailFormatter((duration, record, detailViewerField) -> {
+                    if (duration != null) {
+                        return Job.formatDuration(duration.toString());
+                    } else {
+                        return "";
                     }
                 });
             }
@@ -131,14 +126,12 @@ public class InfoView<T> {
 
     /**
      * Display specific members of the view. This method is meant to be overridden by inheriting classes
-     * @param object
      */
     protected void displayExtraMembers(T object) {
     }
 
     /**
      * Hide specific members of the view. This method is meant to be overridden by inheriting classes
-     * @param object
      */
     protected void hideExtraMembers() {
     }
