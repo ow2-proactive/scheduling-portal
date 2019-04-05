@@ -136,10 +136,6 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Running", "Finished", "Error")
                                                .map(status -> {
                                                    CheckboxItem checkboxItem = new CheckboxItem(status, status);
-                                                   checkboxItem.setCellStyle("navBarOption");
-                                                   checkboxItem.setTextBoxStyle("navBarOptionTextBox");
-                                                   checkboxItem.setTitleStyle("navbarOptionTitle");
-                                                   checkboxItem.setPrintTitleStyle("navBarOptionPrintTitle");
                                                    checkboxItem.setValue(true);
                                                    checkboxItem.setWidth(60);
                                                    checkboxItem.addChangedHandler(event -> {
@@ -152,11 +148,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
                                                })
                                                .collect(Collectors.toList());
 
-        CheckboxItem totalCheckbox = new CheckboxItem("total", "Total");
-        totalCheckbox.setCellStyle("navBarOption");
-        totalCheckbox.setTextBoxStyle("navBarOptionTextBox");
-        totalCheckbox.setTitleStyle("navbarOptionTitle");
-        totalCheckbox.setPrintTitleStyle("navBarOptionPrintTitle");
+        CheckboxItem totalCheckbox = new CheckboxItem("all", "All");
         totalCheckbox.setValue(true);
         totalCheckbox.setWidth(60);
         totalCheckbox.addChangeHandler(event -> {
@@ -172,7 +164,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         List<CheckboxItem> checkboxItems = new ArrayList<>(statusBoxes);
         checkboxItems.add(0, totalCheckbox);
 
-        statusesForm.setItems(checkboxItems.toArray(new CheckboxItem[checkboxItems.size()]));
+        statusesForm.setItems(checkboxItems.toArray(new CheckboxItem[0]));
         navTools.addMember(statusesForm);
 
         return navTools;
