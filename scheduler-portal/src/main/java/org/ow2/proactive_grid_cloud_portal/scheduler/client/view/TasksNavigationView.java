@@ -131,58 +131,23 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
         DynamicForm statusesForm = new DynamicForm();
         statusesForm.addStyleName("form");
-        statusesForm.setNumCols(12);
+        statusesForm.setNumCols(10);
 
         List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Running", "Finished", "Error")
                                                .map(status -> {
                                                    CheckboxItem checkboxItem = new CheckboxItem(status, status);
                                                    checkboxItem.setValue(true);
                                                    checkboxItem.setWidth(60);
+                                                   checkboxItem.addChangeHandler(event -> {
+                                                       setFilterValue(status, (Boolean) event.getValue());
+                                                       controller.getPaginationController().fetch(false);
+                                                   });
                                                    setFilterValue(status, true);
                                                    return checkboxItem;
                                                })
                                                .collect(Collectors.toList());
 
-        CheckboxItem totalCheckbox = new CheckboxItem("all", "All");
-        totalCheckbox.setValue(true);
-        totalCheckbox.setWidth(60);
-        totalCheckbox.addChangeHandler(event -> {
-            statusBoxes.forEach(checkboxItem -> {
-                checkboxItem.setValue(event.getValue());
-            });
-            for (String key : filters.keySet()) {
-                setFilterValue(key, (Boolean) event.getValue());
-            }
-            controller.getPaginationController().fetch(false);
-        });
-
-        List<CheckboxItem> checkboxItems = new ArrayList<>(statusBoxes);
-        checkboxItems.add(0, totalCheckbox);
-
-        statusesForm.setItems(checkboxItems.toArray(new CheckboxItem[0]));
-
-        statusBoxes.forEach(statusBox -> {
-            statusBox.addChangeHandler(event -> {
-                setFilterValue(statusBox.getName(), (Boolean) event.getValue());
-                controller.getPaginationController().fetch(false);
-
-                if ((Boolean) event.getValue()) {
-                    List<CheckboxItem> nonCheckedBoxes = statusBoxes.stream()
-                                                                    .filter(checkBox -> !(Boolean) checkBox.getValue())
-                                                                    .collect(Collectors.toList());
-                    if (nonCheckedBoxes.size() == 1 && nonCheckedBoxes.get(0).getName().equals(statusBox.getName())) {
-                        totalCheckbox.setValue(false);
-                    }
-                } else {
-                    List<CheckboxItem> checkedBoxes = statusBoxes.stream()
-                                                                 .filter(checkBox -> (Boolean) checkBox.getValue())
-                                                                 .collect(Collectors.toList());
-                    if (checkedBoxes.size() == 1 && checkedBoxes.get(0).getName().equals(statusBox.getName())) {
-                        totalCheckbox.setValue(true);
-                    }
-                }
-            });
-        });
+        statusesForm.setItems(statusBoxes.toArray(new CheckboxItem[0]));
 
         navTools.addMember(statusesForm);
 
