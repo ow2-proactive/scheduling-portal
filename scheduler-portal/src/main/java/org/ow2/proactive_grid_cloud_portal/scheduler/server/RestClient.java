@@ -252,6 +252,25 @@ public interface RestClient {
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
 
     /**
+     * Returns a list of taskState of the tasks filtered by a given tag and paginated.
+     * @param sessionId a valid session id.
+     * @param jobId the job id.
+     * @param offset the number of the first task to fetch
+     * @param limit the number of the last task to fetch (non inclusive)
+     * @param taskTag the tag used to filter the tasks.
+     * @param statusFilter aggregation status to apply in filter
+     * @return a list of task' states of the job <code>jobId</code> filtered by a given tag, for a given pagination.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}/{statusFilter}/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesByTagByStatusPaginated(@HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
+            @PathParam("statusFilter") String statusFilter);
+
+    /**
      * Returns a paginated list of <code>TaskStateData</code> regarding the given parameters (decoupled from the associated jobs).
      * The result is paginated using the optional <code>offset</code> and <code>limit</code> parameters.
      * If those parameters are not specified, the following values will be used: [0, DEFAULT_VALUE[

@@ -601,13 +601,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang. String, java.lang.String, java.lang.String)
      */
     @Override
-    public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset,
-            final int limit) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagPaginated(sessionId,
-                                                                                                           jobId,
-                                                                                                           tag,
-                                                                                                           offset,
-                                                                                                           limit));
+    public String getTasksByTagByStatus(String sessionId, String jobId, int offset, int limit, String tag,
+            String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagByStatusPaginated(sessionId,
+                                                                                                                   jobId,
+                                                                                                                   offset,
+                                                                                                                   limit,
+                                                                                                                   tag,
+                                                                                                                   statusFilter));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
