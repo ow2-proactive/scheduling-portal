@@ -142,13 +142,13 @@ public class TasksController {
             if (tagFilter.isEmpty()) {
                 this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, statusFilter, callback);
             } else {
-                this.taskUpdateRequest = scheduler.getTasksByTagByStatus(sessionId,
-                                                                         jobId,
-                                                                         offset,
-                                                                         limit,
-                                                                         tagFilter,
-                                                                         statusFilter,
-                                                                         callback);
+                this.taskUpdateRequest = scheduler.getTasksByTagAndStatus(sessionId,
+                                                                          jobId,
+                                                                          offset,
+                                                                          limit,
+                                                                          tagFilter,
+                                                                          statusFilter,
+                                                                          callback);
             }
         }
     }

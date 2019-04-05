@@ -601,14 +601,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang. String, java.lang.String, java.lang.String)
      */
     @Override
-    public String getTasksByTagByStatus(String sessionId, String jobId, int offset, int limit, String tag,
+    public String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagByStatusPaginated(sessionId,
-                                                                                                                   jobId,
-                                                                                                                   offset,
-                                                                                                                   limit,
-                                                                                                                   tag,
-                                                                                                                   statusFilter));
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
+                                                                                                                    jobId,
+                                                                                                                    offset,
+                                                                                                                    limit,
+                                                                                                                    tag,
+                                                                                                                    statusFilter));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,

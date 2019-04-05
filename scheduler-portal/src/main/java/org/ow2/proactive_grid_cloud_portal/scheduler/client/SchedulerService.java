@@ -154,6 +154,14 @@ public interface SchedulerService extends RemoteService {
      */
     String getTasks(String sessionId, String jobId, int offset, int limit) throws RestServerException, ServiceException;
 
+    /**
+     *
+     * @param jobId the id of the job for which its task list is asked
+     * @param offset the first task to show
+     * @param limit the last task to show
+     * @param statusFilter represent a sequence of filters separated by semicolon
+     * @return the list of tasks as raw json
+     */
     String getTasks(String sessionId, String jobId, int offset, int limit, String statusFilter)
             throws RestServerException, ServiceException;
 
@@ -167,8 +175,8 @@ public interface SchedulerService extends RemoteService {
      * @param statusFilter aggregation status to apply in filter
      * @return the list of tasks as raw json
      */
-    String getTasksByTagByStatus(String sessionId, String jobId, int offset, int limit, String tag, String statusFilter)
-            throws RestServerException, ServiceException;
+    String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
+            String statusFilter) throws RestServerException, ServiceException;
 
     String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
             boolean running, boolean finished, int offset, int limit,

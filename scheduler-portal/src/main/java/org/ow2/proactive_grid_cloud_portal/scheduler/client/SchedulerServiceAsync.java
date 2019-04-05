@@ -162,7 +162,7 @@ public interface SchedulerServiceAsync {
      * @param statusFilter aggregation status to apply in filter
      * @param callback the object used for notifying the caller when the asynchronous call is completed.
      */
-    Request getTasksByTagByStatus(String sessionId, String jobId, int offset, int limit, String tag,
+    Request getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter, AsyncCallback<String> callback);
 
     Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,

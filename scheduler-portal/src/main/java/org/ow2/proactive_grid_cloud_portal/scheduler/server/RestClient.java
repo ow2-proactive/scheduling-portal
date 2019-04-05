@@ -265,7 +265,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/taskstates/{tasktag}/{statusFilter}/paginated")
     @Produces("application/json")
-    InputStream getJobTaskStatesByTagByStatusPaginated(@HeaderParam("sessionid") String sessionId,
+    InputStream getJobTaskStatesByTagAndStatusPaginated(@HeaderParam("sessionid") String sessionId,
             @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
             @PathParam("statusFilter") String statusFilter);
