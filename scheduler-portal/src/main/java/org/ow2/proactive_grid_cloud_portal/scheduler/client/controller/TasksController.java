@@ -131,6 +131,7 @@ public class TasksController {
 
             TasksNavigationModel navigationModel = this.model.getTasksNavigationModel();
             String tagFilter = navigationModel.getCurrentTagFilter();
+            String statusFilter = navigationModel.getStatusFilter();
 
             TasksPaginationModel paginationModel = navigationModel.getPaginationModel();
             int offset = paginationModel.getOffset();
@@ -139,9 +140,15 @@ public class TasksController {
             SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
 
             if (tagFilter.isEmpty()) {
-                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, callback);
+                this.taskUpdateRequest = scheduler.getTasks(sessionId, jobId, offset, limit, statusFilter, callback);
             } else {
-                this.taskUpdateRequest = scheduler.getTasksByTag(sessionId, jobId, tagFilter, offset, limit, callback);
+                this.taskUpdateRequest = scheduler.getTasksByTagAndStatus(sessionId,
+                                                                          jobId,
+                                                                          offset,
+                                                                          limit,
+                                                                          tagFilter,
+                                                                          statusFilter,
+                                                                          callback);
             }
         }
     }

@@ -43,8 +43,6 @@ import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -169,20 +167,12 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         this.openInBrowser = new IButton("Open in browser");
         this.openInBrowser.setLeft(20);
         this.openInBrowser.setWidth(200);
-        openInBrowser.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                controller.doDownload(downloadForm, "browser", "_blank");
-            }
-        });
+        openInBrowser.addClickHandler(event -> controller.doDownload(downloadForm, "browser", "_blank"));
         this.saveAsFile = new IButton("Save as file");
         this.saveAsFile.setLeft(20);
         this.saveAsFile.setWidth(200);
 
-        saveAsFile.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                controller.doDownload(downloadForm, "file", "_top");
-            }
-        });
+        saveAsFile.addClickHandler(event -> controller.doDownload(downloadForm, "file", "_top"));
         formPane = new VLayout();
         formPane.setMembersMargin(10);
         formPane.setWidth100();
@@ -205,8 +195,8 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         if (task == null) {
             this.goToNoSelectedTaskState();
         } else {
-            String label = "Task " + task.getName() + " (id: " + Long.toString(task.getId()) + ") from job " +
-                           task.getJobName() + " (id: " + Long.toString(task.getJobId()) + ")";
+            String label = "Task " + task.getName() + " (id: " + task.getId() + ") from job " + task.getJobName() +
+                           " (id: " + task.getJobId() + ")";
             this.taskSelectedLabel.setContents(label);
             this.selectedTask = task;
             decideButtonsStatus(task);

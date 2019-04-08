@@ -40,8 +40,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
 import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 
 
 public abstract class AbstractSelectedTargetView<M extends AbstractSelectedTargetModel, C extends AbstractSelectedTargetController<M>>
@@ -127,10 +125,6 @@ public abstract class AbstractSelectedTargetView<M extends AbstractSelectedTarge
         this.targetSelect.setShowTitle(false);
         this.targetSelect.setValueMap(SelectionTarget.toStringArray());
         this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
-        this.targetSelect.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                targetSelectChangedHandler();
-            }
-        });
+        this.targetSelect.addChangedHandler(event -> targetSelectChangedHandler());
     }
 }
