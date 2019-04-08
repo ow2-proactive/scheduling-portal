@@ -747,14 +747,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
-        Tab resultTab = new Tab("Task Preview", Images.instance.search_16().getSafeUri().asString());
-        resultTab.setPane(this.controller.buildPreviewView());
+        Tab taskResultTab = new Tab("Task Preview", Images.instance.search_16().getSafeUri().asString());
+        taskResultTab.setPane(this.controller.buildPreviewView());
+
+        Tab jobResultTab = new Tab("Job Results", Images.instance.search_16().getSafeUri().asString());
 
         rightTabSet.addTab(jobinfoTab);
         rightTabSet.addTab(taskinfoTab);
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
-        rightTabSet.addTab(resultTab);
+        rightTabSet.addTab(taskResultTab);
+        rightTabSet.addTab(jobResultTab);
 
         HLayout layout = new HLayout();
 
