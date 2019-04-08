@@ -25,14 +25,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TagSuggestionListener;
@@ -126,7 +124,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         navTools.addMember(autoRefreshForm);
 
         Label filterLabel = new Label("Filters: ");
-        filterLabel.setWidth(60);
+        filterLabel.setWidth("50");
         navTools.addMember(filterLabel);
 
         DynamicForm statusesForm = new DynamicForm();
@@ -137,12 +135,13 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
                                                .map(status -> {
                                                    CheckboxItem checkboxItem = new CheckboxItem(status, status);
                                                    checkboxItem.setValue(true);
-                                                   checkboxItem.setWidth(60);
+                                                   checkboxItem.setWidth("9%");
                                                    checkboxItem.addChangeHandler(event -> {
-                                                       setFilterValue(status, (Boolean) event.getValue());
-                                                       controller.getPaginationController().fetch(false);
+                                                       String allFilters = setOneFilterValueReturnAll(status,
+                                                                                                      (Boolean) event.getValue());
+                                                       controller.fitlerByStatuses(allFilters);
                                                    });
-                                                   setFilterValue(status, true);
+                                                   setOneFilterValueReturnAll(status, true);
                                                    return checkboxItem;
                                                })
                                                .collect(Collectors.toList());
@@ -151,17 +150,22 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
         navTools.addMember(statusesForm);
 
+        controller.getModel().setStatusFilter(returnAllFilters());
+
         return navTools;
     }
 
-    private void setFilterValue(String status, Boolean value) {
+    private String setOneFilterValueReturnAll(String status, Boolean value) {
         filters.put(status, value);
-        String filtersString = filters.entrySet()
-                                      .stream()
-                                      .filter(Map.Entry::getValue)
-                                      .map(Map.Entry::getKey)
-                                      .collect(Collectors.joining(";"));
-        controller.getModel().setStatusFilter(filtersString);
+        return returnAllFilters();
+    }
+
+    private String returnAllFilters() {
+        return filters.entrySet()
+                      .stream()
+                      .filter(Map.Entry::getValue)
+                      .map(Map.Entry::getKey)
+                      .collect(Collectors.joining(";"));
     }
 
     @Override
