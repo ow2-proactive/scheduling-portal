@@ -31,8 +31,6 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -53,7 +51,7 @@ public class StatisticsView implements StatisticsListener {
 
     private DetailViewer statsDetail, accountDetail, taskDetails;
 
-    private Label statsLabel, accountLabel, placeHolder;
+    private Label statsLabel, accountLabel;
 
     /**
      * Default constructor
@@ -66,13 +64,14 @@ public class StatisticsView implements StatisticsListener {
      * Build and return this view's graphical components
      */
     public Layout build() {
-        Layout root = new HLayout();
+        Layout root = new VLayout();
         root.setWidth100();
         root.setHeight100();
 
-        Layout leftPart = new VLayout();
-
+        Layout schedulerStats = new HLayout();
+        schedulerStats.setWidth100();
         statsDetail = new DetailViewer();
+        statsDetail.setWidth("50%");
         statsDetail.setCanSelectText(true);
 
         DetailViewerField jobSubmittingPeriod = new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
@@ -147,21 +146,11 @@ public class StatisticsView implements StatisticsListener {
         accountLabel.setHeight(25);
         accountLabel.hide();
 
-        leftPart.addMember(statsLabel);
-        leftPart.addMember(statsDetail);
-        leftPart.addMember(accountLabel);
-        leftPart.addMember(accountDetail);
+        schedulerStats.addMember(statsDetail);
 
-        root.addMember(leftPart);
-
-        Layout rightPart = new VLayout();
-        root.addMember(rightPart);
-        placeHolder = new Label("<h3> </h3>");
-        placeHolder.setHeight(25);
-        placeHolder.hide();
-        rightPart.addMember(placeHolder);
         taskDetails = new DetailViewer();
         taskDetails.setCanSelectText(true);
+        taskDetails.setWidth("50%");
         DetailViewerField submittedTasksCount = new DetailViewerField("SubmittedTasksCount", "Submitted Tasks Count");
         DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
         DetailViewerField pausedTasksCount = new DetailViewerField("PausedTasksCount", "Paused Tasks Count");
@@ -196,7 +185,13 @@ public class StatisticsView implements StatisticsListener {
                               skippedTasksCount,
                               inErrorTasksCount,
                               totalTasksCount);
-        rightPart.addMember(taskDetails);
+        schedulerStats.addMember(taskDetails);
+
+        root.addMember(statsLabel);
+        root.addMember(schedulerStats);
+        root.addMember(accountLabel);
+        root.addMember(accountDetail);
+
         return root;
 
     }
@@ -259,7 +254,6 @@ public class StatisticsView implements StatisticsListener {
             r.setAttribute(propName, stats.getOrDefault(propName, "0"));
         }
         taskDetails.setData(new DetailViewerRecord[] { r });
-        placeHolder.show();
     }
 
     /*
