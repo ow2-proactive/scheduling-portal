@@ -150,4 +150,15 @@ public class TasksNavigationController {
             this.paginationController.refresh();
         }
     }
+
+    /**
+     * Set new status filters and triggers paginationController
+     * to updated task list
+     * @param allFilters new status filters, e.g. "Pending;Error", etc.
+     */
+    public void fitlerByStatuses(String allFilters) {
+        model.setStatusFilter(allFilters);
+        parentController.resetPendingTasksRequests();
+        paginationController.firstPage();
+    }
 }
