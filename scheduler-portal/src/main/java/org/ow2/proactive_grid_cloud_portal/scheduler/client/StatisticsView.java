@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -153,17 +155,13 @@ public class StatisticsView implements StatisticsListener {
         root.addMember(leftPart);
 
         Layout rightPart = new VLayout();
-
         root.addMember(rightPart);
-
-        placeHolder = new Label("");
+        placeHolder = new Label("<h3> </h3>");
         placeHolder.setHeight(25);
         placeHolder.hide();
         rightPart.addMember(placeHolder);
-
         taskDetails = new DetailViewer();
         taskDetails.setCanSelectText(true);
-
         DetailViewerField submittedTasksCount = new DetailViewerField("SubmittedTasksCount", "Submitted Tasks Count");
         DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
         DetailViewerField pausedTasksCount = new DetailViewerField("PausedTasksCount", "Paused Tasks Count");
@@ -183,7 +181,6 @@ public class StatisticsView implements StatisticsListener {
         DetailViewerField skippedTasksCount = new DetailViewerField("SkippedTasksCount", "Skipped Tasks Count");
         DetailViewerField inErrorTasksCount = new DetailViewerField("InErrorTasksCount", "In-Error Tasks Count");
         DetailViewerField totalTasksCount = new DetailViewerField("TotalTasksCount", "Total Tasks Count");
-
         taskDetails.setFields(submittedTasksCount,
                               pendingTasksCount,
                               pausedTasksCount,
@@ -199,10 +196,9 @@ public class StatisticsView implements StatisticsListener {
                               skippedTasksCount,
                               inErrorTasksCount,
                               totalTasksCount);
-
         rightPart.addMember(taskDetails);
-
         return root;
+
     }
 
     /*
@@ -237,7 +233,7 @@ public class StatisticsView implements StatisticsListener {
                                            "FailedJobsCount");
 
         for (String propName : aList) {
-            r.setAttribute(propName, stats.get(propName));
+            r.setAttribute(propName, stats.getOrDefault(propName, "0"));
         }
 
         statsDetail.setData(new DetailViewerRecord[] { r });
@@ -259,11 +255,9 @@ public class StatisticsView implements StatisticsListener {
                               "SkippedTasksCount",
                               "InErrorTasksCount",
                               "TotalTasksCount");
-
         for (String propName : aList) {
-            r.setAttribute(propName, stats.get(propName));
+            r.setAttribute(propName, stats.getOrDefault(propName, "0"));
         }
-
         taskDetails.setData(new DetailViewerRecord[] { r });
         placeHolder.show();
     }

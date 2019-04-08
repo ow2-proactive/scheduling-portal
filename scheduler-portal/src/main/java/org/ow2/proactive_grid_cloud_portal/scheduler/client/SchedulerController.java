@@ -694,6 +694,9 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     private static String getStringOrElse(JSONObject jsonObject, String attributeName, String defaultValue) {
+        if (!jsonObject.containsKey(attributeName)) {
+            return defaultValue;
+        }
         JSONString result = jsonObject.get(attributeName).isString();
         if (result == null) {
             return defaultValue;
