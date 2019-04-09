@@ -86,12 +86,15 @@ public class Job implements Serializable, Comparable<Job> {
 
     private final ImmutableMap<String, String> variables;
 
+    private final ImmutableMap<String, String> resultMap;
+
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
     public Job() {
         this.genericInformation = ImmutableMap.of();
         this.variables = ImmutableMap.of();
+        this.resultMap = ImmutableMap.of();
     }
 
     /**
@@ -127,9 +130,9 @@ public class Job implements Serializable, Comparable<Job> {
      * @param description job description
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
-            Map<String, String> genericInformation, Map<String, String> variables, int pending, int running,
-            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime, String description) {
+            Map<String, String> genericInformation, Map<String, String> variables, Map<String, String> resultMap,
+            int pending, int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
+            long startTime, long inErrorTime, long finishTime, String description) {
         this.id = id;
         this.name = name;
         this.projectName = projectName;
@@ -151,6 +154,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
         this.variables = ImmutableMap.copyOf(variables);
+        this.resultMap = ImmutableMap.copyOf(resultMap);
         this.description = description;
     }
 
@@ -401,6 +405,7 @@ public class Job implements Serializable, Comparable<Job> {
 
         Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
         Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
+        Map<String, String> resultMap = extractMap(jsonJobInfo.get("resultMap"));
 
         String name = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("name"));
         String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
@@ -414,6 +419,7 @@ public class Job implements Serializable, Comparable<Job> {
                        user,
                        genericInformation,
                        variables,
+                       resultMap,
                        pending,
                        running,
                        finished,
@@ -516,4 +522,7 @@ public class Job implements Serializable, Comparable<Job> {
         return variables;
     }
 
+    public Map<String, String> getResultMap() {
+        return resultMap;
+    }
 }

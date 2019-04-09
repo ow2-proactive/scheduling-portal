@@ -43,6 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
@@ -181,6 +182,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private String logoStripBorder = "0px";
 
     private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
+
+    private JobResultView jobResultView = null;
 
     /**
      * Default constructor
@@ -551,7 +554,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.ow2.proactive_grid_cloud_portal.client.Listeners.SchedulerStatusListener#statusChanged(
      * org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatus)
@@ -747,14 +750,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
-        Tab resultTab = new Tab("Preview", Images.instance.search_16().getSafeUri().asString());
-        resultTab.setPane(this.controller.buildPreviewView());
+        Tab taskResultTab = new Tab("Task Preview", Images.instance.search_16().getSafeUri().asString());
+        taskResultTab.setPane(this.controller.buildPreviewView());
+
+        Tab jobResultTab = new Tab("Job Results", Images.instance.search_16().getSafeUri().asString());
+        this.jobResultView = new JobResultView(this.controller);
+        jobResultTab.setPane(this.jobResultView.build());
 
         rightTabSet.addTab(jobinfoTab);
         rightTabSet.addTab(taskinfoTab);
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
-        rightTabSet.addTab(resultTab);
+        rightTabSet.addTab(taskResultTab);
+        rightTabSet.addTab(jobResultTab);
 
         HLayout layout = new HLayout();
 
