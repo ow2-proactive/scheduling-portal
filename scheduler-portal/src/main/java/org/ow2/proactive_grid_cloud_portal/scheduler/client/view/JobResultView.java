@@ -32,14 +32,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.J
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import com.smartgwt.client.widgets.viewer.DetailViewer;
-import com.smartgwt.client.widgets.viewer.DetailViewerField;
-import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
 
 public class JobResultView implements JobSelectedListener {
@@ -49,9 +47,7 @@ public class JobResultView implements JobSelectedListener {
     /** label when no job is selected or job is not finished*/
     private Label placeHolderLabel;
 
-    private Label resultMapLabel;
-
-    private DetailViewer resultMap;
+    private KeyValueGrid resultMap;
 
     public JobResultView(SchedulerController controller) {
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
@@ -70,17 +66,11 @@ public class JobResultView implements JobSelectedListener {
         placeHolderLabel = new Label(NO_JOB_SELECED);
         placeHolderLabel.setWidth100();
         placeHolderLabel.setAlign(Alignment.CENTER);
-
         root.addMember(placeHolderLabel);
 
-        resultMapLabel = new Label();
-        resultMapLabel.setAlign(Alignment.LEFT);
-        resultMapLabel.setHeight(25);
-        root.addMember(resultMapLabel);
-
-        resultMap = new DetailViewer();
+        resultMap = new KeyValueGrid("Result Map");
         resultMap.setWidth100();
-        resultMap.setCanSelectText(true);
+        resultMap.hide();
         root.addMember(resultMap);
 
         showNoJobSelected();
@@ -110,40 +100,18 @@ public class JobResultView implements JobSelectedListener {
     private void showNoJobSelected() {
         placeHolderLabel.setContents(NO_JOB_SELECED);
         placeHolderLabel.show();
-        resultMapLabel.hide();
         resultMap.hide();
     }
 
     private void showJobNotFinished(Job job) {
         placeHolderLabel.setContents("Job[<b>" + job.getId() + "</b>] is not finished.");
         placeHolderLabel.show();
-        resultMapLabel.hide();
         resultMap.hide();
     }
 
     private void showFinishedJobSelected(Job job) {
-        if (!job.getResultMap().isEmpty()) {
-            resultMapLabel.setContents("<h3>Result Map</h3>");
-            resultMapLabel.show();
-
-            DetailViewerField[] detailViewerFields = job.getResultMap()
-                                                        .entrySet()
-                                                        .stream()
-                                                        .map(entry -> new DetailViewerField(entry.getKey(),
-                                                                                            entry.getKey()))
-                                                        .toArray(DetailViewerField[]::new);
-            resultMap.setFields(detailViewerFields);
-            DetailViewerRecord record = new DetailViewerRecord();
-            job.getResultMap().entrySet().forEach(entry -> record.setAttribute(entry.getKey(), entry.getValue()));
-            resultMap.setData(new DetailViewerRecord[] { record });
-            resultMap.show();
-        } else {
-            resultMapLabel.setContents("<h3>Empty Result Map</h3>");
-            resultMapLabel.show();
-
-            resultMap.hide();
-        }
-
+        resultMap.buildEntries(job.getResultMap());
+        resultMap.show();
         placeHolderLabel.hide();
     }
 
