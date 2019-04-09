@@ -25,13 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
@@ -40,26 +37,26 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.viewer.DetailViewer;
+import com.smartgwt.client.widgets.viewer.DetailViewerField;
+import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
 
 
-public class JobResultView implements SchedulerListeners.JobSelectedListener, SchedulerListeners.JobsUpdatedListener {
+public class JobResultView implements JobSelectedListener {
 
     private static final String NO_JOB_SELECED = "No job selected.";
 
-    private static final String JOB_WITH_ID_NOT_FINISED = "Selected Job[%s] is not finished.";
-
     /** label when no job is selected or job is not finished*/
-    protected Label placeHolderLabel;
+    private Label placeHolderLabel;
 
-    protected SchedulerController controller;
+    private Label resultMapLabel;
+
+    private DetailViewer resultMap;
 
     public JobResultView(SchedulerController controller) {
-        this.controller = controller;
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
-        jobsModel.addJobsUpdatedListener(this);
-
     }
 
     /**
@@ -67,12 +64,26 @@ public class JobResultView implements SchedulerListeners.JobSelectedListener, Sc
      */
     public Layout build() {
         Layout root = new VLayout();
+        root.setWidth100();
+        root.setHeight100();
 
         placeHolderLabel = new Label(NO_JOB_SELECED);
         placeHolderLabel.setWidth100();
         placeHolderLabel.setAlign(Alignment.CENTER);
+
         root.addMember(placeHolderLabel);
 
+        resultMapLabel = new Label();
+        resultMapLabel.setAlign(Alignment.LEFT);
+        resultMapLabel.setHeight(25);
+        root.addMember(resultMapLabel);
+
+        resultMap = new DetailViewer();
+        resultMap.setWidth100();
+        resultMap.setCanSelectText(true);
+        root.addMember(resultMap);
+
+        showNoJobSelected();
         return root;
     }
 
@@ -80,39 +91,60 @@ public class JobResultView implements SchedulerListeners.JobSelectedListener, Sc
     public void jobSelected(Job job) {
         if (job.getStatus().equals(JobStatus.FINISHED) || job.getStatus().equals(JobStatus.FAILED) ||
             job.getStatus().equals(JobStatus.KILLED) || job.getStatus().equals(JobStatus.CANCELED)) {
-            final String results = job.getResultMap()
-                                      .entrySet()
-                                      .stream()
-                                      .map(entry -> entry.getKey() + " -> " + entry.getValue())
-                                      .collect(Collectors.joining(";"));
-            placeHolderLabel.setContents(results);
+            showFinishedJobSelected(job);
         } else {
-            placeHolderLabel.setContents(String.format(JOB_WITH_ID_NOT_FINISED, job.getId().toString()));
+            showJobNotFinished(job);
         }
     }
 
     @Override
     public void jobUnselected() {
-
+        showNoJobSelected();
     }
 
     @Override
     public void selectedJobUpdated(Job job) {
-
+        // nothing to do
     }
 
-    @Override
-    public void jobsUpdated(Map<Integer, Job> jobs) {
-
+    private void showNoJobSelected() {
+        placeHolderLabel.setContents(NO_JOB_SELECED);
+        placeHolderLabel.show();
+        resultMapLabel.hide();
+        resultMap.hide();
     }
 
-    @Override
-    public void jobsUpdating() {
-
+    private void showJobNotFinished(Job job) {
+        placeHolderLabel.setContents("Job[<b>" + job.getId() + "</b>] is not finished.");
+        placeHolderLabel.show();
+        resultMapLabel.hide();
+        resultMap.hide();
     }
 
-    @Override
-    public void jobSubmitted(Job j) {
+    private void showFinishedJobSelected(Job job) {
+        if (!job.getResultMap().isEmpty()) {
+            resultMapLabel.setContents("<h3>Result Map</h3>");
+            resultMapLabel.show();
 
+            DetailViewerField[] detailViewerFields = job.getResultMap()
+                                                        .entrySet()
+                                                        .stream()
+                                                        .map(entry -> new DetailViewerField(entry.getKey(),
+                                                                                            entry.getKey()))
+                                                        .toArray(DetailViewerField[]::new);
+            resultMap.setFields(detailViewerFields);
+            DetailViewerRecord record = new DetailViewerRecord();
+            job.getResultMap().entrySet().forEach(entry -> record.setAttribute(entry.getKey(), entry.getValue()));
+            resultMap.setData(new DetailViewerRecord[] { record });
+            resultMap.show();
+        } else {
+            resultMapLabel.setContents("<h3>Empty Result Map</h3>");
+            resultMapLabel.show();
+
+            resultMap.hide();
+        }
+
+        placeHolderLabel.hide();
     }
+
 }
