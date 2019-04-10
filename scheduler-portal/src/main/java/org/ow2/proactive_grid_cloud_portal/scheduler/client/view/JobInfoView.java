@@ -139,10 +139,12 @@ public class JobInfoView extends InfoView<Job>
         root.setWidth100();
 
         this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
+        this.genericInformationGrid.showTopMargin();
         this.genericInformationGrid.setWidth100();
         this.genericInformationGrid.hide();
 
         this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        this.variablesGrid.showTopMargin();
         this.variablesGrid.setWidth100();
         this.variablesGrid.hide();
 

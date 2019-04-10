@@ -83,6 +83,8 @@ public class JobsModel {
      */
     private FilterModel filterModel;
 
+    private Map<String, Map<String, String>> preciousResultMetadata;
+
     /**
      * Builds a jobs model from the scheduler parent model.
      * @param parentModel the scheduler parent model.
@@ -254,5 +256,13 @@ public class JobsModel {
 
     public void setSelectedJobsIds(List<Integer> selectedJobsIds) {
         this.selectedJobsIds = selectedJobsIds;
+    }
+
+    public Map<String, Map<String, String>> getPreciousResultMetadata() {
+        return preciousResultMetadata;
+    }
+
+    public void setPreciousResultMetadata(Map<String, Map<String, String>> preciousResultMetadata) {
+        this.preciousResultMetadata = preciousResultMetadata;
     }
 }

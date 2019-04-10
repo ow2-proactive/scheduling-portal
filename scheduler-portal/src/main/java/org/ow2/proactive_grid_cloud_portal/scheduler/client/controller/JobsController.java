@@ -531,6 +531,35 @@ public class JobsController {
                                       });
     }
 
+    public void fetchMetadataOfPreciousResults() {
+        Integer jobId = model.getSelectedJob().getId();
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.metadataOfPreciousResults(LoginModel.getInstance().getSessionId(),
+                                            jobId.toString(),
+                                            new AsyncCallback<String>() {
+
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    LogModel.getInstance()
+                                                            .logCriticalMessage("Error while fetching metadata of precious results:\n" +
+                                                                                JSONUtils.getJsonErrorMessage(caught));
+                                                }
+
+                                                @Override
+                                                public void onSuccess(String result) {
+                                                    LogModel.getInstance().logMessage(result);
+                                                    //                    Map hashMap = new ObjectMapper().readValue(result, HashMap.class);
+                                                    Map<String, String> resultMap = new HashMap<>();
+                                                    resultMap.put("content", result);
+                                                    Map<String, Map<String, String>> resultMapMap = new HashMap<>();
+                                                    resultMapMap.put("content1", resultMap);
+                                                    //                    model.setPreciousResultMetadata(hashMap);
+                                                    model.setPreciousResultMetadata(resultMapMap);
+                                                }
+                                            });
+
+    }
+
     /**
      * Fetch jobs state revision. If revision is more recent, fetch jobs.
      */

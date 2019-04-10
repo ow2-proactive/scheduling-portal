@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.Map;
+
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
@@ -49,7 +51,10 @@ public class JobResultView implements JobSelectedListener {
 
     private KeyValueGrid resultMap;
 
+    private SchedulerController controller;
+
     public JobResultView(SchedulerController controller) {
+        this.controller = controller;
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
@@ -79,12 +84,16 @@ public class JobResultView implements JobSelectedListener {
 
     @Override
     public void jobSelected(Job job) {
-        if (job.getStatus().equals(JobStatus.FINISHED) || job.getStatus().equals(JobStatus.FAILED) ||
-            job.getStatus().equals(JobStatus.KILLED) || job.getStatus().equals(JobStatus.CANCELED)) {
+        if (isFinished(job)) {
             showFinishedJobSelected(job);
         } else {
             showJobNotFinished(job);
         }
+    }
+
+    private boolean isFinished(Job job) {
+        return job.getStatus().equals(JobStatus.FINISHED) || job.getStatus().equals(JobStatus.FAILED) ||
+               job.getStatus().equals(JobStatus.KILLED) || job.getStatus().equals(JobStatus.CANCELED);
     }
 
     @Override
@@ -94,7 +103,11 @@ public class JobResultView implements JobSelectedListener {
 
     @Override
     public void selectedJobUpdated(Job job) {
-        // nothing to do
+        if (isFinished(job)) {
+            showFinishedJobSelected(job);
+        } else {
+            showJobNotFinished(job);
+        }
     }
 
     private void showNoJobSelected() {
@@ -113,6 +126,9 @@ public class JobResultView implements JobSelectedListener {
         resultMap.buildEntries(job.getResultMap());
         resultMap.show();
         placeHolderLabel.hide();
+        //        controller.getExecutionController().getJobsController().fetchMetadataOfPreciousResults();
+        //        Map<String, Map<String, String>> preciousResultMetadata = controller.getExecutionController().getJobsController().getModel().getPreciousResultMetadata();
+        //        test.setContents(preciousResultMetadata.toString());
     }
 
 }

@@ -611,6 +611,17 @@ public interface RestClient {
             @PathParam("taskid") String taskId);
 
     /**
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job to which the task belongs
+     * @return all precious task results' metadata associated to the <code>jobId</code>
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/tasks/results/precious/metadata")
+    @Produces("application/json")
+    InputStream metadataOfPreciousResults(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
+
+    /**
      * Gets the serialized result of a task.
      *
      * @param sessionId the session id of the user which is logged in

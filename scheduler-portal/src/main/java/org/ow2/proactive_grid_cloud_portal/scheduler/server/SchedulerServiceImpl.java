@@ -356,6 +356,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                taskId));
     }
 
+    public String metadataOfPreciousResults(String sessionId, String jobId)
+            throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.metadataOfPreciousResults(sessionId,
+                                                                                                      jobId));
+    }
+
     /*
      * (non-Javadoc)
      *
