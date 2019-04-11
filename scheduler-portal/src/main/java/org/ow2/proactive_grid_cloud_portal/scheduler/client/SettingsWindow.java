@@ -126,28 +126,19 @@ public class SettingsWindow {
 
         final IButton applyButton = new IButton("Ok");
         applyButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        applyButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                settingsController.applySettings(form, false);
+        applyButton.addClickHandler(event -> {
+            boolean isApplied = settingsController.applySettings(form, false);
+            if (isApplied) {
                 window.hide();
             }
         });
 
         final IButton resetButton = new IButton("Reset");
-        resetButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                settingsController.resetSettings(form);
-            }
-        });
+        resetButton.addClickHandler(event -> settingsController.resetSettings(form));
 
         final IButton cancelButton = new IButton("Cancel");
         cancelButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                window.hide();
-            }
-        });
+        cancelButton.addClickHandler(event -> window.hide());
 
         HLayout vl = new HLayout();
         vl.setAlign(Alignment.RIGHT);
