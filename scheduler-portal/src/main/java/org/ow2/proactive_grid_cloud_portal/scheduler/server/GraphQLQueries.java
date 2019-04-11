@@ -221,12 +221,12 @@ public final class GraphQLQueries {
                     case USER: {
 
                         if (constraint.getAction() == Action.EQUALS) {
-                            if (user == null)
-                                user = value;
-                            else if (value != user)
+                            if (userFilter == null)
+                                userFilter = value;
+                            else if (value != userFilter)
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
-                            user = filter;
+                            userFilter = filter;
                         break;
                     }
 
@@ -296,7 +296,7 @@ public final class GraphQLQueries {
 
         if (userFilter != null)
             input.owner(userFilter);
-        else
+        else if (user != null)
             input.owner(user);
 
         if (name != null)
