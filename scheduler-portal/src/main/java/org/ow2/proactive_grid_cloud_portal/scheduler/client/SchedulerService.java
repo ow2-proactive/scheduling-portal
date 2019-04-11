@@ -428,6 +428,6 @@ public interface SchedulerService extends RemoteService {
 
     void removeThirdPartyCredential(String sessionId, String key) throws RestServerException;
 
-    String metadataOfPreciousResults(String sessionId, String jobId) throws ServiceException, RestServerException;
+    String getPreciousTaskName(String sessionId, String jobId) throws ServiceException, RestServerException;
 
 }

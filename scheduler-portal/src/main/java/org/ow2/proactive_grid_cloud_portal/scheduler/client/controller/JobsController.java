@@ -45,7 +45,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskResultData;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
@@ -55,7 +54,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -547,37 +545,36 @@ public class JobsController {
         }
         Integer jobId = model.getSelectedJob().getId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        metadataRequest = scheduler.metadataOfPreciousResults(LoginModel.getInstance().getSessionId(),
-                                                              jobId.toString(),
-                                                              new AsyncCallback<String>() {
+        metadataRequest = scheduler.getPreciousTaskName(LoginModel.getInstance().getSessionId(),
+                                                        jobId.toString(),
+                                                        new AsyncCallback<String>() {
 
-                                                                  @Override
-                                                                  public void onFailure(Throwable caught) {
-                                                                      LogModel.getInstance()
-                                                                              .logCriticalMessage("Error while fetching metadata of precious results:\n" +
-                                                                                                  JSONUtils.getJsonErrorMessage(caught));
-                                                                  }
+                                                            @Override
+                                                            public void onFailure(Throwable caught) {
+                                                                LogModel.getInstance()
+                                                                        .logCriticalMessage("Error while fetching metadata of precious results:\n" +
+                                                                                            JSONUtils.getJsonErrorMessage(caught));
+                                                            }
 
-                                                                  @Override
-                                                                  public void onSuccess(String jsonString) {
-                                                                      try {
-                                                                          LogModel.getInstance().logMessage(jsonString);
-                                                                          JSONArray array = parseJSON(jsonString).isArray();
-                                                                          List<TaskResultData> taskResultDataList = new ArrayList<>(array.size());
-                                                                          for (int i = 0; i < array.size(); ++i) {
-                                                                              JSONObject object = array.get(i)
-                                                                                                       .isObject();
-                                                                              TaskResultData resultData = TaskResultData.parseJson(object);
-                                                                              taskResultDataList.add(resultData);
-                                                                          }
+                                                            @Override
+                                                            public void onSuccess(String jsonString) {
+                                                                try {
+                                                                    JSONArray array = parseJSON(jsonString).isArray();
+                                                                    List<String> preciousTaskNames = new ArrayList<>(array.size());
+                                                                    for (int i = 0; i < array.size(); ++i) {
+                                                                        String taskName = array.get(i)
+                                                                                               .isString()
+                                                                                               .stringValue();
+                                                                        preciousTaskNames.add(taskName);
+                                                                    }
 
-                                                                          getModel().setTaskResults(taskResultDataList);
-                                                                      } catch (JSONException e) {
-                                                                          LogModel.getInstance()
-                                                                                  .logCriticalMessage(e.getMessage());
-                                                                      }
-                                                                  }
-                                                              });
+                                                                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
+                                                                } catch (JSONException e) {
+                                                                    LogModel.getInstance()
+                                                                            .logCriticalMessage(e.getMessage());
+                                                                }
+                                                            }
+                                                        });
     }
 
     /**

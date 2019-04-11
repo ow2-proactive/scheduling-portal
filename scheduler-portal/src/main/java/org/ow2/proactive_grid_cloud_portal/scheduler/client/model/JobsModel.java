@@ -34,7 +34,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskResultListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskResultData;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
@@ -259,8 +258,8 @@ public class JobsModel {
         taskResultListeners.add(listener);
     }
 
-    public void setTaskResults(List<TaskResultData> result) {
-        taskResultListeners.forEach(listener -> listener.taskResultLoaded(result));
+    public void setPreciousTaskNamesLoaded(List<String> result) {
+        taskResultListeners.forEach(listener -> listener.preciousTaskNamesLoaded(result));
     }
 
     public List<Integer> getSelectedJobsIds() {

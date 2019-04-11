@@ -57,7 +57,7 @@ public class SchedulerListeners {
     }
 
     public interface TaskResultListener {
-        void taskResultLoaded(List<TaskResultData> result);
+        void preciousTaskNamesLoaded(List<String> preciousTaskNames);
     }
 
     public interface JobSelectedListener {

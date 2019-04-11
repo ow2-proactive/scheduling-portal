@@ -194,29 +194,26 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
     }
 
     @Override
-    public void taskResultLoaded(List<TaskResultData> result) {
-        HLayout[] iButtons = result.stream().map(resultData -> {
+    public void preciousTaskNamesLoaded(List<String> preciousTaskNames) {
+        HLayout[] iButtons = preciousTaskNames.stream().map(preciousTask -> {
             HLayout row = new HLayout();
             row.setWidth100();
             row.setMargin(10);
 
-            Label label = new Label(resultData.getReadableName());
+            Label label = new Label(preciousTask);
             row.addMember(label);
 
             IButton openInBrowser = new IButton("Open in browser");
             openInBrowser.setLeft(20);
             openInBrowser.setWidth(200);
 
-            openInBrowser.addClickHandler(event -> doDownload(resultData.getReadableName(),
-                                                              downloadForm,
-                                                              "browser",
-                                                              "_blank"));
+            openInBrowser.addClickHandler(event -> doDownload(preciousTask, downloadForm, "browser", "_blank"));
             row.addMember(openInBrowser);
 
             IButton saveAsFile = new IButton("Save as file");
             saveAsFile.setLeft(20);
             saveAsFile.setWidth(200);
-            saveAsFile.addClickHandler(event -> doDownload(resultData.getReadableName(), downloadForm, "file", "_top"));
+            saveAsFile.addClickHandler(event -> doDownload(preciousTask, downloadForm, "file", "_top"));
             row.addMember(saveAsFile);
 
             return row;

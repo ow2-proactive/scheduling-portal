@@ -619,7 +619,7 @@ public interface RestClient {
     @GZIP
     @Path("jobs/{jobid}/tasks/results/precious/metadata")
     @Produces("application/json")
-    InputStream metadataOfPreciousResults(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
+    InputStream getPreciousTaskName(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
      * Gets the serialized result of a task.
