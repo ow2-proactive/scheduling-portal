@@ -158,6 +158,7 @@ public final class GraphQLQueries {
         long afterSubmittedTime = -1;
         long beforeSubmittedTime = -1;
 
+        int valueAsInteger;
         String filter;
         long dateInMs;
 
@@ -170,7 +171,15 @@ public final class GraphQLQueries {
 
                     case ID: {
 
+                        // Consider only parseable ids.
+                        try {
+                            valueAsInteger = Integer.valueOf(value);
+                        } catch (NumberFormatException e) {
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
                         switch (constraint.getAction()) {
+
                             case EQUALS:
                                 if (id == null)
                                     id = value;
@@ -178,11 +187,11 @@ public final class GraphQLQueries {
                                     return input.jobName(RETURN_NOTHING_FILTER).build();
                                 break;
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterId == null || Integer.valueOf(value) > Integer.valueOf(afterId))
+                                if (afterId == null || valueAsInteger > Integer.valueOf(afterId))
                                     afterId = value;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeId == null || Integer.valueOf(value) < Integer.valueOf(beforeId))
+                                if (beforeId == null || valueAsInteger < Integer.valueOf(beforeId))
                                     beforeId = value;
                                 break;
                             default:
