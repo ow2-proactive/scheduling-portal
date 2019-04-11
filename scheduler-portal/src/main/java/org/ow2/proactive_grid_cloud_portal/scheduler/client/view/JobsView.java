@@ -131,7 +131,7 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
 
     @Override
     protected Label getLabel() {
-        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br>Be aware that <b> using multiple filters on the same criteria</b> (id, priority,..) lead in most cases to <b>only consider your last filter</b>.");
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br>Be aware that <b> using \"Match all\" with multiple filters on the same criteria</b> (id, priority,..) leads in most cases to <b>only consider your last filter</b>.");
         label.setHeight(20);
         return label;
     }
