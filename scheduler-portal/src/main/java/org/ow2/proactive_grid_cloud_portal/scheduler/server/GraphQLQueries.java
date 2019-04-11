@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +36,6 @@ import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Action;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Constraint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
@@ -48,6 +46,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
  * @since Mar 8, 2017
  */
 public final class GraphQLQueries {
+
+    private static final String RETURN_NOTHING_FILTER = "RETURN_NOTHING_FILTER";
 
     private static GraphQLQueries client;
 
@@ -147,24 +147,38 @@ public final class GraphQLQueries {
         input.status(statusNames);
 
         String id = null;
+        String afterId = null;
+        String beforeId = null;
+        String status = null;
         String priority = null;
+        String userFilter = null;
         String name = null;
-        String statusString = null;
         String projectName = null;
+        long afterSubmittedTime = -1;
+        long beforeSubmittedTime = -1;
 
         for (Constraint constraint : constraints) {
             String value = constraint.getValue();
             switch (constraint.getTargetField()) {
                 case ID: {
+
                     switch (constraint.getAction()) {
                         case EQUALS:
-                            id = getValue(id, value);
+                            if (value != null) {
+                                if (id == null)
+                                    id = value;
+                                else if (value != id)
+                                    return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
                             break;
                         case GREATER_THAN_OR_EQUAL_TO:
-                            input.afterId(value);
+                            if (value != null && (afterId == null || Integer.valueOf(value) > Integer.valueOf(afterId)))
+                                afterId = value;
                             break;
                         case LESS_THAN_OR_EQUAL_TO:
-                            input.beforeId(value);
+                            if (value != null &&
+                                (beforeId == null || Integer.valueOf(value) < Integer.valueOf(beforeId)))
+                                beforeId = value;
                             break;
                         default:
                             break;
@@ -172,35 +186,140 @@ public final class GraphQLQueries {
                     break;
                 }
                 case STATE: {
-                    statusString = getValue(statusString, value.toUpperCase());
+
+                    if (value != null) {
+                        if (status == null)
+                            status = value.toUpperCase();
+                        else if (value.toUpperCase() != status)
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                    }
                     break;
                 }
                 case PRIORITY: {
-                    priority = getValue(priority, value.toUpperCase());
+
+                    if (value != null) {
+                        if (priority == null)
+                            priority = value.toUpperCase();
+                        else if (value.toUpperCase() != priority)
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                    }
                     break;
                 }
                 case USER: {
-                    user = getFilteringString(constraint.getAction(), user, value);
+
+                    switch (constraint.getAction()) {
+                        case EQUALS:
+                            if (value != null) {
+                                if (userFilter == null)
+                                    userFilter = value;
+                                else if (value != userFilter)
+                                    return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
+                            break;
+                        case NOT_EQUAL:
+                            if (value != null)
+                                user = "!" + value;
+                            break;
+                        case CONTAINS:
+                            if (value != null)
+                                user = "*" + value + "*";
+                            break;
+                        case NOT_CONTAIN:
+                            if (value != null)
+                                user = "!*" + value + "*";
+                            break;
+                        case STARTS_WITH:
+                            if (value != null &&
+                                (user == null || (value.startsWith(user) && value.length() > user.length())))
+                                user = value + "*";
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case NAME: {
-                    name = getFilteringString(constraint.getAction(), name, value);
+
+                    switch (constraint.getAction()) {
+                        case EQUALS:
+                            if (value != null) {
+                                if (name == null)
+                                    name = value;
+                                else if (value != name)
+                                    return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
+                            break;
+                        case NOT_EQUAL:
+                            if (value != null)
+                                name = "!" + value;
+                            break;
+                        case CONTAINS:
+                            if (value != null)
+                                name = "*" + value + "*";
+                            break;
+                        case NOT_CONTAIN:
+                            if (value != null)
+                                name = "!*" + value + "*";
+                            break;
+                        case STARTS_WITH:
+                            if (value != null &&
+                                (name == null || (value.startsWith(name) && value.length() > name.length())))
+                                name = value + "*";
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case PROJECT_NAME: {
-                    projectName = getFilteringString(constraint.getAction(), projectName, value);
+
+                    switch (constraint.getAction()) {
+                        case EQUALS:
+                            if (value != null) {
+                                if (projectName == null)
+                                    projectName = value;
+                                else if (value != projectName)
+                                    return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
+                            break;
+                        case NOT_EQUAL:
+                            if (value != null)
+                                projectName = "!" + value;
+                            break;
+                        case CONTAINS:
+                            if (value != null)
+                                projectName = "*" + value + "*";
+                            break;
+                        case NOT_CONTAIN:
+                            if (value != null)
+                                projectName = "!*" + value + "*";
+                            break;
+                        case STARTS_WITH:
+                            if (value != null &&
+                                (projectName == null ||
+                                 (value.startsWith(projectName) && value.length() > projectName.length())))
+                                projectName = value + "*";
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case SUBMITTED_TIME: {
                     try {
-                        Date date = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
-                        long datemillis = date.getTime();
+
+                        long dateInMs = -1;
+                        if (value != null)
+                            dateInMs = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate().getTime();
+
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                input.afterSubmittedTime("" + datemillis);
+                                if (dateInMs != -1 && (afterSubmittedTime == -1 || dateInMs > afterSubmittedTime))
+                                    afterSubmittedTime = dateInMs;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                input.beforeSubmittedTime("" + datemillis);
+                                if (dateInMs != -1 && (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime))
+                                    beforeSubmittedTime = dateInMs;
                                 break;
                             default:
                                 break;
@@ -213,45 +332,32 @@ public final class GraphQLQueries {
             }
         }
 
-        if (user != null)
-            input.owner(user);
+        // Update the job input object and return it
         if (id != null)
             input.id(id);
+        if (afterId != null)
+            input.afterId(afterId);
+        if (beforeId != null)
+            input.beforeId(beforeId);
+        if (status != null)
+            input.status(status);
         if (priority != null)
             input.priority(priority);
+
+        if (userFilter != null)
+            input.owner(userFilter);
+        else
+            input.owner(user);
+
         if (name != null)
             input.jobName(name);
-        if (statusString != null)
-            input.status(statusString);
         if (projectName != null)
             input.projectName(projectName);
+        if (afterSubmittedTime != -1)
+            input.afterSubmittedTime("" + afterSubmittedTime);
+        if (beforeSubmittedTime != -1)
+            input.beforeSubmittedTime("" + beforeSubmittedTime);
 
         return input.build();
     }
-
-    private String getValue(String previousConstraint, String constraint) {
-        if (previousConstraint == null)
-            return constraint;
-        if (constraint == null)
-            return previousConstraint;
-        return constraint;
-    }
-
-    private String getFilteringString(Action action, String previousConstraint, String constraint) {
-        switch (action) {
-            case EQUALS:
-                return getValue(previousConstraint, constraint);
-            case NOT_EQUAL:
-                return getValue(previousConstraint, "!" + constraint);
-            case CONTAINS:
-                return getValue(previousConstraint, "*" + constraint + "*");
-            case NOT_CONTAIN:
-                return getValue(previousConstraint, "!*" + constraint + "*");
-            case STARTS_WITH:
-                return getValue(previousConstraint, constraint + "*");
-            default:
-                return previousConstraint;
-        }
-    }
-
 }
