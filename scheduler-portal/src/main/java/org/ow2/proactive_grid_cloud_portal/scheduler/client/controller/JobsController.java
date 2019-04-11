@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -42,13 +45,17 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskResultData;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -531,33 +538,46 @@ public class JobsController {
                                       });
     }
 
+    private Request metadataRequest;
+
     public void fetchMetadataOfPreciousResults() {
+        if (metadataRequest != null) {
+            metadataRequest.cancel();
+            metadataRequest = null;
+        }
         Integer jobId = model.getSelectedJob().getId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.metadataOfPreciousResults(LoginModel.getInstance().getSessionId(),
-                                            jobId.toString(),
-                                            new AsyncCallback<String>() {
+        metadataRequest = scheduler.metadataOfPreciousResults(LoginModel.getInstance().getSessionId(),
+                                                              jobId.toString(),
+                                                              new AsyncCallback<String>() {
 
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    LogModel.getInstance()
-                                                            .logCriticalMessage("Error while fetching metadata of precious results:\n" +
-                                                                                JSONUtils.getJsonErrorMessage(caught));
-                                                }
+                                                                  @Override
+                                                                  public void onFailure(Throwable caught) {
+                                                                      LogModel.getInstance()
+                                                                              .logCriticalMessage("Error while fetching metadata of precious results:\n" +
+                                                                                                  JSONUtils.getJsonErrorMessage(caught));
+                                                                  }
 
-                                                @Override
-                                                public void onSuccess(String result) {
-                                                    LogModel.getInstance().logMessage(result);
-                                                    //                    Map hashMap = new ObjectMapper().readValue(result, HashMap.class);
-                                                    Map<String, String> resultMap = new HashMap<>();
-                                                    resultMap.put("content", result);
-                                                    Map<String, Map<String, String>> resultMapMap = new HashMap<>();
-                                                    resultMapMap.put("content1", resultMap);
-                                                    //                    model.setPreciousResultMetadata(hashMap);
-                                                    model.setPreciousResultMetadata(resultMapMap);
-                                                }
-                                            });
+                                                                  @Override
+                                                                  public void onSuccess(String jsonString) {
+                                                                      try {
+                                                                          LogModel.getInstance().logMessage(jsonString);
+                                                                          JSONArray array = parseJSON(jsonString).isArray();
+                                                                          List<TaskResultData> taskResultDataList = new ArrayList<>(array.size());
+                                                                          for (int i = 0; i < array.size(); ++i) {
+                                                                              JSONObject object = array.get(i)
+                                                                                                       .isObject();
+                                                                              TaskResultData resultData = TaskResultData.parseJson(object);
+                                                                              taskResultDataList.add(resultData);
+                                                                          }
 
+                                                                          getModel().setTaskResults(taskResultDataList);
+                                                                      } catch (JSONException e) {
+                                                                          LogModel.getInstance()
+                                                                                  .logCriticalMessage(e.getMessage());
+                                                                      }
+                                                                  }
+                                                              });
     }
 
     /**

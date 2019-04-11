@@ -25,39 +25,47 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Map;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskResultListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskResultData;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
-public class JobResultView implements JobSelectedListener {
+public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     private static final String NO_JOB_SELECED = "No job selected.";
 
     /** label when no job is selected or job is not finished*/
     private Label placeHolderLabel;
 
+    private Label preciousResultLabel;
+
     private KeyValueGrid resultMap;
 
     private SchedulerController controller;
+
+    private VLayout preciousButtons;
 
     public JobResultView(SchedulerController controller) {
         this.controller = controller;
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
+        jobsModel.addTaskResultListener(this);
     }
 
     /**
@@ -67,6 +75,7 @@ public class JobResultView implements JobSelectedListener {
         Layout root = new VLayout();
         root.setWidth100();
         root.setHeight100();
+        root.setPadding(20);
 
         placeHolderLabel = new Label(NO_JOB_SELECED);
         placeHolderLabel.setWidth100();
@@ -77,6 +86,16 @@ public class JobResultView implements JobSelectedListener {
         resultMap.setWidth100();
         resultMap.hide();
         root.addMember(resultMap);
+
+        preciousResultLabel = new Label("Job Precious Results");
+        preciousResultLabel.setWidth100();
+        preciousResultLabel.hide();
+        root.addMember(preciousResultLabel);
+
+        preciousButtons = new VLayout();
+        preciousButtons.setMembersMargin(10);
+        preciousButtons.setWidth100();
+        root.addMember(preciousButtons);
 
         showNoJobSelected();
         return root;
@@ -114,21 +133,39 @@ public class JobResultView implements JobSelectedListener {
         placeHolderLabel.setContents(NO_JOB_SELECED);
         placeHolderLabel.show();
         resultMap.hide();
+        preciousButtons.hide();
     }
 
     private void showJobNotFinished(Job job) {
         placeHolderLabel.setContents("Job[<b>" + job.getId() + "</b>] is not finished.");
         placeHolderLabel.show();
         resultMap.hide();
+        preciousButtons.hide();
     }
 
     private void showFinishedJobSelected(Job job) {
+        placeHolderLabel.setContents("Loading...");
+        placeHolderLabel.show();
         resultMap.buildEntries(job.getResultMap());
-        resultMap.show();
-        placeHolderLabel.hide();
-        //        controller.getExecutionController().getJobsController().fetchMetadataOfPreciousResults();
-        //        Map<String, Map<String, String>> preciousResultMetadata = controller.getExecutionController().getJobsController().getModel().getPreciousResultMetadata();
-        //        test.setContents(preciousResultMetadata.toString());
+        resultMap.hide();
+        preciousResultLabel.hide();
+
+        controller.getExecutionController().getJobsController().fetchMetadataOfPreciousResults();
     }
 
+    @Override
+    public void taskResultLoaded(List<TaskResultData> result) {
+        IButton[] iButtons = result.stream().map(resultData -> {
+            IButton button = new IButton(resultData.getReadableName());
+            button.setLeft(20);
+            button.setWidth(200);
+            return button;
+        }).toArray(IButton[]::new);
+        preciousButtons.setMembers(iButtons);
+
+        placeHolderLabel.hide();
+        resultMap.show();
+        preciousResultLabel.show();
+        preciousButtons.show();
+    }
 }

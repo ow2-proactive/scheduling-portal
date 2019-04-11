@@ -392,5 +392,5 @@ public interface SchedulerServiceAsync {
 
     void removeThirdPartyCredential(String sessionId, String key, AsyncCallback<Void> asyncCallback);
 
-    void metadataOfPreciousResults(String sessionId, String jobId, AsyncCallback<String> callback);
+    Request metadataOfPreciousResults(String sessionId, String jobId, AsyncCallback<String> callback);
 }

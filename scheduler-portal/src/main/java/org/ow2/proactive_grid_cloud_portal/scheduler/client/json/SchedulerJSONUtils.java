@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,5 +231,47 @@ public class SchedulerJSONUtils extends JSONUtils {
         }
 
         return Job.parseJSONInfo(jsonJobInfo);
+    }
+
+    public static Long getLongOrElse(JSONObject jsonObject, String attributeName, Long defaultValue) {
+        if (!jsonObject.containsKey(attributeName)) {
+            return defaultValue;
+        }
+        JSONNumber result = jsonObject.get(attributeName).isNumber();
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return Double.valueOf(result.doubleValue()).longValue();
+        }
+    }
+
+    public static String getStringOrElse(JSONObject jsonObject, String attributeName, String defaultValue) {
+        if (!jsonObject.containsKey(attributeName)) {
+            return defaultValue;
+        }
+        JSONString result = jsonObject.get(attributeName).isString();
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return result.stringValue();
+        }
+    }
+
+    public static Map<String, String> extractMap(JSONValue mapValue) {
+        if (mapValue != null) {
+            JSONArray keyValueArray = mapValue.isArray();
+            if (keyValueArray != null) {
+                int arraySize = keyValueArray.size();
+                Map<String, String> resultMap = new HashMap<>(arraySize);
+                for (int i = 0; i < keyValueArray.size(); i++) {
+                    JSONObject object = keyValueArray.get(i).isObject();
+                    String key = object.get("key").isString().stringValue();
+                    String value = object.get("value").isString().stringValue();
+                    resultMap.put(key, value);
+                }
+                return resultMap;
+            }
+        }
+        return Collections.emptyMap();
     }
 }
