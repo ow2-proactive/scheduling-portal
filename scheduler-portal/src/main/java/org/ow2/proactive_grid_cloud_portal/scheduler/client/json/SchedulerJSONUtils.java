@@ -64,7 +64,6 @@ public class SchedulerJSONUtils extends JSONUtils {
     /**
      * Parse a paginated list of jobs
      * @param jsonString the JSON as a string representing the paginated list of tasks.
-     * @param paginationController 
      * @return An object wrapping the list of tasks and the total number of tasks without pagination.
      * @throws JSONException if it fails to parse the JSON.
      */

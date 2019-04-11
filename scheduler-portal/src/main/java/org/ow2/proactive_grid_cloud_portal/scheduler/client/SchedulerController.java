@@ -601,14 +601,10 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                "FormattedJobSubmittingPeriod",
                                                                "MeanJobPendingTime",
                                                                "ConnectedUsersCount",
-                                                               "FinishedTasksCount",
                                                                "RunningJobsCount",
-                                                               "RunningTasksCount",
                                                                "FormattedMeanJobPendingTime",
                                                                "MeanJobExecutionTime",
-                                                               "PendingTasksCount",
                                                                "FinishedJobsCount",
-                                                               "TotalTasksCount",
                                                                "FormattedMeanJobExecutionTime",
                                                                "TotalJobsCount",
                                                                "PendingJobsCount",
@@ -618,10 +614,26 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                "KilledJobsCount",
                                                                "CancelledJobsCount",
                                                                "FailedJobsCount",
-                                                               "NeededNodes");
+                                                               "NeededNodes",
+                                                               "SubmittedTasksCount",
+                                                               "PendingTasksCount",
+                                                               "PausedTasksCount",
+                                                               "RunningTasksCount",
+                                                               "FinishedTasksCount",
+                                                               "WaitingOnErrorTasksCount",
+                                                               "WaitingOnFailureTasksCount",
+                                                               "FailedTasksCount",
+                                                               "NotStartedTasksCount",
+                                                               "NotRestartedTasksCount",
+                                                               "AbortedTasksCount",
+                                                               "FaultyTasksCount",
+                                                               "SkippedTasksCount",
+                                                               "InErrorTasksCount",
+                                                               "TotalTasksCount");
                             for (String propName : aList) {
                                 stats.put(propName, getStringOrElse(json, propName, "0"));
                             }
+
                             model.setSchedulerStatistics(stats);
 
                             long t = (System.currentTimeMillis() - t1);
@@ -682,6 +694,9 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     private static String getStringOrElse(JSONObject jsonObject, String attributeName, String defaultValue) {
+        if (!jsonObject.containsKey(attributeName)) {
+            return defaultValue;
+        }
         JSONString result = jsonObject.get(attributeName).isString();
         if (result == null) {
             return defaultValue;

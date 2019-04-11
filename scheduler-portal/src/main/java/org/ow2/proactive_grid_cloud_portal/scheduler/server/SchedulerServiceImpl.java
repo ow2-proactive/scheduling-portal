@@ -583,6 +583,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                       limit));
     }
 
+    @Override
+    public String getTasks(final String sessionId, final String jobId, final int offset, final int limit,
+            final String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesPaginated(sessionId,
+                                                                                                      jobId,
+                                                                                                      offset,
+                                                                                                      limit,
+                                                                                                      statusFilter));
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -591,13 +601,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang. String, java.lang.String, java.lang.String)
      */
     @Override
-    public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset,
-            final int limit) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagPaginated(sessionId,
-                                                                                                           jobId,
-                                                                                                           tag,
-                                                                                                           offset,
-                                                                                                           limit));
+    public String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
+            String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
+                                                                                                                    jobId,
+                                                                                                                    offset,
+                                                                                                                    limit,
+                                                                                                                    tag,
+                                                                                                                    statusFilter));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,

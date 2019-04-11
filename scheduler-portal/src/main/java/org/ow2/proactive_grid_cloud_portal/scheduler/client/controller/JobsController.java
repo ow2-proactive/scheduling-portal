@@ -429,6 +429,7 @@ public class JobsController {
                         LoginModel.getInstance().getLogin(),
                         new HashMap<>(),
                         new HashMap<>(),
+                        new HashMap<>(),
                         0,
                         0,
                         0,

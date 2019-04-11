@@ -50,6 +50,8 @@ public class TasksNavigationModel {
      */
     private String tasksTagFilter = "";
 
+    private String statusFilter = "";
+
     /**
      * Available tags suggestions for filtering.
      */
@@ -179,5 +181,13 @@ public class TasksNavigationModel {
      */
     public void clearTagSuggestions() {
         this.availableTags.clear();
+    }
+
+    public String getStatusFilter() {
+        return statusFilter;
+    }
+
+    public void setStatusFilter(String statusFilter) {
+        this.statusFilter = statusFilter;
     }
 }
