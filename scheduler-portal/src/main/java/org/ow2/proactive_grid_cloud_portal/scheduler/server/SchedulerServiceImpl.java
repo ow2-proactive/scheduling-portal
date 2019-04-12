@@ -356,6 +356,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                taskId));
     }
 
+    public String getPreciousTaskName(String sessionId, String jobId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getPreciousTaskName(sessionId, jobId));
+    }
+
     /*
      * (non-Javadoc)
      *
