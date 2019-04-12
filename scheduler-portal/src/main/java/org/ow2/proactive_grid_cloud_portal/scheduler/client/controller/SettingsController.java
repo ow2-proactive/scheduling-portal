@@ -58,10 +58,12 @@ public class SettingsController {
      * Apply new settings.
      * @param newSettings the form that contains the new settings to be applied.
      * @param forceRefresh true if the scheduler portal should refresh even if the value has not been modified.
+     * @return boolean to say if the settings could be applied (if validated)
      */
-    public void applySettings(DynamicForm newSettings, boolean forceRefresh) {
-        if (!newSettings.validate())
-            return;
+    public boolean applySettings(DynamicForm newSettings, boolean forceRefresh) {
+        if (!newSettings.validate()) {
+            return false;
+        }
 
         if (setSetting(SchedulerConfig.CLIENT_REFRESH_TIME, newSettings.getValueAsString("refreshTime")) ||
             forceRefresh) {
@@ -94,6 +96,7 @@ public class SettingsController {
                                .getTagSuggestionOracle()
                                .resetTagSuggestions();
         }
+        return true;
     }
 
     /**
