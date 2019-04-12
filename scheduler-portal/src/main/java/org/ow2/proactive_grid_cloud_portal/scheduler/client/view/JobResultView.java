@@ -39,7 +39,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskResultListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskResultData;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
@@ -47,6 +46,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGr
 import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.FormMethod;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -101,10 +101,12 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
         resultMap = new KeyValueGrid("Result Map");
         resultMap.setWidth100();
+        resultMap.setAutoHeight();
         resultMap.hide();
         root.addMember(resultMap);
 
         preciousResultLabel = new Label("<b>Job Precious Results:</b>");
+        preciousResultLabel.setAutoHeight();
         preciousResultLabel.setWidth100();
         preciousResultLabel.hide();
         root.addMember(preciousResultLabel);
@@ -198,20 +200,26 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         HLayout[] iButtons = preciousTaskNames.stream().map(preciousTask -> {
             HLayout row = new HLayout();
             row.setWidth100();
-            row.setMargin(10);
+            row.setMargin(1);
+            row.setPadding(1);
+            row.setAutoHeight();
+            row.setMembersMargin(10);
 
             Label label = new Label(preciousTask);
+            label.setWidth(100);
+            label.setHeight(22);
+            label.setValign(VerticalAlignment.CENTER);
             row.addMember(label);
 
             IButton openInBrowser = new IButton("Open in browser");
-            openInBrowser.setLeft(20);
             openInBrowser.setWidth(200);
+            openInBrowser.setHeight(22);
 
             openInBrowser.addClickHandler(event -> doDownload(preciousTask, downloadForm, "browser", "_blank"));
             row.addMember(openInBrowser);
 
             IButton saveAsFile = new IButton("Save as file");
-            saveAsFile.setLeft(20);
+            saveAsFile.setHeight(22);
             saveAsFile.setWidth(200);
             saveAsFile.addClickHandler(event -> doDownload(preciousTask, downloadForm, "file", "_top"));
             row.addMember(saveAsFile);
