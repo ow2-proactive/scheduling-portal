@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.joda.time.format.ISODateTimeFormat;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
@@ -47,6 +48,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
  * @since Mar 8, 2017
  */
 public final class GraphQLQueries {
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private static final String RETURN_NOTHING_FILTER = "RETURN_NOTHING_FILTER";
 
@@ -175,6 +178,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.valueOf(value);
                         } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing id filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -258,22 +262,26 @@ public final class GraphQLQueries {
 
                         try {
 
-                            dateInMs = ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate().getTime();
+                            dateInMs = DateTime.parse(value, DateTimeFormat.forPattern(DATE_FORMAT)).getMillis();
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Invalid value for field SUBMITTED_TIME : \"" + value +
+                                                     "\" is not a valid date. (" + DATE_FORMAT + ")",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
 
-                            switch (constraint.getAction()) {
-                                case GREATER_THAN_OR_EQUAL_TO:
-                                    if (afterSubmittedTime == -1 || dateInMs > afterSubmittedTime)
-                                        afterSubmittedTime = dateInMs;
-                                    break;
-                                case LESS_THAN_OR_EQUAL_TO:
-                                    if (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime)
-                                        beforeSubmittedTime = dateInMs;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        } catch (Exception e) {
-                            LOGGER.log(Level.SEVERE, "Error when parsing date filter \"" + value + "\"", e);
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterSubmittedTime == -1 || dateInMs > afterSubmittedTime)
+                                    afterSubmittedTime = dateInMs;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime)
+                                    beforeSubmittedTime = dateInMs;
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     }
