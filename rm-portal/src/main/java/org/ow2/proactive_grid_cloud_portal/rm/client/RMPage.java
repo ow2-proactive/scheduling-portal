@@ -282,7 +282,6 @@ public class RMPage implements LogListener {
         ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerHighlightedLinkButton();
         ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
 
-
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
         paShortcutsStrip.addButton(automationDashboardLinkButton);
