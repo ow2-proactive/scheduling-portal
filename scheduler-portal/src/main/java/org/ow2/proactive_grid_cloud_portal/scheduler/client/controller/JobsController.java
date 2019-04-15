@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -48,7 +51,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -529,6 +534,47 @@ public class JobsController {
                                               }
                                           }
                                       });
+    }
+
+    private Request metadataRequest;
+
+    public void fetchMetadataOfPreciousResults() {
+        if (metadataRequest != null) {
+            metadataRequest.cancel();
+            metadataRequest = null;
+        }
+        Integer jobId = model.getSelectedJob().getId();
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        metadataRequest = scheduler.getPreciousTaskName(LoginModel.getInstance().getSessionId(),
+                                                        jobId.toString(),
+                                                        new AsyncCallback<String>() {
+
+                                                            @Override
+                                                            public void onFailure(Throwable caught) {
+                                                                LogModel.getInstance()
+                                                                        .logCriticalMessage("Error while fetching metadata of precious results:\n" +
+                                                                                            JSONUtils.getJsonErrorMessage(caught));
+                                                            }
+
+                                                            @Override
+                                                            public void onSuccess(String jsonString) {
+                                                                try {
+                                                                    JSONArray array = parseJSON(jsonString).isArray();
+                                                                    List<String> preciousTaskNames = new ArrayList<>(array.size());
+                                                                    for (int i = 0; i < array.size(); ++i) {
+                                                                        String taskName = array.get(i)
+                                                                                               .isString()
+                                                                                               .stringValue();
+                                                                        preciousTaskNames.add(taskName);
+                                                                    }
+
+                                                                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
+                                                                } catch (JSONException e) {
+                                                                    LogModel.getInstance()
+                                                                            .logCriticalMessage(e.getMessage());
+                                                                }
+                                                            }
+                                                        });
     }
 
     /**

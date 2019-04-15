@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.OutputCon
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ResultController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLogsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
@@ -55,7 +57,6 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
@@ -631,7 +632,7 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                "InErrorTasksCount",
                                                                "TotalTasksCount");
                             for (String propName : aList) {
-                                stats.put(propName, getStringOrElse(json, propName, "0"));
+                                stats.put(propName, SchedulerJSONUtils.getStringOrElse(json, propName, "0"));
                             }
 
                             model.setSchedulerStatistics(stats);
@@ -691,18 +692,6 @@ public class SchedulerController extends Controller implements UncaughtException
             }
         };
         this.schedulerTimerUpdate.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
-    }
-
-    private static String getStringOrElse(JSONObject jsonObject, String attributeName, String defaultValue) {
-        if (!jsonObject.containsKey(attributeName)) {
-            return defaultValue;
-        }
-        JSONString result = jsonObject.get(attributeName).isString();
-        if (result == null) {
-            return defaultValue;
-        } else {
-            return result.stringValue();
-        }
     }
 
     /**

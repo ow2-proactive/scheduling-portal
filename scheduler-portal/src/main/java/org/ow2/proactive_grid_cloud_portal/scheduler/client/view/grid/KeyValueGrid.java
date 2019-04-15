@@ -64,7 +64,7 @@ public class KeyValueGrid extends VStack {
 
         keyValueGridLabel = new Label("<b>" + gridLabel + "</b>");
         keyValueGridLabel.setValign(VerticalAlignment.BOTTOM);
-        keyValueGridLabel.setHeight(30);
+        keyValueGridLabel.setAutoHeight();
 
         keyValueGrid = new ListGrid();
         keyValueGrid.setWidth100();
@@ -85,6 +85,10 @@ public class KeyValueGrid extends VStack {
         addMember(keyValueGrid);
 
         hide();
+    }
+
+    public void showTopMargin() {
+        keyValueGridLabel.setHeight(30);
     }
 
     /**

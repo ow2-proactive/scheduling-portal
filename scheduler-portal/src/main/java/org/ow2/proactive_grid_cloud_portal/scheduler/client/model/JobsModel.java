@@ -33,6 +33,7 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.TaskResultListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 
@@ -68,6 +69,8 @@ public class JobsModel {
      */
     private ArrayList<JobSelectedListener> jobSelectedListeners = null;
 
+    private List<TaskResultListener> taskResultListeners = null;
+
     /**
      * The parent model.
      */
@@ -83,6 +86,8 @@ public class JobsModel {
      */
     private FilterModel filterModel;
 
+    private Map<String, Map<String, String>> preciousResultMetadata;
+
     /**
      * Builds a jobs model from the scheduler parent model.
      * @param parentModel the scheduler parent model.
@@ -91,6 +96,7 @@ public class JobsModel {
         this.parentModel = parentModel;
         this.jobsUpdatedListeners = new ArrayList<>();
         this.jobSelectedListeners = new ArrayList<>();
+        this.taskResultListeners = new ArrayList<>();
         filterModel = new FilterModel();
     }
 
@@ -248,11 +254,27 @@ public class JobsModel {
         this.jobSelectedListeners.add(listener);
     }
 
+    public void addTaskResultListener(TaskResultListener listener) {
+        taskResultListeners.add(listener);
+    }
+
+    public void setPreciousTaskNamesLoaded(List<String> result) {
+        taskResultListeners.forEach(listener -> listener.preciousTaskNamesLoaded(result));
+    }
+
     public List<Integer> getSelectedJobsIds() {
         return selectedJobsIds;
     }
 
     public void setSelectedJobsIds(List<Integer> selectedJobsIds) {
         this.selectedJobsIds = selectedJobsIds;
+    }
+
+    public Map<String, Map<String, String>> getPreciousResultMetadata() {
+        return preciousResultMetadata;
+    }
+
+    public void setPreciousResultMetadata(Map<String, Map<String, String>> preciousResultMetadata) {
+        this.preciousResultMetadata = preciousResultMetadata;
     }
 }
