@@ -176,7 +176,7 @@ public final class GraphQLQueries {
 
                         // Consider only parseable ids.
                         try {
-                            valueAsInteger = Integer.valueOf(value);
+                            valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE, "Error when parsing id filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
