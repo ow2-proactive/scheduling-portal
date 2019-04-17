@@ -100,17 +100,17 @@ public class FilterView extends VStack {
         switch (field) {
             case ID:
                 try {
-                    Integer.valueOf(value);
+                    Integer.parseInt(value);
                 } catch (NumberFormatException e) {
-                    displayErrorMessage("Invalid value for field " + field + " : " + value + " is not an integer.");
+                    displayErrorMessage("Invalid value for field " + field + " : \"" + value + "\" is not an integer.");
                 }
                 break;
             case SUBMITTED_TIME:
                 try {
                     DateTimeFormat.getFormat(DATE_FORMAT).parse(value);
                 } catch (IllegalArgumentException e) {
-                    displayErrorMessage("Invalid value for field " + field + " : " + value + " is not a valid date. (" +
-                                        DATE_FORMAT + ")");
+                    displayErrorMessage("Invalid value for field " + field + " : \"" + value +
+                                        "\" is not a valid date. (" + DATE_FORMAT + ")");
                 }
                 break;
             default:
@@ -124,10 +124,6 @@ public class FilterView extends VStack {
 
         FilterModel model = new FilterModel();
         int widgetCount = filterPanel.getMembersLength();
-
-        if (widgetCount == 1 && ((RowFilter) filterPanel.getMember(0)).getValue().isEmpty()) {
-            return model;
-        }
 
         model.setMatchAny(matchAnyButton.getValue());
         for (int i = 0; i < widgetCount; i++) {
