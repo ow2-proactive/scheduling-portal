@@ -131,7 +131,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         statusesForm.addStyleName("form");
         statusesForm.setNumCols(10);
 
-        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Running", "Finished", "Error")
+        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Active", "Terminated", "Error")
                                                .map(status -> {
                                                    CheckboxItem checkboxItem = new CheckboxItem(status, status);
                                                    checkboxItem.setValue(true);
