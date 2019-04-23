@@ -99,12 +99,6 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         placeHolderLabel.setAlign(Alignment.CENTER);
         root.addMember(placeHolderLabel);
 
-        resultMap = new KeyValueGrid("Result Map");
-        resultMap.setWidth100();
-        resultMap.setAutoHeight();
-        resultMap.hide();
-        root.addMember(resultMap);
-
         preciousResultLabel = new Label("<b>Job Precious Results:</b>");
         preciousResultLabel.setAutoHeight();
         preciousResultLabel.setWidth100();
@@ -131,6 +125,12 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons.setMembersMargin(10);
         preciousButtons.setWidth100();
         root.addMember(preciousButtons);
+
+        resultMap = new KeyValueGrid("Result Map");
+        resultMap.setWidth100();
+        resultMap.setAutoHeight();
+        resultMap.hide();
+        root.addMember(resultMap);
 
         showNoJobSelected();
         return root;
