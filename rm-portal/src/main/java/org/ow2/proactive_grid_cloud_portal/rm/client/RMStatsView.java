@@ -53,6 +53,9 @@ import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import org.pepstock.charba.client.BarChart;
+import org.pepstock.charba.client.data.BarDataset;
+import org.pepstock.charba.client.enums.Position;
 
 
 /**
@@ -282,7 +285,18 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeColTable.addColumn(ColumnType.NUMBER, "Lost");
 
         nodeColChart = new ColumnChart(nodeColTable, nodeColOpts);
+
+        org.pepstock.charba.client.BarChart barChart = new BarChart();
+//        barChart.getOptions().setResponsive(true);
+//        barChart.getOptions().getLegend().setPosition(Position.TOP);
+//        barChart.getOptions().getTitle().setDisplay(true);
+//        barChart.getOptions().getTitle().setText("Nodes State");
+//        BarDataset barDataset = barChart.newDataset();
+//        barDataset.setData(1, 34, 55, 66);
+//        barChart.getData().setDatasets(barDataset);
+        nodeColPane.add(barChart);
         nodeColPane.add(nodeColChart);
+
 
         nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
         nodeColHeaderLabel.setHeight(24);
