@@ -131,20 +131,17 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         statusesForm.addStyleName("form");
         statusesForm.setNumCols(10);
 
-        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Active", "Terminated", "Error")
-                                               .map(status -> {
-                                                   CheckboxItem checkboxItem = new CheckboxItem(status, status);
-                                                   checkboxItem.setValue(true);
-                                                   checkboxItem.setWidth("9%");
-                                                   checkboxItem.addChangeHandler(event -> {
-                                                       String allFilters = setOneFilterValueReturnAll(status,
-                                                                                                      (Boolean) event.getValue());
-                                                       controller.fitlerByStatuses(allFilters);
-                                                   });
-                                                   setOneFilterValueReturnAll(status, true);
-                                                   return checkboxItem;
-                                               })
-                                               .collect(Collectors.toList());
+        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Current", "Past", "Error").map(status -> {
+            CheckboxItem checkboxItem = new CheckboxItem(status, status);
+            checkboxItem.setValue(true);
+            checkboxItem.setWidth("9%");
+            checkboxItem.addChangeHandler(event -> {
+                String allFilters = setOneFilterValueReturnAll(status, (Boolean) event.getValue());
+                controller.fitlerByStatuses(allFilters);
+            });
+            setOneFilterValueReturnAll(status, true);
+            return checkboxItem;
+        }).collect(Collectors.toList());
 
         statusesForm.setItems(statusBoxes.toArray(new CheckboxItem[0]));
 

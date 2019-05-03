@@ -86,10 +86,10 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
         chkPending = new CheckboxItem("pending", "Pending");
         chkPending.setValue(true);
         chkPending.addChangedHandler(event -> controller.fetchPending(chkPending.getValueAsBoolean()));
-        chkRunning = new CheckboxItem("running", "Active");
+        chkRunning = new CheckboxItem("running", "Current");
         chkRunning.setValue(true);
         chkRunning.addChangedHandler(event -> controller.fetchRunning(chkRunning.getValueAsBoolean()));
-        chkFinished = new CheckboxItem("finished", "Terminated");
+        chkFinished = new CheckboxItem("finished", "Past");
         chkFinished.setValue(true);
         chkFinished.addChangedHandler(event -> controller.fetchFinished(chkFinished.getValueAsBoolean()));
 
