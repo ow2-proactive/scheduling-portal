@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -157,8 +159,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId the id of the client which submits the job
      * @param file      the XML file that is submitted
      * @return an error message upon failure, "id=<jobId>" upon success
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public String submitXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/submit");
@@ -200,8 +200,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId the id of the client which submits the job
      * @param file      the XML file that is submitted
      * @return an error message upon failure, "id=<jobId>" upon success
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public String validateXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/validate");
@@ -243,8 +241,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId the id of the client which submits the job
      * @param file      the XML file that is submitted
      * @return an error message upon failure, "id=<jobId>" upon success
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public String planXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
         HttpPost method = new HttpPost(SchedulerConfig.get().getJobplannerUrl());
@@ -293,12 +289,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param selectionScriptExtension selection script extension for script
      *                                 engine detection ("js", "py", "rb")
      * @return JobId of created Job as JSON
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public String submitFlatJob(String sessionId, String commandFileContent, String jobName,
-            String selectionScriptContent, String selectionScriptExtension)
-            throws RestServerException, ServiceException {
+            String selectionScriptContent, String selectionScriptExtension) throws RestServerException {
 
         try {
             return getRestClientProxy().submitFlat(sessionId,
@@ -320,11 +313,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param jobId     the id of the job the task belongs to
      * @param taskId    the id of the task
      * @return the result
-     * @throws RestServerException
-     * @throws ServiceException
      */
-    public InputStream getTaskResult(String sessionId, String jobId, String taskId)
-            throws RestServerException, ServiceException {
+    public InputStream getTaskResult(String sessionId, String jobId, String taskId) throws RestServerException {
         try {
             return getRestClientProxy().taskresult(sessionId, jobId, taskId);
         } catch (WebApplicationException e) {
@@ -340,11 +330,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param jobId     the id of the job the task belongs to
      * @param taskId    the id of the task
      * @return the serialized result
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public InputStream getTaskSerializedResult(String sessionId, String jobId, String taskId)
-            throws RestServerException, ServiceException {
+            throws RestServerException {
         try {
             return getRestClientProxy().taskSerializedResult(sessionId, jobId, taskId);
         } catch (WebApplicationException e) {
@@ -360,17 +348,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param jobId     the id of the job the task belongs to
      * @param taskId    the id of the task
      * @return the result metadata
-     * @throws RestServerException
-     * @throws ServiceException
      */
     public String getTaskResultMetadata(final String sessionId, final String jobId, final String taskId)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.taskResultMetadata(sessionId, jobId, taskId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.taskResultMetadata(sessionId,
+                                                                                               jobId,
+                                                                                               taskId));
+    }
+
+    public String getPreciousTaskName(String sessionId, String jobId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getPreciousTaskName(sessionId, jobId));
     }
 
     /*
@@ -383,54 +370,38 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public int removeJobs(final String sessionId, List<Integer> jobIdList)
             throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.removeJob(sessionId, Integer.toString(jobId));
-            }
-        }, jobIdList, "job removal");
+        return executeFunction((restClientProxy,
+                jobId) -> restClientProxy.removeJob(sessionId, Integer.toString(jobId)), jobIdList, "job removal");
     }
 
     @Override
     public int pauseJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.pauseJob(sessionId, Integer.toString(jobId));
-            }
-        }, jobIdList, "job paused");
+        return executeFunction((restClientProxy, jobId) -> restClientProxy.pauseJob(sessionId, Integer.toString(jobId)),
+                               jobIdList,
+                               "job paused");
     }
 
     @Override
     public int restartAllInErrorTasks(final String sessionId, List<Integer> jobIdList)
             throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.restartAllTasksInError(sessionId, Integer.toString(jobId));
-            }
-        }, jobIdList, "restart all in error tasks in a job");
+        return executeFunction((restClientProxy, jobId) -> restClientProxy.restartAllTasksInError(sessionId,
+                                                                                                  Integer.toString(jobId)),
+                               jobIdList,
+                               "restart all in error tasks in a job");
     }
 
     @Override
     public int resumeJobs(final String sessionId, List<Integer> jobIdList)
             throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.resumeJob(sessionId, Integer.toString(jobId));
-            }
-        }, jobIdList, "job resumed");
+        return executeFunction((restClientProxy,
+                jobId) -> restClientProxy.resumeJob(sessionId, Integer.toString(jobId)), jobIdList, "job resumed");
     }
 
     @Override
     public int killJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
-        return executeFunction(new BiFunction<RestClient, Integer, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClientProxy, Integer jobId) {
-                return restClientProxy.killJob(sessionId, Integer.toString(jobId));
-            }
-        }, jobIdList, "job killed");
+        return executeFunction((restClientProxy, jobId) -> restClientProxy.killJob(sessionId, Integer.toString(jobId)),
+                               jobIdList,
+                               "job killed");
     }
 
     /*
@@ -442,13 +413,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public void setPriorityByName(final String sessionId, List<Integer> jobIdList, final String priorityName)
-            throws ServiceException, RestServerException {
-        executeVoidFunction(new BiFunction<RestClient, Integer, Void>() {
-            @Override
-            public Void apply(RestClient restClientProxy, Integer jobId) {
-                restClientProxy.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId), priorityName);
-                return null;
-            }
+            throws RestServerException {
+        executeVoidFunction((restClientProxy, jobId) -> {
+            restClientProxy.schedulerChangeJobPriorityByName(sessionId, Integer.toString(jobId), priorityName);
+            return null;
         }, jobIdList, "job set to priority " + priorityName);
     }
 
@@ -457,8 +425,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *
      * @return the sessionId which can be parsed as an Integer, or an error
      * message
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
     public String login(String login, String pass, File cred, String ssh) throws RestServerException, ServiceException {
@@ -538,8 +504,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param pass  password
      * @param ssh   private ssh key
      * @return the the Credentials file as a base64 String
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
     public String createCredentials(String login, String pass, String ssh)
@@ -574,62 +538,37 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * )
      */
     @Override
-    public void logout(String sessionId) throws RestServerException {
+    public void logout(String sessionId) {
         getRestClientProxy().disconnect(sessionId);
     }
 
     @Override
     public boolean killTask(final String sessionId, final Integer jobId, final String taskName)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.killTask(sessionId, jobId.toString(), taskName);
-            }
-        });
+            throws RestServerException {
+        return executeFunction(restClient -> restClient.killTask(sessionId, jobId.toString(), taskName));
     }
 
     @Override
     public boolean restartRunningTask(final String sessionId, final Integer jobId, final String taskName)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.restartTask(sessionId, jobId.toString(), taskName);
-            }
-        });
+            throws RestServerException {
+        return executeFunction(restClient -> restClient.restartTask(sessionId, jobId.toString(), taskName));
     }
 
     @Override
     public boolean restartInErrorTask(final String sessionId, final Integer jobId, final String taskName)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.restartInErrorTask(sessionId, jobId.toString(), taskName);
-            }
-        });
+            throws RestServerException {
+        return executeFunction(restClient -> restClient.restartInErrorTask(sessionId, jobId.toString(), taskName));
     }
 
     @Override
     public boolean preemptTask(final String sessionId, final Integer jobId, final String taskName)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.preemptTask(sessionId, jobId.toString(), taskName);
-            }
-        });
+            throws RestServerException {
+        return executeFunction(restClient -> restClient.preemptTask(sessionId, jobId.toString(), taskName));
     }
 
     public boolean markAsFinishedAndResume(final String sessionId, final Integer jobId, final String taskName)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.markAsFinishedAndResume(sessionId, jobId.toString(), taskName);
-            }
-        });
+            throws RestServerException {
+        return executeFunction(restClient -> restClient.markAsFinishedAndResume(sessionId, jobId.toString(), taskName));
     }
 
     /*
@@ -642,12 +581,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTasks(final String sessionId, final String jobId, final int offset, final int limit)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getJobTaskStatesPaginated(sessionId, jobId, offset, limit);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesPaginated(sessionId,
+                                                                                                      jobId,
+                                                                                                      offset,
+                                                                                                      limit));
+    }
+
+    @Override
+    public String getTasks(final String sessionId, final String jobId, final int offset, final int limit,
+            final String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesPaginated(sessionId,
+                                                                                                      jobId,
+                                                                                                      offset,
+                                                                                                      limit,
+                                                                                                      statusFilter));
     }
 
     /*
@@ -658,68 +605,55 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang. String, java.lang.String, java.lang.String)
      */
     @Override
-    public String getTasksByTag(final String sessionId, final String jobId, final String tag, final int offset,
-            final int limit) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getJobTaskStatesByTagPaginated(sessionId, jobId, tag, offset, limit);
-            }
-        });
+    public String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
+            String statusFilter) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
+                                                                                                                    jobId,
+                                                                                                                    offset,
+                                                                                                                    limit,
+                                                                                                                    tag,
+                                                                                                                    statusFilter));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
             final boolean pending, final boolean running, final boolean finished, final int offset, final int limit,
             final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getTaskStates(sessionId,
-                                                fromDate,
-                                                toDate,
-                                                myTasks,
-                                                running,
-                                                pending,
-                                                finished,
-                                                offset,
-                                                limit,
-                                                sortParameters);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStates(sessionId,
+                                                                                          fromDate,
+                                                                                          toDate,
+                                                                                          myTasks,
+                                                                                          running,
+                                                                                          pending,
+                                                                                          finished,
+                                                                                          offset,
+                                                                                          limit,
+                                                                                          sortParameters));
     }
 
     public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate,
             final boolean myTasks, final boolean pending, final boolean running, final boolean finished,
             final int offset, final int limit, final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getTaskStatesByTag(sessionId,
-                                                     tag,
-                                                     fromDate,
-                                                     toDate,
-                                                     myTasks,
-                                                     running,
-                                                     pending,
-                                                     finished,
-                                                     offset,
-                                                     limit,
-                                                     sortParameters);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStatesByTag(sessionId,
+                                                                                               tag,
+                                                                                               fromDate,
+                                                                                               toDate,
+                                                                                               myTasks,
+                                                                                               running,
+                                                                                               pending,
+                                                                                               finished,
+                                                                                               offset,
+                                                                                               limit,
+                                                                                               sortParameters));
     }
 
     @Override
     public String getJobTaskTagsPrefix(final String sessionId, final String jobId, final String prefix)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getJobTaskTagsPrefix(sessionId, jobId, prefix);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskTagsPrefix(sessionId,
+                                                                                                 jobId,
+                                                                                                 prefix));
     }
 
     /*
@@ -751,22 +685,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String getJobInfo(final String sessionId, final String jobId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.job(sessionId, jobId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.job(sessionId, jobId));
     }
 
     public String getJobInfoDetails(final String sessionId, final String jobId)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.jobInfo(sessionId, jobId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.jobInfo(sessionId, jobId));
     }
 
     public String getJobXML(final String sessionId, final String jobId) throws RestServerException, ServiceException {
@@ -781,13 +705,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean pauseScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.pauseScheduler(sessionId);
-            }
-        });
+    public boolean pauseScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.pauseScheduler(sessionId));
     }
 
     /*
@@ -798,13 +717,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean resumeScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.resumeScheduler(sessionId);
-            }
-        });
+    public boolean resumeScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.resumeScheduler(sessionId));
     }
 
     /*
@@ -815,13 +729,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean freezeScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.freezeScheduler(sessionId);
-            }
-        });
+    public boolean freezeScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.freezeScheduler(sessionId));
     }
 
     /*
@@ -832,13 +741,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public boolean killScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.killScheduler(sessionId);
-            }
-        });
+    public boolean killScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.killScheduler(sessionId));
     }
 
     /*
@@ -849,13 +753,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public boolean shutdownScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.shutdownScheduler(sessionId);
-            }
-        });
+    public boolean shutdownScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.shutdownScheduler(sessionId));
     }
 
     /*
@@ -866,13 +765,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .lang.String)
      */
     @Override
-    public boolean startScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.startScheduler(sessionId);
-            }
-        });
+    public boolean startScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.startScheduler(sessionId));
     }
 
     /*
@@ -883,13 +777,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public boolean stopScheduler(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.stopScheduler(sessionId);
-            }
-        });
+    public boolean stopScheduler(final String sessionId) throws RestServerException {
+        return executeFunction(restClient -> restClient.stopScheduler(sessionId));
     }
 
     /**
@@ -902,12 +791,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *                  SchedulerServiceAsync#LOG_STDERR}, {@link
      *                  SchedulerServiceAsync#LOG_STDOUT}
      * @return the logs for the given task
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
     public String getTaskOutput(String sessionId, String jobId, String taskName, OutputMode logMode)
-            throws RestServerException, ServiceException {
+            throws RestServerException {
 
         RestClient restClientProxy = getRestClientProxy();
 
@@ -933,12 +820,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId current session id
      * @param jobId     id of the job for which logs should be fetched
      * @return console output for the whole job
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
-    public String getLiveLogJob(final String sessionId, final String jobId)
-            throws RestServerException, ServiceException {
+    public String getLiveLogJob(final String sessionId, final String jobId) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         try {
@@ -956,7 +840,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param jobId     id of the job for which logs should be fetched
      * @return number of bytes available in the log for the given job, -1 if no
      * avail
-     * @throws RestServerException
      */
     @Override
     public int getLiveLogJobAvailable(final String sessionId, final String jobId) throws RestServerException {
@@ -982,18 +865,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId current session id
      * @param jobId     id of the job for which live logs should be cleaned
      * @return true if something was actually deleted
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
-    public boolean deleteLiveLogJob(final String sessionId, final String jobId)
-            throws RestServerException, ServiceException {
-        return executeFunction(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.deleteLiveLogJob(sessionId, jobId);
-            }
-        });
+    public boolean deleteLiveLogJob(final String sessionId, final String jobId) throws RestServerException {
+        return executeFunction(restClient -> restClient.deleteLiveLogJob(sessionId, jobId));
     }
 
     /*
@@ -1004,7 +879,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * lang.String)
      */
     @Override
-    public String getStatistics(String sessionId) throws RestServerException, ServiceException {
+    public String getStatistics(String sessionId) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         try {
@@ -1021,7 +896,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * getStatisticsOnMyAccount (java.lang.String)
      */
     @Override
-    public String getStatisticsOnMyAccount(String sessionId) throws RestServerException, ServiceException {
+    public String getStatisticsOnMyAccount(String sessionId) throws RestServerException {
 
         RestClient restClientProxy = getRestClientProxy();
 
@@ -1062,17 +937,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *
      * @param sessionId session id
      * @return user info as a json array
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
     public String getSchedulerUsers(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getSchedulerUsers(sessionId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getSchedulerUsers(sessionId));
     }
 
     /**
@@ -1080,17 +948,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      *
      * @param sessionId session id
      * @return user info as a json array
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
     public String getSchedulerUsersWithJobs(final String sessionId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getSchedulerUsersWithJobs(sessionId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getSchedulerUsersWithJobs(sessionId));
     }
 
     /*
@@ -1103,7 +964,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String revisionAndjobsinfo(final String sessionId, final String startCursor, final String endCursor,
             int pageSize, boolean first, final String user, final boolean pending, final boolean running,
-            final boolean finished, FilterModel filterModel) throws RestServerException, ServiceException {
+            final boolean finished, FilterModel filterModel) {
         Query query = GraphQLQueries.get().getRevisionAndjobsInfoQuery(user,
                                                                        pending,
                                                                        running,
@@ -1113,8 +974,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                        pageSize,
                                                                        first,
                                                                        filterModel);
-        String response = executeGraphQLQuery(sessionId, query);
-        return response;
+        return executeGraphQLQuery(sessionId, query);
     }
 
     /*
@@ -1125,7 +985,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .String, java.lang.String)
      */
     @Override
-    public String getJobImage(String sessionId, String jobId) throws RestServerException, ServiceException {
+    public String getJobImage(String sessionId, String jobId) throws RestServerException {
         String url = "img_" + jobId + ".png";
         String path = getServletContext().getRealPath("/images");
 
@@ -1164,12 +1024,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public String getVersion() throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getVersion();
-            }
-        });
+        return executeFunctionReturnStreamAsString(RestClient::getVersion);
     }
 
     /**
@@ -1179,12 +1034,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param jobId     id of a job
      * @param taskName  name of a task to restart within that job
      * @return job server logs
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
-    public String getTaskServerLogs(String sessionId, Integer jobId, String taskName)
-            throws RestServerException, ServiceException {
+    public String getTaskServerLogs(String sessionId, Integer jobId, String taskName) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         try {
@@ -1200,11 +1052,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param sessionId current session
      * @param jobId     id of a job
      * @return task server logs
-     * @throws RestServerException
-     * @throws ServiceException
      */
     @Override
-    public String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException, ServiceException {
+    public String getJobServerLogs(String sessionId, Integer jobId) throws RestServerException {
 
         RestClient restClientProxy = getRestClientProxy();
 
@@ -1248,12 +1098,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     @Override
     public String getJobHtml(final String sessionId, final String jobId) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(new Function<RestClient, InputStream>() {
-            @Override
-            public InputStream apply(RestClient restClient) {
-                return restClient.getJobHtml(sessionId, jobId);
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobHtml(sessionId, jobId));
     }
 
     @Override
@@ -1306,21 +1151,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     /**
      * Execute a graphQL query. The queries should be built using the GraphQLQueries class
-     * @param sessionId
-     * @param query
-     * @return
-     * @throws ServiceException
-     * @throws RestServerException
      */
-    private String executeGraphQLQuery(String sessionId, Query query) throws ServiceException, RestServerException {
+    private String executeGraphQLQuery(String sessionId, Query query) {
 
-        if (sessionId == null || query == null)
+        if (sessionId == null || query == null) {
             return null;
+        }
 
         Map<String, Object> result = graphQLClient.execute(sessionId, query);
         try {
-            String data = JSON_MAPPER.writeValueAsString(result);
-            return data;
+            return JSON_MAPPER.writeValueAsString(result);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
             return "{\"error\": \"Cannot process JSON\"}";
@@ -1328,8 +1168,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     }
 
-    private boolean executeFunction(Function<RestClient, InputStream> function)
-            throws ServiceException, RestServerException {
+    private boolean executeFunction(Function<RestClient, InputStream> function) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 
         InputStream inputStream = null;
@@ -1382,7 +1221,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private int executeVoidFunction(BiFunction<RestClient, Integer, Void> action, List<Integer> jobIdList,
-            String actionName) throws ServiceException, RestServerException {
+            String actionName) throws RestServerException {
 
         RestClient restClientProxy = getRestClientProxy();
 
@@ -1443,18 +1282,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
         throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
-    }
-
-    private interface BiFunction<T, U, R> {
-
-        R apply(T t, U u);
-
-    }
-
-    private interface Function<T, R> {
-
-        R apply(T t);
-
     }
 
 }

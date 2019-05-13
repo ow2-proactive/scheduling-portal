@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
@@ -44,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsContr
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
+import com.google.gwt.user.client.Window;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
@@ -71,6 +73,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                                                                                                 SortDirection.ASCENDING),
                                                                               new SortSpecifier(ID_ATTR.getName(),
                                                                                                 SortDirection.DESCENDING) };
+
+    //Specifies if the job id given in the URL has already been automatically selected when loading the page where it is
+    private boolean isJobFromUrlAutoSelected = false;
 
     /**
      * The controller for the jobs grid.
@@ -129,6 +134,11 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         this.ds.setCacheData(data.toArray());
         data.destroy();
         applyCurrentLocalFilter();
+
+        //select the job given in the URL if it has not been automatically selected before
+        if (!isJobFromUrlAutoSelected && selectJobIdFromUrl()) {
+            isJobFromUrlAutoSelected = true;
+        }
     }
 
     @Override
@@ -189,6 +199,22 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         }
         return base;
+    }
+
+    private boolean selectJobIdFromUrl() {
+        String urlJobId = Window.Location.getParameter("job");
+        if (urlJobId == null) {
+            return true;
+        }
+        //the job to select should always be the first but we keep this check because sometimes the RecordList is not updated yet
+        int recordIndex = this.getRecordList().findIndex("id", Integer.valueOf(urlJobId));
+        if (recordIndex >= 0) {
+            scrollToRow(recordIndex);
+            selectRecord(recordIndex);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private String highlightRowHavingIssues(int rowNum, String base) {

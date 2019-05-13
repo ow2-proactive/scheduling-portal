@@ -43,6 +43,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.S
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
@@ -76,6 +77,7 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
@@ -120,19 +122,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     /* Actions descriptions */
     private static final String DESCRIPTION = "description";
 
-    private static final String schedStartButtonDescription = "Start Scheduler Server from Stopped status";
+    private static final String SCHED_START_BUTTON_DESCRIPTION = "Start Scheduler Server from Stopped status";
 
-    private static final String schedStopButtonDescription = "Stop Scheduler Server (Submitted Jobs terminate)";
+    private static final String SCHED_STOP_BUTTON_DESCRIPTION = "Stop Scheduler Server (Submitted Jobs terminate)";
 
-    private static final String schedFreezeButtonDescription = "Freeze Scheduler Server (Running Tasks terminate)";
+    private static final String SCHED_FREEZE_BUTTON_DESCRIPTION = "Freeze Scheduler Server (Running Tasks terminate)";
 
-    private static final String schedResumeButtonDescription = "Resume Scheduler Server from Paused or Frozen status";
+    private static final String SCHED_RESUME_BUTTON_DESCRIPTION = "Resume Scheduler Server from Paused or Frozen status";
 
-    private static final String schedPauseButtonDescription = "Pause Scheduler Server (Running Jobs terminate)";
+    private static final String SCHED_PAUSE_BUTTON_DESCRIPTION = "Pause Scheduler Server (Running Jobs terminate)";
 
-    private static final String schedKillButtonDescription = "Kill Scheduler Server";
+    private static final String SCHED_KILL_BUTTON_DESCRIPTION = "Kill Scheduler Server";
 
-    private static final String schedShutdownButtonDescription = "Shutdown Scheduler Server (Running Tasks terminate)";
+    private static final String SCHED_SHUTDOWN_BUTTON_DESCRIPTION = "Shutdown Scheduler Server (Running Tasks terminate)";
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -181,6 +183,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private String logoStripBorder = "0px";
 
     private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
+
+    private JobResultView jobResultView = null;
 
     /**
      * Default constructor
@@ -267,37 +271,23 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     /** admin scheduler functionalities */
-    private MenuItem schedStartButton, schedStopButton, schedFreezeButton, schedResumeButton, schedPauseButton,
-            schedKillButton, schedShutdownButton;
+    private MenuItem schedStartButton;
+
+    private MenuItem schedStopButton;
+
+    private MenuItem schedFreezeButton;
+
+    private MenuItem schedResumeButton;
+
+    private MenuItem schedPauseButton;
+
+    private MenuItem schedKillButton;
+
+    private MenuItem schedShutdownButton;
 
     private ToolStrip buildLogoStrip() {
-        final Label schedulerLabel = new Label("ProActive Scheduling & Orchestration");
-        schedulerLabel.setStyleName("schedulerHeadline");
-        schedulerLabel.setHeight100();
-        schedulerLabel.setAutoWidth();
 
-        ToolStrip logoPA = new ToolStrip();
-        logoPA.setHeight(logoStripHeight);
-        logoPA.setWidth("33%");
-        logoPA.setBackgroundImage("");
-        logoPA.setBackgroundColor(logoStripBackgroundColor);
-        logoPA.setMargin(0);
-        logoPA.setBorder(logoStripBorder);
-        logoPA.setAlign(Alignment.LEFT);
-        logoPA.addMember(new Img(SchedulerImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoPA.addMember(schedulerLabel);
-
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("33%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.CENTER);
-        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
+        // Activeeon Logo
         ToolStrip logoAE = new ToolStrip();
         logoAE.setHeight(logoStripHeight);
         logoAE.setWidth("33%");
@@ -305,22 +295,62 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoAE.setBackgroundColor(logoStripBackgroundColor);
         logoAE.setMargin(0);
         logoAE.setBorder(logoStripBorder);
-        logoAE.setAlign(Alignment.RIGHT);
+        logoAE.setAlign(Alignment.LEFT);
+        logoAE.setStyleName("brand-logo");
         Img logoImg = new Img(SchedulerImagesUnbundled.AE_LOGO, 146, logoStripHeight);
         logoImg.addClickHandler(clickEvent -> Window.open("http://activeeon.com/", "", ""));
         logoAE.addMember(logoImg);
 
+        String login = LoginModel.getInstance().getLogin();
+        if (login != null) {
+            login = " <b>" + login + "</b>";
+        } else {
+            login = "";
+        }
+
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
+        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
+        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
+        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
+
+        // Shortcut buttons strip
+        ToolStrip paShortcutsStrip = new ToolStrip();
+        paShortcutsStrip.addButton(automationDashboardLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(studioLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(schedulerLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(resourceManagerLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        ToolStripSeparator separator = new ToolStripSeparator();
+        separator.setHeight(40);
+        paShortcutsStrip.addMember(separator);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(logoutButton);
+        paShortcutsStrip.addSpacer(4);
+
+        paShortcutsStrip.setMargin(5);
+        paShortcutsStrip.setBackgroundImage("");
+        paShortcutsStrip.setBackgroundColor(logoStripBackgroundColor);
+        paShortcutsStrip.setBorder(logoStripBorder);
+        paShortcutsStrip.setAlign(Alignment.RIGHT);
+        paShortcutsStrip.setStyleName("pa-shortcuts");
+        paShortcutsStrip.setPosition("static");
+        paShortcutsStrip.setAlign(Alignment.RIGHT);
+
+        // Navbar Header
         ToolStrip logoStrip = new ToolStrip();
-        logoStrip.setStyleName("paddingLeftAndRight");
         logoStrip.setHeight(logoStripHeight);
         logoStrip.setWidth100();
         logoStrip.setBackgroundImage("");
         logoStrip.setBackgroundColor(logoStripBackgroundColor);
         logoStrip.setBorder(logoStripBorder);
         logoStrip.setMargin(0);
-        logoStrip.addMember(logoPA);
-        logoStrip.addMember(additionalLogoCenter);
+
         logoStrip.addMember(logoAE);
+        logoStrip.addMember(paShortcutsStrip);
 
         return logoStrip;
     }
@@ -426,32 +456,32 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         schedStartButton = new MenuItem(START);
         schedStartButton.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
-        schedStartButton.setAttribute(DESCRIPTION, schedStartButtonDescription);
+        schedStartButton.setAttribute(DESCRIPTION, SCHED_START_BUTTON_DESCRIPTION);
         schedStartButton.addClickHandler(event -> SchedulerPage.this.controller.startScheduler());
 
         schedStopButton = new MenuItem(STOP);
         schedStopButton.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
-        schedStopButton.setAttribute(DESCRIPTION, schedStopButtonDescription);
+        schedStopButton.setAttribute(DESCRIPTION, SCHED_STOP_BUTTON_DESCRIPTION);
         schedStopButton.addClickHandler(event -> SchedulerPage.this.controller.stopScheduler());
 
         schedFreezeButton = new MenuItem(FREEZE);
         schedFreezeButton.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
-        schedFreezeButton.setAttribute(DESCRIPTION, schedFreezeButtonDescription);
+        schedFreezeButton.setAttribute(DESCRIPTION, SCHED_FREEZE_BUTTON_DESCRIPTION);
         schedFreezeButton.addClickHandler(event -> SchedulerPage.this.controller.freezeScheduler());
 
         schedResumeButton = new MenuItem(RESUME);
         schedResumeButton.setIcon(SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
-        schedResumeButton.setAttribute(DESCRIPTION, schedResumeButtonDescription);
+        schedResumeButton.setAttribute(DESCRIPTION, SCHED_RESUME_BUTTON_DESCRIPTION);
         schedResumeButton.addClickHandler(event -> SchedulerPage.this.controller.resumeScheduler());
 
         schedPauseButton = new MenuItem(PAUSE);
         schedPauseButton.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
-        schedPauseButton.setAttribute(DESCRIPTION, schedPauseButtonDescription);
+        schedPauseButton.setAttribute(DESCRIPTION, SCHED_PAUSE_BUTTON_DESCRIPTION);
         schedPauseButton.addClickHandler(event -> SchedulerPage.this.controller.pauseScheduler());
 
         schedKillButton = new MenuItem(KILL);
         schedKillButton.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
-        schedKillButton.setAttribute(DESCRIPTION, schedKillButtonDescription);
+        schedKillButton.setAttribute(DESCRIPTION, SCHED_KILL_BUTTON_DESCRIPTION);
         schedKillButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>kill</strong> the Scheduler?",
                                                             value -> {
                                                                 if (value)
@@ -460,7 +490,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         schedShutdownButton = new MenuItem(SHUTDOWN);
         schedShutdownButton.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
-        schedShutdownButton.setAttribute(DESCRIPTION, schedShutdownButtonDescription);
+        schedShutdownButton.setAttribute(DESCRIPTION, SCHED_SHUTDOWN_BUTTON_DESCRIPTION);
         schedShutdownButton.addClickHandler(event -> SC.confirm("Do you really want to <strong>shutdown</strong> the Scheduler?",
                                                                 value -> {
                                                                     if (value)
@@ -490,12 +520,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         });
         adminMenuButton.setMenu(adminMenu);
 
-        String login = LoginModel.getInstance().getLogin();
-        if (login != null)
-            login = " <b>" + login + "</b>";
-        else
-            login = "";
-
         errorButton = new ToolStripButton("<strong>Network error</strong>",
                                           Images.instance.net_error_16().getSafeUri().asString());
         errorButton.setBackgroundColor("#ffbbbb");
@@ -512,11 +536,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
-        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerLinkButton();
-        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
-        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerHighlightedLinkButton();
-        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
-        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, SchedulerPage.this.controller);
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("10%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.RIGHT);
+        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        additionalLogoCenter.addMember(logoAzureImg);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
@@ -530,18 +559,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addFill();
         tools.addMember(schedulerStatusLabelLayout);
         tools.addFill();
-        tools.addButton(automationDashboardLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(studioLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(schedulerLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(resourceManagerLinkButton);
-        tools.addSpacer(2);
-        tools.addSeparator();
-        tools.addSpacer(2);
-        tools.addButton(logoutButton);
-        tools.addSpacer(10);
+        tools.addMember(additionalLogoCenter);
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.KILLED);
@@ -551,7 +569,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.ow2.proactive_grid_cloud_portal.client.Listeners.SchedulerStatusListener#statusChanged(
      * org.ow2.proactive_grid_cloud_portal.shared.SchedulerStatus)
@@ -569,6 +587,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedKillButton.setEnabled(false);
                 schedShutdownButton.setEnabled(false);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
+                break;
             case KILLED:
                 schedStartButton.setEnabled(false);
                 schedStopButton.setEnabled(false);
@@ -628,24 +647,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         // Update the scheduler status label
 
         String neededNodes = "-";
-        String pendingEligibleTasks = "-";
 
         HashMap<String, String> statistics = controller.getModel().getSchedulerStatistics();
         if (statistics != null) {
             neededNodes = statistics.get("NeededNodes");
-            pendingEligibleTasks = statistics.get("PendingEligibleTasks");
         }
 
         if (notOnlyDigits(neededNodes)) {
             neededNodes = "-";
         }
 
-        if (notOnlyDigits(pendingEligibleTasks)) {
-            pendingEligibleTasks = "-";
-        }
-
-        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes +
-                                         "<br>Pending Eligible Tasks:" + pendingEligibleTasks);
+        schedulerStatusLabel.setContents("Status:" + status.name() + "<br>Needed Nodes:" + neededNodes);
         this.adminMenu.redraw();
     }
 
@@ -754,14 +766,19 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
-        Tab resultTab = new Tab("Preview", Images.instance.search_16().getSafeUri().asString());
-        resultTab.setPane(this.controller.buildPreviewView());
+        Tab taskResultTab = new Tab("Task Preview", Images.instance.search_16().getSafeUri().asString());
+        taskResultTab.setPane(this.controller.buildPreviewView());
+
+        Tab jobResultTab = new Tab("Job Results", Images.instance.search_16().getSafeUri().asString());
+        this.jobResultView = new JobResultView(this.controller);
+        jobResultTab.setPane(this.jobResultView.build());
 
         rightTabSet.addTab(jobinfoTab);
         rightTabSet.addTab(taskinfoTab);
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
-        rightTabSet.addTab(resultTab);
+        rightTabSet.addTab(taskResultTab);
+        rightTabSet.addTab(jobResultTab);
 
         HLayout layout = new HLayout();
 
@@ -798,10 +815,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     @Override
     public void logImportantMessage(String message) {
-        long dt = System.currentTimeMillis() - this.lastCriticalMessage;
-        if (dt > SchedulerConfig.get().getClientRefreshTime() * 4) {
-            this.errorButton.hide();
-        }
+        logMessage(message);
     }
 
     @Override

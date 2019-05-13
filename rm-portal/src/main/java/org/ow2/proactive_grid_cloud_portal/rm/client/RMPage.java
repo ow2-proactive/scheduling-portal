@@ -51,22 +51,12 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
-import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.DrawEvent;
-import com.smartgwt.client.widgets.events.DrawHandler;
-import com.smartgwt.client.widgets.events.ResizedEvent;
-import com.smartgwt.client.widgets.events.ResizedHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.SectionStack;
@@ -75,19 +65,16 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
-import com.smartgwt.client.widgets.menu.events.MenuItemClickEvent;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.toolbar.ToolStripMenuButton;
+import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 
 /**
  * Page shown when an user is logged
- * 
- * 
- * 
  * 
  * @author mschnoor
  *
@@ -149,7 +136,7 @@ public class RMPage implements LogListener {
     // Logo strip properties
     private int logoStripHeight = 40;
 
-    private String logoStripBackgroundColor = "#fafafa";
+    private static final String LOGO_STRIP_BACKGROUND_COLOR = "#fafafa";
 
     private String logoStripBorder = "0px";
 
@@ -167,7 +154,7 @@ public class RMPage implements LogListener {
         this.rootLayout = rl;
         rl.setWidth100();
         rl.setHeight100();
-        rl.setBackgroundColor("#fafafa");
+        rl.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
 
         this.aboutWindow = new AboutWindow();
         this.addNodeWindow = new AddNodeWindow();
@@ -198,11 +185,7 @@ public class RMPage implements LogListener {
         expandButton.setHeight(16);
         expandButton.setSrc(Images.instance.expand_16().getSafeUri().asString());
         expandButton.setTooltip("Expand all items");
-        expandButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                RMPage.this.treeView.expandAll();
-            }
-        });
+        expandButton.addClickHandler(event -> RMPage.this.treeView.expandAll());
         expandButton.setShowFocusedIcon(false);
         expandButton.setShowRollOver(false);
         expandButton.setShowDown(false);
@@ -210,11 +193,7 @@ public class RMPage implements LogListener {
 
         final CheckboxItem c1 = new CheckboxItem("mynodes", "My nodes");
         c1.setValue(false);
-        c1.addChangedHandler(new ChangedHandler() {
-            public void onChanged(ChangedEvent event) {
-                compactView.setViewMyNodes(c1.getValueAsBoolean());
-            }
-        });
+        c1.addChangedHandler(event -> compactView.setViewMyNodes(c1.getValueAsBoolean()));
 
         // for some reason IE9 standards fails to detect the right width
         if (SC.isIE()) {
@@ -230,11 +209,7 @@ public class RMPage implements LogListener {
         closeButton.setHeight(16);
         closeButton.setSrc(Images.instance.close_16().getSafeUri().asString());
         closeButton.setTooltip("Collapse all items");
-        closeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                RMPage.this.treeView.closeAll();
-            }
-        });
+        closeButton.addClickHandler(event -> RMPage.this.treeView.closeAll());
         closeButton.setShowFocusedIcon(false);
         closeButton.setShowRollOver(false);
         closeButton.setShowDown(false);
@@ -264,18 +239,8 @@ public class RMPage implements LogListener {
         stack.setSections(topSection, botSection);
 
         // dynamic width of controls layout
-        stack.addResizedHandler(new ResizedHandler() {
-            @Override
-            public void onResized(ResizedEvent event) {
-                controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH);
-            }
-        });
-        stack.addDrawHandler(new DrawHandler() {
-            @Override
-            public void onDraw(DrawEvent event) {
-                controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH);
-            }
-        });
+        stack.addResizedHandler(event -> controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH));
+        stack.addDrawHandler(event -> controls.setWidth(stack.getWidth() - EXPAND_COLLAPSE_SECTION_LABEL_WIDTH));
 
         rl.addMember(buildLogoStrip());
         rl.addMember(header);
@@ -288,61 +253,72 @@ public class RMPage implements LogListener {
     }
 
     private ToolStrip buildLogoStrip() {
-        final Label resourcesLabel = new Label("ProActive Resource Manager");
-        resourcesLabel.setStyleName("rmHeadline");
-        resourcesLabel.setHeight100();
-        resourcesLabel.setAutoWidth();
 
-        ToolStrip logoPA = new ToolStrip();
-        logoPA.setHeight(logoStripHeight);
-        logoPA.setWidth("33%");
-        logoPA.setBackgroundImage("");
-        logoPA.setBackgroundColor(logoStripBackgroundColor);
-        logoPA.setMargin(0);
-        logoPA.setBorder(logoStripBorder);
-        logoPA.setAlign(Alignment.LEFT);
-        logoPA.addMember(new Img(RMImagesUnbundled.PA_ICON, logoStripHeight, logoStripHeight));
-        logoPA.addMember(resourcesLabel);
-
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("33%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.CENTER);
-        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
+        // Activeeon Logo
         ToolStrip logoAE = new ToolStrip();
         logoAE.setHeight(logoStripHeight);
         logoAE.setWidth("33%");
         logoAE.setBackgroundImage("");
-        logoAE.setBackgroundColor(logoStripBackgroundColor);
+        logoAE.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
         logoAE.setMargin(0);
         logoAE.setBorder(logoStripBorder);
-        logoAE.setAlign(Alignment.RIGHT);
+        logoAE.setAlign(Alignment.LEFT);
+        logoAE.setStyleName("brand-logo");
+        logoAE.setTop(0);
         Img logoImg = new Img(RMImagesUnbundled.AE_LOGO, 146, logoStripHeight);
-        logoImg.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                Window.open("http://activeeon.com/", "", "");
-            }
-        });
+        logoImg.addClickHandler(clickEvent -> Window.open("http://activeeon.com/", "", ""));
         logoAE.addMember(logoImg);
 
+        String login = LoginModel.getInstance().getLogin();
+        if (login != null) {
+            login = " <b>" + login + "</b>";
+        } else {
+            login = "";
+        }
+
+        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
+        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
+        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
+        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerHighlightedLinkButton();
+        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
+
+        // Shortcut buttons strip
+        ToolStrip paShortcutsStrip = new ToolStrip();
+        paShortcutsStrip.addButton(automationDashboardLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(studioLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(schedulerLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(resourceManagerLinkButton);
+        paShortcutsStrip.addSpacer(4);
+        ToolStripSeparator separator = new ToolStripSeparator();
+        separator.setHeight(40);
+        paShortcutsStrip.addMember(separator);
+        paShortcutsStrip.addSpacer(4);
+        paShortcutsStrip.addButton(logoutButton);
+        paShortcutsStrip.addSpacer(4);
+
+        paShortcutsStrip.setMargin(5);
+        paShortcutsStrip.setBackgroundImage("");
+        paShortcutsStrip.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
+        paShortcutsStrip.setBorder(logoStripBorder);
+        paShortcutsStrip.setAlign(Alignment.RIGHT);
+        paShortcutsStrip.setStyleName("pa-shortcuts");
+        paShortcutsStrip.setPosition("static");
+        paShortcutsStrip.setAlign(Alignment.RIGHT);
+
+        // Navbar Header
         ToolStrip logoStrip = new ToolStrip();
-        logoStrip.setStyleName("paddingLeftAndRight");
         logoStrip.setHeight(logoStripHeight);
         logoStrip.setWidth100();
         logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
         logoStrip.setBorder(logoStripBorder);
         logoStrip.setMargin(0);
-        logoStrip.addMember(logoPA);
-        logoStrip.addMember(additionalLogoCenter);
+
         logoStrip.addMember(logoAE);
+        logoStrip.addMember(paShortcutsStrip);
 
         return logoStrip;
     }
@@ -352,43 +328,24 @@ public class RMPage implements LogListener {
         tools.setHeight(50);
         tools.setWidth100();
         tools.setBackgroundImage("");
-        tools.setBackgroundColor("#fafafa");
+        tools.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
         tools.setBorder("0px");
 
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
-        settingsMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.settingsWindow.show();
-            }
-        });
+        settingsMenuItem.addClickHandler(event -> RMPage.this.settingsWindow.show());
 
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
-        credMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.credentialsWindow.show();
-            }
-        });
+        credMenuItem.addClickHandler(event -> RMPage.this.credentialsWindow.show());
 
         MenuItem nodeMenuItem = new MenuItem("Launch a Node", ImagesUnbundled.PA_16);
-        nodeMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.addNodeWindow.show();
-                //Window.open(RMConfig.get().getRestUrl() + "/../node.jar", "", "");
-            }
-        });
+        nodeMenuItem.addClickHandler(event -> RMPage.this.addNodeWindow.show());
 
         MenuItem logoutMenuItem = new MenuItem("Logout", Images.instance.exit_18().getSafeUri().asString());
-        logoutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value) {
-                            RMPage.this.controller.logout();
-                        }
-                    }
-                });
+        logoutMenuItem.addClickHandler(event -> SC.confirm("Logout", "Are you sure you want to exit?", value -> {
+            if (value) {
+                RMPage.this.controller.logout();
             }
-        });
+        }));
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
@@ -400,29 +357,17 @@ public class RMPage implements LogListener {
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
-                Window.open("http://doc.activeeon.com/" + docVersion, "", "");
-            }
+        documentationMenuItem.addClickHandler(event -> {
+            String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
+            Window.open("http://doc.activeeon.com/" + docVersion, "", "");
         });
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
-        aboutMenuItem.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
-            public void onClick(MenuItemClickEvent event) {
-                RMPage.this.aboutWindow.show();
-            }
-        });
+        aboutMenuItem.addClickHandler(event -> RMPage.this.aboutWindow.show());
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
         helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
         helpMenuButton.setMenu(helpMenu);
-
-        String login = LoginModel.getInstance().getLogin();
-        if (login != null)
-            login = " <b>" + login + "</b>";
-        else
-            login = "";
 
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
         nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
@@ -435,11 +380,16 @@ public class RMPage implements LogListener {
         errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
-        ToolStripButton studioLinkButton = toolButtonsRender.getStudioLinkButton();
-        ToolStripButton schedulerLinkButton = toolButtonsRender.getSchedulerLinkButton();
-        ToolStripButton automationDashboardLinkButton = toolButtonsRender.getAutomationDashboardLinkButton();
-        ToolStripButton resourceManagerLinkButton = toolButtonsRender.getResourceManagerHighlightedLinkButton();
-        ToolStripButton logoutButton = toolButtonsRender.getLogoutButton(login, RMPage.this.controller);
+        ToolStrip additionalLogoCenter = new ToolStrip();
+        additionalLogoCenter.setHeight(logoStripHeight);
+        additionalLogoCenter.setWidth("10%");
+        additionalLogoCenter.setBackgroundImage("");
+        additionalLogoCenter.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
+        additionalLogoCenter.setMargin(0);
+        additionalLogoCenter.setBorder(logoStripBorder);
+        additionalLogoCenter.setAlign(Alignment.CENTER);
+        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        additionalLogoCenter.addMember(logoAzureImg);
 
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -447,18 +397,7 @@ public class RMPage implements LogListener {
         tools.addButton(nsButton);
         tools.addButton(errorButton);
         tools.addFill();
-        tools.addButton(automationDashboardLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(studioLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(schedulerLinkButton);
-        tools.addSpacer(12);
-        tools.addButton(resourceManagerLinkButton);
-        tools.addSpacer(2);
-        tools.addSeparator();
-        tools.addSpacer(2);
-        tools.addButton(logoutButton);
-        tools.addSpacer(10);
+        tools.addMember(additionalLogoCenter);
 
         return tools;
     }
@@ -555,10 +494,7 @@ public class RMPage implements LogListener {
 
     @Override
     public void logImportantMessage(String message) {
-        long dt = System.currentTimeMillis() - this.lastCriticalMessage;
-        if (dt > RMConfig.get().getClientRefreshTime() * 4) {
-            this.errorButton.hide();
-        }
+        logMessage(message);
     }
 
     @Override

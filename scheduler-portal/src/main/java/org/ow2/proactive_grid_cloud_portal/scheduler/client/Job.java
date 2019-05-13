@@ -26,16 +26,12 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -86,12 +82,15 @@ public class Job implements Serializable, Comparable<Job> {
 
     private final ImmutableMap<String, String> variables;
 
+    private final ImmutableMap<String, String> resultMap;
+
     /**
      * The constructor that has no arguments required by the Serializable interface
      */
     public Job() {
         this.genericInformation = ImmutableMap.of();
         this.variables = ImmutableMap.of();
+        this.resultMap = ImmutableMap.of();
     }
 
     /**
@@ -127,9 +126,9 @@ public class Job implements Serializable, Comparable<Job> {
      * @param description job description
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
-            Map<String, String> genericInformation, Map<String, String> variables, int pending, int running,
-            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime, String description) {
+            Map<String, String> genericInformation, Map<String, String> variables, Map<String, String> resultMap,
+            int pending, int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
+            long startTime, long inErrorTime, long finishTime, String description) {
         this.id = id;
         this.name = name;
         this.projectName = projectName;
@@ -151,6 +150,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
         this.variables = ImmutableMap.copyOf(variables);
+        this.resultMap = ImmutableMap.copyOf(resultMap);
         this.description = description;
     }
 
@@ -399,8 +399,9 @@ public class Job implements Serializable, Comparable<Job> {
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
         String description = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("description"));
 
-        Map<String, String> genericInformation = extractMap(jsonJobInfo.get("genericInformation"));
-        Map<String, String> variables = extractMap(jsonJobInfo.get("variables"));
+        Map<String, String> genericInformation = SchedulerJSONUtils.extractMap(jsonJobInfo.get("genericInformation"));
+        Map<String, String> variables = SchedulerJSONUtils.extractMap(jsonJobInfo.get("variables"));
+        Map<String, String> resultMap = SchedulerJSONUtils.extractMap(jsonJobInfo.get("resultMap"));
 
         String name = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("name"));
         String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
@@ -414,6 +415,7 @@ public class Job implements Serializable, Comparable<Job> {
                        user,
                        genericInformation,
                        variables,
+                       resultMap,
                        pending,
                        running,
                        finished,
@@ -426,24 +428,6 @@ public class Job implements Serializable, Comparable<Job> {
                        inErrorTime,
                        finishedTime,
                        description);
-    }
-
-    private static Map<String, String> extractMap(JSONValue mapValue) {
-        if (mapValue != null) {
-            JSONArray keyValueArray = mapValue.isArray();
-            if (keyValueArray != null) {
-                int arraySize = keyValueArray.size();
-                Map<String, String> resultMap = new HashMap<>(arraySize);
-                for (int i = 0; i < keyValueArray.size(); i++) {
-                    JSONObject object = keyValueArray.get(i).isObject();
-                    String key = object.get("key").isString().stringValue();
-                    String value = object.get("value").isString().stringValue();
-                    resultMap.put(key, value);
-                }
-                return resultMap;
-            }
-        }
-        return Collections.emptyMap();
     }
 
     /**
@@ -516,4 +500,7 @@ public class Job implements Serializable, Comparable<Job> {
         return variables;
     }
 
+    public Map<String, String> getResultMap() {
+        return resultMap;
+    }
 }

@@ -79,11 +79,9 @@ public interface RestClient {
     /**
      * Submit a flat command job
      * Each line in the file is a command that will be run on a different node
-     * @param sessionId
      * @param commandFileContent content of the flat command file, one task per line
      * @param jobName name of the job
      * @param selectionScriptContent selection script or null
-     * @return
      */
     @POST
     @Path("submitflat")
@@ -151,10 +149,6 @@ public interface RestClient {
 
     /**
      * Kill a task
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/kill")
@@ -163,10 +157,6 @@ public interface RestClient {
 
     /**
      * Preempt a task
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/preempt")
@@ -175,10 +165,6 @@ public interface RestClient {
 
     /**
      * Mark as finished and resume
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/finishInErrorTask")
@@ -187,10 +173,6 @@ public interface RestClient {
 
     /**
      * Restart a running task.
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/restart")
@@ -199,10 +181,6 @@ public interface RestClient {
 
     /**
      * Restart a task paused on error.
-     * @param sessionId
-     * @param jobId
-     * @param taskName
-     * @return
      */
     @PUT
     @Path("jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
@@ -234,6 +212,14 @@ public interface RestClient {
     InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
 
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/filtered/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
+            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit,
+            @QueryParam("statusFilter") @DefaultValue("") String statusFilter);
+
     /**
      * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
      * @param sessionId the session id of the user which is logged in
@@ -264,6 +250,25 @@ public interface RestClient {
     InputStream getJobTaskStatesByTagPaginated(@HeaderParam("sessionid") String sessionId,
             @PathParam("jobid") String jobId, @PathParam("tasktag") String taskTag,
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
+
+    /**
+     * Returns a list of taskState of the tasks filtered by a given tag and paginated.
+     * @param sessionId a valid session id.
+     * @param jobId the job id.
+     * @param offset the number of the first task to fetch
+     * @param limit the number of the last task to fetch (non inclusive)
+     * @param taskTag the tag used to filter the tasks.
+     * @param statusFilter aggregation status to apply in filter
+     * @return a list of task' states of the job <code>jobId</code> filtered by a given tag, for a given pagination.
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/taskstates/{tasktag}/{statusFilter}/paginated")
+    @Produces("application/json")
+    InputStream getJobTaskStatesByTagAndStatusPaginated(@HeaderParam("sessionid") String sessionId,
+            @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
+            @PathParam("statusFilter") String statusFilter);
 
     /**
      * Returns a paginated list of <code>TaskStateData</code> regarding the given parameters (decoupled from the associated jobs).
@@ -381,7 +386,6 @@ public interface RestClient {
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
      * @param priorityName the new priority of the job 
-     * @return a ClientResponse containing the response status.
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")
@@ -605,6 +609,17 @@ public interface RestClient {
     @Produces("application/json")
     InputStream taskResultMetadata(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("taskid") String taskId);
+
+    /**
+     * @param sessionId the session id of the user which is logged in
+     * @param jobId the id of the job to which the task belongs
+     * @return all precious task results' metadata associated to the <code>jobId</code>
+     */
+    @GET
+    @GZIP
+    @Path("jobs/{jobid}/tasks/results/precious/metadata")
+    @Produces("application/json")
+    InputStream getPreciousTaskName(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
      * Gets the serialized result of a task.

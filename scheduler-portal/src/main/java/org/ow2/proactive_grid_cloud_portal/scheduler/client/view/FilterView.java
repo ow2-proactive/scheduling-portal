@@ -37,15 +37,11 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.HStack;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -64,22 +60,70 @@ public class FilterView extends VStack {
 
     private Anchor addButton;
 
+    private Label errorLabel;
+
     private final static ImageResource ADD_BUTTON_IMAGE = SchedulerImages.instance.add();
 
     private final static ImageResource REMOVE_BUTTON_IMAGE = SchedulerImages.instance.remove();
+
+    private static final String ERROR_MESSAGE = "errorMessage";
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public FilterView() {
         initComp();
         setLayout();
     }
 
+    private void clearMessagePanel() {
+        if (filterPanel.contains(errorLabel)) {
+            filterPanel.removeMember(errorLabel);
+        }
+    }
+
+    private void displayErrorMessage(String message) {
+
+        clearMessagePanel();
+
+        errorLabel = new Label(message);
+        errorLabel.setHeight(30);
+        errorLabel.setWidth100();
+        errorLabel.setMargin(10);
+        errorLabel.setAlign(Alignment.CENTER);
+        errorLabel.setStyleName(ERROR_MESSAGE);
+
+        filterPanel.addMember(errorLabel);
+        filterPanel.reflow();
+    }
+
+    private void validateField(Field field, String value) {
+        switch (field) {
+            case ID:
+                try {
+                    Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    displayErrorMessage("Invalid value for field " + field + " : \"" + value + "\" is not an integer.");
+                }
+                break;
+            case SUBMITTED_TIME:
+                try {
+                    DateTimeFormat.getFormat(DATE_FORMAT).parse(value);
+                } catch (IllegalArgumentException e) {
+                    displayErrorMessage("Invalid value for field " + field + " : \"" + value +
+                                        "\" is not a valid date. (" + DATE_FORMAT + ")");
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     public FilterModel getFilterModel() {
+
+        clearMessagePanel();
+
         FilterModel model = new FilterModel();
         int widgetCount = filterPanel.getMembersLength();
-
-        if (widgetCount == 1 && ((RowFilter) filterPanel.getMember(0)).getValue().isEmpty()) {
-            return model;
-        }
 
         model.setMatchAny(matchAnyButton.getValue());
         for (int i = 0; i < widgetCount; i++) {
@@ -87,6 +131,9 @@ public class FilterView extends VStack {
             Field field = Field.get(row.fieldsList.getSelectedValue());
             Action action = Action.get(row.actionList.getSelectedValue());
             String value = row.getValue();
+
+            validateField(field, value);
+
             model.addConstraint(field, action, value);
         }
 
@@ -205,9 +252,9 @@ public class FilterView extends VStack {
         private void setActionsAccordingToSelectedField() {
             Field field = Field.get(fieldsList.getSelectedValue());
             actionList.clear();
-            actionList.addItem(Action.EQUALS.getName());
             switch (field) {
                 case ID: {
+                    actionList.addItem(Action.EQUALS.getName());
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
                     actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
                     valuePanel.setWidget(textBox);
@@ -216,16 +263,21 @@ public class FilterView extends VStack {
                 case PROJECT_NAME:
                 case USER:
                 case NAME: {
+                    actionList.addItem(Action.EQUALS.getName());
+                    actionList.addItem(Action.NOT_EQUAL.getName());
                     actionList.addItem(Action.CONTAINS.getName());
+                    actionList.addItem(Action.NOT_CONTAIN.getName());
                     actionList.addItem(Action.STARTS_WITH.getName());
                     valuePanel.setWidget(textBox);
                     break;
                 }
                 case PRIORITY: {
+                    actionList.addItem(Action.EQUALS.getName());
                     valuePanel.setWidget(priorityList);
                     break;
                 }
                 case STATE: {
+                    actionList.addItem(Action.EQUALS.getName());
                     valuePanel.setWidget(stateList);
                     break;
                 }

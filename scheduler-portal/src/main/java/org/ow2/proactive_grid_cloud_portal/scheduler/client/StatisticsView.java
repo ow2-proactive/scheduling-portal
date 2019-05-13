@@ -25,11 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.StatisticsListener;
 
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
@@ -46,16 +49,12 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  */
 public class StatisticsView implements StatisticsListener {
 
-    private Layout root = null;
+    private DetailViewer statsDetail, accountDetail, taskDetails;
 
-    private DetailViewer statsDetail, accountDetail;
-
-    private Label l1, l2;
+    private Label statsLabel, accountLabel;
 
     /**
      * Default constructor
-     * 
-     * @param controller
      */
     public StatisticsView(SchedulerController controller) {
         controller.getEventDispatcher().addStatisticsListener(this);
@@ -63,15 +62,16 @@ public class StatisticsView implements StatisticsListener {
 
     /**
      * Build and return this view's graphical components
-     * 
-     * @return
      */
     public Layout build() {
-        this.root = new VLayout();
-        this.root.setWidth100();
-        this.root.setHeight100();
+        Layout root = new VLayout();
+        root.setWidth100();
+        root.setHeight100();
 
+        Layout schedulerStats = new HLayout();
+        schedulerStats.setWidth100();
         statsDetail = new DetailViewer();
+        statsDetail.setWidth("50%");
         statsDetail.setCanSelectText(true);
 
         DetailViewerField jobSubmittingPeriod = new DetailViewerField("JobSubmittingPeriod", "Job Submitting Period");
@@ -91,13 +91,14 @@ public class StatisticsView implements StatisticsListener {
 
         DetailViewerField pendingJobsCount = new DetailViewerField("PendingJobsCount", "Pending Jobs Count");
         DetailViewerField runningJobsCount = new DetailViewerField("RunningJobsCount", "Running Jobs Count");
+        DetailViewerField stalledJobsCount = new DetailViewerField("StalledJobsCount", "Stalled Jobs Count");
+        DetailViewerField pausedJobsCount = new DetailViewerField("PausedJobsCount", "Paused Jobs Count");
         DetailViewerField finishedJobsCount = new DetailViewerField("FinishedJobsCount", "Finished Jobs Count");
+        DetailViewerField inErrorJobsCount = new DetailViewerField("InErrorJobsCount", "In-Error Jobs Count");
+        DetailViewerField killedJobsCount = new DetailViewerField("KilledJobsCount", "Killed Jobs Count");
+        DetailViewerField cancelledJobsCount = new DetailViewerField("CancelledJobsCount", "Cancelled Jobs Count");
+        DetailViewerField failedJobsCount = new DetailViewerField("FailedJobsCount", "Failed Jobs Count");
         DetailViewerField totalJobsCount = new DetailViewerField("TotalJobsCount", "Total Jobs Count");
-
-        DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
-        DetailViewerField runningTasksCount = new DetailViewerField("RunningTasksCount", "Running Tasks Count");
-        DetailViewerField finishedTasksCount = new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
-        DetailViewerField totalTasksCount = new DetailViewerField("TotalTasksCount", "Total Tasks Count");
 
         statsDetail.setFields(connectedUsersCount,
                               jobSubmittingPeriod,
@@ -108,12 +109,14 @@ public class StatisticsView implements StatisticsListener {
                               formattedMeanJobExecutionTime,
                               pendingJobsCount,
                               runningJobsCount,
+                              stalledJobsCount,
+                              pausedJobsCount,
                               finishedJobsCount,
-                              totalJobsCount,
-                              pendingTasksCount,
-                              runningTasksCount,
-                              finishedTasksCount,
-                              totalTasksCount);
+                              inErrorJobsCount,
+                              killedJobsCount,
+                              cancelledJobsCount,
+                              failedJobsCount,
+                              totalJobsCount);
 
         accountDetail = new DetailViewer();
         accountDetail.setCanSelectText(true);
@@ -135,20 +138,62 @@ public class StatisticsView implements StatisticsListener {
                                 totalTaskDuration,
                                 formattedTotalTaskDuration);
 
-        l1 = new Label("<h3>Scheduler statistics</h3>");
-        l1.setHeight(25);
-        l1.hide();
+        statsLabel = new Label("<h3>Scheduler statistics</h3>");
+        statsLabel.setHeight(25);
+        statsLabel.hide();
 
-        l2 = new Label("<h3>My account</h3>");
-        l2.setHeight(25);
-        l2.hide();
+        accountLabel = new Label("<h3>My account</h3>");
+        accountLabel.setHeight(25);
+        accountLabel.hide();
 
-        this.root.addMember(l1);
-        this.root.addMember(statsDetail);
-        this.root.addMember(l2);
-        this.root.addMember(accountDetail);
+        schedulerStats.addMember(statsDetail);
 
-        return this.root;
+        taskDetails = new DetailViewer();
+        taskDetails.setCanSelectText(true);
+        taskDetails.setWidth("50%");
+        DetailViewerField submittedTasksCount = new DetailViewerField("SubmittedTasksCount", "Submitted Tasks Count");
+        DetailViewerField pendingTasksCount = new DetailViewerField("PendingTasksCount", "Pending Tasks Count");
+        DetailViewerField pausedTasksCount = new DetailViewerField("PausedTasksCount", "Paused Tasks Count");
+        DetailViewerField runningTasksCount = new DetailViewerField("RunningTasksCount", "Running Tasks Count");
+        DetailViewerField finishedTasksCount = new DetailViewerField("FinishedTasksCount", "Finished Tasks Count");
+        DetailViewerField waitingOnErrorTasksCount = new DetailViewerField("WaitingOnErrorTasksCount",
+                                                                           "Faulty... Tasks Count");
+        DetailViewerField waitingOnFailureTasksCount = new DetailViewerField("WaitingOnFailureTasksCount",
+                                                                             "Failed... Tasks Count");
+        DetailViewerField failedTasksCount = new DetailViewerField("FailedTasksCount", "Resource down Tasks Count");
+        DetailViewerField notStartedTasksCount = new DetailViewerField("NotStartedTasksCount",
+                                                                       "Could not start Tasks Count");
+        DetailViewerField notRestartedTasksCount = new DetailViewerField("NotRestartedTasksCount",
+                                                                         "Could not restart Tasks Count");
+        DetailViewerField abortedTasksCount = new DetailViewerField("AbortedTasksCount", "Aborted Tasks Count");
+        DetailViewerField faultyTasksCount = new DetailViewerField("FaultyTasksCount", "Faulty Tasks Count");
+        DetailViewerField skippedTasksCount = new DetailViewerField("SkippedTasksCount", "Skipped Tasks Count");
+        DetailViewerField inErrorTasksCount = new DetailViewerField("InErrorTasksCount", "In-Error Tasks Count");
+        DetailViewerField totalTasksCount = new DetailViewerField("TotalTasksCount", "Total Tasks Count");
+        taskDetails.setFields(submittedTasksCount,
+                              pendingTasksCount,
+                              pausedTasksCount,
+                              runningTasksCount,
+                              finishedTasksCount,
+                              waitingOnErrorTasksCount,
+                              waitingOnFailureTasksCount,
+                              failedTasksCount,
+                              notStartedTasksCount,
+                              notRestartedTasksCount,
+                              abortedTasksCount,
+                              faultyTasksCount,
+                              skippedTasksCount,
+                              inErrorTasksCount,
+                              totalTasksCount);
+        schedulerStats.addMember(taskDetails);
+
+        root.addMember(statsLabel);
+        root.addMember(schedulerStats);
+        root.addMember(accountLabel);
+        root.addMember(accountDetail);
+
+        return root;
+
     }
 
     /*
@@ -160,24 +205,55 @@ public class StatisticsView implements StatisticsListener {
      */
     public void schedulerStatsUpdated(HashMap<String, String> stats) {
         DetailViewerRecord r = new DetailViewerRecord();
-        r.setAttribute("JobSubmittingPeriod", stats.get("JobSubmittingPeriod"));
-        r.setAttribute("FormattedJobSubmittingPeriod", stats.get("FormattedJobSubmittingPeriod"));
-        r.setAttribute("MeanJobPendingTime", stats.get("MeanJobPendingTime"));
-        r.setAttribute("ConnectedUsersCount", stats.get("ConnectedUsersCount"));
-        r.setAttribute("FinishedTasksCount", stats.get("FinishedTasksCount"));
-        r.setAttribute("RunningJobsCount", stats.get("RunningJobsCount"));
-        r.setAttribute("RunningTasksCount", stats.get("RunningTasksCount"));
-        r.setAttribute("FormattedMeanJobPendingTime", stats.get("FormattedMeanJobPendingTime"));
-        r.setAttribute("MeanJobExecutionTime", stats.get("MeanJobExecutionTime"));
-        r.setAttribute("PendingTasksCount", stats.get("PendingTasksCount"));
-        r.setAttribute("FinishedJobsCount", stats.get("FinishedJobsCount"));
-        r.setAttribute("TotalTasksCount", stats.get("TotalTasksCount"));
-        r.setAttribute("FormattedMeanJobExecutionTime", stats.get("FormattedMeanJobExecutionTime"));
-        r.setAttribute("TotalJobsCount", stats.get("TotalJobsCount"));
-        r.setAttribute("PendingJobsCount", stats.get("PendingJobsCount"));
+        List<String> aList = Arrays.asList("JobSubmittingPeriod",
+                                           "FormattedJobSubmittingPeriod",
+                                           "MeanJobPendingTime",
+                                           "ConnectedUsersCount",
+                                           "FinishedTasksCount",
+                                           "RunningJobsCount",
+                                           "RunningTasksCount",
+                                           "FormattedMeanJobPendingTime",
+                                           "MeanJobExecutionTime",
+                                           "PendingTasksCount",
+                                           "FinishedJobsCount",
+                                           "TotalTasksCount",
+                                           "FormattedMeanJobExecutionTime",
+                                           "TotalJobsCount",
+                                           "PendingJobsCount",
+                                           "StalledJobsCount",
+                                           "PausedJobsCount",
+                                           "InErrorJobsCount",
+                                           "KilledJobsCount",
+                                           "CancelledJobsCount",
+                                           "FailedJobsCount");
 
-        this.statsDetail.setData(new DetailViewerRecord[] { r });
-        l1.show();
+        for (String propName : aList) {
+            r.setAttribute(propName, stats.getOrDefault(propName, "0"));
+        }
+
+        statsDetail.setData(new DetailViewerRecord[] { r });
+        statsLabel.show();
+
+        r = new DetailViewerRecord();
+        aList = Arrays.asList("SubmittedTasksCount",
+                              "PendingTasksCount",
+                              "PausedTasksCount",
+                              "RunningTasksCount",
+                              "FinishedTasksCount",
+                              "WaitingOnErrorTasksCount",
+                              "WaitingOnFailureTasksCount",
+                              "FailedTasksCount",
+                              "NotStartedTasksCount",
+                              "NotRestartedTasksCount",
+                              "AbortedTasksCount",
+                              "FaultyTasksCount",
+                              "SkippedTasksCount",
+                              "InErrorTasksCount",
+                              "TotalTasksCount");
+        for (String propName : aList) {
+            r.setAttribute(propName, stats.getOrDefault(propName, "0"));
+        }
+        taskDetails.setData(new DetailViewerRecord[] { r });
     }
 
     /*
@@ -195,8 +271,8 @@ public class StatisticsView implements StatisticsListener {
         r.setAttribute("TotalJobCount", stats.get("TotalJobCount"));
         r.setAttribute("TotalTaskDuration", stats.get("TotalTaskDuration"));
         r.setAttribute("FormattedTotalTaskDuration", Job.formatDuration(stats.get("TotalTaskDuration")));
-        this.accountDetail.setData(new DetailViewerRecord[] { r });
-        l2.show();
+        accountDetail.setData(new DetailViewerRecord[] { r });
+        accountLabel.show();
     }
 
 }

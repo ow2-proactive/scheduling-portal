@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
+import static org.ow2.proactive_grid_cloud_portal.common.shared.Base64Utils.toBase64;
+
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPaginationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsPaginationView;
 
@@ -73,20 +75,20 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
 
     @Override
     public void nextPage() {
-        int curPage = model.getPage();
-        if (curPage == model.getMaxPage())
+        if (!this.hasNext()) {
             return;
-        model.setPage(curPage + 1);
+        }
+        model.setPage(model.getPage() + 1);
         model.setFetchData(null, model.getCurrentStartCursor(), false);
         this.fetch(false);
     }
 
     @Override
     public void previousPage() {
-        int curPage = model.getPage();
-        if (curPage == 0)
+        if (!this.hasPrevious()) {
             return;
-        model.setPage(curPage - 1);
+        }
+        model.setPage(model.getPage() - 1);
         model.setFetchData(model.getCurrentEndCursor(), null, true);
         this.fetch(false);
     }
@@ -101,6 +103,16 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
     public boolean hasNext() {
         //GraphQL fetches the jobs starting from the oldest
         return model.hasPreviousPage();
+    }
+
+    /**
+     * Fetch the jobs of the page starting with the given id
+     */
+    public void openPageWithId(int jobId) {
+        String unconvertedCursor = "graphql-cursor" + (jobId + 1);
+        String base64Cursor = toBase64(unconvertedCursor.getBytes());
+        model.setFetchData(null, base64Cursor, false);
+        this.fetch(false);
     }
 
     public JobsPaginationModel getModel() {

@@ -7,6 +7,9 @@ rm-portal/src/main/webapp/portal/
 scheduler-portal/src/main/webapp/WEB-INF/deploy/
 scheduler-portal/src/main/webapp/portal/
 
+common-portal/out/
+scheduler-portal/out/
+
 /lib/
 /.settings/
 /classes/
@@ -18,3 +21,5 @@ gradle/ext/
 *.settings
 applet/bin/
 rm-portal/bin/
+
+*.DS_Store

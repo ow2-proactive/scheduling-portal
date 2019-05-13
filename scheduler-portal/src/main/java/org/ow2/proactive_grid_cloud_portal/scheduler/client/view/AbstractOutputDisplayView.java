@@ -32,8 +32,6 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -87,11 +85,7 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
         this.refreshButton = new IButton(this.refreshButtonLabel);
         this.refreshButton.setTooltip(this.refreshButtonTooltip);
         this.refreshButton.setAutoFit(true);
-        this.refreshButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                refreshButtonHandler();
-            }
-        });
+        this.refreshButton.addClickHandler(event -> refreshButtonHandler());
     }
 
     /**
@@ -138,7 +132,6 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
 
     /**
      * Update view to show the control when a job or task has been selected.
-     * @param output
      */
     protected void goToTargetSelectedState() {
         this.refreshButton.show();

@@ -27,10 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.common.client;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
-import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 
@@ -75,17 +72,11 @@ public class ToolButtonsRender {
         logoutButton.setTooltip("Logout");
         logoutButton.setBorder(GREY_BUTTON_BORDER);
 
-        logoutButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                SC.confirm("Logout", "Are you sure you want to exit?", new BooleanCallback() {
-                    public void execute(Boolean value) {
-                        if (value) {
-                            controller.logout();
-                        }
-                    }
-                });
+        logoutButton.addClickHandler(event -> SC.confirm("Logout", "Are you sure you want to exit?", value -> {
+            if (value) {
+                controller.logout();
             }
-        });
+        }));
         return logoutButton;
     }
 
@@ -108,11 +99,7 @@ public class ToolButtonsRender {
             final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
 
-        toolStripButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.open(url, url, "");
-            }
-        });
+        toolStripButton.addClickHandler(event -> Window.open(url, url, ""));
         return toolStripButton;
     }
 
