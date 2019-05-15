@@ -93,7 +93,7 @@ subprojects {
         compile 'com.google.guava:guava:21.0'
         compile 'com.google.guava:guava-gwt:21.0'
 
-        compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.17.Final'
+        compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.19.Final'
         compile 'org.apache.httpcomponents:httpmime:4.3.6'
 
         runtime 'com.google.gwt:gwt-servlet:2.8.0'
@@ -130,7 +130,7 @@ project(':applet') {
 project(':rm-portal') {
     dependencies {
         compile 'codemirror:codemirror2-gwt:1.2.0'
-        compile 'org.jboss.resteasy:resteasy-client:3.0.17.Final'
+        compile 'org.jboss.resteasy:resteasy-client:3.0.19.Final'
 
         runtime 'org.slf4j:slf4j-simple:1.7.12'
         compile 'org.codehaus.jettison:jettison:1.2'
@@ -151,7 +151,7 @@ project(':scheduler-portal') {
         compile 'raphaelgwt:raphaelgwt:r28'
         compile 'org.vectomatic:lib-gwt-file:0.3.3'
         compile 'org.codehaus.jettison:jettison:1.2'
-        compile 'org.jboss.resteasy:resteasy-multipart-provider:3.0.17.Final'
+        compile 'org.jboss.resteasy:resteasy-multipart-provider:3.0.19.Final'
         compile 'org.apache.commons:commons-csv:1.1'
 
         compile project(':common-portal')
