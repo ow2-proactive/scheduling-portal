@@ -205,7 +205,8 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
         args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize() - "-portal"}",
                 '-war', "$buildDir/portal",
                 '-logLevel', 'ALL',
-                '-localWorkers', '2', '-generateJsInteropExports',
+                '-localWorkers', '2',
+                '-generateJsInteropExports'
         ]
         systemProperties = ['gwt.persistentunitcachedir': buildDir]
 

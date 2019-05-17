@@ -33,6 +33,11 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.pepstock.charba.client.BarChart;
+import org.pepstock.charba.client.data.BarBorderWidth;
+import org.pepstock.charba.client.data.BarDataset;
+import org.pepstock.charba.client.resources.EmbeddedResources;
+import org.pepstock.charba.client.resources.ResourcesType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -41,9 +46,9 @@ import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
@@ -53,9 +58,6 @@ import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
-import org.pepstock.charba.client.BarChart;
-import org.pepstock.charba.client.data.BarDataset;
-import org.pepstock.charba.client.enums.Position;
 
 
 /**
@@ -84,12 +86,6 @@ public class RMStatsView implements StatsListener, NodesListener {
 
     private DynamicForm nodeLineSeriesForm;
 
-    private ColumnChart nodeColChart;
-
-    private DataTable nodeColTable;
-
-    private Options nodeColOpts;
-
     private Label nodeColHeaderLabel;
 
     private AreaChart loadChart;
@@ -104,6 +100,8 @@ public class RMStatsView implements StatsListener, NodesListener {
 
     private Label loadHeaderLabel;
 
+    private BarChart barChart;
+
     RMStatsView(RMController controller) {
         this.controller = controller;
         this.controller.getEventDispatcher().addStatsListener(this);
@@ -116,6 +114,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.setPadding(5);
         root.setWidth100();
         root.setHeight100();
+        root.setAlign(Alignment.CENTER);
         root.setOverflow(Overflow.AUTO);
 
         /*
@@ -258,45 +257,35 @@ public class RMStatsView implements StatsListener, NodesListener {
         /*
          * Instantaneous node state - Node State histogram
          */
-        final AbsolutePanel nodeColPane = new AbsolutePanel();
-        nodeColPane.setWidth("100%");
-        nodeColPane.setHeight("150px");
+        ResourcesType.setClientBundle(EmbeddedResources.INSTANCE);
 
-        this.nodeColOpts = Options.create();
-        nodeColOpts.setHeight(150);
-        nodeColOpts.setLegend(LegendPosition.NONE);
-        HorizontalAxisOptions nodeColHaxis = HorizontalAxisOptions.create();
-        //nodeColHaxis.setSlantedText(false);
-        nodeColHaxis.setMaxAlternation(1);
-        nodeColOpts.setHAxisOptions(nodeColHaxis);
-        nodeColOpts.setIsStacked(true);
-        nodeColOpts.setColors("#3a668d", "#35a849", "#ffff00", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-        //nodeColOpts.set("enableInteractivity", "false");
+        barChart = new BarChart();
+        barChart.getOptions().setResponsive(true);
+        barChart.getOptions().getLegend().setDisplay(false);
 
-        nodeColTable = DataTable.create();
-        nodeColTable.addColumn(ColumnType.STRING, "State");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Total");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Free");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Needed");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Busy");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Deploying");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Configuring");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Down");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Lost");
+        BarDataset dataset1 = barChart.newDataset();
+        BarBorderWidth border = new BarBorderWidth();
+        border.setTop(0);
+        border.setLeft(0);
+        border.setRight(0);
 
-        nodeColChart = new ColumnChart(nodeColTable, nodeColOpts);
+        dataset1.setBorderWidth(border);
+        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
 
-        org.pepstock.charba.client.BarChart barChart = new BarChart();
-//        barChart.getOptions().setResponsive(true);
-//        barChart.getOptions().getLegend().setPosition(Position.TOP);
-//        barChart.getOptions().getTitle().setDisplay(true);
-//        barChart.getOptions().getTitle().setText("Nodes State");
-//        BarDataset barDataset = barChart.newDataset();
-//        barDataset.setData(1, 34, 55, 66);
-//        barChart.getData().setDatasets(barDataset);
-        nodeColPane.add(barChart);
-        nodeColPane.add(nodeColChart);
+        dataset1.setBackgroundColor("#3a668d",
+                                    "#35a849",
+                                    "#ffff00",
+                                    "#fcaf3e",
+                                    "#24c1ff",
+                                    "#1e4ed7",
+                                    "#ef2929",
+                                    "#000000");
 
+        barChart.getData().setLabels("Total", "Free", "Needed", "Busy", "Deploying", "Configuring", "Down", "Lost");
+        barChart.getData().setDatasets(dataset1);
+        barChart.setHeight("150px");
+        barChart.setWidth("100%");
+        barChart.getOptions().setMaintainAspectRatio(false);
 
         nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
         nodeColHeaderLabel.setHeight(24);
@@ -304,6 +293,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         /*
          * Activity graph - Load history graph
          */
+
         final AbsolutePanel loadPane = new AbsolutePanel();
         loadPane.setWidth("100%");
         loadPane.setHeight("150px");
@@ -365,7 +355,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         cc2.setBackgroundColor("#eee");
 
         root.addMember(nodeColHeaderLabel);
-        root.addMember(nodeColPane);
+        root.addMember(barChart);
         root.addMember(cc1);
         root.addMember(nodeLineHeader);
         root.addMember(nodeLinePane);
@@ -463,34 +453,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         int total = controller.getModel().getNumNodes();
         int needed = controller.getModel().getNeededNodes();
 
-        nodeColTable.removeRows(0, nodeColTable.getNumberOfRows());
-        nodeColTable.addRows(8);
-
-        nodeColTable.setValue(0, 0, "Total");
-        nodeColTable.setValue(0, 1, total);
-
-        nodeColTable.setValue(1, 0, "Free");
-        nodeColTable.setValue(1, 2, free);
-
-        nodeColTable.setValue(2, 0, "Needed");
-        nodeColTable.setValue(2, 3, needed);
-
-        nodeColTable.setValue(3, 0, "Busy");
-        nodeColTable.setValue(3, 4, busy);
-
-        nodeColTable.setValue(4, 0, "Deploying");
-        nodeColTable.setValue(4, 5, depl);
-
-        nodeColTable.setValue(5, 0, "Configuring");
-        nodeColTable.setValue(5, 6, conf);
-
-        nodeColTable.setValue(6, 0, "Down");
-        nodeColTable.setValue(6, 7, down);
-
-        nodeColTable.setValue(7, 0, "Lost");
-        nodeColTable.setValue(7, 8, lost);
-
-        nodeColChart.draw(nodeColTable, nodeColOpts);
-
+        barChart.getData().getDatasets().get(0).setData(total, free, needed, busy, depl, conf, down, lost);
+        barChart.update();
     }
 }
