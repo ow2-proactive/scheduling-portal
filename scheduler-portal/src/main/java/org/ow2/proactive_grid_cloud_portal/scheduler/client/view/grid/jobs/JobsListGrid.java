@@ -177,18 +177,21 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             try {
                 switch (getJobStatus(record)) {
                     case KILLED:
-                        return "color:#d37a11;font-weight:bold;" + base;
+                        return "color:#E07472;" + base; // red color
                     case CANCELED:
+                        return "color:#A9A9A9;" + base; // Dark Gray color
                     case FAILED:
+                        return "color:#FF8281;" + base; // Light Red color
                     case IN_ERROR:
-                        return "color:#c50000;font-weight:bold;" + base;
+                        return "color:#D3D3D3;font-weight:bold;" + base; // Light Gray color
                     case RUNNING:
-                        return "color:#176925;font-weight:bold;" + base;
+                        return "color:#2962ff;font-weight:bold;" + base; //  Blue color
                     case PENDING:
-                        return "color:#1a8bba;" + base;
+                        return "color:#FFFF00;" + base; // Yellow color
                     case STALLED:
+                        return "color:#62cef7;" + base; // Dark Blue color
                     case PAUSED:
-                        return "font-weight:bold;" + base;
+                        return "color:#FFA500;font-weight:bold;" + base; // Orange color
                     case FINISHED:
                         return base;
                     default:
