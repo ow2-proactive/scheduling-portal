@@ -70,6 +70,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.plugins.interceptors.encoding.AcceptEncodingGZIPFilter;
+import org.jboss.resteasy.plugins.interceptors.encoding.GZIPDecodingInterceptor;
+import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
@@ -1272,9 +1275,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     private RestClient getRestClientProxy() {
-        ResteasyClient client = new ResteasyClientBuilder().asyncExecutor(threadPool)
-                                                           .httpEngine(new ApacheHttpClient4Engine(httpClient))
-                                                           .build();
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        builder.register(AcceptEncodingGZIPFilter.class);
+        builder.register(GZIPDecodingInterceptor.class);
+        builder.register(GZIPEncodingInterceptor.class);
+        ResteasyClient client = builder.asyncExecutor(threadPool)
+                                       .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                                       .build();
         ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
 
         return target.proxy(RestClient.class);
