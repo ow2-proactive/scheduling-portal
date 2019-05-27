@@ -54,7 +54,7 @@ import org.pepstock.charba.client.enums.TimeUnit;
 import org.pepstock.charba.client.resources.EmbeddedResources;
 import org.pepstock.charba.client.resources.ResourcesType;
 
-import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
@@ -74,6 +74,24 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class RMStatsView implements StatsListener, NodesListener {
 
+    public static final String FREE_NODES_COUNT = "FreeNodesCount";
+
+    public static final String NEEDED_NODES_COUNT = "NeededNodesCount";
+
+    public static final String BUSY_NODES_COUNT = "BusyNodesCount";
+
+    public static final String AVAILABLE_NODES_COUNT = "AvailableNodesCount";
+
+    public static final String DEPLOYING_NODES_COUNT = "DeployingNodesCount";
+
+    public static final String CONFIG_NODES_COUNT = "ConfigNodesCount";
+
+    public static final String DOWN_NODES_COUNT = "DownNodesCount";
+
+    public static final String LOST_NODES_COUNT = "LostNodesCount";
+
+    public static final String AVERAGE_ACTIVITY = "AverageActivity";
+
     private RMController controller;
 
     private DynamicForm nodeLineForm;
@@ -89,6 +107,8 @@ public class RMStatsView implements StatsListener, NodesListener {
     private BarChart barChart;
 
     private LineChart nodeHistoryChart;
+
+    private LineChart activityChart;
 
     private List<Map.Entry<String, String>> datasetsAndColor = new ArrayList<>();
 
@@ -162,9 +182,6 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         nodeHistoryChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
 
-
-
-
         nodeLineForm = new DynamicForm();
         final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
         LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
@@ -181,14 +198,14 @@ public class RMStatsView implements StatsListener, NodesListener {
             nodeLineHeaderLabel.setIcon("loading.gif");
             Range r = Range.create(nodeLineSelect.getValueAsString().charAt(0));
             controller.setRuntimeRRDRange(r,
-                                          "FreeNodesCount",
-                                          "BusyNodesCount",
-                                          "DeployingNodesCount",
-                                          "DownNodesCount",
-                                          "LostNodesCount",
-                                          "ConfigNodesCount",
-                                          "NeededNodesCount",
-                                          "AvailableNodesCount");
+                                          FREE_NODES_COUNT,
+                                          BUSY_NODES_COUNT,
+                                          DEPLOYING_NODES_COUNT,
+                                          DOWN_NODES_COUNT,
+                                          LOST_NODES_COUNT,
+                                          CONFIG_NODES_COUNT,
+                                          NEEDED_NODES_COUNT,
+                                          AVAILABLE_NODES_COUNT);
         });
 
         nodeLineHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes History<nobr>");
@@ -201,11 +218,10 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineHeader.setHeight(24);
         nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
 
-//
+        //
         /*
          * Instantaneous node state - Node State histogram
          */
-
 
         barChart = new BarChart();
         barChart.getOptions().setResponsive(true);
@@ -229,7 +245,7 @@ public class RMStatsView implements StatsListener, NodesListener {
                                     "#ef2929",
                                     "#000000");
 
-        barChart.getData().setLabels("Total", "Free", "Needed", "Busy", "Deploying", "Configuring", "Down", "Lost");
+        barChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
         barChart.getData().setDatasets(dataset1);
         barChart.setHeight("150px");
         barChart.setWidth("100%");
@@ -245,25 +261,27 @@ public class RMStatsView implements StatsListener, NodesListener {
          * Activity graph - Load history graph
          */
 
-        final AbsolutePanel loadPane = new AbsolutePanel();
-        loadPane.setWidth("100%");
-        loadPane.setHeight("150px");
+        activityChart = new LineChart();
+        CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
+        axis.getTicks().setAutoSkip(false);
+        axis.getTicks().setMaxRotation(0);
 
-//        loadOpts = Options.create();
-//        loadOpts.setHeight(150);
-//        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-//        loadAxis.setMaxAlternation(1);
-//        loadAxis.setSlantedText(false);
-//        loadOpts.setLegend(LegendPosition.NONE);
-//        loadOpts.setHAxisOptions(loadAxis);
-//        loadOpts.setColors("#fcaf3e");
+        activityChart.getOptions().setResponsive(true);
+        activityChart.getOptions().getLegend().setDisplay(false);
+        activityChart.getOptions().getTitle().setDisplay(false);
+        activityChart.getOptions().setSpanGaps(false);
+        activityChart.getOptions().getElements().getLine().setTension(0.000001D);
+        activityChart.getOptions().getScales().setYAxes(axis);
 
-//        loadTable = DataTable.create();
-//        loadTimeId = loadTable.addColumn(ColumnType.STRING, "Time");
-//        loadValId = loadTable.addColumn(ColumnType.NUMBER, "Load");
+        LineDataset dataset = activityChart.newDataset();
 
-//        loadChart = new AreaChart(loadTable, loadOpts);
-//        loadPane.add(loadChart);
+        dataset.setBackgroundColor("#fcaf3e");
+        dataset.setBorderColor("#fcaf3e");
+        //        dataset.setData(getRandomDigits(months));
+        dataset.setFill(Fill.START);
+        activityChart.getData().setDatasets(dataset);
+        //        activityChart.getData().setLabels(getLabels());
+        //        activityChart.getData().setDatasets(dataset);
 
         loadForm = new DynamicForm();
         final SelectItem loadSelect = new SelectItem("loadSelect", "");
@@ -277,14 +295,12 @@ public class RMStatsView implements StatsListener, NodesListener {
         loadForm.setHeight(24);
         loadForm.setWidth(40);
 
-//        loadSelect.addChangedHandler(event -> {
-//            loadForm.setDisabled(true);
-//            loadHeaderLabel.setIcon("loading.gif");
-//            nodeLineSeriesForm.setDisabled(true);
-//
-//            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
-//            controller.setRuntimeRRDRange(r, "AverageActivity");
-//        });
+        loadSelect.addChangedHandler(event -> {
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r, AVERAGE_ACTIVITY);
+        });
 
         loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
         loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
@@ -310,35 +326,29 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.addMember(cc1);
         root.addMember(nodeLineHeader);
         root.addMember(nodeHistoryChart);
-//        root.addMember(nodeLineSeriesForm);
+        //        root.addMember(nodeLineSeriesForm);
         root.addMember(cc2);
         root.addMember(loadHeader);
-//        root.addMember(loadPane);
+        root.addMember(activityChart);
 
         return root;
     }
 
-
     @Override
     public void statsUpdated(Map<String, StatHistory> values) {
 
-        StatHistory freeNodes = values.get("FreeNodesCount");
-        StatHistory busyNodes = values.get("BusyNodesCount");
-        StatHistory deployingNodes = values.get("DeployingNodesCount");
-        StatHistory downNodes = values.get("DownNodesCount");
-        StatHistory neededNodes = values.get("NeededNodesCount");
-        StatHistory totalNodes = values.get("AvailableNodesCount");
-        StatHistory configuringNodes = values.get("ConfigNodesCount");
-        StatHistory lostNodes = values.get("LostNodesCount");
+        StatHistory freeNodes = values.get(FREE_NODES_COUNT);
 
         long now = new Date().getTime() / 1000; // seconds
         long dur = freeNodes.range.getDuration();
         long step = dur / freeNodes.values.size();
 
-        StatHistory [] statHistories = new StatHistory[] {
-            totalNodes, freeNodes, neededNodes, busyNodes,
-            deployingNodes, configuringNodes, downNodes, lostNodes
-        };
+        StatHistory[] statHistories = new StatHistory[] { values.get(AVAILABLE_NODES_COUNT),
+                                                          values.get(FREE_NODES_COUNT), values.get(NEEDED_NODES_COUNT),
+                                                          values.get(BUSY_NODES_COUNT),
+                                                          values.get(DEPLOYING_NODES_COUNT),
+                                                          values.get(CONFIG_NODES_COUNT), values.get(DOWN_NODES_COUNT),
+                                                          values.get(LOST_NODES_COUNT) };
 
         for (int d = 0; d < statHistories.length; ++d) {
             StatHistory statHistory = statHistories[d];
@@ -357,25 +367,32 @@ public class RMStatsView implements StatsListener, NodesListener {
         }
 
         nodeHistoryChart.update();
-//        nodeLineChart.draw(nodeLineTable, nodeLineOpts);
-//        nodeLineForm.setDisabled(false);
-//        nodeLineSeriesForm.setDisabled(false);
-//        nodeLineHeaderLabel.setIcon(null);
-//        StatHistory loadHist = values.get("AverageActivity");
-//        loadTable.removeRows(0, loadTable.getNumberOfRows());
-//        loadTable.addRows(loadHist.values.size());
-//        dur = loadHist.range.getDuration();
-//        step = dur / loadHist.values.size();
-//        for (int i = 0; i < loadHist.values.size(); i++) {
-//            long t = now - dur + step * i;
-//            PredefinedFormat format = loadHist.range.getFormat();
-//            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
-//            loadTable.setValue(i, loadTimeId, timeStamp);
-//            loadTable.setValue(i, loadValId, loadHist.values.get(i));
-//        }
-//        loadChart.draw(loadTable, loadOpts);
-//        loadForm.setDisabled(false);
-//        loadHeaderLabel.setIcon(null);
+
+        StatHistory loadHist = values.get(AVERAGE_ACTIVITY);
+
+        LineDataset dataset = (LineDataset) activityChart.getData().getDatasets().get(0);
+
+        dur = loadHist.range.getDuration();
+        step = dur / loadHist.values.size();
+        List<Double> dps = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+
+        for (int i = 0; i < loadHist.values.size(); i++) {
+            long t = now - dur + step * i;
+            DateTimeFormat.PredefinedFormat format = loadHist.range.getFormat();
+            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+
+            Long value = Math.round(loadHist.values.get(i));
+            dps.add(value.doubleValue());
+            labels.add(timeStamp);
+        }
+        activityChart.getData().setLabels(labels.toArray(new String[0]));
+        dataset.setData(dps);
+
+        activityChart.update();
+        loadForm.setDisabled(false);
+        loadHeaderLabel.setIcon(null);
+
     }
 
     @Override
@@ -393,4 +410,3 @@ public class RMStatsView implements StatsListener, NodesListener {
         barChart.update();
     }
 }
-

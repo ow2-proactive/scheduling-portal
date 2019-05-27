@@ -450,14 +450,14 @@ public class RMPage implements LogListener {
 
         hl.addMember(leftTabs);
 
-//         in offline charts are not displayed
-//        VisualizationUtils.loadVisualizationApi(() -> {
-//            Tab monitoringTab = new Tab("Monitoring");
-//            monitoringView = new MonitoringView(controller);
-//            Canvas monitoringCanvas = monitoringView.build();
-//            monitoringTab.setPane(monitoringCanvas);
-//            leftTabs.addTab(monitoringTab);
-//        }, CoreChart.PACKAGE);
+        //         in offline charts are not displayed
+        //        VisualizationUtils.loadVisualizationApi(() -> {
+        //            Tab monitoringTab = new Tab("Monitoring");
+        //            monitoringView = new MonitoringView(controller);
+        //            Canvas monitoringCanvas = monitoringView.build();
+        //            monitoringTab.setPane(monitoringCanvas);
+        //            leftTabs.addTab(monitoringTab);
+        //        }, CoreChart.PACKAGE);
 
         rmStatsView = new RMStatsView(controller);
         final Canvas rmStatsCanvas = rmStatsView.build();
