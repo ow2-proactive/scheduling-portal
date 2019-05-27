@@ -150,21 +150,19 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeHistoryChart.getOptions().getLegend().setPosition(Position.BOTTOM);
         nodeHistoryChart.getOptions().getTitle().setDisplay(false);
         nodeHistoryChart.getOptions().setMaintainAspectRatio(false);
-        nodeHistoryChart.setHeight("150px");
+        nodeHistoryChart.setHeight("250px");
         nodeHistoryChart.setWidth("100%");
-        CartesianTimeAxis Xaxis = new CartesianTimeAxis(nodeHistoryChart);
-        Xaxis.setDistribution(ScaleDistribution.SERIES);
-        Xaxis.getTicks().setSource(TickSource.DATA);
-        Xaxis.getTicks().setAutoSkip(true);
-        Xaxis.getTime().setUnit(TimeUnit.SECOND);
-        CartesianLinearAxis Yaxis = new CartesianLinearAxis(nodeHistoryChart);
-        Yaxis.setDisplay(true);
-        Yaxis.getTicks().setBeginAtZero(true);
-        nodeHistoryChart.getOptions().getScales().setXAxes(Xaxis);
-        nodeHistoryChart.getOptions().getScales().setYAxes(Yaxis);
-        nodeHistoryChart.setHeight("150px");
-        nodeHistoryChart.setWidth("100%");
-        nodeHistoryChart.getOptions().setMaintainAspectRatio(false);
+        //        CartesianTimeAxis xAxis = new CartesianTimeAxis(nodeHistoryChart);
+        //        xAxis.setDistribution(ScaleDistribution.SERIES);
+        //        xAxis.getTicks().setSource(TickSource.DATA);
+        //        xAxis.getTicks().setDisplay(true);
+        //        xAxis.getTicks().setAutoSkip(true);
+        //        xAxis.getTime().setUnit(TimeUnit.SECOND);
+        //        CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeHistoryChart);
+        //        yAxis.setDisplay(true);
+        //        yAxis.getTicks().setBeginAtZero(true);
+        //        nodeHistoryChart.getOptions().getScales().setXAxes(xAxis);
+        //        nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
 
         List<Dataset> datasets = new ArrayList<>();
         for (Map.Entry<String, String> datasetAndColor : datasetsAndColor) {
@@ -265,6 +263,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
         axis.getTicks().setAutoSkip(false);
         axis.getTicks().setMaxRotation(0);
+        axis.getTicks().setMin(0.0);
 
         activityChart.getOptions().setResponsive(true);
         activityChart.getOptions().getLegend().setDisplay(false);
@@ -272,16 +271,15 @@ public class RMStatsView implements StatsListener, NodesListener {
         activityChart.getOptions().setSpanGaps(false);
         activityChart.getOptions().getElements().getLine().setTension(0.000001D);
         activityChart.getOptions().getScales().setYAxes(axis);
+        activityChart.setHeight("250px");
+        activityChart.setWidth("100%");
+        activityChart.getOptions().setMaintainAspectRatio(false);
 
         LineDataset dataset = activityChart.newDataset();
-
         dataset.setBackgroundColor("#fcaf3e");
         dataset.setBorderColor("#fcaf3e");
-        //        dataset.setData(getRandomDigits(months));
         dataset.setFill(Fill.START);
         activityChart.getData().setDatasets(dataset);
-        //        activityChart.getData().setLabels(getLabels());
-        //        activityChart.getData().setDatasets(dataset);
 
         loadForm = new DynamicForm();
         final SelectItem loadSelect = new SelectItem("loadSelect", "");
@@ -326,7 +324,6 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.addMember(cc1);
         root.addMember(nodeLineHeader);
         root.addMember(nodeHistoryChart);
-        //        root.addMember(nodeLineSeriesForm);
         root.addMember(cc2);
         root.addMember(loadHeader);
         root.addMember(activityChart);
@@ -354,19 +351,26 @@ public class RMStatsView implements StatsListener, NodesListener {
             StatHistory statHistory = statHistories[d];
             LineDataset dataset = (LineDataset) nodeHistoryChart.getData().getDatasets().get(d);
 
-            List<DataPoint> dps = new ArrayList<>();
+            List<Double> dps = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
             for (int i = 0; i < statHistory.values.size(); i++) {
                 long t = now - dur + step * i; // seconds
-                DataPoint dataPoint = new DataPoint();
-                dataPoint.setT(new Date(t * 1000));
-                dataPoint.setY(Math.round(statHistory.values.get(i)));
-                dps.add(dataPoint);
+
+                DateTimeFormat.PredefinedFormat format = statHistory.range.getFormat();
+                String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+                labels.add(timeStamp);
+
+                Long value = Math.round(statHistory.values.get(i));
+                dps.add(value.doubleValue());
             }
 
-            dataset.setDataPoints(dps);
+            dataset.setData(dps);
+            nodeHistoryChart.getData().setLabels(labels.toArray(new String[0]));
         }
 
         nodeHistoryChart.update();
+
+        nodeLineHeaderLabel.setIcon(null);
 
         StatHistory loadHist = values.get(AVERAGE_ACTIVITY);
 
