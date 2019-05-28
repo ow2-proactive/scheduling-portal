@@ -35,9 +35,13 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 import org.pepstock.charba.client.BarChart;
 import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.configuration.BarCategoryAxis;
+import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
 import org.pepstock.charba.client.configuration.CartesianTimeAxis;
 import org.pepstock.charba.client.data.BarBorderWidth;
@@ -141,6 +145,53 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.setAlign(Alignment.CENTER);
         root.setOverflow(Overflow.AUTO);
 
+        //
+        /*
+         * Instantaneous node state - Node State histogram
+         */
+
+        barChart = new BarChart();
+        barChart.getOptions().setResponsive(true);
+        barChart.getOptions().getLegend().setDisplay(false);
+
+        BarDataset dataset1 = barChart.newDataset();
+        BarBorderWidth border = new BarBorderWidth();
+        border.setTop(0);
+        border.setLeft(0);
+        border.setRight(0);
+
+        dataset1.setBorderWidth(border);
+        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
+
+        dataset1.setBackgroundColor("#3a668d",
+                                    "#35a849",
+                                    "#ffff00",
+                                    "#fcaf3e",
+                                    "#24c1ff",
+                                    "#1e4ed7",
+                                    "#ef2929",
+                                    "#000000");
+
+        barChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
+        barChart.getData().setDatasets(dataset1);
+        barChart.setHeight("150px");
+        barChart.setWidth("100%");
+        barChart.getOptions().setMaintainAspectRatio(false);
+        barChart.getOptions().getLayout().getPadding().setRight(20);
+
+        CartesianCategoryAxis cartesianCategoryAxis0 = new CartesianCategoryAxis(barChart);
+        cartesianCategoryAxis0.getGrideLines().setDisplay(false);
+        barChart.getOptions().getScales().setXAxes(cartesianCategoryAxis0);
+        //        LogModel.getInstance().logCriticalMessage(barChart.getOptions().getScales().getXAxes().get(0).getClass().getName());
+        //        BarCategoryAxis barCategoryAxis = (BarCategoryAxis) barChart.getOptions().getScales().getXAxes().get(0);
+        //        barCategoryAxis.getGrideLines().setDisplay(false);
+
+        barChart.getOptions().getLayout().getPadding().setLeft(20);
+        barChart.getOptions().getElements().getRectangle().setBorderWidth(10);
+
+        nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
+        nodeColHeaderLabel.setHeight(24);
+
         /*
          * Node history graph
          */
@@ -152,29 +203,34 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeHistoryChart.getOptions().setMaintainAspectRatio(false);
         nodeHistoryChart.setHeight("250px");
         nodeHistoryChart.setWidth("100%");
-        //        CartesianTimeAxis xAxis = new CartesianTimeAxis(nodeHistoryChart);
+        //                CartesianTimeAxis xAxis = new CartesianTimeAxis(nodeHistoryChart);
         //        xAxis.setDistribution(ScaleDistribution.SERIES);
         //        xAxis.getTicks().setSource(TickSource.DATA);
         //        xAxis.getTicks().setDisplay(true);
         //        xAxis.getTicks().setAutoSkip(true);
         //        xAxis.getTime().setUnit(TimeUnit.SECOND);
-        //        CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeHistoryChart);
-        //        yAxis.setDisplay(true);
-        //        yAxis.getTicks().setBeginAtZero(true);
-        //        nodeHistoryChart.getOptions().getScales().setXAxes(xAxis);
-        //        nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
+        CartesianLinearAxis cartesianLinearAxis = new CartesianLinearAxis(nodeHistoryChart);
+        cartesianLinearAxis.setDisplay(true);
+        cartesianLinearAxis.getTicks().setBeginAtZero(true);
+        cartesianLinearAxis.getTicks().setStepSize(1);
+        nodeHistoryChart.getOptions().getScales().setYAxes(cartesianLinearAxis);
+
+        CartesianCategoryAxis cartesianCategoryAxis = new CartesianCategoryAxis(nodeHistoryChart);
+        cartesianCategoryAxis.getGrideLines().setDisplay(false);
+        nodeHistoryChart.getOptions().getScales().setXAxes(cartesianCategoryAxis);
 
         List<Dataset> datasets = new ArrayList<>();
         for (Map.Entry<String, String> datasetAndColor : datasetsAndColor) {
             LineDataset dataset = nodeHistoryChart.newDataset();
-            dataset.setFill(Fill.FALSE);
+            dataset.setFill(Fill.START);
             dataset.setLabel(datasetAndColor.getKey());
-            dataset.setBackgroundColor(datasetAndColor.getValue());
             dataset.setBorderColor(datasetAndColor.getValue());
             dataset.setPointBackgroundColor(datasetAndColor.getValue());
             dataset.setPointBorderColor(datasetAndColor.getValue());
+            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
             dataset.setSteppedLine(SteppedLine.AFTER);
 
+            dataset.setPointRadius(2);
             datasets.add(dataset);
         }
 
@@ -216,45 +272,6 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineHeader.setHeight(24);
         nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
 
-        //
-        /*
-         * Instantaneous node state - Node State histogram
-         */
-
-        barChart = new BarChart();
-        barChart.getOptions().setResponsive(true);
-        barChart.getOptions().getLegend().setDisplay(false);
-
-        BarDataset dataset1 = barChart.newDataset();
-        BarBorderWidth border = new BarBorderWidth();
-        border.setTop(0);
-        border.setLeft(0);
-        border.setRight(0);
-
-        dataset1.setBorderWidth(border);
-        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
-
-        dataset1.setBackgroundColor("#3a668d",
-                                    "#35a849",
-                                    "#ffff00",
-                                    "#fcaf3e",
-                                    "#24c1ff",
-                                    "#1e4ed7",
-                                    "#ef2929",
-                                    "#000000");
-
-        barChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
-        barChart.getData().setDatasets(dataset1);
-        barChart.setHeight("150px");
-        barChart.setWidth("100%");
-        barChart.getOptions().setMaintainAspectRatio(false);
-        barChart.getOptions().getLayout().getPadding().setRight(20);
-        barChart.getOptions().getLayout().getPadding().setLeft(20);
-        barChart.getOptions().getElements().getRectangle().setBorderWidth(10);
-
-        nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
-        nodeColHeaderLabel.setHeight(24);
-
         /*
          * Activity graph - Load history graph
          */
@@ -275,9 +292,14 @@ public class RMStatsView implements StatsListener, NodesListener {
         activityChart.setWidth("100%");
         activityChart.getOptions().setMaintainAspectRatio(false);
 
+        CartesianCategoryAxis cartesianCategoryAxis1 = new CartesianCategoryAxis(activityChart);
+        cartesianCategoryAxis1.getGrideLines().setDisplay(false);
+        activityChart.getOptions().getScales().setXAxes(cartesianCategoryAxis1);
+
         LineDataset dataset = activityChart.newDataset();
-        dataset.setBackgroundColor("#fcaf3e");
         dataset.setBorderColor("#fcaf3e");
+        dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+        dataset.setPointRadius(2);
         dataset.setFill(Fill.START);
         activityChart.getData().setDatasets(dataset);
 
