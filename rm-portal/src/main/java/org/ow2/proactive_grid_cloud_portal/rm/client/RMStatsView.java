@@ -100,7 +100,7 @@ public class RMStatsView implements StatsListener, NodesListener {
 
     private DynamicForm nodeLineForm;
 
-    private List<Map.Entry<String, String>> datasetsAndColor = new ArrayList<>();
+    private List<Map.Entry<String, String>> datasetsAndColor = new ArrayList<>(8);
 
     {
         datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Total", "#3a668d"));
@@ -253,7 +253,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         xAxis.getGrideLines().setDisplay(false);
         nodeHistoryChart.getOptions().getScales().setXAxes(xAxis);
 
-        List<Dataset> datasets = new ArrayList<>();
+        List<Dataset> datasets = new ArrayList<>(datasetsAndColor.size());
         for (Map.Entry<String, String> datasetAndColor : datasetsAndColor) {
             LineDataset dataset = nodeHistoryChart.newDataset();
             dataset.setFill(Fill.START);
@@ -272,7 +272,7 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         nodeLineForm = new DynamicForm();
         final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
-        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>(Range.values().length);
         for (Range r : StatHistory.Range.values()) {
             nodeLineValues.put("" + r.getChar(), r.getString());
         }
@@ -362,8 +362,8 @@ public class RMStatsView implements StatsListener, NodesListener {
             StatHistory statHistory = statHistories[d];
             LineDataset dataset = (LineDataset) nodeHistoryChart.getData().getDatasets().get(d);
 
-            List<Double> dps = new ArrayList<>();
-            List<String> labels = new ArrayList<>();
+            List<Double> dps = new ArrayList<>(statHistory.values.size());
+            List<String> labels = new ArrayList<>(statHistory.values.size());
             for (int i = 0; i < statHistory.values.size(); i++) {
                 long t = now - dur + step * i; // seconds
 
@@ -389,8 +389,8 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         dur = loadHist.range.getDuration();
         step = dur / loadHist.values.size();
-        List<Double> dps = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
+        List<Double> dps = new ArrayList<>(loadHist.values.size());
+        List<String> labels = new ArrayList<>(loadHist.values.size());
 
         for (int i = 0; i < loadHist.values.size(); i++) {
             long t = now - dur + step * i;
