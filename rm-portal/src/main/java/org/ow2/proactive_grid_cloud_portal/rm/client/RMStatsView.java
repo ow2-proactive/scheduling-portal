@@ -35,26 +35,18 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 import org.pepstock.charba.client.BarChart;
 import org.pepstock.charba.client.LineChart;
-import org.pepstock.charba.client.configuration.Axis;
-import org.pepstock.charba.client.configuration.BarCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
-import org.pepstock.charba.client.configuration.CartesianTimeAxis;
 import org.pepstock.charba.client.data.BarBorderWidth;
 import org.pepstock.charba.client.data.BarDataset;
-import org.pepstock.charba.client.data.DataPoint;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.Position;
-import org.pepstock.charba.client.enums.ScaleDistribution;
 import org.pepstock.charba.client.enums.SteppedLine;
-import org.pepstock.charba.client.enums.TickSource;
-import org.pepstock.charba.client.enums.TimeUnit;
 import org.pepstock.charba.client.resources.EmbeddedResources;
 import org.pepstock.charba.client.resources.ResourcesType;
 
@@ -71,48 +63,42 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
  * Displays monitoring graphs using Google Visualization
- * 
- * 
- * @author mschnoor
- *
  */
 public class RMStatsView implements StatsListener, NodesListener {
 
-    public static final String FREE_NODES_COUNT = "FreeNodesCount";
+    private static final String FREE_NODES_COUNT = "FreeNodesCount";
 
-    public static final String NEEDED_NODES_COUNT = "NeededNodesCount";
+    private static final String NEEDED_NODES_COUNT = "NeededNodesCount";
 
-    public static final String BUSY_NODES_COUNT = "BusyNodesCount";
+    private static final String BUSY_NODES_COUNT = "BusyNodesCount";
 
-    public static final String AVAILABLE_NODES_COUNT = "AvailableNodesCount";
+    private static final String AVAILABLE_NODES_COUNT = "AvailableNodesCount";
 
-    public static final String DEPLOYING_NODES_COUNT = "DeployingNodesCount";
+    private static final String DEPLOYING_NODES_COUNT = "DeployingNodesCount";
 
-    public static final String CONFIG_NODES_COUNT = "ConfigNodesCount";
+    private static final String CONFIG_NODES_COUNT = "ConfigNodesCount";
 
-    public static final String DOWN_NODES_COUNT = "DownNodesCount";
+    private static final String DOWN_NODES_COUNT = "DownNodesCount";
 
-    public static final String LOST_NODES_COUNT = "LostNodesCount";
+    private static final String LOST_NODES_COUNT = "LostNodesCount";
 
-    public static final String AVERAGE_ACTIVITY = "AverageActivity";
+    private static final String AVERAGE_ACTIVITY = "AverageActivity";
 
     private RMController controller;
 
-    private DynamicForm nodeLineForm;
-
     private Label nodeLineHeaderLabel;
-
-    private Label nodeColHeaderLabel;
 
     private DynamicForm loadForm;
 
     private Label loadHeaderLabel;
 
-    private BarChart barChart;
+    private BarChart nodeStateChart;
 
     private LineChart nodeHistoryChart;
 
     private LineChart activityChart;
+
+    private DynamicForm nodeLineForm;
 
     private List<Map.Entry<String, String>> datasetsAndColor = new ArrayList<>();
 
@@ -145,53 +131,106 @@ public class RMStatsView implements StatsListener, NodesListener {
         root.setAlign(Alignment.CENTER);
         root.setOverflow(Overflow.AUTO);
 
-        //
-        /*
-         * Instantaneous node state - Node State histogram
-         */
+        initNodeStateChart();
 
-        barChart = new BarChart();
-        barChart.getOptions().setResponsive(true);
-        barChart.getOptions().getLegend().setDisplay(false);
-
-        BarDataset dataset1 = barChart.newDataset();
-        BarBorderWidth border = new BarBorderWidth();
-        border.setTop(0);
-        border.setLeft(0);
-        border.setRight(0);
-
-        dataset1.setBorderWidth(border);
-        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
-
-        dataset1.setBackgroundColor("#3a668d",
-                                    "#35a849",
-                                    "#ffff00",
-                                    "#fcaf3e",
-                                    "#24c1ff",
-                                    "#1e4ed7",
-                                    "#ef2929",
-                                    "#000000");
-
-        barChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
-        barChart.getData().setDatasets(dataset1);
-        barChart.setHeight("150px");
-        barChart.setWidth("100%");
-        barChart.getOptions().setMaintainAspectRatio(false);
-        barChart.getOptions().getLayout().getPadding().setRight(20);
-
-        CartesianCategoryAxis cartesianCategoryAxis0 = new CartesianCategoryAxis(barChart);
-        cartesianCategoryAxis0.getGrideLines().setDisplay(false);
-        barChart.getOptions().getScales().setXAxes(cartesianCategoryAxis0);
-        //        LogModel.getInstance().logCriticalMessage(barChart.getOptions().getScales().getXAxes().get(0).getClass().getName());
-        //        BarCategoryAxis barCategoryAxis = (BarCategoryAxis) barChart.getOptions().getScales().getXAxes().get(0);
-        //        barCategoryAxis.getGrideLines().setDisplay(false);
-
-        barChart.getOptions().getLayout().getPadding().setLeft(20);
-        barChart.getOptions().getElements().getRectangle().setBorderWidth(10);
-
-        nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
+        Label nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
         nodeColHeaderLabel.setHeight(24);
 
+        initNodeHistoryChart();
+
+        Canvas filler = new Canvas();
+        filler.setWidth100();
+
+        HLayout nodeLineHeader = new HLayout();
+        nodeLineHeader.setHeight(24);
+        nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
+
+        initLoadHistoryChart();
+
+        filler = new Canvas();
+        filler.setWidth100();
+
+        HLayout loadHeader = new HLayout();
+        loadHeader.setHeight(24);
+        loadHeader.setMembersMargin(20);
+        loadHeader.setMembers(loadHeaderLabel, filler, loadForm);
+
+        Canvas cc1 = new Canvas();
+        cc1.setHeight(4);
+        cc1.setBackgroundColor("#eee");
+        Canvas cc2 = new Canvas();
+        cc2.setHeight(4);
+        cc2.setBackgroundColor("#eee");
+
+        root.addMember(nodeColHeaderLabel);
+        root.addMember(nodeStateChart);
+        root.addMember(cc1);
+        root.addMember(nodeLineHeader);
+        root.addMember(nodeHistoryChart);
+        root.addMember(cc2);
+        root.addMember(loadHeader);
+        root.addMember(activityChart);
+
+        return root;
+    }
+
+    private void initLoadHistoryChart() {
+        /*
+         * Activity graph - Load history graph
+         */
+
+        activityChart = new LineChart();
+        CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
+        axis.getTicks().setAutoSkip(false);
+        axis.getTicks().setMaxRotation(0);
+        axis.getTicks().setMin(0.0);
+
+        activityChart.getOptions().setResponsive(true);
+        activityChart.getOptions().getLegend().setDisplay(false);
+        activityChart.getOptions().getTitle().setDisplay(false);
+        activityChart.getOptions().setSpanGaps(false);
+        activityChart.getOptions().getElements().getLine().setTension(0.000001D);
+        activityChart.getOptions().getScales().setYAxes(axis);
+        activityChart.setHeight("250px");
+        activityChart.setWidth("100%");
+        activityChart.getOptions().setMaintainAspectRatio(false);
+
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(activityChart);
+        xAxis.getGrideLines().setDisplay(false);
+        activityChart.getOptions().getScales().setXAxes(xAxis);
+
+        LineDataset dataset = activityChart.newDataset();
+        dataset.setBorderColor("#fcaf3e");
+        dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+        dataset.setPointRadius(2);
+        dataset.setFill(Fill.START);
+        activityChart.getData().setDatasets(dataset);
+
+        loadForm = new DynamicForm();
+        final SelectItem loadSelect = new SelectItem("loadSelect", "");
+        LinkedHashMap<String, String> loadValues = new LinkedHashMap<>();
+        for (Range r : StatHistory.Range.values()) {
+            loadValues.put("" + r.getChar(), r.getString());
+        }
+        loadSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
+        loadSelect.setValueMap(loadValues);
+        loadForm.setItems(loadSelect);
+        loadForm.setHeight(24);
+        loadForm.setWidth(40);
+
+        loadSelect.addChangedHandler(event -> {
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r, AVERAGE_ACTIVITY);
+        });
+
+        loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
+        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
+        loadHeaderLabel.setHeight(24);
+    }
+
+    private void initNodeHistoryChart() {
         /*
          * Node history graph
          */
@@ -203,21 +242,16 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeHistoryChart.getOptions().setMaintainAspectRatio(false);
         nodeHistoryChart.setHeight("250px");
         nodeHistoryChart.setWidth("100%");
-        //                CartesianTimeAxis xAxis = new CartesianTimeAxis(nodeHistoryChart);
-        //        xAxis.setDistribution(ScaleDistribution.SERIES);
-        //        xAxis.getTicks().setSource(TickSource.DATA);
-        //        xAxis.getTicks().setDisplay(true);
-        //        xAxis.getTicks().setAutoSkip(true);
-        //        xAxis.getTime().setUnit(TimeUnit.SECOND);
-        CartesianLinearAxis cartesianLinearAxis = new CartesianLinearAxis(nodeHistoryChart);
-        cartesianLinearAxis.setDisplay(true);
-        cartesianLinearAxis.getTicks().setBeginAtZero(true);
-        cartesianLinearAxis.getTicks().setStepSize(1);
-        nodeHistoryChart.getOptions().getScales().setYAxes(cartesianLinearAxis);
 
-        CartesianCategoryAxis cartesianCategoryAxis = new CartesianCategoryAxis(nodeHistoryChart);
-        cartesianCategoryAxis.getGrideLines().setDisplay(false);
-        nodeHistoryChart.getOptions().getScales().setXAxes(cartesianCategoryAxis);
+        CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeHistoryChart);
+        yAxis.setDisplay(true);
+        yAxis.getTicks().setBeginAtZero(true);
+        yAxis.getTicks().setStepSize(1);
+        nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
+
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeHistoryChart);
+        xAxis.getGrideLines().setDisplay(false);
+        nodeHistoryChart.getOptions().getScales().setXAxes(xAxis);
 
         List<Dataset> datasets = new ArrayList<>();
         for (Map.Entry<String, String> datasetAndColor : datasetsAndColor) {
@@ -264,93 +298,48 @@ public class RMStatsView implements StatsListener, NodesListener {
 
         nodeLineHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes History<nobr>");
         nodeLineHeaderLabel.setHeight(24);
+    }
 
-        Canvas filler = new Canvas();
-        filler.setWidth100();
-
-        HLayout nodeLineHeader = new HLayout();
-        nodeLineHeader.setHeight(24);
-        nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
-
+    private void initNodeStateChart() {
         /*
-         * Activity graph - Load history graph
+         * Instantaneous node state - Node State histogram
          */
 
-        activityChart = new LineChart();
-        CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
-        axis.getTicks().setAutoSkip(false);
-        axis.getTicks().setMaxRotation(0);
-        axis.getTicks().setMin(0.0);
+        nodeStateChart = new BarChart();
+        nodeStateChart.getOptions().setResponsive(true);
+        nodeStateChart.getOptions().getLegend().setDisplay(false);
 
-        activityChart.getOptions().setResponsive(true);
-        activityChart.getOptions().getLegend().setDisplay(false);
-        activityChart.getOptions().getTitle().setDisplay(false);
-        activityChart.getOptions().setSpanGaps(false);
-        activityChart.getOptions().getElements().getLine().setTension(0.000001D);
-        activityChart.getOptions().getScales().setYAxes(axis);
-        activityChart.setHeight("250px");
-        activityChart.setWidth("100%");
-        activityChart.getOptions().setMaintainAspectRatio(false);
+        BarDataset dataset1 = nodeStateChart.newDataset();
+        BarBorderWidth border = new BarBorderWidth();
+        border.setTop(0);
+        border.setLeft(0);
+        border.setRight(0);
 
-        CartesianCategoryAxis cartesianCategoryAxis1 = new CartesianCategoryAxis(activityChart);
-        cartesianCategoryAxis1.getGrideLines().setDisplay(false);
-        activityChart.getOptions().getScales().setXAxes(cartesianCategoryAxis1);
+        dataset1.setBorderWidth(border);
+        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
 
-        LineDataset dataset = activityChart.newDataset();
-        dataset.setBorderColor("#fcaf3e");
-        dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
-        dataset.setPointRadius(2);
-        dataset.setFill(Fill.START);
-        activityChart.getData().setDatasets(dataset);
+        dataset1.setBackgroundColor("#3a668d",
+                                    "#35a849",
+                                    "#ffff00",
+                                    "#fcaf3e",
+                                    "#24c1ff",
+                                    "#1e4ed7",
+                                    "#ef2929",
+                                    "#000000");
 
-        loadForm = new DynamicForm();
-        final SelectItem loadSelect = new SelectItem("loadSelect", "");
-        LinkedHashMap<String, String> loadValues = new LinkedHashMap<String, String>();
-        for (Range r : StatHistory.Range.values()) {
-            loadValues.put("" + r.getChar(), r.getString());
-        }
-        loadSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
-        loadSelect.setValueMap(loadValues);
-        loadForm.setItems(loadSelect);
-        loadForm.setHeight(24);
-        loadForm.setWidth(40);
+        nodeStateChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
+        nodeStateChart.getData().setDatasets(dataset1);
+        nodeStateChart.setHeight("150px");
+        nodeStateChart.setWidth("100%");
+        nodeStateChart.getOptions().setMaintainAspectRatio(false);
+        nodeStateChart.getOptions().getLayout().getPadding().setRight(20);
 
-        loadSelect.addChangedHandler(event -> {
-            loadForm.setDisabled(true);
-            loadHeaderLabel.setIcon("loading.gif");
-            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
-            controller.setRuntimeRRDRange(r, AVERAGE_ACTIVITY);
-        });
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeStateChart);
+        xAxis.getGrideLines().setDisplay(false);
+        nodeStateChart.getOptions().getScales().setXAxes(xAxis);
 
-        loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
-        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
-        loadHeaderLabel.setHeight(24);
-
-        filler = new Canvas();
-        filler.setWidth100();
-
-        HLayout loadHeader = new HLayout();
-        loadHeader.setHeight(24);
-        loadHeader.setMembersMargin(20);
-        loadHeader.setMembers(loadHeaderLabel, filler, loadForm);
-
-        Canvas cc1 = new Canvas();
-        cc1.setHeight(4);
-        cc1.setBackgroundColor("#eee");
-        Canvas cc2 = new Canvas();
-        cc2.setHeight(4);
-        cc2.setBackgroundColor("#eee");
-
-        root.addMember(nodeColHeaderLabel);
-        root.addMember(barChart);
-        root.addMember(cc1);
-        root.addMember(nodeLineHeader);
-        root.addMember(nodeHistoryChart);
-        root.addMember(cc2);
-        root.addMember(loadHeader);
-        root.addMember(activityChart);
-
-        return root;
+        nodeStateChart.getOptions().getLayout().getPadding().setLeft(20);
+        nodeStateChart.getOptions().getElements().getRectangle().setBorderWidth(10);
     }
 
     @Override
@@ -432,7 +421,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         int total = controller.getModel().getNumNodes();
         int needed = controller.getModel().getNeededNodes();
 
-        barChart.getData().getDatasets().get(0).setData(total, free, needed, busy, depl, conf, down, lost);
-        barChart.update();
+        nodeStateChart.getData().getDatasets().get(0).setData(total, free, needed, busy, depl, conf, down, lost);
+        nodeStateChart.update();
     }
 }
