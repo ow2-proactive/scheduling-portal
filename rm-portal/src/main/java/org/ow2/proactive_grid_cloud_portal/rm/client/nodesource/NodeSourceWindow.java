@@ -54,23 +54,12 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.types.Encoding;
-import com.smartgwt.client.types.FormMethod;
-import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.*;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.HiddenItem;
-import com.smartgwt.client.widgets.form.fields.PasswordItem;
-import com.smartgwt.client.widgets.form.fields.PickerIcon;
-import com.smartgwt.client.widgets.form.fields.RowSpacerItem;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.SpacerItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.*;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
@@ -442,6 +431,13 @@ public abstract class NodeSourceWindow {
                                                        pluginField.getName()));
             } else if (pluginField.isFile() || pluginField.isCredential()) {
                 formItemsForField.addAll(handleNonTextualPluginField(plugin, pluginField));
+            } else if (pluginField.isTextarea()) {
+                formItemsForField.add(new TextAreaItem(plugin.getPluginName() + pluginField.getName(),
+                                                       pluginField.getName()) {
+                    {
+                        setWrap(TextAreaWrap.OFF);
+                    }
+                });
             } else {
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
