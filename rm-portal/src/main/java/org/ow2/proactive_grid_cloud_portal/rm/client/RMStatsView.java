@@ -37,16 +37,21 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 import org.pepstock.charba.client.BarChart;
+import org.pepstock.charba.client.IsChart;
 import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
 import org.pepstock.charba.client.data.BarBorderWidth;
 import org.pepstock.charba.client.data.BarDataset;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.enums.CubicInterpolationMode;
 import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
 import org.pepstock.charba.client.enums.SteppedLine;
+import org.pepstock.charba.client.items.TooltipItem;
 import org.pepstock.charba.client.resources.EmbeddedResources;
 import org.pepstock.charba.client.resources.ResourcesType;
 
@@ -194,6 +199,24 @@ public class RMStatsView implements StatsListener, NodesListener {
         activityChart.setHeight("250px");
         activityChart.setWidth("100%");
         activityChart.getOptions().setMaintainAspectRatio(false);
+        activityChart.getOptions().getHover().setIntersect(false);
+        activityChart.getOptions().getHover().setMode(InteractionMode.INDEX);
+
+        activityChart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
+        activityChart.getOptions().getTooltips().setIntersect(false);
+
+        // lets not convert this object to LAMBDA! it fails
+        activityChart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
+            @Override
+            public boolean onFilter(IsChart chart, TooltipItem item) {
+                Double pointData = chart.getData()
+                                        .getDatasets()
+                                        .get(item.getDatasetIndex())
+                                        .getData()
+                                        .get(item.getIndex());
+                return pointData != null && pointData > 0;
+            }
+        });
 
         CartesianCategoryAxis xAxis = new CartesianCategoryAxis(activityChart);
         xAxis.getGrideLines().setDisplay(false);
@@ -203,6 +226,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         dataset.setBorderColor("#fcaf3e");
         dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
         dataset.setPointRadius(0);
+        dataset.setBorderWidth(1);
         dataset.setFill(Fill.START);
         activityChart.getData().setDatasets(dataset);
 
@@ -248,6 +272,27 @@ public class RMStatsView implements StatsListener, NodesListener {
         yAxis.getTicks().setBeginAtZero(true);
         yAxis.getTicks().setPrecision(0);
         nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
+        nodeHistoryChart.getOptions().getHover().setIntersect(false);
+        nodeHistoryChart.getOptions().getHover().setMode(InteractionMode.INDEX);
+
+        nodeHistoryChart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
+        nodeHistoryChart.getOptions().getTooltips().setIntersect(false);
+
+        // lets not convert this object to LAMBDA! it fails
+        nodeHistoryChart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
+            @Override
+            public boolean onFilter(IsChart chart, TooltipItem item) {
+                Double pointData = chart.getData()
+                                        .getDatasets()
+                                        .get(item.getDatasetIndex())
+                                        .getData()
+                                        .get(item.getIndex());
+                return pointData != null && pointData > 0;
+            }
+        });
+
+        nodeHistoryChart.getOptions().getLegend().getLabels().setUsePointStyle(true);
+        //        nodeHistoryChart.getOptions().getLegend().getLabels().setBoxWidth(15);
 
         CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeHistoryChart);
         xAxis.getGrideLines().setDisplay(false);
@@ -262,7 +307,10 @@ public class RMStatsView implements StatsListener, NodesListener {
             dataset.setPointBackgroundColor(datasetAndColor.getValue());
             dataset.setPointBorderColor(datasetAndColor.getValue());
             dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
-            dataset.setSteppedLine(SteppedLine.AFTER);
+            dataset.setSteppedLine(false);
+            dataset.setLineTension(0);
+            //            dataset.setSteppedLine(SteppedLine.AFTER);
+            //            dataset.setCubicInterpolationMode(CubicInterpolationMode.MONOTONE);
 
             dataset.setPointRadius(0);
             datasets.add(dataset);
@@ -383,6 +431,7 @@ public class RMStatsView implements StatsListener, NodesListener {
             }
 
             dataset.setData(dps);
+            dataset.setBorderWidth(1);
             nodeHistoryChart.getData().setLabels(labels.toArray(new String[0]));
         }
 
