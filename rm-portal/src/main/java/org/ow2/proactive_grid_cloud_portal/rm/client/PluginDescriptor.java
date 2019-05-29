@@ -60,6 +60,8 @@ public class PluginDescriptor {
 
         private boolean file;
 
+        private boolean textarea;
+
         private boolean dynamic;
 
         Field(String name, String value) {
@@ -67,17 +69,18 @@ public class PluginDescriptor {
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false, false);
+            this(name, value, description, false, false, false, false, false);
         }
 
         public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
-                boolean dynamic) {
+                boolean textarea, boolean dynamic) {
             this.name = name;
             this.value = value;
             this.description = description;
             this.password = password;
             this.credential = credential;
             this.file = file;
+            this.textarea = textarea;
             this.dynamic = dynamic;
         }
 
@@ -103,6 +106,10 @@ public class PluginDescriptor {
 
         public boolean isFile() {
             return file;
+        }
+
+        public boolean isTextarea() {
+            return textarea;
         }
 
         public boolean isDynamic() {
