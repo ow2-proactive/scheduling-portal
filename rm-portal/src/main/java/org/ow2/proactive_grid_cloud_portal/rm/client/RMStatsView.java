@@ -340,7 +340,6 @@ public class RMStatsView implements StatsListener, NodesListener {
         yAxis.getTicks().setPrecision(0);
         nodeStateChart.getOptions().getScales().setYAxes(yAxis);
 
-
         CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeStateChart);
         xAxis.getGrideLines().setDisplay(false);
 
