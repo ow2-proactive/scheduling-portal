@@ -202,7 +202,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         LineDataset dataset = activityChart.newDataset();
         dataset.setBorderColor("#fcaf3e");
         dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
-        dataset.setPointRadius(2);
+        dataset.setPointRadius(0);
         dataset.setFill(Fill.START);
         activityChart.getData().setDatasets(dataset);
 
@@ -246,7 +246,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeHistoryChart);
         yAxis.setDisplay(true);
         yAxis.getTicks().setBeginAtZero(true);
-        yAxis.getTicks().setStepSize(1);
+        yAxis.getTicks().setPrecision(0);
         nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
 
         CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeHistoryChart);
@@ -264,7 +264,7 @@ public class RMStatsView implements StatsListener, NodesListener {
             dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
             dataset.setSteppedLine(SteppedLine.AFTER);
 
-            dataset.setPointRadius(2);
+            dataset.setPointRadius(0);
             datasets.add(dataset);
         }
 
@@ -334,8 +334,16 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeStateChart.getOptions().setMaintainAspectRatio(false);
         nodeStateChart.getOptions().getLayout().getPadding().setRight(20);
 
+        CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeStateChart);
+        yAxis.setDisplay(true);
+        yAxis.getTicks().setBeginAtZero(true);
+        yAxis.getTicks().setPrecision(0);
+        nodeStateChart.getOptions().getScales().setYAxes(yAxis);
+
+
         CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeStateChart);
         xAxis.getGrideLines().setDisplay(false);
+
         nodeStateChart.getOptions().getScales().setXAxes(xAxis);
 
         nodeStateChart.getOptions().getLayout().getPadding().setLeft(20);
