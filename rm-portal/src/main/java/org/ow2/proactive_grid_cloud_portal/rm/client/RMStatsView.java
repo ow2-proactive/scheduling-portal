@@ -25,81 +25,93 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.pepstock.charba.client.BarChart;
+import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
+import org.pepstock.charba.client.configuration.CartesianLinearAxis;
+import org.pepstock.charba.client.data.BarBorderWidth;
+import org.pepstock.charba.client.data.BarDataset;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.Position;
+import org.pepstock.charba.client.enums.SteppedLine;
+import org.pepstock.charba.client.resources.EmbeddedResources;
+import org.pepstock.charba.client.resources.ResourcesType;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
-import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
 /**
  * Displays monitoring graphs using Google Visualization
- * 
- * 
- * @author mschnoor
- *
  */
 public class RMStatsView implements StatsListener, NodesListener {
 
+    private static final String FREE_NODES_COUNT = "FreeNodesCount";
+
+    private static final String NEEDED_NODES_COUNT = "NeededNodesCount";
+
+    private static final String BUSY_NODES_COUNT = "BusyNodesCount";
+
+    private static final String AVAILABLE_NODES_COUNT = "AvailableNodesCount";
+
+    private static final String DEPLOYING_NODES_COUNT = "DeployingNodesCount";
+
+    private static final String CONFIG_NODES_COUNT = "ConfigNodesCount";
+
+    private static final String DOWN_NODES_COUNT = "DownNodesCount";
+
+    private static final String LOST_NODES_COUNT = "LostNodesCount";
+
+    private static final String AVERAGE_ACTIVITY = "AverageActivity";
+
     private RMController controller;
 
-    private AreaChart nodeLineChart;
-
-    private DataTable nodeLineTable;
-
-    private Options nodeLineOpts;
-
-    private int nodeLineTimeId, nodeLineFreeId, nodeLineBusyId, nodeLineDownId, nodeLineTotalId, linePendingTasksId,
-            nodeLineDeployingId, nodeLineConfiguringId, nodeLineLostId;
-
-    private DynamicForm nodeLineForm;
-
     private Label nodeLineHeaderLabel;
-
-    private DynamicForm nodeLineSeriesForm;
-
-    private ColumnChart nodeColChart;
-
-    private DataTable nodeColTable;
-
-    private Options nodeColOpts;
-
-    private Label nodeColHeaderLabel;
-
-    private AreaChart loadChart;
-
-    private DataTable loadTable;
-
-    private Options loadOpts;
-
-    private int loadTimeId, loadValId;
 
     private DynamicForm loadForm;
 
     private Label loadHeaderLabel;
+
+    private BarChart nodeStateChart;
+
+    private LineChart nodeHistoryChart;
+
+    private LineChart activityChart;
+
+    private DynamicForm nodeLineForm;
+
+    private List<Map.Entry<String, String>> datasetsAndColor = new ArrayList<>(8);
+
+    {
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Total", "#3a668d"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Free", "#35a849"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Needed", "#ffff00"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Busy", "#fcaf3e"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Deploying", "#24c1ff"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Configuring", "#1e4ed7"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Down", "#ef2929"));
+        datasetsAndColor.add(new AbstractMap.SimpleEntry<>("Lost", "#000000"));
+    }
 
     RMStatsView(RMController controller) {
         this.controller = controller;
@@ -108,78 +120,23 @@ public class RMStatsView implements StatsListener, NodesListener {
     }
 
     Canvas build() {
+
+        ResourcesType.setClientBundle(EmbeddedResources.INSTANCE);
+
         VLayout root = new VLayout();
         root.setBackgroundColor("white");
         root.setPadding(5);
         root.setWidth100();
         root.setHeight100();
+        root.setAlign(Alignment.CENTER);
         root.setOverflow(Overflow.AUTO);
 
-        /*
-         * Node history graph
-         */
-        final AbsolutePanel nodeLinePane = new AbsolutePanel();
-        nodeLinePane.setWidth("100%");
-        nodeLinePane.setHeight("150px");
+        initNodeStateChart();
 
-        nodeLineOpts = Options.create();
-        // no specified width : will fill available space on chart.draw()
-        //nodeLineOpts.setWidth(400);
-        HorizontalAxisOptions axisOpts = HorizontalAxisOptions.create();
-        axisOpts.setMaxAlternation(1);
-        axisOpts.setSlantedText(false);
-        //axisOpts.setTitle("Time");
-        nodeLineOpts.setHAxisOptions(axisOpts);
-        nodeLineOpts.setHeight(150);
-        nodeLineOpts.setLegend(LegendPosition.NONE);
-        nodeLineOpts.setColors("#3a668d", "#35a849", "#ffff00", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
+        Label nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
+        nodeColHeaderLabel.setHeight(24);
 
-        nodeLineTable = DataTable.create();
-        nodeLineTimeId = nodeLineTable.addColumn(ColumnType.STRING, "Time");
-
-        nodeLineTotalId = nodeLineTable.addColumn(ColumnType.NUMBER, "Total");
-        nodeLineFreeId = nodeLineTable.addColumn(ColumnType.NUMBER, "Free");
-        linePendingTasksId = nodeLineTable.addColumn(ColumnType.NUMBER, "Needed");
-        nodeLineBusyId = nodeLineTable.addColumn(ColumnType.NUMBER, "Busy");
-        nodeLineDeployingId = nodeLineTable.addColumn(ColumnType.NUMBER, "Deploying");
-        nodeLineConfiguringId = nodeLineTable.addColumn(ColumnType.NUMBER, "Configuting");
-        nodeLineDownId = nodeLineTable.addColumn(ColumnType.NUMBER, "Down");
-        nodeLineLostId = nodeLineTable.addColumn(ColumnType.NUMBER, "Lost");
-
-        nodeLineChart = new AreaChart(nodeLineTable, nodeLineOpts);
-        nodeLinePane.add(nodeLineChart);
-
-        nodeLineForm = new DynamicForm();
-        final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
-        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
-        for (Range r : StatHistory.Range.values()) {
-            nodeLineValues.put("" + r.getChar(), r.getString());
-        }
-        nodeLineSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
-        nodeLineSelect.setValueMap(nodeLineValues);
-        nodeLineForm.setItems(nodeLineSelect);
-        nodeLineForm.setHeight(24);
-        nodeLineForm.setWidth(40);
-
-        nodeLineSelect.addChangedHandler(event -> {
-            nodeLineForm.setDisabled(true);
-            nodeLineHeaderLabel.setIcon("loading.gif");
-            nodeLineSeriesForm.setDisabled(true);
-
-            Range r = Range.create(nodeLineSelect.getValueAsString().charAt(0));
-            controller.setRuntimeRRDRange(r,
-                                          "FreeNodesCount",
-                                          "BusyNodesCount",
-                                          "DeployingNodesCount",
-                                          "DownNodesCount",
-                                          "LostNodesCount",
-                                          "ConfigNodesCount",
-                                          "NeededNodesCount",
-                                          "AvailableNodesCount");
-        });
-
-        nodeLineHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes History<nobr>");
-        nodeLineHeaderLabel.setHeight(24);
+        initNodeHistoryChart();
 
         Canvas filler = new Canvas();
         filler.setWidth100();
@@ -188,152 +145,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         nodeLineHeader.setHeight(24);
         nodeLineHeader.setMembers(nodeLineHeaderLabel, filler, nodeLineForm);
 
-        ChangedHandler seriesChanged = event -> {
-            nodeLineSeriesForm.setDisabled(true);
-            loadForm.setDisabled(true);
-            loadHeaderLabel.setIcon("loading.gif");
-            RMStatsView.this.statsUpdated(controller.getModel().getStatHistory());
-        };
-
-        this.nodeLineSeriesForm = new DynamicForm();
-        nodeLineSeriesForm.setHeight(24);
-        nodeLineSeriesForm.setNumCols(16);
-        nodeLineSeriesForm.setWidth100();
-
-        final int widthOfCheckbox = 90;
-        CheckboxItem freeIt = new CheckboxItem("free",
-                                               "<span style='background:#35a849;'>&nbsp;&nbsp;&nbsp;</span> Free");
-        freeIt.setValue(true);
-        freeIt.setWidth(widthOfCheckbox);
-        freeIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem busyIt = new CheckboxItem("busy",
-                                               "<span style='background:#fcaf3e;'>&nbsp;&nbsp;&nbsp;</span> Busy");
-        busyIt.setValue(true);
-        busyIt.setWidth(widthOfCheckbox);
-        busyIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem deployingIt = new CheckboxItem("deploying",
-                                                    "<span style='background:#24c1ff;'>&nbsp;&nbsp;&nbsp;</span> Deploying");
-        deployingIt.setValue(true);
-        deployingIt.setWidth(widthOfCheckbox);
-        deployingIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem downIt = new CheckboxItem("down",
-                                               "<span style='background:#ef2929;'>&nbsp;&nbsp;&nbsp;</span> Down");
-        downIt.setValue(false);
-        downIt.setWidth(widthOfCheckbox);
-        downIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem pendingIt = new CheckboxItem("pending",
-                                                  "<span style='background:#ffff00;'>&nbsp;&nbsp;&nbsp;</span> Needed");
-        pendingIt.setValue(true);
-        pendingIt.setWidth(widthOfCheckbox);
-        pendingIt.setTooltip("Number of total Nodes needed for pending tasks ready to execute and that does not have an appropriate Node(s) to execute.");
-        pendingIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem totalIt = new CheckboxItem("total",
-                                                "<span style='background:#3a668d;'>&nbsp;&nbsp;&nbsp;</span> Total");
-        totalIt.setValue(true);
-        totalIt.setWidth(widthOfCheckbox);
-        totalIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem configuringIt = new CheckboxItem("configuring",
-                                                      "<span style='background:#1e4ed7;'>&nbsp;&nbsp;&nbsp;</span> Configuring");
-        configuringIt.setValue(false);
-        configuringIt.setWidth(widthOfCheckbox);
-        configuringIt.addChangedHandler(seriesChanged);
-
-        CheckboxItem lostIt = new CheckboxItem("lost",
-                                               "<span style='background:#000000;'>&nbsp;&nbsp;&nbsp;</span> Lost");
-        lostIt.setValue(false);
-        lostIt.setWidth(widthOfCheckbox);
-        lostIt.addChangedHandler(seriesChanged);
-
-        nodeLineSeriesForm.setItems(totalIt, freeIt, pendingIt, busyIt, deployingIt, configuringIt, downIt, lostIt);
-
-        /*
-         * Instantaneous node state - Node State histogram
-         */
-        final AbsolutePanel nodeColPane = new AbsolutePanel();
-        nodeColPane.setWidth("100%");
-        nodeColPane.setHeight("150px");
-
-        this.nodeColOpts = Options.create();
-        nodeColOpts.setHeight(150);
-        nodeColOpts.setLegend(LegendPosition.NONE);
-        HorizontalAxisOptions nodeColHaxis = HorizontalAxisOptions.create();
-        //nodeColHaxis.setSlantedText(false);
-        nodeColHaxis.setMaxAlternation(1);
-        nodeColOpts.setHAxisOptions(nodeColHaxis);
-        nodeColOpts.setIsStacked(true);
-        nodeColOpts.setColors("#3a668d", "#35a849", "#ffff00", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-        //nodeColOpts.set("enableInteractivity", "false");
-
-        nodeColTable = DataTable.create();
-        nodeColTable.addColumn(ColumnType.STRING, "State");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Total");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Free");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Needed");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Busy");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Deploying");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Configuring");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Down");
-        nodeColTable.addColumn(ColumnType.NUMBER, "Lost");
-
-        nodeColChart = new ColumnChart(nodeColTable, nodeColOpts);
-        nodeColPane.add(nodeColChart);
-
-        nodeColHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes State</nobr>");
-        nodeColHeaderLabel.setHeight(24);
-
-        /*
-         * Activity graph - Load history graph
-         */
-        final AbsolutePanel loadPane = new AbsolutePanel();
-        loadPane.setWidth("100%");
-        loadPane.setHeight("150px");
-
-        loadOpts = Options.create();
-        loadOpts.setHeight(150);
-        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-        loadAxis.setMaxAlternation(1);
-        loadAxis.setSlantedText(false);
-        loadOpts.setLegend(LegendPosition.NONE);
-        loadOpts.setHAxisOptions(loadAxis);
-        loadOpts.setColors("#fcaf3e");
-
-        loadTable = DataTable.create();
-        loadTimeId = loadTable.addColumn(ColumnType.STRING, "Time");
-        loadValId = loadTable.addColumn(ColumnType.NUMBER, "Load");
-
-        loadChart = new AreaChart(loadTable, loadOpts);
-        loadPane.add(loadChart);
-
-        loadForm = new DynamicForm();
-        final SelectItem loadSelect = new SelectItem("loadSelect", "");
-        LinkedHashMap<String, String> loadValues = new LinkedHashMap<String, String>();
-        for (Range r : StatHistory.Range.values()) {
-            loadValues.put("" + r.getChar(), r.getString());
-        }
-        loadSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
-        loadSelect.setValueMap(loadValues);
-        loadForm.setItems(loadSelect);
-        loadForm.setHeight(24);
-        loadForm.setWidth(40);
-
-        loadSelect.addChangedHandler(event -> {
-            loadForm.setDisabled(true);
-            loadHeaderLabel.setIcon("loading.gif");
-            nodeLineSeriesForm.setDisabled(true);
-
-            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
-            controller.setRuntimeRRDRange(r, "AverageActivity");
-        });
-
-        loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
-        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
-        loadHeaderLabel.setHeight(24);
+        initLoadHistoryChart();
 
         filler = new Canvas();
         filler.setWidth100();
@@ -351,91 +163,251 @@ public class RMStatsView implements StatsListener, NodesListener {
         cc2.setBackgroundColor("#eee");
 
         root.addMember(nodeColHeaderLabel);
-        root.addMember(nodeColPane);
+        root.addMember(nodeStateChart);
         root.addMember(cc1);
         root.addMember(nodeLineHeader);
-        root.addMember(nodeLinePane);
-        root.addMember(nodeLineSeriesForm);
+        root.addMember(nodeHistoryChart);
         root.addMember(cc2);
         root.addMember(loadHeader);
-        root.addMember(loadPane);
+        root.addMember(activityChart);
 
         return root;
+    }
+
+    private void initLoadHistoryChart() {
+        /*
+         * Activity graph - Load history graph
+         */
+
+        activityChart = new LineChart();
+        CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
+        axis.getTicks().setAutoSkip(false);
+        axis.getTicks().setMaxRotation(0);
+        axis.getTicks().setMin(0.0);
+
+        activityChart.getOptions().setResponsive(true);
+        activityChart.getOptions().getLegend().setDisplay(false);
+        activityChart.getOptions().getTitle().setDisplay(false);
+        activityChart.getOptions().setSpanGaps(false);
+        activityChart.getOptions().getElements().getLine().setTension(0.000001D);
+        activityChart.getOptions().getScales().setYAxes(axis);
+        activityChart.setHeight("250px");
+        activityChart.setWidth("100%");
+        activityChart.getOptions().setMaintainAspectRatio(false);
+
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(activityChart);
+        xAxis.getGrideLines().setDisplay(false);
+        activityChart.getOptions().getScales().setXAxes(xAxis);
+
+        LineDataset dataset = activityChart.newDataset();
+        dataset.setBorderColor("#fcaf3e");
+        dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+        dataset.setPointRadius(2);
+        dataset.setFill(Fill.START);
+        activityChart.getData().setDatasets(dataset);
+
+        loadForm = new DynamicForm();
+        final SelectItem loadSelect = new SelectItem("loadSelect", "");
+        LinkedHashMap<String, String> loadValues = new LinkedHashMap<>();
+        for (Range r : StatHistory.Range.values()) {
+            loadValues.put("" + r.getChar(), r.getString());
+        }
+        loadSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
+        loadSelect.setValueMap(loadValues);
+        loadForm.setItems(loadSelect);
+        loadForm.setHeight(24);
+        loadForm.setWidth(40);
+
+        loadSelect.addChangedHandler(event -> {
+            loadForm.setDisabled(true);
+            loadHeaderLabel.setIcon("loading.gif");
+            Range r = Range.create(loadSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r, AVERAGE_ACTIVITY);
+        });
+
+        loadHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Load History<nobr>");
+        loadHeaderLabel.setTooltip("Percentage of cumulative node utilization since server start-up.");
+        loadHeaderLabel.setHeight(24);
+    }
+
+    private void initNodeHistoryChart() {
+        /*
+         * Node history graph
+         */
+        nodeHistoryChart = new LineChart();
+        nodeHistoryChart.getOptions().setResponsive(true);
+        nodeHistoryChart.getOptions().getLegend().setDisplay(true);
+        nodeHistoryChart.getOptions().getLegend().setPosition(Position.BOTTOM);
+        nodeHistoryChart.getOptions().getTitle().setDisplay(false);
+        nodeHistoryChart.getOptions().setMaintainAspectRatio(false);
+        nodeHistoryChart.setHeight("250px");
+        nodeHistoryChart.setWidth("100%");
+
+        CartesianLinearAxis yAxis = new CartesianLinearAxis(nodeHistoryChart);
+        yAxis.setDisplay(true);
+        yAxis.getTicks().setBeginAtZero(true);
+        yAxis.getTicks().setStepSize(1);
+        nodeHistoryChart.getOptions().getScales().setYAxes(yAxis);
+
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeHistoryChart);
+        xAxis.getGrideLines().setDisplay(false);
+        nodeHistoryChart.getOptions().getScales().setXAxes(xAxis);
+
+        List<Dataset> datasets = new ArrayList<>(datasetsAndColor.size());
+        for (Map.Entry<String, String> datasetAndColor : datasetsAndColor) {
+            LineDataset dataset = nodeHistoryChart.newDataset();
+            dataset.setFill(Fill.START);
+            dataset.setLabel(datasetAndColor.getKey());
+            dataset.setBorderColor(datasetAndColor.getValue());
+            dataset.setPointBackgroundColor(datasetAndColor.getValue());
+            dataset.setPointBorderColor(datasetAndColor.getValue());
+            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+            dataset.setSteppedLine(SteppedLine.AFTER);
+
+            dataset.setPointRadius(2);
+            datasets.add(dataset);
+        }
+
+        nodeHistoryChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+        nodeLineForm = new DynamicForm();
+        final SelectItem nodeLineSelect = new SelectItem("nodeLineSelect", "");
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>(Range.values().length);
+        for (Range r : StatHistory.Range.values()) {
+            nodeLineValues.put("" + r.getChar(), r.getString());
+        }
+        nodeLineSelect.setDefaultValue("" + Range.MINUTE_10.getChar());
+        nodeLineSelect.setValueMap(nodeLineValues);
+        nodeLineForm.setItems(nodeLineSelect);
+        nodeLineForm.setHeight(24);
+        nodeLineForm.setWidth(40);
+
+        nodeLineSelect.addChangedHandler(event -> {
+            nodeLineHeaderLabel.setIcon("loading.gif");
+            Range r = Range.create(nodeLineSelect.getValueAsString().charAt(0));
+            controller.setRuntimeRRDRange(r,
+                                          FREE_NODES_COUNT,
+                                          BUSY_NODES_COUNT,
+                                          DEPLOYING_NODES_COUNT,
+                                          DOWN_NODES_COUNT,
+                                          LOST_NODES_COUNT,
+                                          CONFIG_NODES_COUNT,
+                                          NEEDED_NODES_COUNT,
+                                          AVAILABLE_NODES_COUNT);
+        });
+
+        nodeLineHeaderLabel = new Label("<nobr style='font-size:1.4em;font-weight:bold;'>Nodes History<nobr>");
+        nodeLineHeaderLabel.setHeight(24);
+    }
+
+    private void initNodeStateChart() {
+        /*
+         * Instantaneous node state - Node State histogram
+         */
+
+        nodeStateChart = new BarChart();
+        nodeStateChart.getOptions().setResponsive(true);
+        nodeStateChart.getOptions().getLegend().setDisplay(false);
+
+        BarDataset dataset1 = nodeStateChart.newDataset();
+        BarBorderWidth border = new BarBorderWidth();
+        border.setTop(0);
+        border.setLeft(0);
+        border.setRight(0);
+
+        dataset1.setBorderWidth(border);
+        dataset1.setData(0, 0, 0, 0, 0, 0, 0, 0);
+
+        dataset1.setBackgroundColor("#3a668d",
+                                    "#35a849",
+                                    "#ffff00",
+                                    "#fcaf3e",
+                                    "#24c1ff",
+                                    "#1e4ed7",
+                                    "#ef2929",
+                                    "#000000");
+
+        nodeStateChart.getData().setLabels(datasetsAndColor.stream().map(Map.Entry::getKey).toArray(String[]::new));
+        nodeStateChart.getData().setDatasets(dataset1);
+        nodeStateChart.setHeight("150px");
+        nodeStateChart.setWidth("100%");
+        nodeStateChart.getOptions().setMaintainAspectRatio(false);
+        nodeStateChart.getOptions().getLayout().getPadding().setRight(20);
+
+        CartesianCategoryAxis xAxis = new CartesianCategoryAxis(nodeStateChart);
+        xAxis.getGrideLines().setDisplay(false);
+        nodeStateChart.getOptions().getScales().setXAxes(xAxis);
+
+        nodeStateChart.getOptions().getLayout().getPadding().setLeft(20);
+        nodeStateChart.getOptions().getElements().getRectangle().setBorderWidth(10);
     }
 
     @Override
     public void statsUpdated(Map<String, StatHistory> values) {
 
-        StatHistory freeNodes = values.get("FreeNodesCount");
-        StatHistory busyNodes = values.get("BusyNodesCount");
-        StatHistory deployingNodes = values.get("DeployingNodesCount");
-        StatHistory downNodes = values.get("DownNodesCount");
-        StatHistory pendingTasks = values.get("NeededNodesCount");
-        StatHistory totalNodes = values.get("AvailableNodesCount");
-        StatHistory configuringNodes = values.get("ConfigNodesCount");
-        StatHistory lostNodes = values.get("LostNodesCount");
+        StatHistory freeNodes = values.get(FREE_NODES_COUNT);
 
-        nodeLineTable.removeRows(0, nodeLineTable.getNumberOfRows());
-        nodeLineTable.addRows(freeNodes.values.size());
-
-        long now = new Date().getTime() / 1000;
+        long now = new Date().getTime() / 1000; // seconds
         long dur = freeNodes.range.getDuration();
         long step = dur / freeNodes.values.size();
-        for (int i = 0; i < freeNodes.values.size(); i++) {
-            long t = now - dur + step * i;
-            PredefinedFormat format = freeNodes.range.getFormat();
-            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
 
-            nodeLineTable.setValue(i, nodeLineTimeId, timeStamp);
+        StatHistory[] statHistories = new StatHistory[] { values.get(AVAILABLE_NODES_COUNT),
+                                                          values.get(FREE_NODES_COUNT), values.get(NEEDED_NODES_COUNT),
+                                                          values.get(BUSY_NODES_COUNT),
+                                                          values.get(DEPLOYING_NODES_COUNT),
+                                                          values.get(CONFIG_NODES_COUNT), values.get(DOWN_NODES_COUNT),
+                                                          values.get(LOST_NODES_COUNT) };
 
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("free"))) {
-                nodeLineTable.setValue(i, nodeLineFreeId, Math.round(freeNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("busy"))) {
-                nodeLineTable.setValue(i, nodeLineBusyId, Math.round(busyNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("deploying"))) {
-                nodeLineTable.setValue(i, nodeLineDeployingId, Math.round(deployingNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("down"))) {
-                nodeLineTable.setValue(i, nodeLineDownId, Math.round(downNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("pending"))) {
-                nodeLineTable.setValue(i, linePendingTasksId, Math.round(pendingTasks.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("total"))) {
-                nodeLineTable.setValue(i, nodeLineTotalId, Math.round(totalNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("configuring"))) {
-                nodeLineTable.setValue(i, nodeLineConfiguringId, Math.round(configuringNodes.values.get(i)));
-            }
-            if (Boolean.parseBoolean(nodeLineSeriesForm.getValueAsString("lost"))) {
-                nodeLineTable.setValue(i, nodeLineLostId, Math.round(lostNodes.values.get(i)));
+        for (int d = 0; d < statHistories.length; ++d) {
+            StatHistory statHistory = statHistories[d];
+            LineDataset dataset = (LineDataset) nodeHistoryChart.getData().getDatasets().get(d);
+
+            List<Double> dps = new ArrayList<>(statHistory.values.size());
+            List<String> labels = new ArrayList<>(statHistory.values.size());
+            for (int i = 0; i < statHistory.values.size(); i++) {
+                long t = now - dur + step * i; // seconds
+
+                DateTimeFormat.PredefinedFormat format = statHistory.range.getFormat();
+                String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+                labels.add(timeStamp);
+
+                Long value = Math.round(statHistory.values.get(i));
+                dps.add(value.doubleValue());
             }
 
+            dataset.setData(dps);
+            nodeHistoryChart.getData().setLabels(labels.toArray(new String[0]));
         }
-        nodeLineChart.draw(nodeLineTable, nodeLineOpts);
-        nodeLineForm.setDisabled(false);
-        nodeLineSeriesForm.setDisabled(false);
+
+        nodeHistoryChart.update();
+
         nodeLineHeaderLabel.setIcon(null);
 
-        StatHistory loadHist = values.get("AverageActivity");
+        StatHistory loadHist = values.get(AVERAGE_ACTIVITY);
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
-        loadTable.addRows(loadHist.values.size());
+        LineDataset dataset = (LineDataset) activityChart.getData().getDatasets().get(0);
+
         dur = loadHist.range.getDuration();
         step = dur / loadHist.values.size();
+        List<Double> dps = new ArrayList<>(loadHist.values.size());
+        List<String> labels = new ArrayList<>(loadHist.values.size());
+
         for (int i = 0; i < loadHist.values.size(); i++) {
             long t = now - dur + step * i;
-            PredefinedFormat format = loadHist.range.getFormat();
+            DateTimeFormat.PredefinedFormat format = loadHist.range.getFormat();
             String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
 
-            loadTable.setValue(i, loadTimeId, timeStamp);
-            loadTable.setValue(i, loadValId, loadHist.values.get(i));
+            Long value = Math.round(loadHist.values.get(i));
+            dps.add(value.doubleValue());
+            labels.add(timeStamp);
         }
-        loadChart.draw(loadTable, loadOpts);
+        activityChart.getData().setLabels(labels.toArray(new String[0]));
+        dataset.setData(dps);
+
+        activityChart.update();
         loadForm.setDisabled(false);
         loadHeaderLabel.setIcon(null);
+
     }
 
     @Override
@@ -449,34 +421,7 @@ public class RMStatsView implements StatsListener, NodesListener {
         int total = controller.getModel().getNumNodes();
         int needed = controller.getModel().getNeededNodes();
 
-        nodeColTable.removeRows(0, nodeColTable.getNumberOfRows());
-        nodeColTable.addRows(8);
-
-        nodeColTable.setValue(0, 0, "Total");
-        nodeColTable.setValue(0, 1, total);
-
-        nodeColTable.setValue(1, 0, "Free");
-        nodeColTable.setValue(1, 2, free);
-
-        nodeColTable.setValue(2, 0, "Needed");
-        nodeColTable.setValue(2, 3, needed);
-
-        nodeColTable.setValue(3, 0, "Busy");
-        nodeColTable.setValue(3, 4, busy);
-
-        nodeColTable.setValue(4, 0, "Deploying");
-        nodeColTable.setValue(4, 5, depl);
-
-        nodeColTable.setValue(5, 0, "Configuring");
-        nodeColTable.setValue(5, 6, conf);
-
-        nodeColTable.setValue(6, 0, "Down");
-        nodeColTable.setValue(6, 7, down);
-
-        nodeColTable.setValue(7, 0, "Lost");
-        nodeColTable.setValue(7, 8, lost);
-
-        nodeColChart.draw(nodeColTable, nodeColOpts);
-
+        nodeStateChart.getData().getDatasets().get(0).setData(total, free, needed, busy, depl, conf, down, lost);
+        nodeStateChart.update();
     }
 }

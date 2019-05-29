@@ -130,6 +130,7 @@ public class NodeSourceConfigurationParser {
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
+            boolean textArea = false;
 
             if (metaType.equalsIgnoreCase("password")) {
                 password = true;
@@ -137,6 +138,8 @@ public class NodeSourceConfigurationParser {
                 file = true;
             } else if (metaType.equalsIgnoreCase("credential")) {
                 credentials = true;
+            } else if (metaType.equalsIgnoreCase("textArea")) {
+                textArea = true;
             }
 
             PluginDescriptor.Field f = new PluginDescriptor.Field(name,
@@ -145,6 +148,7 @@ public class NodeSourceConfigurationParser {
                                                                   password,
                                                                   credentials,
                                                                   file,
+                                                                  textArea,
                                                                   dynamic);
 
             desc.getConfigurableFields().add(f);

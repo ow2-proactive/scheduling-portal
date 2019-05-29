@@ -357,10 +357,7 @@ public class RMPage implements LogListener {
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(event -> {
-            String docVersion = Config.get().getVersion().contains("SNAPSHOT") ? "dev" : Config.get().getVersion();
-            Window.open("http://doc.activeeon.com/" + docVersion, "", "");
-        });
+        documentationMenuItem.addClickHandler(event -> Window.open("/doc/", "Documentation", ""));
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> RMPage.this.aboutWindow.show());
@@ -460,12 +457,12 @@ public class RMPage implements LogListener {
             Canvas monitoringCanvas = monitoringView.build();
             monitoringTab.setPane(monitoringCanvas);
             leftTabs.addTab(monitoringTab);
-
-            rmStatsView = new RMStatsView(controller);
-            final Canvas rmStatsCanvas = rmStatsView.build();
-            rmStatsCanvas.setWidth("50%");
-            hl.addMember(rmStatsCanvas);
         }, CoreChart.PACKAGE);
+
+        rmStatsView = new RMStatsView(controller);
+        final Canvas rmStatsCanvas = rmStatsView.build();
+        rmStatsCanvas.setWidth("50%");
+        hl.addMember(rmStatsCanvas);
 
         Tab threadDumpTab = new Tab("Thread Dump");
         threadDumpTab.setPane(threadDumpCanvas);
