@@ -92,6 +92,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 
@@ -1109,9 +1110,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         RestClient restClientProxy = getRestClientProxy();
 
         try {
+            key = java.net.URLDecoder.decode(key, Charsets.UTF_8.displayName());
             restClientProxy.putThirdPartyCredential(sessionId, key, value);
         } catch (WebApplicationException e) {
             rethrowRestServerException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RestServerException(e);
         }
     }
 
