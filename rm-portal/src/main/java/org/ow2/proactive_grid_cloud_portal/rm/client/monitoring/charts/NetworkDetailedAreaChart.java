@@ -64,32 +64,32 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-            addRow();
-
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-
-            // getting primitive values of all attributes
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                long t = System.currentTimeMillis();
-                if (history[i] > 0) {
-                    double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) mbPerSec);
-                } else {
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, 0);
-                }
-
-                history[i] = (long) value;
-                time[i] = t;
-            }
-
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONArray array = controller.parseJSON(result).isArray();
+        //        if (array != null) {
+        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+        //                                             .format(new Date(System.currentTimeMillis()));
+        //            addRow();
+        //
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+        //
+        //             getting primitive values of all attributes
+        //            for (int i = 0; i < attrs.length; i++) {
+        //                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+        //                long t = System.currentTimeMillis();
+        //                if (history[i] > 0) {
+        //                    double bytePerMilliSec = (value - history[i]) / (t - time[i]);
+        //                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
+        //                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) mbPerSec);
+        //                } else {
+        //                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, 0);
+        //                }
+        //
+        //                history[i] = (long) value;
+        //                time[i] = t;
+        //            }
+        //
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 
     public void processHistoryResult(String result) {
@@ -147,7 +147,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             }
         }
 
-        loadChart.draw(loadTable, loadOpts);
+        //        loadChart.draw(loadTable, loadOpts);
     }
 
 }

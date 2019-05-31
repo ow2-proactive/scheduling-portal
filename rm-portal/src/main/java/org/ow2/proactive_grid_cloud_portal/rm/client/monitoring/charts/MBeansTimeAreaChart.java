@@ -25,20 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.LinkedHashMap;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.LineChart;
 
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 
 
 /**
@@ -76,8 +71,8 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new AreaChart(data, opts);
+    public AbstractChart createChart(DataTable data, Options opts) {
+        return new LineChart();
     }
 
 }

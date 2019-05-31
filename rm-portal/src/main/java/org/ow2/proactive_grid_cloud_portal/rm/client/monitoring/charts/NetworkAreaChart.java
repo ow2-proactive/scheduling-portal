@@ -64,45 +64,45 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public void processResult(String result) {
 
         // Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
-
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-
-            addRow();
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-
-            boolean initColumns = super.initColumns();
-
-            if (initColumns) {
-                time = new long[object.size()];
-                txBytes = new long[object.size()];
-            }
-
-            int colIndex = 1;
-            for (String key : object.keySet()) {
-
-                if (initColumns) {
-                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-                }
-
-                long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
-                long t = System.currentTimeMillis();
-                if (txBytes[colIndex - 1] > 0) {
-                    double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
-                }
-
-                txBytes[colIndex - 1] = value;
-                time[colIndex - 1] = t;
-
-                colIndex++;
-            }
-
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONObject object = controller.parseJSON(result).isObject();
+        //        if (object != null) {
+        //
+        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+        //                                             .format(new Date(System.currentTimeMillis()));
+        //
+        //            addRow();
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+        //
+        //            boolean initColumns = super.initColumns();
+        //
+        //            if (initColumns) {
+        //                time = new long[object.size()];
+        //                txBytes = new long[object.size()];
+        //            }
+        //
+        //            int colIndex = 1;
+        //            for (String key : object.keySet()) {
+        //
+        //                if (initColumns) {
+        //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+        //                }
+        //
+        //                long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
+        //                long t = System.currentTimeMillis();
+        //                if (txBytes[colIndex - 1] > 0) {
+        //                    double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
+        //                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
+        //                    loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
+        //                }
+        //
+        //                txBytes[colIndex - 1] = value;
+        //                time[colIndex - 1] = t;
+        //
+        //                colIndex++;
+        //            }
+        //
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 
     public void processHistoryResult(String result) {
@@ -160,7 +160,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-        loadChart.draw(loadTable, loadOpts);
+        //        loadChart.draw(loadTable, loadOpts);
     }
 
     private String beautifyName(String mbeanName) {

@@ -26,6 +26,8 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.PieChart;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.regexp.shared.MatchResult;
@@ -33,9 +35,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 
 
 /**
@@ -54,21 +54,21 @@ public class DiskPieChart extends MBeansChart {
     @Override
     public void processResult(String result) {
 
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
-
-            loadTable.removeRows(0, loadTable.getNumberOfRows());
-            for (String key : object.keySet()) {
-                addRow();
-
-                double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
-                long inMB = (long) (value / 1024);
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, beautifyName(key));
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
-            }
-
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONObject object = controller.parseJSON(result).isObject();
+        //        if (object != null) {
+        //
+        //            loadTable.removeRows(0, loadTable.getNumberOfRows());
+        //            for (String key : object.keySet()) {
+        //                addRow();
+        //
+        //                double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
+        //                long inMB = (long) (value / 1024);
+        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, beautifyName(key));
+        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
+        //            }
+        //
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 
     private String beautifyName(String mbeanName) {
@@ -80,7 +80,7 @@ public class DiskPieChart extends MBeansChart {
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new PieChart(data, opts);
+    public AbstractChart createChart(DataTable data, Options opts) {
+        return new PieChart();
     }
 }

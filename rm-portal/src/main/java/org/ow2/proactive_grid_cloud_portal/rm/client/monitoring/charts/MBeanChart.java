@@ -37,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
+import org.pepstock.charba.client.AbstractChart;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -74,7 +75,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] attrs;
 
-    protected CoreChart loadChart;
+    protected AbstractChart loadChart;
 
     protected DataTable loadTable;
 
@@ -120,9 +121,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadChart.setWidth("100%");
         loadChart.setHeight("200px");
         chartContainer.add(loadChart);
-        if (!(loadChart instanceof PieChart)) {
-            addMember(getTimeSlotSelector());
-        }
+        //        if (!(loadChart instanceof PieChart)) {
+        //            addMember(getTimeSlotSelector());
+        //        }
         addMember(chartContainer);
     }
 
@@ -247,7 +248,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         }
 
-        loadChart.draw(loadTable, loadOpts);
+        //        loadChart.draw(loadTable, loadOpts);
     }
 
     protected void addRow() {
@@ -257,7 +258,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadTable.addRow();
     }
 
-    public abstract CoreChart createChart(DataTable data, Options opts);
+    public abstract AbstractChart createChart(DataTable data, Options opts);
 
     public abstract void processResult(String result);
 

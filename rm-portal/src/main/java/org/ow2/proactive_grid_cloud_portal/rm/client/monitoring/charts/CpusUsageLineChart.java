@@ -28,6 +28,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.Date;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.LineChart;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -38,8 +40,6 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
-import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
@@ -60,33 +60,33 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
-
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-
-            addRow();
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-
-            boolean initColumns = super.initColumns();
-            int colIndex = 1;
-            for (String key : object.keySet()) {
-
-                if (initColumns) {
-                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-                }
-
-                double value = 0;
-                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
-                if (jsonVal != null && jsonVal.isNumber() != null) {
-                    value = jsonVal.isNumber().doubleValue();
-                }
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
-            }
-
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONObject object = controller.parseJSON(result).isObject();
+        //        if (object != null) {
+        //
+        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+        //                                             .format(new Date(System.currentTimeMillis()));
+        //
+        //            addRow();
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+        //
+        //            boolean initColumns = super.initColumns();
+        //            int colIndex = 1;
+        //            for (String key : object.keySet()) {
+        //
+        //                if (initColumns) {
+        //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+        //                }
+        //
+        //                double value = 0;
+        //                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
+        //                if (jsonVal != null && jsonVal.isNumber() != null) {
+        //                    value = jsonVal.isNumber().doubleValue();
+        //                }
+        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
+        //            }
+        //
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 
     private String beautifyName(String mbeanName) {
@@ -98,7 +98,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new LineChart(data, opts);
+    public AbstractChart createChart(DataTable data, Options opts) {
+        return new LineChart();
     }
 }
