@@ -40,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.data.Dataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -54,7 +55,6 @@ import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -124,9 +124,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadChart.setWidth("100%");
         loadChart.setHeight("200px");
         chartContainer.add(loadChart);
-        //        if (!(loadChart instanceof PieChart)) {
-        //            addMember(getTimeSlotSelector());
-        //        }
+        if (!(loadChart instanceof PieChart)) {
+            addMember(getTimeSlotSelector());
+        }
         addMember(chartContainer);
     }
 
