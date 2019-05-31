@@ -28,17 +28,17 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.Date;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.LineChart;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
@@ -71,28 +71,28 @@ public class MBeanTimeAreaChart extends MBeanChart {
 
     @Override
     public void processResult(String result) {
-        JSONValue json = controller.parseJSON(result);
-        JSONArray array = json.isArray();
-
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-            addRow();
-
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-
-            // getting primitive values of all attributes
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, value);
-            }
-
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONValue json = controller.parseJSON(result);
+        //        JSONArray array = json.isArray();
+        //
+        //        if (array != null) {
+        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+        //                                             .format(new Date(System.currentTimeMillis()));
+        //            addRow();
+        //
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+        //
+        //             getting primitive values of all attributes
+        //            for (int i = 0; i < attrs.length; i++) {
+        //                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, value);
+        //            }
+        //
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new AreaChart(data, opts);
+    public AbstractChart createChart(DataTable data, Options opts) {
+        return new LineChart();
     }
 }

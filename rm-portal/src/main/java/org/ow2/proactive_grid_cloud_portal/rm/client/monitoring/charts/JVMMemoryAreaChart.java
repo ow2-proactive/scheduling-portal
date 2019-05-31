@@ -54,16 +54,16 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-            double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
-
-            addRow();
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
-            loadChart.draw(loadTable, loadOpts);
-        }
+        //        JSONArray array = controller.parseJSON(result).isArray();
+        //        if (array != null) {
+        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+        //                                             .format(new Date(System.currentTimeMillis()));
+        //            double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
+        //
+        //            addRow();
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
+        //            loadChart.draw(loadTable, loadOpts);
+        //        }
     }
 }
