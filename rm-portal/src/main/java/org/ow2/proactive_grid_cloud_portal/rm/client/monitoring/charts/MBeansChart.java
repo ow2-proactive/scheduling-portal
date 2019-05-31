@@ -70,11 +70,11 @@ public abstract class MBeansChart extends MBeanChart {
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
                                                   (System.currentTimeMillis() - t) + "ms");
 
-                if (realTime) {
-                    processResult(result);
-                } else {
-                    processHistoryResult(result);
-                }
+                //                if (realTime) {
+                //                    processResult(result);
+                //                } else {
+                processHistoryResult(result);
+                //                }
             }
 
             public void onFailure(Throwable caught) {
