@@ -25,9 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -38,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.data.Dataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -148,11 +151,11 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
                                                   (System.currentTimeMillis() - t) + "ms");
 
-                if (realTime) {
-                    processResult(result);
-                } else {
-                    processHistoryResult(result);
-                }
+                //                if (realTime) {
+                //                    processResult(result);
+                //                } else {
+                processHistoryResult(result);
+                //                }
             }
 
             public void onFailure(Throwable caught) {
@@ -233,6 +236,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         long size = getJsonInternalSize(json);
         long step = dur / size;
 
+        final Dataset dataset = loadChart.newDataset();
+
+        List<Double> dps = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
         for (int i = 0; i < size; i++) {
 
             double[] slice = getJsonSlice(json, i);
@@ -240,14 +247,19 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
             String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i, 0, timeStamp);
+            labels.add(timeStamp);
 
-            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
-                loadTable.setValue(i, sliceIndex + 1, formatValue(slice[sliceIndex]));
-            }
+            //            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+            //                loadTable.setValue(i, sliceIndex + 1, formatValue(slice[sliceIndex]));
+            //            }
+            dps.add(formatValue(slice[0]));
         }
 
+        loadChart.getData().setLabels(labels.toArray(new String[0]));
+        dataset.setData(dps);
+
+        loadChart.getData().setDatasets(dataset);
+        loadChart.update();
         //        loadChart.draw(loadTable, loadOpts);
     }
 
