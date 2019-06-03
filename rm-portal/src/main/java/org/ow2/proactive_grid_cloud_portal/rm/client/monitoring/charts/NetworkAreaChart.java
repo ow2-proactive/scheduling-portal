@@ -105,7 +105,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         //        }
     }
 
-    public void processHistoryResult(String result) {
+    //    @Override
+    public void processHistoryResult1(String result) {
 
         // removing internal escaping
         result = result.replace("\\\"", "\"");
