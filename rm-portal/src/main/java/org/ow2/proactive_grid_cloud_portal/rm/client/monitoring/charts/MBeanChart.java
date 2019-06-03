@@ -42,19 +42,14 @@ import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.IsChart;
 import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
-import org.pepstock.charba.client.callbacks.LegendLabelsCallback;
-import org.pepstock.charba.client.callbacks.TickCallback;
-import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
-import org.pepstock.charba.client.configuration.ConfigurationOptions;
-import org.pepstock.charba.client.configuration.LegendLabels;
-import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
-import org.pepstock.charba.client.items.LegendItem;
-import org.pepstock.charba.client.items.LegendLabelItem;
+import org.pepstock.charba.client.items.TooltipItem;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -63,10 +58,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -90,11 +81,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] attrs;
 
-    protected AbstractChart loadChart;
-
-    protected DataTable loadTable;
-
-    protected Options loadOpts;
+    protected AbstractChart chart;
 
     protected AbsolutePanel chartContainer;
 
@@ -108,16 +95,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.mbeanName = mbean;
         this.attrs = attrs;
 
-        loadOpts = Options.create();
-        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-        loadAxis.setMaxAlternation(1);
-        loadAxis.setSlantedText(false);
-        loadOpts.setLegend(LegendPosition.NONE);
-        loadOpts.setHAxisOptions(loadAxis);
-        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-        loadAxis.setMinValue(0);
-
-        loadTable = DataTable.create();
 
         setWidth100();
         setHeight100();
@@ -132,13 +109,40 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         chartContainer.setWidth("100%");
         chartContainer.setHeight("200px");
 
-        loadChart = createChart(loadTable, loadOpts);
-        loadChart.setWidth("100%");
-        loadChart.setHeight("200px");
-        chartContainer.add(loadChart);
-        if (!(loadChart instanceof PieChart)) {
+        chart = createChart();
+        chart.setWidth("100%");
+        chart.setHeight("200px");
+        chartContainer.add(chart);
+
+        if (!(chart instanceof PieChart)) {
             addMember(getTimeSlotSelector());
         }
+
+
+        chart.getOptions().getHover().setIntersect(false);
+        chart.getOptions().getHover().setMode(InteractionMode.INDEX);
+
+        chart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
+        chart.getOptions().getTooltips().setIntersect(false);
+
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
+
+        chart.getOptions().getLegend().setDisplay(false);
+
+        CartesianLinearAxis xAxis = new CartesianLinearAxis(chart);
+        LineChart
+        // lets not convert this object to LAMBDA! it fails
+        chart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
+            @Override
+            public boolean onFilter(IsChart chart, TooltipItem item) {
+                Double pointData = chart.getData()
+                        .getDatasets()
+                        .get(item.getDatasetIndex())
+                        .getData()
+                        .get(item.getIndex());
+                return pointData != null && pointData > 0;
+            }
+        });
 
         addMember(chartContainer);
     }
@@ -258,19 +262,23 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
                                          "#000000" };
         for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) loadChart.newDataset();
+            LineDataset dataset = (LineDataset) chart.newDataset();
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
             dataset.setLabel(String.valueOf(i));
             dataset.setPointRadius(0);
             datasets.add(dataset);
+            dataset.setBorderWidth(1);
             if (length == 1) {
                 dataset.setFill(Fill.START);
                 dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+                chart.getOptions().setResponsive(true);
+                chart.getOptions().getLegend().setDisplay(false);
             } else {
                 dataset.setFill(Fill.FALSE);
             }
+            chart.getOptions().getLegend().getLabels().setUsePointStyle(true);
 
             dpss[i] = new ArrayList<>();
         }
@@ -279,8 +287,20 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         //        for (int i = 0; i < legendLabelItems.length; ++i) {
         //            LegendLabelItem legendLabelItem = new LegendLabelItem();
         //            legendLabelItem.setDatasetIndex(i);
+        //            legendLabelItem.setPointStyle(PointStyle.LINE);
+        //            legendLabelItem.setText(String.valueOf(i + 10));
+        //            legendLabelItem.setHidden(true);
+        //            legendLabelItem.setIndex(i);
+        //            LineDataset dataset = (LineDataset) datasets.get(i);
+        //            legendLabelItem.setFillStyle(dataset.getBorderColor());
         //            legendLabelItems[i] = legendLabelItem;
         //        }
+        //        chart.getOptions().getLegend().getLabels().setLabelsCallback(new LegendLabelsCallback() {
+        //            @Override
+        //            public LegendLabelItem[] generateLegendLabels(IsChart chart) {
+        //                return legendLabelItems;
+        //            }
+        //        });
 
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -297,16 +317,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         }
 
-        loadChart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(labels.toArray(new String[0]));
 
-        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {
             datasets.get(i).setData(dpss[i]);
         }
 
-        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
 
-        loadChart.update();
+        chart.update();
     }
 
     protected void addRow() {
@@ -316,7 +336,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadTable.addRow();
     }
 
-    public abstract AbstractChart createChart(DataTable data, Options opts);
+    public abstract AbstractChart createChart();
 
     public abstract void processResult(String result);
 

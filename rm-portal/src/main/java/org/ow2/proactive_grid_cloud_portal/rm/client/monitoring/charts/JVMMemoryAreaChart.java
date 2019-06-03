@@ -63,7 +63,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         //            addRow();
         //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
         //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 }

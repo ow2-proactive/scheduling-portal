@@ -25,22 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.Date;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -55,7 +46,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
         vAxis.set("format", "#%");
         loadOpts.setVAxisOptions(vAxis);
         chartContainer.setHeight("300px");
-        loadChart.setHeight("300px");
+        chart.setHeight("300px");
     }
 
     @Override
@@ -85,7 +76,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
         //                loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
         //            }
         //
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 
@@ -98,7 +89,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 }

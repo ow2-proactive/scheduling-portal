@@ -25,21 +25,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.Date;
-
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -87,12 +78,12 @@ public class MBeanTimeAreaChart extends MBeanChart {
         //                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, value);
         //            }
         //
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 }

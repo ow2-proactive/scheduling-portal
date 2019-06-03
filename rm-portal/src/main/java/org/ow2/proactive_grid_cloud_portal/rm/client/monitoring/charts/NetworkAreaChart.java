@@ -26,14 +26,10 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.callbacks.TickCallback;
 import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
@@ -50,8 +46,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -67,9 +61,9 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public NetworkAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
-        ConfigurationOptions options = loadChart.getOptions();
+        ConfigurationOptions options = chart.getOptions();
         if (options instanceof LineOptions) {
-            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
+            CartesianLinearAxis axis = new CartesianLinearAxis(chart);
             axis.getTicks().setCallback(new TickCallback() {
                 @Override
                 public String onCallback(Axis axis, double value, int index, List<Double> values) {
@@ -123,7 +117,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         //                colIndex++;
         //            }
         //
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 
@@ -157,7 +151,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
                                          "#000000" };
         for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) loadChart.newDataset();
+            LineDataset dataset = (LineDataset) chart.newDataset();
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
@@ -206,16 +200,16 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-        loadChart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(labels.toArray(new String[0]));
 
-        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {
             datasets.get(i).setData(dpss[i]);
         }
 
-        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
 
-        loadChart.update();
+        chart.update();
 
         for (int i = 1; i < size; i++) {
 
@@ -252,7 +246,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-        //        loadChart.draw(loadTable, loadOpts);
+        //        chart.draw(loadTable, loadOpts);
     }
 
     private String beautifyName(String mbeanName) {

@@ -30,10 +30,7 @@ import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -71,7 +68,7 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 

@@ -29,13 +29,10 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.PieChart;
 
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -67,7 +64,7 @@ public class DiskPieChart extends MBeansChart {
         //                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
         //            }
         //
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 
@@ -80,7 +77,7 @@ public class DiskPieChart extends MBeansChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new PieChart();
     }
 }
