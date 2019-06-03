@@ -181,7 +181,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                     case CANCELED:
                         return "color:#C50000;font-weight:bold;" + base; // red color
                     case FAILED:
-                        return "color:#850003;" + base; // dark Red color
+                        return "color:#850003;font-weight:bold;" + base; // dark Red color
                     case IN_ERROR:
                         return "color:#E94504;font-weight:bold;" + base; // light orange color
                     case RUNNING:
