@@ -188,9 +188,9 @@ public class RMStatsView implements StatsListener, NodesListener {
         CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
         axis.getTicks().setAutoSkip(false);
         axis.getTicks().setMaxRotation(0);
+
         axis.getTicks().setMin(0.0);
         axis.getTicks().setCallback(new TickCallback() {
-
             @Override
             public String onCallback(Axis axis, double value, int index, List<Double> values) {
                 return value + "%";

@@ -29,8 +29,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.callbacks.TickCallback;
+import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.configuration.CartesianLinearAxis;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.Position;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -58,6 +67,14 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "#.# Kb/s");
         loadOpts.setVAxisOptions(vAxis);
+
+        //        CartesianLinearAxis axis = (CartesianLinearAxis) ((LineChart) loadChart).getOptions().getScales().getYAxes().get(0);
+        //        axis.getTicks().setCallback(new TickCallback() {
+        //            @Override
+        //            public String onCallback(Axis axis, double value, int index, List<Double> values) {
+        //                return value + " Kb/s";
+        //            }
+        //        });
     }
 
     @Override
@@ -105,8 +122,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         //        }
     }
 
-    //    @Override
-    public void processHistoryResult1(String result) {
+    @Override
+    public void processHistoryResult(String result) {
 
         // removing internal escaping
         result = result.replace("\\\"", "\"");
@@ -121,10 +138,79 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         }
 
         loadTable.removeRows(0, loadTable.getNumberOfRows());
+
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
         long step = dur / size;
+
+        final int length = getJsonSlice(json, 0).length;
+
+        List<Dataset> datasets = new ArrayList<>();
+        List<Double>[] dpss = new List[length];
+
+        String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
+                                         "#000000" };
+        for (int i = 0; i < length; ++i) {
+            LineDataset dataset = (LineDataset) loadChart.newDataset();
+            if (i < colors.length) {
+                dataset.setBorderColor(colors[i]);
+            }
+            dataset.setFill(Fill.FALSE);
+            dataset.setLabel(String.valueOf(i));
+            datasets.add(dataset);
+            dpss[i] = new ArrayList<>();
+        }
+        List<String> labels = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+
+            double[] slice = getJsonSlice(json, i);
+
+            if (i == 1) {
+                time = new long[slice.length];
+                txBytes = new long[slice.length];
+            }
+
+            long t = now - dur + step * i;
+            DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
+            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+
+            labels.add(timeStamp);
+
+            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+
+                long value = (long) slice[sliceIndex];
+
+                if (i > 1) {
+                    double bytePerSec = (value - txBytes[sliceIndex]) / (t - time[sliceIndex]);
+                    double kbPerSec = bytePerSec / 1024;
+
+                    if (kbPerSec < 0) {
+                        // rx counter is reset
+                        kbPerSec = 0;
+                    }
+
+                    dpss[sliceIndex].add(kbPerSec);
+                }
+
+                txBytes[sliceIndex] = value;
+                time[sliceIndex] = t;
+
+                //                dpss[sliceIndex].add(formatValue(slice[sliceIndex]));
+            }
+        }
+
+        loadChart.getData().setLabels(labels.toArray(new String[0]));
+
+        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        for (int i = 0; i < length; ++i) {
+            datasets.get(i).setData(dpss[i]);
+        }
+
+        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+        loadChart.update();
 
         for (int i = 1; i < size; i++) {
 
