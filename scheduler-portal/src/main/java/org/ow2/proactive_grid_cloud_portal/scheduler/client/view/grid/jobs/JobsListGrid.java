@@ -187,7 +187,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                     case RUNNING:
                         return "color:#2051F4;font-weight:bold;" + base; // Blue color
                     case PENDING:
-                        return "color:#F0E130;font-weight:bold;" + base; // Yellow color: Dandelion color name
+                        return "color:#F0E130;" + base; // Yellow color: Dandelion color name
                     case STALLED:
                         return "color:#1B89B8;font-weight:bold;" + base; // Light Blue color
                     case PAUSED:
