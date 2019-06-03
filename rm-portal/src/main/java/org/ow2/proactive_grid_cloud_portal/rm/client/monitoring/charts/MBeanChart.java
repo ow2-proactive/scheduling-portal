@@ -39,11 +39,22 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.IsChart;
+import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
+import org.pepstock.charba.client.callbacks.LegendLabelsCallback;
+import org.pepstock.charba.client.callbacks.TickCallback;
+import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.configuration.CartesianLinearAxis;
+import org.pepstock.charba.client.configuration.ConfigurationOptions;
+import org.pepstock.charba.client.configuration.LegendLabels;
+import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.Position;
+import org.pepstock.charba.client.items.LegendItem;
+import org.pepstock.charba.client.items.LegendLabelItem;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -128,6 +139,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         if (!(loadChart instanceof PieChart)) {
             addMember(getTimeSlotSelector());
         }
+
         addMember(chartContainer);
     }
 
@@ -250,11 +262,26 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
-            dataset.setFill(Fill.FALSE);
             dataset.setLabel(String.valueOf(i));
+            dataset.setPointRadius(0);
             datasets.add(dataset);
+            if (length == 1) {
+                dataset.setFill(Fill.START);
+                dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+            } else {
+                dataset.setFill(Fill.FALSE);
+            }
+
             dpss[i] = new ArrayList<>();
         }
+
+        //        LegendLabelItem [] legendLabelItems = new LegendLabelItem[length];
+        //        for (int i = 0; i < legendLabelItems.length; ++i) {
+        //            LegendLabelItem legendLabelItem = new LegendLabelItem();
+        //            legendLabelItem.setDatasetIndex(i);
+        //            legendLabelItems[i] = legendLabelItem;
+        //        }
+
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < size; i++) {
 
