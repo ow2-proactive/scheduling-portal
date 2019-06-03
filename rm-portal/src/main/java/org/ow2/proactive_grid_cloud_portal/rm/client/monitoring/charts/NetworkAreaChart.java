@@ -31,11 +31,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.callbacks.TickCallback;
 import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
+import org.pepstock.charba.client.configuration.ConfigurationOptions;
+import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
@@ -64,17 +67,19 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public NetworkAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#.# Kb/s");
-        loadOpts.setVAxisOptions(vAxis);
+        ConfigurationOptions options = loadChart.getOptions();
+        if (options instanceof LineOptions) {
+            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
+            axis.getTicks().setCallback(new TickCallback() {
+                @Override
+                public String onCallback(Axis axis, double value, int index, List<Double> values) {
+                    return value + " Kb/s";
+                }
+            });
 
-        //        CartesianLinearAxis axis = (CartesianLinearAxis) ((LineChart) loadChart).getOptions().getScales().getYAxes().get(0);
-        //        axis.getTicks().setCallback(new TickCallback() {
-        //            @Override
-        //            public String onCallback(Axis axis, double value, int index, List<Double> values) {
-        //                return value + " Kb/s";
-        //            }
-        //        });
+            LineOptions lineOptions = (LineOptions) options;
+            lineOptions.getScales().setYAxes(axis);
+        }
     }
 
     @Override
