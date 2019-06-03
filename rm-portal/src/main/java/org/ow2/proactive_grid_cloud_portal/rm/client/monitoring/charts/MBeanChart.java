@@ -36,12 +36,14 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.Position;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -52,7 +54,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.smartgwt.client.widgets.Label;
@@ -132,13 +133,12 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     @Override
     public void reload() {
-        final RMServiceAsync rm = controller.getRMService();
-        final RMModel model = controller.getModel();
-        final long t = System.currentTimeMillis();
+        RMServiceAsync rm = controller.getRMService();
+        long t = System.currentTimeMillis();
 
-        final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
+        boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 
-        final LoginModel loginModel = LoginModel.getInstance();
+        LoginModel loginModel = LoginModel.getInstance();
 
         AsyncCallback callback = new AsyncCallback<String>() {
             public void onSuccess(String result) {
@@ -151,11 +151,11 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 LogModel.getInstance().logMessage("Fetched " + mbeanName + ":" + Arrays.toString(attrs) + " in " +
                                                   (System.currentTimeMillis() - t) + "ms");
 
-                //                if (realTime) {
-                //                    processResult(result);
-                //                } else {
-                processHistoryResult(result);
-                //                }
+                if (realTime) {
+                    //                    processResult(result);
+                } else {
+                    processHistoryResult(result);
+                }
             }
 
             public void onFailure(Throwable caught) {
@@ -234,11 +234,27 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         long size = getJsonInternalSize(json);
+        if (size == 0) {
+            size = 1; // TODO
+        }
         long step = dur / size;
 
-        final Dataset dataset = loadChart.newDataset();
+        final int length = getJsonSlice(json, 0).length;
+        List<Dataset> datasets = new ArrayList<>();
+        List<Double>[] dpss = new List[length];
 
-        List<Double> dps = new ArrayList<>();
+        String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
+                                         "#000000" };
+        for (int i = 0; i < length; ++i) {
+            LineDataset dataset = (LineDataset) loadChart.newDataset();
+            if (i < colors.length) {
+                dataset.setBorderColor(colors[i]);
+            }
+            dataset.setFill(Fill.FALSE);
+            dataset.setLabel(String.valueOf(i));
+            datasets.add(dataset);
+            dpss[i] = new ArrayList<>();
+        }
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < size; i++) {
 
@@ -249,18 +265,21 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
             labels.add(timeStamp);
 
-            //            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
-            //                loadTable.setValue(i, sliceIndex + 1, formatValue(slice[sliceIndex]));
-            //            }
-            dps.add(formatValue(slice[0]));
+            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+                dpss[sliceIndex].add(formatValue(slice[sliceIndex]));
+            }
         }
 
         loadChart.getData().setLabels(labels.toArray(new String[0]));
-        dataset.setData(dps);
 
-        loadChart.getData().setDatasets(dataset);
+        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        for (int i = 0; i < length; ++i) {
+            datasets.get(i).setData(dpss[i]);
+        }
+
+        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
         loadChart.update();
-        //        loadChart.draw(loadTable, loadOpts);
     }
 
     protected void addRow() {
