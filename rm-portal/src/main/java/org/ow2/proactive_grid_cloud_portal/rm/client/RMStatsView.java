@@ -39,7 +39,9 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 import org.pepstock.charba.client.BarChart;
 import org.pepstock.charba.client.IsChart;
 import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.callbacks.TickCallback;
 import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
+import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
 import org.pepstock.charba.client.data.BarBorderWidth;
@@ -186,7 +188,14 @@ public class RMStatsView implements StatsListener, NodesListener {
         CartesianLinearAxis axis = new CartesianLinearAxis(activityChart);
         axis.getTicks().setAutoSkip(false);
         axis.getTicks().setMaxRotation(0);
+
         axis.getTicks().setMin(0.0);
+        axis.getTicks().setCallback(new TickCallback() {
+            @Override
+            public String onCallback(Axis axis, double value, int index, List<Double> values) {
+                return value + " %";
+            }
+        });
 
         activityChart.getOptions().setResponsive(true);
         activityChart.getOptions().getLegend().setDisplay(false);
