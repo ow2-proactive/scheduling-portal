@@ -45,6 +45,7 @@ import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.callbacks.LegendLabelsCallback;
 import org.pepstock.charba.client.callbacks.TickCallback;
 import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
 import org.pepstock.charba.client.configuration.ConfigurationOptions;
 import org.pepstock.charba.client.configuration.LegendLabels;
@@ -137,7 +138,18 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadChart.setHeight("200px");
         chartContainer.add(loadChart);
         if (!(loadChart instanceof PieChart)) {
+            LineChart lineChart = (LineChart) loadChart;
+
             addMember(getTimeSlotSelector());
+
+            CartesianCategoryAxis xAxis = new CartesianCategoryAxis(loadChart);
+            xAxis.getGrideLines().setDisplay(false);
+            lineChart.getOptions().getScales().setXAxes(xAxis);
+
+            CartesianLinearAxis yAxis = new CartesianLinearAxis(loadChart);
+            yAxis.getTicks().setBeginAtZero(true);
+            lineChart.getOptions().getScales().setYAxes(yAxis);
+
         }
 
         addMember(chartContainer);
@@ -264,6 +276,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
             dataset.setLabel(String.valueOf(i));
             dataset.setPointRadius(0);
+            dataset.setBorderWidth(1);
             datasets.add(dataset);
             if (length == 1) {
                 dataset.setFill(Fill.START);
@@ -274,13 +287,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
             dpss[i] = new ArrayList<>();
         }
-
-        //        LegendLabelItem [] legendLabelItems = new LegendLabelItem[length];
-        //        for (int i = 0; i < legendLabelItems.length; ++i) {
-        //            LegendLabelItem legendLabelItem = new LegendLabelItem();
-        //            legendLabelItem.setDatasetIndex(i);
-        //            legendLabelItems[i] = legendLabelItem;
-        //        }
 
         List<String> labels = new ArrayList<>();
         for (int i = 0; i < size; i++) {

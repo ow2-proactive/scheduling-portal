@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
@@ -33,6 +34,11 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
+import org.pepstock.charba.client.callbacks.TickCallback;
+import org.pepstock.charba.client.configuration.Axis;
+import org.pepstock.charba.client.configuration.CartesianLinearAxis;
+import org.pepstock.charba.client.configuration.ConfigurationOptions;
+import org.pepstock.charba.client.configuration.LineOptions;
 
 
 /**
@@ -42,6 +48,21 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
     public JVMMemoryAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
+
+        ConfigurationOptions options = loadChart.getOptions();
+        if (options instanceof LineOptions) {
+            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
+            axis.getTicks().setCallback(new TickCallback() {
+                @Override
+                public String onCallback(Axis axis, double value, int index, List<Double> values) {
+                    return value + " Mb";
+                }
+            });
+
+            LineOptions lineOptions = (LineOptions) options;
+            lineOptions.getScales().setYAxes(axis);
+        }
+
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "# Mb");
         loadOpts.setVAxisOptions(vAxis);
