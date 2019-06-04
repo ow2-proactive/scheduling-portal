@@ -193,7 +193,7 @@ public class RMStatsView implements StatsListener, NodesListener {
 
             @Override
             public String onCallback(Axis axis, double value, int index, List<Double> values) {
-                return value + " %";
+                return value + "%";
             }
         });
 
