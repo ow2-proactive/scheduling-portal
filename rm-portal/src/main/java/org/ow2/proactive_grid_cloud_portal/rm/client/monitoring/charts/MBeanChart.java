@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -93,6 +95,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected Runnable onFinish;
 
+    protected AbsolutePanel chartContainer;
+
+
     public MBeanChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
         this.controller = controller;
         this.jmxServerUrl = jmxServerUrl;
@@ -119,9 +124,14 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             addMember(label);
         }
 
+        chartContainer = new AbsolutePanel();
+        chartContainer.setWidth("100%");
+        chartContainer.setHeight("200px");
+        chartContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+
         chart = createChart();
         chart.setWidth("100%");
-        chart.setHeight("200px");
+        chart.setHeight("100%");
         chart.getOptions().setMaintainAspectRatio(false);
         if (!(chart instanceof PieChart)) {
             LineChart lineChart = (LineChart) chart;
@@ -158,7 +168,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         });
 
-        addMember(chart);
+        chartContainer.add(chart);
+
+        addMember(chartContainer);
     }
 
     public static String removingInternalEscaping(String result) {
