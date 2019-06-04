@@ -129,13 +129,10 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
                                          "#000000" };
         for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) chart.newDataset();
-            if (i < colors.length) {
-                dataset.setBorderColor(colors[i]);
-            }
-            dataset.setFill(Fill.FALSE);
-            dataset.setLabel(String.valueOf(i));
+            LineDataset dataset = (LineDataset) createDataset(i);
+
             datasets.add(dataset);
+
             dpss[i] = new ArrayList<>();
         }
         List<String> labels = new ArrayList<>();
@@ -173,8 +170,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
                 txBytes[sliceIndex] = value;
                 time[sliceIndex] = t;
-
-                //                dpss[sliceIndex].add(formatValue(slice[sliceIndex]));
             }
         }
 

@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
@@ -35,6 +37,8 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
 
 
 /**
@@ -94,8 +98,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         }
     }
 
-    //    @Override
-    public void processHistoryResult1(String result) {
+    @Override
+    public void processHistoryResult(String result) {
         result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
@@ -105,11 +109,23 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             return;
         }
 
-//        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
         long step = dur / size;
+        final int length = getJsonSlice(json, 0).length;
+
+        List<Dataset> datasets = new ArrayList<>();
+        List<Double>[] dpss = new List[length];
+        for (int i = 0; i < length; ++i) {
+            LineDataset dataset = (LineDataset) createDataset(i);
+
+            datasets.add(dataset);
+
+            dpss[i] = new ArrayList<>();
+        }
+        List<String> labels = new ArrayList<>(size);
+
 
         for (int i = 1; i < size; i++) {
 
@@ -125,6 +141,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
 //            loadTable.addRow();
 //            loadTable.setValue(i - 1, 0, timeStamp);
+            labels.add(timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
                 long value = (long) slice[j];
@@ -138,7 +155,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-//                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+                    dpss[j].add(kbPerSec);
+
                 }
 
                 history[j] = value;
@@ -147,6 +165,16 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         }
 
         //        chart.draw(loadTable, loadOpts);
+
+        chart.getData().setLabels(labels.toArray(new String[0]));
+
+        for (int i = 0; i < length; ++i) {
+            datasets.get(i).setData(dpss[i]);
+        }
+
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+        chart.update();
     }
 
 }
