@@ -40,7 +40,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.IsChart;
-import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
@@ -95,7 +94,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.mbeanName = mbean;
         this.attrs = attrs;
 
-
         setWidth100();
         setHeight100();
 
@@ -118,7 +116,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             addMember(getTimeSlotSelector());
         }
 
-
         chart.getOptions().getHover().setIntersect(false);
         chart.getOptions().getHover().setMode(InteractionMode.INDEX);
 
@@ -130,16 +127,15 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         chart.getOptions().getLegend().setDisplay(false);
 
         CartesianLinearAxis xAxis = new CartesianLinearAxis(chart);
-        LineChart
         // lets not convert this object to LAMBDA! it fails
         chart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
             @Override
             public boolean onFilter(IsChart chart, TooltipItem item) {
                 Double pointData = chart.getData()
-                        .getDatasets()
-                        .get(item.getDatasetIndex())
-                        .getData()
-                        .get(item.getIndex());
+                                        .getDatasets()
+                                        .get(item.getDatasetIndex())
+                                        .getData()
+                                        .get(item.getIndex());
                 return pointData != null && pointData > 0;
             }
         });
@@ -246,7 +242,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         long size = getJsonInternalSize(json);
@@ -329,13 +324,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         chart.update();
     }
 
-    protected void addRow() {
-        if (loadTable.getNumberOfRows() > MAX_ROWS_NUMBER) {
-            loadTable.removeRow(0);
-        }
-        loadTable.addRow();
-    }
-
     public abstract AbstractChart createChart();
 
     public abstract void processResult(String result);
@@ -363,7 +351,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             @Override
             public void onChanged(ChangedEvent event) {
                 timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-                loadTable.removeRows(0, loadTable.getNumberOfRows());
                 reload();
             }
         });

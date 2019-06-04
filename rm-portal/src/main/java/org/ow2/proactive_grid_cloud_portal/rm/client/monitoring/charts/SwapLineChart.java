@@ -47,9 +47,9 @@ public class SwapLineChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "sigar:Type=Swap", new String[] { "Used", "Free", "Total" }, "Swap");
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "# Mb");
-        loadOpts.setVAxisOptions(vAxis);
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
+        //        loadOpts.setVAxisOptions(vAxis);
+        //        loadOpts.setLegend(LegendPosition.RIGHT);
+        //        loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
     }
 
     @Override
@@ -63,14 +63,13 @@ public class SwapLineChart extends MBeanTimeAreaChart {
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
-            addRow();
 
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+            //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
 
             // getting primitive values of all attributes
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, formatValue(value));
+                //                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, formatValue(value));
             }
 
             //            chart.draw(loadTable, loadOpts);

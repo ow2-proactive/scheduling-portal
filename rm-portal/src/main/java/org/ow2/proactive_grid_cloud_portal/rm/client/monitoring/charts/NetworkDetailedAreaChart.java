@@ -56,10 +56,10 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "#.# Kb/s");
-        loadOpts.setVAxisOptions(vAxis);
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.setColumnLabel(1, "RX");
-        loadTable.setColumnLabel(2, "TX");
+        //        loadOpts.setVAxisOptions(vAxis);
+        //        loadOpts.setLegend(LegendPosition.RIGHT);
+        //        loadTable.setColumnLabel(1, "RX");
+        //        loadTable.setColumnLabel(2, "TX");
     }
 
     @Override
@@ -107,7 +107,6 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
@@ -125,8 +124,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
+            //            loadTable.setValue(i - 1, 0, timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
                 long value = (long) slice[j];
@@ -140,7 +138,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+                    //                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
                 }
 
                 history[j] = value;

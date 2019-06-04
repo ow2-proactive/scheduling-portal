@@ -44,7 +44,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "# Mb");
-        loadOpts.setVAxisOptions(vAxis);
+        //        loadOpts.setVAxisOptions(vAxis);
     }
 
     @Override

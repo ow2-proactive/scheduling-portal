@@ -136,8 +136,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
-
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
@@ -223,8 +221,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
+            //            loadTable.addRow();
+            //            loadTable.setValue(i - 1, 0, timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
                 long value = (long) slice[j];
@@ -238,7 +236,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+                    //                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
                 }
 
                 txBytes[j] = value;

@@ -39,6 +39,6 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "#%");
-        loadOpts.setVAxisOptions(vAxis);
+        //        loadOpts.setVAxisOptions(vAxis);
     }
 }

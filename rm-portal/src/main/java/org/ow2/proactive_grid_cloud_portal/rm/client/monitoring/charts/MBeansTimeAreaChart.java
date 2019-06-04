@@ -29,9 +29,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.LegendPosition;
-
 
 /**
  * Chart that retrieves information from several MBeans and shows time on Y axis.
@@ -49,17 +46,16 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
             String title) {
         super(controller, jmxServerUrl, mbean, attributes, title);
 
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.addColumn(ColumnType.STRING);
+        //        loadOpts.setLegend(LegendPosition.RIGHT);
+        //        loadTable.addColumn(ColumnType.STRING);
         // fake column to draw the chart properly
         // with mbeans we don't know how many columns we will have until receive first results
-        loadTable.addColumn(ColumnType.NUMBER);
+        //        loadTable.addColumn(ColumnType.NUMBER);
     }
 
     public boolean initColumns() {
         if (initializing) {
             // removing fake column
-            loadTable.removeColumn(1);
             initializing = false;
             return true;
         }

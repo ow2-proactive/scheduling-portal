@@ -50,14 +50,11 @@ public class MBeanTimeAreaChart extends MBeanChart {
         AxisOptions vAxis = AxisOptions.create();
         vAxis.setMinValue(0);
         vAxis.set("format", "#");
-        loadOpts.setVAxisOptions(vAxis);
-
-        loadTable.addColumn(ColumnType.STRING);
-        for (String attribute : attributes) {
-            loadTable.addColumn(ColumnType.NUMBER, attribute);
-        }
-
-        addRow();
+        //        loadOpts.setVAxisOptions(vAxis);
+        //        loadTable.addColumn(ColumnType.STRING);
+        //        for (String attribute : attributes) {
+        //            loadTable.addColumn(ColumnType.NUMBER, attribute);
+        //        }
     }
 
     @Override
