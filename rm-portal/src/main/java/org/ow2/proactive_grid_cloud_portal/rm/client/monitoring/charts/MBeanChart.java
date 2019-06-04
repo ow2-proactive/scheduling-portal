@@ -155,6 +155,23 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         addMember(chartContainer);
     }
 
+    public void setYAxesTicksSuffix(String suffix) {
+        ConfigurationOptions options = loadChart.getOptions();
+        if (options instanceof LineOptions) {
+            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
+            axis.getTicks().setCallback(new TickCallback() {
+                @Override
+                public String onCallback(Axis axis, double value, int index, List<Double> values) {
+                    return value + suffix;
+                }
+            });
+
+            LineOptions lineOptions = (LineOptions) options;
+            lineOptions.getScales().setYAxes(axis);
+        }
+
+    }
+
     @Override
     public void reload() {
         RMServiceAsync rm = controller.getRMService();

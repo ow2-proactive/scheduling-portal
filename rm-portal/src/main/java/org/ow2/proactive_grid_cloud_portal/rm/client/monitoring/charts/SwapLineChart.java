@@ -47,9 +47,9 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
     public SwapLineChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=Swap", new String[] { "Used", "Free", "Total" }, "Swap");
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "# Mb");
-        loadOpts.setVAxisOptions(vAxis);
+
+        setYAxesTicksSuffix(" Mb");
+
         loadOpts.setLegend(LegendPosition.RIGHT);
         loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
     }

@@ -51,9 +51,8 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
               "sigar:Type=Mem",
               new String[] { "ActualUsed", "ActualFree", "Total" },
               "Memory");
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "# Mb");
-        loadOpts.setVAxisOptions(vAxis);
+
+        setYAxesTicksSuffix(" Mb");
 
         loadOpts.setLegend(LegendPosition.RIGHT);
         loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");

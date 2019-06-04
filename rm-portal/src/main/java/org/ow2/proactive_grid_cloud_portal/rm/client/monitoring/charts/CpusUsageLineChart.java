@@ -53,6 +53,8 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
         AxisOptions vAxis = AxisOptions.create();
         vAxis.set("format", "#%");
+        setYAxesTicksSuffix("%");
+
         loadOpts.setVAxisOptions(vAxis);
         chartContainer.setHeight("300px");
         loadChart.setHeight("300px");
