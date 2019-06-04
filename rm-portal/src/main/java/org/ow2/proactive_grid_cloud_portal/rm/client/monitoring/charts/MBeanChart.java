@@ -40,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.IsChart;
+import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
@@ -114,6 +115,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         if (!(chart instanceof PieChart)) {
             addMember(getTimeSlotSelector());
+            CartesianLinearAxis xAxis = new CartesianLinearAxis(chart);
+            xAxis.getGrideLines().setDisplay(false);
+            LineChart lineChart = (LineChart) chart;
+            lineChart.getOptions().getScales().setXAxes(xAxis);
         }
 
         chart.getOptions().getHover().setIntersect(false);
@@ -126,7 +131,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         chart.getOptions().getLegend().setDisplay(false);
 
-        CartesianLinearAxis xAxis = new CartesianLinearAxis(chart);
+
+
+
         // lets not convert this object to LAMBDA! it fails
         chart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
             @Override
