@@ -44,6 +44,7 @@ import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.callbacks.LegendLabelsCallback;
 import org.pepstock.charba.client.callbacks.TickCallback;
+import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
@@ -53,9 +54,11 @@ import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
+import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
 import org.pepstock.charba.client.items.LegendItem;
 import org.pepstock.charba.client.items.LegendLabelItem;
+import org.pepstock.charba.client.items.TooltipItem;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -152,13 +155,39 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         }
 
+        loadChart.getOptions().getHover().setIntersect(false);
+        loadChart.getOptions().getHover().setMode(InteractionMode.INDEX);
+
+        loadChart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
+        loadChart.getOptions().getTooltips().setIntersect(false);
+
+        // lets not convert this object to LAMBDA! it fails
+        loadChart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
+            @Override
+            public boolean onFilter(IsChart chart, TooltipItem item) {
+                Double pointData = chart.getData()
+                                        .getDatasets()
+                                        .get(item.getDatasetIndex())
+                                        .getData()
+                                        .get(item.getIndex());
+                return pointData != null && pointData > 0;
+            }
+        });
+
         addMember(chartContainer);
     }
 
     public void setYAxesTicksSuffix(String suffix) {
         ConfigurationOptions options = loadChart.getOptions();
         if (options instanceof LineOptions) {
-            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
+            LineOptions lineOptions = (LineOptions) options;
+            CartesianLinearAxis axis;
+            if (lineOptions.getScales().getYAxes().isEmpty()) {
+                axis = new CartesianLinearAxis(loadChart);
+            } else {
+                axis = (CartesianLinearAxis) lineOptions.getScales().getYAxes().get(0);
+
+            }
             axis.getTicks().setCallback(new TickCallback() {
                 @Override
                 public String onCallback(Axis axis, double value, int index, List<Double> values) {
@@ -166,8 +195,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 }
             });
 
-            LineOptions lineOptions = (LineOptions) options;
             lineOptions.getScales().setYAxes(axis);
+
         }
 
     }
@@ -257,6 +286,13 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         return res;
     }
 
+    private String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
+                                             "#ef2929", "#000000" };
+
+    public void setColors(String... colors) {
+        this.colors = colors;
+    }
+
     public void processHistoryResult(String result) {
 
         // removing internal escaping
@@ -284,14 +320,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         List<Dataset> datasets = new ArrayList<>();
         List<Double>[] dpss = new List[length];
 
-        String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
-                                         "#000000" };
         for (int i = 0; i < length; ++i) {
             LineDataset dataset = (LineDataset) loadChart.newDataset();
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
-            dataset.setLabel(String.valueOf(i));
+            if (attrs != null && attrs.length == length) {
+                dataset.setLabel(attrs[i]);
+            } else {
+                dataset.setLabel(String.valueOf(i));
+            }
             dataset.setPointRadius(0);
             dataset.setBorderWidth(1);
             datasets.add(dataset);

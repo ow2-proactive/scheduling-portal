@@ -52,6 +52,8 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
         loadOpts.setLegend(LegendPosition.RIGHT);
         loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
+
+        this.setColors("#fcaf3e", "#35a849", "#3a668d");
     }
 
     @Override
