@@ -64,7 +64,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
             addPointToDataset(0, value);
 
-            loadChart.update();
+            chart.update();
         }
     }
 }

@@ -90,7 +90,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                 time[i] = t;
             }
 
-            loadChart.update();
+            chart.update();
         }
     }
 
@@ -146,7 +146,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             }
         }
 
-        //        loadChart.draw(loadTable, loadOpts);
+        //        chart.draw(loadTable, loadOpts);
     }
 
 }

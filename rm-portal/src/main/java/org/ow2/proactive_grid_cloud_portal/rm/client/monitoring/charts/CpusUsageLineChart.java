@@ -52,7 +52,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
         vAxis.set("format", "#%");
         setYAxesTicksSuffix("%");
 
-        loadChart.setHeight("300px");
+        chart.setHeight("300px");
     }
 
     @Override
@@ -81,7 +81,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
                 addPointToDataset(colIndex++, value);
             }
 
-            loadChart.update();
+            chart.update();
         }
     }
 

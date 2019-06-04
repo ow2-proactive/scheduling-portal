@@ -99,7 +99,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 colIndex++;
             }
 
-            loadChart.update();
+            chart.update();
         }
     }
 
@@ -129,7 +129,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
                                          "#000000" };
         for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) loadChart.newDataset();
+            LineDataset dataset = (LineDataset) chart.newDataset();
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
@@ -178,16 +178,16 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-        loadChart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(labels.toArray(new String[0]));
 
-        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {
             datasets.get(i).setData(dpss[i]);
         }
 
-        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
 
-        loadChart.update();
+        chart.update();
 
     }
 

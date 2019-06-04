@@ -87,7 +87,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] labels;
 
-    protected AbstractChart loadChart;
+    protected AbstractChart chart;
 
     protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
@@ -119,33 +119,33 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             addMember(label);
         }
 
-        loadChart = createChart();
-        loadChart.setWidth("100%");
-        loadChart.setHeight("200px");
-        loadChart.getOptions().setMaintainAspectRatio(false);
-        if (!(loadChart instanceof PieChart)) {
-            LineChart lineChart = (LineChart) loadChart;
+        chart = createChart();
+        chart.setWidth("100%");
+        chart.setHeight("200px");
+        chart.getOptions().setMaintainAspectRatio(false);
+        if (!(chart instanceof PieChart)) {
+            LineChart lineChart = (LineChart) chart;
 
             addMember(getTimeSlotSelector());
 
-            CartesianCategoryAxis xAxis = new CartesianCategoryAxis(loadChart);
+            CartesianCategoryAxis xAxis = new CartesianCategoryAxis(chart);
             xAxis.getGrideLines().setDisplay(false);
             lineChart.getOptions().getScales().setXAxes(xAxis);
 
-            CartesianLinearAxis yAxis = new CartesianLinearAxis(loadChart);
+            CartesianLinearAxis yAxis = new CartesianLinearAxis(chart);
             yAxis.getTicks().setBeginAtZero(true);
             lineChart.getOptions().getScales().setYAxes(yAxis);
 
         }
 
-        loadChart.getOptions().getHover().setIntersect(false);
-        loadChart.getOptions().getHover().setMode(InteractionMode.INDEX);
+        chart.getOptions().getHover().setIntersect(false);
+        chart.getOptions().getHover().setMode(InteractionMode.INDEX);
 
-        loadChart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
-        loadChart.getOptions().getTooltips().setIntersect(false);
+        chart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
+        chart.getOptions().getTooltips().setIntersect(false);
 
         // lets not convert this object to LAMBDA! it fails
-        loadChart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
+        chart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
             @Override
             public boolean onFilter(IsChart chart, TooltipItem item) {
                 Double pointData = chart.getData()
@@ -157,7 +157,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         });
 
-        addMember(loadChart);
+        addMember(chart);
     }
 
     public static String removingInternalEscaping(String result) {
@@ -170,25 +170,25 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     public void addLabel(String label) {
         String[] strings;
         try {
-            strings = loadChart.getData().getLabels().getStrings(0);
+            strings = chart.getData().getLabels().getStrings(0);
         } catch (Exception e) {
             strings = new String[0];
         }
         String[] newString = new String[strings.length + 1];
         System.arraycopy(strings, 0, newString, 0, strings.length);
         newString[newString.length - 1] = label;
-        loadChart.getData().setLabels(newString);
+        chart.getData().setLabels(newString);
     }
 
     public void addPointToDataset(int index, double value) {
         Dataset dataset;
-        if (index < loadChart.getData().getDatasets().size()) {
-            dataset = loadChart.getData().getDatasets().get(index);
+        if (index < chart.getData().getDatasets().size()) {
+            dataset = chart.getData().getDatasets().get(index);
         } else {
             dataset = createDataset(index);
-            ArrayList<Dataset> newDatasets = new ArrayList<>(loadChart.getData().getDatasets());
+            ArrayList<Dataset> newDatasets = new ArrayList<>(chart.getData().getDatasets());
             newDatasets.add(dataset);
-            loadChart.getData().setDatasets(newDatasets.toArray(new Dataset[0]));
+            chart.getData().setDatasets(newDatasets.toArray(new Dataset[0]));
         }
 
         List<Double> data = new ArrayList<>(dataset.getData());
@@ -197,12 +197,12 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void setYAxesTicksSuffix(String suffix) {
-        ConfigurationOptions options = loadChart.getOptions();
+        ConfigurationOptions options = chart.getOptions();
         if (options instanceof LineOptions) {
             LineOptions lineOptions = (LineOptions) options;
             CartesianLinearAxis axis;
             if (lineOptions.getScales().getYAxes().isEmpty()) {
-                axis = new CartesianLinearAxis(loadChart);
+                axis = new CartesianLinearAxis(chart);
             } else {
                 axis = (CartesianLinearAxis) lineOptions.getScales().getYAxes().get(0);
 
@@ -323,7 +323,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     protected Dataset createDataset(int i) {
-        LineDataset dataset = (LineDataset) loadChart.newDataset();
+        LineDataset dataset = (LineDataset) chart.newDataset();
         if (i < colors.length) {
             dataset.setBorderColor(colors[i]);
         }
@@ -391,16 +391,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         }
 
-        loadChart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(labels.toArray(new String[0]));
 
-        loadChart.getOptions().getLegend().setPosition(Position.RIGHT);
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {
             datasets.get(i).setData(dpss[i]);
         }
 
-        loadChart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
 
-        loadChart.update();
+        chart.update();
     }
 
     public abstract AbstractChart createChart();

@@ -64,7 +64,7 @@ public class DiskPieChart extends MBeansChart {
         //                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
         //            }
         //
-        //            loadChart.draw(loadTable, loadOpts);
+        //            chart.draw(loadTable, loadOpts);
         //        }
     }
 

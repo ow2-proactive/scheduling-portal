@@ -34,7 +34,6 @@ import org.pepstock.charba.client.LineChart;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.visualization.client.LegendPosition;
 
 
 /**
@@ -71,7 +70,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
                 addPointToDataset(i, formatValue(value));
             }
 
-            loadChart.update();
+            chart.update();
         }
     }
 
