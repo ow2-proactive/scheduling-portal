@@ -30,10 +30,7 @@ import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -53,17 +50,17 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
             String title) {
         super(controller, jmxServerUrl, mbean, attributes, title);
 
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.addColumn(ColumnType.STRING);
+//        loadOpts.setLegend(LegendPosition.RIGHT);
+//        loadTable.addColumn(ColumnType.STRING);
         // fake column to draw the chart properly
         // with mbeans we don't know how many columns we will have until receive first results
-        loadTable.addColumn(ColumnType.NUMBER);
+//        loadTable.addColumn(ColumnType.NUMBER);
     }
 
     public boolean initColumns() {
         if (initializing) {
             // removing fake column
-            loadTable.removeColumn(1);
+//            loadTable.removeColumn(1);
             initializing = false;
             return true;
         }
@@ -72,7 +69,7 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 

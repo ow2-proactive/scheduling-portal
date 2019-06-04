@@ -25,9 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 

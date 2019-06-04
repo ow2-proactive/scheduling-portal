@@ -42,23 +42,18 @@ import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.IsChart;
 import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
-import org.pepstock.charba.client.callbacks.LegendLabelsCallback;
 import org.pepstock.charba.client.callbacks.TickCallback;
 import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
 import org.pepstock.charba.client.configuration.CartesianLinearAxis;
 import org.pepstock.charba.client.configuration.ConfigurationOptions;
-import org.pepstock.charba.client.configuration.LegendLabels;
 import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
-import org.pepstock.charba.client.data.Labels;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
-import org.pepstock.charba.client.items.LegendItem;
-import org.pepstock.charba.client.items.LegendLabelItem;
 import org.pepstock.charba.client.items.TooltipItem;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -67,11 +62,6 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.HorizontalAxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -99,12 +89,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected AbstractChart loadChart;
 
-    protected DataTable loadTable;
-
-    protected Options loadOpts;
-
-//    protected AbsolutePanel chartContainer;
-
     protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
     protected Runnable onFinish;
@@ -115,16 +99,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.mbeanName = mbean;
         this.attrs = attrs;
 
-        loadOpts = Options.create();
-        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-        loadAxis.setMaxAlternation(1);
-        loadAxis.setSlantedText(false);
-        loadOpts.setLegend(LegendPosition.NONE);
-        loadOpts.setHAxisOptions(loadAxis);
-        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-        loadAxis.setMinValue(0);
+//        loadOpts = Options.create();
+//        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
+//        loadAxis.setMaxAlternation(1);
+//        loadAxis.setSlantedText(false);
+//        loadOpts.setLegend(LegendPosition.NONE);
+//        loadOpts.setHAxisOptions(loadAxis);
+//        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
+//        loadAxis.setMinValue(0);
 
-        loadTable = DataTable.create();
+//        loadTable = DataTable.create();
 
         setWidth100();
         setHeight100();
@@ -135,15 +119,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             addMember(label);
         }
 
-//        chartContainer = new AbsolutePanel();
-//        chartContainer.setWidth("100%");
-//        chartContainer.setHeight("200px");
-
-        loadChart = createChart(loadTable, loadOpts);
+        loadChart = createChart();
         loadChart.setWidth("100%");
         loadChart.setHeight("200px");
         loadChart.getOptions().setMaintainAspectRatio(false);
-//        chartContainer.add(loadChart);
         if (!(loadChart instanceof PieChart)) {
             LineChart lineChart = (LineChart) loadChart;
 
@@ -179,6 +158,13 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         });
 
         addMember(loadChart);
+    }
+
+    public static String removingInternalEscaping(String result) {
+        result = result.replace("\\\"", "\"");
+        result = result.replace("\"{", "{");
+        result = result.replace("}\"", "}");
+        return result;
     }
 
     public void addLabel(String label) {
@@ -360,11 +346,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void processHistoryResult(String result) {
-
-        // removing internal escaping
-        result = result.replace("\\\"", "\"");
-        result = result.replace("\"{", "{");
-        result = result.replace("}\"", "}");
+        result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
         JSONObject json = resultVal.isObject();
@@ -373,7 +355,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
+//        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         long size = getJsonInternalSize(json);
@@ -421,14 +403,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         loadChart.update();
     }
 
-    protected void addRow() {
-        if (loadTable.getNumberOfRows() > MAX_ROWS_NUMBER) {
-            loadTable.removeRow(0);
-        }
-        loadTable.addRow();
-    }
-
-    public abstract AbstractChart createChart(DataTable data, Options opts);
+    public abstract AbstractChart createChart();
 
     public abstract void processResult(String result);
 
@@ -455,7 +430,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             @Override
             public void onChanged(ChangedEvent event) {
                 timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-                loadTable.removeRows(0, loadTable.getNumberOfRows());
+//                loadTable.removeRows(0, loadTable.getNumberOfRows());
                 reload();
             }
         });

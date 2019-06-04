@@ -25,26 +25,18 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
-import org.pepstock.charba.client.data.Dataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -65,14 +57,12 @@ public class MBeanTimeAreaChart extends MBeanChart {
         AxisOptions vAxis = AxisOptions.create();
         vAxis.setMinValue(0);
         vAxis.set("format", "#");
-        loadOpts.setVAxisOptions(vAxis);
 
-        loadTable.addColumn(ColumnType.STRING);
-        for (String attribute : attributes) {
-            loadTable.addColumn(ColumnType.NUMBER, attribute);
-        }
+//        loadTable.addColumn(ColumnType.STRING);
+//        for (String attribute : attributes) {
+//            loadTable.addColumn(ColumnType.NUMBER, attribute);
+//        }
 
-        addRow();
     }
 
     @Override
@@ -98,7 +88,7 @@ public class MBeanTimeAreaChart extends MBeanChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 }

@@ -96,11 +96,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
     //    @Override
     public void processHistoryResult1(String result) {
-
-        // removing internal escaping
-        result = result.replace("\\\"", "\"");
-        result = result.replace("\"{", "{");
-        result = result.replace("}\"", "}");
+        result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
         JSONObject json = resultVal.isObject();
@@ -109,7 +105,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
+//        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
@@ -127,8 +123,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
+//            loadTable.addRow();
+//            loadTable.setValue(i - 1, 0, timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
                 long value = (long) slice[j];
@@ -142,7 +138,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+//                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
                 }
 
                 history[j] = value;

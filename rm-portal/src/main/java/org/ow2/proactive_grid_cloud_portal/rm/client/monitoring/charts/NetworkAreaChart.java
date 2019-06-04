@@ -26,19 +26,10 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.pepstock.charba.client.LineChart;
-import org.pepstock.charba.client.callbacks.TickCallback;
-import org.pepstock.charba.client.configuration.Axis;
-import org.pepstock.charba.client.configuration.CartesianLinearAxis;
-import org.pepstock.charba.client.configuration.ConfigurationOptions;
-import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
@@ -50,8 +41,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -116,11 +105,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
     @Override
     public void processHistoryResult(String result) {
-
-        // removing internal escaping
-        result = result.replace("\\\"", "\"");
-        result = result.replace("\"{", "{");
-        result = result.replace("}\"", "}");
+        result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
         JSONObject json = resultVal.isObject();
@@ -129,7 +114,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
+//        loadTable.removeRows(0, loadTable.getNumberOfRows());
 
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
@@ -204,42 +189,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
         loadChart.update();
 
-        for (int i = 1; i < size; i++) {
-
-            double[] slice = getJsonSlice(json, i);
-
-            if (i == 1) {
-                time = new long[slice.length];
-                txBytes = new long[slice.length];
-            }
-
-            long t = now - dur + step * (i - 1);
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
-
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
-
-            for (int j = 0; j < slice.length; j++) {
-                long value = (long) slice[j];
-
-                if (i > 1) {
-                    double bytePerSec = (value - txBytes[j]) / (t - time[j]);
-                    double kbPerSec = bytePerSec / 1024;
-
-                    if (kbPerSec < 0) {
-                        // rx counter is reset
-                        kbPerSec = 0;
-                    }
-
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
-                }
-
-                txBytes[j] = value;
-                time[j] = t;
-            }
-        }
-
-        //        loadChart.draw(loadTable, loadOpts);
     }
 
     private String beautifyName(String mbeanName) {

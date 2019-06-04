@@ -34,9 +34,7 @@ import org.pepstock.charba.client.LineChart;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -49,7 +47,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
         setYAxesTicksSuffix(" Mb");
 
-        loadOpts.setLegend(LegendPosition.RIGHT);
+//        loadOpts.setLegend(LegendPosition.RIGHT);
 
         setNames("Used", "Free", "Total");
         this.setColors("#fcaf3e", "#35a849", "#3a668d");
@@ -78,7 +76,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 }

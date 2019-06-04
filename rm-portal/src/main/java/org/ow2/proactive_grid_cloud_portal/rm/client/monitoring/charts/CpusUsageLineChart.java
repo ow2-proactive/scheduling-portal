@@ -37,10 +37,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
 /**
@@ -55,7 +52,6 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
         vAxis.set("format", "#%");
         setYAxesTicksSuffix("%");
 
-        loadOpts.setVAxisOptions(vAxis);
         loadChart.setHeight("300px");
     }
 
@@ -98,7 +94,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
     }
 
     @Override
-    public AbstractChart createChart(DataTable data, Options opts) {
+    public AbstractChart createChart() {
         return new LineChart();
     }
 }
