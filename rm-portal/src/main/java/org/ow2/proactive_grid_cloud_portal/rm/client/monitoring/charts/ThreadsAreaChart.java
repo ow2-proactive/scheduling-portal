@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.enums.Position;
 
 
 /**
@@ -36,5 +37,6 @@ public class ThreadsAreaChart extends MBeanTimeAreaChart {
     public ThreadsAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "java.lang:type=Threading", "ThreadCount", "Threads");
         setNames("ThreadCount");
+        chart.getOptions().getLegend().setDisplay(false);
     }
 }

@@ -143,6 +143,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         chart.getOptions().getTooltips().setMode(InteractionMode.INDEX);
         chart.getOptions().getTooltips().setIntersect(false);
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
 
         // lets not convert this object to LAMBDA! it fails
         chart.getOptions().getTooltips().setFilterCallback(new TooltipFilterCallback() {
@@ -338,7 +339,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         dataset.setBorderWidth(2);
         if (areaChart) {
             dataset.setFill(Fill.START);
-            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.3));
         } else {
             dataset.setFill(Fill.FALSE);
         }
@@ -438,6 +439,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         form.setItems(selectedRange);
         form.setHeight(24);
         form.setWidth(40);
+        form.setPadding(10);
 
         return form;
     }
