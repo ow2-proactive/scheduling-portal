@@ -55,11 +55,7 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
 
         setColors("#fcaf3e", "#35a849", "#3a668d");
         loadOpts.setLegend(LegendPosition.RIGHT);
-        //        loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
         setNames("Used", "Free", "Total");
-        //        loadTable.setColumnLabel(1, "Used");
-        //        loadTable.setColumnLabel(2, "Free");
-        //        loadTable.setColumnLabel(3, "Total");
     }
 
     @Override

@@ -103,7 +103,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected Options loadOpts;
 
-    protected AbsolutePanel chartContainer;
+//    protected AbsolutePanel chartContainer;
 
     protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
@@ -135,14 +135,15 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             addMember(label);
         }
 
-        chartContainer = new AbsolutePanel();
-        chartContainer.setWidth("100%");
-        chartContainer.setHeight("200px");
+//        chartContainer = new AbsolutePanel();
+//        chartContainer.setWidth("100%");
+//        chartContainer.setHeight("200px");
 
         loadChart = createChart(loadTable, loadOpts);
         loadChart.setWidth("100%");
         loadChart.setHeight("200px");
-        chartContainer.add(loadChart);
+        loadChart.getOptions().setMaintainAspectRatio(false);
+//        chartContainer.add(loadChart);
         if (!(loadChart instanceof PieChart)) {
             LineChart lineChart = (LineChart) loadChart;
 
@@ -177,7 +178,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             }
         });
 
-        addMember(chartContainer);
+        addMember(loadChart);
     }
 
     public void addLabel(String label) {
@@ -188,6 +189,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             strings = new String[0];
         }
         String[] newString = new String[strings.length + 1];
+        System.arraycopy(strings, 0, newString, 0, strings.length);
         newString[newString.length - 1] = label;
         loadChart.getData().setLabels(newString);
     }
@@ -347,7 +349,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         }
 
         dataset.setPointRadius(0);
-        dataset.setBorderWidth(1);
+        dataset.setBorderWidth(2);
         if (areaChart) {
             dataset.setFill(Fill.START);
             dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
