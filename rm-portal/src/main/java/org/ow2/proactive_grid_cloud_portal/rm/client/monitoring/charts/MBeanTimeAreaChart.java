@@ -52,16 +52,6 @@ public class MBeanTimeAreaChart extends MBeanChart {
     public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes,
             String title) {
         super(controller, jmxServerUrl, mbean, attributes, title);
-
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.setMinValue(0);
-        vAxis.set("format", "#");
-
-//        loadTable.addColumn(ColumnType.STRING);
-//        for (String attribute : attributes) {
-//            loadTable.addColumn(ColumnType.NUMBER, attribute);
-//        }
-
     }
 
     @Override

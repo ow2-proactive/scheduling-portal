@@ -114,8 +114,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             return;
         }
 
-//        loadTable.removeRows(0, loadTable.getNumberOfRows());
-
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);

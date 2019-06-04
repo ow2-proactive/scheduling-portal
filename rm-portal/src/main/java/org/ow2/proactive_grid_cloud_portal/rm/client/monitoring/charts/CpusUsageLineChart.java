@@ -48,12 +48,10 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
     public CpusUsageLineChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=CpuCoreUsage,Name=*", "Combined", "Load History");
 
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#%");
         setYAxesTicksSuffix("%");
 
         setAreaChart(false);
-        chart.setHeight("300px");
+        chartContainer.setHeight("300px");
     }
 
     @Override

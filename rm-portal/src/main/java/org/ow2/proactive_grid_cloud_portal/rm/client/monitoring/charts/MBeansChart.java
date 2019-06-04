@@ -71,7 +71,7 @@ public abstract class MBeansChart extends MBeanChart {
                                                   (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
-                    //                                    processResult(result);
+                    processResult(result);
                 } else {
                     processHistoryResult(result);
                 }
