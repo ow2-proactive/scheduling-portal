@@ -734,7 +734,7 @@ public interface RestClient {
 
     @DELETE
     @Path("/credentials/{key}")
-    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") String key);
+    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key);
 
     @GET
     @Path("/credentials/")
