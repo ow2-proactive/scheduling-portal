@@ -46,6 +46,7 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
             String title) {
         this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
+        setAreaChart(true);
     }
 
     public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes,

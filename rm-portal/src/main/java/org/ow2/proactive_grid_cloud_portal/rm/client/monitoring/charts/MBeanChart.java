@@ -52,6 +52,7 @@ import org.pepstock.charba.client.configuration.ConfigurationOptions;
 import org.pepstock.charba.client.configuration.LegendLabels;
 import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.Labels;
 import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.InteractionMode;
@@ -179,6 +180,34 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         addMember(chartContainer);
     }
 
+    public void addLabel(String label) {
+        String[] strings;
+        try {
+            strings = loadChart.getData().getLabels().getStrings(0);
+        } catch (Exception e) {
+            strings = new String[0];
+        }
+        String[] newString = new String[strings.length + 1];
+        newString[newString.length - 1] = label;
+        loadChart.getData().setLabels(newString);
+    }
+
+    public void addPointToDataset(int index, double value) {
+        Dataset dataset;
+        if (index < loadChart.getData().getDatasets().size()) {
+            dataset = loadChart.getData().getDatasets().get(index);
+        } else {
+            dataset = createDataset(index);
+            ArrayList<Dataset> newDatasets = new ArrayList<>(loadChart.getData().getDatasets());
+            newDatasets.add(dataset);
+            loadChart.getData().setDatasets(newDatasets.toArray(new Dataset[0]));
+        }
+
+        List<Double> data = new ArrayList<>(dataset.getData());
+        data.add(formatValue(value));
+        dataset.setData(data);
+    }
+
     public void setYAxesTicksSuffix(String suffix) {
         ConfigurationOptions options = loadChart.getOptions();
         if (options instanceof LineOptions) {
@@ -224,7 +253,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                                                   (System.currentTimeMillis() - t) + "ms");
 
                 if (realTime) {
-                    //                    processResult(result);
+                    processResult(result);
                 } else {
                     processHistoryResult(result);
                 }
@@ -295,8 +324,37 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.colors = colors;
     }
 
-    public void setLabels(String... labels) {
+    public void setNames(String... labels) {
         this.labels = labels;
+    }
+
+    private boolean areaChart = false;
+
+    public void setAreaChart(boolean areaChart) {
+        this.areaChart = areaChart;
+    }
+
+    protected Dataset createDataset(int i) {
+        LineDataset dataset = (LineDataset) loadChart.newDataset();
+        if (i < colors.length) {
+            dataset.setBorderColor(colors[i]);
+        }
+
+        if (labels != null && i < labels.length) {
+            dataset.setLabel(labels[i]);
+        } else {
+            dataset.setLabel(String.valueOf(i));
+        }
+
+        dataset.setPointRadius(0);
+        dataset.setBorderWidth(1);
+        if (areaChart) {
+            dataset.setFill(Fill.START);
+            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
+        } else {
+            dataset.setFill(Fill.FALSE);
+        }
+        return dataset;
     }
 
     public void processHistoryResult(String result) {
@@ -327,24 +385,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         List<Double>[] dpss = new List[length];
 
         for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) loadChart.newDataset();
-            if (i < colors.length) {
-                dataset.setBorderColor(colors[i]);
-            }
-            if (labels != null && labels.length == length) {
-                dataset.setLabel(labels[i]);
-            } else {
-                dataset.setLabel(String.valueOf(i));
-            }
-            dataset.setPointRadius(0);
-            dataset.setBorderWidth(1);
+            Dataset dataset = createDataset(i);
+
             datasets.add(dataset);
-            if (length == 1) {
-                dataset.setFill(Fill.START);
-                dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.2));
-            } else {
-                dataset.setFill(Fill.FALSE);
-            }
 
             dpss[i] = new ArrayList<>();
         }

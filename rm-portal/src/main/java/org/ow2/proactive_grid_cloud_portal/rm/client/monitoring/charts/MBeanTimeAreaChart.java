@@ -25,11 +25,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
+import org.pepstock.charba.client.data.Dataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -50,6 +55,7 @@ public class MBeanTimeAreaChart extends MBeanChart {
     public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
             String title) {
         this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
+        setAreaChart(true);
     }
 
     public MBeanTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes,
@@ -71,24 +77,24 @@ public class MBeanTimeAreaChart extends MBeanChart {
 
     @Override
     public void processResult(String result) {
-        //        JSONValue json = controller.parseJSON(result);
-        //        JSONArray array = json.isArray();
-        //
-        //        if (array != null) {
-        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-        //                                             .format(new Date(System.currentTimeMillis()));
-        //            addRow();
-        //
-        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-        //
-        //             getting primitive values of all attributes
-        //            for (int i = 0; i < attrs.length; i++) {
-        //                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, value);
-        //            }
-        //
-        //            loadChart.draw(loadTable, loadOpts);
-        //        }
+        JSONValue json = controller.parseJSON(result);
+        JSONArray array = json.isArray();
+
+        if (array != null) {
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                             .format(new Date(System.currentTimeMillis()));
+
+            addLabel(timeStamp);
+
+            for (int i = 0; i < attrs.length; i++) {
+                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+
+                addPointToDataset(i, value);
+            }
+
+            loadChart.update();
+        }
+
     }
 
     @Override

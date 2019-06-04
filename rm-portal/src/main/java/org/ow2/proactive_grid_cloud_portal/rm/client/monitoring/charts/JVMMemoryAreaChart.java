@@ -25,20 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.pepstock.charba.client.callbacks.TickCallback;
-import org.pepstock.charba.client.configuration.Axis;
-import org.pepstock.charba.client.configuration.CartesianLinearAxis;
-import org.pepstock.charba.client.configuration.ConfigurationOptions;
-import org.pepstock.charba.client.configuration.LineOptions;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -50,7 +45,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
 
         setYAxesTicksSuffix(" Mb");
-        setLabels("HeapMemoryUsage");
+        setNames("HeapMemoryUsage");
 
     }
 
@@ -61,16 +56,17 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        //        JSONArray array = controller.parseJSON(result).isArray();
-        //        if (array != null) {
-        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-        //                                             .format(new Date(System.currentTimeMillis()));
-        //            double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
-        //
-        //            addRow();
-        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
-        //            loadChart.draw(loadTable, loadOpts);
-        //        }
+        JSONArray array = controller.parseJSON(result).isArray();
+        if (array != null) {
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                             .format(new Date(System.currentTimeMillis()));
+            double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
+
+            addLabel(timeStamp);
+
+            addPointToDataset(0, value);
+
+            loadChart.update();
+        }
     }
 }

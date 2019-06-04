@@ -34,7 +34,6 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
@@ -59,41 +58,40 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
         setYAxesTicksSuffix(" Kb/s");
 
-        setLabels("RX", "TX");
-//        loadOpts.setVAxisOptions(vAxis);
-//        loadOpts.setLegend(LegendPosition.RIGHT);
-//        loadTable.setColumnLabel(1, "RX");
-//        loadTable.setColumnLabel(2, "TX");
+        setNames("RX", "TX");
+        //        loadOpts.setVAxisOptions(vAxis);
+        //        loadOpts.setLegend(LegendPosition.RIGHT);
+        //        loadTable.setColumnLabel(1, "RX");
+        //        loadTable.setColumnLabel(2, "TX");
     }
 
     @Override
     public void processResult(String result) {
-        //        JSONArray array = controller.parseJSON(result).isArray();
-        //        if (array != null) {
-        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-        //                                             .format(new Date(System.currentTimeMillis()));
-        //            addRow();
-        //
-        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-        //
-        //             getting primitive values of all attributes
-        //            for (int i = 0; i < attrs.length; i++) {
-        //                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-        //                long t = System.currentTimeMillis();
-        //                if (history[i] > 0) {
-        //                    double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-        //                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-        //                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) mbPerSec);
-        //                } else {
-        //                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, 0);
-        //                }
-        //
-        //                history[i] = (long) value;
-        //                time[i] = t;
-        //            }
-        //
-        //            loadChart.draw(loadTable, loadOpts);
-        //        }
+        JSONArray array = controller.parseJSON(result).isArray();
+        if (array != null) {
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                             .format(new Date(System.currentTimeMillis()));
+
+            addLabel(timeStamp);
+
+            for (int i = 0; i < attrs.length; i++) {
+                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+                long t = System.currentTimeMillis();
+                if (history[i] > 0) {
+                    double bytePerMilliSec = (value - history[i]) / (t - time[i]);
+                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
+
+                    addPointToDataset(i, (long) mbPerSec);
+                } else {
+                    addPointToDataset(i, 0);
+                }
+
+                history[i] = (long) value;
+                time[i] = t;
+            }
+
+            loadChart.update();
+        }
     }
 
     //    @Override

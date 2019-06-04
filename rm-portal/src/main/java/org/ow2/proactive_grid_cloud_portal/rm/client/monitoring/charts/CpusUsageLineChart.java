@@ -62,33 +62,32 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        //        JSONObject object = controller.parseJSON(result).isObject();
-        //        if (object != null) {
-        //
-        //            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-        //                                             .format(new Date(System.currentTimeMillis()));
-        //
-        //            addRow();
-        //            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-        //
-        //            boolean initColumns = super.initColumns();
-        //            int colIndex = 1;
-        //            for (String key : object.keySet()) {
-        //
-        //                if (initColumns) {
-        //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-        //                }
-        //
-        //                double value = 0;
-        //                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
-        //                if (jsonVal != null && jsonVal.isNumber() != null) {
-        //                    value = jsonVal.isNumber().doubleValue();
-        //                }
-        //                loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex++, value);
-        //            }
-        //
-        //            loadChart.draw(loadTable, loadOpts);
-        //        }
+        JSONObject object = controller.parseJSON(result).isObject();
+        if (object != null) {
+
+            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                             .format(new Date(System.currentTimeMillis()));
+
+            addLabel(timeStamp);
+
+            //            boolean initColumns = super.initColumns();
+            int colIndex = 1;
+            for (String key : object.keySet()) {
+
+                //                if (initColumns) {
+                //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+                //                }
+
+                double value = 0;
+                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
+                if (jsonVal != null && jsonVal.isNumber() != null) {
+                    value = jsonVal.isNumber().doubleValue();
+                }
+                addPointToDataset(colIndex++, value);
+            }
+
+            loadChart.update();
+        }
     }
 
     private String beautifyName(String mbeanName) {

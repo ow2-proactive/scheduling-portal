@@ -36,7 +36,6 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 
 
@@ -52,7 +51,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
         loadOpts.setLegend(LegendPosition.RIGHT);
 
-        setLabels("Used", "Free", "Total");
+        setNames("Used", "Free", "Total");
         this.setColors("#fcaf3e", "#35a849", "#3a668d");
     }
 
@@ -67,17 +66,14 @@ public class SwapLineChart extends MBeanTimeAreaChart {
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
-            addRow();
+            addLabel(timeStamp);
 
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-
-            // getting primitive values of all attributes
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, formatValue(value));
+                addPointToDataset(i, formatValue(value));
             }
 
-            //            loadChart.draw(loadTable, loadOpts);
+            loadChart.update();
         }
     }
 
