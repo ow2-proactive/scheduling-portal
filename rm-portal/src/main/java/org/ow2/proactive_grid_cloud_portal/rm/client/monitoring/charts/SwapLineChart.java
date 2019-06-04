@@ -51,8 +51,8 @@ public class SwapLineChart extends MBeanTimeAreaChart {
         setYAxesTicksSuffix(" Mb");
 
         loadOpts.setLegend(LegendPosition.RIGHT);
-        loadOpts.setColors("#fcaf3e", "#35a849", "#3a668d");
 
+        setLabels("Used", "Free", "Total");
         this.setColors("#fcaf3e", "#35a849", "#3a668d");
     }
 

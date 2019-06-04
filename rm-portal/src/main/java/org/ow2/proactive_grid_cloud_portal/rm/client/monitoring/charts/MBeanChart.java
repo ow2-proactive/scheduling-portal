@@ -94,6 +94,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] attrs;
 
+    protected String[] labels;
+
     protected AbstractChart loadChart;
 
     protected DataTable loadTable;
@@ -293,6 +295,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.colors = colors;
     }
 
+    public void setLabels(String... labels) {
+        this.labels = labels;
+    }
+
     public void processHistoryResult(String result) {
 
         // removing internal escaping
@@ -325,8 +331,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             if (i < colors.length) {
                 dataset.setBorderColor(colors[i]);
             }
-            if (attrs != null && attrs.length == length) {
-                dataset.setLabel(attrs[i]);
+            if (labels != null && labels.length == length) {
+                dataset.setLabel(labels[i]);
             } else {
                 dataset.setLabel(String.valueOf(i));
             }

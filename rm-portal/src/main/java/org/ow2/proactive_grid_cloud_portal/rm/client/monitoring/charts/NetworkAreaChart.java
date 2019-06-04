@@ -67,19 +67,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public NetworkAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
-        ConfigurationOptions options = loadChart.getOptions();
-        if (options instanceof LineOptions) {
-            CartesianLinearAxis axis = new CartesianLinearAxis(loadChart);
-            axis.getTicks().setCallback(new TickCallback() {
-                @Override
-                public String onCallback(Axis axis, double value, int index, List<Double> values) {
-                    return value + " Kb/s";
-                }
-            });
-
-            LineOptions lineOptions = (LineOptions) options;
-            lineOptions.getScales().setYAxes(axis);
-        }
+        setYAxesTicksSuffix(" Kb/s");
     }
 
     @Override

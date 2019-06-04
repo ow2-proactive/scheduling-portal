@@ -50,6 +50,8 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
 
         setYAxesTicksSuffix(" Mb");
+        setLabels("HeapMemoryUsage");
+
     }
 
     @Override
