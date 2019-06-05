@@ -34,15 +34,12 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.pepstock.charba.client.PieChart;
+import org.pepstock.charba.client.data.PieDataset;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
@@ -90,16 +87,16 @@ public class FileSystemView extends VLayout {
 
                                      //{"sigar:Name=/boot,Type=FileSystem":[{"name":"DevName","value":"/dev/sda1"},{"name":"DirName","value":"/boot"},{"name":"Files","value":76912},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":236558},{"name":"Used","value":60927},{"name":"Total","value":297485}],"sigar:Name=/,Type=FileSystem":[{"name":"DevName","value":"/dev/sda2"},{"name":"DirName","value":"/"},{"name":"Files","value":1921360},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":15705152},{"name":"Used","value":14532496},{"name":"Total","value":30237648}],"sigar:Name=/local,Type=FileSystem":[{"name":"DevName","value":"/dev/sda5"},{"name":"DirName","value":"/local"},{"name":"Files","value":58851328},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":916766088},{"name":"Used","value":9996480},{"name":"Total","value":926762568}]}
 
-                                     Options opts = Options.create();
-                                     opts.setLegend(LegendPosition.NONE);
-                                     opts.setColors("#fcaf3e",
-                                                    "#3a668d",
-                                                    "#35a849",
-                                                    "#fcaf3e",
-                                                    "#24c1ff",
-                                                    "#1e4ed7",
-                                                    "#ef2929",
-                                                    "#000000");
+                                     //                                     Options opts = Options.create();
+                                     //                                     opts.setLegend(LegendPosition.NONE);
+                                     //                                     opts.setColors("#fcaf3e",
+                                     //                                                    "#3a668d",
+                                     //                                                    "#35a849",
+                                     //                                                    "#fcaf3e",
+                                     //                                                    "#24c1ff",
+                                     //                                                    "#1e4ed7",
+                                     //                                                    "#ef2929",
+                                     //                                                    "#000000");
 
                                      JSONObject object = controller.parseJSON(result).isObject();
                                      if (object != null) {
@@ -108,9 +105,9 @@ public class FileSystemView extends VLayout {
 
                                              HLayout diskLayout = new HLayout();
 
-                                             DataTable pieData = DataTable.create();
-                                             pieData.addColumn(ColumnType.STRING, "Type");
-                                             pieData.addColumn(ColumnType.NUMBER, "Bytes");
+                                             //                                             DataTable pieData = DataTable.create();
+                                             //                                             pieData.addColumn(ColumnType.STRING, "Type");
+                                             //                                             pieData.addColumn(ColumnType.NUMBER, "Bytes");
 
                                              DetailViewer details = new DetailViewer();
                                              DetailViewerRecord dv = new DetailViewerRecord();
@@ -119,9 +116,14 @@ public class FileSystemView extends VLayout {
                                                  fields[i] = new DetailViewerField(attrs.get(i));
                                              }
                                              details.setFields(fields);
+                                             details.setData(new DetailViewerRecord[] { dv });
+                                             details.setWidth("50%");
 
+                                             PieChart pie = new PieChart();
+                                             PieDataset dataset = pie.newDataset();
+                                             List<String> labels = new ArrayList<>();
+                                             List<Double> values = new ArrayList<>();
                                              JSONArray properties = object.get(disk).isArray();
-
                                              for (int i = 0; i < properties.size(); i++) {
                                                  String name = properties.get(i)
                                                                          .isObject()
@@ -130,15 +132,15 @@ public class FileSystemView extends VLayout {
                                                                          .stringValue();
                                                  String value = properties.get(i).isObject().get("value").toString();
                                                  if (name.equals("Free") || name.equals("Used")) {
-                                                     pieData.addRow();
-                                                     pieData.setValue(pieData.getNumberOfRows() - 1, 0, name);
-                                                     pieData.setValue(pieData.getNumberOfRows() - 1,
-                                                                      1,
-                                                                      properties.get(i)
-                                                                                .isObject()
-                                                                                .get("value")
-                                                                                .isNumber()
-                                                                                .doubleValue());
+
+                                                     double doubleValue = properties.get(i)
+                                                                                    .isObject()
+                                                                                    .get("value")
+                                                                                    .isNumber()
+                                                                                    .doubleValue();
+
+                                                     labels.add(name);
+                                                     values.add(doubleValue);
                                                  }
 
                                                  if (name.equals("Free") || name.equals("Used") ||
@@ -152,12 +154,15 @@ public class FileSystemView extends VLayout {
                                                  }
                                                  dv.setAttribute(name, value);
                                              }
-                                             details.setData(new DetailViewerRecord[] { dv });
-                                             details.setWidth("50%");
 
-                                             PieChart pie = new PieChart(pieData, opts);
+                                             pie.getData().setLabels(labels.toArray(new String[0]));
+
+                                             dataset.setData(values);
+                                             pie.getData().setDatasets(dataset);
+
                                              pie.setWidth("50%");
-                                             pie.draw(pieData, opts);
+                                             pie.update();
+
                                              diskLayout.addMember(details);
                                              diskLayout.addMember(pie);
                                              addMember(diskLayout);
