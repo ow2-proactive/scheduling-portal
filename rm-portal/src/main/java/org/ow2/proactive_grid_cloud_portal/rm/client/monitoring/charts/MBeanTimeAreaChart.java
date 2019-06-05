@@ -35,7 +35,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**

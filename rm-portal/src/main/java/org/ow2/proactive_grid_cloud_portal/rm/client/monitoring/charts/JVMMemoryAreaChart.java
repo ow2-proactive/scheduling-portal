@@ -46,7 +46,6 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         setNames("HeapMemoryUsage");
         chart.getOptions().getLegend().setDisplay(false);
 
-
     }
 
     @Override

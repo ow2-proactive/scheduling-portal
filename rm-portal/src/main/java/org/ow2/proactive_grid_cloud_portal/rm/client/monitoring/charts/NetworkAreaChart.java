@@ -81,9 +81,9 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             int colIndex = 1;
             for (String key : object.keySet()) {
 
-//                if (initColumns) {
-//                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-//                }
+                //                if (initColumns) {
+                //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+                //                }
 
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();

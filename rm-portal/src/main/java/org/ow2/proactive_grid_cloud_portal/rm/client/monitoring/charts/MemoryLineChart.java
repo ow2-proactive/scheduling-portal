@@ -51,7 +51,7 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
         setYAxesTicksSuffix(" Mb");
 
         setColors("#fcaf3e", "#35a849", "#3a668d");
-//        loadOpts.setLegend(LegendPosition.RIGHT);
+        //        loadOpts.setLegend(LegendPosition.RIGHT);
         setNames("Used", "Free", "Total");
     }
 

@@ -30,15 +30,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-import org.pepstock.charba.client.data.Dataset;
-import org.pepstock.charba.client.data.LineDataset;
 
 
 /**
@@ -118,7 +117,6 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         }
         List<String> labels = new ArrayList<>(size);
 
-
         for (int i = 1; i < size; i++) {
 
             double[] slice = getJsonSlice(json, i);
@@ -131,8 +129,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-//            loadTable.addRow();
-//            loadTable.setValue(i - 1, 0, timeStamp);
+            //            loadTable.addRow();
+            //            loadTable.setValue(i - 1, 0, timeStamp);
             labels.add(timeStamp);
 
             for (int j = 0; j < slice.length; j++) {

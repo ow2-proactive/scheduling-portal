@@ -31,8 +31,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -53,17 +51,20 @@ import org.pepstock.charba.client.configuration.ConfigurationOptions;
 import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.data.PieDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
 import org.pepstock.charba.client.items.TooltipItem;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -97,6 +98,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected AbsolutePanel chartContainer;
 
+    protected boolean areaChart = false;
+
+    protected String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
+                                               "#ef2929", "#000000" };
 
     public MBeanChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
         this.controller = controller;
@@ -104,16 +109,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.mbeanName = mbean;
         this.attrs = attrs;
 
-//        loadOpts = Options.create();
-//        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-//        loadAxis.setMaxAlternation(1);
-//        loadAxis.setSlantedText(false);
-//        loadOpts.setLegend(LegendPosition.NONE);
-//        loadOpts.setHAxisOptions(loadAxis);
-//        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-//        loadAxis.setMinValue(0);
+        //        loadOpts = Options.create();
+        //        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
+        //        loadAxis.setMaxAlternation(1);
+        //        loadAxis.setSlantedText(false);
+        //        loadOpts.setLegend(LegendPosition.NONE);
+        //        loadOpts.setHAxisOptions(loadAxis);
+        //        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
+        //        loadAxis.setMinValue(0);
 
-//        loadTable = DataTable.create();
+        //        loadTable = DataTable.create();
 
         setWidth100();
         setHeight100();
@@ -318,44 +323,32 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         return res;
     }
 
-    private String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
-                                             "#ef2929", "#000000" };
-
-    public void setColors(String... colors) {
-        this.colors = colors;
-    }
-
-    public void setNames(String... labels) {
-        this.labels = labels;
-    }
-
-    private boolean areaChart = false;
-
-    public void setAreaChart(boolean areaChart) {
-        this.areaChart = areaChart;
-    }
-
     protected Dataset createDataset(int i) {
-        LineDataset dataset = (LineDataset) chart.newDataset();
-        if (i < colors.length) {
-            dataset.setBorderColor(colors[i]);
-        }
+        if (chart instanceof LineChart) {
+            LineDataset dataset = (LineDataset) chart.newDataset();
+            if (i < colors.length) {
+                dataset.setBorderColor(colors[i]);
+            }
 
-        if (labels != null && i < labels.length) {
-            dataset.setLabel(labels[i]);
-        } else {
-            dataset.setLabel(String.valueOf(i));
-        }
+            if (labels != null && i < labels.length) {
+                dataset.setLabel(labels[i]);
+            } else {
+                dataset.setLabel(String.valueOf(i));
+            }
 
-        dataset.setPointRadius(0);
-        dataset.setBorderWidth(2);
-        if (areaChart) {
-            dataset.setFill(Fill.START);
-            dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.3));
+            dataset.setPointRadius(0);
+            dataset.setBorderWidth(2);
+            if (areaChart) {
+                dataset.setFill(Fill.START);
+                dataset.setBackgroundColor(dataset.getBorderColor().alpha(0.3));
+            } else {
+                dataset.setFill(Fill.FALSE);
+            }
+            return dataset;
         } else {
-            dataset.setFill(Fill.FALSE);
+            LogModel.getInstance().logCriticalMessage("Chart has wrong type: " + chart.getClass().getName());
+            return null;
         }
-        return dataset;
     }
 
     public void processHistoryResult(String result) {
@@ -368,7 +361,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             return;
         }
 
-//        loadTable.removeRows(0, loadTable.getNumberOfRows());
+        //        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         long size = getJsonInternalSize(json);
@@ -443,7 +436,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             @Override
             public void onChanged(ChangedEvent event) {
                 timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-//                loadTable.removeRows(0, loadTable.getNumberOfRows());
+                //                                loadTable.removeRows(0, loadTable.getNumberOfRows());
+                chart.getData().setDatasets();
                 reload();
             }
         });
@@ -454,5 +448,21 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         form.setPadding(10);
 
         return form;
+    }
+
+    public void setColors(String... colors) {
+        this.colors = colors;
+    }
+
+    public String[] getColors() {
+        return colors;
+    }
+
+    public void setNames(String... labels) {
+        this.labels = labels;
+    }
+
+    public void setAreaChart(boolean areaChart) {
+        this.areaChart = areaChart;
     }
 }
