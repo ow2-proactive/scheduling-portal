@@ -87,17 +87,6 @@ public class FileSystemView extends VLayout {
 
                                      //{"sigar:Name=/boot,Type=FileSystem":[{"name":"DevName","value":"/dev/sda1"},{"name":"DirName","value":"/boot"},{"name":"Files","value":76912},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":236558},{"name":"Used","value":60927},{"name":"Total","value":297485}],"sigar:Name=/,Type=FileSystem":[{"name":"DevName","value":"/dev/sda2"},{"name":"DirName","value":"/"},{"name":"Files","value":1921360},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":15705152},{"name":"Used","value":14532496},{"name":"Total","value":30237648}],"sigar:Name=/local,Type=FileSystem":[{"name":"DevName","value":"/dev/sda5"},{"name":"DirName","value":"/local"},{"name":"Files","value":58851328},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":916766088},{"name":"Used","value":9996480},{"name":"Total","value":926762568}]}
 
-                                     //                                     Options opts = Options.create();
-                                     //                                     opts.setLegend(LegendPosition.NONE);
-                                     //                                     opts.setColors("#fcaf3e",
-                                     //                                                    "#3a668d",
-                                     //                                                    "#35a849",
-                                     //                                                    "#fcaf3e",
-                                     //                                                    "#24c1ff",
-                                     //                                                    "#1e4ed7",
-                                     //                                                    "#ef2929",
-                                     //                                                    "#000000");
-
                                      JSONObject object = controller.parseJSON(result).isObject();
                                      if (object != null) {
 
@@ -121,6 +110,8 @@ public class FileSystemView extends VLayout {
 
                                              PieChart pie = new PieChart();
                                              PieDataset dataset = pie.newDataset();
+                                             dataset.setBackgroundColor(new String[]{"#fcaf3e", "#3a668d", "#35a849", "#fcaf3e",
+                                                     "#24c1ff", "#1e4ed7", "#ef2929", "#000000"});
                                              List<String> labels = new ArrayList<>();
                                              List<Double> values = new ArrayList<>();
                                              JSONArray properties = object.get(disk).isArray();
@@ -161,6 +152,7 @@ public class FileSystemView extends VLayout {
                                              pie.getData().setDatasets(dataset);
 
                                              pie.setWidth("50%");
+                                             pie.getOptions().getLegend().setDisplay(false);
                                              pie.update();
 
                                              diskLayout.addMember(details);
