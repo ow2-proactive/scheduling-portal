@@ -54,7 +54,6 @@ public class DiskPieChart extends MBeansChart {
         setYAxesTicksSuffix(" Mb");
     }
 
-
     @Override
     public void processResult(String result) {
         //        LogModel.getInstance().logCriticalMessage("PieChart processResult");

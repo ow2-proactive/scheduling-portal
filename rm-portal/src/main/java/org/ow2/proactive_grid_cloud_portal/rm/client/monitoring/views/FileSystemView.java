@@ -110,8 +110,9 @@ public class FileSystemView extends VLayout {
 
                                              PieChart pie = new PieChart();
                                              PieDataset dataset = pie.newDataset();
-                                             dataset.setBackgroundColor(new String[]{"#fcaf3e", "#3a668d", "#35a849", "#fcaf3e",
-                                                     "#24c1ff", "#1e4ed7", "#ef2929", "#000000"});
+                                             dataset.setBackgroundColor(new String[] { "#fcaf3e", "#3a668d", "#35a849",
+                                                                                       "#fcaf3e", "#24c1ff", "#1e4ed7",
+                                                                                       "#ef2929", "#000000" });
                                              List<String> labels = new ArrayList<>();
                                              List<Double> values = new ArrayList<>();
                                              JSONArray properties = object.get(disk).isArray();

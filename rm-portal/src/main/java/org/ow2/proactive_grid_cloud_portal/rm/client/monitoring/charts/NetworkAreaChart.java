@@ -177,8 +177,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-
-
         chart.getData().setLabels(labels.toArray(new String[0]));
 
         chart.getOptions().getLegend().setPosition(Position.RIGHT);
