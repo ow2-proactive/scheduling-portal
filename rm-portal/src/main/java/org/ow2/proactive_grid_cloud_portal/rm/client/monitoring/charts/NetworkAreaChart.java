@@ -78,12 +78,15 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 txBytes = new long[object.size()];
             }
 
+            List<String> names = new ArrayList<>();
+
             int colIndex = 1;
             for (String key : object.keySet()) {
 
                 //                if (initColumns) {
                 //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
                 //                }
+                names.add(beautifyName(key));
 
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();
@@ -98,6 +101,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
                 colIndex++;
             }
+
+            setNames(names.toArray(new String[0]));
 
             chart.update();
         }
@@ -134,6 +139,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             dpss[i] = new ArrayList<>();
         }
         List<String> labels = new ArrayList<>();
+        List<String> names = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
 
@@ -170,6 +176,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 time[sliceIndex] = t;
             }
         }
+
+
 
         chart.getData().setLabels(labels.toArray(new String[0]));
 
