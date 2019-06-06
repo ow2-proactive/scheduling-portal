@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
@@ -75,17 +76,16 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             if (initColumns) {
                 time = new long[object.size()];
                 txBytes = new long[object.size()];
+                String[] datasourceNames = object.keySet().stream()
+                        .map(this::beautifyName)
+                        .toArray(String[]::new);
+
+                setDatasourceNames(datasourceNames);
             }
 
-            List<String> names = new ArrayList<>();
 
             int colIndex = 1;
-            for (String key : object.keySet()) {
-
-                //                if (initColumns) {
-                //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-                //                }
-                names.add(beautifyName(key));
+            for (String key : object.keySet().stream().sorted().collect(Collectors.toList())) {
 
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();
@@ -100,8 +100,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
                 colIndex++;
             }
-
-            setDatasourceNames(names.toArray(new String[0]));
 
             chart.update();
         }

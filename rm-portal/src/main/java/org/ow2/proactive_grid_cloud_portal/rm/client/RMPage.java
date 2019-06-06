@@ -448,6 +448,10 @@ public class RMPage implements LogListener {
 
         hl.addMember(leftTabs);
 
+        Tab threadDumpTab = new Tab("Thread Dump");
+        threadDumpTab.setPane(threadDumpCanvas);
+        leftTabs.addTab(threadDumpTab);
+
         Tab monitoringTab = new Tab("Monitoring");
         monitoringView = new MonitoringView(controller);
         Canvas monitoringCanvas = monitoringView.build();
@@ -458,10 +462,6 @@ public class RMPage implements LogListener {
         final Canvas rmStatsCanvas = rmStatsView.build();
         rmStatsCanvas.setWidth("50%");
         hl.addMember(rmStatsCanvas);
-
-        Tab threadDumpTab = new Tab("Thread Dump");
-        threadDumpTab.setPane(threadDumpCanvas);
-        leftTabs.addTab(threadDumpTab);
 
         return hl;
     }

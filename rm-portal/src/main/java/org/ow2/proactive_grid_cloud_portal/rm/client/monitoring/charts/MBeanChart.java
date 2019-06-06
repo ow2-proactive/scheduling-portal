@@ -51,7 +51,6 @@ import org.pepstock.charba.client.configuration.ConfigurationOptions;
 import org.pepstock.charba.client.configuration.LineOptions;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
-import org.pepstock.charba.client.data.PieDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
@@ -88,7 +87,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] attrs;
 
-    protected String[] datasouceNames;
+    protected String[] datasourceNames;
 
     protected AbstractChart chart;
 
@@ -130,7 +129,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         }
 
         chartContainer = new AbsolutePanel();
-        chartContainer.setWidth("100%");
+        chartContainer.setWidth("90%");
         chartContainer.setHeight("200px");
         chartContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
 
@@ -330,8 +329,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 dataset.setBorderColor(colors[i]);
             }
 
-            if (datasouceNames != null && i < datasouceNames.length) {
-                dataset.setLabel(datasouceNames[i]);
+            if (datasourceNames != null && i < datasourceNames.length) {
+                dataset.setLabel(datasourceNames[i]);
             } else {
                 dataset.setLabel(String.valueOf(i));
             }
@@ -458,7 +457,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void setDatasourceNames(String... datasouceNames) {
-        this.datasouceNames = datasouceNames;
+        this.datasourceNames = datasouceNames;
     }
 
     public void setAreaChart(boolean areaChart) {
