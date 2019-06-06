@@ -25,19 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
-
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.json.client.JSONArray;
 
 
 /**
@@ -55,31 +45,12 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
         setYAxesTicksSuffix(" Mb");
 
         setColors("#fcaf3e", "#35a849", "#3a668d");
-        //        loadOpts.setLegend(LegendPosition.RIGHT);
         setDatasourceNames("Used", "Free", "Total");
     }
 
     @Override
     public double formatValue(double value) {
         return (long) (value / (1024 * 1024));
-    }
-
-    @Override
-    public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-
-            addXLabel(timeStamp);
-
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                addPointToDataset(i, value);
-            }
-
-            chart.update();
-        }
     }
 
     @Override

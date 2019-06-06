@@ -31,10 +31,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.json.client.JSONArray;
-
 
 /**
  * Shows the swap consumption.
@@ -53,23 +49,6 @@ public class SwapLineChart extends MBeanTimeAreaChart {
     @Override
     public double formatValue(double value) {
         return (long) (value / (1024 * 1024));
-    }
-
-    @Override
-    public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-            addXLabel(timeStamp);
-
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                addPointToDataset(i, value);
-            }
-
-            chart.update();
-        }
     }
 
     @Override
