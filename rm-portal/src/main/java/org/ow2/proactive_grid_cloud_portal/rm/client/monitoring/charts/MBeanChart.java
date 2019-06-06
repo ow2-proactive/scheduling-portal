@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -108,17 +107,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.jmxServerUrl = jmxServerUrl;
         this.mbeanName = mbean;
         this.attrs = attrs;
-
-        //        loadOpts = Options.create();
-        //        HorizontalAxisOptions loadAxis = HorizontalAxisOptions.create();
-        //        loadAxis.setMaxAlternation(1);
-        //        loadAxis.setSlantedText(false);
-        //        loadOpts.setLegend(LegendPosition.NONE);
-        //        loadOpts.setHAxisOptions(loadAxis);
-        //        loadOpts.setColors("#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929", "#000000");
-        //        loadAxis.setMinValue(0);
-
-        //        loadTable = DataTable.create();
 
         setWidth100();
         setHeight100();

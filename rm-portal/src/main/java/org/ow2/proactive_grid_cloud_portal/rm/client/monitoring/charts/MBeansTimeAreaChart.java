@@ -47,11 +47,6 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
             String title) {
         super(controller, jmxServerUrl, mbean, attributes, title);
 
-        //        loadOpts.setLegend(LegendPosition.RIGHT);
-        //        loadTable.addColumn(ColumnType.STRING);
-        // fake column to draw the chart properly
-        // with mbeans we don't know how many columns we will have until receive first results
-        //        loadTable.addColumn(ColumnType.NUMBER);
     }
 
     public boolean initColumns() {

@@ -28,11 +28,9 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.PieChart;
-import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.PieDataset;
 
 import com.google.gwt.json.client.JSONObject;
@@ -47,7 +45,6 @@ public class DiskPieChart extends MBeansChart {
 
     public DiskPieChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" }, "File System, Mb");
-        //        LogModel.getInstance().logCriticalMessage("AAAAAAAAAAAAA");
         //        loadOpts.setLegend(LegendPosition.RIGHT);
         //        loadTable.addColumn(ColumnType.STRING, "Type");
         //        loadTable.addColumn(ColumnType.NUMBER, "Mb");
@@ -56,10 +53,8 @@ public class DiskPieChart extends MBeansChart {
 
     @Override
     public void processResult(String result) {
-        //        LogModel.getInstance().logCriticalMessage("PieChart processResult");
         JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
-            //            LogModel.getInstance().logCriticalMessage("PieChart processResult 1");
 
             PieDataset dataset = (PieDataset) chart.newDataset();
             dataset.setBackgroundColor(getColors());

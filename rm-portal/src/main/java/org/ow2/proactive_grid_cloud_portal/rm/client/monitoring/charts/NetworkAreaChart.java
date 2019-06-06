@@ -30,9 +30,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
@@ -138,8 +136,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
             dpss[i] = new ArrayList<>();
         }
-        List<String> labels = new ArrayList<>();
-        List<String> names = new ArrayList<>();
+        List<String> datasourceNames = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
 
@@ -154,7 +151,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
             String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
 
-            labels.add(timeStamp);
+            datasourceNames.add(timeStamp);
 
             for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
 
@@ -177,7 +174,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             }
         }
 
-        chart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(datasourceNames.toArray(new String[0]));
 
         chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {

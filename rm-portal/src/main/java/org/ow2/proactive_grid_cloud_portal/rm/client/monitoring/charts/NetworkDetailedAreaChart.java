@@ -129,8 +129,6 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-            //            loadTable.addRow();
-            //            loadTable.setValue(i - 1, 0, timeStamp);
             labels.add(timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
@@ -153,8 +151,6 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                 time[j] = t;
             }
         }
-
-        //        chart.draw(loadTable, loadOpts);
 
         chart.getData().setLabels(labels.toArray(new String[0]));
 
