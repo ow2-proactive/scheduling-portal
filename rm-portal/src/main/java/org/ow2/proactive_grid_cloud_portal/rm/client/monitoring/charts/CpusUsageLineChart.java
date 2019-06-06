@@ -61,7 +61,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
 
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             //            boolean initColumns = super.initColumns();
             int colIndex = 1;

@@ -46,7 +46,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
         setYAxesTicksSuffix(" Mb");
 
-        setNames("Used", "Free", "Total");
+        setDatasourceNames("Used", "Free", "Total");
         this.setColors("#fcaf3e", "#35a849", "#3a668d");
     }
 
@@ -61,7 +61,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();

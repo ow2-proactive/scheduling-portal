@@ -32,7 +32,6 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
-import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.Position;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -69,7 +68,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
 
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             boolean initColumns = super.initColumns();
 
@@ -102,7 +101,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 colIndex++;
             }
 
-            setNames(names.toArray(new String[0]));
+            setDatasourceNames(names.toArray(new String[0]));
 
             chart.update();
         }

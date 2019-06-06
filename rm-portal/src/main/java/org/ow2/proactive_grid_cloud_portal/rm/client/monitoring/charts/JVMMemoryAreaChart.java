@@ -43,7 +43,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
 
         setYAxesTicksSuffix(" Mb");
-        setNames("HeapMemoryUsage");
+        setDatasourceNames("HeapMemoryUsage");
         chart.getOptions().getLegend().setDisplay(false);
 
     }
@@ -61,7 +61,7 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
                                              .format(new Date(System.currentTimeMillis()));
             double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
 
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             addPointToDataset(0, value);
 

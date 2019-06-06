@@ -88,7 +88,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected String[] attrs;
 
-    protected String[] labels;
+    protected String[] datasouceNames;
 
     protected AbstractChart chart;
 
@@ -185,7 +185,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         return result;
     }
 
-    public void addLabel(String label) {
+    public void addXLabel(String label) {
         String[] strings;
         try {
             strings = chart.getData().getLabels().getStrings(0);
@@ -330,8 +330,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 dataset.setBorderColor(colors[i]);
             }
 
-            if (labels != null && i < labels.length) {
-                dataset.setLabel(labels[i]);
+            if (datasouceNames != null && i < datasouceNames.length) {
+                dataset.setLabel(datasouceNames[i]);
             } else {
                 dataset.setLabel(String.valueOf(i));
             }
@@ -436,7 +436,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             @Override
             public void onChanged(ChangedEvent event) {
                 timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-                //                                loadTable.removeRows(0, loadTable.getNumberOfRows());
                 chart.getData().setDatasets();
                 reload();
             }
@@ -458,8 +457,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         return colors;
     }
 
-    public void setNames(String... labels) {
-        this.labels = labels;
+    public void setDatasourceNames(String... datasouceNames) {
+        this.datasouceNames = datasouceNames;
     }
 
     public void setAreaChart(boolean areaChart) {

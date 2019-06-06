@@ -57,7 +57,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         time = new long[2];
 
         setYAxesTicksSuffix(" Kb/s");
-        setNames("RX", "TX");
+        setDatasourceNames("RX", "TX");
     }
 
     @Override
@@ -67,7 +67,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
 
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();

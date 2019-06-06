@@ -35,7 +35,7 @@ public class ClassesAreaChart extends MBeanTimeAreaChart {
 
     public ClassesAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "java.lang:type=ClassLoading", "LoadedClassCount", "Classes");
-        setNames("LoadedClassCount");
+        setDatasourceNames("LoadedClassCount");
         chart.getOptions().getLegend().setDisplay(false);
 
     }

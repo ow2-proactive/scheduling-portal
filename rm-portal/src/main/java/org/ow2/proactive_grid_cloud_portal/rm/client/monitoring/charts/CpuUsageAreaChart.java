@@ -36,7 +36,7 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
     public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
         setYAxesTicksSuffix("%");
-        setNames("Combined");
+        setDatasourceNames("Combined");
         chart.getOptions().getLegend().setDisplay(false);
     }
 }

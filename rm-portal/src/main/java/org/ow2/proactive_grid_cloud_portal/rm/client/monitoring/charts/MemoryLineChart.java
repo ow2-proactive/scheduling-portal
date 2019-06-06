@@ -52,7 +52,7 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
 
         setColors("#fcaf3e", "#35a849", "#3a668d");
         //        loadOpts.setLegend(LegendPosition.RIGHT);
-        setNames("Used", "Free", "Total");
+        setDatasourceNames("Used", "Free", "Total");
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
 
-            addLabel(timeStamp);
+            addXLabel(timeStamp);
 
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
