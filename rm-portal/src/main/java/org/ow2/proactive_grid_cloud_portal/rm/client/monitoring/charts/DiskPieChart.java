@@ -25,17 +25,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.PieChart;
+import org.pepstock.charba.client.data.PieDataset;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 
 
 /**
@@ -45,29 +45,35 @@ public class DiskPieChart extends MBeansChart {
 
     public DiskPieChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" }, "File System, Mb");
-
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.addColumn(ColumnType.STRING, "Type");
-        loadTable.addColumn(ColumnType.NUMBER, "Mb");
+        setYAxesTicksSuffix(" Mb");
     }
 
     @Override
     public void processResult(String result) {
-
         JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
-            loadTable.removeRows(0, loadTable.getNumberOfRows());
+            PieDataset dataset = (PieDataset) chart.newDataset();
+            dataset.setBackgroundColor(getColors());
+            List<String> labels = new ArrayList<>();
+            List<Double> values = new ArrayList<>();
             for (String key : object.keySet()) {
-                addRow();
 
                 double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
                 long inMB = (long) (value / 1024);
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, beautifyName(key));
-                loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, inMB);
+
+                labels.add(beautifyName(key));
+
+                values.add((double) inMB);
             }
 
-            loadChart.draw(loadTable, loadOpts);
+            dataset.setData(values);
+
+            chart.getData().setLabels(labels.toArray(new String[0]));
+
+            chart.getData().setDatasets(dataset);
+
+            chart.update();
         }
     }
 
@@ -80,7 +86,7 @@ public class DiskPieChart extends MBeansChart {
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new PieChart(data, opts);
+    public AbstractChart createChart() {
+        return new PieChart();
     }
 }

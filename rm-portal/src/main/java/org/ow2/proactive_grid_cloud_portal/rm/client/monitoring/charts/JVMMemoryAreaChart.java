@@ -32,7 +32,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -42,9 +41,11 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
     public JVMMemoryAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "java.lang:type=Memory", "HeapMemoryUsage", "Heap Memory Usage");
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "# Mb");
-        loadOpts.setVAxisOptions(vAxis);
+
+        setYAxesTicksSuffix(" Mb");
+        setDatasourceNames("HeapMemoryUsage");
+        chart.getOptions().getLegend().setDisplay(false);
+
     }
 
     @Override
@@ -60,10 +61,11 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
                                              .format(new Date(System.currentTimeMillis()));
             double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
 
-            addRow();
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 1, formatValue(value));
-            loadChart.draw(loadTable, loadOpts);
+            addXLabel(timeStamp);
+
+            addPointToDataset(0, value);
+
+            chart.update();
         }
     }
 }

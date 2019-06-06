@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
-
 
 /**
  * Shows the total CPU usage in percentage.
@@ -37,8 +35,8 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
 
     public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#%");
-        loadOpts.setVAxisOptions(vAxis);
+        setYAxesTicksSuffix("%");
+        setDatasourceNames("Combined");
+        chart.getOptions().getLegend().setDisplay(false);
     }
 }

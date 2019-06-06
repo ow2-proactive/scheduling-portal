@@ -27,10 +27,14 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
+import org.pepstock.charba.client.enums.Position;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -38,8 +42,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -55,62 +57,57 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     public NetworkAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#.# Kb/s");
-        loadOpts.setVAxisOptions(vAxis);
+        setYAxesTicksSuffix(" Kb/s");
     }
 
     @Override
     public void processResult(String result) {
 
-        // Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
         JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
 
-            addRow();
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+            addXLabel(timeStamp);
 
             boolean initColumns = super.initColumns();
 
             if (initColumns) {
                 time = new long[object.size()];
                 txBytes = new long[object.size()];
+                String[] datasourceNames = object.keySet()
+                                                 .stream()
+                                                 .sorted()
+                                                 .map(this::beautifyName)
+                                                 .toArray(String[]::new);
+
+                setDatasourceNames(datasourceNames);
             }
 
-            int colIndex = 1;
-            for (String key : object.keySet()) {
+            int colIndex = 0;
 
-                if (initColumns) {
-                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-                }
+            for (String key : object.keySet().stream().sorted().collect(Collectors.toList())) {
 
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();
-                if (txBytes[colIndex - 1] > 0) {
-                    double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, colIndex, (long) mbPerSec);
-                }
+                double bytePerMilliSec = (value - txBytes[colIndex]) / (t - time[colIndex]);
+                double mbPerSec = bytePerMilliSec * 1000 / 1024;
+                addPointToDataset(colIndex, (long) mbPerSec);
 
-                txBytes[colIndex - 1] = value;
-                time[colIndex - 1] = t;
+                txBytes[colIndex] = value;
+                time[colIndex] = t;
 
                 colIndex++;
             }
 
-            loadChart.draw(loadTable, loadOpts);
+            chart.update();
         }
     }
 
+    @Override
     public void processHistoryResult(String result) {
-
-        // removing internal escaping
-        result = result.replace("\\\"", "\"");
-        result = result.replace("\"{", "{");
-        result = result.replace("}\"", "}");
+        result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
         JSONObject json = resultVal.isObject();
@@ -119,13 +116,26 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
         long step = dur / size;
 
-        for (int i = 1; i < size; i++) {
+        final int length = getJsonSlice(json, 0).length;
+
+        List<Dataset> datasets = new ArrayList<>();
+        List<Double>[] dpss = new List[length];
+
+        for (int i = 0; i < length; ++i) {
+            LineDataset dataset = (LineDataset) createDataset(i);
+
+            datasets.add(dataset);
+
+            dpss[i] = new ArrayList<>();
+        }
+        List<String> datasourceNames = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
 
             double[] slice = getJsonSlice(json, i);
 
@@ -134,17 +144,18 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 txBytes = new long[slice.length];
             }
 
-            long t = now - dur + step * (i - 1);
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
+            long t = now - dur + step * i;
+            DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
+            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
+            datasourceNames.add(timeStamp);
 
-            for (int j = 0; j < slice.length; j++) {
-                long value = (long) slice[j];
+            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+
+                long value = (long) slice[sliceIndex];
 
                 if (i > 1) {
-                    double bytePerSec = (value - txBytes[j]) / (t - time[j]);
+                    double bytePerSec = (value - txBytes[sliceIndex]) / (t - time[sliceIndex]);
                     double kbPerSec = bytePerSec / 1024;
 
                     if (kbPerSec < 0) {
@@ -152,15 +163,25 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+                    dpss[sliceIndex].add(kbPerSec);
                 }
 
-                txBytes[j] = value;
-                time[j] = t;
+                txBytes[sliceIndex] = value;
+                time[sliceIndex] = t;
             }
         }
 
-        loadChart.draw(loadTable, loadOpts);
+        chart.getData().setLabels(datasourceNames.toArray(new String[0]));
+
+        chart.getOptions().getLegend().setPosition(Position.RIGHT);
+        for (int i = 0; i < length; ++i) {
+            datasets.get(i).setData(dpss[i]);
+        }
+
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+        chart.update();
+
     }
 
     private String beautifyName(String mbeanName) {
