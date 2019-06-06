@@ -26,10 +26,13 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
@@ -76,27 +79,27 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
             if (initColumns) {
                 time = new long[object.size()];
                 txBytes = new long[object.size()];
-                String[] datasourceNames = object.keySet().stream()
-                        .map(this::beautifyName)
-                        .toArray(String[]::new);
+                String[] datasourceNames = object.keySet()
+                                                 .stream()
+                                                 .sorted()
+                                                 .map(this::beautifyName)
+                                                 .toArray(String[]::new);
 
                 setDatasourceNames(datasourceNames);
             }
 
+            int colIndex = 0;
 
-            int colIndex = 1;
             for (String key : object.keySet().stream().sorted().collect(Collectors.toList())) {
 
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();
-                if (txBytes[colIndex - 1] > 0) {
-                    double bytePerMilliSec = (value - txBytes[colIndex - 1]) / (t - time[colIndex - 1]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                    addPointToDataset(colIndex, (long) mbPerSec);
-                }
+                double bytePerMilliSec = (value - txBytes[colIndex]) / (t - time[colIndex]);
+                double mbPerSec = bytePerMilliSec * 1000 / 1024;
+                addPointToDataset(colIndex, (long) mbPerSec);
 
-                txBytes[colIndex - 1] = value;
-                time[colIndex - 1] = t;
+                txBytes[colIndex] = value;
+                time[colIndex] = t;
 
                 colIndex++;
             }

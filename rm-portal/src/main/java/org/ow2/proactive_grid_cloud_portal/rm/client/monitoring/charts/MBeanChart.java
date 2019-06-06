@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -458,6 +459,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     public void setDatasourceNames(String... datasouceNames) {
         this.datasourceNames = datasouceNames;
+    }
+
+    public String[] getDatasourceNames() {
+        return datasourceNames;
     }
 
     public void setAreaChart(boolean areaChart) {
