@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
@@ -180,10 +181,15 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         } catch (Exception e) {
             strings = new String[0];
         }
-        String[] newString = new String[strings.length + 1];
-        System.arraycopy(strings, 0, newString, 0, strings.length);
-        newString[newString.length - 1] = label;
-        chart.getData().setLabels(newString);
+        List<String> labels = new LinkedList<>();
+        labels.addAll(Arrays.asList(strings));
+        while (labels.size() >= MAX_ROWS_NUMBER) {
+            labels.remove(0);
+        }
+
+        labels.add(label);
+
+        chart.getData().setLabels(labels.toArray(new String[0]));
     }
 
     public void addPointToDataset(int index, double value) {
@@ -198,6 +204,9 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         }
 
         List<Double> data = new ArrayList<>(dataset.getData());
+        while (data.size() >= MAX_ROWS_NUMBER) {
+            data.remove(0);
+        }
         data.add(formatValue(value));
         dataset.setData(data);
     }
@@ -349,13 +358,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             return;
         }
 
-        //        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         long size = getJsonInternalSize(json);
-        if (size == 0) {
-            size = 1; // TODO
-        }
+
         long step = dur / size;
 
         final int length = getJsonSlice(json, 0).length;

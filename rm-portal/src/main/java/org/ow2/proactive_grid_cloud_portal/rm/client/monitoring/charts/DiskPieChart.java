@@ -45,9 +45,6 @@ public class DiskPieChart extends MBeansChart {
 
     public DiskPieChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" }, "File System, Mb");
-        //        loadOpts.setLegend(LegendPosition.RIGHT);
-        //        loadTable.addColumn(ColumnType.STRING, "Type");
-        //        loadTable.addColumn(ColumnType.NUMBER, "Mb");
         setYAxesTicksSuffix(" Mb");
     }
 

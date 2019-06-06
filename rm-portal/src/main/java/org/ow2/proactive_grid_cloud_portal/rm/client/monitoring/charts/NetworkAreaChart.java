@@ -63,7 +63,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     @Override
     public void processResult(String result) {
 
-        //         Result:{"sigar:Name=lo,Type=NetInterface":[{"name":"TxBytes","value":147762795896}],"sigar:Name=eth0,Type=NetInterface":[{"name":"TxBytes","value":249539647369}]}
         JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
 
@@ -127,8 +126,6 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         List<Dataset> datasets = new ArrayList<>();
         List<Double>[] dpss = new List[length];
 
-        String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7", "#ef2929",
-                                         "#000000" };
         for (int i = 0; i < length; ++i) {
             LineDataset dataset = (LineDataset) createDataset(i);
 

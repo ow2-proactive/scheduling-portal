@@ -51,8 +51,6 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
 
     public boolean initColumns() {
         if (initializing) {
-            // removing fake column
-            //            loadTable.removeColumn(1);
             initializing = false;
             return true;
         }
