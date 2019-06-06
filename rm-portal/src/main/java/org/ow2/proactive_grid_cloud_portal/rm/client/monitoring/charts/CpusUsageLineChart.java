@@ -64,7 +64,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
             addXLabel(timeStamp);
 
             //            boolean initColumns = super.initColumns();
-            int colIndex = 1;
+            int colIndex = 0;
             for (String key : object.keySet()) {
 
                 //                if (initColumns) {

@@ -65,7 +65,7 @@ public class SwapLineChart extends MBeanTimeAreaChart {
 
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                addPointToDataset(i, formatValue(value));
+                addPointToDataset(i, value);
             }
 
             chart.update();

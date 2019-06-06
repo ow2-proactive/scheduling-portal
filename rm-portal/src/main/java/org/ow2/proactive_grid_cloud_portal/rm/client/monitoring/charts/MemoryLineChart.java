@@ -25,8 +25,12 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
@@ -71,7 +75,7 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
 
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                addPointToDataset(i, formatValue(value));
+                addPointToDataset(i, value);
             }
 
             chart.update();
