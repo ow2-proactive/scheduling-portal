@@ -54,6 +54,11 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
     }
 
     @Override
+    public double formatValue(double value) {
+        return super.formatValue(value * 100);
+    }
+
+    @Override
     public void processResult(String result) {
         JSONObject object = controller.parseJSON(result).isObject();
         if (object != null) {
