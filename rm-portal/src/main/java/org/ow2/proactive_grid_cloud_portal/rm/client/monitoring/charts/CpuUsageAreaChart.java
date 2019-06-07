@@ -39,4 +39,9 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
         setDatasourceNames("Combined");
         chart.getOptions().getLegend().setDisplay(false);
     }
+
+    @Override
+    public double formatValue(double value) {
+        return super.formatValue(value * 100);
+    }
 }

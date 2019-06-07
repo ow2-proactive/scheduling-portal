@@ -350,6 +350,13 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         }
     }
 
+    /**
+     * When time selector (1m, 5m, 10m, 30m, etc) selects any value
+     * except very first one (1 minute - it is special case)
+     * this method is called.
+     * Method should parse JSON and load all values to the chart.
+     * @param result JSON string
+     */
     public void processHistoryResult(String result) {
         result = removingInternalEscaping(result);
 
@@ -395,7 +402,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
         chart.getData().setLabels(labels.toArray(new String[0]));
 
-        chart.getOptions().getLegend().setPosition(Position.RIGHT);
         for (int i = 0; i < length; ++i) {
             datasets.get(i).setData(dpss[i]);
         }
@@ -405,9 +411,16 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         chart.update();
     }
 
-    public abstract AbstractChart createChart();
-
+    /**
+     * Read processHistoryResult.
+     * Instead of 'processHistoryResult' this method
+     * is called only when '1 minute' interval is selected.
+     * Method should parse JSON and add one value to the chart.
+     * @param result JSON string
+     */
     public abstract void processResult(String result);
+
+    public abstract AbstractChart createChart();
 
     public double formatValue(double value) {
         return value;

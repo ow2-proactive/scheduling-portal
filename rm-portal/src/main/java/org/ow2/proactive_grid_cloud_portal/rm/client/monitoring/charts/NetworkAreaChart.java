@@ -58,6 +58,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         super(controller, jmxServerUrl, "sigar:Type=NetInterface,Name=*", "RxBytes", "Network");
 
         setYAxesTicksSuffix(" Kb/s");
+        chart.getOptions().getLegend().setPosition(Position.BOTTOM);
     }
 
     @Override

@@ -74,7 +74,8 @@ public class Overview extends VLayout implements Reloadable {
 
         VLayout osInfoRow = new VLayout();
         HLayout cpuMemRow = new HLayout();
-        HLayout netFileSysRow = new HLayout();
+        HLayout netRow = new HLayout();
+        HLayout fileSysRow = new HLayout();
 
         Label osLabel = new Label("<nobr style='font-weight:bold;'>Operating system<nobr>");
         osLabel.setHeight(50);
@@ -85,12 +86,13 @@ public class Overview extends VLayout implements Reloadable {
 
         cpuMemRow.addMember(cpuUsage);
         cpuMemRow.addMember(memory);
-        netFileSysRow.addMember(network);
-        netFileSysRow.addMember(disk);
+        netRow.addMember(network);
+        fileSysRow.addMember(disk);
 
         addMember(osInfoRow);
         addMember(cpuMemRow);
-        addMember(netFileSysRow);
+        addMember(netRow);
+        addMember(fileSysRow);
     }
 
     @Override
