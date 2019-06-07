@@ -71,7 +71,6 @@ public class MBeanDetailedView extends DetailViewer {
         setFields(fields);
 
         final RMServiceAsync rm = controller.getRMService();
-        final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
         final LoginModel loginModel = LoginModel.getInstance();
