@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -44,6 +46,7 @@ import org.pepstock.charba.client.IsChart;
 import org.pepstock.charba.client.LineChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.callbacks.TickCallback;
+import org.pepstock.charba.client.callbacks.TooltipCustomCallback;
 import org.pepstock.charba.client.callbacks.TooltipFilterCallback;
 import org.pepstock.charba.client.configuration.Axis;
 import org.pepstock.charba.client.configuration.CartesianCategoryAxis;
@@ -55,8 +58,14 @@ import org.pepstock.charba.client.data.LineDataset;
 import org.pepstock.charba.client.enums.Fill;
 import org.pepstock.charba.client.enums.InteractionMode;
 import org.pepstock.charba.client.enums.Position;
+import org.pepstock.charba.client.items.TooltipBodyItem;
 import org.pepstock.charba.client.items.TooltipItem;
+import org.pepstock.charba.client.items.TooltipLabelColor;
+import org.pepstock.charba.client.items.TooltipModel;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -477,4 +486,93 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     public void setAreaChart(boolean areaChart) {
         this.areaChart = areaChart;
     }
+
+    public void setTooltipItemHandler(Function<String, String> handler) {
+        chart.getOptions().getTooltips().setEnabled(false);
+
+        chart.getOptions().getTooltips().setCustomCallback(new TooltipCustomCallback() {
+
+            private DivElement element = null;
+
+            @Override
+            public void onCustom(IsChart chart, TooltipModel model) {
+                if (model.getOpacity() == 0) {
+                    element.getStyle().setOpacity(0);
+                    return;
+                }
+                if (element == null) {
+                    element = Document.get().createDivElement();
+                    AbstractChart<?> chartInstance = (AbstractChart<?>) chart;
+                    chartInstance.getElement().appendChild(element);
+                }
+                element.removeClassName("above");
+                element.removeClassName("below");
+                element.removeClassName("no-transform");
+                if (model.getYAlign() != null) {
+                    element.addClassName(model.getYAlign());
+                } else {
+                    element.addClassName("no-transform");
+                }
+                StringBuilder innerHTML = new StringBuilder("<table cellpadding=0>");
+
+                if (model.getBody() != null && !model.getBody().isEmpty()) {
+                    innerHTML.append("<tbody>");
+                    if (model.getTitle() != null && !model.getTitle().isEmpty()) {
+                        for (String title : model.getTitle()) {
+                            innerHTML.append("<tr><td style='white-space: nowrap;'>")
+                                     .append(title)
+                                     .append("</td></tr>");
+                        }
+                    }
+                    //                    innerHTML.append("</thead><tbody>");
+                    List<TooltipLabelColor> colors = model.getLabelColors();
+                    int index = 0;
+                    for (TooltipBodyItem item : model.getBody()) {
+                        List<String> lines = item.getLines();
+                        lines = lines.stream().map(handler::apply).collect(Collectors.toList());
+                        for (int i = 0; i < lines.size(); i++) {
+
+                            TooltipLabelColor color = colors.get(index);
+                            DivElement wrapper = Document.get().createDivElement();
+                            SpanElement span = Document.get().createSpanElement();
+                            span.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+                            span.getStyle().setWidth(10, Style.Unit.PX);
+                            span.getStyle().setHeight(10, Style.Unit.PX);
+                            span.getStyle().setMarginRight(2, Style.Unit.PX);
+                            span.getStyle().setBackgroundColor(color.getBackgroundColor().toRGBA());
+                            span.getStyle().setBorderColor(color.getBorderColor().toRGBA());
+                            span.getStyle().setBorderStyle(Style.BorderStyle.SOLID);
+                            span.getStyle().setBorderWidth(2, Style.Unit.PX);
+                            wrapper.appendChild(span);
+                            innerHTML.append("<tr><td style='white-space: nowrap;'>")
+                                     .append(wrapper.getInnerHTML())
+                                     .append(lines.get(i))
+                                     .append("</td></tr>");
+                        }
+                        index++;
+                    }
+                    innerHTML.append("</tbody>");
+                }
+                innerHTML.append("</table>");
+                element.setInnerHTML(innerHTML.toString());
+                element.getStyle().setLeft(model.getCaretX(), Style.Unit.PX);
+                element.getStyle().setTop(model.getCaretY(), Style.Unit.PX);
+                element.getStyle().setFontSize(model.getBodyFontSize(), Style.Unit.PX);
+                element.getStyle().setPaddingLeft(model.getXPadding(), Style.Unit.PX);
+                element.getStyle().setPaddingTop(model.getYPadding(), Style.Unit.PX);
+
+                element.getStyle().setOpacity(1);
+                element.getStyle().setBackgroundColor("rgba(0, 0, 0, .7)");
+                element.getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
+                element.getStyle().setColor("white");
+                element.getStyle().setProperty("borderRadius", "3px");
+                element.getStyle().setProperty("WebkitTransition", "all .1s ease");
+                element.getStyle().setProperty("transition", "all .1s ease");
+                element.getStyle().setProperty("pointerEvents", "none");
+                element.getStyle().setProperty("WebkitTransform", "translate(-50%, 0)");
+                element.getStyle().setProperty("transform", "translate(-50%, 0)");
+            }
+        });
+    }
+
 }
