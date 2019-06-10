@@ -143,6 +143,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     /** view displaying info about the selected job */
     private JobInfoView jobInfo = null;
 
+    /** view displaying job variables of the selected job */
     private VarInfoView varInfoView = null;
 
     /** view displaying info about the selected task */
