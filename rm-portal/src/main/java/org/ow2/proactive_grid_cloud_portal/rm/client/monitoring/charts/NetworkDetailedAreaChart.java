@@ -63,6 +63,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String line) {
+                // dropping decimal digits if they exist
                 if (line.contains(".")) {
                     return line.substring(0, line.indexOf(".")) + " Kb/s";
                 } else {

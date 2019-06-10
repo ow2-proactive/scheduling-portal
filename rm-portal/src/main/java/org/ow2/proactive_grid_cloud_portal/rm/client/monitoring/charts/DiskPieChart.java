@@ -76,6 +76,7 @@ public class DiskPieChart extends MBeansChart {
         sb.append(number.charAt(0));
         for (int i = 1; i < number.length(); ++i) {
 
+            // when nubmer of digits left to read is dividable by 3
             if ((number.length() - i) % 3 == 0) {
                 sb.append(",");
             }

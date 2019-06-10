@@ -44,6 +44,7 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String s) {
+                // leave only 2 digits after dot
                 int index = s.lastIndexOf(" ");
                 String firstHalf = s.substring(0, index);
                 String secondHalf = s.substring(index + 1);
