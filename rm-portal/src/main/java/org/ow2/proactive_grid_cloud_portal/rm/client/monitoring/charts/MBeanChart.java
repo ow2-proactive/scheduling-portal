@@ -562,8 +562,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 }
                 innerHTML.append("</table>");
                 element.setInnerHTML(innerHTML.toString());
-                if (chart.getCanvas().getAbsoluteLeft() < model.getCaretX() - 50) {
-                    element.getStyle().setLeft(model.getCaretX() - 50, Style.Unit.PX);
+                if (chart.getCanvas().getAbsoluteLeft() < model.getCaretX() - 80) {
+                    element.getStyle().setLeft(model.getCaretX() - 80, Style.Unit.PX);
                 } else {
                     element.getStyle().setLeft(model.getCaretX(), Style.Unit.PX);
                 }
