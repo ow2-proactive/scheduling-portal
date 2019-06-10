@@ -68,6 +68,7 @@ public class KeyValueGrid extends VStack {
 
         keyValueGrid = new ListGrid();
         keyValueGrid.setWidth100();
+        keyValueGrid.setAutoHeight();
 
         GridColumns[] columns = keyValueColumnsFactory.getColumns();
         ListGridField[] fields = new ListGridField[columns.length];

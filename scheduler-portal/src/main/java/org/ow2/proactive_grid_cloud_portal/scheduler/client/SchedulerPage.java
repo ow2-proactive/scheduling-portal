@@ -45,6 +45,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.VarInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
@@ -141,6 +142,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /** view displaying info about the selected job */
     private JobInfoView jobInfo = null;
+
+    private VarInfoView varInfoView = null;
 
     /** view displaying info about the selected task */
     private TaskInfoView taskInfo = null;
@@ -753,6 +756,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.jobInfo = new JobInfoView(this.controller, new JobsDetailColumnsFactory());
         jobinfoTab.setPane(this.jobInfo.build());
 
+        Tab varInfoTab = new Tab("Variables Info", SchedulerImages.instance.info_16().getSafeUri().asString());
+        this.varInfoView = new VarInfoView(this.controller, null);
+        varInfoTab.setPane(this.varInfoView.build());
+
         Tab taskinfoTab = new Tab("Task Info", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.taskInfo = new TaskInfoView(this.controller, new TaskDetailColumnsFactory());
         taskinfoTab.setPane(this.taskInfo.build());
@@ -771,6 +778,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         jobResultTab.setPane(this.jobResultView.build());
 
         rightTabSet.addTab(jobinfoTab);
+        rightTabSet.addTab(varInfoTab);
         rightTabSet.addTab(taskinfoTab);
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
@@ -797,6 +805,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         this.rootLayout = null;
         this.jobInfo = null;
+        this.varInfoView = null;
         this.controller = null;
         this.logWindow = null;
         this.aboutWindow = null;
