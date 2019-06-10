@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.function.Function;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
@@ -46,6 +48,12 @@ public class MemoryLineChart extends MBeanTimeAreaChart {
 
         setColors("#fcaf3e", "#35a849", "#3a668d");
         setDatasourceNames("Used", "Free", "Total");
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                return s + " Mb";
+            }
+        });
     }
 
     @Override

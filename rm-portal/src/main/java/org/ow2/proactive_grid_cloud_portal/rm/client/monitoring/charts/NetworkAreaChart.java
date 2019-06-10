@@ -26,9 +26,9 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -59,6 +59,17 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
         setYAxesTicksSuffix(" Kb/s");
         chart.getOptions().getLegend().setPosition(Position.BOTTOM);
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String line) {
+                if (line.contains(".")) {
+                    return line.substring(0, line.indexOf(".")) + " Kb/s";
+                } else {
+                    return line + " Kb/s";
+                }
+            }
+        });
     }
 
     @Override

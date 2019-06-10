@@ -27,13 +27,15 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.DiskPieChart;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.data.PieDataset;
 
@@ -103,12 +105,18 @@ public class FileSystemView extends VLayout {
 
                                              PieChart pie = new PieChart();
                                              PieDataset dataset = pie.newDataset();
-                                             dataset.setBackgroundColor(new String[] { "#fcaf3e", "#3a668d", "#35a849",
-                                                                                       "#fcaf3e", "#24c1ff", "#1e4ed7",
-                                                                                       "#ef2929", "#000000" });
+                                             dataset.setBackgroundColor("#fcaf3e",
+                                                                        "#3a668d",
+                                                                        "#35a849",
+                                                                        "#fcaf3e",
+                                                                        "#24c1ff",
+                                                                        "#1e4ed7",
+                                                                        "#ef2929",
+                                                                        "#000000");
                                              List<String> labels = new ArrayList<>();
                                              List<Double> values = new ArrayList<>();
                                              JSONArray properties = object.get(disk).isArray();
+                                             long total = 0;
                                              for (int i = 0; i < properties.size(); i++) {
                                                  String name = properties.get(i)
                                                                          .isObject()
@@ -126,11 +134,13 @@ public class FileSystemView extends VLayout {
 
                                                      labels.add(name);
                                                      values.add(doubleValue);
+                                                     total += doubleValue;
                                                  }
 
                                                  if (name.equals("Free") || name.equals("Used") ||
                                                      name.equals("Total")) {
-                                                     int inMb = Integer.parseInt(value) / 1024;
+                                                     final int inKb = Integer.parseInt(value);
+                                                     int inMb = inKb / 1024;
                                                      if (inMb > 1024) {
                                                          value = (inMb / 1024) + " Gb";
                                                      } else {
@@ -147,6 +157,29 @@ public class FileSystemView extends VLayout {
 
                                              pie.setWidth("50%");
                                              pie.getOptions().getLegend().setDisplay(false);
+                                             final long ttotal = total;
+
+                                             MBeanChart.setTooltipItemHandler(pie, new Function<String, String>() {
+                                                 @Override
+                                                 public String apply(String s) {
+                                                     int indexOfSpace = s.lastIndexOf(" ");
+                                                     String firstHalf = s.substring(0, indexOfSpace);
+                                                     String secondHalf = s.substring(indexOfSpace + 1);
+
+                                                     if (secondHalf.contains(".")) {
+                                                         secondHalf = secondHalf.substring(0, secondHalf.indexOf("."));
+                                                     }
+
+                                                     long valueInKb = Long.parseLong(secondHalf);
+
+                                                     long percentage = (long) (((double) valueInKb / ttotal) * 100);
+
+                                                     secondHalf = DiskPieChart.putCommasEveryThreeDigits(secondHalf);
+
+                                                     return firstHalf + " " + secondHalf + " Kb (" + percentage + "%)";
+                                                 }
+                                             });
+
                                              pie.update();
 
                                              diskLayout.addMember(details);

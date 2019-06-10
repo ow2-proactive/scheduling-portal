@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
@@ -58,6 +59,18 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
         setYAxesTicksSuffix(" Kb/s");
         setDatasourceNames("RX", "TX");
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String line) {
+                // dropping decimal digits if they exist
+                if (line.contains(".")) {
+                    return line.substring(0, line.indexOf(".")) + " Kb/s";
+                } else {
+                    return line + " Kb/s";
+                }
+            }
+        });
     }
 
     @Override

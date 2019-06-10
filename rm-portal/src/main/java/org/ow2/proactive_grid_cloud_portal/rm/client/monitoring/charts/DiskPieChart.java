@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
@@ -43,9 +44,46 @@ import com.google.gwt.regexp.shared.RegExp;
  */
 public class DiskPieChart extends MBeansChart {
 
+    private int total = 0;
+
     public DiskPieChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" }, "File System, Mb");
         setYAxesTicksSuffix(" Mb");
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                int indexOfSpace = s.lastIndexOf(" ");
+                String firstHalf = s.substring(0, indexOfSpace);
+                String secondHalf = s.substring(indexOfSpace + 1);
+
+                if (secondHalf.contains(".")) {
+                    secondHalf = secondHalf.substring(0, secondHalf.indexOf("."));
+                }
+
+                long valueInMb = Long.parseLong(secondHalf);
+
+                long percentage = (long) (((double) valueInMb / total) * 100);
+
+                secondHalf = putCommasEveryThreeDigits(secondHalf);
+
+                return firstHalf + " " + secondHalf + " Mb (" + percentage + "%)";
+            }
+        });
+    }
+
+    public static String putCommasEveryThreeDigits(String number) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(number.charAt(0));
+        for (int i = 1; i < number.length(); ++i) {
+
+            // when nubmer of digits left to read is dividable by 3
+            if ((number.length() - i) % 3 == 0) {
+                sb.append(",");
+            }
+
+            sb.append(number.charAt(i));
+        }
+        return sb.toString();
     }
 
     @Override
@@ -57,10 +95,13 @@ public class DiskPieChart extends MBeansChart {
             dataset.setBackgroundColor(getColors());
             List<String> labels = new ArrayList<>();
             List<Double> values = new ArrayList<>();
+            total = 0;
             for (String key : object.keySet()) {
 
                 double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
                 long inMB = (long) (value / 1024);
+
+                total += inMB;
 
                 labels.add(beautifyName(key));
 
