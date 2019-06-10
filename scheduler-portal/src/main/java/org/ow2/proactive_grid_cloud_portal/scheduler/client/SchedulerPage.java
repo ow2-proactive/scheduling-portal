@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobVariablesView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TaskInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsDetailColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskDetailColumnsFactory;
@@ -141,6 +142,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /** view displaying info about the selected job */
     private JobInfoView jobInfo = null;
+
+    /** view displaying info about the selected job */
+    private JobVariablesView jobVariables = null;
 
     /** view displaying info about the selected task */
     private TaskInfoView taskInfo = null;
@@ -752,6 +756,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Tab jobinfoTab = new Tab("Job Info", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.jobInfo = new JobInfoView(this.controller, new JobsDetailColumnsFactory());
         jobinfoTab.setPane(this.jobInfo.build());
+
+        Tab jobVariablesTab = new Tab("Job Variables", Images.instance.search_16().getSafeUri().asString());
+        this.jobVariables = new JobVariablesView(this.controller);
+        jobVariablesTab.setPane(this.jobResultView.build());
 
         Tab taskinfoTab = new Tab("Task Info", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.taskInfo = new TaskInfoView(this.controller, new TaskDetailColumnsFactory());

@@ -55,18 +55,6 @@ public class JobInfoView extends InfoView<Job>
 
     protected SchedulerController controller;
 
-    /** Generic information label text */
-    private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic Information";
-
-    /** Variables label text */
-    private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
-
-    /** Generic information grid */
-    private KeyValueGrid genericInformationGrid;
-
-    /** Variables grid */
-    private KeyValueGrid variablesGrid;
-
     /**
      * @param controller the Controller that created this View
      */
@@ -136,21 +124,9 @@ public class JobInfoView extends InfoView<Job>
     protected Layout getLayout() {
 
         VStack root = new VStack();
-        root.setWidth100();
-
-        this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
-        this.genericInformationGrid.showTopMargin();
-        this.genericInformationGrid.setWidth100();
-        this.genericInformationGrid.hide();
-
-        this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
-        this.variablesGrid.showTopMargin();
-        this.variablesGrid.setWidth100();
-        this.variablesGrid.hide();
 
         root.addMember(super.getLayout());
-        root.addMember(genericInformationGrid);
-        root.addMember(variablesGrid);
+
         return root;
     }
 
@@ -162,11 +138,7 @@ public class JobInfoView extends InfoView<Job>
      */
     @Override
     protected void displayExtraMembers(Job job) {
-        genericInformationGrid.buildEntries(job.getGenericInformation());
-        variablesGrid.buildEntries(job.getVariables());
 
-        this.genericInformationGrid.show();
-        this.variablesGrid.show();
     }
 
     /*
@@ -176,8 +148,7 @@ public class JobInfoView extends InfoView<Job>
      */
     @Override
     protected void hideExtraMembers() {
-        this.genericInformationGrid.hide();
-        this.variablesGrid.hide();
+
     }
 
 }
