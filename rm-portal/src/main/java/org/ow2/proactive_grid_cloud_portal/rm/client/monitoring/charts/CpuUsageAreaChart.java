@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.function.Function;
+
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 
@@ -38,6 +40,22 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
         setYAxesTicksSuffix("%");
         setDatasourceNames("Combined");
         chart.getOptions().getLegend().setDisplay(false);
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                int index = s.lastIndexOf(" ");
+                String firstHalf = s.substring(0, index);
+                String secondHalf = s.substring(index + 1);
+                if (secondHalf.contains(".")) {
+                    int i = secondHalf.indexOf(".");
+                    i = Math.min(i + 3, secondHalf.length());
+                    secondHalf = secondHalf.substring(0, i);
+                }
+
+                return firstHalf + " " + secondHalf + "%";
+            }
+        });
     }
 
     @Override

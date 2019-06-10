@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
@@ -51,6 +52,13 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
         setAreaChart(false);
         chartContainer.setHeight("300px");
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                return s + "%";
+            }
+        });
     }
 
     @Override

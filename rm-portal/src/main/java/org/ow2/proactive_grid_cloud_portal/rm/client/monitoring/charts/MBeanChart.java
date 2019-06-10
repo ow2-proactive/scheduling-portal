@@ -130,11 +130,13 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         chartContainer = new AbsolutePanel();
         chartContainer.setWidth("90%");
         chartContainer.setHeight("200px");
-        chartContainer.getElement().getStyle().setMargin(10, Style.Unit.PX);
+        //        chartContainer.getElement().getStyle().setMargin(30, Style.Unit.PX);
+        chartContainer.getElement().getStyle().setPadding(30, Style.Unit.PX);
 
         chart = createChart();
         chart.setWidth("100%");
         chart.setHeight("100%");
+
         chart.getOptions().setMaintainAspectRatio(false);
         if (!(chart instanceof PieChart)) {
             LineChart lineChart = (LineChart) chart;
@@ -488,6 +490,10 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void setTooltipItemHandler(Function<String, String> handler) {
+        setTooltipItemHandler(chart, handler);
+    }
+
+    public static void setTooltipItemHandler(AbstractChart chart, Function<String, String> handler) {
         chart.getOptions().getTooltips().setEnabled(false);
 
         chart.getOptions().getTooltips().setCustomCallback(new TooltipCustomCallback() {

@@ -63,7 +63,11 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String line) {
-                return line.substring(0, line.indexOf(".")) + " Kb/s";
+                if (line.contains(".")) {
+                    return line.substring(0, line.indexOf(".")) + " Kb/s";
+                } else {
+                    return line + " Kb/s";
+                }
             }
         });
     }
