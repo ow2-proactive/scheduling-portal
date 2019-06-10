@@ -756,7 +756,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.jobInfo = new JobInfoView(this.controller, new JobsDetailColumnsFactory());
         jobinfoTab.setPane(this.jobInfo.build());
 
-        Tab varInfoTab = new Tab("Variables Info", SchedulerImages.instance.info_16().getSafeUri().asString());
+        Tab varInfoTab = new Tab("Job Variables", SchedulerImages.instance.info_16().getSafeUri().asString());
         this.varInfoView = new VarInfoView(this.controller, null);
         varInfoTab.setPane(this.varInfoView.build());
 
@@ -779,11 +779,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         rightTabSet.addTab(jobinfoTab);
         rightTabSet.addTab(varInfoTab);
+        rightTabSet.addTab(jobResultTab);
         rightTabSet.addTab(taskinfoTab);
+        rightTabSet.addTab(taskResultTab);
         rightTabSet.addTab(outputTab);
         rightTabSet.addTab(serverLogsTab);
-        rightTabSet.addTab(taskResultTab);
-        rightTabSet.addTab(jobResultTab);
 
         HLayout layout = new HLayout();
 
