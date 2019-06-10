@@ -502,6 +502,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
             @Override
             public void onCustom(IsChart chart, TooltipModel model) {
+
                 if (model.getOpacity() == 0) {
                     element.getStyle().setOpacity(0);
                     return;
@@ -561,7 +562,11 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                 }
                 innerHTML.append("</table>");
                 element.setInnerHTML(innerHTML.toString());
-                element.getStyle().setLeft(model.getCaretX(), Style.Unit.PX);
+                if (chart.getCanvas().getAbsoluteLeft() < model.getCaretX() - 50) {
+                    element.getStyle().setLeft(model.getCaretX() - 50, Style.Unit.PX);
+                } else {
+                    element.getStyle().setLeft(model.getCaretX(), Style.Unit.PX);
+                }
                 element.getStyle().setTop(model.getCaretY(), Style.Unit.PX);
                 element.getStyle().setFontSize(model.getBodyFontSize(), Style.Unit.PX);
                 element.getStyle().setPaddingLeft(model.getXPadding(), Style.Unit.PX);
