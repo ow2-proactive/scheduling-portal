@@ -39,6 +39,8 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -50,15 +52,27 @@ import com.smartgwt.client.widgets.layout.VStack;
  * @author the activeeon team
  *
  */
-public class JobInfoView extends InfoView<Job>
+public class VarInfoView extends InfoView<Job>
         implements JobSelectedListener, JobsUpdatedListener, ExecutionDisplayModeListener {
 
     protected SchedulerController controller;
 
+    /** Generic information label text */
+    private static final String GENERIC_INFORMATION_LABEL_TEXT = "Generic Information";
+
+    /** Variables label text */
+    private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
+
+    /** Generic information grid */
+    private KeyValueGrid genericInformationGrid;
+
+    /** Variables grid */
+    private KeyValueGrid variablesGrid;
+
     /**
      * @param controller the Controller that created this View
      */
-    public JobInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
+    public VarInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
         super(factory, "No job selected");
         this.controller = controller;
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
@@ -70,9 +84,22 @@ public class JobInfoView extends InfoView<Job>
         executionModel.addExecutionsDisplayModeListener(this);
     }
 
+    @Override
+    public Layout build() {
+        return getLayout();
+    }
+
     public void jobSelected(Job job) {
         this.displayedItem = job;
         this.displayItem();
+    }
+
+    @Override
+    public void displayItem() {
+        displayExtraMembers(this.displayedItem);
+
+        this.label.hide();
+
     }
 
     public void jobsUpdating() {
@@ -126,7 +153,24 @@ public class JobInfoView extends InfoView<Job>
         VStack root = new VStack();
         root.setWidth100();
 
-        root.addMember(super.getLayout());
+        this.label = new Label(this.emptyMessage);
+        this.label.setWidth100();
+        this.label.setAlign(Alignment.CENTER);
+
+        root.addMember(label);
+
+        this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
+        this.genericInformationGrid.showTopMargin();
+        this.genericInformationGrid.setWidth100();
+        this.genericInformationGrid.hide();
+
+        this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        this.variablesGrid.showTopMargin();
+        this.variablesGrid.setWidth100();
+        this.variablesGrid.hide();
+
+        root.addMember(variablesGrid);
+        root.addMember(genericInformationGrid);
         return root;
     }
 
@@ -138,6 +182,12 @@ public class JobInfoView extends InfoView<Job>
      */
     @Override
     protected void displayExtraMembers(Job job) {
+        genericInformationGrid.buildEntries(job.getGenericInformation());
+        variablesGrid.buildEntries(job.getVariables());
+
+        this.genericInformationGrid.show();
+        this.variablesGrid.show();
+        this.label.hide();
     }
 
     /*
@@ -147,6 +197,9 @@ public class JobInfoView extends InfoView<Job>
      */
     @Override
     protected void hideExtraMembers() {
+        this.genericInformationGrid.hide();
+        this.variablesGrid.hide();
+        this.label.show();
     }
 
 }
