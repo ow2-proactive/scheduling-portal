@@ -62,6 +62,8 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     private static final String NO_ITEMS_TO_SHOW = "<b>Result List: no items to show.</b>";
 
+    private static final String ITEMS_TO_SHOW = "<b>Result List:</b>";
+
     /**
      * label when no job is selected or job is not finished
      */
@@ -101,7 +103,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         placeHolderLabel.setAlign(Alignment.CENTER);
         root.addMember(placeHolderLabel);
 
-        preciousResultLabel = new Label("<b>Result List:</b>");
+        preciousResultLabel = new Label(ITEMS_TO_SHOW);
         preciousResultLabel.setAutoHeight();
         preciousResultLabel.setWidth100();
         preciousResultLabel.hide();
@@ -232,7 +234,11 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
         placeHolderLabel.hide();
         resultMap.show();
-        preciousResultLabel.setContents(NO_ITEMS_TO_SHOW);
+        if (preciousTaskNames.isEmpty()) {
+            preciousResultLabel.setContents(NO_ITEMS_TO_SHOW);
+        } else {
+            preciousResultLabel.setContents(ITEMS_TO_SHOW);
+        }
         preciousResultLabel.show();
         preciousButtons.show();
     }
