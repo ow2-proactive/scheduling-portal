@@ -586,4 +586,46 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         });
     }
 
+    public static String keepNDigitsAfterComma(String number, int nDigits) {
+        // leave only 2 digits after dot
+        if (number.contains(".")) {
+            int i = number.indexOf(".");
+            if (nDigits == 0) {
+                number = number.substring(0, i);
+            } else {
+                i = Math.min(i + (nDigits + 1), number.length());
+                number = number.substring(0, i);
+            }
+        }
+
+        return number;
+    }
+
+    public static String parseAndKeepOnlyNDigits(String s, int nDigits) {
+        int index = s.lastIndexOf(" ");
+        String prefix = s.substring(0, index);
+        String number = s.substring(index + 1);
+        number = MBeanChart.keepNDigitsAfterComma(number, 2);
+        return prefix + " " + number;
+    }
+
+    public static String[] VOLUME_UNITS = new String[] { "Kb", "Mb", "Gb", "Tb" };
+
+    public static String[] THROUGHPUT_UNITS = new String[] { "Kb/s", "Mb/s", "Gb/s", "Tb/s" };
+
+    public static String addUnitDependsOnSize(String number, String[] units) {
+        number = keepNDigitsAfterComma(number, 0);
+        Long aLong = Long.parseLong(number);
+
+        int i;
+        for (i = 0; i < units.length - 1; ++i) {
+            if (aLong / 1024 == 0) {
+                break;
+            }
+            aLong /= 1024;
+        }
+
+        return aLong.toString() + " " + units[i];
+    }
+
 }

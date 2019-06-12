@@ -48,25 +48,22 @@ public class DiskPieChart extends MBeansChart {
 
     public DiskPieChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=FileSystem,Name=*", new String[] { "Total" }, "File System, Mb");
-        setYAxesTicksSuffix(" Mb");
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String s) {
                 int indexOfSpace = s.lastIndexOf(" ");
                 String firstHalf = s.substring(0, indexOfSpace);
-                String secondHalf = s.substring(indexOfSpace + 1);
+                String number = s.substring(indexOfSpace + 1);
 
-                if (secondHalf.contains(".")) {
-                    secondHalf = secondHalf.substring(0, secondHalf.indexOf("."));
-                }
+                number = MBeanChart.keepNDigitsAfterComma(number, 0);
 
-                long valueInMb = Long.parseLong(secondHalf);
+                long valueInKb = Long.parseLong(number);
 
-                long percentage = (long) (((double) valueInMb / total) * 100);
+                long percentage = (long) (((double) valueInKb / total) * 100);
 
-                secondHalf = putCommasEveryThreeDigits(secondHalf);
+                number = MBeanChart.addUnitDependsOnSize(number, VOLUME_UNITS);
 
-                return firstHalf + " " + secondHalf + " Mb (" + percentage + "%)";
+                return firstHalf + " " + number + " (" + percentage + "%)";
             }
         });
     }
@@ -99,13 +96,13 @@ public class DiskPieChart extends MBeansChart {
             for (String key : object.keySet()) {
 
                 double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
-                long inMB = (long) (value / 1024);
+                long inKB = (long) value;
 
-                total += inMB;
+                total += inKB;
 
                 labels.add(beautifyName(key));
 
-                values.add((double) inMB);
+                values.add((double) inKB);
             }
 
             dataset.setData(values);

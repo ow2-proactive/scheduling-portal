@@ -34,7 +34,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.DiskPieChart;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
 import org.pepstock.charba.client.PieChart;
 import org.pepstock.charba.client.data.PieDataset;
@@ -164,19 +163,18 @@ public class FileSystemView extends VLayout {
                                                  public String apply(String s) {
                                                      int indexOfSpace = s.lastIndexOf(" ");
                                                      String firstHalf = s.substring(0, indexOfSpace);
-                                                     String secondHalf = s.substring(indexOfSpace + 1);
+                                                     String number = s.substring(indexOfSpace + 1);
 
-                                                     if (secondHalf.contains(".")) {
-                                                         secondHalf = secondHalf.substring(0, secondHalf.indexOf("."));
-                                                     }
+                                                     number = MBeanChart.keepNDigitsAfterComma(number, 0);
 
-                                                     long valueInKb = Long.parseLong(secondHalf);
+                                                     long valueInKb = Long.parseLong(number);
 
                                                      long percentage = (long) (((double) valueInKb / ttotal) * 100);
 
-                                                     secondHalf = DiskPieChart.putCommasEveryThreeDigits(secondHalf);
+                                                     number = MBeanChart.addUnitDependsOnSize(number,
+                                                                                              MBeanChart.VOLUME_UNITS);
 
-                                                     return firstHalf + " " + secondHalf + " Kb (" + percentage + "%)";
+                                                     return firstHalf + " " + number + " (" + percentage + "%)";
                                                  }
                                              });
 
