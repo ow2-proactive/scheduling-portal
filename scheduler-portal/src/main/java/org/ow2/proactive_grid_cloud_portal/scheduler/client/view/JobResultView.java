@@ -97,6 +97,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         root.setWidth100();
         root.setHeight100();
         root.setPadding(20);
+        root.setMembersMargin(5);
 
         placeHolderLabel = new Label(NO_JOB_SELECED);
         placeHolderLabel.setWidth100();
@@ -118,7 +119,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
         downloadForm = new DynamicForm();
         downloadForm.setWidth100();
-        downloadForm.setAutoHeight();
+        downloadForm.setHeight(0);
         downloadForm.setMethod(FormMethod.POST);
         downloadForm.setFields(sess, job, destination, task);
         downloadForm.setAction(GWT.getModuleBaseURL() + "downloader");
@@ -128,6 +129,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons = new VLayout();
         preciousButtons.setMembersMargin(10);
         preciousButtons.setWidth100();
+        preciousButtons.setAutoHeight();
         root.addMember(preciousButtons);
 
         resultMap = new KeyValueGrid("Result Map");
