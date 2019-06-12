@@ -45,16 +45,7 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
             @Override
             public String apply(String s) {
                 // leave only 2 digits after dot
-                int index = s.lastIndexOf(" ");
-                String firstHalf = s.substring(0, index);
-                String secondHalf = s.substring(index + 1);
-                if (secondHalf.contains(".")) {
-                    int i = secondHalf.indexOf(".");
-                    i = Math.min(i + 3, secondHalf.length());
-                    secondHalf = secondHalf.substring(0, i);
-                }
-
-                return firstHalf + " " + secondHalf + "%";
+                return MBeanChart.parseAndKeepOnlyNDigits(s, 2) + "%";
             }
         });
     }

@@ -56,7 +56,7 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String s) {
-                return s + "%";
+                return MBeanChart.parseAndKeepOnlyNDigits(s, 2) + "%";
             }
         });
     }

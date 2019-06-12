@@ -63,11 +63,11 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
         setTooltipItemHandler(new Function<String, String>() {
             @Override
             public String apply(String line) {
-                if (line.contains(".")) {
-                    return line.substring(0, line.indexOf(".")) + " Kb/s";
-                } else {
-                    return line + " Kb/s";
-                }
+                int index = line.lastIndexOf(" ");
+                String prefix = line.substring(0, index);
+                String number = line.substring(index + 1);
+                number = MBeanChart.addUnitDependsOnSize(number, THROUGHPUT_UNITS);
+                return prefix + " " + number;
             }
         });
     }
@@ -104,8 +104,8 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
                 long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
                 long t = System.currentTimeMillis();
                 double bytePerMilliSec = (value - txBytes[colIndex]) / (t - time[colIndex]);
-                double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                addPointToDataset(colIndex, (long) mbPerSec);
+                double kbPerSec = bytePerMilliSec * 1000 / 1024;
+                addPointToDataset(colIndex, (long) kbPerSec);
 
                 txBytes[colIndex] = value;
                 time[colIndex] = t;

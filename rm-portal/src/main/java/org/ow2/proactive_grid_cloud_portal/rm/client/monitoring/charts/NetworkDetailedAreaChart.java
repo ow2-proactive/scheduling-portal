@@ -62,13 +62,19 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
         setTooltipItemHandler(new Function<String, String>() {
             @Override
-            public String apply(String line) {
+            public String apply(String s) {
                 // dropping decimal digits if they exist
-                if (line.contains(".")) {
-                    return line.substring(0, line.indexOf(".")) + " Kb/s";
-                } else {
-                    return line + " Kb/s";
-                }
+                int indexOfSpace = s.lastIndexOf(" ");
+                String firstHalf = s.substring(0, indexOfSpace);
+                String number = s.substring(indexOfSpace + 1);
+
+                number = MBeanChart.keepNDigitsAfterComma(number, 0);
+
+                long valueInKb = Long.parseLong(number);
+
+                number = MBeanChart.addUnitDependsOnSize(number, THROUGHPUT_UNITS);
+
+                return firstHalf + " " + number;
             }
         });
     }
