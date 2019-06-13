@@ -68,11 +68,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                 String firstHalf = s.substring(0, indexOfSpace);
                 String number = s.substring(indexOfSpace + 1);
 
-                number = MBeanChart.keepNDigitsAfterComma(number, 0);
-
-                long valueInKb = Long.parseLong(number);
-
-                number = MBeanChart.addUnitDependsOnSize(number, THROUGHPUT_UNITS);
+                Double bytes = Double.valueOf(number) * 1024;
+                number = MBeanChart.addUnitDependsOnSize(bytes.toString(), THROUGHPUT_UNITS);
 
                 return firstHalf + " " + number;
             }
@@ -93,9 +90,9 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                 long t = System.currentTimeMillis();
                 if (history[i] > 0) {
                     double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
+                    double kbPerSec = bytePerMilliSec * 1000 / 1024;
 
-                    addPointToDataset(i, (long) mbPerSec);
+                    addPointToDataset(i, kbPerSec);
                 } else {
                     addPointToDataset(i, 0);
                 }

@@ -50,6 +50,24 @@ public class SwapLineChart extends MBeanTimeAreaChart {
                 return s + " Mb";
             }
         });
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                int indexOfSpace = s.lastIndexOf(" ");
+                String firstHalf = s.substring(0, indexOfSpace);
+                String number = s.substring(indexOfSpace + 1);
+
+                number = MBeanChart.keepNDigitsAfterComma(number, 0);
+
+                Long valueInKb = (Long.parseLong(number) * 1024);
+
+                number = valueInKb.toString();
+
+                number = MBeanChart.addUnitDependsOnSize(number, VOLUME_UNITS);
+
+                return firstHalf + " " + number;
+            }
+        });
     }
 
     @Override

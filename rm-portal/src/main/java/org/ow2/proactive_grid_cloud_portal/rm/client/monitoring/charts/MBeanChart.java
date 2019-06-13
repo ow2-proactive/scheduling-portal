@@ -112,6 +112,8 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     protected String[] colors = new String[] { "#fcaf3e", "#3a668d", "#35a849", "#fcaf3e", "#24c1ff", "#1e4ed7",
                                                "#ef2929", "#000000" };
 
+    private List<String> xLabels = new LinkedList<>();
+
     public MBeanChart(RMController controller, String jmxServerUrl, String mbean, String[] attrs, String title) {
         this.controller = controller;
         this.jmxServerUrl = jmxServerUrl;
@@ -187,40 +189,32 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void addXLabel(String label) {
-        String[] strings;
-        try {
-            strings = chart.getData().getLabels().getStrings(0);
-        } catch (Exception e) {
-            strings = new String[0];
-        }
-        List<String> labels = new LinkedList<>();
-        labels.addAll(Arrays.asList(strings));
-        while (labels.size() >= MAX_ROWS_NUMBER) {
-            labels.remove(0);
+        while (xLabels.size() >= MAX_ROWS_NUMBER) {
+            xLabels.remove(0);
         }
 
-        labels.add(label);
+        xLabels.add(label);
 
-        chart.getData().setLabels(labels.toArray(new String[0]));
+        chart.getData().setLabels(xLabels.toArray(new String[0]));
     }
 
     public void addPointToDataset(int index, double value) {
-        Dataset dataset;
-        if (index < chart.getData().getDatasets().size()) {
-            dataset = chart.getData().getDatasets().get(index);
-        } else {
-            dataset = createDataset(index);
+        if (index >= chart.getData().getDatasets().size()) {
+            Dataset dataset = createDataset(index);
             ArrayList<Dataset> newDatasets = new ArrayList<>(chart.getData().getDatasets());
             newDatasets.add(dataset);
             chart.getData().setDatasets(newDatasets.toArray(new Dataset[0]));
         }
 
+        List<Dataset> datasets = new ArrayList<>(chart.getData().getDatasets());
+        Dataset dataset = datasets.get(index);
         List<Double> data = new ArrayList<>(dataset.getData());
         while (data.size() >= MAX_ROWS_NUMBER) {
             data.remove(0);
         }
         data.add(formatValue(value));
         dataset.setData(data);
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
     }
 
     public void setYAxesTicksSuffix(String suffix) {
@@ -457,6 +451,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
             public void onChanged(ChangedEvent event) {
                 timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
                 chart.getData().setDatasets();
+                xLabels = new LinkedList<>();
                 reload();
             }
         });
@@ -611,21 +606,23 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     public static String[] VOLUME_UNITS = new String[] { "Kb", "Mb", "Gb", "Tb" };
 
-    public static String[] THROUGHPUT_UNITS = new String[] { "Kb/s", "Mb/s", "Gb/s", "Tb/s" };
+    public static String[] THROUGHPUT_UNITS = new String[] { "b/s", "Kb/s", "Mb/s", "Gb/s", "Tb/s" };
 
     public static String addUnitDependsOnSize(String number, String[] units) {
-        number = keepNDigitsAfterComma(number, 0);
-        Long aLong = Long.parseLong(number);
+        Double original = Double.parseDouble(number);
+        Double copy = original;
 
         int i;
         for (i = 0; i < units.length - 1; ++i) {
-            if (aLong / 1024 == 0) {
+            if (copy < 1024) {
                 break;
             }
-            aLong /= 1024;
+            copy /= 1024;
         }
 
-        return aLong.toString() + " " + units[i];
+        double value = original / Math.pow(1024, i);
+        return keepNDigitsAfterComma(Double.toString(value), 3) + " " + units[i];
+
     }
 
 }
