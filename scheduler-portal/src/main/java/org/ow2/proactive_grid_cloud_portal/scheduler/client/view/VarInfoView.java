@@ -83,18 +83,18 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
 
     @Override
     public void jobSelected(Job job) {
-        genericInformationGrid.buildEntries(job.getGenericInformation());
         variablesGrid.buildEntries(job.getVariables());
+        genericInformationGrid.buildEntries(job.getGenericInformation());
 
-        genericInformationGrid.show();
-        variablesGrid.show();
         label.hide();
+        variablesGrid.show();
+        genericInformationGrid.show();
     }
 
     public void jobUnselected() {
-        genericInformationGrid.hide();
-        variablesGrid.hide();
         label.show();
+        variablesGrid.hide();
+        genericInformationGrid.hide();
     }
 
     @Override
@@ -121,18 +121,18 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         label.setAlign(Alignment.CENTER);
         root.addMember(label);
 
+        variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        variablesGrid.showTopMargin();
+        variablesGrid.setWidth100();
+        variablesGrid.hide();
+        root.addMember(variablesGrid);
+
         genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
         genericInformationGrid.showTopMargin();
         genericInformationGrid.setWidth100();
         genericInformationGrid.hide();
         root.addMember(genericInformationGrid);
 
-        variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
-        variablesGrid.showTopMargin();
-        variablesGrid.setWidth100();
-        variablesGrid.hide();
-
-        root.addMember(variablesGrid);
         return root;
     }
 }
