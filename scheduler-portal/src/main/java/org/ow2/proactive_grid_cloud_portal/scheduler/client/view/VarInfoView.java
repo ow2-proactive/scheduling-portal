@@ -31,12 +31,10 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
 import com.smartgwt.client.types.Alignment;
@@ -46,14 +44,9 @@ import com.smartgwt.client.widgets.layout.VStack;
 
 
 /**
- * Displays detailed info about the currently selected job
- *
- *
- * @author the activeeon team
- *
+ * Displays Job Variables and Generic Info about the currently selected job
  */
-public class VarInfoView extends InfoView<Job>
-        implements JobSelectedListener, JobsUpdatedListener, ExecutionDisplayModeListener {
+public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeListener {
 
     protected SchedulerController controller;
 
@@ -62,6 +55,9 @@ public class VarInfoView extends InfoView<Job>
 
     /** Variables label text */
     private static final String JOB_VARIABLES_LABEL_TEXT = "Submitted Job Variables";
+
+    /** Label to show that now Job Is selected */
+    private Label label;
 
     /** Generic information grid */
     private KeyValueGrid genericInformationGrid;
@@ -72,57 +68,33 @@ public class VarInfoView extends InfoView<Job>
     /**
      * @param controller the Controller that created this View
      */
-    public VarInfoView(SchedulerController controller, ColumnsFactory<Job> factory) {
-        super(factory, "No job selected");
+    public VarInfoView(SchedulerController controller) {
         this.controller = controller;
+
         ExecutionsModel executionModel = ((SchedulerModelImpl) controller.getModel()).getExecutionsModel();
         JobsModel jobsModel = executionModel.getJobsModel();
         jobsModel.addJobSelectedListener(this);
-        jobsModel.addJobsUpdatedListener(this);
 
-        executionModel.getTasksModel().addJobSelectedListener(this);
-        executionModel.addExecutionsDisplayModeListener(this);
     }
 
-    @Override
     public Layout build() {
         return getLayout();
     }
 
+    @Override
     public void jobSelected(Job job) {
-        this.displayedItem = job;
-        this.displayItem();
-    }
+        variablesGrid.buildEntries(job.getVariables());
+        genericInformationGrid.buildEntries(job.getGenericInformation());
 
-    @Override
-    public void displayItem() {
-        displayExtraMembers(this.displayedItem);
-
-        this.label.hide();
-
-    }
-
-    public void jobsUpdating() {
-    }
-
-    public void jobSubmitted(Job j) {
-    }
-
-    @Override
-    public void jobsUpdated(Map<Integer, Job> jobs) {
-        if (this.displayedItem == null)
-            return;
-
-        for (Job j : jobs.values()) {
-            if (j.getId().equals(this.displayedItem.getId())) {
-                jobSelected(j);
-            }
-        }
+        label.hide();
+        variablesGrid.show();
+        genericInformationGrid.show();
     }
 
     public void jobUnselected() {
-        this.displayedItem = null;
-        this.hideDetails();
+        label.show();
+        variablesGrid.hide();
+        genericInformationGrid.hide();
     }
 
     @Override
@@ -132,74 +104,35 @@ public class VarInfoView extends InfoView<Job>
 
     @Override
     public void modeSwitched(ExecutionListMode mode) {
-        Job job = this.controller.getSelectedJob();
+        Job job = controller.getSelectedJob();
         if (job == null) {
-            this.jobUnselected();
+            jobUnselected();
         } else {
             jobSelected(job);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#addRootExtraMembers(com.
-     * smartgwt.client.widgets.layout.Layout)
-     */
-    @Override
     protected Layout getLayout() {
-
         VStack root = new VStack();
         root.setWidth100();
 
-        this.label = new Label(this.emptyMessage);
-        this.label.setWidth100();
-        this.label.setAlign(Alignment.CENTER);
-
+        label = new Label("No job selected");
+        label.setWidth100();
+        label.setAlign(Alignment.CENTER);
         root.addMember(label);
 
-        this.genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
-        this.genericInformationGrid.showTopMargin();
-        this.genericInformationGrid.setWidth100();
-        this.genericInformationGrid.hide();
-
-        this.variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
-        this.variablesGrid.showTopMargin();
-        this.variablesGrid.setWidth100();
-        this.variablesGrid.hide();
-
+        variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
+        variablesGrid.showTopMargin();
+        variablesGrid.setWidth100();
+        variablesGrid.hide();
         root.addMember(variablesGrid);
+
+        genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
+        genericInformationGrid.showTopMargin();
+        genericInformationGrid.setWidth100();
+        genericInformationGrid.hide();
         root.addMember(genericInformationGrid);
+
         return root;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#displayExtraMembers(
-     * boolean)
-     */
-    @Override
-    protected void displayExtraMembers(Job job) {
-        genericInformationGrid.buildEntries(job.getGenericInformation());
-        variablesGrid.buildEntries(job.getVariables());
-
-        this.genericInformationGrid.show();
-        this.variablesGrid.show();
-        this.label.hide();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ow2.proactive_grid_cloud_portal.scheduler.client.view.InfoView#hideExtraMembers()
-     */
-    @Override
-    protected void hideExtraMembers() {
-        this.genericInformationGrid.hide();
-        this.variablesGrid.hide();
-        this.label.show();
-    }
-
 }
