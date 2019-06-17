@@ -196,8 +196,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 if (node.isRemoved()) {
                     removeNode(node);
                 } else {
-                    addNodeIfNotExists(node);
-                    changeNodeStatusIfChanged(node);
+                    if (currentNodes.containsKey(node.getSourceName())) {
+                        addNodeIfNotExists(node);
+                        changeNodeStatusIfChanged(node);
+                    }
                 }
             }
         }
