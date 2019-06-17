@@ -119,7 +119,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
         downloadForm = new DynamicForm();
         downloadForm.setWidth100();
-        downloadForm.setHeight(0);
+        downloadForm.setAutoHeight();
         downloadForm.setMethod(FormMethod.POST);
         downloadForm.setFields(sess, job, destination, task);
         downloadForm.setAction(GWT.getModuleBaseURL() + "downloader");
