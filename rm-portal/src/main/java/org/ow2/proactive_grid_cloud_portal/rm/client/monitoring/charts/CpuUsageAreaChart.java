@@ -25,9 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import java.util.function.Function;
 
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 
 /**
@@ -37,8 +37,21 @@ public class CpuUsageAreaChart extends MBeanTimeAreaChart {
 
     public CpuUsageAreaChart(RMController controller, String jmxServerUrl) {
         super(controller, jmxServerUrl, "sigar:Type=CpuUsage", "Combined", "Cpu Usage");
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#%");
-        loadOpts.setVAxisOptions(vAxis);
+        setYAxesTicksSuffix("%");
+        setDatasourceNames("Combined");
+        chart.getOptions().getLegend().setDisplay(false);
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                // leave only 2 digits after dot
+                return MBeanChart.parseAndKeepOnlyNDigits(s, 2) + "%";
+            }
+        });
+    }
+
+    @Override
+    public double formatValue(double value) {
+        return super.formatValue(value * 100);
     }
 }

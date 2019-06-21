@@ -53,7 +53,6 @@ public abstract class MBeansChart extends MBeanChart {
     @Override
     public void reload() {
         final RMServiceAsync rm = controller.getRMService();
-        final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
         final boolean realTime = timeRange.equals(Model.StatHistory.Range.MINUTE_1);
 

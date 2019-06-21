@@ -30,6 +30,8 @@ import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.KeyValueColumnsFactory;
 
+import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.grid.ListGrid;
@@ -68,6 +70,12 @@ public class KeyValueGrid extends VStack {
 
         keyValueGrid = new ListGrid();
         keyValueGrid.setWidth100();
+        keyValueGrid.setLeaveScrollbarGap(false);
+        keyValueGrid.setAutoFitData(Autofit.VERTICAL);
+        keyValueGrid.setShowAllRecords(true);
+        keyValueGrid.setOverflow(Overflow.VISIBLE);
+        keyValueGrid.setHeight(1);
+        keyValueGrid.setBodyOverflow(Overflow.VISIBLE);
 
         GridColumns[] columns = keyValueColumnsFactory.getColumns();
         ListGridField[] fields = new ListGridField[columns.length];

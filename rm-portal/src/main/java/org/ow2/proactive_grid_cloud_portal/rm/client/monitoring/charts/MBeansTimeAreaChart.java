@@ -25,20 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
-import java.util.LinkedHashMap;
-
-import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AreaChart;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import org.pepstock.charba.client.AbstractChart;
+import org.pepstock.charba.client.LineChart;
 
 
 /**
@@ -51,23 +40,17 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String attribute,
             String title) {
         this(controller, jmxServerUrl, mbean, new String[] { attribute }, title);
+        setAreaChart(true);
     }
 
     public MBeansTimeAreaChart(RMController controller, String jmxServerUrl, String mbean, String[] attributes,
             String title) {
         super(controller, jmxServerUrl, mbean, attributes, title);
 
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.addColumn(ColumnType.STRING);
-        // fake column to draw the chart properly
-        // with mbeans we don't know how many columns we will have until receive first results
-        loadTable.addColumn(ColumnType.NUMBER);
     }
 
     public boolean initColumns() {
         if (initializing) {
-            // removing fake column
-            loadTable.removeColumn(1);
             initializing = false;
             return true;
         }
@@ -76,8 +59,8 @@ public abstract class MBeansTimeAreaChart extends MBeansChart {
     }
 
     @Override
-    public CoreChart createChart(DataTable data, Options opts) {
-        return new AreaChart(data, opts);
+    public AbstractChart createChart() {
+        return new LineChart();
     }
 
 }

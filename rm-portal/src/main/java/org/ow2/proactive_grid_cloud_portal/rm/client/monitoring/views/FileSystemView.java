@@ -27,22 +27,20 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
-import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
+import org.pepstock.charba.client.PieChart;
+import org.pepstock.charba.client.data.PieDataset;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
@@ -70,7 +68,6 @@ public class FileSystemView extends VLayout {
         attrs.add("Total");
 
         final RMServiceAsync rm = controller.getRMService();
-        final RMModel model = controller.getModel();
         final long t = System.currentTimeMillis();
 
         final LoginModel loginModel = LoginModel.getInstance();
@@ -88,29 +85,12 @@ public class FileSystemView extends VLayout {
                                      LogModel.getInstance().logMessage("Fetched Runtime info in " +
                                                                        (System.currentTimeMillis() - t) + "ms");
 
-                                     //{"sigar:Name=/boot,Type=FileSystem":[{"name":"DevName","value":"/dev/sda1"},{"name":"DirName","value":"/boot"},{"name":"Files","value":76912},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":236558},{"name":"Used","value":60927},{"name":"Total","value":297485}],"sigar:Name=/,Type=FileSystem":[{"name":"DevName","value":"/dev/sda2"},{"name":"DirName","value":"/"},{"name":"Files","value":1921360},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":15705152},{"name":"Used","value":14532496},{"name":"Total","value":30237648}],"sigar:Name=/local,Type=FileSystem":[{"name":"DevName","value":"/dev/sda5"},{"name":"DirName","value":"/local"},{"name":"Files","value":58851328},{"name":"Options","value":"rw"},{"name":"SysTypeName","value":"ext4"},{"name":"Free","value":916766088},{"name":"Used","value":9996480},{"name":"Total","value":926762568}]}
-
-                                     Options opts = Options.create();
-                                     opts.setLegend(LegendPosition.NONE);
-                                     opts.setColors("#fcaf3e",
-                                                    "#3a668d",
-                                                    "#35a849",
-                                                    "#fcaf3e",
-                                                    "#24c1ff",
-                                                    "#1e4ed7",
-                                                    "#ef2929",
-                                                    "#000000");
-
                                      JSONObject object = controller.parseJSON(result).isObject();
                                      if (object != null) {
 
                                          for (String disk : object.keySet()) {
 
                                              HLayout diskLayout = new HLayout();
-
-                                             DataTable pieData = DataTable.create();
-                                             pieData.addColumn(ColumnType.STRING, "Type");
-                                             pieData.addColumn(ColumnType.NUMBER, "Bytes");
 
                                              DetailViewer details = new DetailViewer();
                                              DetailViewerRecord dv = new DetailViewerRecord();
@@ -119,9 +99,23 @@ public class FileSystemView extends VLayout {
                                                  fields[i] = new DetailViewerField(attrs.get(i));
                                              }
                                              details.setFields(fields);
+                                             details.setData(new DetailViewerRecord[] { dv });
+                                             details.setWidth("50%");
 
+                                             PieChart pie = new PieChart();
+                                             PieDataset dataset = pie.newDataset();
+                                             dataset.setBackgroundColor("#fcaf3e",
+                                                                        "#3a668d",
+                                                                        "#35a849",
+                                                                        "#fcaf3e",
+                                                                        "#24c1ff",
+                                                                        "#1e4ed7",
+                                                                        "#ef2929",
+                                                                        "#000000");
+                                             List<String> labels = new ArrayList<>();
+                                             List<Double> values = new ArrayList<>();
                                              JSONArray properties = object.get(disk).isArray();
-
+                                             long total = 0;
                                              for (int i = 0; i < properties.size(); i++) {
                                                  String name = properties.get(i)
                                                                          .isObject()
@@ -130,20 +124,22 @@ public class FileSystemView extends VLayout {
                                                                          .stringValue();
                                                  String value = properties.get(i).isObject().get("value").toString();
                                                  if (name.equals("Free") || name.equals("Used")) {
-                                                     pieData.addRow();
-                                                     pieData.setValue(pieData.getNumberOfRows() - 1, 0, name);
-                                                     pieData.setValue(pieData.getNumberOfRows() - 1,
-                                                                      1,
-                                                                      properties.get(i)
-                                                                                .isObject()
-                                                                                .get("value")
-                                                                                .isNumber()
-                                                                                .doubleValue());
+
+                                                     double doubleValue = properties.get(i)
+                                                                                    .isObject()
+                                                                                    .get("value")
+                                                                                    .isNumber()
+                                                                                    .doubleValue();
+
+                                                     labels.add(name);
+                                                     values.add(doubleValue);
+                                                     total += doubleValue;
                                                  }
 
                                                  if (name.equals("Free") || name.equals("Used") ||
                                                      name.equals("Total")) {
-                                                     int inMb = Integer.parseInt(value) / 1024;
+                                                     final int inKb = Integer.parseInt(value);
+                                                     int inMb = inKb / 1024;
                                                      if (inMb > 1024) {
                                                          value = (inMb / 1024) + " Gb";
                                                      } else {
@@ -152,12 +148,38 @@ public class FileSystemView extends VLayout {
                                                  }
                                                  dv.setAttribute(name, value);
                                              }
-                                             details.setData(new DetailViewerRecord[] { dv });
-                                             details.setWidth("50%");
 
-                                             PieChart pie = new PieChart(pieData, opts);
+                                             pie.getData().setLabels(labels.toArray(new String[0]));
+
+                                             dataset.setData(values);
+                                             pie.getData().setDatasets(dataset);
+
                                              pie.setWidth("50%");
-                                             pie.draw(pieData, opts);
+                                             pie.getOptions().getLegend().setDisplay(false);
+                                             final long ttotal = total;
+
+                                             MBeanChart.setTooltipItemHandler(pie, new Function<String, String>() {
+                                                 @Override
+                                                 public String apply(String s) {
+                                                     int indexOfSpace = s.lastIndexOf(" ");
+                                                     String firstHalf = s.substring(0, indexOfSpace);
+                                                     String number = s.substring(indexOfSpace + 1);
+
+                                                     number = MBeanChart.keepNDigitsAfterComma(number, 0);
+
+                                                     long valueInKb = Long.parseLong(number);
+
+                                                     long percentage = (long) (((double) valueInKb / ttotal) * 100);
+
+                                                     number = MBeanChart.addUnitDependsOnSize(number,
+                                                                                              MBeanChart.VOLUME_UNITS);
+
+                                                     return firstHalf + " " + number + " (" + percentage + "%)";
+                                                 }
+                                             });
+
+                                             pie.update();
+
                                              diskLayout.addMember(details);
                                              diskLayout.addMember(pie);
                                              addMember(diskLayout);

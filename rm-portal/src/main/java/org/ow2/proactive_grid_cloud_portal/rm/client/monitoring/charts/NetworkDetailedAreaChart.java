@@ -25,17 +25,20 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Function;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.pepstock.charba.client.data.Dataset;
+import org.pepstock.charba.client.data.LineDataset;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.visualization.client.LegendPosition;
-import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 
 
 /**
@@ -54,12 +57,23 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         history = new long[2];
         time = new long[2];
 
-        AxisOptions vAxis = AxisOptions.create();
-        vAxis.set("format", "#.# Kb/s");
-        loadOpts.setVAxisOptions(vAxis);
-        loadOpts.setLegend(LegendPosition.RIGHT);
-        loadTable.setColumnLabel(1, "RX");
-        loadTable.setColumnLabel(2, "TX");
+        setYAxesTicksSuffix(" Kb/s");
+        setDatasourceNames("RX", "TX");
+
+        setTooltipItemHandler(new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                // dropping decimal digits if they exist
+                int indexOfSpace = s.lastIndexOf(" ");
+                String firstHalf = s.substring(0, indexOfSpace);
+                String number = s.substring(indexOfSpace + 1);
+
+                Double bytes = Double.valueOf(number) * 1024;
+                number = MBeanChart.addUnitDependsOnSize(bytes.toString(), THROUGHPUT_UNITS);
+
+                return firstHalf + " " + number;
+            }
+        });
     }
 
     @Override
@@ -68,36 +82,32 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
         if (array != null) {
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
                                              .format(new Date(System.currentTimeMillis()));
-            addRow();
 
-            loadTable.setValue(loadTable.getNumberOfRows() - 1, 0, timeStamp);
+            addXLabel(timeStamp);
 
-            // getting primitive values of all attributes
             for (int i = 0; i < attrs.length; i++) {
                 double value = array.get(i).isObject().get("value").isNumber().doubleValue();
                 long t = System.currentTimeMillis();
                 if (history[i] > 0) {
                     double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-                    double mbPerSec = bytePerMilliSec * 1000 / 1024;
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, (long) mbPerSec);
+                    double kbPerSec = bytePerMilliSec * 1000 / 1024;
+
+                    addPointToDataset(i, kbPerSec);
                 } else {
-                    loadTable.setValue(loadTable.getNumberOfRows() - 1, i + 1, 0);
+                    addPointToDataset(i, 0);
                 }
 
                 history[i] = (long) value;
                 time[i] = t;
             }
 
-            loadChart.draw(loadTable, loadOpts);
+            chart.update();
         }
     }
 
+    @Override
     public void processHistoryResult(String result) {
-
-        // removing internal escaping
-        result = result.replace("\\\"", "\"");
-        result = result.replace("\"{", "{");
-        result = result.replace("}\"", "}");
+        result = removingInternalEscaping(result);
 
         JSONValue resultVal = controller.parseJSON(result);
         JSONObject json = resultVal.isObject();
@@ -106,11 +116,22 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             return;
         }
 
-        loadTable.removeRows(0, loadTable.getNumberOfRows());
         long now = new Date().getTime() / 1000;
         long dur = timeRange.getDuration();
         int size = getJsonInternalSize(json);
         long step = dur / size;
+        final int length = getJsonSlice(json, 0).length;
+
+        List<Dataset> datasets = new ArrayList<>();
+        List<Double>[] dpss = new List[length];
+        for (int i = 0; i < length; ++i) {
+            LineDataset dataset = (LineDataset) createDataset(i);
+
+            datasets.add(dataset);
+
+            dpss[i] = new ArrayList<>();
+        }
+        List<String> labels = new ArrayList<>(size);
 
         for (int i = 1; i < size; i++) {
 
@@ -124,8 +145,7 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             long t = now - dur + step * (i - 1);
             String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
 
-            loadTable.addRow();
-            loadTable.setValue(i - 1, 0, timeStamp);
+            labels.add(timeStamp);
 
             for (int j = 0; j < slice.length; j++) {
                 long value = (long) slice[j];
@@ -139,7 +159,8 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
                         kbPerSec = 0;
                     }
 
-                    loadTable.setValue(i - 1, j + 1, (long) kbPerSec);
+                    dpss[j].add(kbPerSec);
+
                 }
 
                 history[j] = value;
@@ -147,7 +168,15 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
             }
         }
 
-        loadChart.draw(loadTable, loadOpts);
+        chart.getData().setLabels(labels.toArray(new String[0]));
+
+        for (int i = 0; i < length; ++i) {
+            datasets.get(i).setData(dpss[i]);
+        }
+
+        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+        chart.update();
     }
 
 }

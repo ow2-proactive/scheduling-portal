@@ -729,12 +729,12 @@ public interface RestClient {
 
     @POST
     @Path("/credentials/{key}")
-    void putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") String key,
+    void putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key,
             @FormParam("value") String value);
 
     @DELETE
     @Path("/credentials/{key}")
-    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") String key);
+    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key);
 
     @GET
     @Path("/credentials/")

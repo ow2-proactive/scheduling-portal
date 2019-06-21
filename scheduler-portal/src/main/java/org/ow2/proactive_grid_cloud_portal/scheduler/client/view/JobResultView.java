@@ -60,6 +60,10 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     private static final String NO_JOB_SELECED = "No job selected.";
 
+    private static final String NO_ITEMS_TO_SHOW = "<b>Result List: no items to show.</b>";
+
+    private static final String ITEMS_TO_SHOW = "<b>Result List:</b>";
+
     /**
      * label when no job is selected or job is not finished
      */
@@ -93,13 +97,14 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         root.setWidth100();
         root.setHeight100();
         root.setPadding(20);
+        root.setMembersMargin(5);
 
         placeHolderLabel = new Label(NO_JOB_SELECED);
         placeHolderLabel.setWidth100();
         placeHolderLabel.setAlign(Alignment.CENTER);
         root.addMember(placeHolderLabel);
 
-        preciousResultLabel = new Label("<b>Result List:</b>");
+        preciousResultLabel = new Label(ITEMS_TO_SHOW);
         preciousResultLabel.setAutoHeight();
         preciousResultLabel.setWidth100();
         preciousResultLabel.hide();
@@ -124,6 +129,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons = new VLayout();
         preciousButtons.setMembersMargin(10);
         preciousButtons.setWidth100();
+        preciousButtons.setAutoHeight();
         root.addMember(preciousButtons);
 
         resultMap = new KeyValueGrid("Result Map");
@@ -230,6 +236,11 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
         placeHolderLabel.hide();
         resultMap.show();
+        if (preciousTaskNames.isEmpty()) {
+            preciousResultLabel.setContents(NO_ITEMS_TO_SHOW);
+        } else {
+            preciousResultLabel.setContents(ITEMS_TO_SHOW);
+        }
         preciousResultLabel.show();
         preciousButtons.show();
     }
