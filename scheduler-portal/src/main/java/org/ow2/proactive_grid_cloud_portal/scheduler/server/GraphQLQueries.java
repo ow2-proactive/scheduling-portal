@@ -25,11 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -59,6 +59,25 @@ public final class GraphQLQueries {
      * Logger
      */
     private static final Logger LOGGER = Logger.getLogger(GraphQLQueries.class.getName());
+
+    private static List<String> PAST_JOB_STATUSES = Stream.of(JobStatus.CANCELED,
+                                                              JobStatus.FAILED,
+                                                              JobStatus.KILLED,
+                                                              JobStatus.FINISHED)
+                                                          .map(Enum::name)
+                                                          .map(String::toUpperCase)
+                                                          .collect(Collectors.toList());
+
+    private static List<String> CURRENT_JOB_STATUSES = Stream.of(JobStatus.PAUSED,
+                                                                 JobStatus.IN_ERROR,
+                                                                 JobStatus.STALLED,
+                                                                 JobStatus.RUNNING)
+                                                             .map(Enum::name)
+                                                             .map(String::toUpperCase)
+                                                             .collect(Collectors.toList());
+
+    private static List<String> PENDING_JOB_STATUSES = Collections.singletonList(JobStatus.PENDING.name()
+                                                                                                  .toUpperCase());
 
     private GraphQLQueries() {
     }
@@ -112,26 +131,15 @@ public final class GraphQLQueries {
      */
     private List<JobInput> getJobInputs(final String user, final boolean pending, final boolean running,
             final boolean finished, FilterModel filterModel) {
-
-        // Gather job status to consider
-        ArrayList<String> statusNames = new ArrayList<>(JobStatus.values().length);
-        for (JobStatus status : JobStatus.values()) {
-            switch (status) {
-                case PENDING:
-                    if (pending)
-                        statusNames.add(status.name().toUpperCase());
-                    break;
-                case RUNNING:
-                    if (running)
-                        statusNames.add(status.name().toUpperCase());
-                    break;
-                case FINISHED:
-                    if (finished)
-                        statusNames.add(status.name().toUpperCase());
-                    break;
-                default:
-                    statusNames.add(status.name().toUpperCase());
-            }
+        List<String> statusNames = new ArrayList<>();
+        if (pending) { // PENDING
+            statusNames.addAll(PENDING_JOB_STATUSES);
+        }
+        if (running) { // CURENT
+            statusNames.addAll(CURRENT_JOB_STATUSES);
+        }
+        if (finished) { // PAST
+            statusNames.addAll(PAST_JOB_STATUSES);
         }
 
         // Create filters
@@ -187,7 +195,7 @@ public final class GraphQLQueries {
                             case EQUALS:
                                 if (id == null)
                                     id = value;
-                                else if (value != id)
+                                else if (!value.equals(id))
                                     return input.jobName(RETURN_NOTHING_FILTER).build();
                                 break;
                             case GREATER_THAN_OR_EQUAL_TO:
@@ -208,7 +216,7 @@ public final class GraphQLQueries {
 
                         if (status == null)
                             status = value.toUpperCase();
-                        else if (value.toUpperCase() != status)
+                        else if (!value.toUpperCase().equals(status))
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         break;
                     }
@@ -217,7 +225,7 @@ public final class GraphQLQueries {
 
                         if (priority == null)
                             priority = value.toUpperCase();
-                        else if (value.toUpperCase() != priority)
+                        else if (!value.toUpperCase().equals(priority))
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         break;
                     }
@@ -227,7 +235,7 @@ public final class GraphQLQueries {
                         if (constraint.getAction() == Action.EQUALS) {
                             if (userFilter == null)
                                 userFilter = value;
-                            else if (value != userFilter)
+                            else if (!value.equals(userFilter))
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             userFilter = filter;
@@ -239,7 +247,7 @@ public final class GraphQLQueries {
                         if (constraint.getAction() == Action.EQUALS) {
                             if (name == null)
                                 name = value;
-                            else if (value != name)
+                            else if (!value.equals(name))
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             name = filter;
@@ -251,7 +259,7 @@ public final class GraphQLQueries {
                         if (constraint.getAction() == Action.EQUALS) {
                             if (projectName == null)
                                 projectName = value;
-                            else if (value != projectName)
+                            else if (!value.equals(projectName))
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             projectName = filter;
