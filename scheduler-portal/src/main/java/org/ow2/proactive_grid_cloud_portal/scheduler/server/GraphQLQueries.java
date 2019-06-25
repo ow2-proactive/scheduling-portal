@@ -158,6 +158,10 @@ public final class GraphQLQueries {
         JobInput.Builder input = new JobInput.Builder();
         input.status(statusNames);
 
+        if (statusNames.isEmpty()) {
+            return input.jobName(RETURN_NOTHING_FILTER).build();
+        }
+
         String id = null;
         String afterId = null;
         String beforeId = null;
