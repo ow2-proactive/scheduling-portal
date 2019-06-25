@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
