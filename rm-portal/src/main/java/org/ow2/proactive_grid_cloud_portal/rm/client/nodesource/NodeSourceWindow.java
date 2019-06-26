@@ -335,7 +335,25 @@ public abstract class NodeSourceWindow {
         }, this.window::hide);
     }
 
+    private void checkFileField(List<FormItem> formItems) {
+        if (formItems != null) {
+            UploadItem uploadItem = null;
+            for (FormItem formItem : formItems) {
+                if (formItem instanceof UploadItem) {
+                    UploadItem candidate = (UploadItem) formItem;
+                    if (candidate.getValue() != null) {
+                        uploadItem = candidate;
+                        showErrorMessage("Please fill: " + uploadItem.getTitle());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     private void resetFormForPolicySelectChange() {
+        checkFileField(formItemsByName.get(infrastructureSelectItem.getValueAsString()));
+
         String policyPluginName = this.policySelectItem.getValueAsString();
         if (this.previousSelectedPolicy != null) {
             for (FormItem formItem : this.formItemsByName.get(this.previousSelectedPolicy)) {
@@ -349,6 +367,8 @@ public abstract class NodeSourceWindow {
     }
 
     private void resetFormForInfrastructureSelectChange() {
+        checkFileField(formItemsByName.get(policySelectItem.getValueAsString()));
+
         if (this.previousSelectedInfrastructure != null) {
             for (FormItem formItem : this.formItemsByName.get(this.previousSelectedInfrastructure)) {
                 formItem.hide();
@@ -667,6 +687,11 @@ public abstract class NodeSourceWindow {
         LogModel.getInstance().logImportantMessage(errorMessage + ": " + e.getMessage());
         this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + " :<br>" + e.getMessage() +
                                                "</span>");
+    }
+
+    public void showErrorMessage(String errorMessage) {
+        LogModel.getInstance().logImportantMessage(errorMessage);
+        this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + "</span>");
     }
 
     public void show() {
