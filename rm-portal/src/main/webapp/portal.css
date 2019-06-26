@@ -74,6 +74,10 @@
 	padding: 3px 5px !important;
 }
 
+.error-message {
+    color: red !important;
+}
+
 .gwt-FileUpload {
                 font-size : 11px;
                 margin-left : 60px;
