@@ -37,7 +37,6 @@ import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.SchedulerStatusListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ExecutionListMode;

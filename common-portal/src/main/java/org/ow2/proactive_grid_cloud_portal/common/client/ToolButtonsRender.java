@@ -88,10 +88,13 @@ public class ToolButtonsRender {
     }
 
     private ToolStripButton getToolStripButtonHighlighted(ImageResource imageResource, String title, final String url) {
-        ToolStripButton toolStripButton = getToolStripButtonWithoutBorder(imageResource, title, url);
+        // Workaround to change text color of a button in smartgwt
+        String inlineStyledTitle = "<span style='color:#ffffff;'>" + title + "</span>";
+        ToolStripButton toolStripButton = getToolStripButtonWithoutBorder(imageResource, inlineStyledTitle, url);
 
         toolStripButton.setBorder(GREY_BUTTON_BORDER);
-        toolStripButton.setBackgroundColor("#e6e6e6");
+        toolStripButton.setBackgroundColor("#E86D1F");
+        toolStripButton.setBaseStyle("toolStripButton no-hover");
         return toolStripButton;
     }
 
