@@ -333,22 +333,25 @@ public class SubmitWindow {
         selectWfLayout.setGroupTitle("1. Select workflow");
         selectWfLayout.setIsGroup(true);
         selectWfLayout.setHeight("130px");
+	selectWfLayout.setMargin(2);
+
 
         // This panel changes depending on the selected method of getting a
         // workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
         selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        selectWorkflowButtonsPanel.setSpacing(5);
+        selectWorkflowButtonsPanel.setSpacing(2);
         selectWorkflowButtonsPanel.setHeight("50px");
 
         final VerticalPanel getWfMethodsPanel = new VerticalPanel();
-        getWfMethodsPanel.setSpacing(10);
-        getWfMethodsPanel.setHeight("30px");
+        getWfMethodsPanel.setSpacing(2);
+        getWfMethodsPanel.setHeight("20px");
         wfMethodsListBox = new ListBox();
         wfMethodsListBox.addItem(METHOD_INSTRUCTION);
         wfMethodsListBox.addItem(METHOD_FROM_FILE);
         wfMethodsListBox.addItem(METHOD_FROM_CATALOG);
+	wfMethodsListBox.setHeight("20px");
         getWfMethodsPanel.add(wfMethodsListBox);
 
         wfMethodsListBox.addChangeHandler(new ChangeHandler() {
@@ -638,7 +641,7 @@ public class SubmitWindow {
         dateChooser.setMargin(10);
 
         startAtRadioGroupPanel = new VerticalPanel();
-        startAtRadioGroupPanel.setSpacing(10);
+        startAtRadioGroupPanel.setSpacing(5);
 
         startAtRadioGroupPanel.add(startAccordingPlanningRadioButton);
 
@@ -787,13 +790,14 @@ public class SubmitWindow {
 
     private void initSelectWorkflowFromFilePanel() {
         fromFilePanel = new VLayout();
-        fromFilePanel.setHeight("30px");
+        fromFilePanel.setHeight("20px");
 
         fileUpload = new FileUpload();
         fileUpload.setName("job");
 
         VerticalPanel formContent = new VerticalPanel();
-        formContent.setHeight("30px");
+        formContent.setHeight("20px");
+	formContent.setSpacing(5);
 
         Hidden hiddenField = new Hidden();
         hiddenField.setName(SESSION_ID_PARAMETER_NAME);
@@ -807,22 +811,24 @@ public class SubmitWindow {
         importFromFileformPanel.setAction(URL_UPLOAD_FILE);
         importFromFileformPanel.add(formContent);
         importFromFileformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
-        importFromFileformPanel.setHeight("30px");
+        importFromFileformPanel.setHeight("20px");
         fromFilePanel.addMember(importFromFileformPanel);
 
         sendFromFileButton = new Button("Upload file");
-        sendFromFileButton.addClickHandler(clickHandlerForUploadFromFileButton(importFromFileformPanel));
+	sendFromFileButton.setHeight("20px");        
+	sendFromFileButton.addClickHandler(clickHandlerForUploadFromFileButton(importFromFileformPanel));
 
     }
 
     private void initSelectWorkflowFromCatalogPanel() {
         fromCatalogPanel = new HorizontalPanel();
-        fromCatalogPanel.setHeight("30px");
+        fromCatalogPanel.setHeight("20px");
         fromCatalogPanel.setWidth("100%");
         fromCatalogPanel.setSpacing(2);
         fromCatalogPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         bucketsListBox = new ListBox();
+	bucketsListBox.setHeight("20px");
         workflowsListBox = new ListBox();
 
         bucketsListBox.setEnabled(false);
@@ -830,6 +836,7 @@ public class SubmitWindow {
 
         workflowsListBox.setEnabled(false);
         workflowsListBox.addItem(CATALOG_SELECT_WF);
+	workflowsListBox.setHeight("20px");
 
         bucketsListBox.addChangeHandler(event -> {
             String selectedBucket = bucketsListBox.getSelectedValue();
@@ -904,6 +911,8 @@ public class SubmitWindow {
         workflowsListBox.setWidth("230px");
 
         VerticalPanel formContent = new VerticalPanel();
+        formContent.setSpacing(5);
+	formContent.setMargin(2);
         formContent.setHeight("30px");
         formContent.add(new Hidden(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId()));
 
@@ -913,7 +922,7 @@ public class SubmitWindow {
         importFromCatalogformPanel.setAction(URL_UPLOAD_FILE);
         importFromCatalogformPanel.add(formContent);
         importFromCatalogformPanel.addSubmitCompleteHandler(fileUploadCompleteHandler());
-        importFromCatalogformPanel.setHeight("30px");
+        importFromCatalogformPanel.setHeight("20px");
         fromCatalogPanel.add(importFromCatalogformPanel);
 
         sendFromCatalogButton = new Button("Import workflow");
