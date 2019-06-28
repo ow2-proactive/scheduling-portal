@@ -338,14 +338,13 @@ public class SubmitWindow {
         // workflow
         selectWorkflowButtonsPanel = new VerticalPanel();
         selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
         selectWorkflowButtonsPanel.setSpacing(5);
-        selectWorkflowButtonsPanel.setHeight("50px");
 
         final VerticalPanel getWfMethodsPanel = new VerticalPanel();
         getWfMethodsPanel.setSpacing(10);
         getWfMethodsPanel.setHeight("30px");
         wfMethodsListBox = new ListBox();
+        wfMethodsListBox.setHeight("20px");
         wfMethodsListBox.addItem(METHOD_INSTRUCTION);
         wfMethodsListBox.addItem(METHOD_FROM_FILE);
         wfMethodsListBox.addItem(METHOD_FROM_CATALOG);
@@ -823,8 +822,9 @@ public class SubmitWindow {
         fromCatalogPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         bucketsListBox = new ListBox();
+        bucketsListBox.setHeight("20px");
         workflowsListBox = new ListBox();
-
+        workflowsListBox.setHeight("20px");
         bucketsListBox.setEnabled(false);
         bucketsListBox.addItem(CATALOG_SELECT_BUCKET);
 
