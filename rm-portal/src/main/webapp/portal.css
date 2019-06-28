@@ -49,7 +49,7 @@
 }
 
 .pa-shortcuts > .active {
-	background-color: #f76800;
+	background-color: #E86D1F;
 	color: white;
 }
 
@@ -66,6 +66,11 @@
 	display: inline-flex;
 	float: right;
 	width: auto!important;
+}
+
+.no-hover{
+	box-shadow: none;
+	background-image: none;
 }
 
 .toolStripButton, .toolStripButtonOver, .toolStripButtonFocused, .toolStripButtonFocusedOver, .toolStripButtonDown, .toolStripButtonFocusedDown, .toolStripButtonSelected, .toolStripButtonSelectedFocused, .toolStripButtonSelectedDown, .toolStripButtonSelectedFocusedDown, .toolStripButtonSelectedOver, .toolStripButtonSelectedFocusedOver, .toolStripButtonDisabled, .toolStripButtonSelectedDisabled {
