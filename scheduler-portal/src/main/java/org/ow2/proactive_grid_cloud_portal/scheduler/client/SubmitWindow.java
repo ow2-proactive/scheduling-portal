@@ -340,7 +340,6 @@ public class SubmitWindow {
         selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         selectWorkflowButtonsPanel.setSpacing(5);
-        selectWorkflowButtonsPanel.setHeight("50px");
 
         final VerticalPanel getWfMethodsPanel = new VerticalPanel();
         getWfMethodsPanel.setSpacing(10);
