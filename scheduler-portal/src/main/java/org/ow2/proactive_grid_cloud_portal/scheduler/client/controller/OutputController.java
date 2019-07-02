@@ -122,7 +122,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
             @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
-                if (msg.equals("HTTP 403 Forbidden")) {
+                if (msg.contains("HTTP 403 Forbidden")) {
                     view.goToNotAuthorized();
                 }
             }

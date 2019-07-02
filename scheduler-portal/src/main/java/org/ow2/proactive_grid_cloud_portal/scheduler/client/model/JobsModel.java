@@ -262,6 +262,10 @@ public class JobsModel {
         taskResultListeners.forEach(listener -> listener.preciousTaskNamesLoaded(result));
     }
 
+    public void preciousTaskNamesNotAuthorized() {
+        taskResultListeners.forEach(TaskResultListener::preciousTaskNamesNotAuthorized);
+    }
+
     public List<Integer> getSelectedJobsIds() {
         return selectedJobsIds;
     }

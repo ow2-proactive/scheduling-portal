@@ -133,7 +133,7 @@ public class ServerLogsController extends AbstractSelectedTargetController<Serve
                                                              public void onFailure(Throwable caught) {
                                                                  String msg = JSONUtils.getJsonErrorMessage(caught);
                                                                  // might be an exception
-                                                                 if (msg.equals("HTTP 403 Forbidden")) {
+                                                                 if (msg.contains("HTTP 403 Forbidden")) {
                                                                      view.goToNotAuthorized();
                                                                  }
                                                                  try {

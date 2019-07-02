@@ -58,6 +58,8 @@ public class SchedulerListeners {
 
     public interface TaskResultListener {
         void preciousTaskNamesLoaded(List<String> preciousTaskNames);
+
+        void preciousTaskNamesNotAuthorized();
     }
 
     public interface JobSelectedListener {

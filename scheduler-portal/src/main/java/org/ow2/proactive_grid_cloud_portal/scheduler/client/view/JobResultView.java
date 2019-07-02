@@ -60,6 +60,8 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     private static final String NO_JOB_SELECED = "No job selected.";
 
+    public static final String NOT_AUTHORIZED = "You are not authorized to see this job's result";
+
     private static final String NO_ITEMS_TO_SHOW = "<b>Result List: no items to show.</b>";
 
     private static final String ITEMS_TO_SHOW = "<b>Result List:</b>";
@@ -193,7 +195,6 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         selectedJob = job;
         placeHolderLabel.setContents("Loading...");
         placeHolderLabel.show();
-        resultMap.buildEntries(job.getResultMap());
         resultMap.hide();
         preciousButtons.hide();
         preciousResultLabel.hide();
@@ -235,6 +236,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons.setMembers(iButtons);
 
         placeHolderLabel.hide();
+        resultMap.buildEntries(selectedJob.getResultMap());
         resultMap.show();
         if (preciousTaskNames.isEmpty()) {
             preciousResultLabel.setContents(NO_ITEMS_TO_SHOW);
@@ -243,6 +245,16 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         }
         preciousResultLabel.show();
         preciousButtons.show();
+    }
+
+    @Override
+    public void preciousTaskNamesNotAuthorized() {
+        placeHolderLabel.setContents(NOT_AUTHORIZED);
+        placeHolderLabel.show();
+        resultMap.hide();
+        resultMap.hide();
+        preciousButtons.hide();
+        preciousResultLabel.hide();
     }
 
     private void doDownload(String readableName, DynamicForm form, String contentType, String target) {
