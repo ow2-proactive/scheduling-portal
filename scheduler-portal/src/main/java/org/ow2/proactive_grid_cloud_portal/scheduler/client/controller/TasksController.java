@@ -108,7 +108,7 @@ public class TasksController {
 
                 public void onFailure(Throwable caught) {
                     String msg = JSONUtils.getJsonErrorMessage(caught);
-                    if (msg.equals("HTTP 403 Forbidden")) {
+                    if (msg.contains("HTTP 403 Forbidden")) {
                         model.taskUpdateError("You are not authorized to see this job's tasks.");
                     } else {
                         model.taskUpdateError(msg);

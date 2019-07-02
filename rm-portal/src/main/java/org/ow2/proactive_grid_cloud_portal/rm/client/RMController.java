@@ -1445,7 +1445,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         String msg = JSONUtils.getJsonErrorMessage(caught);
         LogModel.getInstance()
                 .logImportantMessage("Failed to execute a script " + script + " on " + scriptTarget + ": " + msg);
-        if (msg.equals("HTTP 500 Internal Server Error")) {
+        if (msg.contains("HTTP 500 Internal Server Error")) {
             msg = "You are not authorized to execute scripts on this node source. Please contact the administrator.";
         }
         syncCallBack.onFailure(msg);
