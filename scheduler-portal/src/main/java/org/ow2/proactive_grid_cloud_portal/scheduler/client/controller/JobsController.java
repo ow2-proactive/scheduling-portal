@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 
 import com.google.gwt.core.client.GWT;
@@ -551,9 +552,16 @@ public class JobsController {
 
                                                             @Override
                                                             public void onFailure(Throwable caught) {
-                                                                LogModel.getInstance()
-                                                                        .logCriticalMessage("Error while fetching metadata of precious results:\n" +
-                                                                                            JSONUtils.getJsonErrorMessage(caught));
+                                                                String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                                if (msg.equals("HTTP 403 Forbidden")) {
+                                                                    getModel().preciousTaskNamesNotAuthorized();
+                                                                    LogModel.getInstance()
+                                                                            .logImportantMessage(JobResultView.NOT_AUTHORIZED);
+                                                                } else {
+                                                                    LogModel.getInstance()
+                                                                            .logImportantMessage("Error while fetching metadata of precious results:\n" +
+                                                                                                 JSONUtils.getJsonErrorMessage(caught));
+                                                                }
                                                             }
 
                                                             @Override
