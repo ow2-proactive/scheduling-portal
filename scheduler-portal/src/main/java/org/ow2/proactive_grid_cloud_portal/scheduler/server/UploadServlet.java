@@ -51,8 +51,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
@@ -175,7 +177,14 @@ public class UploadServlet extends HttpServlet {
         HttpGet httpGet = new HttpGet(url);
         httpGet.addHeader(PARAMS_SESSION_ID, sessionId);
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                                                         .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
+                                                                                                                  (certificate,
+                                                                                                                          authType) -> true)
+                                                                                               .build())
+                                                         .setSSLHostnameVerifier(new NoopHostnameVerifier())
+                                                         .setConnectionManagerShared(true)
+                                                         .build();
                 CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
             HttpEntity responseBody = httpResponse.getEntity();
             File job = File.createTempFile("job_upload", ".xml");
