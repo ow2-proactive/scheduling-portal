@@ -60,6 +60,10 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.*;
+import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
@@ -336,19 +340,56 @@ public abstract class NodeSourceWindow {
     }
 
     private void resetFormForPolicySelectChange() {
-        String policyPluginName = this.policySelectItem.getValueAsString();
+        String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
+        warnForUploadFiles(infrastructurePluginName);
         if (this.previousSelectedPolicy != null) {
             for (FormItem formItem : this.formItemsByName.get(this.previousSelectedPolicy)) {
                 formItem.hide();
             }
         }
+        String policyPluginName = this.policySelectItem.getValueAsString();
         for (FormItem formItem : this.formItemsByName.get(policyPluginName)) {
             formItem.show();
         }
         this.previousSelectedPolicy = policyPluginName;
     }
 
+    private void warnForUploadFiles(String policyOrInfrastructureName) {
+        if (policyOrInfrastructureName == null || policyOrInfrastructureName.isEmpty()) {
+            return;
+        }
+        List<UploadItem> itemsToUpdate = new LinkedList<>();
+        for (FormItem item : this.formItemsByName.get(policyOrInfrastructureName)) {
+            if (item instanceof UploadItem) {
+                UploadItem uploadItem = (UploadItem) item;
+                if (uploadItem.getValueAsString() != null && !uploadItem.getValueAsString().isEmpty()) {
+                    uploadItem.setTextBoxStyle("error-message uploadItem");
+                    itemsToUpdate.add(uploadItem);
+                }
+            }
+        }
+
+        for (UploadItem item : itemsToUpdate) {
+            item.updateState();
+            item.addChangeHandler(changeEvent -> {
+                if (changeEvent.getValue() != null && !((String) changeEvent.getValue()).isEmpty()) {
+                    UploadItem uploadItem = (UploadItem) changeEvent.getItem();
+                    uploadItem.setTextBoxStyle("uploadItem");
+                }
+            });
+
+            item.addChangedHandler(changedEvent -> {
+                UploadItem uploadItem = (UploadItem) changedEvent.getItem();
+                if (uploadItem.getValueAsString() != null && !item.getValueAsString().isEmpty()) {
+                    changedEvent.getItem().setTextBoxStyle("uploadItem");
+                }
+            });
+        }
+    }
+
     private void resetFormForInfrastructureSelectChange() {
+        String policyPluginName = this.policySelectItem.getValueAsString();
+        warnForUploadFiles(policyPluginName);
         if (this.previousSelectedInfrastructure != null) {
             for (FormItem formItem : this.formItemsByName.get(this.previousSelectedInfrastructure)) {
                 formItem.hide();

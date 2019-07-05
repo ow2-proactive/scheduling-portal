@@ -49,7 +49,7 @@
 }
 
 .pa-shortcuts > .active {
-	background-color: #f76800;
+	background-color: #E86D1F;
 	color: white;
 }
 
@@ -68,10 +68,19 @@
 	width: auto!important;
 }
 
+.no-hover{
+	box-shadow: none;
+	background-image: none;
+}
+
 .toolStripButton, .toolStripButtonOver, .toolStripButtonFocused, .toolStripButtonFocusedOver, .toolStripButtonDown, .toolStripButtonFocusedDown, .toolStripButtonSelected, .toolStripButtonSelectedFocused, .toolStripButtonSelectedDown, .toolStripButtonSelectedFocusedDown, .toolStripButtonSelectedOver, .toolStripButtonSelectedFocusedOver, .toolStripButtonDisabled, .toolStripButtonSelectedDisabled {
     color: #777 !important;
     font-size: 14px !important;
 	padding: 3px 5px !important;
+}
+
+.error-message {
+    color: red !important;
 }
 
 .gwt-FileUpload {
