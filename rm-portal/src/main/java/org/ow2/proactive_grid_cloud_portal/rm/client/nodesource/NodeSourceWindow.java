@@ -359,31 +359,41 @@ public abstract class NodeSourceWindow {
             return;
         }
         List<UploadItem> itemsToUpdate = new LinkedList<>();
-        for (FormItem item : this.formItemsByName.get(policyOrInfrastructureName)) {
-            if (item instanceof UploadItem) {
-                UploadItem uploadItem = (UploadItem) item;
-                if (uploadItem.getValueAsString() != null && !uploadItem.getValueAsString().isEmpty()) {
-                    uploadItem.setTextBoxStyle("error-message uploadItem");
-                    itemsToUpdate.add(uploadItem);
+        if (this.formItemsByName.containsKey(policyOrInfrastructureName)) {
+            for (FormItem item : this.formItemsByName.get(policyOrInfrastructureName)) {
+                if (item instanceof UploadItem && !item.isDisabled()) {
+                    UploadItem uploadItem = (UploadItem) item;
+                    if (uploadItem.getValueAsString() != null && !uploadItem.getValueAsString().isEmpty()) {
+                        uploadItem.setTextBoxStyle("error-message uploadItem");
+                        itemsToUpdate.add(uploadItem);
+                    }
                 }
             }
         }
 
         for (UploadItem item : itemsToUpdate) {
-            item.updateState();
-            item.addChangeHandler(changeEvent -> {
-                if (changeEvent.getValue() != null && !((String) changeEvent.getValue()).isEmpty()) {
-                    UploadItem uploadItem = (UploadItem) changeEvent.getItem();
-                    uploadItem.setTextBoxStyle("uploadItem");
-                }
-            });
+            try {
+                item.updateState();
+                item.addChangeHandler(changeEvent -> {
+                    if (changeEvent.getValue() != null && !((String) changeEvent.getValue()).isEmpty()) {
+                        if (changeEvent.getItem() instanceof UploadItem) {
+                            UploadItem uploadItem = (UploadItem) changeEvent.getItem();
+                            uploadItem.setTextBoxStyle("uploadItem");
+                        }
+                    }
+                });
 
-            item.addChangedHandler(changedEvent -> {
-                UploadItem uploadItem = (UploadItem) changedEvent.getItem();
-                if (uploadItem.getValueAsString() != null && !item.getValueAsString().isEmpty()) {
-                    changedEvent.getItem().setTextBoxStyle("uploadItem");
-                }
-            });
+                item.addChangedHandler(changedEvent -> {
+                    if (changedEvent.getItem() instanceof UploadItem) {
+                        UploadItem uploadItem = (UploadItem) changedEvent.getItem();
+                        if (uploadItem.getValueAsString() != null && !item.getValueAsString().isEmpty()) {
+                            changedEvent.getItem().setTextBoxStyle("uploadItem");
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                // defensive exception ignore.
+            }
         }
     }
 
