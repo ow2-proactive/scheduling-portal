@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,10 +61,6 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.*;
-import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
-import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
-import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
@@ -78,7 +75,15 @@ public abstract class NodeSourceWindow {
 
     protected static final String INFRASTRUCTURE_FORM_KEY = "infra";
 
+    protected static final String INFRASTRUCTURE_PARAM_ORDER_KEY = "infraParamOrder";
+
+    protected static final String INFRASTRUCTURE_PARAM_FILE_ORDER_KEY = "infraParamFileOrder";
+
     protected static final String POLICY_FORM_KEY = "policy";
+
+    protected static final String POLICY_PARAM_ORDER_KEY = "policyParamOrder";
+
+    protected static final String POLICY_PARAM_FILE_ORDER_KEY = "policyParamFileOrder";
 
     private static final String NS_NAME_FORM_KEY = "nsName";
 
@@ -473,10 +478,45 @@ public abstract class NodeSourceWindow {
     }
 
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
-        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields();
+        List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
+                                                          .stream()
+                                                          .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
+                                                          .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
         List<FormItem> formItemsForField = new LinkedList<>();
+        int currentSectionSelector = -1;
         for (PluginDescriptor.Field pluginField : pluginFields) {
+            if (pluginField.getSectionSelector() != currentSectionSelector) {
+                currentSectionSelector = pluginField.getSectionSelector();
+                // so we need to add SectionItem as a Header for the section
+                // but if selector is 0 than we dont add anything (0 is default value,
+                // so if vlaue is not set, then all values would be at the top without header)
+                if (currentSectionSelector > 0) {
+                    // if there is no description then we dont do anything
+                    if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
+                        final String[] ids = pluginFields.stream()
+                                                         .filter(field -> field.getSectionSelector() == pluginField.getSectionSelector())
+                                                         .map(field -> plugin.getPluginName() + field.getName())
+                                                         .toArray(String[]::new);
+                        //                        SectionItem sectionItem = new SectionItem(plugin.getPluginName() + currentSectionSelector);
+                        //                        sectionItem.setDefaultValue(plugin.getSectionDescriptions().get(pluginField.getSectionSelector()));
+                        //                        sectionItem.setCanCollapse(false);
+                        //                        sectionItem.setSectionExpanded(true);
+                        //                        sectionItem.setItemIds(ids);
+                        //                        allFormItems.add(sectionItem);
+                        RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
+                                                                        currentSectionSelector);
+                        allFormItems.add(rowSpacerItem);
+                        StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() +
+                                                                           currentSectionSelector,
+                                                                           plugin.getSectionDescriptions()
+                                                                                 .get(pluginField.getSectionSelector()) +
+                                                                                                   ":");
+                        staticTextItem.setTitleStyle("generalParametersStyle");
+                        allFormItems.add(staticTextItem);
+                    }
+                }
+            }
             if (pluginField.isPassword()) {
                 formItemsForField.add(new PasswordItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()));
@@ -625,6 +665,19 @@ public abstract class NodeSourceWindow {
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_ORDER_KEY, policyPluginDescriptor.getConfigurableFields()
+                                                                                          .stream()
+                                                                                          .filter(field -> !field.isFile() &&
+                                                                                                           !field.isCredential())
+                                                                                          .map(PluginDescriptor.Field::getName)
+                                                                                          .collect(Collectors.joining(";")));
+        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY, policyPluginDescriptor.getConfigurableFields()
+                                                                                               .stream()
+                                                                                               .filter(field -> field.isFile() ||
+                                                                                                                field.isCredential())
+                                                                                               .map(PluginDescriptor.Field::getName)
+                                                                                               .collect(Collectors.joining(";")));
+
         validatePolicyNameOrFail(policyPluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
@@ -661,6 +714,21 @@ public abstract class NodeSourceWindow {
 
     private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_ORDER_KEY,
+                                            infrastructurePluginDescriptor.getConfigurableFields()
+                                                                          .stream()
+                                                                          .filter(field -> !field.isFile() &&
+                                                                                           !field.isCredential())
+                                                                          .map(PluginDescriptor.Field::getName)
+                                                                          .collect(Collectors.joining(";")));
+        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
+                                            infrastructurePluginDescriptor.getConfigurableFields()
+                                                                          .stream()
+                                                                          .filter(field -> field.isFile() ||
+                                                                                           field.isCredential())
+                                                                          .map(PluginDescriptor.Field::getName)
+                                                                          .collect(Collectors.joining(";")));
+
         validateInfrastructureNameOrFail(infrastructurePluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
