@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,6 +132,11 @@ public abstract class NodeSourceWindow {
      * to achieve a correct display.
      */
     private Map<String, List<FormItem>> formItemsByName;
+
+    /**
+     * Initial order or the parameters of each plugin
+     */
+    private Map<String, String> pluginParamOrders = new HashMap<>();
 
     private Label nodeSourceWindowLabel;
 
@@ -437,17 +443,20 @@ public abstract class NodeSourceWindow {
         this.policySelectItem.setRequired(true);
         this.policySelectItem.setWidth(300);
 
-        HiddenItem name = new HiddenItem(NS_NAME_FORM_KEY);
-        HiddenItem deploy = new HiddenItem(DEPLOY_FORM_KEY);
-        HiddenItem nodeSourceAction = new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY);
-        HiddenItem callback = new HiddenItem(NS_CALLBACK_FORM_KEY);
-        HiddenItem session = new HiddenItem(SESSION_ID_FORM_KEY);
-
-        this.formItemsByName.put(NS_NAME_FORM_KEY, Collections.singletonList(name));
-        this.formItemsByName.put(DEPLOY_FORM_KEY, Collections.singletonList(deploy));
-        this.formItemsByName.put(NODE_SOURCE_ACTION_FORM_KEY, Collections.singletonList(nodeSourceAction));
-        this.formItemsByName.put(NS_CALLBACK_FORM_KEY, Collections.singletonList(callback));
-        this.formItemsByName.put(SESSION_ID_FORM_KEY, Collections.singletonList(session));
+        this.formItemsByName.put(NS_NAME_FORM_KEY, Collections.singletonList(new HiddenItem(NS_NAME_FORM_KEY)));
+        this.formItemsByName.put(DEPLOY_FORM_KEY, Collections.singletonList(new HiddenItem(DEPLOY_FORM_KEY)));
+        this.formItemsByName.put(NODE_SOURCE_ACTION_FORM_KEY,
+                                 Collections.singletonList(new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY)));
+        this.formItemsByName.put(NS_CALLBACK_FORM_KEY, Collections.singletonList(new HiddenItem(NS_CALLBACK_FORM_KEY)));
+        this.formItemsByName.put(SESSION_ID_FORM_KEY, Collections.singletonList(new HiddenItem(SESSION_ID_FORM_KEY)));
+        this.formItemsByName.put(INFRASTRUCTURE_PARAM_ORDER_KEY,
+                                 Collections.singletonList(new HiddenItem(INFRASTRUCTURE_PARAM_ORDER_KEY)));
+        this.formItemsByName.put(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
+                                 Collections.singletonList(new HiddenItem(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY)));
+        this.formItemsByName.put(POLICY_PARAM_ORDER_KEY,
+                                 Collections.singletonList(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
+        this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY,
+                                 Collections.singletonList(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
@@ -483,6 +492,35 @@ public abstract class NodeSourceWindow {
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
+        if (plugin.getPluginName().contains(".policy.")) {
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, plugin.getConfigurableFields()
+                                                                                         .stream()
+                                                                                         .filter(field -> !field.isFile() &&
+                                                                                                          !field.isCredential())
+                                                                                         .map(field -> plugin.getPluginName() +
+                                                                                                       field.getName())
+                                                                                         .collect(Collectors.joining(";")));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, plugin.getConfigurableFields()
+                                                                                              .stream()
+                                                                                              .filter(field -> field.isFile() ||
+                                                                                                               field.isCredential())
+                                                                                              .map(field -> plugin.getPluginName() +
+                                                                                                            field.getName())
+                                                                                              .collect(Collectors.joining(";")));
+        } else {
+            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY,
+                                  plugin.getConfigurableFields()
+                                        .stream()
+                                        .filter(field -> !field.isFile() && !field.isCredential())
+                                        .map(field -> plugin.getPluginName() + field.getName())
+                                        .collect(Collectors.joining(";")));
+            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
+                                  plugin.getConfigurableFields()
+                                        .stream()
+                                        .filter(field -> field.isFile() || field.isCredential())
+                                        .map(field -> plugin.getPluginName() + field.getName())
+                                        .collect(Collectors.joining(";")));
+        }
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
         for (PluginDescriptor.Field pluginField : pluginFields) {
@@ -498,16 +536,10 @@ public abstract class NodeSourceWindow {
                                                          .filter(field -> field.getSectionSelector() == pluginField.getSectionSelector())
                                                          .map(field -> plugin.getPluginName() + field.getName())
                                                          .toArray(String[]::new);
-                        //                        SectionItem sectionItem = new SectionItem(plugin.getPluginName() + currentSectionSelector);
-                        //                        sectionItem.setDefaultValue(plugin.getSectionDescriptions().get(pluginField.getSectionSelector()));
-                        //                        sectionItem.setCanCollapse(false);
-                        //                        sectionItem.setSectionExpanded(true);
-                        //                        sectionItem.setItemIds(ids);
-                        //                        allFormItems.add(sectionItem);
                         RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
                                                                         currentSectionSelector);
                         allFormItems.add(rowSpacerItem);
-                        StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() +
+                        StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() + "staticTextItem" +
                                                                            currentSectionSelector,
                                                                            plugin.getSectionDescriptions()
                                                                                  .get(pluginField.getSectionSelector()) +
@@ -575,6 +607,18 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_FORM_KEY, this.policySelectItem.getValueAsString());
         this.nodeSourcePluginsForm.setValue(SESSION_ID_FORM_KEY, LoginModel.getInstance().getSessionId());
         this.nodeSourcePluginsForm.setValue(NODE_SOURCE_ACTION_FORM_KEY, actionDescription);
+        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_ORDER_KEY,
+                                            pluginParamOrders.get(infrastructureSelectItem.getValueAsString() +
+                                                                  INFRASTRUCTURE_PARAM_ORDER_KEY));
+        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
+                                            pluginParamOrders.get(infrastructureSelectItem.getValueAsString() +
+                                                                  INFRASTRUCTURE_PARAM_FILE_ORDER_KEY));
+        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_ORDER_KEY,
+                                            pluginParamOrders.get(policySelectItem.getValueAsString() +
+                                                                  POLICY_PARAM_ORDER_KEY));
+        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
+                                            pluginParamOrders.get(policySelectItem.getValueAsString() +
+                                                                  POLICY_PARAM_FILE_ORDER_KEY));
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
             JSONObject jsonCallback = new JSONObject(javascriptObject);
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
@@ -665,19 +709,6 @@ public abstract class NodeSourceWindow {
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
-        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_ORDER_KEY, policyPluginDescriptor.getConfigurableFields()
-                                                                                          .stream()
-                                                                                          .filter(field -> !field.isFile() &&
-                                                                                                           !field.isCredential())
-                                                                                          .map(PluginDescriptor.Field::getName)
-                                                                                          .collect(Collectors.joining(";")));
-        this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY, policyPluginDescriptor.getConfigurableFields()
-                                                                                               .stream()
-                                                                                               .filter(field -> field.isFile() ||
-                                                                                                                field.isCredential())
-                                                                                               .map(PluginDescriptor.Field::getName)
-                                                                                               .collect(Collectors.joining(";")));
-
         validatePolicyNameOrFail(policyPluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
@@ -714,21 +745,6 @@ public abstract class NodeSourceWindow {
 
     private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
-        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_ORDER_KEY,
-                                            infrastructurePluginDescriptor.getConfigurableFields()
-                                                                          .stream()
-                                                                          .filter(field -> !field.isFile() &&
-                                                                                           !field.isCredential())
-                                                                          .map(PluginDescriptor.Field::getName)
-                                                                          .collect(Collectors.joining(";")));
-        this.nodeSourcePluginsForm.setValue(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
-                                            infrastructurePluginDescriptor.getConfigurableFields()
-                                                                          .stream()
-                                                                          .filter(field -> field.isFile() ||
-                                                                                           field.isCredential())
-                                                                          .map(PluginDescriptor.Field::getName)
-                                                                          .collect(Collectors.joining(";")));
-
         validateInfrastructureNameOrFail(infrastructurePluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()

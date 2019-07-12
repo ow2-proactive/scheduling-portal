@@ -121,29 +121,17 @@ public class NSCreationServlet extends HttpServlet {
                         infra = formFieldValue;
                         readingInfraParams = true;
                     } else if (formFieldName.equals("infraParamOrder")) {
-                        String[] split = formFieldValue.split(";");
-                        for (int i = 0; i < split.length; ++i) {
-                            infraParamOrder.put(split[i], i);
-                        }
+                        populateOrderMap(infraParamOrder, formFieldValue);
                     } else if (formFieldName.equals("infraParamFileOrder")) {
-                        String[] split = formFieldValue.split(";");
-                        for (int i = 0; i < split.length; ++i) {
-                            infraParamFileOrder.put(split[i], i);
-                        }
+                        populateOrderMap(infraParamFileOrder, formFieldValue);
                     } else if (formFieldName.equals("policy")) {
                         policy = formFieldValue;
                         readingPolicyParams = true;
                         readingInfraParams = false;
                     } else if (formFieldName.equals("policyParamOrder")) {
-                        String[] split = formFieldValue.split(";");
-                        for (int i = 0; i < split.length; ++i) {
-                            policyParamOrder.put(split[i], i);
-                        }
+                        populateOrderMap(policyParamOrder, formFieldValue);
                     } else if (formFieldName.equals("policyParamFileOrder")) {
-                        String[] split = formFieldValue.split(";");
-                        for (int i = 0; i < split.length; ++i) {
-                            policyParamFileOrder.put(split[i], i);
-                        }
+                        populateOrderMap(policyParamFileOrder, formFieldValue);
                     } else if (readingInfraParams) {
                         addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {
@@ -179,10 +167,10 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-            String[] infraParamsArray = orderValues(infraParams, infraParamOrder);
             String[] infraFileParamsArray = orderValues(infraFileParams, infraParamFileOrder);
-            String[] policyParamsArray = orderValues(policyParams, policyParamOrder);
+            String[] infraParamsArray = orderValues(infraParams, infraParamOrder);
             String[] policyFileParamsArray = orderValues(policyFileParams, policyParamFileOrder);
+            String[] policyParamsArray = orderValues(policyParams, policyParamOrder);
 
             String jsonResponsePayload;
             switch (nodeSourceAction) {
@@ -252,10 +240,22 @@ public class NSCreationServlet extends HttpServlet {
         }
     }
 
+    private void populateOrderMap(Map<String, Integer> orderMap, String value) {
+        String[] split = value.split(";");
+        if (split.length > 1) {
+            for (int i = 0; i < split.length; ++i) {
+                orderMap.put(split[i], i);
+            }
+        } else if (value != null && !value.trim().isEmpty()) {
+            orderMap.put(value, 0);
+        }
+    }
+
     private String[] orderValues(Map<String, String> keyValue, Map<String, Integer> keyIndex) {
-        return keyValue.entrySet()
+        return keyIndex.entrySet()
                        .stream()
                        .sorted(Comparator.comparing(Map.Entry::getValue))
+                       .filter(e -> !e.getKey().contains("staticTextItem"))
                        .map(e -> keyValue.get(e.getKey()))
                        .toArray(String[]::new);
     }
