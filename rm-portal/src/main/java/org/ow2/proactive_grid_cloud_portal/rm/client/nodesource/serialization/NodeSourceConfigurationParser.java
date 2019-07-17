@@ -185,11 +185,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
 
         // policy
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("policyPluginDescriptor", policyJsonObject);
 
         return nodeSourceJsonObject.toString();
@@ -203,11 +199,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
 
         // infrastructure
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", policyJsonObject);
 
         // infrastructure
@@ -220,6 +212,16 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
 
         return nodeSourceJsonObject.toString();
+    }
+
+    private JSONObject createEmptyPlugin() {
+        JSONObject emptyPlugin = new JSONObject();
+        emptyPlugin.put("pluginName", new JSONString(""));
+        emptyPlugin.put("pluginDescription", new JSONString(""));
+        emptyPlugin.put("configurableFields", new JSONArray());
+        emptyPlugin.put("sectionDescriptions", new JSONObject());
+        emptyPlugin.put("defaultValues", new JSONObject());
+        return emptyPlugin;
     }
 
 }

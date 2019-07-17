@@ -167,11 +167,10 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
-
-
             String[] infraFileParamsArray = orderValues(removeSuffixEditFromKeys(infraFileParams), infraParamFileOrder);
             String[] infraParamsArray = orderValues(infraParams, infraParamOrder);
-            String[] policyFileParamsArray = orderValues(removeSuffixEditFromKeys(policyFileParams), policyParamFileOrder);
+            String[] policyFileParamsArray = orderValues(removeSuffixEditFromKeys(policyFileParams),
+                                                         policyParamFileOrder);
             String[] policyParamsArray = orderValues(policyParams, policyParamOrder);
 
             String jsonResponsePayload;
@@ -245,14 +244,14 @@ public class NSCreationServlet extends HttpServlet {
     private Map<String, String> removeSuffixEditFromKeys(Map<String, String> map) {
         Map<String, String> result = new HashMap<>();
 
-        for (Map.Entry<String, String> entry: map.entrySet()) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             if (entry.getKey().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-                result.put(entry.getKey().substring(0, entry.getKey().length() - EDIT_FORM_ITEM_SUFFIX.length()), entry.getValue());
+                result.put(entry.getKey().substring(0, entry.getKey().length() - EDIT_FORM_ITEM_SUFFIX.length()),
+                           entry.getValue());
             } else {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
-
 
         return result;
     }
