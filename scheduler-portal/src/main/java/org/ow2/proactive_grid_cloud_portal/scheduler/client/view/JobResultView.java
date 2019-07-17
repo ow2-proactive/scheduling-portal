@@ -146,11 +146,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     @Override
     public void jobSelected(Job job) {
-        if (isFinished(job)) {
-            showFinishedJobSelected(job);
-        } else {
-            showJobNotFinished(job);
-        }
+        showJobSelected(job);
     }
 
     private boolean isFinished(Job job) {
@@ -165,11 +161,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     @Override
     public void selectedJobUpdated(Job job) {
-        if (isFinished(job)) {
-            showFinishedJobSelected(job);
-        } else {
-            showJobNotFinished(job);
-        }
+        showJobSelected(job);
     }
 
     private void showNoJobSelected() {
@@ -180,26 +172,6 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons.hide();
         preciousResultLabel.hide();
 
-    }
-
-    private void showJobNotFinished(Job job) {
-        selectedJob = null;
-        placeHolderLabel.setContents("Job[<b>" + job.getId() + "</b>] is not finished.");
-        placeHolderLabel.show();
-        resultMap.hide();
-        preciousButtons.hide();
-        preciousResultLabel.hide();
-    }
-
-    private void showFinishedJobSelected(Job job) {
-        selectedJob = job;
-        placeHolderLabel.setContents("Loading...");
-        placeHolderLabel.show();
-        resultMap.hide();
-        preciousButtons.hide();
-        preciousResultLabel.hide();
-
-        controller.getExecutionController().getJobsController().fetchMetadataOfPreciousResults();
     }
 
     @Override
@@ -245,6 +217,17 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         }
         preciousResultLabel.show();
         preciousButtons.show();
+    }
+
+    private void showJobSelected(Job job) {
+        selectedJob = job;
+        placeHolderLabel.setContents("Loading...");
+        placeHolderLabel.show();
+        resultMap.hide();
+        preciousButtons.hide();
+        preciousResultLabel.hide();
+
+        controller.getExecutionController().getJobsController().fetchMetadataOfPreciousResults();
     }
 
     @Override
