@@ -242,7 +242,7 @@ public class NSCreationServlet extends HttpServlet {
     }
 
     private Map<String, String> removeSuffixEditFromKeys(Map<String, String> map) {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(map.size());
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (entry.getKey().endsWith(EDIT_FORM_ITEM_SUFFIX)) {

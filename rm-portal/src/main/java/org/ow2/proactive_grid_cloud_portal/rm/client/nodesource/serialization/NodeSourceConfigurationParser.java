@@ -115,7 +115,7 @@ public class NodeSourceConfigurationParser {
 
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
         JSONObject jsonSectionDescriptions = p.get("sectionDescriptions").isObject();
-        Map<Integer, String> sectionDescriptions = new HashMap<>();
+        Map<Integer, String> sectionDescriptions = new HashMap<>(jsonSectionDescriptions.size());
         for (String key : jsonSectionDescriptions.keySet()) {
             int sectionSelector = Integer.parseInt(key);
             String sectionDescription = jsonSectionDescriptions.get(key).isString().stringValue();

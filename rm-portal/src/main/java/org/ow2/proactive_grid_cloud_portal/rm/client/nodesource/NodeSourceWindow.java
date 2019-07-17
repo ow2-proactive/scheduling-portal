@@ -524,31 +524,11 @@ public abstract class NodeSourceWindow {
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
         for (PluginDescriptor.Field pluginField : pluginFields) {
-            if (pluginField.getSectionSelector() != currentSectionSelector) {
-                currentSectionSelector = pluginField.getSectionSelector();
-                // so we need to add SectionItem as a Header for the section
-                // but if selector is 0 than we dont add anything (0 is default value,
-                // so if vlaue is not set, then all values would be at the top without header)
-                if (currentSectionSelector > 0) {
-                    // if there is no description then we dont do anything
-                    if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
-                        final String[] ids = pluginFields.stream()
-                                                         .filter(field -> field.getSectionSelector() == pluginField.getSectionSelector())
-                                                         .map(field -> plugin.getPluginName() + field.getName())
-                                                         .toArray(String[]::new);
-                        RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
-                                                                        currentSectionSelector);
-                        allFormItems.add(rowSpacerItem);
-                        StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() + "staticTextItem" +
-                                                                           currentSectionSelector,
-                                                                           plugin.getSectionDescriptions()
-                                                                                 .get(pluginField.getSectionSelector()) +
-                                                                                                   ":");
-                        staticTextItem.setTitleStyle("generalParametersStyle");
-                        allFormItems.add(staticTextItem);
-                    }
-                }
-            }
+            currentSectionSelector = possiblyAddSection(plugin,
+                                                        pluginFields,
+                                                        allFormItems,
+                                                        currentSectionSelector,
+                                                        pluginField);
             if (pluginField.isPassword()) {
                 formItemsForField.add(new PasswordItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()));
@@ -577,6 +557,36 @@ public abstract class NodeSourceWindow {
             formItemsForField.clear();
         }
         return allFormItems;
+    }
+
+    private int possiblyAddSection(PluginDescriptor plugin, List<PluginDescriptor.Field> pluginFields,
+            List<FormItem> allFormItems, int currentSectionSelector, PluginDescriptor.Field pluginField) {
+        if (pluginField.getSectionSelector() != currentSectionSelector) {
+            currentSectionSelector = pluginField.getSectionSelector();
+            // so we need to add SectionItem as a Header for the section
+            // but if selector is 0 then we dont add anything (0 is default value,
+            // so if value is not set, then all values would be at the top without header)
+            if (currentSectionSelector > 0) {
+                // if there is no description then we dont do anything
+                if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
+                    final String[] ids = pluginFields.stream()
+                                                     .filter(field -> field.getSectionSelector() == pluginField.getSectionSelector())
+                                                     .map(field -> plugin.getPluginName() + field.getName())
+                                                     .toArray(String[]::new);
+                    RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
+                                                                    currentSectionSelector);
+                    allFormItems.add(rowSpacerItem);
+                    StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() + "staticTextItem" +
+                                                                       currentSectionSelector,
+                                                                       plugin.getSectionDescriptions()
+                                                                             .get(pluginField.getSectionSelector()) +
+                                                                                               ":");
+                    staticTextItem.setTitleStyle("generalParametersStyle");
+                    allFormItems.add(staticTextItem);
+                }
+            }
+        }
+        return currentSectionSelector;
     }
 
     private String getPluginShortName(PluginDescriptor plugin) {
