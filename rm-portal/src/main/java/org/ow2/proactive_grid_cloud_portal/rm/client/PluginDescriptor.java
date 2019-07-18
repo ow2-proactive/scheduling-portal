@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -47,6 +48,8 @@ public class PluginDescriptor {
 
     private List<Field> configurableFields;
 
+    private Map<Integer, String> sectionDescriptions;
+
     public static class Field {
         private String name;
 
@@ -64,16 +67,18 @@ public class PluginDescriptor {
 
         private boolean dynamic;
 
+        private int sectionSelector;
+
         Field(String name, String value) {
             this(name, value, "");
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false, false, false);
+            this(name, value, description, false, false, false, false, false, 0);
         }
 
         public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
-                boolean textarea, boolean dynamic) {
+                boolean textarea, boolean dynamic, int sectionSelector) {
             this.name = name;
             this.value = value;
             this.description = description;
@@ -82,6 +87,7 @@ public class PluginDescriptor {
             this.file = file;
             this.textarea = textarea;
             this.dynamic = dynamic;
+            this.sectionSelector = sectionSelector;
         }
 
         public String getName() {
@@ -116,12 +122,16 @@ public class PluginDescriptor {
             return dynamic;
         }
 
+        public int getSectionSelector() {
+            return sectionSelector;
+        }
     }
 
-    public PluginDescriptor(String pluginName, String pluginDescription) {
+    public PluginDescriptor(String pluginName, String pluginDescription, Map<Integer, String> sectionDescriptions) {
         this.pluginDescription = pluginDescription;
         this.pluginName = pluginName;
         this.configurableFields = new ArrayList<>();
+        this.sectionDescriptions = sectionDescriptions;
     }
 
     public String getPluginName() {
@@ -136,4 +146,7 @@ public class PluginDescriptor {
         return configurableFields;
     }
 
+    public Map<Integer, String> getSectionDescriptions() {
+        return sectionDescriptions;
+    }
 }

@@ -30,7 +30,10 @@ import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.I
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -79,16 +82,21 @@ public class NSCreationServlet extends HttpServlet {
         String infra = "";
         String policy = "";
 
-        ArrayList<String> infraParams = new ArrayList<>();
-        ArrayList<String> infraFileParams = new ArrayList<>();
-        ArrayList<String> policyParams = new ArrayList<>();
-        ArrayList<String> policyFileParams = new ArrayList<>();
+        Map<String, String> infraParams = new HashMap<>();
+        Map<String, String> infraFileParams = new HashMap<>();
+        Map<String, String> policyParams = new HashMap<>();
+        Map<String, String> policyFileParams = new HashMap<>();
 
         boolean readingInfraParams = false;
         boolean readingPolicyParams = false;
 
         boolean deployNodeSource = false;
         NodeSourceAction nodeSourceAction = NodeSourceAction.UNKNOWN;
+
+        Map<String, Integer> infraParamOrder = new HashMap<>();
+        Map<String, Integer> infraParamFileOrder = new HashMap<>();
+        Map<String, Integer> policyParamOrder = new HashMap<>();
+        Map<String, Integer> policyParamFileOrder = new HashMap<>();
 
         try {
             List<FileItem> formItems = new ServletRequestTransformer().getFormItems(request);
@@ -112,10 +120,18 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (formFieldName.equals("infra")) {
                         infra = formFieldValue;
                         readingInfraParams = true;
+                    } else if (formFieldName.equals("infraParamOrder")) {
+                        populateOrderMap(infraParamOrder, formFieldValue);
+                    } else if (formFieldName.equals("infraParamFileOrder")) {
+                        populateOrderMap(infraParamFileOrder, formFieldValue);
                     } else if (formFieldName.equals("policy")) {
                         policy = formFieldValue;
                         readingPolicyParams = true;
                         readingInfraParams = false;
+                    } else if (formFieldName.equals("policyParamOrder")) {
+                        populateOrderMap(policyParamOrder, formFieldValue);
+                    } else if (formFieldName.equals("policyParamFileOrder")) {
+                        populateOrderMap(policyParamFileOrder, formFieldValue);
                     } else if (readingInfraParams) {
                         addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {
@@ -126,10 +142,10 @@ public class NSCreationServlet extends HttpServlet {
                 } else {
                     if (readingInfraParams) {
                         byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
-                        infraFileParams.add(new String(bytes));
+                        infraFileParams.put(formFieldName, new String(bytes));
                     } else if (readingPolicyParams) {
                         byte[] bytes = IOUtils.toByteArray(formItem.getInputStream());
-                        policyFileParams.add(new String(bytes));
+                        policyFileParams.put(formFieldName, new String(bytes));
                     } else {
                         LOGGER.warn("Unexpected parameter " + formFieldName);
                     }
@@ -151,39 +167,45 @@ public class NSCreationServlet extends HttpServlet {
                 throw new RestServerException(failFast);
             }
 
+            String[] infraFileParamsArray = orderValues(removeSuffixEditFromKeys(infraFileParams), infraParamFileOrder);
+            String[] infraParamsArray = orderValues(infraParams, infraParamOrder);
+            String[] policyFileParamsArray = orderValues(removeSuffixEditFromKeys(policyFileParams),
+                                                         policyParamFileOrder);
+            String[] policyParamsArray = orderValues(policyParams, policyParamOrder);
+
             String jsonResponsePayload;
             switch (nodeSourceAction) {
                 case EDIT:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).editNodeSource(sessionId,
                                                                                                nsName,
                                                                                                infra,
-                                                                                               toArray(infraParams),
-                                                                                               toArray(infraFileParams),
+                                                                                               infraParamsArray,
+                                                                                               infraFileParamsArray,
                                                                                                policy,
-                                                                                               toArray(policyParams),
-                                                                                               toArray(policyFileParams),
+                                                                                               policyParamsArray,
+                                                                                               policyFileParamsArray,
                                                                                                nodesRecoverable);
                     break;
                 case CREATE:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).defineNodeSource(sessionId,
                                                                                                  nsName,
                                                                                                  infra,
-                                                                                                 toArray(infraParams),
-                                                                                                 toArray(infraFileParams),
+                                                                                                 infraParamsArray,
+                                                                                                 infraFileParamsArray,
                                                                                                  policy,
-                                                                                                 toArray(policyParams),
-                                                                                                 toArray(policyFileParams),
+                                                                                                 policyParamsArray,
+                                                                                                 policyFileParamsArray,
                                                                                                  nodesRecoverable);
                     break;
                 case UPDATE:
                     jsonResponsePayload = ((RMServiceImpl) RMServiceImpl.get()).updateDynamicParameters(sessionId,
                                                                                                         nsName,
                                                                                                         infra,
-                                                                                                        toArray(infraParams),
-                                                                                                        toArray(infraFileParams),
+                                                                                                        infraParamsArray,
+                                                                                                        infraFileParamsArray,
                                                                                                         policy,
-                                                                                                        toArray(policyParams),
-                                                                                                        toArray(policyFileParams));
+                                                                                                        policyParamsArray,
+                                                                                                        policyFileParamsArray);
                     break;
                 default:
                     jsonResponsePayload = new JSONWriter(new StringWriter()).object()
@@ -219,12 +241,47 @@ public class NSCreationServlet extends HttpServlet {
         }
     }
 
-    private void addToStringParamsOrToFileParams(ArrayList<String> params, ArrayList<String> fileParams,
+    private Map<String, String> removeSuffixEditFromKeys(Map<String, String> map) {
+        Map<String, String> result = new HashMap<>(map.size());
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
+                result.put(entry.getKey().substring(0, entry.getKey().length() - EDIT_FORM_ITEM_SUFFIX.length()),
+                           entry.getValue());
+            } else {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    private void populateOrderMap(Map<String, Integer> orderMap, String value) {
+        String[] split = value.split(";");
+        if (split.length > 1) {
+            for (int i = 0; i < split.length; ++i) {
+                orderMap.put(split[i], i);
+            }
+        } else if (value != null && !value.trim().isEmpty()) {
+            orderMap.put(value, 0);
+        }
+    }
+
+    private String[] orderValues(Map<String, String> keyValue, Map<String, Integer> keyIndex) {
+        return keyIndex.entrySet()
+                       .stream()
+                       .sorted(Comparator.comparing(Map.Entry::getValue))
+                       .filter(e -> !e.getKey().contains("staticTextItem"))
+                       .map(e -> keyValue.get(e.getKey()))
+                       .toArray(String[]::new);
+    }
+
+    private void addToStringParamsOrToFileParams(Map<String, String> params, Map<String, String> fileParams,
             String formFieldName, String formFieldValue) {
         if (formFieldName.endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-            fileParams.add(formFieldValue);
+            fileParams.put(formFieldName, formFieldValue);
         } else if (!formFieldName.endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX)) {
-            params.add(formFieldValue);
+            params.put(formFieldName, formFieldValue);
         }
     }
 
