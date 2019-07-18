@@ -11,7 +11,8 @@
 
 .generalParametersStyle {
     font-weight: bold;
-    color: #003168
+    color: #003168;
+    white-space: nowrap;
 }
 
 .generalParametersStyleDisabled {

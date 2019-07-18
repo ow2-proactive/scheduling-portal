@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
@@ -113,7 +114,15 @@ public class NodeSourceConfigurationParser {
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
 
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
-        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
+        JSONObject jsonSectionDescriptions = p.get("sectionDescriptions").isObject();
+        Map<Integer, String> sectionDescriptions = new HashMap<>(jsonSectionDescriptions.size());
+        for (String key : jsonSectionDescriptions.keySet()) {
+            int sectionSelector = Integer.parseInt(key);
+            String sectionDescription = jsonSectionDescriptions.get(key).isString().stringValue();
+            sectionDescriptions.put(sectionSelector, sectionDescription);
+        }
+
+        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription, sectionDescriptions);
 
         JSONArray fields = p.get("configurableFields").isArray();
         for (int j = 0; j < fields.size(); j++) {
@@ -126,6 +135,7 @@ public class NodeSourceConfigurationParser {
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
             boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
+            int sectionSelector = (int) meta.get("sectionSelector").isNumber().doubleValue();
 
             boolean password = false;
             boolean credentials = false;
@@ -149,7 +159,8 @@ public class NodeSourceConfigurationParser {
                                                                   credentials,
                                                                   file,
                                                                   textArea,
-                                                                  dynamic);
+                                                                  dynamic,
+                                                                  sectionSelector);
 
             desc.getConfigurableFields().add(f);
         }
@@ -174,11 +185,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
 
         // policy
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("policyPluginDescriptor", policyJsonObject);
 
         return nodeSourceJsonObject.toString();
@@ -192,11 +199,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
 
         // infrastructure
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", policyJsonObject);
 
         // infrastructure
@@ -209,6 +212,16 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
 
         return nodeSourceJsonObject.toString();
+    }
+
+    private JSONObject createEmptyPlugin() {
+        JSONObject emptyPlugin = new JSONObject();
+        emptyPlugin.put("pluginName", new JSONString(""));
+        emptyPlugin.put("pluginDescription", new JSONString(""));
+        emptyPlugin.put("configurableFields", new JSONArray());
+        emptyPlugin.put("sectionDescriptions", new JSONObject());
+        emptyPlugin.put("defaultValues", new JSONObject());
+        return emptyPlugin;
     }
 
 }
