@@ -62,9 +62,15 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     public static final String NOT_AUTHORIZED = "You are not authorized to see this job's result";
 
-    private static final String NO_ITEMS_TO_SHOW = "<b>Result List: no items to show.</b>";
+    private static final String RESULT_LIST_NO_ITEMS = "<b>Result List: no items to show.</b>";
 
-    private static final String ITEMS_TO_SHOW = "<b>Result List:</b>";
+    private static final String RESULT_LIST = "<b>Result List:</b>";
+
+    private static final String RESULT_LIST_NOT_FINISHED = "<b>Result List (Partial, for all finished Tasks):</b>";
+
+    private static final String RESULT_MAP = "Result Map";
+
+    private static final String RESULT_MAP_NOT_FINISHED = "Result Map (Partial, from all finished Tasks):";
 
     /**
      * label when no job is selected or job is not finished
@@ -106,7 +112,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         placeHolderLabel.setAlign(Alignment.CENTER);
         root.addMember(placeHolderLabel);
 
-        preciousResultLabel = new Label(ITEMS_TO_SHOW);
+        preciousResultLabel = new Label(RESULT_LIST);
         preciousResultLabel.setAutoHeight();
         preciousResultLabel.setWidth100();
         preciousResultLabel.hide();
@@ -134,7 +140,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         preciousButtons.setAutoHeight();
         root.addMember(preciousButtons);
 
-        resultMap = new KeyValueGrid("Result Map");
+        resultMap = new KeyValueGrid(RESULT_MAP);
         resultMap.setWidth100();
         resultMap.setAutoHeight();
         resultMap.hide();
@@ -146,6 +152,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     @Override
     public void jobSelected(Job job) {
+        selectedJob = job;
         showJobSelected(job);
     }
 
@@ -161,6 +168,7 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
 
     @Override
     public void selectedJobUpdated(Job job) {
+        selectedJob = job;
         showJobSelected(job);
     }
 
@@ -210,10 +218,16 @@ public class JobResultView implements JobSelectedListener, TaskResultListener {
         placeHolderLabel.hide();
         resultMap.buildEntries(selectedJob.getResultMap());
         resultMap.show();
-        if (preciousTaskNames.isEmpty()) {
-            preciousResultLabel.setContents(NO_ITEMS_TO_SHOW);
+        if (isFinished(selectedJob)) {
+            if (preciousTaskNames.isEmpty()) {
+                preciousResultLabel.setContents(RESULT_LIST_NO_ITEMS);
+            } else {
+                preciousResultLabel.setContents(RESULT_LIST);
+            }
+            resultMap.setLabel(RESULT_MAP);
         } else {
-            preciousResultLabel.setContents(ITEMS_TO_SHOW);
+            preciousResultLabel.setContents(RESULT_LIST_NOT_FINISHED);
+            resultMap.setLabel(RESULT_MAP_NOT_FINISHED);
         }
         preciousResultLabel.show();
         preciousButtons.show();
