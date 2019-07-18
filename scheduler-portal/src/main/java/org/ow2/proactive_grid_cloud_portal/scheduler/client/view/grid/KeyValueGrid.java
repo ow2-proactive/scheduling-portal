@@ -95,6 +95,10 @@ public class KeyValueGrid extends VStack {
         hide();
     }
 
+    public void setLabel(String label) {
+        keyValueGridLabel.setContents("<b>" + label + "</b>");
+    }
+
     public void showTopMargin() {
         keyValueGridLabel.setHeight(30);
     }
