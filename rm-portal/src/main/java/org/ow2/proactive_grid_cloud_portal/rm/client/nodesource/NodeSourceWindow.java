@@ -546,6 +546,9 @@ public abstract class NodeSourceWindow {
                                                    pluginField.getName()));
             }
             formItemsForField.forEach(formItem -> {
+                if (pluginField.isImportant()) {
+                    formItem.setTitleStyle("error-message");
+                }
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
                 if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
