@@ -136,7 +136,10 @@ public class NodeSourceConfigurationParser {
             String descr = meta.get("description").isString().stringValue();
             boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
             int sectionSelector = (int) meta.get("sectionSelector").isNumber().doubleValue();
-            boolean important = meta.get("important").isBoolean().booleanValue();
+            boolean important = false;
+            if (meta.get("important") != null) {
+                important = meta.get("important").isBoolean().booleanValue();
+            }
 
             boolean password = false;
             boolean credentials = false;
