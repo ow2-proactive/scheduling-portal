@@ -224,7 +224,7 @@ public abstract class NodeSourceWindow {
         Label createNodeSourceLabel = new Label("Create Node Source");
         createNodeSourceLabel.setHeight("20px");
         createNodeSourceLayout.addMember(createNodeSourceLabel);
-        createNodeSourceLayout.setPadding(10);
+        createNodeSourceLayout.setPadding(5);
         createNodeSourceLayout.setWidth("75%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
@@ -232,10 +232,15 @@ public abstract class NodeSourceWindow {
                                                                    getNodeSourceAction());
         DynamicForm nodeSourceWindowForm = new DynamicForm();
         nodeSourceWindowForm.setWidth100();
-        nodeSourceWindowForm.setHeight("50px");
+        nodeSourceWindowForm.setHeight("30px");
         nodeSourceWindowForm.setFields(this.nodeSourceNameText);
         nodeSourceWindowForm.setTitleSuffix("");
         createNodeSourceLayout.addMember(nodeSourceWindowForm);
+
+        Label importantFieldsLabel = new Label();
+        importantFieldsLabel.setHeight("20px");
+        importantFieldsLabel.setContents("<span style='color:#E86D1F'>* important fields</span>");
+        createNodeSourceLayout.addMember(importantFieldsLabel);
 
         this.populateFormValues();
 
@@ -546,6 +551,9 @@ public abstract class NodeSourceWindow {
                                                    pluginField.getName()));
             }
             formItemsForField.forEach(formItem -> {
+                if (pluginField.isImportant()) {
+                    formItem.setTitleStyle("important-message");
+                }
                 formItem.setValue(pluginField.getValue());
                 formItem.setWidth(250);
                 if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&

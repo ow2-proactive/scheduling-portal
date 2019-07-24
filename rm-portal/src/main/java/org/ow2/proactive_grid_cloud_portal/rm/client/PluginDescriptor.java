@@ -69,16 +69,18 @@ public class PluginDescriptor {
 
         private int sectionSelector;
 
+        private boolean important;
+
         Field(String name, String value) {
             this(name, value, "");
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false, false, false, 0);
+            this(name, value, description, false, false, false, false, false, 0, false);
         }
 
         public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
-                boolean textarea, boolean dynamic, int sectionSelector) {
+                boolean textarea, boolean dynamic, int sectionSelector, boolean important) {
             this.name = name;
             this.value = value;
             this.description = description;
@@ -88,6 +90,7 @@ public class PluginDescriptor {
             this.textarea = textarea;
             this.dynamic = dynamic;
             this.sectionSelector = sectionSelector;
+            this.important = important;
         }
 
         public String getName() {
@@ -124,6 +127,10 @@ public class PluginDescriptor {
 
         public int getSectionSelector() {
             return sectionSelector;
+        }
+
+        public boolean isImportant() {
+            return important;
         }
     }
 
