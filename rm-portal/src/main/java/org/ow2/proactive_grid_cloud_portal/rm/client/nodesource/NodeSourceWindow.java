@@ -239,7 +239,7 @@ public abstract class NodeSourceWindow {
 
         Label importantFieldsLabel = new Label();
         importantFieldsLabel.setHeight("20px");
-        importantFieldsLabel.setContents("<span style='color:orange'>* important fields</span>");
+        importantFieldsLabel.setContents("<span style='color:#E86D1F'>* important fields</span>");
         createNodeSourceLayout.addMember(importantFieldsLabel);
 
         this.populateFormValues();
