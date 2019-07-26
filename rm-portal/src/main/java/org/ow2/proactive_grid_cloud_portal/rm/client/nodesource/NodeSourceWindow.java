@@ -483,7 +483,9 @@ public abstract class NodeSourceWindow {
 
     private void addAllPluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors,
             LinkedHashMap<String, String> selectItemValues) {
-        for (PluginDescriptor pluginDescriptor : allPluginDescriptors) {
+        for (PluginDescriptor pluginDescriptor : allPluginDescriptors.stream()
+                                                                     .sorted(Comparator.comparing(this::getPluginShortName))
+                                                                     .collect(Collectors.toList())) {
             String shortName = getPluginShortName(pluginDescriptor);
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
