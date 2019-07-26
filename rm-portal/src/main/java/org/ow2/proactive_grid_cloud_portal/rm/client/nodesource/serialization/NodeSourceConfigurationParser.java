@@ -27,18 +27,13 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 
 
 public class NodeSourceConfigurationParser {
@@ -114,13 +109,20 @@ public class NodeSourceConfigurationParser {
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
 
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
-        JSONObject jsonSectionDescriptions = p.get("sectionDescriptions").isObject();
-        Map<Integer, String> sectionDescriptions = new HashMap<>(jsonSectionDescriptions.size());
-        for (String key : jsonSectionDescriptions.keySet()) {
-            int sectionSelector = Integer.parseInt(key);
-            String sectionDescription = jsonSectionDescriptions.get(key).isString().stringValue();
-            sectionDescriptions.put(sectionSelector, sectionDescription);
-        }
+        Map<Integer, String> sectionDescriptions = Optional.ofNullable(p.get("sectionDescriptions"))
+                                                           .map(JSONValue::isObject)
+                                                           .map(jsonSectionDescriptions -> {
+                                                               Map<Integer, String> newSections = new HashMap<>();
+                                                               for (String key : jsonSectionDescriptions.keySet()) {
+                                                                   int sectionSelector = Integer.parseInt(key);
+                                                                   String sectionDescription = jsonSectionDescriptions.get(key)
+                                                                                                                      .isString()
+                                                                                                                      .stringValue();
+                                                                   newSections.put(sectionSelector, sectionDescription);
+                                                               }
+                                                               return newSections;
+                                                           })
+                                                           .orElse(new HashMap<>());
 
         PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription, sectionDescriptions);
 
@@ -135,12 +137,15 @@ public class NodeSourceConfigurationParser {
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
             boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
-            int sectionSelector = (int) meta.get("sectionSelector").isNumber().doubleValue();
-            boolean important = false;
-            if (meta.get("important") != null) {
-                important = meta.get("important").isBoolean().booleanValue();
-            }
-
+            int sectionSelector = Optional.ofNullable(meta.get("sectionSelector"))
+                                          .map(JSONValue::isNumber)
+                                          .map(JSONNumber::doubleValue)
+                                          .map(Double::intValue)
+                                          .orElse(0);
+            boolean important = Optional.ofNullable(meta.get("important"))
+                                        .map(JSONValue::isBoolean)
+                                        .map(JSONBoolean::booleanValue)
+                                        .orElse(false);
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
