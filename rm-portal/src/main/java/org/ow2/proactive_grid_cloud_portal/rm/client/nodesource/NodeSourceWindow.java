@@ -548,6 +548,13 @@ public abstract class NodeSourceWindow {
                         setWrap(TextAreaWrap.OFF);
                     }
                 });
+            } else if (pluginField.isCheckbox()) {
+                CheckboxItem checkboxItem = new CheckboxItem(plugin.getPluginName() + pluginField.getName(),
+                                                             pluginField.getName());
+                checkboxItem.setShowTitle(true);
+                checkboxItem.setShowLabel(false);
+                checkboxItem.setLabelAsTitle(true);
+                formItemsForField.add(checkboxItem);
             } else {
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
@@ -556,7 +563,11 @@ public abstract class NodeSourceWindow {
                 if (pluginField.isImportant()) {
                     formItem.setTitleStyle("important-message");
                 }
-                formItem.setValue(pluginField.getValue());
+                if (pluginField.isCheckbox()) {
+                    formItem.setDefaultValue(Boolean.parseBoolean(pluginField.getValue()));
+                } else {
+                    formItem.setValue(pluginField.getValue());
+                }
                 formItem.setWidth(250);
                 if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
                     !formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {

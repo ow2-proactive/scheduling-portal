@@ -150,6 +150,7 @@ public class NodeSourceConfigurationParser {
             boolean credentials = false;
             boolean file = false;
             boolean textArea = false;
+            boolean checkbox = false;
 
             if (metaType.equalsIgnoreCase("password")) {
                 password = true;
@@ -159,6 +160,8 @@ public class NodeSourceConfigurationParser {
                 credentials = true;
             } else if (metaType.equalsIgnoreCase("textArea")) {
                 textArea = true;
+            } else if (metaType.equalsIgnoreCase("checkbox")) {
+                checkbox = true;
             }
 
             PluginDescriptor.Field f = new PluginDescriptor.Field(name,
@@ -168,6 +171,7 @@ public class NodeSourceConfigurationParser {
                                                                   credentials,
                                                                   file,
                                                                   textArea,
+                                                                  checkbox,
                                                                   dynamic,
                                                                   sectionSelector,
                                                                   important);

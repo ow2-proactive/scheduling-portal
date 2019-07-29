@@ -65,6 +65,8 @@ public class PluginDescriptor {
 
         private boolean textarea;
 
+        private boolean checkbox;
+
         private boolean dynamic;
 
         private int sectionSelector;
@@ -76,11 +78,11 @@ public class PluginDescriptor {
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false, false, false, 0, false);
+            this(name, value, description, false, false, false, false, false, false, 0, false);
         }
 
         public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
-                boolean textarea, boolean dynamic, int sectionSelector, boolean important) {
+                boolean textarea, boolean checkbox, boolean dynamic, int sectionSelector, boolean important) {
             this.name = name;
             this.value = value;
             this.description = description;
@@ -88,6 +90,7 @@ public class PluginDescriptor {
             this.credential = credential;
             this.file = file;
             this.textarea = textarea;
+            this.checkbox = checkbox;
             this.dynamic = dynamic;
             this.sectionSelector = sectionSelector;
             this.important = important;
@@ -119,6 +122,10 @@ public class PluginDescriptor {
 
         public boolean isTextarea() {
             return textarea;
+        }
+
+        public boolean isCheckbox() {
+            return checkbox;
         }
 
         public boolean isDynamic() {
