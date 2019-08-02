@@ -88,6 +88,11 @@
     color: #E86D1F !important;
 }
 
+.important-messageFocused {
+    color: #E86D1F !important;
+}
+
+
 .gwt-FileUpload {
                 font-size : 11px;
                 margin-left : 60px;
