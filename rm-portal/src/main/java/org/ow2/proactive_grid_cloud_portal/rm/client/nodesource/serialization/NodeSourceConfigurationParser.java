@@ -109,6 +109,7 @@ public class NodeSourceConfigurationParser {
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
 
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
+
         Map<Integer, String> sectionDescriptions = Optional.ofNullable(p.get("sectionDescriptions"))
                                                            .map(JSONValue::isObject)
                                                            .map(jsonSectionDescriptions -> {
@@ -124,7 +125,16 @@ public class NodeSourceConfigurationParser {
                                                            })
                                                            .orElse(new HashMap<>());
 
-        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription, sectionDescriptions);
+        Map<String, String> pluginMeta = Optional.ofNullable(p.get("meta")).map(JSONValue::isObject).map(json -> {
+            Map<String, String> metaMap = new HashMap<>();
+            for (String key : json.keySet()) {
+                String value = json.get(key).isString().stringValue();
+                metaMap.put(key, value);
+            }
+            return metaMap;
+        }).orElse(new HashMap<>());
+
+        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription, sectionDescriptions, pluginMeta);
 
         JSONArray fields = p.get("configurableFields").isArray();
         for (int j = 0; j < fields.size(); j++) {

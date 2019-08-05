@@ -50,6 +50,8 @@ public class PluginDescriptor {
 
     private Map<Integer, String> sectionDescriptions;
 
+    private Map<String, String> meta;
+
     public static class Field {
         private String name;
 
@@ -141,11 +143,13 @@ public class PluginDescriptor {
         }
     }
 
-    public PluginDescriptor(String pluginName, String pluginDescription, Map<Integer, String> sectionDescriptions) {
+    public PluginDescriptor(String pluginName, String pluginDescription, Map<Integer, String> sectionDescriptions,
+            Map<String, String> meta) {
         this.pluginDescription = pluginDescription;
         this.pluginName = pluginName;
         this.configurableFields = new ArrayList<>();
         this.sectionDescriptions = sectionDescriptions;
+        this.meta = meta;
     }
 
     public String getPluginName() {
@@ -162,5 +166,9 @@ public class PluginDescriptor {
 
     public Map<Integer, String> getSectionDescriptions() {
         return sectionDescriptions;
+    }
+
+    public Map<String, String> getMeta() {
+        return meta;
     }
 }

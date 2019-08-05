@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
+import org.ow2.proactive_grid_cloud_portal.rm.client.RMImages;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportInfrastructureLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
@@ -225,7 +226,7 @@ public abstract class NodeSourceWindow {
         createNodeSourceLabel.setHeight("20px");
         createNodeSourceLayout.addMember(createNodeSourceLabel);
         createNodeSourceLayout.setPadding(5);
-        createNodeSourceLayout.setWidth("75%");
+        createNodeSourceLayout.setWidth("85%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
                                                                    "or Import Node Source (Infrastructure+Policy)",
@@ -530,6 +531,16 @@ public abstract class NodeSourceWindow {
         }
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
+
+        if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
+            StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
+            elasticInfra.setTitle("");
+            elasticInfra.setValue("Elastic Infrastructure");
+            FormItemIcon icon = new FormItemIcon();
+            icon.setSrc(RMImages.instance.good().getSafeUri().asString());
+            elasticInfra.setIcons(icon);
+            allFormItems.add(elasticInfra);
+        }
         for (PluginDescriptor.Field pluginField : pluginFields) {
             currentSectionSelector = possiblyAddSection(plugin,
                                                         pluginFields,
@@ -590,10 +601,6 @@ public abstract class NodeSourceWindow {
             if (currentSectionSelector > 0) {
                 // if there is no description then we dont do anything
                 if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
-                    final String[] ids = pluginFields.stream()
-                                                     .filter(field -> field.getSectionSelector() == pluginField.getSectionSelector())
-                                                     .map(field -> plugin.getPluginName() + field.getName())
-                                                     .toArray(String[]::new);
                     RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
                                                                     currentSectionSelector);
                     allFormItems.add(rowSpacerItem);
