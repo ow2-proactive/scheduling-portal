@@ -533,13 +533,7 @@ public abstract class NodeSourceWindow {
         int currentSectionSelector = -1;
 
         if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
-            StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
-            elasticInfra.setTitle("");
-            elasticInfra.setValue("Elastic Infrastructure");
-            FormItemIcon icon = new FormItemIcon();
-            icon.setSrc(RMImages.instance.good().getSafeUri().asString());
-            elasticInfra.setIcons(icon);
-            allFormItems.add(elasticInfra);
+            allFormItems.add(createElasticLabel(plugin));
         }
         for (PluginDescriptor.Field pluginField : pluginFields) {
             currentSectionSelector = possiblyAddSection(plugin,
@@ -589,6 +583,16 @@ public abstract class NodeSourceWindow {
             formItemsForField.clear();
         }
         return allFormItems;
+    }
+
+    private StaticTextItem createElasticLabel(PluginDescriptor plugin) {
+        StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
+        elasticInfra.setTitle("");
+        elasticInfra.setValue("Elastic Infrastructure");
+        FormItemIcon icon = new FormItemIcon();
+        icon.setSrc(RMImages.instance.good().getSafeUri().asString());
+        elasticInfra.setIcons(icon);
+        return elasticInfra;
     }
 
     private int possiblyAddSection(PluginDescriptor plugin, List<PluginDescriptor.Field> pluginFields,
