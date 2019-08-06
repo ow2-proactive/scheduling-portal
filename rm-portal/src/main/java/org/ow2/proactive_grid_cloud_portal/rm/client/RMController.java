@@ -853,9 +853,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                                                           @Override
                                                           public void onSuccess(String result) {
-                                                              model.setInfraPolicyMapping(nodeSourceConfigurationParser.parseInfraPoliciesMapping(result));
-
-                                                              Map<String, List<String>> infraPolicyMapping = model.getInfraPolicyMapping();
+                                                              Map<String, List<String>> mapping = nodeSourceConfigurationParser.parseInfraPoliciesMapping(result);
+                                                              model.setInfraPolicyMapping(mapping);
 
                                                               success.run();
                                                           }

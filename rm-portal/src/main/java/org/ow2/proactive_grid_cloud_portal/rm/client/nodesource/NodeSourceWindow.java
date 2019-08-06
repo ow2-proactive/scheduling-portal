@@ -151,6 +151,8 @@ public abstract class NodeSourceWindow {
 
     private String waitingMessage;
 
+    private LinkedHashMap<String, String> fullPolicyValueMap;
+
     protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
         this.windowTitle = windowTitle;
@@ -427,8 +429,33 @@ public abstract class NodeSourceWindow {
             formItem.show();
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
-        if (infrastructureSelectItem.getValueAsString().contains("Local")) {
-            policySelectItem.setValue("StaticPolicy");
+
+        if (this.controller.getModel()
+                           .getInfraPolicyMapping()
+                           .containsKey(infrastructureSelectItem.getValueAsString())) {
+
+            List<String> appropriatePolicies = this.controller.getModel()
+                                                              .getInfraPolicyMapping()
+                                                              .get(infrastructureSelectItem.getValueAsString());
+            Map<String, String> filtered = fullPolicyValueMap.entrySet()
+                                                             .stream()
+                                                             .filter(x -> appropriatePolicies.contains(x.getKey()))
+                                                             .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                       Map.Entry::getValue));
+            LinkedHashMap<String, String> sorted = new LinkedHashMap<>();
+            for (Map.Entry<String, String> entry : filtered.entrySet()
+                                                           .stream()
+                                                           .sorted(Comparator.comparing(Map.Entry::getValue))
+                                                           .collect(Collectors.toList())) {
+                sorted.put(entry.getKey(), entry.getValue());
+            }
+
+            policySelectItem.setValueMap(sorted);
+            if (!appropriatePolicies.contains(policySelectItem.getValueAsString())) {
+                policySelectItem.setValue("");
+                resetFormForPolicySelectChange();
+            }
+
         }
     }
 
@@ -483,6 +510,7 @@ public abstract class NodeSourceWindow {
         LinkedHashMap<String, String> selectItemValues = new LinkedHashMap<>();
         addAllPluginValuesToAllFormItems(allPluginDescriptors, selectItemValues);
         this.policySelectItem.setValueMap(selectItemValues);
+        this.fullPolicyValueMap = selectItemValues;
     }
 
     private void addAllPluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors,
