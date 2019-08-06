@@ -92,6 +92,8 @@ public interface RMServiceAsync {
      */
     void getPolicies(String sessionId, AsyncCallback<String> callback);
 
+    void getInfrasToPoliciesMapping(String sessionId, AsyncCallback<String> callback);
+
     /**
      * Retrieve the configuration of a given node source, in other words, a
      * representation of all the parameters with which a node source was

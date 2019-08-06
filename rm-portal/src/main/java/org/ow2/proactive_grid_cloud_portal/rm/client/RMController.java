@@ -840,7 +840,27 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
                     public void onSuccess(String result) {
                         model.setSupportedPolicies(nodeSourceConfigurationParser.parsePluginDescriptors(result));
-                        success.run();
+
+                        rm.getInfrasToPoliciesMapping(LoginModel.getInstance().getSessionId(),
+                                                      new AsyncCallback<String>() {
+                                                          @Override
+                                                          public void onFailure(Throwable caught) {
+                                                              String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                              SC.warn("Failed to fetch infra policies mapping:<br>" +
+                                                                      msg);
+                                                              failure.run();
+                                                          }
+
+                                                          @Override
+                                                          public void onSuccess(String result) {
+                                                              model.setInfraPolicyMapping(nodeSourceConfigurationParser.parseInfraPoliciesMapping(result));
+
+                                                              Map<String, List<String>> infraPolicyMapping = model.getInfraPolicyMapping();
+
+                                                              success.run();
+                                                          }
+                                                      });
+
                     }
                 });
             }

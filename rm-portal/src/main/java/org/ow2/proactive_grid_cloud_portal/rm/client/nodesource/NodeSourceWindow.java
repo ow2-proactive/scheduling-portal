@@ -427,6 +427,9 @@ public abstract class NodeSourceWindow {
             formItem.show();
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
+        if (infrastructureSelectItem.getValueAsString().contains("Local")) {
+            policySelectItem.setValue("StaticPolicy");
+        }
     }
 
     private void hideAllPluginFormItems() {

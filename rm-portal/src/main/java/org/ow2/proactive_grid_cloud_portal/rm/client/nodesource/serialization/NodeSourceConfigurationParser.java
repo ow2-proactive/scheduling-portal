@@ -25,7 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,6 +106,24 @@ public class NodeSourceConfigurationParser {
         }
 
         return plugins;
+    }
+
+    public Map<String, List<String>> parseInfraPoliciesMapping(String json) {
+        Map<String, List<String>> result = new HashMap<>();
+        JSONObject jsonObject = parseJSON(json).isObject();
+
+        for (String infra : jsonObject.keySet()) {
+            JSONArray array = jsonObject.get(infra).isArray();
+            List<String> policies = new ArrayList<>();
+            int size = array.size();
+            for (int i = 0; i < size; ++i) {
+                String policy = array.get(i).isString().stringValue();
+                policies.add(policy);
+            }
+            result.put(infra, policies);
+        }
+
+        return result;
     }
 
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {

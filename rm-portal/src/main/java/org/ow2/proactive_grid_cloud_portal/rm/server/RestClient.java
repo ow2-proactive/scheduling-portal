@@ -77,6 +77,12 @@ public interface RestClient {
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @GET
+    @Path("/rm/infrastructuresmapping")
+    @GZIP
+    @Produces("application/json")
+    InputStream getInfrasToPoliciesMapping(@HeaderParam("sessionid") String sessionId);
+
+    @GET
     @GZIP
     @Path("/rm/nodesource/configuration")
     @Produces("application/json")
