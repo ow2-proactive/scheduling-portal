@@ -361,13 +361,14 @@ public abstract class NodeSourceWindow {
     private void resetFormForPolicySelectChange() {
         String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
         warnForUploadFiles(infrastructurePluginName);
-        if (this.previousSelectedPolicy != null) {
+        if (this.previousSelectedPolicy != null && !previousSelectedPolicy.isEmpty()) {
             for (FormItem formItem : this.formItemsByName.get(this.previousSelectedPolicy)) {
                 formItem.hide();
             }
         }
         String policyPluginName = this.policySelectItem.getValueAsString();
-        for (FormItem formItem : this.formItemsByName.get(policyPluginName)) {
+        for (FormItem formItem : this.formItemsByName.getOrDefault(policyPluginName,
+                                                                   (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
         }
         this.previousSelectedPolicy = policyPluginName;
