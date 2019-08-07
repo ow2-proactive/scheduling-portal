@@ -100,6 +100,13 @@ public interface RMService extends RemoteService {
     String getPolicies(String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * @param sessionId a valid session
+     * @return a mapping which for each infrastructure provides list of policies
+     * that can work together with given infrastructure
+     */
+    String getInfrasToPoliciesMapping(String sessionId) throws RestServerException, ServiceException;
+
+    /**
      * Retrieve the configuration of a given node source, in other words, a
      * representation of all the parameters with which a node source was
      * configured.

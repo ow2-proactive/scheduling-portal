@@ -316,6 +316,10 @@ public class RMServiceImpl extends Service implements RMService {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.policies(sessionId));
     }
 
+    public String getInfrasToPoliciesMapping(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.getInfrasToPoliciesMapping(sessionId));
+    }
+
     @Override
     public String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
             throws RestServerException, ServiceException {

@@ -73,6 +73,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     private HashMap<String, PluginDescriptor> policies = null;
 
+    private Map<String, List<String>> infraPolicyMapping = null;
+
     private Map<String, StatHistory> statistics = null;
 
     private Map<String, Range> requestedStatHistoryRange = null;
@@ -127,6 +129,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.nodes = new HashMap<>();
         this.infrastructures = new HashMap<>();
         this.policies = new HashMap<>();
+        this.infraPolicyMapping = new HashMap<>();
         this.requestedStatHistoryRange = new HashMap<>();
 
         this.logListeners = new ArrayList<>();
@@ -296,6 +299,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setSupportedPolicies(HashMap<String, PluginDescriptor> pol) {
         this.policies = pol;
+    }
+
+    @Override
+    public Map<String, List<String>> getInfraPolicyMapping() {
+        return infraPolicyMapping;
+    }
+
+    public void setInfraPolicyMapping(Map<String, List<String>> infraPolicyMapping) {
+        this.infraPolicyMapping = infraPolicyMapping;
     }
 
     @Override
