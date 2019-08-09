@@ -153,6 +153,8 @@ public abstract class NodeSourceWindow {
 
     private LinkedHashMap<String, String> fullPolicyValueMap;
 
+    private LinkedHashMap<String, String> latestPoliciesList;
+
     protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
         this.windowTitle = windowTitle;
@@ -451,6 +453,7 @@ public abstract class NodeSourceWindow {
                 sorted.put(entry.getKey(), entry.getValue());
             }
 
+            latestPoliciesList = sorted;
             policySelectItem.setValueMap(sorted);
             if (!appropriatePolicies.contains(policySelectItem.getValueAsString())) {
                 policySelectItem.setValue("");
@@ -783,6 +786,12 @@ public abstract class NodeSourceWindow {
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+        if (!latestPoliciesList.containsKey(policyPluginDescriptor.getPluginName())) {
+            LogModel.getInstance()
+                    .logMessage("You cannot use '" + policyPluginDescriptor.getPluginName() + "' policy with '" +
+                                infrastructureSelectItem.getValueAsString() + "' infrastructure.");
+            return;
+        }
         validatePolicyNameOrFail(policyPluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()
@@ -792,6 +801,7 @@ public abstract class NodeSourceWindow {
                                                                    .startsWith(policyPluginDescriptor.getPluginName()));
 
         this.previousSelectedPolicy = this.policySelectItem.getValueAsString();
+
         this.policySelectItem.setValue(policyPluginDescriptor.getPluginName());
         List<FormItem> prefilledFormItems = getPrefilledFormItems(policyPluginDescriptor);
         allNodeSourcePluginsFormItems.addAll(findFormItemIndexByName(POLICY_FORM_KEY, allNodeSourcePluginsFormItems) +
