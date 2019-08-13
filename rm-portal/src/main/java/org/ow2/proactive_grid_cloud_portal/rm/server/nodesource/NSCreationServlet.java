@@ -132,6 +132,26 @@ public class NSCreationServlet extends HttpServlet {
                         populateOrderMap(policyParamOrder, formFieldValue);
                     } else if (formFieldName.equals("policyParamFileOrder")) {
                         populateOrderMap(policyParamFileOrder, formFieldValue);
+                    } else if (formFieldName.equals("hidden-infra")) {
+                        String[] pairs = formFieldValue.split("\\^");
+                        for (String pair : pairs) {
+                            String[] split = pair.split("->");
+                            if (split.length == 2) {
+                                addToStringParamsOrToFileParams(infraParams, infraFileParams, split[0], split[1]);
+                            } else {
+                                addToStringParamsOrToFileParams(infraParams, infraFileParams, split[0], "");
+                            }
+                        }
+                    } else if (formFieldName.equals("hidden-policy")) {
+                        String[] pairs = formFieldValue.split("\\^");
+                        for (String pair : pairs) {
+                            String[] split = pair.split("->");
+                            if (split.length == 2) {
+                                addToStringParamsOrToFileParams(policyParams, policyFileParams, split[0], split[1]);
+                            } else {
+                                addToStringParamsOrToFileParams(policyParams, policyFileParams, split[0], "");
+                            }
+                        }
                     } else if (readingInfraParams) {
                         addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {

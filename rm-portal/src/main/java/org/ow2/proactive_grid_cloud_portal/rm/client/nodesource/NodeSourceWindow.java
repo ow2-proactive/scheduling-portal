@@ -134,6 +134,8 @@ public abstract class NodeSourceWindow {
      */
     private Map<String, List<FormItem>> formItemsByName;
 
+    private Map<String, String> hiddenItems = new HashMap<>();
+
     /**
      * Initial order or the parameters of each plugin
      */
@@ -497,6 +499,8 @@ public abstract class NodeSourceWindow {
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
         this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY,
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
+        this.formItemsByName.put("hidden-infra", Collections.singletonList(new HiddenItem("hidden-infra")));
+        this.formItemsByName.put("hidden-policy", Collections.singletonList(new HiddenItem("hidden-policy")));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
@@ -526,12 +530,21 @@ public abstract class NodeSourceWindow {
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
             this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+
+            String collect = pluginDescriptor.getConfigurableFields()
+                                             .stream()
+                                             .filter(x -> !x.isImportant())
+                                             .map(x -> pluginDescriptor.getPluginName() + x.getName() + "->" +
+                                                       x.getValue())
+                                             .collect(Collectors.joining("^"));
+            this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
         }
     }
 
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
                                                           .stream()
+                                                          .filter(PluginDescriptor.Field::isImportant)
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
@@ -696,6 +709,9 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
+        this.nodeSourcePluginsForm.setValue("hidden-infra",
+                                            hiddenItems.get(infrastructureSelectItem.getValueAsString()));
+        this.nodeSourcePluginsForm.setValue("hidden-policy", hiddenItems.get(policySelectItem.getValueAsString()));
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
             JSONObject jsonCallback = new JSONObject(javascriptObject);
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
