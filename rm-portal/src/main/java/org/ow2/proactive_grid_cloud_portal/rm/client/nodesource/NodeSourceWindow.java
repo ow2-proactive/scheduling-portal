@@ -534,8 +534,17 @@ public abstract class NodeSourceWindow {
             String collect = pluginDescriptor.getConfigurableFields()
                                              .stream()
                                              .filter(x -> !x.isImportant())
-                                             .map(x -> pluginDescriptor.getPluginName() + x.getName() + "->" +
-                                                       x.getValue())
+                                             .map(x -> {
+                                                String returnValue = "";
+                                                if (x.isFile() || x.isCredential()) {
+                                                    returnValue += "file->";
+                                                } else {
+                                                    returnValue += "field->";
+                                                }
+                                                returnValue += pluginDescriptor.getPluginName() + x.getName() + "->" +
+                                                x.getValue();
+                                                return returnValue;
+                                             })
                                              .collect(Collectors.joining("^"));
             this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
         }

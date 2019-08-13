@@ -136,20 +136,30 @@ public class NSCreationServlet extends HttpServlet {
                         String[] pairs = formFieldValue.split("\\^");
                         for (String pair : pairs) {
                             String[] split = pair.split("->");
-                            if (split.length == 2) {
-                                addToStringParamsOrToFileParams(infraParams, infraFileParams, split[0], split[1]);
+                            String value = "";
+                            String name = split[1];
+                            if (split.length == 3) {
+                                value = split[2];
+                            }
+                            if (split[0].equals("file")) {
+                                infraFileParams.put(name, value);
                             } else {
-                                addToStringParamsOrToFileParams(infraParams, infraFileParams, split[0], "");
+                                infraParams.put(name, value);
                             }
                         }
                     } else if (formFieldName.equals("hidden-policy")) {
                         String[] pairs = formFieldValue.split("\\^");
                         for (String pair : pairs) {
                             String[] split = pair.split("->");
-                            if (split.length == 2) {
-                                addToStringParamsOrToFileParams(policyParams, policyFileParams, split[0], split[1]);
+                            String value = "";
+                            String name = split[1];
+                            if (split.length == 3) {
+                                value = split[2];
+                            }
+                            if (split[0].equals("file")) {
+                                policyFileParams.put(name, value);
                             } else {
-                                addToStringParamsOrToFileParams(policyParams, policyFileParams, split[0], "");
+                                policyParams.put(name, value);
                             }
                         }
                     } else if (readingInfraParams) {
