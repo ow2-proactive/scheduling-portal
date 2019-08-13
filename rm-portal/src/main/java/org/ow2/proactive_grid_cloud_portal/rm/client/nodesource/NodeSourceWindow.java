@@ -109,6 +109,8 @@ public abstract class NodeSourceWindow {
 
     protected TextItem nodeSourceNameText;
 
+    protected CheckboxItem isAdvanced;
+
     protected Label generalParametersLabel;
 
     protected boolean createdFromImport;
@@ -243,6 +245,21 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowForm.setFields(this.nodeSourceNameText);
         nodeSourceWindowForm.setTitleSuffix("");
         createNodeSourceLayout.addMember(nodeSourceWindowForm);
+
+        isAdvanced = new CheckboxItem();
+        isAdvanced.setTitle("Advanced configuration");
+        isAdvanced.setDefaultValue(false);
+        isAdvanced.addChangeHandler(e -> {
+            populateFormValues();
+            resetFormForInfrastructureSelectChange();
+        });
+
+        DynamicForm radioForm = new DynamicForm();
+        radioForm.setWidth100();
+        radioForm.setHeight("30px");
+        radioForm.setFields(this.isAdvanced);
+        radioForm.setTitleSuffix("");
+        createNodeSourceLayout.addMember(radioForm);
 
         Label importantFieldsLabel = new Label();
         importantFieldsLabel.setHeight("20px");
@@ -531,29 +548,34 @@ public abstract class NodeSourceWindow {
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
             this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
 
-            String collect = pluginDescriptor.getConfigurableFields()
-                                             .stream()
-                                             .filter(x -> !x.isImportant())
-                                             .map(x -> {
-                                                String returnValue = "";
-                                                if (x.isFile() || x.isCredential()) {
-                                                    returnValue += "file->";
-                                                } else {
-                                                    returnValue += "field->";
-                                                }
-                                                returnValue += pluginDescriptor.getPluginName() + x.getName() + "->" +
-                                                x.getValue();
-                                                return returnValue;
-                                             })
-                                             .collect(Collectors.joining("^"));
-            this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
+            if (!isAdvanced.getValueAsBoolean()) {
+                String collect = pluginDescriptor.getConfigurableFields()
+                                                 .stream()
+                                                 .filter(x -> !x.isImportant())
+                                                 .map(x -> {
+                                                     String returnValue = "";
+                                                     if (x.isFile() || x.isCredential()) {
+                                                         returnValue += "file->";
+                                                     } else {
+                                                         returnValue += "field->";
+                                                     }
+                                                     returnValue += pluginDescriptor.getPluginName() + x.getName() +
+                                                                    "->" + x.getValue();
+                                                     return returnValue;
+                                                 })
+                                                 .collect(Collectors.joining("^"));
+                this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
+            } else {
+                this.hiddenItems.clear();
+            }
         }
     }
 
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
                                                           .stream()
-                                                          .filter(PluginDescriptor.Field::isImportant)
+                                                          .filter(field -> isAdvanced.getValueAsBoolean() ||
+                                                                           field.isImportant())
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
@@ -718,9 +740,11 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
-        this.nodeSourcePluginsForm.setValue("hidden-infra",
-                                            hiddenItems.get(infrastructureSelectItem.getValueAsString()));
-        this.nodeSourcePluginsForm.setValue("hidden-policy", hiddenItems.get(policySelectItem.getValueAsString()));
+        if (!isAdvanced.getValueAsBoolean()) {
+            this.nodeSourcePluginsForm.setValue("hidden-infra",
+                                                hiddenItems.get(infrastructureSelectItem.getValueAsString()));
+            this.nodeSourcePluginsForm.setValue("hidden-policy", hiddenItems.get(policySelectItem.getValueAsString()));
+        }
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
             JSONObject jsonCallback = new JSONObject(javascriptObject);
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
