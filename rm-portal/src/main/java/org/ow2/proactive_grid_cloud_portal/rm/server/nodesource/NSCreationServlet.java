@@ -132,7 +132,7 @@ public class NSCreationServlet extends HttpServlet {
                         populateOrderMap(policyParamOrder, formFieldValue);
                     } else if (formFieldName.equals("policyParamFileOrder")) {
                         populateOrderMap(policyParamFileOrder, formFieldValue);
-                    } else if (formFieldName.equals("hidden-infra")) {
+                    } else if (formFieldName.equals("hidden-infra") && !formFieldValue.isEmpty()) {
                         String[] pairs = formFieldValue.split("\\^");
                         for (String pair : pairs) {
                             String[] split = pair.split("->");
@@ -147,7 +147,7 @@ public class NSCreationServlet extends HttpServlet {
                                 infraParams.put(name, value);
                             }
                         }
-                    } else if (formFieldName.equals("hidden-policy")) {
+                    } else if (formFieldName.equals("hidden-policy") & !formFieldValue.isEmpty()) {
                         String[] pairs = formFieldValue.split("\\^");
                         for (String pair : pairs) {
                             String[] split = pair.split("->");

@@ -99,6 +99,12 @@ public abstract class NodeSourceWindow {
 
     private static final String NS_CALLBACK_FORM_KEY = "nsCallback";
 
+    private static final String HIDDEN_POLICY = "hidden-policy";
+
+    private static final String HIDDEN_INFRA = "hidden-infra";
+
+    private static final String FIELD_SEPARATOR = "->";
+
     public SelectItem infrastructureSelectItem;
 
     public SelectItem policySelectItem;
@@ -249,17 +255,17 @@ public abstract class NodeSourceWindow {
         isAdvanced = new CheckboxItem();
         isAdvanced.setTitle("Advanced configuration");
         isAdvanced.setDefaultValue(false);
-        isAdvanced.addChangeHandler(e -> {
-            populateFormValues();
-            resetFormForInfrastructureSelectChange();
+        isAdvanced.addChangedHandler(e -> {
+            hideAllPluginFormItems();
+            populateFormValues(() -> resetFormForInfrastructureSelectChange());
         });
 
-        DynamicForm radioForm = new DynamicForm();
-        radioForm.setWidth100();
-        radioForm.setHeight("30px");
-        radioForm.setFields(this.isAdvanced);
-        radioForm.setTitleSuffix("");
-        createNodeSourceLayout.addMember(radioForm);
+        DynamicForm formIsAdvanced = new DynamicForm();
+        formIsAdvanced.setWidth100();
+        formIsAdvanced.setHeight("30px");
+        formIsAdvanced.setFields(this.isAdvanced);
+        formIsAdvanced.setTitleSuffix("");
+        createNodeSourceLayout.addMember(formIsAdvanced);
 
         Label importantFieldsLabel = new Label();
         importantFieldsLabel.setHeight("20px");
@@ -354,7 +360,13 @@ public abstract class NodeSourceWindow {
     }
 
     private void populateFormValues() {
+        populateFormValues(() -> {
+        });
+    }
+
+    private void populateFormValues(Runnable afterFunciton) {
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
+            this.formItemsByName.clear();
             prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
             this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
@@ -376,6 +388,7 @@ public abstract class NodeSourceWindow {
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
             hideAllPluginFormItems();
+            afterFunciton.run();
         }, this.window::hide);
     }
 
@@ -516,8 +529,8 @@ public abstract class NodeSourceWindow {
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
         this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY,
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
-        this.formItemsByName.put("hidden-infra", Collections.singletonList(new HiddenItem("hidden-infra")));
-        this.formItemsByName.put("hidden-policy", Collections.singletonList(new HiddenItem("hidden-policy")));
+        this.formItemsByName.put(HIDDEN_INFRA, Collections.singletonList(new HiddenItem(HIDDEN_INFRA)));
+        this.formItemsByName.put(HIDDEN_POLICY, Collections.singletonList(new HiddenItem(HIDDEN_POLICY)));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
@@ -547,27 +560,25 @@ public abstract class NodeSourceWindow {
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
             this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+            populateHiddenItemsIfNecessary(pluginDescriptor);
+        }
+    }
 
-            if (!isAdvanced.getValueAsBoolean()) {
-                String collect = pluginDescriptor.getConfigurableFields()
-                                                 .stream()
-                                                 .filter(x -> !x.isImportant())
-                                                 .map(x -> {
-                                                     String returnValue = "";
-                                                     if (x.isFile() || x.isCredential()) {
-                                                         returnValue += "file->";
-                                                     } else {
-                                                         returnValue += "field->";
-                                                     }
-                                                     returnValue += pluginDescriptor.getPluginName() + x.getName() +
-                                                                    "->" + x.getValue();
-                                                     return returnValue;
-                                                 })
-                                                 .collect(Collectors.joining("^"));
-                this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
-            } else {
-                this.hiddenItems.clear();
-            }
+    private void populateHiddenItemsIfNecessary(PluginDescriptor pluginDescriptor) {
+        if (!isAdvanced.getValueAsBoolean()) {
+            String collect = pluginDescriptor.getConfigurableFields().stream().filter(x -> !x.isImportant()).map(x -> {
+                String returnValue = "";
+                if (x.isFile() || x.isCredential()) {
+                    returnValue += "file" + FIELD_SEPARATOR;
+                } else {
+                    returnValue += "field" + FIELD_SEPARATOR;
+                }
+                returnValue += pluginDescriptor.getPluginName() + x.getName() + FIELD_SEPARATOR + x.getValue();
+                return returnValue;
+            }).collect(Collectors.joining("^"));
+            this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
+        } else {
+            this.hiddenItems.clear();
         }
     }
 
@@ -741,9 +752,9 @@ public abstract class NodeSourceWindow {
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
         if (!isAdvanced.getValueAsBoolean()) {
-            this.nodeSourcePluginsForm.setValue("hidden-infra",
+            this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
                                                 hiddenItems.get(infrastructureSelectItem.getValueAsString()));
-            this.nodeSourcePluginsForm.setValue("hidden-policy", hiddenItems.get(policySelectItem.getValueAsString()));
+            this.nodeSourcePluginsForm.setValue(HIDDEN_POLICY, hiddenItems.get(policySelectItem.getValueAsString()));
         }
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
             JSONObject jsonCallback = new JSONObject(javascriptObject);
