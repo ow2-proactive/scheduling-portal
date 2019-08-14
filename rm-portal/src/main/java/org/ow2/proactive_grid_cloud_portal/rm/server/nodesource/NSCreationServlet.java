@@ -132,6 +132,36 @@ public class NSCreationServlet extends HttpServlet {
                         populateOrderMap(policyParamOrder, formFieldValue);
                     } else if (formFieldName.equals("policyParamFileOrder")) {
                         populateOrderMap(policyParamFileOrder, formFieldValue);
+                    } else if (formFieldName.equals("hidden-infra") && !formFieldValue.isEmpty()) {
+                        String[] pairs = formFieldValue.split("\\^");
+                        for (String pair : pairs) {
+                            String[] split = pair.split("->");
+                            String value = "";
+                            String name = split[1];
+                            if (split.length == 3) {
+                                value = split[2];
+                            }
+                            if (split[0].equals("file")) {
+                                infraFileParams.put(name, value);
+                            } else {
+                                infraParams.put(name, value);
+                            }
+                        }
+                    } else if (formFieldName.equals("hidden-policy") & !formFieldValue.isEmpty()) {
+                        String[] pairs = formFieldValue.split("\\^");
+                        for (String pair : pairs) {
+                            String[] split = pair.split("->");
+                            String value = "";
+                            String name = split[1];
+                            if (split.length == 3) {
+                                value = split[2];
+                            }
+                            if (split[0].equals("file")) {
+                                policyFileParams.put(name, value);
+                            } else {
+                                policyParams.put(name, value);
+                            }
+                        }
                     } else if (readingInfraParams) {
                         addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {

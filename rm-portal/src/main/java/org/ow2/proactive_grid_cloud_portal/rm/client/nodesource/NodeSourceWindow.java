@@ -99,6 +99,12 @@ public abstract class NodeSourceWindow {
 
     private static final String NS_CALLBACK_FORM_KEY = "nsCallback";
 
+    private static final String HIDDEN_POLICY = "hidden-policy";
+
+    private static final String HIDDEN_INFRA = "hidden-infra";
+
+    private static final String FIELD_SEPARATOR = "->";
+
     public SelectItem infrastructureSelectItem;
 
     public SelectItem policySelectItem;
@@ -108,6 +114,8 @@ public abstract class NodeSourceWindow {
     protected CheckboxItem nodesRecoverableCheckbox;
 
     protected TextItem nodeSourceNameText;
+
+    protected CheckboxItem isAdvanced;
 
     protected Label generalParametersLabel;
 
@@ -133,6 +141,8 @@ public abstract class NodeSourceWindow {
      * to achieve a correct display.
      */
     private Map<String, List<FormItem>> formItemsByName;
+
+    private Map<String, String> hiddenItems = new HashMap<>();
 
     /**
      * Initial order or the parameters of each plugin
@@ -242,6 +252,21 @@ public abstract class NodeSourceWindow {
         nodeSourceWindowForm.setTitleSuffix("");
         createNodeSourceLayout.addMember(nodeSourceWindowForm);
 
+        isAdvanced = new CheckboxItem();
+        isAdvanced.setTitle("Advanced configuration");
+        isAdvanced.setDefaultValue(false);
+        isAdvanced.addChangedHandler(e -> {
+            hideAllPluginFormItems();
+            populateFormValues(() -> resetFormForInfrastructureSelectChange());
+        });
+
+        DynamicForm formIsAdvanced = new DynamicForm();
+        formIsAdvanced.setWidth100();
+        formIsAdvanced.setHeight("30px");
+        formIsAdvanced.setFields(this.isAdvanced);
+        formIsAdvanced.setTitleSuffix("");
+        createNodeSourceLayout.addMember(formIsAdvanced);
+
         Label importantFieldsLabel = new Label();
         importantFieldsLabel.setHeight("20px");
         importantFieldsLabel.setContents("<span style='color:#E86D1F'>* Requested or Important Fields</span>");
@@ -335,7 +360,13 @@ public abstract class NodeSourceWindow {
     }
 
     private void populateFormValues() {
+        populateFormValues(() -> {
+        });
+    }
+
+    private void populateFormValues(Runnable afterFunciton) {
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
+            this.formItemsByName.clear();
             prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
             this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
@@ -357,6 +388,7 @@ public abstract class NodeSourceWindow {
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
             hideAllPluginFormItems();
+            afterFunciton.run();
         }, this.window::hide);
     }
 
@@ -497,6 +529,8 @@ public abstract class NodeSourceWindow {
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
         this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY,
                                  Collections.singletonList(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
+        this.formItemsByName.put(HIDDEN_INFRA, Collections.singletonList(new HiddenItem(HIDDEN_INFRA)));
+        this.formItemsByName.put(HIDDEN_POLICY, Collections.singletonList(new HiddenItem(HIDDEN_POLICY)));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
@@ -526,12 +560,33 @@ public abstract class NodeSourceWindow {
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
             this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
+            populateHiddenItemsIfNecessary(pluginDescriptor);
+        }
+    }
+
+    private void populateHiddenItemsIfNecessary(PluginDescriptor pluginDescriptor) {
+        if (!isAdvanced.getValueAsBoolean()) {
+            String collect = pluginDescriptor.getConfigurableFields().stream().filter(x -> !x.isImportant()).map(x -> {
+                String returnValue = "";
+                if (x.isFile() || x.isCredential()) {
+                    returnValue += "file" + FIELD_SEPARATOR;
+                } else {
+                    returnValue += "field" + FIELD_SEPARATOR;
+                }
+                returnValue += pluginDescriptor.getPluginName() + x.getName() + FIELD_SEPARATOR + x.getValue();
+                return returnValue;
+            }).collect(Collectors.joining("^"));
+            this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
+        } else {
+            this.hiddenItems.clear();
         }
     }
 
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
                                                           .stream()
+                                                          .filter(field -> isAdvanced.getValueAsBoolean() ||
+                                                                           field.isImportant())
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
@@ -696,6 +751,11 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
+        if (!isAdvanced.getValueAsBoolean()) {
+            this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
+                                                hiddenItems.get(infrastructureSelectItem.getValueAsString()));
+            this.nodeSourcePluginsForm.setValue(HIDDEN_POLICY, hiddenItems.get(policySelectItem.getValueAsString()));
+        }
         this.nodeSourcePluginsForm.setValue(NS_CALLBACK_FORM_KEY, JSUtil.register(javascriptObject -> {
             JSONObject jsonCallback = new JSONObject(javascriptObject);
             if (jsonCallback.containsKey("result") && jsonCallback.get("result").isBoolean().booleanValue()) {
