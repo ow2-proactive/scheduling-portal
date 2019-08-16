@@ -257,7 +257,10 @@ public abstract class NodeSourceWindow {
         isAdvanced.setDefaultValue(false);
         isAdvanced.addChangedHandler(e -> {
             hideAllPluginFormItems();
-            populateFormValues(() -> resetFormForInfrastructureSelectChange());
+            populateFormValues(() -> {
+                resetFormForInfrastructureSelectChange();
+                resetFormForPolicySelectChange();
+            });
         });
 
         DynamicForm formIsAdvanced = new DynamicForm();
@@ -460,7 +463,8 @@ public abstract class NodeSourceWindow {
             }
         }
         String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
-        for (FormItem formItem : this.formItemsByName.get(infrastructurePluginName)) {
+        for (FormItem formItem : this.formItemsByName.getOrDefault(infrastructurePluginName,
+                                                                   (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
