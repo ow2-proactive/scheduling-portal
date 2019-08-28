@@ -664,7 +664,16 @@ public abstract class NodeSourceWindow {
 
     private void addElasticLabelIfNecessary(PluginDescriptor plugin, List<FormItem> allFormItems) {
         if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
-            allFormItems.add(createElasticLabel(plugin));
+            StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
+            elasticInfra.setTitle("");
+            elasticInfra.setTitleStyle("important-message");
+            elasticInfra.setTextBoxStyle("grey-message");
+            elasticInfra.setValue("Elastic");
+
+            FormItemIcon icon = new FormItemIcon();
+            icon.setSrc(RMImages.instance.good().getSafeUri().asString());
+            elasticInfra.setIcons(icon);
+            allFormItems.add(elasticInfra);
         }
     }
 
@@ -682,16 +691,6 @@ public abstract class NodeSourceWindow {
                      .filter(field -> field.isFile() || field.isCredential())
                      .map(field -> plugin.getPluginName() + field.getName())
                      .collect(Collectors.joining(";"));
-    }
-
-    private StaticTextItem createElasticLabel(PluginDescriptor plugin) {
-        StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
-        elasticInfra.setTitle("");
-        elasticInfra.setValue("Elastic Infrastructure");
-        FormItemIcon icon = new FormItemIcon();
-        icon.setSrc(RMImages.instance.good().getSafeUri().asString());
-        elasticInfra.setIcons(icon);
-        return elasticInfra;
     }
 
     private int possiblyAddSection(PluginDescriptor plugin, List<PluginDescriptor.Field> pluginFields,
@@ -712,7 +711,7 @@ public abstract class NodeSourceWindow {
                                                                        plugin.getSectionDescriptions()
                                                                              .get(pluginField.getSectionSelector()) +
                                                                                                ":");
-                    staticTextItem.setTitleStyle("generalParametersStyle");
+                    staticTextItem.setTitleStyle("sectionParametersStyle");
                     allFormItems.add(staticTextItem);
                 }
             }
