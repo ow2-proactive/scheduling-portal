@@ -161,9 +161,9 @@ public abstract class NodeSourceWindow {
 
     private String waitingMessage;
 
-    private LinkedHashMap<String, String> fullPolicyValueMap;
+    private LinkedHashMap<String, String> fullPolicyValueMap = new LinkedHashMap<>();
 
-    private LinkedHashMap<String, String> latestPoliciesList;
+    private LinkedHashMap<String, String> latestPoliciesList = new LinkedHashMap<>();
 
     protected NodeSourceWindow(RMController controller, String windowTitle, String waitingMessage) {
         this.controller = controller;
@@ -492,7 +492,11 @@ public abstract class NodeSourceWindow {
             latestPoliciesList = sorted;
             policySelectItem.setValueMap(sorted);
             if (!appropriatePolicies.contains(policySelectItem.getValueAsString())) {
-                policySelectItem.setValue("");
+                if (policySelectItem.getValueAsString() != null) {
+                    setNodeSourceWindowLabelWithError(policySelectItem.getValueAsString() + " is not compatible with " +
+                                                      infrastructurePluginName + ".");
+                }
+                policySelectItem.setValue((String) null);
                 resetFormForPolicySelectChange();
             }
 
@@ -850,10 +854,16 @@ public abstract class NodeSourceWindow {
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+
+        if (infrastructureSelectItem.getValueAsString() == null) {
+            setNodeSourceWindowLabelWithError("You have to select infrastructure first.");
+            return;
+        }
         if (!latestPoliciesList.containsKey(policyPluginDescriptor.getPluginName())) {
-            LogModel.getInstance()
-                    .logMessage("You cannot use '" + policyPluginDescriptor.getPluginName() + "' policy with '" +
-                                infrastructureSelectItem.getValueAsString() + "' infrastructure.");
+            String errorMessage = "You cannot use '" + policyPluginDescriptor.getPluginName() + "' policy with '" +
+                                  infrastructureSelectItem.getValueAsString() + "' infrastructure.";
+            LogModel.getInstance().logMessage(errorMessage);
+            setNodeSourceWindowLabelWithError(errorMessage);
             return;
         }
         validatePolicyNameOrFail(policyPluginDescriptor.getPluginName());
@@ -944,6 +954,10 @@ public abstract class NodeSourceWindow {
 
     public void setNormalNodeSourceWindowLabel() {
         this.nodeSourceWindowLabel.setContents(WINDOW_HEADER);
+    }
+
+    public void setNodeSourceWindowLabelWithError(String errorMessage) {
+        this.nodeSourceWindowLabel.setContents("<span style='color:red'>" + errorMessage + "</span>");
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage, Throwable e) {
