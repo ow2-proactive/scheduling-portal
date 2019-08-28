@@ -601,40 +601,17 @@ public abstract class NodeSourceWindow {
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
         if (plugin.getPluginName().contains(".policy.")) {
-            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, plugin.getConfigurableFields()
-                                                                                         .stream()
-                                                                                         .filter(field -> !field.isFile() &&
-                                                                                                          !field.isCredential())
-                                                                                         .map(field -> plugin.getPluginName() +
-                                                                                                       field.getName())
-                                                                                         .collect(Collectors.joining(";")));
-            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, plugin.getConfigurableFields()
-                                                                                              .stream()
-                                                                                              .filter(field -> field.isFile() ||
-                                                                                                               field.isCredential())
-                                                                                              .map(field -> plugin.getPluginName() +
-                                                                                                            field.getName())
-                                                                                              .collect(Collectors.joining(";")));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, orderedFields(plugin));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, orderedFileFields(plugin));
         } else {
-            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY,
-                                  plugin.getConfigurableFields()
-                                        .stream()
-                                        .filter(field -> !field.isFile() && !field.isCredential())
-                                        .map(field -> plugin.getPluginName() + field.getName())
-                                        .collect(Collectors.joining(";")));
+            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY, orderedFields(plugin));
             pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
-                                  plugin.getConfigurableFields()
-                                        .stream()
-                                        .filter(field -> field.isFile() || field.isCredential())
-                                        .map(field -> plugin.getPluginName() + field.getName())
-                                        .collect(Collectors.joining(";")));
+                                  orderedFileFields(plugin));
         }
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
 
-        if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
-            allFormItems.add(createElasticLabel(plugin));
-        }
+        addElasticLabelIfNecessary(plugin, allFormItems);
         for (PluginDescriptor.Field pluginField : pluginFields) {
             currentSectionSelector = possiblyAddSection(plugin,
                                                         pluginFields,
@@ -683,6 +660,28 @@ public abstract class NodeSourceWindow {
             formItemsForField.clear();
         }
         return allFormItems;
+    }
+
+    private void addElasticLabelIfNecessary(PluginDescriptor plugin, List<FormItem> allFormItems) {
+        if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
+            allFormItems.add(createElasticLabel(plugin));
+        }
+    }
+
+    private String orderedFields(PluginDescriptor plugin) {
+        return plugin.getConfigurableFields()
+                     .stream()
+                     .filter(field -> !field.isFile() && !field.isCredential())
+                     .map(field -> plugin.getPluginName() + field.getName())
+                     .collect(Collectors.joining(";"));
+    }
+
+    private String orderedFileFields(PluginDescriptor plugin) {
+        return plugin.getConfigurableFields()
+                     .stream()
+                     .filter(field -> field.isFile() || field.isCredential())
+                     .map(field -> plugin.getPluginName() + field.getName())
+                     .collect(Collectors.joining(";"));
     }
 
     private StaticTextItem createElasticLabel(PluginDescriptor plugin) {
