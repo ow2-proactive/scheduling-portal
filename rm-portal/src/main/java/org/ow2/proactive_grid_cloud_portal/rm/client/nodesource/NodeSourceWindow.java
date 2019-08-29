@@ -493,8 +493,10 @@ public abstract class NodeSourceWindow {
             policySelectItem.setValueMap(sorted);
             if (!appropriatePolicies.contains(policySelectItem.getValueAsString())) {
                 if (policySelectItem.getValueAsString() != null) {
-                    setNodeSourceWindowLabelWithError(policySelectItem.getValueAsString() + " is not compatible with " +
-                                                      infrastructurePluginName + ".");
+
+                    setNodeSourceWindowLabelWithError(getShortName(policySelectItem.getValueAsString()) +
+                                                      " is not compatible with " +
+                                                      getShortName(infrastructurePluginName) + ".");
                 }
                 policySelectItem.setValue((String) null);
                 resetFormForPolicySelectChange();
@@ -720,7 +722,11 @@ public abstract class NodeSourceWindow {
     }
 
     private String getPluginShortName(PluginDescriptor plugin) {
-        return plugin.getPluginName().substring(plugin.getPluginName().lastIndexOf('.') + 1);
+        return getShortName(plugin.getPluginName());
+    }
+
+    private String getShortName(String fullName) {
+        return fullName.substring(fullName.lastIndexOf('.') + 1);
     }
 
     private void applyModificationsToNodeSource(VLayout nodeSourceWindowLayout, List<IButton> buttonList,
@@ -860,8 +866,9 @@ public abstract class NodeSourceWindow {
             return;
         }
         if (!latestPoliciesList.containsKey(policyPluginDescriptor.getPluginName())) {
-            String errorMessage = "You cannot use '" + policyPluginDescriptor.getPluginName() + "' policy with '" +
-                                  infrastructureSelectItem.getValueAsString() + "' infrastructure.";
+            String errorMessage = "You cannot use '" + getShortName(policyPluginDescriptor.getPluginName()) +
+                                  "' policy with '" + getShortName(infrastructureSelectItem.getValueAsString()) +
+                                  "' infrastructure.";
             LogModel.getInstance().logMessage(errorMessage);
             setNodeSourceWindowLabelWithError(errorMessage);
             return;
