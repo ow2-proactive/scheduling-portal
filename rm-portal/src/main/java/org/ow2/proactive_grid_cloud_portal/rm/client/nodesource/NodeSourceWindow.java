@@ -494,9 +494,9 @@ public abstract class NodeSourceWindow {
             if (!appropriatePolicies.contains(policySelectItem.getValueAsString())) {
                 if (policySelectItem.getValueAsString() != null) {
 
-                    setNodeSourceWindowLabelWithError(getShortName(policySelectItem.getValueAsString()) +
-                                                      " is not compatible with " +
-                                                      getShortName(infrastructurePluginName) + ".");
+                    setNodeSourceWindowLabelWithError("'" + getShortName(policySelectItem.getValueAsString()) +
+                                                      "' is not compatible with '" +
+                                                      getShortName(infrastructurePluginName) + "'.");
                 }
                 policySelectItem.setValue((String) null);
                 resetFormForPolicySelectChange();
@@ -861,11 +861,8 @@ public abstract class NodeSourceWindow {
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
 
-        if (infrastructureSelectItem.getValueAsString() == null) {
-            setNodeSourceWindowLabelWithError("You have to select infrastructure first.");
-            return;
-        }
-        if (!latestPoliciesList.containsKey(policyPluginDescriptor.getPluginName())) {
+        if (infrastructureSelectItem.getValueAsString() != null &&
+            !latestPoliciesList.containsKey(policyPluginDescriptor.getPluginName())) {
             String errorMessage = "You cannot use '" + getShortName(policyPluginDescriptor.getPluginName()) +
                                   "' policy with '" + getShortName(infrastructureSelectItem.getValueAsString()) +
                                   "' infrastructure.";
