@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server.nodesource;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow.FIELD_SEPARATOR;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow.FILE;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow.ROW_SEPARATOR;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_FORM_ITEM_SUFFIX;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.InlineItemModificationCreator.EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX;
 
@@ -133,35 +136,9 @@ public class NSCreationServlet extends HttpServlet {
                     } else if (formFieldName.equals("policyParamFileOrder")) {
                         populateOrderMap(policyParamFileOrder, formFieldValue);
                     } else if (formFieldName.equals("hidden-infra") && !formFieldValue.isEmpty()) {
-                        String[] pairs = formFieldValue.split("\\^");
-                        for (String pair : pairs) {
-                            String[] split = pair.split("->");
-                            String value = "";
-                            String name = split[1];
-                            if (split.length == 3) {
-                                value = split[2];
-                            }
-                            if (split[0].equals("file")) {
-                                infraFileParams.put(name, value);
-                            } else {
-                                infraParams.put(name, value);
-                            }
-                        }
+                        extractHiddenItems(infraParams, infraFileParams, formFieldValue);
                     } else if (formFieldName.equals("hidden-policy") & !formFieldValue.isEmpty()) {
-                        String[] pairs = formFieldValue.split("\\^");
-                        for (String pair : pairs) {
-                            String[] split = pair.split("->");
-                            String value = "";
-                            String name = split[1];
-                            if (split.length == 3) {
-                                value = split[2];
-                            }
-                            if (split[0].equals("file")) {
-                                policyFileParams.put(name, value);
-                            } else {
-                                policyParams.put(name, value);
-                            }
-                        }
+                        extractHiddenItems(policyParams, policyFileParams, formFieldValue);
                     } else if (readingInfraParams) {
                         addToStringParamsOrToFileParams(infraParams, infraFileParams, formFieldName, formFieldValue);
                     } else if (readingPolicyParams) {
@@ -268,6 +245,21 @@ public class NSCreationServlet extends HttpServlet {
         } catch (Throwable t) {
             write(response,
                   createJavascriptPayload(callbackName, createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
+        }
+    }
+
+    private void extractHiddenItems(Map<String, String> infraParams, Map<String, String> infraFileParams,
+            String formFieldValue) {
+        for (String row : formFieldValue.split(ROW_SEPARATOR)) {
+            String[] fields = row.split(FIELD_SEPARATOR);
+            boolean isFile = fields[0].equals(FILE);
+            String name = fields[1];
+            String value = fields.length > 2 ? fields[2] : "";
+            if (isFile) {
+                infraFileParams.put(name, value);
+            } else {
+                infraParams.put(name, value);
+            }
         }
     }
 

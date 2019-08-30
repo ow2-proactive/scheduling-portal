@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -103,7 +104,13 @@ public abstract class NodeSourceWindow {
 
     private static final String HIDDEN_INFRA = "hidden-infra";
 
-    private static final String FIELD_SEPARATOR = "->";
+    public static final String FIELD_SEPARATOR = "\u0003";
+
+    public static final String ROW_SEPARATOR = "\u0006";
+
+    public static final String FILE = "file";
+
+    public static final String FIELD = "field";
 
     public SelectItem infrastructureSelectItem;
 
@@ -576,16 +583,19 @@ public abstract class NodeSourceWindow {
 
     private void populateHiddenItemsIfNecessary(PluginDescriptor pluginDescriptor) {
         if (!isAdvanced.getValueAsBoolean()) {
-            String collect = pluginDescriptor.getConfigurableFields().stream().filter(x -> !x.isImportant()).map(x -> {
-                String returnValue = "";
-                if (x.isFile() || x.isCredential()) {
-                    returnValue += "file" + FIELD_SEPARATOR;
-                } else {
-                    returnValue += "field" + FIELD_SEPARATOR;
-                }
-                returnValue += pluginDescriptor.getPluginName() + x.getName() + FIELD_SEPARATOR + x.getValue();
-                return returnValue;
-            }).collect(Collectors.joining("^"));
+            String collect = pluginDescriptor.getConfigurableFields()
+                                             .stream()
+                                             .filter(field -> !field.isImportant())
+                                             .map(field -> {
+                                                 String fieldId = pluginDescriptor.getPluginName() + field.getName();
+                                                 String fieldType = field.isFile() || field.isCredential() ? FILE
+                                                                                                           : FIELD;
+                                                 return String.join(FIELD_SEPARATOR,
+                                                                    fieldType,
+                                                                    fieldId,
+                                                                    field.getValue());
+                                             })
+                                             .collect(Collectors.joining(ROW_SEPARATOR));
             this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
         } else {
             this.hiddenItems.clear();
