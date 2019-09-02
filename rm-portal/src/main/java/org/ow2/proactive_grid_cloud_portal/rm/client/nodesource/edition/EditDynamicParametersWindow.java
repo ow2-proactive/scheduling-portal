@@ -39,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
 import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.StaticTextItem;
 import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
@@ -100,6 +101,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
         Arrays.stream(this.nodeSourcePluginsForm.getFields())
               .filter(formItem -> isNotDynamic(formItem.getName(), dynamicParametersName) &&
                                   isFocusedPluginItem(focusedInfrastructurePlugin, focusedPolicyPlugin, formItem))
+              .filter(formItem -> !(formItem instanceof StaticTextItem))
               .forEach(FormItem::disable);
     }
 
