@@ -39,7 +39,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -612,10 +611,11 @@ public abstract class NodeSourceWindow {
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
         if (plugin.getPluginName().contains(".policy.")) {
-            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, orderedFields(plugin));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, orderedNonFileFields(plugin));
             pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, orderedFileFields(plugin));
         } else {
-            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY, orderedFields(plugin));
+            pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY,
+                                  orderedNonFileFields(plugin));
             pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
                                   orderedFileFields(plugin));
         }
@@ -688,7 +688,7 @@ public abstract class NodeSourceWindow {
         }
     }
 
-    private String orderedFields(PluginDescriptor plugin) {
+    private String orderedNonFileFields(PluginDescriptor plugin) {
         return plugin.getConfigurableFields()
                      .stream()
                      .filter(field -> !field.isFile() && !field.isCredential())

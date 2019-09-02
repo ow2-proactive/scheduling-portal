@@ -252,6 +252,10 @@ public class NSCreationServlet extends HttpServlet {
             String formFieldValue) {
         for (String row : formFieldValue.split(ROW_SEPARATOR)) {
             String[] fields = row.split(FIELD_SEPARATOR);
+            if (fields.length != 2 && fields.length != 3) {
+                LOGGER.warn("Failed extract hidden value from: " + row);
+                continue;
+            }
             boolean isFile = fields[0].equals(FILE);
             String name = fields[1];
             String value = fields.length > 2 ? fields[2] : "";
