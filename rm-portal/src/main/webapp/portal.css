@@ -20,6 +20,11 @@
     color: #AAAAAA
 }
 
+.sectionParametersStyle {
+    color: #003168;
+    white-space: nowrap;
+}
+
 .paddingLeftAndRight {
 	padding-left: 10px;
 	padding-right: 10px;
@@ -92,6 +97,10 @@
     color: #E86D1F !important;
 }
 
+.grey-message {
+    color: grey;
+    font-size: 10px;
+}
 
 .gwt-FileUpload {
                 font-size : 11px;

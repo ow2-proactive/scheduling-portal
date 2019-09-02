@@ -103,7 +103,13 @@ public abstract class NodeSourceWindow {
 
     private static final String HIDDEN_INFRA = "hidden-infra";
 
-    private static final String FIELD_SEPARATOR = "->";
+    public static final String FIELD_SEPARATOR = "\u0003";
+
+    public static final String ROW_SEPARATOR = "\u0006";
+
+    public static final String FILE = "file";
+
+    public static final String FIELD = "field";
 
     public SelectItem infrastructureSelectItem;
 
@@ -212,7 +218,7 @@ public abstract class NodeSourceWindow {
 
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
-        this.generalParametersLabel = new Label("General Parameters :");
+        this.generalParametersLabel = new Label("General Parameters:");
         this.generalParametersLabel.setStyleName("generalParametersStyle");
         this.generalParametersLabel.setHeight("20px");
         this.generalParametersLabel.setMargin(5);
@@ -238,9 +244,10 @@ public abstract class NodeSourceWindow {
         VLayout createNodeSourceLayout = new VLayout();
         Label createNodeSourceLabel = new Label("Create Node Source");
         createNodeSourceLabel.setHeight("20px");
+        createNodeSourceLabel.setStyleName("generalParametersStyle");
         createNodeSourceLayout.addMember(createNodeSourceLabel);
         createNodeSourceLayout.setPadding(5);
-        createNodeSourceLayout.setWidth("85%");
+        createNodeSourceLayout.setWidth("95%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
                                                                    "or Import Node Source (Infrastructure+Policy)",
@@ -576,16 +583,19 @@ public abstract class NodeSourceWindow {
 
     private void populateHiddenItemsIfNecessary(PluginDescriptor pluginDescriptor) {
         if (!isAdvanced.getValueAsBoolean()) {
-            String collect = pluginDescriptor.getConfigurableFields().stream().filter(x -> !x.isImportant()).map(x -> {
-                String returnValue = "";
-                if (x.isFile() || x.isCredential()) {
-                    returnValue += "file" + FIELD_SEPARATOR;
-                } else {
-                    returnValue += "field" + FIELD_SEPARATOR;
-                }
-                returnValue += pluginDescriptor.getPluginName() + x.getName() + FIELD_SEPARATOR + x.getValue();
-                return returnValue;
-            }).collect(Collectors.joining("^"));
+            String collect = pluginDescriptor.getConfigurableFields()
+                                             .stream()
+                                             .filter(field -> !field.isImportant())
+                                             .map(field -> {
+                                                 String fieldId = pluginDescriptor.getPluginName() + field.getName();
+                                                 String fieldType = field.isFile() || field.isCredential() ? FILE
+                                                                                                           : FIELD;
+                                                 return String.join(FIELD_SEPARATOR,
+                                                                    fieldType,
+                                                                    fieldId,
+                                                                    field.getValue());
+                                             })
+                                             .collect(Collectors.joining(ROW_SEPARATOR));
             this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
         } else {
             this.hiddenItems.clear();
@@ -601,40 +611,18 @@ public abstract class NodeSourceWindow {
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
         if (plugin.getPluginName().contains(".policy.")) {
-            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, plugin.getConfigurableFields()
-                                                                                         .stream()
-                                                                                         .filter(field -> !field.isFile() &&
-                                                                                                          !field.isCredential())
-                                                                                         .map(field -> plugin.getPluginName() +
-                                                                                                       field.getName())
-                                                                                         .collect(Collectors.joining(";")));
-            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, plugin.getConfigurableFields()
-                                                                                              .stream()
-                                                                                              .filter(field -> field.isFile() ||
-                                                                                                               field.isCredential())
-                                                                                              .map(field -> plugin.getPluginName() +
-                                                                                                            field.getName())
-                                                                                              .collect(Collectors.joining(";")));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_ORDER_KEY, orderedNonFileFields(plugin));
+            pluginParamOrders.put(plugin.getPluginName() + POLICY_PARAM_FILE_ORDER_KEY, orderedFileFields(plugin));
         } else {
             pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_ORDER_KEY,
-                                  plugin.getConfigurableFields()
-                                        .stream()
-                                        .filter(field -> !field.isFile() && !field.isCredential())
-                                        .map(field -> plugin.getPluginName() + field.getName())
-                                        .collect(Collectors.joining(";")));
+                                  orderedNonFileFields(plugin));
             pluginParamOrders.put(plugin.getPluginName() + INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
-                                  plugin.getConfigurableFields()
-                                        .stream()
-                                        .filter(field -> field.isFile() || field.isCredential())
-                                        .map(field -> plugin.getPluginName() + field.getName())
-                                        .collect(Collectors.joining(";")));
+                                  orderedFileFields(plugin));
         }
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
 
-        if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
-            allFormItems.add(createElasticLabel(plugin));
-        }
+        addElasticLabelIfNecessary(plugin, allFormItems);
         for (PluginDescriptor.Field pluginField : pluginFields) {
             currentSectionSelector = possiblyAddSection(plugin,
                                                         pluginFields,
@@ -676,7 +664,7 @@ public abstract class NodeSourceWindow {
                 formItem.setWidth(250);
                 if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
                     !formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-                    formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+                    formItem.setHint(pluginField.getDescription());
                 }
             });
             allFormItems.addAll(formItemsForField);
@@ -685,14 +673,35 @@ public abstract class NodeSourceWindow {
         return allFormItems;
     }
 
-    private StaticTextItem createElasticLabel(PluginDescriptor plugin) {
-        StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
-        elasticInfra.setTitle("");
-        elasticInfra.setValue("Elastic Infrastructure");
-        FormItemIcon icon = new FormItemIcon();
-        icon.setSrc(RMImages.instance.good().getSafeUri().asString());
-        elasticInfra.setIcons(icon);
-        return elasticInfra;
+    private void addElasticLabelIfNecessary(PluginDescriptor plugin, List<FormItem> allFormItems) {
+        if ("true".equalsIgnoreCase(plugin.getMeta().get("elastic"))) {
+            StaticTextItem elasticInfra = new StaticTextItem(plugin.getPluginName() + "elastic0");
+            elasticInfra.setTitle("");
+            elasticInfra.setTitleStyle("important-message");
+            elasticInfra.setTextBoxStyle("grey-message");
+            elasticInfra.setValue("Elastic");
+
+            FormItemIcon icon = new FormItemIcon();
+            icon.setSrc(RMImages.instance.good().getSafeUri().asString());
+            elasticInfra.setIcons(icon);
+            allFormItems.add(elasticInfra);
+        }
+    }
+
+    private String orderedNonFileFields(PluginDescriptor plugin) {
+        return plugin.getConfigurableFields()
+                     .stream()
+                     .filter(field -> !field.isFile() && !field.isCredential())
+                     .map(field -> plugin.getPluginName() + field.getName())
+                     .collect(Collectors.joining(";"));
+    }
+
+    private String orderedFileFields(PluginDescriptor plugin) {
+        return plugin.getConfigurableFields()
+                     .stream()
+                     .filter(field -> field.isFile() || field.isCredential())
+                     .map(field -> plugin.getPluginName() + field.getName())
+                     .collect(Collectors.joining(";"));
     }
 
     private int possiblyAddSection(PluginDescriptor plugin, List<PluginDescriptor.Field> pluginFields,
@@ -713,7 +722,7 @@ public abstract class NodeSourceWindow {
                                                                        plugin.getSectionDescriptions()
                                                                              .get(pluginField.getSectionSelector()) +
                                                                                                ":");
-                    staticTextItem.setTitleStyle("generalParametersStyle");
+                    staticTextItem.setTitleStyle("sectionParametersStyle");
                     allFormItems.add(staticTextItem);
                 }
             }
