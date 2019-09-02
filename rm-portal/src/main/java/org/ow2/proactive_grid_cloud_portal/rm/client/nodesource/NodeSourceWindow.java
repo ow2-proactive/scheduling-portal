@@ -219,7 +219,7 @@ public abstract class NodeSourceWindow {
 
         VStack nodeSourcePluginsLayout = new VStack();
         nodeSourcePluginsLayout.setHeight(26);
-        this.generalParametersLabel = new Label("General Parameters :");
+        this.generalParametersLabel = new Label("General Parameters:");
         this.generalParametersLabel.setStyleName("generalParametersStyle");
         this.generalParametersLabel.setHeight("20px");
         this.generalParametersLabel.setMargin(5);
@@ -245,9 +245,10 @@ public abstract class NodeSourceWindow {
         VLayout createNodeSourceLayout = new VLayout();
         Label createNodeSourceLabel = new Label("Create Node Source");
         createNodeSourceLabel.setHeight("20px");
+        createNodeSourceLabel.setStyleName("generalParametersStyle");
         createNodeSourceLayout.addMember(createNodeSourceLabel);
         createNodeSourceLayout.setPadding(5);
-        createNodeSourceLayout.setWidth("85%");
+        createNodeSourceLayout.setWidth("95%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
                                                                    "or Import Node Source (Infrastructure+Policy)",
@@ -663,7 +664,7 @@ public abstract class NodeSourceWindow {
                 formItem.setWidth(250);
                 if (!formItem.getName().endsWith(EDIT_OR_UPLOAD_FORM_ITEM_SUFFIX) &&
                     !formItem.getName().endsWith(EDIT_FORM_ITEM_SUFFIX)) {
-                    formItem.setHint("<nobr>" + pluginField.getDescription() + "</nobr>");
+                    formItem.setHint(pluginField.getDescription());
                 }
             });
             allFormItems.addAll(formItemsForField);
