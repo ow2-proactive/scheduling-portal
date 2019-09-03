@@ -53,6 +53,7 @@ public class ImportPolicyLayout extends ImportLayout {
                                                                                    .getPolicyPluginDescriptor();
             this.nodeSourceWindow.setCreatedFromImport();
             this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
+            this.nodeSourceWindow.changeToAdvancedConfiguration();
             this.nodeSourceWindow.replacePolicyItems(policyPluginDescriptor);
             this.nodeSourceWindow.resetCreatedFromImport();
         } catch (Exception e) {

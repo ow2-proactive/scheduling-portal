@@ -28,7 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.NodeSourceConfigurationParser;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
 
@@ -53,6 +52,7 @@ public class ImportInfrastructureLayout extends ImportLayout {
             PluginDescriptor infrastructurePluginDescriptor = nodeSourceConfigurationParser.parseNodeSourceConfiguration(importedNodeSourceJsonString)
                                                                                            .getInfrastructurePluginDescriptor();
             this.nodeSourceWindow.setCreatedFromImport();
+            this.nodeSourceWindow.changeToAdvancedConfiguration();
             this.nodeSourceWindow.replaceInfrastructureItems(infrastructurePluginDescriptor);
             this.nodeSourceWindow.resetCreatedFromImport();
             this.nodeSourceWindow.setNormalNodeSourceWindowLabel();

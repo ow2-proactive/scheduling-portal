@@ -263,11 +263,7 @@ public abstract class NodeSourceWindow {
         isAdvanced.setTitle("Advanced configuration");
         isAdvanced.setDefaultValue(false);
         isAdvanced.addChangedHandler(e -> {
-            hideAllPluginFormItems();
-            populateFormValues(() -> {
-                resetFormForInfrastructureSelectChange();
-                resetFormForPolicySelectChange();
-            });
+            isAdvanceChangedHandler();
         });
 
         DynamicForm formIsAdvanced = new DynamicForm();
@@ -334,6 +330,14 @@ public abstract class NodeSourceWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    private void isAdvanceChangedHandler() {
+        hideAllPluginFormItems();
+        populateFormValues(() -> {
+            resetFormForInfrastructureSelectChange();
+            resetFormForPolicySelectChange();
+        });
     }
 
     private void createButtons(VLayout nodeSourceWindowLayout) {
@@ -968,6 +972,12 @@ public abstract class NodeSourceWindow {
 
     public void setNormalNodeSourceWindowLabel() {
         this.nodeSourceWindowLabel.setContents(WINDOW_HEADER);
+    }
+
+    public void changeToAdvancedConfiguration() {
+        isAdvanced.setDefaultValue(true);
+        isAdvanceChangedHandler();
+
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage) {
