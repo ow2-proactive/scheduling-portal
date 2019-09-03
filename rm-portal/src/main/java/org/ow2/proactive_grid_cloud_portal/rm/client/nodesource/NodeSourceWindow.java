@@ -975,9 +975,8 @@ public abstract class NodeSourceWindow {
     }
 
     public void changeToAdvancedConfiguration() {
-        isAdvanced.setDefaultValue(true);
+        isAdvanced.setValue(true);
         isAdvanceChangedHandler();
-
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage) {
