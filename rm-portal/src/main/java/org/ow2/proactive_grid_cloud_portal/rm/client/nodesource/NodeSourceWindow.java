@@ -212,7 +212,7 @@ public abstract class NodeSourceWindow {
     protected void buildForm() {
         VLayout nodeSourceWindowLayout = new VLayout();
         nodeSourceWindowLayout.setMargin(5);
-        nodeSourceWindowLayout.setMembersMargin(5);
+        nodeSourceWindowLayout.setMembersMargin(0);
         HLayout nodeSourceWindowSubLayoutTop = new HLayout(5);
         HLayout nodeSourceWindowSubLayoutBottom = new HLayout(5);
 
@@ -220,7 +220,7 @@ public abstract class NodeSourceWindow {
         nodeSourcePluginsLayout.setHeight(26);
         this.generalParametersLabel = new Label("General Parameters:");
         this.generalParametersLabel.setStyleName("generalParametersStyle");
-        this.generalParametersLabel.setHeight("20px");
+        this.generalParametersLabel.setHeight("15px");
         this.generalParametersLabel.setMargin(5);
 
         this.nodeSourcePluginsWaitingLabel = new Label(this.waitingMessage);
@@ -263,11 +263,7 @@ public abstract class NodeSourceWindow {
         isAdvanced.setTitle("Advanced configuration");
         isAdvanced.setDefaultValue(false);
         isAdvanced.addChangedHandler(e -> {
-            hideAllPluginFormItems();
-            populateFormValues(() -> {
-                resetFormForInfrastructureSelectChange();
-                resetFormForPolicySelectChange();
-            });
+            isAdvanceChangedHandler();
         });
 
         DynamicForm formIsAdvanced = new DynamicForm();
@@ -278,7 +274,7 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.addMember(formIsAdvanced);
 
         Label importantFieldsLabel = new Label();
-        importantFieldsLabel.setHeight("20px");
+        importantFieldsLabel.setHeight("15px");
         importantFieldsLabel.setContents("<span style='color:#E86D1F'>* Requested or Important Fields</span>");
         createNodeSourceLayout.addMember(importantFieldsLabel);
 
@@ -334,6 +330,14 @@ public abstract class NodeSourceWindow {
         this.window.setCanDragResize(true);
         this.window.setCanDragReposition(true);
         this.window.centerInPage();
+    }
+
+    private void isAdvanceChangedHandler() {
+        hideAllPluginFormItems();
+        populateFormValues(() -> {
+            resetFormForInfrastructureSelectChange();
+            resetFormForPolicySelectChange();
+        });
     }
 
     private void createButtons(VLayout nodeSourceWindowLayout) {
@@ -550,6 +554,7 @@ public abstract class NodeSourceWindow {
         this.formItemsByName.put(HIDDEN_POLICY, Collections.singletonList(new HiddenItem(HIDDEN_POLICY)));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
+        this.nodesRecoverableCheckbox.setHeight("15px");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
         this.formItemsByName.put(NODES_RECOVERABLE_FORM_KEY, Collections.singletonList(this.nodesRecoverableCheckbox));
         this.formItemsByName.put("generalParametersSpacer", Collections.singletonList(new RowSpacerItem()));
@@ -967,6 +972,11 @@ public abstract class NodeSourceWindow {
 
     public void setNormalNodeSourceWindowLabel() {
         this.nodeSourceWindowLabel.setContents(WINDOW_HEADER);
+    }
+
+    public void changeToAdvancedConfiguration() {
+        isAdvanced.setValue(true);
+        isAdvanceChangedHandler();
     }
 
     public void setNodeSourceWindowLabelWithError(String errorMessage) {

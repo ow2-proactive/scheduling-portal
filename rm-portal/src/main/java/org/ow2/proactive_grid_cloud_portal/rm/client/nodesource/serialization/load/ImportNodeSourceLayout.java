@@ -26,17 +26,8 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.catalog.ImportFromCatalogPanel;
-import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.file.ImportFromFilePanel;
-import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogConstants;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
-
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.smartgwt.client.widgets.layout.VLayout;
 
 
 public class ImportNodeSourceLayout extends ImportLayout {
@@ -55,6 +46,7 @@ public class ImportNodeSourceLayout extends ImportLayout {
     public void handleImport(String submitResult) {
         try {
             this.nodeSourceWindow.setCreatedFromImport();
+            this.nodeSourceWindow.changeToAdvancedConfiguration();
             this.nodeSourceWindow.importNodeSourceFromJson(submitResult);
             this.nodeSourceWindow.resetCreatedFromImport();
             this.nodeSourceWindow.setNormalNodeSourceWindowLabel();
