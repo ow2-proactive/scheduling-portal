@@ -309,10 +309,12 @@ public class NodeSource {
 
             private String eventType = null;
 
+            private Map<String, String> usageInfo;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker, String eventType) {
+                    String nodeLocker, String eventType, Map<String, String> usageInfo) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
@@ -335,6 +337,7 @@ public class NodeSource {
                     this.nodeLocker = nodeLocker;
                 }
                 this.eventType = eventType;
+                this.usageInfo = usageInfo;
             }
 
             public Node(String sourceName, String hostName, String nodeUrl) {
@@ -365,6 +368,7 @@ public class NodeSource {
                     this.lockTime = t.lockTime;
                     this.nodeLocker = t.nodeLocker;
                 }
+                this.usageInfo = t.usageInfo;
             }
 
             @Override
@@ -486,6 +490,14 @@ public class NodeSource {
 
             public boolean isVirtual() {
                 return getNodeUrl().toLowerCase().contains("virt-");
+            }
+
+            public Map<String, String> getUsageInfo() {
+                return usageInfo;
+            }
+
+            public void setUsageInfo(Map<String, String> usageInfo) {
+                this.usageInfo = usageInfo;
             }
 
             /**

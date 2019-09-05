@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
@@ -754,6 +755,18 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         String defaultJMXUrl = getJsonStringNullable(nodeObj, "defaultJMXUrl");
         String proactiveJMXUrl = getJsonStringNullable(nodeObj, "proactiveJMXUrl");
 
+        Map<String, String> usageInfo = Optional.ofNullable(nodeObj.get("usageInfo"))
+                                                .map(JSONValue::isObject)
+                                                .map(json -> {
+                                                    Map<String, String> metaMap = new HashMap<>();
+                                                    for (String key : json.keySet()) {
+                                                        String value = json.get(key).isString().stringValue();
+                                                        metaMap.put(key, value);
+                                                    }
+                                                    return metaMap;
+                                                })
+                                                .orElse(new HashMap<>());
+
         boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
         long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
         String nodeLocker = getJsonStringNullable(nodeObj, "nodeLocker");
@@ -774,7 +787,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         isLocked,
                         lockTime,
                         nodeLocker,
-                        eventType);
+                        eventType,
+                        usageInfo);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
