@@ -516,7 +516,7 @@ public class NodeSource {
                 RMImages instance = RMImages.instance;
                 switch (nodeState) {
                     case BUSY:
-                        if (tokens.isEmpty()) {
+                        if (tokens == null || tokens.isEmpty()) {
                             return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
                         } else {
                             return getIcon(instance.kill(), instance.kill(), version); //VERO
@@ -528,7 +528,7 @@ public class NodeSource {
                     case DOWN:
                         return getIcon(instance.node_down_16(), instance.node_down_16_locked(), version);
                     case FREE:
-                        if (tokens.isEmpty()) {
+                        if (tokens == null || tokens.isEmpty()) {
                             return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
                         } else {
                             return getIcon(instance.kill(), instance.kill(), version); //VERO
