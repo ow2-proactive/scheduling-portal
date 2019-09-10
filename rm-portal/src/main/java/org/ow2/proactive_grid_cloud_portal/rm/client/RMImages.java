@@ -43,6 +43,9 @@ public interface RMImages extends ClientBundle {
     @Source("images/good.png")
     ImageResource good();
 
+    @Source("images/scheduler_kill_16.png")
+    ImageResource kill();
+
     @Source("images/host_16.png")
     ImageResource host_16();
 

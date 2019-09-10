@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -311,10 +312,12 @@ public class NodeSource {
 
             private Map<String, String> usageInfo;
 
+            private List<String> tokens;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker, String eventType, Map<String, String> usageInfo) {
+                    String nodeLocker, String eventType, Map<String, String> usageInfo, List<String> tokens) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
@@ -338,6 +341,7 @@ public class NodeSource {
                 }
                 this.eventType = eventType;
                 this.usageInfo = usageInfo;
+                this.tokens = tokens;
             }
 
             public Node(String sourceName, String hostName, String nodeUrl) {
@@ -369,6 +373,7 @@ public class NodeSource {
                     this.nodeLocker = t.nodeLocker;
                 }
                 this.usageInfo = t.usageInfo;
+                this.tokens = t.tokens;
             }
 
             @Override
@@ -496,8 +501,8 @@ public class NodeSource {
                 return usageInfo;
             }
 
-            public void setUsageInfo(Map<String, String> usageInfo) {
-                this.usageInfo = usageInfo;
+            public List<String> getTokens() {
+                return tokens;
             }
 
             /**
