@@ -1172,6 +1172,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void setNodeTokens(String nodeUrl, List<String> tokens) {
+        rm.setNodeTokens(LoginModel.getInstance().getSessionId(), nodeUrl, tokens, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+        });
+    }
+
     private abstract class NodeRemovalCallback {
         public abstract void run(boolean force);
     }

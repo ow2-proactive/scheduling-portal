@@ -125,7 +125,7 @@ public class ContextMenu extends Menu {
         MenuItem editTokens = new MenuItem("Edit Tokens");
         editTokens.addClickHandler(x -> {
             if (menu.node != null) {
-                EditNodeTokens editNodeTokens = new EditNodeTokens(menu.node);
+                EditNodeTokens editNodeTokens = new EditNodeTokens(controller, menu.node);
                 editNodeTokens.show();
             }
         });

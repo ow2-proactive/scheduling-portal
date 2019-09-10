@@ -378,4 +378,6 @@ public interface RMService extends RemoteService {
      */
     String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException;
 
+    void setNodeTokens(String sessionId, String nodeurl, List<String> tokens);
+
 }

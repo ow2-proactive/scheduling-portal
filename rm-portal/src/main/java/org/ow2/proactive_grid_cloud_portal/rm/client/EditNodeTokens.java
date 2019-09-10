@@ -55,7 +55,9 @@ public class EditNodeTokens {
 
     private IButton addMoreButton;
 
-    public EditNodeTokens(Node node) {
+    private List<TextItem> textItemList = new ArrayList<>();
+
+    public EditNodeTokens(RMController controller, Node node) {
         this.node = node;
 
         vLayout = new VLayout();
@@ -77,8 +79,8 @@ public class EditNodeTokens {
         window.setPadding(10);
         window.setMargin(10);
         window.addItem(vLayout);
-        window.setWidth(800);
-        window.setHeight(400);
+        window.setWidth(300);
+        window.setHeight(340);
         window.setCanDragResize(true);
         window.setCanDragReposition(true);
         window.centerInPage();
@@ -110,14 +112,18 @@ public class EditNodeTokens {
         IButton applyButton = new IButton("Apply");
         applyButton.addClickHandler(h -> {
             window.hide();
+            List<String> tokens = textItemList.stream()
+                                              .map(TextItem::getValueAsString)
+                                              .filter(x -> !x.isEmpty())
+                                              .collect(Collectors.toList());
+
+            controller.setNodeTokens(node.getNodeUrl(), tokens);
         });
 
         buttonsLayout.addMember(cancelButton);
         buttonsLayout.addMember(applyButton);
 
     }
-
-    private List<TextItem> textItemList = new ArrayList<>();
 
     private void createHLayoutForToken(String token) {
         HLayout hLayout = new HLayout();
@@ -127,9 +133,9 @@ public class EditNodeTokens {
         TextItem textItem = new TextItem();
         textItem.setValue(token);
         textItem.setShowTitle(false);
-        textItem.setWidth(80);
+        textItem.setWidth(200);
         dynamicForm.setFields(textItem);
-        dynamicForm.setWidth(80);
+        dynamicForm.setWidth(200);
         hLayout.addMember(dynamicForm);
 
         textItemList.add(textItem);
@@ -144,6 +150,8 @@ public class EditNodeTokens {
         });
 
         hLayout.addMember(removeLabel);
+        hLayout.setMembersMargin(10);
+        hLayout.setMargin(10);
         vLayout.addMember(hLayout, textItemList.size() + 2);
     }
 
