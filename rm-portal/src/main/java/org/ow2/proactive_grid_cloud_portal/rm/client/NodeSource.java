@@ -516,7 +516,11 @@ public class NodeSource {
                 RMImages instance = RMImages.instance;
                 switch (nodeState) {
                     case BUSY:
-                        return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
+                        if (tokens.isEmpty()) {
+                            return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
+                        } else {
+                            return getIcon(instance.kill(), instance.kill(), version); //VERO
+                        }
                     case CONFIGURING:
                         return getIcon(instance.node_configuring_16(), instance.node_configuring_16_locked(), version);
                     case DEPLOYING:
@@ -524,7 +528,11 @@ public class NodeSource {
                     case DOWN:
                         return getIcon(instance.node_down_16(), instance.node_down_16_locked(), version);
                     case FREE:
-                        return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
+                        if (tokens.isEmpty()) {
+                            return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
+                        } else {
+                            return getIcon(instance.kill(), instance.kill(), version); //VERO
+                        }
                     case LOST:
                         return getIcon(instance.node_lost_16(), instance.node_lost_16_locked(), version);
                     case TO_BE_REMOVED:

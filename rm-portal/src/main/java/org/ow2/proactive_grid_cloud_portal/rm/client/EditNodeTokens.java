@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
 import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -51,6 +49,8 @@ public class EditNodeTokens {
 
     private VLayout vLayout;
 
+    private VLayout rootLayout;
+
     private HLayout buttonsLayout;
 
     private IButton addMoreButton;
@@ -60,9 +60,16 @@ public class EditNodeTokens {
     public EditNodeTokens(RMController controller, Node node) {
         this.node = node;
 
+        rootLayout = new VLayout();
+        rootLayout.setAlign(Alignment.CENTER);
+        rootLayout.setMembersMargin(5);
+        rootLayout.setPadding(10);
+
         vLayout = new VLayout();
         vLayout.setAlign(Alignment.CENTER);
         vLayout.setMembersMargin(5);
+        vLayout.setPadding(10);
+        vLayout.setHeight100();
 
         buttonsLayout = new HLayout();
         buttonsLayout.setWidth100();
@@ -78,22 +85,51 @@ public class EditNodeTokens {
         window.setShowModalMask(true);
         window.setPadding(10);
         window.setMargin(10);
-        window.addItem(vLayout);
-        window.setWidth(300);
-        window.setHeight(340);
+        window.setWidth(470);
+        window.setHeight(400);
         window.setCanDragResize(true);
         window.setCanDragReposition(true);
         window.centerInPage();
 
-        Label nsName = new Label("Node Source name: <b>" + node.getSourceName() + "</b>");
+        HLayout hNsname = new HLayout();
+        Label leftnsName = new Label("Node Source name: ");
+        leftnsName.setAlign(Alignment.RIGHT);
+        leftnsName.setWidth(120);
+        leftnsName.setHeight(14);
+        Label nsName = new Label("<b>" + node.getSourceName() + "</b>");
         nsName.setHeight(14);
-        Label hostName = new Label("Host name: <b>" + node.getHostName() + "</b>");
+        nsName.setWidth(250);
+        hNsname.setHeight(14);
+        hNsname.setMembersMargin(10);
+        hNsname.setMembers(leftnsName, nsName);
+
+        HLayout hHostname = new HLayout();
+        Label lefthostName = new Label("Host name: ");
+        lefthostName.setAlign(Alignment.RIGHT);
+        lefthostName.setWidth(120);
+        lefthostName.setHeight(14);
+        Label hostName = new Label("<b>" + node.getHostName() + "</b>");
         hostName.setHeight(14);
-        Label nodeUrl = new Label("Node url: <b>" + node.getNodeUrl() + "</b>");
+        hostName.setWidth(250);
+        hHostname.setHeight(14);
+        hHostname.setMembersMargin(10);
+        hHostname.setMembers(lefthostName, hostName);
+
+        HLayout hNode = new HLayout();
+        Label leftnodeUrl = new Label("Node url: ");
+        leftnodeUrl.setAlign(Alignment.RIGHT);
+        leftnodeUrl.setWidth(120);
+        leftnodeUrl.setHeight(14);
+        Label nodeUrl = new Label("<b>" + node.getNodeUrl() + "</b>");
         nodeUrl.setHeight(14);
-        vLayout.addMember(nsName);
-        vLayout.addMember(hostName);
-        vLayout.addMember(nodeUrl);
+        nodeUrl.setWidth(250);
+        hNode.setHeight(14);
+        hNode.setMembersMargin(10);
+        hNode.setMembers(leftnodeUrl, nodeUrl);
+
+        vLayout.addMember(hNsname);
+        vLayout.addMember(hHostname);
+        vLayout.addMember(hNode);
 
         node.getTokens().forEach(this::createHLayoutForToken);
 
@@ -104,7 +140,9 @@ public class EditNodeTokens {
 
         vLayout.addMember(addMoreButton);
 
-        vLayout.addMember(buttonsLayout);
+        rootLayout.addMember(vLayout);
+
+        rootLayout.addMember(buttonsLayout);
 
         IButton cancelButton = new IButton("Cancel");
         cancelButton.addClickHandler(h -> window.hide());
@@ -123,27 +161,31 @@ public class EditNodeTokens {
         buttonsLayout.addMember(cancelButton);
         buttonsLayout.addMember(applyButton);
 
+        window.addItem(rootLayout);
+
     }
 
     private void createHLayoutForToken(String token) {
         HLayout hLayout = new HLayout();
         hLayout.setWidth100();
+        hLayout.setHeight(20);
 
         DynamicForm dynamicForm = new DynamicForm();
         TextItem textItem = new TextItem();
         textItem.setValue(token);
+        textItem.setHeight(20);
+        textItem.setWidth(320);
         textItem.setShowTitle(false);
-        textItem.setWidth(200);
         dynamicForm.setFields(textItem);
-        dynamicForm.setWidth(200);
+        dynamicForm.setWidth("90%");
         hLayout.addMember(dynamicForm);
 
         textItemList.add(textItem);
 
         Label removeLabel = new Label();
         removeLabel.setIcon(RMImages.instance.kill().getSafeUri().asString());
-        removeLabel.setWidth(12);
-        removeLabel.setHeight(12);
+        removeLabel.setWidth(20);
+        removeLabel.setHeight(20);
         removeLabel.addClickHandler(t -> {
             textItemList.remove(textItem);
             vLayout.removeMember(hLayout);

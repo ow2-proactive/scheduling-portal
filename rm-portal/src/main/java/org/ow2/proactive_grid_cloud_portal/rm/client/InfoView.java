@@ -241,7 +241,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("vmName", node.getVmName());
         dv.setAttribute("description", "<pre>" + node.getDescription() + "</pre>");
         dv.setAttribute("usage", niceUsageString(node.getUsageInfo()));
-        dv.setAttribute("tokens", String.join(", ", node.getTokens()));
+        dv.setAttribute("tokens", "<pre>" + String.join("\n", node.getTokens()) + "</pre>");
 
         this.nodeDetails.setData(new DetailViewerRecord[] { dv });
         this.nodeLabel.setIcon(node.getIcon());
