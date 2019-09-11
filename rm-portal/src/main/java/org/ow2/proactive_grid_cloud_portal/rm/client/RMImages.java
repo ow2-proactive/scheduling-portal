@@ -43,6 +43,18 @@ public interface RMImages extends ClientBundle {
     @Source("images/good.png")
     ImageResource good();
 
+    @Source("images/node_free_16_reserved_1.png")
+    ImageResource free_r();
+
+    @Source("images/node_free_16_reserved.png")
+    ImageResource free_r_disabled();
+
+    @Source("images/node_free_16_locked_reserved_1.png")
+    ImageResource free_r_locked();
+
+    @Source("images/node_free_16_locked_reserved.png")
+    ImageResource free_r_locked_disabled();
+
     @Source("images/scheduler_kill_16.png")
     ImageResource kill();
 

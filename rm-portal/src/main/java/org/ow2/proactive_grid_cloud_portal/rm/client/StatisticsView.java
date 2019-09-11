@@ -178,7 +178,7 @@ public class StatisticsView implements NodesListener {
                                                       .reduce(0, Integer::sum))
                                          .reduce(0, Integer::sum);
 
-        r[index++] = createListGridRecord("Protected by token", "Nodes", protectedByToken, instance.padlock()); // VERO
+        r[index++] = createListGridRecord("Protected by token", "Nodes", protectedByToken, instance.padlock()); //VERO
 
         r[index++] = createListGridRecord("Physical",
                                           "Hosts",

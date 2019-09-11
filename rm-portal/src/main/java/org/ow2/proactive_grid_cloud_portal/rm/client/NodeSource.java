@@ -519,7 +519,7 @@ public class NodeSource {
                         if (tokens == null || tokens.isEmpty()) {
                             return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
                         } else {
-                            return getIcon(instance.kill(), instance.kill(), version); //VERO
+                            return getIcon(instance.free_r_disabled(), instance.free_r_locked_disabled(), version); //VERO
                         }
                     case CONFIGURING:
                         return getIcon(instance.node_configuring_16(), instance.node_configuring_16_locked(), version);
@@ -531,7 +531,7 @@ public class NodeSource {
                         if (tokens == null || tokens.isEmpty()) {
                             return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
                         } else {
-                            return getIcon(instance.kill(), instance.kill(), version); //VERO
+                            return getIcon(instance.free_r(), instance.free_r_locked(), version); //VERO
                         }
                     case LOST:
                         return getIcon(instance.node_lost_16(), instance.node_lost_16_locked(), version);

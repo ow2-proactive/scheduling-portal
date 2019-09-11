@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -45,33 +46,25 @@ public class EditNodeTokens {
 
     private Window window;
 
-    private Node node;
-
     private VLayout vLayout;
-
-    private VLayout rootLayout;
-
-    private HLayout buttonsLayout;
-
-    private IButton addMoreButton;
 
     private List<TextItem> textItemList = new ArrayList<>();
 
     public EditNodeTokens(RMController controller, Node node) {
-        this.node = node;
-
-        rootLayout = new VLayout();
+        VLayout rootLayout = new VLayout();
         rootLayout.setAlign(Alignment.CENTER);
         rootLayout.setMembersMargin(5);
         rootLayout.setPadding(10);
+        rootLayout.setAlign(VerticalAlignment.TOP);
 
         vLayout = new VLayout();
         vLayout.setAlign(Alignment.CENTER);
-        vLayout.setMembersMargin(5);
+        vLayout.setMembersMargin(10);
         vLayout.setPadding(10);
         vLayout.setHeight100();
+        vLayout.setAlign(VerticalAlignment.TOP);
 
-        buttonsLayout = new HLayout();
+        HLayout buttonsLayout = new HLayout();
         buttonsLayout.setWidth100();
         buttonsLayout.setHeight(22);
         buttonsLayout.setMargin(5);
@@ -133,7 +126,8 @@ public class EditNodeTokens {
 
         node.getTokens().forEach(this::createHLayoutForToken);
 
-        addMoreButton = new IButton("Add token");
+        IButton addMoreButton = new IButton("Add token");
+        addMoreButton.setMargin(2);
         addMoreButton.addClickHandler(h -> {
             createHLayoutForToken("");
         });
@@ -174,9 +168,10 @@ public class EditNodeTokens {
         TextItem textItem = new TextItem();
         textItem.setValue(token);
         textItem.setHeight(20);
-        textItem.setWidth(320);
+        textItem.setWidth(360);
         textItem.setShowTitle(false);
         dynamicForm.setFields(textItem);
+        dynamicForm.setPadding(0);
         dynamicForm.setWidth("90%");
         hLayout.addMember(dynamicForm);
 
@@ -193,7 +188,6 @@ public class EditNodeTokens {
 
         hLayout.addMember(removeLabel);
         hLayout.setMembersMargin(10);
-        hLayout.setMargin(10);
         vLayout.addMember(hLayout, textItemList.size() + 2);
     }
 
