@@ -314,7 +314,7 @@ public class NodeSource {
 
             private List<String> tokens;
 
-            private String userAccessType;
+            private String userAccessType = "ALL";
 
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
