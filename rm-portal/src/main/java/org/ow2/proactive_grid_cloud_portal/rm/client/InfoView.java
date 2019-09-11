@@ -261,7 +261,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             return "<pre>" + "Job id: " + usage.get("JOB_ID") + "\n" + "Job name: " + usage.get("JOB_NAME") + "\n" +
                    "Task id: " + usage.get("TASK_ID") + "\n" + "Task name: " + usage.get("TASK_NAME") + "\n" + "</pre>";
         } else {
-            return "<pre>This node is not executing any task.</pre>";
+            return "<pre>(Free)</pre>";
         }
     }
 

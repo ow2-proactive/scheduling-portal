@@ -536,6 +536,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 // if node source was not deleted
                 if (nodeSource != null) {
 
+                    String userAccessType = retrieveUserAccessType(nodeSource);
+                    node.setUserAccessType(userAccessType);
+
                     if (!node.isRemoved()) {
                         addNodeToNodeSource(node, nodeSource);
                     } else {
@@ -561,6 +564,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         recalculateStatistics();
 
+    }
+
+    private String retrieveUserAccessType(NodeSource nodeSource) {
+        final String iHopeItNeverChange = "user access type [";
+        String sourceDescription = nodeSource.getSourceDescription();
+        if (sourceDescription.contains(iHopeItNeverChange)) {
+            int begin = sourceDescription.indexOf(iHopeItNeverChange) + iHopeItNeverChange.length();
+            int end = sourceDescription.indexOf("]", begin);
+            return sourceDescription.substring(begin, end);
+        } else {
+            LogModel.getInstance()
+                    .logMessage("NodeSource[" + nodeSource.getSourceName() + "] does not seem to have userAccessType.");
+            return "";
+        }
     }
 
     /**

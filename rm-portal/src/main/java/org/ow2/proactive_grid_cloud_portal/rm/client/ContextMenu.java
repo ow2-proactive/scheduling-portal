@@ -122,7 +122,7 @@ public class ContextMenu extends Menu {
         MenuItem exportInfrastructureItem = exportMenu.getExportInfrastructureItem();
         MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
 
-        MenuItem editTokens = new MenuItem("Edit Tokens", RMImages.instance.kill().getSafeUri().asString()); //VERO
+        MenuItem editTokens = new MenuItem("Edit Tokens");
         editTokens.addClickHandler(x -> {
             if (menu.node != null) {
                 EditNodeTokens editNodeTokens = new EditNodeTokens(controller, menu.node);

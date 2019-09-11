@@ -314,6 +314,8 @@ public class NodeSource {
 
             private List<String> tokens;
 
+            private String userAccessType;
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
@@ -374,6 +376,25 @@ public class NodeSource {
                 }
                 this.usageInfo = t.usageInfo;
                 this.tokens = t.tokens;
+                this.userAccessType = t.userAccessType;
+            }
+
+            public boolean isThereRestriction() {
+                return !noLocalTokens() || (!onlyTokens() && !isALL());
+            }
+
+            private boolean noLocalTokens() {
+                return tokens == null || tokens.isEmpty();
+            }
+
+            private boolean isALL() {
+                return userAccessType.equals("ALL");
+            }
+
+            private boolean onlyTokens() {
+                return userAccessType.contains("tokens=") &&
+                       (userAccessType.indexOf("=") == userAccessType.lastIndexOf("=")) &&
+                       (!userAccessType.contains("|"));
             }
 
             @Override
@@ -516,10 +537,10 @@ public class NodeSource {
                 RMImages instance = RMImages.instance;
                 switch (nodeState) {
                     case BUSY:
-                        if (tokens == null || tokens.isEmpty()) {
+                        if (!isThereRestriction()) {
                             return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
                         } else {
-                            return getIcon(instance.free_r_disabled(), instance.free_r_locked_disabled(), version); //VERO
+                            return getIcon(instance.busy_token(), instance.busy_locked_token(), version);
                         }
                     case CONFIGURING:
                         return getIcon(instance.node_configuring_16(), instance.node_configuring_16_locked(), version);
@@ -528,10 +549,10 @@ public class NodeSource {
                     case DOWN:
                         return getIcon(instance.node_down_16(), instance.node_down_16_locked(), version);
                     case FREE:
-                        if (tokens == null || tokens.isEmpty()) {
+                        if (!isThereRestriction()) {
                             return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
                         } else {
-                            return getIcon(instance.free_r(), instance.free_r_locked(), version); //VERO
+                            return getIcon(instance.free_token(), instance.free_locked_token(), version);
                         }
                     case LOST:
                         return getIcon(instance.node_lost_16(), instance.node_lost_16_locked(), version);
@@ -562,6 +583,9 @@ public class NodeSource {
                 return imageResource.getSafeUri().asString();
             }
 
+            public void setUserAccessType(String userAccessType) {
+                this.userAccessType = userAccessType;
+            }
         }
     }
 }
