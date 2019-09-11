@@ -687,7 +687,7 @@ public abstract class NodeSourceWindow {
             LinkItem linkItem = new LinkItem(plugin.getPluginName() + "elastic1");
             linkItem.setTitle("");
             linkItem.setValue(helpLink.get());
-            linkItem.setLinkTitle(getShortName(plugin.getPluginName()) + " documentaion");
+            linkItem.setLinkTitle(getShortName(plugin.getPluginName()) + " documentation");
             linkItem.hide();
             allFormItems.add(linkItem);
         }

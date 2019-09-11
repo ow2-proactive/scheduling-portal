@@ -45,7 +45,7 @@ public class RMConfig extends Config {
 
     /**
      * Path to property file, where keys are plugin names (infra, policies)
-     * and values are relatives pathes to its documetations
+     * and values are relatives pathes to its documentation
      */
     public static final String HELP_PATH = "help.conf";
 
