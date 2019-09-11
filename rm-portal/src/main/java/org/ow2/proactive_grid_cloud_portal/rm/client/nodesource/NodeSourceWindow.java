@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
@@ -54,6 +55,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.lo
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportNodeSourceLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.load.ImportPolicyLayout;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.NodeSourceAction;
+import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
@@ -627,6 +629,7 @@ public abstract class NodeSourceWindow {
         List<FormItem> formItemsForField = new LinkedList<>();
         int currentSectionSelector = -1;
 
+        addHelpLinkIfPossible(plugin, allFormItems);
         addElasticLabelIfNecessary(plugin, allFormItems);
         for (PluginDescriptor.Field pluginField : pluginFields) {
             currentSectionSelector = possiblyAddSection(plugin,
@@ -676,6 +679,18 @@ public abstract class NodeSourceWindow {
             formItemsForField.clear();
         }
         return allFormItems;
+    }
+
+    protected void addHelpLinkIfPossible(PluginDescriptor plugin, List<FormItem> allFormItems) {
+        Optional<String> helpLink = RMConfig.get().getHelpLink(plugin.getPluginName());
+        if (helpLink.isPresent()) {
+            LinkItem linkItem = new LinkItem(plugin.getPluginName() + "elastic1");
+            linkItem.setTitle("");
+            linkItem.setValue(helpLink.get());
+            linkItem.setLinkTitle(getShortName(plugin.getPluginName()) + " documentaion");
+            linkItem.hide();
+            allFormItems.add(linkItem);
+        }
     }
 
     private void addElasticLabelIfNecessary(PluginDescriptor plugin, List<FormItem> allFormItems) {

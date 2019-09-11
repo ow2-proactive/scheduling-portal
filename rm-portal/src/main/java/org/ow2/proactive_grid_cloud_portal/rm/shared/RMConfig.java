@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.shared;
 
+import java.util.Optional;
+
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
 
@@ -40,6 +42,12 @@ public class RMConfig extends Config {
      * to the webapp file path
      */
     public static final String CONFIG_PATH = "rm.conf";
+
+    /**
+     * Path to property file, where keys are plugin names (infra, policies)
+     * and values are relatives pathes to its documetations
+     */
+    public static final String HELP_PATH = "help.conf";
 
     /** URL of the REST service */
     public static final String REST_URL = "rm.rest.url";
@@ -258,6 +266,10 @@ public class RMConfig extends Config {
      */
     public String getCatalogUrl() {
         return properties.get(CATALOG_URL);
+    }
+
+    public Optional<String> getHelpLink(String pluginName) {
+        return Optional.ofNullable(properties.get(pluginName));
     }
 
 }

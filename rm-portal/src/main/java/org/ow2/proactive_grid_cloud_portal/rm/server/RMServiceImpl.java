@@ -116,6 +116,7 @@ public class RMServiceImpl extends Service implements RMService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
+        RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.HELP_PATH)));
         RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
         ConfigUtils.loadSystemProperties(RMConfig.get());
     }
