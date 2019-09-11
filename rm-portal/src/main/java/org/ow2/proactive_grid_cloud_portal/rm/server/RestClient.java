@@ -242,4 +242,10 @@ public interface RestClient {
     @Produces("application/json")
     InputStream getNodeThreadDump(@HeaderParam("sessionid") String sessionId, @QueryParam("nodeurl") String nodeUrl);
 
+    @POST
+    @GZIP
+    @Path("/rm/node/tokens")
+    @Produces("application/json")
+    void setNodeTokens(@HeaderParam("sessionid") String sessionId, @HeaderParam("nodeurl") String nodeUrl,
+            @QueryParam("tokens") List<String> tokens);
 }

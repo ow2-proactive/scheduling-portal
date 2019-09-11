@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -535,6 +536,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 // if node source was not deleted
                 if (nodeSource != null) {
 
+                    String userAccessType = retrieveUserAccessType(nodeSource);
+                    node.setUserAccessType(userAccessType);
+
                     if (!node.isRemoved()) {
                         addNodeToNodeSource(node, nodeSource);
                     } else {
@@ -560,6 +564,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         recalculateStatistics();
 
+    }
+
+    private String retrieveUserAccessType(NodeSource nodeSource) {
+        final String iHopeItNeverChange = "user access type [";
+        String sourceDescription = nodeSource.getSourceDescription();
+        if (sourceDescription.contains(iHopeItNeverChange)) {
+            int begin = sourceDescription.indexOf(iHopeItNeverChange) + iHopeItNeverChange.length();
+            int end = sourceDescription.indexOf("]", begin);
+            return sourceDescription.substring(begin, end);
+        } else {
+            LogModel.getInstance()
+                    .logMessage("NodeSource[" + nodeSource.getSourceName() + "] does not seem to have userAccessType.");
+            return "";
+        }
     }
 
     /**
@@ -766,6 +784,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                     return metaMap;
                                                 })
                                                 .orElse(new HashMap<>());
+        List<String> tokens = Optional.ofNullable(nodeObj.get("tokens")).map(JSONValue::isArray).map(arr -> {
+            List<String> ts = new ArrayList<>(arr.size());
+            for (int i = 0; i < arr.size(); ++i) {
+                ts.add(arr.get(i).isString().stringValue());
+            }
+            return ts;
+        }).orElse(Collections.emptyList());
 
         boolean isLocked = getJsonBooleanNullable(nodeObj, "locked", false);
         long lockTime = getJsonLongNullable(nodeObj, "lockTime", -1);
@@ -788,7 +813,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         lockTime,
                         nodeLocker,
                         eventType,
-                        usageInfo);
+                        usageInfo,
+                        tokens);
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
@@ -1161,6 +1187,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 }
             });
         }
+    }
+
+    public void setNodeTokens(String nodeUrl, List<String> tokens) {
+        rm.setNodeTokens(LoginModel.getInstance().getSessionId(), nodeUrl, tokens, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+        });
     }
 
     private abstract class NodeRemovalCallback {

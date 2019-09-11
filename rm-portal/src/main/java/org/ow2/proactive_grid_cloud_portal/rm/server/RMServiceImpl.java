@@ -457,6 +457,12 @@ public class RMServiceImpl extends Service implements RMService {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeThreadDump(sessionId, nodeUrl));
     }
 
+    @Override
+    public void setNodeTokens(String sessionId, String nodeurl, List<String> tokens) {
+        RestClient restClientProxy = getRestClientProxy();
+        restClientProxy.setNodeTokens(sessionId, nodeurl, tokens);
+    }
+
     private RestClient getRestClientProxy() {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         builder.register(AcceptEncodingGZIPFilter.class);

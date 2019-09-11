@@ -87,7 +87,7 @@ public class StatisticsView implements NodesListener {
         this.grid.setCanFreezeFields(false);
 
         ListGridField labelField = new ListGridField("status", "Status");
-        labelField.setWidth(100);
+        labelField.setWidth(160);
 
         ListGridField iconField = new ListGridField("icon", "Caption");
         iconField.setType(ListGridFieldType.IMAGE);
@@ -160,6 +160,24 @@ public class StatisticsView implements NodesListener {
                                           "Nodes",
                                           controller.getModel().getNumLocked(),
                                           instance.padlock());
+        int protectedByToken = controller.getModel()
+                                         .getNodeSources()
+                                         .values()
+                                         .stream()
+                                         .map(ns -> ns.getHosts()
+                                                      .values()
+                                                      .stream()
+                                                      .map(host -> host.getNodes()
+                                                                       .values()
+                                                                       .stream()
+                                                                       .map(node -> node.isThereRestriction() ? 1
+                                                                                                              : 0)
+                                                                       .reduce(0,
+                                                                               Integer::sum))
+                                                      .reduce(0, Integer::sum))
+                                         .reduce(0, Integer::sum);
+
+        r[index++] = createListGridRecord("Node with Usage Restriction", "Nodes", protectedByToken);
 
         r[index++] = createListGridRecord("Physical",
                                           "Hosts",
