@@ -204,6 +204,7 @@ public class Tile extends Image {
             str += "Job Id: " + node.getUsageInfo().get("JOB_ID") + " <br>";
             str += "Task Id: " + node.getUsageInfo().get("TASK_ID") + " <br>";
         }
+        str += "Restrictions: " + node.getUserAccessTypeLocal() + " <br>";
         str += node.getNodeState().toString() + " since " + JSUtil.getTime(node.getTimeStamp());
         this.hoverLabel.setContents(str);
     }

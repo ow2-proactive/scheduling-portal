@@ -104,8 +104,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField d7 = new DetailViewerField("vmName", "JVM");
         DetailViewerField d8 = new DetailViewerField("description", "Description");
         DetailViewerField d9 = new DetailViewerField("usage", "Usage");
-        DetailViewerField d10 = new DetailViewerField("tokens", "Tokens");
-        this.nodeDetails.setFields(d1, d5, d6, d2, d3, d4, d7, d8, d9, d10);
+        DetailViewerField d10 = new DetailViewerField("access", "Usage restrictions");
+        DetailViewerField d11 = new DetailViewerField("tokens", "Tokens");
+        this.nodeDetails.setFields(d1, d5, d6, d2, d3, d4, d7, d8, d9, d10, d11);
         this.nodeCanvas = new VLayout();
         this.nodeCanvas.setWidth100();
         this.nodeLabel = new Label("<h3>Node</h3>");
@@ -241,6 +242,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("vmName", node.getVmName());
         dv.setAttribute("description", "<pre>" + node.getDescription() + "</pre>");
         dv.setAttribute("usage", niceUsageString(node.getUsageInfo()));
+        dv.setAttribute("access", node.getUserAccessTypeLocal());
         dv.setAttribute("tokens", "<pre>" + String.join("\n", node.getTokens()) + "</pre>");
 
         this.nodeDetails.setData(new DetailViewerRecord[] { dv });

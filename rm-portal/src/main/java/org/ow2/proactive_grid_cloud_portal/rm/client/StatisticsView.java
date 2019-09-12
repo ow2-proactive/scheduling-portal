@@ -156,7 +156,7 @@ public class StatisticsView implements NodesListener {
         }
         r[index++] = aliveLimit;
 
-        r[index++] = createListGridRecord("Nodes locked",
+        r[index++] = createListGridRecord("Node locked",
                                           "Nodes",
                                           controller.getModel().getNumLocked(),
                                           instance.padlock());
@@ -177,7 +177,10 @@ public class StatisticsView implements NodesListener {
                                                       .reduce(0, Integer::sum))
                                          .reduce(0, Integer::sum);
 
-        r[index++] = createListGridRecord("Node with Usage Restriction", "Nodes", protectedByToken);
+        r[index++] = createListGridRecord("Node with Usage Restriction",
+                                          "Nodes",
+                                          protectedByToken,
+                                          instance.free_token());
 
         r[index++] = createListGridRecord("Physical",
                                           "Hosts",
