@@ -383,6 +383,20 @@ public class NodeSource {
                 return !noLocalTokens() || (!onlyTokens() && !isALL());
             }
 
+            public String getUserAccessTypeLocal() {
+                String newTokens = "";
+                if (!getTokens().isEmpty()) {
+                    newTokens = "tokens=" + String.join(",", getTokens());
+                }
+                if (userAccessType.contains("tokens=")) {
+                    return userAccessType.replaceAll("tokens=[^;|]+", newTokens);
+                } else if (!newTokens.isEmpty()) {
+                    return userAccessType + ";" + newTokens;
+                } else {
+                    return userAccessType;
+                }
+            }
+
             private boolean noLocalTokens() {
                 return tokens == null || tokens.isEmpty();
             }
