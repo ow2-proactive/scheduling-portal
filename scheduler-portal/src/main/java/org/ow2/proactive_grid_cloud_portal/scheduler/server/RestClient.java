@@ -676,7 +676,7 @@ public interface RestClient {
      */
     @GET
     @Path("jobs/{jobid}/html")
-    @Produces("text/html")
+    @Produces("application/json;charset=utf-8")
     InputStream getJobHtml(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
