@@ -371,10 +371,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * .String, java.util.List)
      */
     @Override
-    public int removeJobs(final String sessionId, List<Integer> jobIdList)
-            throws RestServerException, ServiceException {
-        return executeFunction((restClientProxy,
-                jobId) -> restClientProxy.removeJob(sessionId, Integer.toString(jobId)), jobIdList, "job removal");
+    public int removeJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException {
+        executeFunction(restClient -> restClient.removeJobs(sessionId,
+                                                            jobIdList.stream()
+                                                                     .map(Object::toString)
+                                                                     .collect(Collectors.toList())));
+        return jobIdList.size();
     }
 
     @Override
