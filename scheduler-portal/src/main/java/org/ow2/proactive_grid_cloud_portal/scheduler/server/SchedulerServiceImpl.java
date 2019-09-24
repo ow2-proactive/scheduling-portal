@@ -92,6 +92,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 
@@ -100,6 +101,8 @@ import com.google.common.io.Files;
  */
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
+
+    public static final int LIMIT_QUERY_PARAMS_NUMBER = 1000;
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
@@ -372,10 +375,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      */
     @Override
     public int removeJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException {
-        executeFunction(restClient -> restClient.removeJobs(sessionId,
-                                                            jobIdList.stream()
+        for (List<Integer> chunk : Lists.partition(jobIdList, LIMIT_QUERY_PARAMS_NUMBER)) {
+            executeFunction(restClient -> restClient.removeJobs(sessionId,
+                                                                chunk.stream()
                                                                      .map(Object::toString)
                                                                      .collect(Collectors.toList())));
+        }
+
         return jobIdList.size();
     }
 
