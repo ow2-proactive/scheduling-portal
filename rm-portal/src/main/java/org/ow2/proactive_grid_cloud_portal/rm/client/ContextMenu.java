@@ -122,6 +122,14 @@ public class ContextMenu extends Menu {
         MenuItem exportInfrastructureItem = exportMenu.getExportInfrastructureItem();
         MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
 
+        MenuItem editTokens = new MenuItem("Edit Tokens");
+        editTokens.addClickHandler(x -> {
+            if (menu.node != null) {
+                EditNodeTokens editNodeTokens = new EditNodeTokens(controller, menu.node);
+                editNodeTokens.show();
+            }
+        });
+
         if (menu.node != null) {
             copyItem.setEnabled(true);
             if (menu.node.isLocked()) {
@@ -132,6 +140,7 @@ public class ContextMenu extends Menu {
                 unlockItem.setEnabled(false);
             }
         } else {
+            editTokens.setEnabled(false);
             copyItem.setEnabled(false);
         }
 
@@ -159,19 +168,37 @@ public class ContextMenu extends Menu {
                               exportPolicyItem);
         }
 
-        menu.setItems(copyItem,
-                      new MenuItemSeparator(),
-                      deployItem,
-                      undeployItem,
-                      editItem,
-                      new MenuItemSeparator(),
-                      lockItem,
-                      unlockItem,
-                      removeItem,
-                      new MenuItemSeparator(),
-                      exportNodeSourceItem,
-                      exportInfrastructureItem,
-                      exportPolicyItem);
+        List<MenuItem> items = new ArrayList<>();
+        if (menu.node != null) {
+            items.add(copyItem);
+            items.add(new MenuItemSeparator());
+        }
+
+        if (menu.nodesource != null) {
+            items.add(deployItem);
+            items.add(undeployItem);
+            items.add(editItem);
+            items.add(new MenuItemSeparator());
+        }
+
+        items.add(lockItem);
+        items.add(unlockItem);
+        items.add(removeItem);
+
+        if (menu.nodesource != null) {
+            items.add(new MenuItemSeparator());
+            items.add(exportNodeSourceItem);
+            items.add(exportInfrastructureItem);
+            items.add(exportPolicyItem);
+
+        }
+
+        if (menu.node != null) {
+            items.add(new MenuItemSeparator());
+            items.add(editTokens);
+        }
+
+        menu.setItems(items.toArray(new MenuItem[0]));
 
         return menu;
     }

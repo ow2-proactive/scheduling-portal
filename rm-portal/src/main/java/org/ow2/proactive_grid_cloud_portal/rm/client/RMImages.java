@@ -40,6 +40,24 @@ public interface RMImages extends ClientBundle {
 
     public static final RMImages instance = GWT.create(RMImages.class);
 
+    @Source("images/good.png")
+    ImageResource good();
+
+    @Source("images/node_free_16_token.png")
+    ImageResource free_token();
+
+    @Source("images/node_busy_16_token.png")
+    ImageResource busy_token();
+
+    @Source("images/node_free_16_locked_token.png")
+    ImageResource free_locked_token();
+
+    @Source("images/node_busy_16_locked_token.png")
+    ImageResource busy_locked_token();
+
+    @Source("images/scheduler_kill_16.png")
+    ImageResource kill();
+
     @Source("images/host_16.png")
     ImageResource host_16();
 

@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -309,10 +310,16 @@ public class NodeSource {
 
             private String eventType = null;
 
+            private Map<String, String> usageInfo;
+
+            private List<String> tokens;
+
+            private String userAccessType = "ALL";
+
             Node(String nodeUrl, String nodeState, String nodeInfo, long timeStamp, String timeStampFormatted,
                     String nodeProvider, String nodeOwner, String sourceName, String hostName, String vmName,
                     String description, String defaultJMXUrl, String proactiveJMXUrl, boolean isLocked, long lockTime,
-                    String nodeLocker, String eventType) {
+                    String nodeLocker, String eventType, Map<String, String> usageInfo, List<String> tokens) {
 
                 this.nodeUrl = nodeUrl;
                 this.nodeState = NodeState.parse(nodeState);
@@ -335,6 +342,8 @@ public class NodeSource {
                     this.nodeLocker = nodeLocker;
                 }
                 this.eventType = eventType;
+                this.usageInfo = usageInfo;
+                this.tokens = tokens;
             }
 
             public Node(String sourceName, String hostName, String nodeUrl) {
@@ -365,6 +374,41 @@ public class NodeSource {
                     this.lockTime = t.lockTime;
                     this.nodeLocker = t.nodeLocker;
                 }
+                this.usageInfo = t.usageInfo;
+                this.tokens = t.tokens;
+                this.userAccessType = t.userAccessType;
+            }
+
+            public boolean isThereRestriction() {
+                return !noLocalTokens() || (!onlyTokens() && !isALL());
+            }
+
+            public String getUserAccessTypeLocal() {
+                String newTokens = "";
+                if (!getTokens().isEmpty()) {
+                    newTokens = "tokens=" + String.join(",", getTokens());
+                }
+                if (userAccessType.contains("tokens=")) {
+                    return userAccessType.replaceAll("tokens=[^;|]+", newTokens);
+                } else if (!newTokens.isEmpty()) {
+                    return userAccessType + ";" + newTokens;
+                } else {
+                    return userAccessType;
+                }
+            }
+
+            private boolean noLocalTokens() {
+                return tokens == null || tokens.isEmpty();
+            }
+
+            private boolean isALL() {
+                return userAccessType.equals("ALL");
+            }
+
+            private boolean onlyTokens() {
+                return userAccessType.contains("tokens=") &&
+                       (userAccessType.indexOf("=") == userAccessType.lastIndexOf("=")) &&
+                       (!userAccessType.contains("|"));
             }
 
             @Override
@@ -488,6 +532,14 @@ public class NodeSource {
                 return getNodeUrl().toLowerCase().contains("virt-");
             }
 
+            public Map<String, String> getUsageInfo() {
+                return usageInfo;
+            }
+
+            public List<String> getTokens() {
+                return tokens;
+            }
+
             /**
              * @param version if not {@code null} and {@code true}, returns a locked version of the icon whatever the
              *                real lock of the node is. if not {@code null} and {@code false}, returns a non locked
@@ -499,7 +551,11 @@ public class NodeSource {
                 RMImages instance = RMImages.instance;
                 switch (nodeState) {
                     case BUSY:
-                        return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
+                        if (!isThereRestriction()) {
+                            return getIcon(instance.node_busy_16(), instance.node_busy_16_locked(), version);
+                        } else {
+                            return getIcon(instance.busy_token(), instance.busy_locked_token(), version);
+                        }
                     case CONFIGURING:
                         return getIcon(instance.node_configuring_16(), instance.node_configuring_16_locked(), version);
                     case DEPLOYING:
@@ -507,7 +563,11 @@ public class NodeSource {
                     case DOWN:
                         return getIcon(instance.node_down_16(), instance.node_down_16_locked(), version);
                     case FREE:
-                        return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
+                        if (!isThereRestriction()) {
+                            return getIcon(instance.node_free_16(), instance.node_free_16_locked(), version);
+                        } else {
+                            return getIcon(instance.free_token(), instance.free_locked_token(), version);
+                        }
                     case LOST:
                         return getIcon(instance.node_lost_16(), instance.node_lost_16_locked(), version);
                     case TO_BE_REMOVED:
@@ -537,6 +597,9 @@ public class NodeSource {
                 return imageResource.getSafeUri().asString();
             }
 
+            public void setUserAccessType(String userAccessType) {
+                this.userAccessType = userAccessType;
+            }
         }
     }
 }

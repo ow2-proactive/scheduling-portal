@@ -11,12 +11,18 @@
 
 .generalParametersStyle {
     font-weight: bold;
-    color: #003168
+    color: #003168;
+    white-space: nowrap;
 }
 
 .generalParametersStyleDisabled {
     font-weight: bold;
     color: #AAAAAA
+}
+
+.sectionParametersStyle {
+    color: #003168;
+    white-space: nowrap;
 }
 
 .paddingLeftAndRight {
@@ -81,6 +87,19 @@
 
 .error-message {
     color: red !important;
+}
+
+.important-message {
+    color: #E86D1F !important;
+}
+
+.important-messageFocused {
+    color: #E86D1F !important;
+}
+
+.grey-message {
+    color: grey;
+    font-size: 10px;
 }
 
 .gwt-FileUpload {

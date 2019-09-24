@@ -25,19 +25,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceConfiguration;
 import org.ow2.proactive_grid_cloud_portal.rm.client.PluginDescriptor;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 
 
 public class NodeSourceConfigurationParser {
@@ -110,10 +108,53 @@ public class NodeSourceConfigurationParser {
         return plugins;
     }
 
+    public Map<String, List<String>> parseInfraPoliciesMapping(String json) {
+        Map<String, List<String>> result = new HashMap<>();
+        JSONObject jsonObject = parseJSON(json).isObject();
+
+        for (String infra : jsonObject.keySet()) {
+            JSONArray array = jsonObject.get(infra).isArray();
+            List<String> policies = new ArrayList<>();
+            int size = array.size();
+            for (int i = 0; i < size; ++i) {
+                String policy = array.get(i).isString().stringValue();
+                policies.add(policy);
+            }
+            result.put(infra, policies);
+        }
+
+        return result;
+    }
+
     private PluginDescriptor getPluginDescriptor(JSONObject p, String pluginName) {
 
         String pluginDescription = p.get("pluginDescription").isString().stringValue();
-        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription);
+
+        Map<Integer, String> sectionDescriptions = Optional.ofNullable(p.get("sectionDescriptions"))
+                                                           .map(JSONValue::isObject)
+                                                           .map(jsonSectionDescriptions -> {
+                                                               Map<Integer, String> newSections = new HashMap<>();
+                                                               for (String key : jsonSectionDescriptions.keySet()) {
+                                                                   int sectionSelector = Integer.parseInt(key);
+                                                                   String sectionDescription = jsonSectionDescriptions.get(key)
+                                                                                                                      .isString()
+                                                                                                                      .stringValue();
+                                                                   newSections.put(sectionSelector, sectionDescription);
+                                                               }
+                                                               return newSections;
+                                                           })
+                                                           .orElse(new HashMap<>());
+
+        Map<String, String> pluginMeta = Optional.ofNullable(p.get("meta")).map(JSONValue::isObject).map(json -> {
+            Map<String, String> metaMap = new HashMap<>();
+            for (String key : json.keySet()) {
+                String value = json.get(key).isString().stringValue();
+                metaMap.put(key, value);
+            }
+            return metaMap;
+        }).orElse(new HashMap<>());
+
+        PluginDescriptor desc = new PluginDescriptor(pluginName, pluginDescription, sectionDescriptions, pluginMeta);
 
         JSONArray fields = p.get("configurableFields").isArray();
         for (int j = 0; j < fields.size(); j++) {
@@ -126,11 +167,20 @@ public class NodeSourceConfigurationParser {
             String metaType = meta.get("type").isString().stringValue();
             String descr = meta.get("description").isString().stringValue();
             boolean dynamic = meta.get("dynamic").isBoolean().booleanValue();
-
+            int sectionSelector = Optional.ofNullable(meta.get("sectionSelector"))
+                                          .map(JSONValue::isNumber)
+                                          .map(JSONNumber::doubleValue)
+                                          .map(Double::intValue)
+                                          .orElse(0);
+            boolean important = Optional.ofNullable(meta.get("important"))
+                                        .map(JSONValue::isBoolean)
+                                        .map(JSONBoolean::booleanValue)
+                                        .orElse(false);
             boolean password = false;
             boolean credentials = false;
             boolean file = false;
             boolean textArea = false;
+            boolean checkbox = false;
 
             if (metaType.equalsIgnoreCase("password")) {
                 password = true;
@@ -140,6 +190,8 @@ public class NodeSourceConfigurationParser {
                 credentials = true;
             } else if (metaType.equalsIgnoreCase("textArea")) {
                 textArea = true;
+            } else if (metaType.equalsIgnoreCase("checkbox")) {
+                checkbox = true;
             }
 
             PluginDescriptor.Field f = new PluginDescriptor.Field(name,
@@ -149,7 +201,10 @@ public class NodeSourceConfigurationParser {
                                                                   credentials,
                                                                   file,
                                                                   textArea,
-                                                                  dynamic);
+                                                                  checkbox,
+                                                                  dynamic,
+                                                                  sectionSelector,
+                                                                  important);
 
             desc.getConfigurableFields().add(f);
         }
@@ -174,11 +229,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", infrastructureJsonObject);
 
         // policy
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("policyPluginDescriptor", policyJsonObject);
 
         return nodeSourceJsonObject.toString();
@@ -192,11 +243,7 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("nodesRecoverable", JSONBoolean.getInstance(false));
 
         // infrastructure
-        JSONObject policyJsonObject = new JSONObject();
-        policyJsonObject.put("pluginName", new JSONString(""));
-        policyJsonObject.put("pluginDescription", new JSONString(""));
-        policyJsonObject.put("configurableFields", new JSONArray());
-        policyJsonObject.put("defaultValues", new JSONObject());
+        JSONObject policyJsonObject = createEmptyPlugin();
         nodeSourceJsonObject.put("infrastructurePluginDescriptor", policyJsonObject);
 
         // infrastructure
@@ -209,6 +256,16 @@ public class NodeSourceConfigurationParser {
         nodeSourceJsonObject.put("policyPluginDescriptor", infrastructureJsonObject);
 
         return nodeSourceJsonObject.toString();
+    }
+
+    private JSONObject createEmptyPlugin() {
+        JSONObject emptyPlugin = new JSONObject();
+        emptyPlugin.put("pluginName", new JSONString(""));
+        emptyPlugin.put("pluginDescription", new JSONString(""));
+        emptyPlugin.put("configurableFields", new JSONArray());
+        emptyPlugin.put("sectionDescriptions", new JSONObject());
+        emptyPlugin.put("defaultValues", new JSONObject());
+        return emptyPlugin;
     }
 
 }

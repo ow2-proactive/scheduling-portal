@@ -116,6 +116,7 @@ public class RMServiceImpl extends Service implements RMService {
      * Loads properties defined in the configuration file and in JVM arguments.
      */
     private void loadProperties() {
+        RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.HELP_PATH)));
         RMConfig.get().load(ConfigReader.readPropertiesFromFile(getServletContext().getRealPath(RMConfig.CONFIG_PATH)));
         ConfigUtils.loadSystemProperties(RMConfig.get());
     }
@@ -316,6 +317,10 @@ public class RMServiceImpl extends Service implements RMService {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.policies(sessionId));
     }
 
+    public String getInfrasToPoliciesMapping(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.getInfrasToPoliciesMapping(sessionId));
+    }
+
     @Override
     public String getNodeSourceConfiguration(String sessionId, String nodeSourceName)
             throws RestServerException, ServiceException {
@@ -451,6 +456,12 @@ public class RMServiceImpl extends Service implements RMService {
     @Override
     public String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getNodeThreadDump(sessionId, nodeUrl));
+    }
+
+    @Override
+    public void setNodeTokens(String sessionId, String nodeurl, List<String> tokens) {
+        RestClient restClientProxy = getRestClientProxy();
+        restClientProxy.setNodeTokens(sessionId, nodeurl, tokens);
     }
 
     private RestClient getRestClientProxy() {

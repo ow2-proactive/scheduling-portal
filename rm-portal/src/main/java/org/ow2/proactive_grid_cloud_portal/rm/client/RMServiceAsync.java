@@ -92,6 +92,8 @@ public interface RMServiceAsync {
      */
     void getPolicies(String sessionId, AsyncCallback<String> callback);
 
+    void getInfrasToPoliciesMapping(String sessionId, AsyncCallback<String> callback);
+
     /**
      * Retrieve the configuration of a given node source, in other words, a
      * representation of all the parameters with which a node source was
@@ -223,7 +225,6 @@ public interface RMServiceAsync {
     /**
      * Remove a node source
      * @param sessionId current session
-     * @param url unique url of the node
      * @param preempt don't wait for current tasks if true
      * @param callback
      */
@@ -247,7 +248,6 @@ public interface RMServiceAsync {
      * Retrieves attributes of the specified mbean.
      * 
      * @param sessionId current session
-     * @param name of mbean
      * @param nodeJmxUrl mbean server url
      * @param attrs set of mbean attributes
      *
@@ -348,4 +348,5 @@ public interface RMServiceAsync {
      */
     void getNodeThreadDump(String sessionId, String nodeUrl, AsyncCallback<String> callback);
 
+    void setNodeTokens(String sessionId, String nodeurl, List<String> tokens, AsyncCallback<Void> callback);
 }

@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Model;
@@ -73,6 +74,11 @@ public abstract class RMModel implements Model {
      * @return a list of supported policies and their parameters
      */
     public abstract Map<String, PluginDescriptor> getSupportedPolicies();
+
+    /**
+     * @return mapping from infra to list of appropriate policies
+     */
+    public abstract Map<String, List<String>> getInfraPolicyMapping();
 
     /**
      * @return an object that represents the configuration of a node source

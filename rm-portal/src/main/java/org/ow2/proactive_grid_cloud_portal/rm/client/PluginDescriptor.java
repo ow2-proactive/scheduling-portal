@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -47,6 +48,10 @@ public class PluginDescriptor {
 
     private List<Field> configurableFields;
 
+    private Map<Integer, String> sectionDescriptions;
+
+    private Map<String, String> meta;
+
     public static class Field {
         private String name;
 
@@ -62,18 +67,24 @@ public class PluginDescriptor {
 
         private boolean textarea;
 
+        private boolean checkbox;
+
         private boolean dynamic;
+
+        private int sectionSelector;
+
+        private boolean important;
 
         Field(String name, String value) {
             this(name, value, "");
         }
 
         Field(String name, String value, String description) {
-            this(name, value, description, false, false, false, false, false);
+            this(name, value, description, false, false, false, false, false, false, 0, false);
         }
 
         public Field(String name, String value, String description, boolean password, boolean credential, boolean file,
-                boolean textarea, boolean dynamic) {
+                boolean textarea, boolean checkbox, boolean dynamic, int sectionSelector, boolean important) {
             this.name = name;
             this.value = value;
             this.description = description;
@@ -81,7 +92,10 @@ public class PluginDescriptor {
             this.credential = credential;
             this.file = file;
             this.textarea = textarea;
+            this.checkbox = checkbox;
             this.dynamic = dynamic;
+            this.sectionSelector = sectionSelector;
+            this.important = important;
         }
 
         public String getName() {
@@ -112,16 +126,30 @@ public class PluginDescriptor {
             return textarea;
         }
 
+        public boolean isCheckbox() {
+            return checkbox;
+        }
+
         public boolean isDynamic() {
             return dynamic;
         }
 
+        public int getSectionSelector() {
+            return sectionSelector;
+        }
+
+        public boolean isImportant() {
+            return important;
+        }
     }
 
-    public PluginDescriptor(String pluginName, String pluginDescription) {
+    public PluginDescriptor(String pluginName, String pluginDescription, Map<Integer, String> sectionDescriptions,
+            Map<String, String> meta) {
         this.pluginDescription = pluginDescription;
         this.pluginName = pluginName;
         this.configurableFields = new ArrayList<>();
+        this.sectionDescriptions = sectionDescriptions;
+        this.meta = meta;
     }
 
     public String getPluginName() {
@@ -136,4 +164,11 @@ public class PluginDescriptor {
         return configurableFields;
     }
 
+    public Map<Integer, String> getSectionDescriptions() {
+        return sectionDescriptions;
+    }
+
+    public Map<String, String> getMeta() {
+        return meta;
+    }
 }

@@ -77,6 +77,12 @@ public interface RestClient {
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @GET
+    @Path("/rm/infrastructures/mapping")
+    @GZIP
+    @Produces("application/json")
+    InputStream getInfrasToPoliciesMapping(@HeaderParam("sessionid") String sessionId);
+
+    @GET
     @GZIP
     @Path("/rm/nodesource/configuration")
     @Produces("application/json")
@@ -236,4 +242,10 @@ public interface RestClient {
     @Produces("application/json")
     InputStream getNodeThreadDump(@HeaderParam("sessionid") String sessionId, @QueryParam("nodeurl") String nodeUrl);
 
+    @POST
+    @GZIP
+    @Path("/rm/node/tokens")
+    @Produces("application/json")
+    void setNodeTokens(@HeaderParam("sessionid") String sessionId, @HeaderParam("nodeurl") String nodeUrl,
+            @QueryParam("tokens") List<String> tokens);
 }

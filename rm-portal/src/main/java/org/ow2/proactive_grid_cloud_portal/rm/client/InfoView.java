@@ -103,7 +103,10 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField d6 = new DetailViewerField("hostName", "Host");
         DetailViewerField d7 = new DetailViewerField("vmName", "JVM");
         DetailViewerField d8 = new DetailViewerField("description", "Description");
-        this.nodeDetails.setFields(d1, d5, d6, d2, d3, d4, d7, d8);
+        DetailViewerField d9 = new DetailViewerField("usage", "Usage");
+        DetailViewerField d10 = new DetailViewerField("access", "Usage restrictions");
+        DetailViewerField d11 = new DetailViewerField("tokens", "Tokens");
+        this.nodeDetails.setFields(d1, d5, d6, d2, d3, d4, d7, d8, d9, d10, d11);
         this.nodeCanvas = new VLayout();
         this.nodeCanvas.setWidth100();
         this.nodeLabel = new Label("<h3>Node</h3>");
@@ -238,6 +241,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("sourceName", node.getSourceName());
         dv.setAttribute("vmName", node.getVmName());
         dv.setAttribute("description", "<pre>" + node.getDescription() + "</pre>");
+        dv.setAttribute("usage", niceUsageString(node.getUsageInfo()));
+        dv.setAttribute("access", node.getUserAccessTypeLocal());
+        dv.setAttribute("tokens", "<pre>" + String.join("\n", node.getTokens()) + "</pre>");
 
         this.nodeDetails.setData(new DetailViewerRecord[] { dv });
         this.nodeLabel.setIcon(node.getIcon());
@@ -250,6 +256,15 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.selNode = node;
         this.selHost = null;
         this.selNS = null;
+    }
+
+    private String niceUsageString(Map<String, String> usage) {
+        if (!usage.isEmpty()) {
+            return "<pre>" + "Job id: " + usage.get("JOB_ID") + "\n" + "Job name: " + usage.get("JOB_NAME") + "\n" +
+                   "Task id: " + usage.get("TASK_ID") + "\n" + "Task name: " + usage.get("TASK_NAME") + "\n" + "</pre>";
+        } else {
+            return "<pre>(Free)</pre>";
+        }
     }
 
     /*
