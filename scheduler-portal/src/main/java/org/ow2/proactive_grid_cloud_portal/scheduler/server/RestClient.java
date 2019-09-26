@@ -152,6 +152,10 @@ public interface RestClient {
     @Path("jobs/{jobid}/kill")
     InputStream killJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
+    @PUT
+    @Path("jobs/kill")
+    InputStream killJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
+
     /**
      * Kill a task
      */

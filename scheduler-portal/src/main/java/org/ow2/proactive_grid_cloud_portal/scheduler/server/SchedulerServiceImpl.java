@@ -410,9 +410,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     @Override
     public int killJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
-        return executeFunction((restClientProxy, jobId) -> restClientProxy.killJob(sessionId, Integer.toString(jobId)),
-                               jobIdList,
-                               "job killed");
+        for (List<Integer> chunk : Lists.partition(jobIdList, LIMIT_QUERY_PARAMS_NUMBER)) {
+            executeFunction(restClient -> restClient.killJobs(sessionId,
+                                                              chunk.stream()
+                                                                   .map(Object::toString)
+                                                                   .collect(Collectors.toList())));
+        }
+
+        return jobIdList.size();
     }
 
     /*
