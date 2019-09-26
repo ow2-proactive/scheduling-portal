@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.*;
@@ -100,6 +101,10 @@ public interface RestClient {
     @DELETE
     @Path("jobs/{jobid}")
     InputStream removeJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
+
+    @DELETE
+    @Path("jobs")
+    InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
 
     /**
      * Pauses a job.
