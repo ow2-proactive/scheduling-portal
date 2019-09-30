@@ -102,7 +102,7 @@ import com.google.common.io.Files;
 @SuppressWarnings("serial")
 public class SchedulerServiceImpl extends Service implements SchedulerService {
 
-    public static final int LIMIT_QUERY_PARAMS_NUMBER = 1000;
+    public static final int LIMIT_QUERY_PARAMS_NUMBER = 500;
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 
