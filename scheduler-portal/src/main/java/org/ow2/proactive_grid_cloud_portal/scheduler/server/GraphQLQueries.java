@@ -33,8 +33,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
@@ -50,8 +48,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
  * @since Mar 8, 2017
  */
 public final class GraphQLQueries {
-
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private static final String RETURN_NOTHING_FILTER = "RETURN_NOTHING_FILTER";
 
@@ -174,6 +170,24 @@ public final class GraphQLQueries {
         String projectName = null;
         long afterSubmittedTime = -1;
         long beforeSubmittedTime = -1;
+        long afterLastUpdatedTime = -1;
+        long beforeLastUpdatedTime = -1;
+        long afterStartTime = -1;
+        long beforeStartTime = -1;
+        long afterFinishedTime = -1;
+        long beforeFinishedTime = -1;
+        String afterNumberOfPendingTask = null;
+        String beforeNumberOfPendingTask = null;
+        String afterNumberOfRunningTask = null;
+        String beforeNumberOfRunningTask = null;
+        String afterNumberOfFinishedTask = null;
+        String beforeNumberOfFinishedTask = null;
+        String afterNumberOfFaultyTask = null;
+        String beforeNumberOfFaultyTask = null;
+        String afterNumberOfFailedTask = null;
+        String beforeNumberOfFailedTask = null;
+        String afterNumberOfInErrorTask = null;
+        String beforeNumberOfInErrorTask = null;
 
         int valueAsInteger;
         String filter;
@@ -273,14 +287,11 @@ public final class GraphQLQueries {
                     }
 
                     case SUBMITTED_TIME: {
-
                         try {
-
-                            dateInMs = DateTime.parse(value, DateTimeFormat.forPattern(DATE_FORMAT)).getMillis();
-                        } catch (IllegalArgumentException e) {
+                            dateInMs = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
-                                       "Invalid value for field SUBMITTED_TIME : \"" + value +
-                                                     "\" is not a valid date. (" + DATE_FORMAT + ")",
+                                       "Invalid value for field SUBMITTED_TIME : \"" + value + "\" is not a long int",
                                        e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
@@ -293,6 +304,241 @@ public final class GraphQLQueries {
                             case LESS_THAN_OR_EQUAL_TO:
                                 if (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime)
                                     beforeSubmittedTime = dateInMs;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case START_TIME: {
+                        try {
+                            dateInMs = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Invalid value for field START_TIME : \"" + value + "\" is not a long int",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterStartTime == -1 || dateInMs > afterStartTime)
+                                    afterStartTime = dateInMs;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeStartTime == -1 || dateInMs < beforeStartTime)
+                                    beforeStartTime = dateInMs;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case LAST_UPDATED_TIME: {
+                        try {
+                            dateInMs = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Invalid value for field LAST_UPDATED_TIME : \"" + value +
+                                                     "\" is not a long int",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterLastUpdatedTime == -1 || dateInMs > afterLastUpdatedTime)
+                                    afterLastUpdatedTime = dateInMs;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeLastUpdatedTime == -1 || dateInMs < beforeLastUpdatedTime)
+                                    beforeLastUpdatedTime = dateInMs;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case FINISHED_TIME: {
+                        try {
+                            dateInMs = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Invalid value for field FINISHED_TIME : \"" + value + "\" is not a long int",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterFinishedTime == -1 || dateInMs > afterFinishedTime)
+                                    afterFinishedTime = dateInMs;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeFinishedTime == -1 || dateInMs < beforeFinishedTime)
+                                    beforeFinishedTime = dateInMs;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_PENDING_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_PENDING_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfPendingTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfPendingTask))
+                                    afterNumberOfPendingTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfPendingTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfPendingTask))
+                                    beforeNumberOfPendingTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_RUNNING_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_RUNNING_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfRunningTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfRunningTask))
+                                    afterNumberOfRunningTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfRunningTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfRunningTask))
+                                    beforeNumberOfRunningTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_FINISHED_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_FINISHED_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfFinishedTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfFinishedTask))
+                                    afterNumberOfFinishedTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfFinishedTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfFinishedTask))
+                                    beforeNumberOfFinishedTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_FAULTY_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_FAULTY_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfFaultyTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfFaultyTask))
+                                    afterNumberOfFaultyTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfFaultyTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfFaultyTask))
+                                    beforeNumberOfFaultyTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_FAILED_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_FAILED_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfFailedTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfFailedTask))
+                                    afterNumberOfFailedTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfFailedTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfFailedTask))
+                                    beforeNumberOfFailedTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_IN_ERROR_TASKS: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_IN_ERROR_TASKS filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfInErrorTask == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfInErrorTask))
+                                    afterNumberOfInErrorTask = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfInErrorTask == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfInErrorTask))
+                                    beforeNumberOfInErrorTask = value;
                                 break;
                             default:
                                 break;
@@ -329,6 +575,42 @@ public final class GraphQLQueries {
             input.afterSubmittedTime("" + afterSubmittedTime);
         if (beforeSubmittedTime != -1)
             input.beforeSubmittedTime("" + beforeSubmittedTime);
+        if (afterStartTime != -1)
+            input.afterStartTime("" + afterStartTime);
+        if (beforeStartTime != -1)
+            input.beforeStartTime("" + beforeStartTime);
+        if (afterLastUpdatedTime != -1)
+            input.afterLastUpdatedTime("" + afterLastUpdatedTime);
+        if (beforeLastUpdatedTime != -1)
+            input.beforeLastUpdatedTime("" + beforeLastUpdatedTime);
+        if (afterFinishedTime != -1)
+            input.afterFinishedTime("" + afterFinishedTime);
+        if (beforeFinishedTime != -1)
+            input.beforeFinishedTime("" + beforeFinishedTime);
+        if (afterNumberOfPendingTask != null)
+            input.afterNumberOfPendingTasks(afterNumberOfPendingTask);
+        if (afterNumberOfRunningTask != null)
+            input.afterNumberOfRunningTasks(afterNumberOfRunningTask);
+        if (afterNumberOfFinishedTask != null)
+            input.afterNumberOfFinishedTasks(afterNumberOfFinishedTask);
+        if (afterNumberOfFaultyTask != null)
+            input.afterNumberOfFaultyTasks(afterNumberOfFaultyTask);
+        if (afterNumberOfFailedTask != null)
+            input.afterNumberOfFailedTasks(afterNumberOfFailedTask);
+        if (afterNumberOfInErrorTask != null)
+            input.afterNumberOfInErrorTasks(afterNumberOfInErrorTask);
+        if (beforeNumberOfPendingTask != null)
+            input.beforeNumberOfPendingTasks(beforeNumberOfPendingTask);
+        if (beforeNumberOfRunningTask != null)
+            input.beforeNumberOfRunningTasks(beforeNumberOfRunningTask);
+        if (beforeNumberOfFinishedTask != null)
+            input.beforeNumberOfFinishedTasks(beforeNumberOfFinishedTask);
+        if (beforeNumberOfFaultyTask != null)
+            input.beforeNumberOfFaultyTasks(beforeNumberOfFaultyTask);
+        if (beforeNumberOfFailedTask != null)
+            input.beforeNumberOfFailedTasks(beforeNumberOfFailedTask);
+        if (beforeNumberOfInErrorTask != null)
+            input.beforeNumberOfInErrorTasks(beforeNumberOfInErrorTask);
 
         return input.build();
     }
