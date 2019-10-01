@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.Date;
+
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
@@ -66,9 +68,15 @@ public class FilterView extends VStack {
 
     private final static ImageResource REMOVE_BUTTON_IMAGE = SchedulerImages.instance.remove();
 
-    private static final String ERROR_MESSAGE = "errorMessage";
+    private static final String DATE_FORMAT_FULL = "yyyy-MM-dd HH:mm:ss ZZ";
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT_MEDIUM = "yyyy-MM-dd HH:mm:ss";
+
+    private static final String DATE_FORMAT_DATE_ONLY = "yyyy-MM-dd";
+
+    private static final String DATE_FORMAT_HOUR_ONLY = "HH:mm:ss";
+
+    private static final String ERROR_MESSAGE = "errorMessage";
 
     public FilterView() {
         initComp();
@@ -96,9 +104,15 @@ public class FilterView extends VStack {
         filterPanel.reflow();
     }
 
-    private void validateField(Field field, String value) {
+    private String validateField(Field field, String value) {
         switch (field) {
             case ID:
+            case NUMBER_OF_PENDING_TASKS:
+            case NUMBER_OF_RUNNING_TASKS:
+            case NUMBER_OF_FINISHED_TASKS:
+            case NUMBER_OF_FAILED_TASKS:
+            case NUMBER_OF_FAULTY_TASKS:
+            case NUMBER_OF_IN_ERROR_TASKS:
                 try {
                     Integer.parseInt(value);
                 } catch (NumberFormatException e) {
@@ -106,16 +120,19 @@ public class FilterView extends VStack {
                 }
                 break;
             case SUBMITTED_TIME:
+            case START_TIME:
+            case LAST_UPDATED_TIME:
+            case FINISHED_TIME:
                 try {
-                    DateTimeFormat.getFormat(DATE_FORMAT).parse(value);
+                    return "" + getMillisFromDate(value, field.getName());
                 } catch (IllegalArgumentException e) {
-                    displayErrorMessage("Invalid value for field " + field + " : \"" + value +
-                                        "\" is not a valid date. (" + DATE_FORMAT + ")");
+                    displayErrorMessage(e.getMessage());
                 }
                 break;
             default:
                 break;
         }
+        return value;
     }
 
     public FilterModel getFilterModel() {
@@ -132,7 +149,7 @@ public class FilterView extends VStack {
             Action action = Action.get(row.actionList.getSelectedValue());
             String value = row.getValue();
 
-            validateField(field, value);
+            value = validateField(field, value);
 
             model.addConstraint(field, action, value);
         }
@@ -193,6 +210,37 @@ public class FilterView extends VStack {
         if (widgetCount >= 1) {
             ((RowFilter) filterPanel.getMember(0)).enableRemoveButton(widgetCount > 1);
         }
+    }
+
+    public long getMillisFromDate(String value, String fieldName) {
+        Date now = new Date();
+        String nowDateString = DateTimeFormat.getFormat(DATE_FORMAT_DATE_ONLY).format(now);
+        Date answer;
+
+        try {
+            answer = DateTimeFormat.getFormat(DATE_FORMAT_DATE_ONLY).parse(value.trim());
+        } catch (Exception e) {
+            try {
+                answer = DateTimeFormat.getFormat(DATE_FORMAT_MEDIUM).parse(nowDateString + " " + value.trim());
+            } catch (Exception e1) {
+                try {
+                    answer = DateTimeFormat.getFormat(DATE_FORMAT_MEDIUM).parse(value.trim());
+                } catch (Exception e2) {
+                    try {
+
+                        answer = DateTimeFormat.getFormat(DATE_FORMAT_FULL).parse(value.trim());
+                    } catch (Exception e3) {
+                        throw new IllegalArgumentException("Invalid value for field '" + fieldName + "' : \"" + value +
+                                                           "\" is not a valid date. (" + DATE_FORMAT_HOUR_ONLY + "|" +
+                                                           DATE_FORMAT_DATE_ONLY + "|" + DATE_FORMAT_MEDIUM + "|" +
+                                                           DATE_FORMAT_FULL + ")", e3);
+                    }
+                }
+            }
+        }
+
+        return answer.getTime();
+
     }
 
     private class RowFilter extends HStack implements ClickHandler, ChangeHandler {
@@ -281,15 +329,30 @@ public class FilterView extends VStack {
                     valuePanel.setWidget(stateList);
                     break;
                 }
-                case SUBMITTED_TIME: {
+                case SUBMITTED_TIME:
+                case START_TIME:
+                case LAST_UPDATED_TIME:
+                case FINISHED_TIME: {
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
                     actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
 
-                    dateTextBox.getElement().setPropertyString("placeholder", "ISO 8601 format");
+                    dateTextBox.getElement().setPropertyString("placeholder", "yyyy-MM-dd HH:mm:ss");
 
                     valuePanel.setWidget(dateTextBox);
                     break;
                 }
+                case NUMBER_OF_PENDING_TASKS:
+                case NUMBER_OF_RUNNING_TASKS:
+                case NUMBER_OF_FINISHED_TASKS:
+                case NUMBER_OF_FAULTY_TASKS:
+                case NUMBER_OF_FAILED_TASKS:
+                case NUMBER_OF_IN_ERROR_TASKS: {
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+                    valuePanel.setWidget(textBox);
+                    break;
+                }
+
                 default:
                     break;
             }

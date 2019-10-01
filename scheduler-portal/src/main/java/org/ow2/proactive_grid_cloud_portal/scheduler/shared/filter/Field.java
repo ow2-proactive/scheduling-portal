@@ -39,7 +39,16 @@ public enum Field implements IsSerializable {
     USER("user"),
     STATE("state"),
     PROJECT_NAME("project"),
-    SUBMITTED_TIME("Submitted time");
+    SUBMITTED_TIME("Submitted time"),
+    START_TIME("Start time"),
+    LAST_UPDATED_TIME("Last-updated time"),
+    FINISHED_TIME("Finished time"),
+    NUMBER_OF_PENDING_TASKS("Pending tasks"),
+    NUMBER_OF_RUNNING_TASKS("Running tasks"),
+    NUMBER_OF_FINISHED_TASKS("Finished tasks"),
+    NUMBER_OF_FAULTY_TASKS("Faulty tasks"),
+    NUMBER_OF_FAILED_TASKS("Failed tasks"),
+    NUMBER_OF_IN_ERROR_TASKS("In-error tasks"),;
 
     private String name;
 
