@@ -38,11 +38,10 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
  */
 public enum SchedulerStatus {
     /**
-     * The scheduler is starting.
      * The very first status of the scheduler,
      * before receiving any event.
      */
-    STARTING("Starting"),
+    LOADING("Loading"),
     /**
      * The scheduler is running. Jobs can be submitted.
      * Get the jobs results is possible.
