@@ -562,7 +562,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addMember(additionalLogoCenter);
 
         // disable all controls at first, next event will sort it out
-        this.statusChanged(SchedulerStatus.KILLED);
+        this.statusChanged(SchedulerStatus.STARTING);
 
         return tools;
     }
@@ -578,6 +578,16 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         // this only changes the enable status of scheduler admin buttons
 
         switch (status) {
+            case STARTING:
+                schedStartButton.setEnabled(false);
+                schedStopButton.setEnabled(false);
+                schedFreezeButton.setEnabled(false);
+                schedPauseButton.setEnabled(false);
+                schedResumeButton.setEnabled(false);
+                schedKillButton.setEnabled(false);
+                schedShutdownButton.setEnabled(false);
+                schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_starting_16().getSafeUri().asString());
+                break;
             case SHUTTING_DOWN:
                 schedStartButton.setEnabled(false);
                 schedStopButton.setEnabled(false);
