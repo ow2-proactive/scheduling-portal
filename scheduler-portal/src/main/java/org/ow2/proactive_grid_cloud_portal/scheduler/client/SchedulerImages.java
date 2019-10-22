@@ -65,6 +65,9 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/scheduler_resume_16.png")
     ImageResource scheduler_resume_16();
 
+    @Source("images/loading.gif")
+    ImageResource loading();
+
     @Source("images/scheduler_start_16.png")
     ImageResource scheduler_start_16();
 
