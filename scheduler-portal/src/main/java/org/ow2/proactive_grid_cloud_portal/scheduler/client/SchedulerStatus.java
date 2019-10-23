@@ -38,6 +38,11 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
  */
 public enum SchedulerStatus {
     /**
+     * The very first status of the scheduler,
+     * before receiving any event.
+     */
+    LOADING("Loading"),
+    /**
      * The scheduler is running. Jobs can be submitted.
      * Get the jobs results is possible.
      * It can be paused, stopped or shutdown.
