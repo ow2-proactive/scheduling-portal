@@ -833,18 +833,19 @@ public abstract class NodeSourceWindow {
     public void addCredentialsPickerIcon(PluginDescriptor.Field pluginField, List<FormItem> formItems,
             FormItem formItem) {
         if (pluginField.isCredential()) {
-            PickerIcon createCredentialsPicker = new PickerIcon(new PickerIcon.Picker(Images.instance.key_16()
-                                                                                                     .getSafeUri()
-                                                                                                     .asString()),
-                                                                formItemIconClickEvent -> {
-                                                                    CredentialsWindow win = new CredentialsWindow();
-                                                                    win.show();
-                                                                });
-            createCredentialsPicker.setPrompt("Create a Credential file");
-            createCredentialsPicker.setWidth(16);
-            createCredentialsPicker.setHeight(16);
-            createCredentialsPicker.setAttribute("hspace", 6);
-            formItem.setIcons(createCredentialsPicker);
+            FormItemIcon formItemIconProperties = new FormItemIcon();
+            formItemIconProperties.setAttribute("hspace", 6);
+            formItemIconProperties.addFormItemClickHandler(formItemIconClickEvent -> {
+                CredentialsWindow win = new CredentialsWindow();
+                win.show();
+            });
+            formItem.setShowPickerIcon(true);
+            formItem.setPickerIconProperties(formItemIconProperties);
+            formItem.setPickerIconPrompt("Create a Credential file");
+            formItem.setPickerIconWidth(16);
+            formItem.setPickerIconHeight(16);
+            formItem.setPickerIconSrc(Images.instance.key_16().getSafeUri().asString());
+
         }
         formItems.add(formItem);
     }
