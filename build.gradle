@@ -63,7 +63,9 @@ subprojects {
         providedCompile 'com.google.gwt:gwt-dev:2.8.2'
         providedCompile 'com.google.gwt:gwt-codeserver:2.8.2'
         // needed on the server side because we use GWT-RPC
-        compile 'com.smartgwt:smartgwt:5.1d-2015-05-23'
+        //compile 'com.smartgwt:smartgwt:5.1d-2015-05-23'
+        compile 'com.isomorphic.smartgwt.lgpl:smartgwt-lgpl:12.0-p20191023'
+        compile 'com.isomorphic.smartgwt.lgpl:smartgwt-skins:12.0-p20191023'
         providedCompile 'com.google.gwt.google-apis:gwt-visualization:1.1.1'
         // Needed for GWT compile and at runtime for RequestBuilder
         // Specify two artifacts as workaround for GRADLE-1934
