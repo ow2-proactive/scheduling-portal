@@ -30,7 +30,6 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tas
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -463,7 +462,7 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     @Override
     protected void selectionChangedHandler(SelectionEvent event) {
-        if (event.getState() && !fetchingData) {
+        if (event.getState() && !updatingData.get()) {
             ListGridRecord record = event.getRecord();
             Task task = TaskRecord.getTask(record);
             controller.selectTask(task);

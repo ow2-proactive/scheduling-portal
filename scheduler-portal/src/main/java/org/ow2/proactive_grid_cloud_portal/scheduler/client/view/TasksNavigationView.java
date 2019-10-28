@@ -134,7 +134,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Current", "Past", "Error").map(status -> {
             CheckboxItem checkboxItem = new CheckboxItem(status, status);
             checkboxItem.setValue(true);
-            checkboxItem.setWidth("9%");
+            checkboxItem.setWidth(13);
             checkboxItem.addChangeHandler(event -> {
                 String allFilters = setOneFilterValueReturnAll(status, (Boolean) event.getValue());
                 controller.fitlerByStatuses(allFilters);
