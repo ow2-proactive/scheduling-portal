@@ -47,10 +47,12 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListG
 
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
+import com.smartgwt.client.types.SelectionNotificationType;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.grid.ListGridField;
@@ -94,25 +96,50 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         super.build();
         this.setSelectionProperty("isSelected");
         this.setSort(DEFAULT_SORT);
+        this.setReselectOnUpdate(true);
+        this.setReselectOnUpdateNotifications(SelectionNotificationType.NONE);
     }
 
     @Override
     protected void selectionChangedHandler(SelectionEvent event) {
-        if (event.getState() && !fetchingData) {
+        if (event.getState()) {
             ListGridRecord record = event.getRecord();
             Job job = JobRecord.getJob(record);
-            controller.selectJob(job);
+            if (updatingData.get()) {
+                if (controller.getModel().getSelectedJob() != null &&
+                    job.getId().equals(controller.getModel().getSelectedJob().getId())) {
+                    // updating data, reselect only previously selected job
+                    controller.selectJob(job);
+                } else if (controller.getModel().getSelectedJob() == null) {
+                    // updating data, but no job previously selected
+                    controller.selectJob(job);
+                }
+            } else {
+                controller.selectJob(job);
+            }
         }
     }
 
     @Override
     protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
         ListGridRecord[] selectedRecords = this.getSelectedRecords();
-        List<Integer> selectedJobsIds = new ArrayList<>(selectedRecords.length);
-        for (ListGridRecord selectedRecord : selectedRecords) {
-            selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
+        if (selectedRecords.length > 0) {
+            List<Integer> selectedJobsIds = new ArrayList<>(selectedRecords.length);
+            for (ListGridRecord selectedRecord : selectedRecords) {
+                selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
+            }
+            controller.getModel().setSelectedJobsIds(selectedJobsIds);
+            if (updatingData.get()) {
+                updatingData.set(false); // end of the updating process
+            }
+
+        } else if (updatingData.get()) {
+            // this empty selection updated message is sent by smartgwt when refreshing data
+            // we need to reselect jobs
+            reSelectJobs();
+        } else {
+            controller.getModel().setSelectedJobsIds(null);
         }
-        controller.getModel().setSelectedJobsIds(selectedJobsIds);
     }
 
     @Override
@@ -135,9 +162,27 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         data.destroy();
         applyCurrentLocalFilter();
 
+        reSelectJobs();
         //select the job given in the URL if it has not been automatically selected before
         if (!isJobFromUrlAutoSelected && selectJobIdFromUrl()) {
             isJobFromUrlAutoSelected = true;
+        }
+        // smargwt will send a SelectionUpdatedEvent with no records, this flag is used to handle it properly
+        if (selectedJobsIds != null && !selectedJobsIds.isEmpty()) {
+            updatingData.set(true);
+        }
+    }
+
+    private void reSelectJobs() {
+        List<Integer> selectedJobsIds = this.controller.getModel().getSelectedJobsIds();
+        List<Record> selectedRecords = new ArrayList<>();
+        if (selectedJobsIds != null) {
+            for (Record record : getRecordList().toArray()) {
+                if (selectedJobsIds.contains(record.getAttributeAsInt(ID_ATTR.getName()))) {
+                    selectedRecords.add(record);
+                }
+            }
+            super.selectRecords(selectedRecords.toArray(new Record[0]), true);
         }
     }
 

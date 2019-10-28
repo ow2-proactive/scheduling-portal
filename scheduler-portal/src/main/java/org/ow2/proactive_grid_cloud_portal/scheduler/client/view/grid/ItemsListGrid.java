@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 
@@ -80,7 +81,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
     protected ItemDS ds = null;
 
     /** To disable selection listener while fetching data */
-    protected boolean fetchingData;
+    protected AtomicBoolean updatingData = new AtomicBoolean(false);
 
     public ItemsListGrid() {
     }
