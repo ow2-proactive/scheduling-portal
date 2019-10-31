@@ -380,27 +380,35 @@ public abstract class NodeSourceWindow {
         });
     }
 
+    protected static List listOfOne(Object o) {
+        return new ArrayList() {
+            {
+                add(o);
+            }
+        };
+    }
+
     private void populateFormValues(Runnable afterFunciton) {
         this.controller.fetchSupportedInfrastructuresAndPolicies(() -> {
             this.formItemsByName.clear();
             prepareFormItems();
             this.nodesRecoverableCheckbox.setValue(true);
-            this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, Collections.singletonList(this.infrastructureSelectItem));
+            this.formItemsByName.put(INFRASTRUCTURE_FORM_KEY, listOfOne(this.infrastructureSelectItem));
             addInfrastructurePluginValuesToAllFormItems(this.controller.getModel()
                                                                        .getSupportedInfrastructures()
                                                                        .values());
-            this.formItemsByName.put("spacer3", Collections.singletonList(new SpacerItem()));
-            this.formItemsByName.put(POLICY_FORM_KEY, Collections.singletonList(this.policySelectItem));
+            this.formItemsByName.put("spacer3", listOfOne(new SpacerItem()));
+            this.formItemsByName.put(POLICY_FORM_KEY, listOfOne(this.policySelectItem));
             addPolicyPluginValuesToAllFormItems(this.controller.getModel().getSupportedPolicies().values());
             this.infrastructureSelectItem.addChangedHandler(changedEvent -> resetFormForInfrastructureSelectChange());
             this.policySelectItem.addChangedHandler(changedEvent -> resetFormForPolicySelectChange());
 
             afterItemsCreation();
 
-            this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
-                                                                     .stream()
-                                                                     .flatMap(Collection::stream)
-                                                                     .toArray(FormItem[]::new));
+            setFieldsToTheDynamicForm(this.formItemsByName.values()
+                                                          .stream()
+                                                          .flatMap(Collection::stream)
+                                                          .toArray(FormItem[]::new));
             this.nodeSourcePluginsWaitingLabel.hide();
             this.nodeSourcePluginsForm.show();
             hideAllPluginFormItems();
@@ -538,28 +546,25 @@ public abstract class NodeSourceWindow {
         this.policySelectItem.setRequired(true);
         this.policySelectItem.setWidth(300);
 
-        this.formItemsByName.put(NS_NAME_FORM_KEY, Collections.singletonList(new HiddenItem(NS_NAME_FORM_KEY)));
-        this.formItemsByName.put(DEPLOY_FORM_KEY, Collections.singletonList(new HiddenItem(DEPLOY_FORM_KEY)));
-        this.formItemsByName.put(NODE_SOURCE_ACTION_FORM_KEY,
-                                 Collections.singletonList(new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY)));
-        this.formItemsByName.put(NS_CALLBACK_FORM_KEY, Collections.singletonList(new HiddenItem(NS_CALLBACK_FORM_KEY)));
-        this.formItemsByName.put(SESSION_ID_FORM_KEY, Collections.singletonList(new HiddenItem(SESSION_ID_FORM_KEY)));
+        this.formItemsByName.put(NS_NAME_FORM_KEY, listOfOne(new HiddenItem(NS_NAME_FORM_KEY)));
+        this.formItemsByName.put(DEPLOY_FORM_KEY, listOfOne(new HiddenItem(DEPLOY_FORM_KEY)));
+        this.formItemsByName.put(NODE_SOURCE_ACTION_FORM_KEY, listOfOne(new HiddenItem(NODE_SOURCE_ACTION_FORM_KEY)));
+        this.formItemsByName.put(NS_CALLBACK_FORM_KEY, listOfOne(new HiddenItem(NS_CALLBACK_FORM_KEY)));
+        this.formItemsByName.put(SESSION_ID_FORM_KEY, listOfOne(new HiddenItem(SESSION_ID_FORM_KEY)));
         this.formItemsByName.put(INFRASTRUCTURE_PARAM_ORDER_KEY,
-                                 Collections.singletonList(new HiddenItem(INFRASTRUCTURE_PARAM_ORDER_KEY)));
+                                 listOfOne(new HiddenItem(INFRASTRUCTURE_PARAM_ORDER_KEY)));
         this.formItemsByName.put(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY,
-                                 Collections.singletonList(new HiddenItem(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY)));
-        this.formItemsByName.put(POLICY_PARAM_ORDER_KEY,
-                                 Collections.singletonList(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
-        this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY,
-                                 Collections.singletonList(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
-        this.formItemsByName.put(HIDDEN_INFRA, Collections.singletonList(new HiddenItem(HIDDEN_INFRA)));
-        this.formItemsByName.put(HIDDEN_POLICY, Collections.singletonList(new HiddenItem(HIDDEN_POLICY)));
+                                 listOfOne(new HiddenItem(INFRASTRUCTURE_PARAM_FILE_ORDER_KEY)));
+        this.formItemsByName.put(POLICY_PARAM_ORDER_KEY, listOfOne(new HiddenItem(POLICY_PARAM_ORDER_KEY)));
+        this.formItemsByName.put(POLICY_PARAM_FILE_ORDER_KEY, listOfOne(new HiddenItem(POLICY_PARAM_FILE_ORDER_KEY)));
+        this.formItemsByName.put(HIDDEN_INFRA, listOfOne(new HiddenItem(HIDDEN_INFRA)));
+        this.formItemsByName.put(HIDDEN_POLICY, listOfOne(new HiddenItem(HIDDEN_POLICY)));
 
         this.nodesRecoverableCheckbox = new CheckboxItem(NODES_RECOVERABLE_FORM_KEY, "Nodes Recoverable");
         this.nodesRecoverableCheckbox.setHeight("15px");
         this.nodesRecoverableCheckbox.setTooltip("Defines whether the nodes of this node source can be recovered after a crash of the Resource Manager");
-        this.formItemsByName.put(NODES_RECOVERABLE_FORM_KEY, Collections.singletonList(this.nodesRecoverableCheckbox));
-        this.formItemsByName.put("generalParametersSpacer", Collections.singletonList(new RowSpacerItem()));
+        this.formItemsByName.put(NODES_RECOVERABLE_FORM_KEY, listOfOne(this.nodesRecoverableCheckbox));
+        this.formItemsByName.put("generalParametersSpacer", listOfOne(new RowSpacerItem()));
     }
 
     private void addInfrastructurePluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors) {
@@ -878,14 +883,43 @@ public abstract class NodeSourceWindow {
                                              allNodeSourcePluginsFormItems);
         replacePolicyItemsInItemList(nodeSourceConfiguration.getPolicyPluginDescriptor(),
                                      allNodeSourcePluginsFormItems);
-        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+        setFieldsToTheDynamicForm(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
     }
 
     public void replacePolicyItems(PluginDescriptor policyPluginDescriptor) {
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         replacePolicyItemsInItemList(policyPluginDescriptor, allNodeSourcePluginsFormItems);
-        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+        setFieldsToTheDynamicForm(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+    }
+
+    protected void setFieldsToTheDynamicForm(FormItem[] fields) {
+        Map<FormItem, FormItem> oldToNew = new HashMap<>();
+        FormItem[] copies = new FormItem[fields.length];
+        for (int i = 0; i < fields.length; ++i) {
+            FormItem old = fields[i];
+            FormItem copy = FormItemFactory.getFormItem(old.getJsObj());
+            copies[i] = copy;
+            oldToNew.put(old, copy);
+        }
+
+        int replaced = 0;
+        for (List<FormItem> list : formItemsByName.values()) {
+            for (int j = 0; j < list.size(); ++j) {
+                FormItem old = list.get(j);
+                if (oldToNew.containsKey(old)) {
+                    list.set(j, oldToNew.get(old));
+                    ++replaced;
+                }
+            }
+        }
+        ;
+
+        long total = formItemsByName.values().stream().mapToLong(Collection::size).sum();
+        LogModel.getInstance()
+                .logCriticalMessage("Replaced / total " + replaced + " / " + total + " / " + fields.length);
+        this.nodeSourcePluginsForm.setFields(copies);
+
     }
 
     private void replacePolicyItemsInItemList(PluginDescriptor policyPluginDescriptor,
@@ -932,7 +966,7 @@ public abstract class NodeSourceWindow {
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         replaceInfrastructureItemsInItemList(infrastructurePluginDescriptor, allNodeSourcePluginsFormItems);
-        this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
+        setFieldsToTheDynamicForm(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
     }
 
     private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
