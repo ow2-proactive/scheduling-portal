@@ -115,8 +115,10 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.setSelectionType(SelectionStyle.SINGLE);
         this.setSelectionProperty("isSelected");
         this.sort(TasksCentricColumnsFactory.JOB_ID_ATTR.getName(), SortDirection.DESCENDING);
-        this.setShowRecordComponents(true);
-        this.setShowRecordComponentsByCell(true);
+
+        // these lines brake scrolling - it lags too much. But it might be that we need there lines. 
+        //        this.setShowRecordComponents(true);
+        //        this.setShowRecordComponentsByCell(true);
     }
 
     protected Map<GridColumns, ListGridField> buildListGridField() {
