@@ -140,8 +140,9 @@ public class JobsModel {
 
         for (JobsUpdatedListener listener : this.jobsUpdatedListeners) {
             listener.jobsUpdated(this.jobs);
-            if (empty)
+            if (empty) {
                 listener.jobsUpdating();
+            }
         }
 
         if (this.selectedJob != null) {

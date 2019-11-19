@@ -52,7 +52,7 @@ public class SchedulerListeners {
          * 
          * @param status the new status
          */
-        public void statusChanged(SchedulerStatus status);
+        void statusChanged(SchedulerStatus status);
 
     }
 
@@ -69,17 +69,17 @@ public class SchedulerListeners {
          *
          * @param job the selected job
          */
-        public void jobSelected(Job job);
+        void jobSelected(Job job);
 
         /**
          * Called when the Job selection in the main Scheduler View Grid is canceled
          */
-        public void jobUnselected();
+        void jobUnselected();
 
         /**
          * Called when the selected job has been updated because of jobs revision.
          */
-        public void selectedJobUpdated(Job job);
+        void selectedJobUpdated(Job job);
 
     }
 
@@ -90,7 +90,7 @@ public class SchedulerListeners {
          *
          * @param jobs the last JobSet received by the model
          */
-        public void jobsUpdated(Map<Integer, Job> jobs);
+        void jobsUpdated(Map<Integer, Job> jobs);
 
         /**
          * The job list has changed, and the new version is currently being fetched
@@ -98,7 +98,7 @@ public class SchedulerListeners {
          * Views displaying the jobs list should switch to an undeterminate 'loading' state
          * and wait for the next call to {@link #jobsUpdated(JobSet)} to actually display jobs
          */
-        public void jobsUpdating();
+        void jobsUpdating();
 
         /**
          * A new job has been submitted by this client
@@ -106,7 +106,7 @@ public class SchedulerListeners {
          * still we need to display something to notify the user that the job was submitted
          * @param j a fake job displaying some known characteristics of the submitted job
          */
-        public void jobSubmitted(Job j);
+        void jobSubmitted(Job j);
 
     }
 
@@ -141,14 +141,14 @@ public class SchedulerListeners {
          *  @param jobChanged false when the tasks in the next {@link #tasksUpdated(TaskSet)} event
          *  	are part of the same job as the tasks in the last {@link #tasksUpdated(TaskSet)}
          */
-        public void tasksUpdating();
+        void tasksUpdating();
 
         /**
          * The tasks list has been updated and new values are available
          * 
          * @param tasks the latest TaskSet received by the model
          */
-        public void tasksUpdated(List<Task> tasks, long totalTasks);
+        void tasksUpdated(List<Task> tasks, long totalTasks);
 
         /**
          * Task update was requested but failed
@@ -158,7 +158,7 @@ public class SchedulerListeners {
          * 
          * @param message error message explaining failure to the user
          */
-        public void tasksUpdatedFailure(String message);
+        void tasksUpdatedFailure(String message);
 
     }
 
@@ -170,11 +170,11 @@ public class SchedulerListeners {
          * 
          * @param output the output of a job
          */
-        public void jobOutputUpdated(JobOutput output, SelectionTarget target);
+        void jobOutputUpdated(JobOutput output, SelectionTarget target);
 
-        public void liveToggled(boolean newValue);
+        void liveToggled(boolean newValue);
 
-        public void liveEnabled(boolean newValue);
+        void liveEnabled(boolean newValue);
 
     }
 
@@ -185,7 +185,7 @@ public class SchedulerListeners {
          * 
          * @param users users currently connected to the scheduler
          */
-        public void usersUpdated(List<SchedulerUser> users);
+        void usersUpdated(List<SchedulerUser> users);
 
     }
 
@@ -196,14 +196,14 @@ public class SchedulerListeners {
          * 
          * @param stats new stats
          */
-        public void schedulerStatsUpdated(HashMap<String, String> stats);
+        void schedulerStatsUpdated(HashMap<String, String> stats);
 
         /**
          * Stats regarging the current user have been updated
          * 
          * @param stats new stats
          */
-        public void accountStatsUpdated(HashMap<String, String> stats);
+        void accountStatsUpdated(HashMap<String, String> stats);
 
     }
 
@@ -214,7 +214,7 @@ public class SchedulerListeners {
          * 
          * @param hint the log entry, must be parsed
          */
-        public void remoteHintRead(RemoteHint hint);
+        void remoteHintRead(RemoteHint hint);
     }
 
     public interface VisualizationListener {
@@ -225,7 +225,7 @@ public class SchedulerListeners {
          * @param jobId id of the job
          * @param path Relative path of the image on the server
          */
-        public void htmlUpdated(String jobId, String path);
+        void htmlUpdated(String jobId, String path);
 
         /**
          * The image used for job visualization has been updated
@@ -233,7 +233,7 @@ public class SchedulerListeners {
          * @param jobId id of the job
          * @param path Relative path of the image on the server
          */
-        public void imageUpdated(String jobId, String path);
+        void imageUpdated(String jobId, String path);
 
         /**
          * The coordinate map for job visu has been updated
@@ -241,20 +241,20 @@ public class SchedulerListeners {
          * @param jobId id of the job
          * @param map position and size of tasks on the image sent through {@link #imageUpdated(String, String)}
          */
-        public void mapUpdated(String jobId, JobVisuMap map);
+        void mapUpdated(String jobId, JobVisuMap map);
 
         /**
          * No visu available for this job
          * 
          * @param jobId id of the job
          */
-        public void visualizationUnavailable(String jobId);
+        void visualizationUnavailable(String jobId);
 
     }
 
     public interface UsageListener {
 
-        public void usageUpdated(List<JobUsage> usage);
+        void usageUpdated(List<JobUsage> usage);
 
     }
 
@@ -295,7 +295,7 @@ public class SchedulerListeners {
 
     public interface ServerLogsListener {
 
-        public void logsUpdated(String logs, String jobId);
+        void logsUpdated(String logs, String jobId);
     }
 
 }

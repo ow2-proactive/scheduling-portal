@@ -40,13 +40,13 @@ public interface ColumnsFactory<I> {
      * Gets the list of columns.
      * @return the list of columns.
      */
-    public GridColumns[] getColumns();
+    GridColumns[] getColumns();
 
     /**
      * Builds a record from a given item according to the columns provided by this factory.
      * @param item the item used to build a new record.
      * @param record the new record to be built with new attributes.
      */
-    public void buildRecord(I item, Record record);
+    void buildRecord(I item, Record record);
 
 }
