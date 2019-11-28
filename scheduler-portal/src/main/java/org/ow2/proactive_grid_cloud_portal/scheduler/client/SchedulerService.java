@@ -429,4 +429,10 @@ public interface SchedulerService extends RemoteService {
 
     String getPreciousTaskName(String sessionId, String jobId) throws ServiceException, RestServerException;
 
+    /**
+     * @param sessionId d of the current session
+     * @return true if user has right to access RM portal
+     */
+    String portalAccess(String sessionId) throws ServiceException, RestServerException;
+
 }

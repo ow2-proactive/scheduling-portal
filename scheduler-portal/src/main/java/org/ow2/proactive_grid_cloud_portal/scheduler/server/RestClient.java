@@ -47,7 +47,7 @@ public interface RestClient {
 
     /**
      * Disconnect the user identified by the sessionId from the scheduler
-     * 
+     *
      * @param sessionId the session id of the user
      */
     @PUT
@@ -69,8 +69,8 @@ public interface RestClient {
     /**
      * Submits a job to the Scheduler.
      * @param sessionId the session id of the user that performs the submission
-     * @param multipart the multipart message that encodes the job descriptor file 
-     * @return a ClientResponse containing the response status and the job id generated, in case of success. 
+     * @param multipart the multipart message that encodes the job descriptor file
+     * @return a ClientResponse containing the response status and the job id generated, in case of success.
      */
     @POST
     @Path("submit")
@@ -110,7 +110,7 @@ public interface RestClient {
      * Pauses a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job that will be deleted
-     * @return a ClientResponse containing the response status and true - if the job was successfully paused, false - otherwise. 
+     * @return a ClientResponse containing the response status and true - if the job was successfully paused, false - otherwise.
      */
     @PUT
     @Path("jobs/{jobid}/pause")
@@ -284,7 +284,7 @@ public interface RestClient {
      * The result is paginated using the optional <code>offset</code> and <code>limit</code> parameters.
      * If those parameters are not specified, the following values will be used: [0, DEFAULT_VALUE[
      * The DEFAULT_VALUE can be set in the scheduler config file as the <code>pa.scheduler.tasks.page.size</code> parameter.
-     * 
+     *
      * @param sessionId  a valid session id.
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
      * @param to  the end scheduled end date to stop fetching tasks. The format is in Epoch time.
@@ -310,7 +310,7 @@ public interface RestClient {
      * The result is paginated using the optional <code>offset</code> and <code>limit</code> parameters.
      * If those parameters are not specified, the following values will be used: [0, DEFAULT_VALUE[
      * The DEFAULT_VALUE can be set in the scheduler config file as the <code>pa.scheduler.tasks.page.size</code> parameter.
-     * 
+     *
      * @param sessionId  a valid session id.
      * @param taskTag  tag to filter the tasks. The tag should be complete as the criteria is strict.
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
@@ -357,7 +357,7 @@ public interface RestClient {
     InputStream job(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
-     * Returns the job info associated to the job referenced by the 
+     * Returns the job info associated to the job referenced by the
      * id <code>jobid</code>
      * @param sessionId a valid session id
      * @return  a ClientResponse containing the job info of the corresponding job
@@ -384,7 +384,7 @@ public interface RestClient {
      * Changes the priority of a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
-     * @param priorityName the new priority of the job 
+     * @param priorityName the new priority of the job
      */
     @PUT
     @Path("jobs/{jobid}/priority/byname/{name}")
@@ -470,7 +470,7 @@ public interface RestClient {
     final String sessionId);
 
     /**
-     * Gets the tasks ids for a job. 
+     * Gets the tasks ids for a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job for which the list of task ids is asked for
      * @return a ClientResponse containing the response status and a list of strings which represent the list of tasks ids
@@ -484,7 +484,7 @@ public interface RestClient {
      * Gets all the logs for a finished task.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
@@ -498,7 +498,7 @@ public interface RestClient {
      * Gets the logs for a finished task, only on stdout
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
@@ -512,7 +512,7 @@ public interface RestClient {
      * Gets the logs for a finished task, only on stderr
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
@@ -559,7 +559,7 @@ public interface RestClient {
      * Gets server logs for a given task.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the server logs
      */
     @GET
@@ -680,7 +680,7 @@ public interface RestClient {
 
     /**
      * Users currently connected to the scheduler
-     * 
+     *
      * @param sessionId the session id associated to this new connection
      */
     @GET
@@ -691,7 +691,7 @@ public interface RestClient {
 
     /**
      * Users having jobs in the scheduler
-     * 
+     *
      * @param sessionId the session id associated to this new connection
      */
     @GET
@@ -701,7 +701,7 @@ public interface RestClient {
     InputStream getSchedulerUsersWithJobs(@HeaderParam("sessionid") String sessionId);
 
     /**
-     * Returns the Scheduler status as a String, 
+     * Returns the Scheduler status as a String,
      * ie org.ow2.proactive.scheduler.common.SchedulerStatus.toString()
      * @param sessionId a valid session id
      * @return a String describing the current scheduler status
