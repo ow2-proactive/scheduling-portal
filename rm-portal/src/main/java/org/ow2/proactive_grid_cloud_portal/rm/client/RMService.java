@@ -62,6 +62,12 @@ public interface RMService extends RemoteService {
     void logout(String sessionId) throws ServiceException;
 
     /**
+     * @param sessionId d of the current session
+     * @return true if user has right to access RM portal
+     */
+    String portalAccess(String sessionId) throws ServiceException, RestServerException;
+
+    /**
      * Limited info about the current RM State : freeNodesNumber, totalAliveNodesNumber, totalNodesNumber
      * @param sessionId the current session
      * @return freeNodesNumber, totalAliveNodesNumber, totalNodesNumber in a JSON string
