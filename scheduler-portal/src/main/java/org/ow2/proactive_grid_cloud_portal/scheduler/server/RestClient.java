@@ -42,22 +42,18 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCent
  *
  * Interface defining a client for the REST service
  */
-@Path("/")
+@Path("/scheduler/")
 public interface RestClient {
 
     /**
      * Disconnect the user identified by the sessionId from the scheduler
-     * 
+     *
      * @param sessionId the session id of the user
      */
     @PUT
-    @Path("/scheduler/disconnect")
+    @Path("disconnect")
     void disconnect(@HeaderParam("sessionid")
-    final String sessionId);
-
-    @GET
-    @Path("/common/permissions/portals/{portal}")
-    InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
+                    final String sessionId);
 
     /**
      * Gets the list of jobs in a JSON array
@@ -66,18 +62,18 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and the JSON array including the job list, in case of success.
      */
     @GET
-    @Path("/scheduler/jobsinfo")
+    @Path("jobsinfo")
     @Produces({ "application/json", "application/xml" })
     InputStream jobs(@HeaderParam("sessionid") String sessionId);
 
     /**
      * Submits a job to the Scheduler.
      * @param sessionId the session id of the user that performs the submission
-     * @param multipart the multipart message that encodes the job descriptor file 
-     * @return a ClientResponse containing the response status and the job id generated, in case of success. 
+     * @param multipart the multipart message that encodes the job descriptor file
+     * @return a ClientResponse containing the response status and the job id generated, in case of success.
      */
     @POST
-    @Path("/scheduler/submit")
+    @Path("submit")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     String jobs(@HeaderParam("sessionid") String sessionId, MultipartInput multipart);
 
@@ -89,12 +85,12 @@ public interface RestClient {
      * @param selectionScriptContent selection script or null
      */
     @POST
-    @Path("/scheduler/submitflat")
+    @Path("submitflat")
     @Produces("application/json")
     String submitFlat(@HeaderParam("sessionid") String sessionId,
-            @FormParam("commandFileContent") String commandFileContent, @FormParam("jobName") String jobName,
-            @FormParam("selectionScriptContent") String selectionScriptContent,
-            @FormParam("selectionScriptExtension") String selectionScriptExtension);
+                      @FormParam("commandFileContent") String commandFileContent, @FormParam("jobName") String jobName,
+                      @FormParam("selectionScriptContent") String selectionScriptContent,
+                      @FormParam("selectionScriptExtension") String selectionScriptExtension);
 
     /**
      * Deletes a job from the Scheduler.
@@ -103,24 +99,24 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and true - if the removed was successfully, false - otherwise.
      */
     @DELETE
-    @Path("/scheduler/jobs/{jobid}")
+    @Path("jobs/{jobid}")
     InputStream removeJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     @DELETE
-    @Path("/scheduler/jobs")
+    @Path("jobs")
     InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
 
     /**
      * Pauses a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job that will be deleted
-     * @return a ClientResponse containing the response status and true - if the job was successfully paused, false - otherwise. 
+     * @return a ClientResponse containing the response status and true - if the job was successfully paused, false - otherwise.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/pause")
+    @Path("jobs/{jobid}/pause")
     InputStream pauseJob(@HeaderParam("sessionid")
-    final String sessionId, @PathParam("jobid")
-    final String jobId);
+                         final String sessionId, @PathParam("jobid")
+                         final String jobId);
 
     /**
      * Restart all in error tasks in a job.
@@ -129,10 +125,10 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and true - if the job was successfully restarted, false - otherwise.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/restartAllInErrorTasks")
+    @Path("jobs/{jobid}/restartAllInErrorTasks")
     InputStream restartAllTasksInError(@HeaderParam("sessionid")
-    final String sessionId, @PathParam("jobid")
-    final String jobId);
+                                       final String sessionId, @PathParam("jobid")
+                                       final String jobId);
 
     /**
      * Resumes a job.
@@ -141,10 +137,10 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and true - if the job was successfully resumed, false - otherwise.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/resume")
+    @Path("jobs/{jobid}/resume")
     InputStream resumeJob(@HeaderParam("sessionid")
-    final String sessionId, @PathParam("jobid")
-    final String jobId);
+                          final String sessionId, @PathParam("jobid")
+                          final String jobId);
 
     /**
      * Kills a job.
@@ -153,52 +149,52 @@ public interface RestClient {
      * @return a ClientResponse containing the response status.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/kill")
+    @Path("jobs/{jobid}/kill")
     InputStream killJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     @PUT
-    @Path("/scheduler/jobs/kill")
+    @Path("jobs/kill")
     InputStream killJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
 
     /**
      * Kill a task
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskname}/kill")
+    @Path("jobs/{jobid}/tasks/{taskname}/kill")
     InputStream killTask(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskname") String taskName);
+                         @PathParam("taskname") String taskName);
 
     /**
      * Preempt a task
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskname}/preempt")
+    @Path("jobs/{jobid}/tasks/{taskname}/preempt")
     InputStream preemptTask(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskname") String taskName);
+                            @PathParam("taskname") String taskName);
 
     /**
      * Mark as finished and resume
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskname}/finishInErrorTask")
+    @Path("jobs/{jobid}/tasks/{taskname}/finishInErrorTask")
     InputStream markAsFinishedAndResume(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskname") String taskName);
+                                        @PathParam("taskname") String taskName);
 
     /**
      * Restart a running task.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskname}/restart")
+    @Path("jobs/{jobid}/tasks/{taskname}/restart")
     InputStream restartTask(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskname") String taskName);
+                            @PathParam("taskname") String taskName);
 
     /**
      * Restart a task paused on error.
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
+    @Path("jobs/{jobid}/tasks/{taskname}/restartInErrorTask")
     InputStream restartInErrorTask(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskname") String taskName);
+                                   @PathParam("taskname") String taskName);
 
     /**
      * Gets the list of tasks in a JSON array for a given job.
@@ -208,7 +204,7 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates")
+    @Path("jobs/{jobid}/taskstates")
     @Produces("application/json")
     InputStream getJobTaskStates(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -220,18 +216,18 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates/paginated")
+    @Path("jobs/{jobid}/taskstates/paginated")
     @Produces("application/json")
     InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
+                                          @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
 
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates/filtered/paginated")
+    @Path("jobs/{jobid}/taskstates/filtered/paginated")
     @Produces("application/json")
     InputStream getJobTaskStatesPaginated(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit,
-            @QueryParam("statusFilter") @DefaultValue("") String statusFilter);
+                                          @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit,
+                                          @QueryParam("statusFilter") @DefaultValue("") String statusFilter);
 
     /**
      * Gets the list of tasks in a JSON array for a given job and filtered by a given tag.
@@ -242,10 +238,10 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates/{tasktag}")
+    @Path("jobs/{jobid}/taskstates/{tasktag}")
     @Produces("application/json")
     InputStream getJobTaskStatesByTag(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("tasktag") String tag);
+                                      @PathParam("tasktag") String tag);
 
     /**
      * Returns a list of taskState of the tasks filtered by a given tag and paginated.
@@ -258,11 +254,11 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates/{tasktag}/paginated")
+    @Path("jobs/{jobid}/taskstates/{tasktag}/paginated")
     @Produces("application/json")
     InputStream getJobTaskStatesByTagPaginated(@HeaderParam("sessionid") String sessionId,
-            @PathParam("jobid") String jobId, @PathParam("tasktag") String taskTag,
-            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
+                                               @PathParam("jobid") String jobId, @PathParam("tasktag") String taskTag,
+                                               @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("50") int limit);
 
     /**
      * Returns a list of taskState of the tasks filtered by a given tag and paginated.
@@ -276,19 +272,19 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/taskstates/{tasktag}/{statusFilter}/paginated")
+    @Path("jobs/{jobid}/taskstates/{tasktag}/{statusFilter}/paginated")
     @Produces("application/json")
     InputStream getJobTaskStatesByTagAndStatusPaginated(@HeaderParam("sessionid") String sessionId,
-            @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
-            @PathParam("statusFilter") String statusFilter);
+                                                        @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
+                                                        @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
+                                                        @PathParam("statusFilter") String statusFilter);
 
     /**
      * Returns a paginated list of <code>TaskStateData</code> regarding the given parameters (decoupled from the associated jobs).
      * The result is paginated using the optional <code>offset</code> and <code>limit</code> parameters.
      * If those parameters are not specified, the following values will be used: [0, DEFAULT_VALUE[
      * The DEFAULT_VALUE can be set in the scheduler config file as the <code>pa.scheduler.tasks.page.size</code> parameter.
-     * 
+     *
      * @param sessionId  a valid session id.
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
      * @param to  the end scheduled end date to stop fetching tasks. The format is in Epoch time.
@@ -303,23 +299,23 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/taskstates")
+    @Path("taskstates")
     @Produces("application/json")
     InputStream getTaskStates(@HeaderParam("sessionid") String sessionId,
-            @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
-            @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
-            @QueryParam("running") @DefaultValue("true") boolean running,
-            @QueryParam("pending") @DefaultValue("true") boolean pending,
-            @QueryParam("finished") @DefaultValue("true") boolean finished,
-            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
-            @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
+                              @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
+                              @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
+                              @QueryParam("running") @DefaultValue("true") boolean running,
+                              @QueryParam("pending") @DefaultValue("true") boolean pending,
+                              @QueryParam("finished") @DefaultValue("true") boolean finished,
+                              @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
+                              @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
 
     /**
      * Returns a paginated list of <code>TaskStateData</code> regarding the given parameters (decoupled from the associated jobs).
      * The result is paginated using the optional <code>offset</code> and <code>limit</code> parameters.
      * If those parameters are not specified, the following values will be used: [0, DEFAULT_VALUE[
      * The DEFAULT_VALUE can be set in the scheduler config file as the <code>pa.scheduler.tasks.page.size</code> parameter.
-     * 
+     *
      * @param sessionId  a valid session id.
      * @param taskTag  tag to filter the tasks. The tag should be complete as the criteria is strict.
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
@@ -335,16 +331,16 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/taskstates/tag/{tasktag}")
+    @Path("taskstates/tag/{tasktag}")
     @Produces("application/json")
     InputStream getTaskStatesByTag(@HeaderParam("sessionid") String sessionId, @PathParam("tasktag") String taskTag,
-            @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
-            @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
-            @QueryParam("running") @DefaultValue("true") boolean running,
-            @QueryParam("pending") @DefaultValue("true") boolean pending,
-            @QueryParam("finished") @DefaultValue("true") boolean finished,
-            @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
-            @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
+                                   @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
+                                   @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
+                                   @QueryParam("running") @DefaultValue("true") boolean running,
+                                   @QueryParam("pending") @DefaultValue("true") boolean pending,
+                                   @QueryParam("finished") @DefaultValue("true") boolean finished,
+                                   @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
+                                   @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
 
     /**
      * Returns a list of the tags of the tasks belonging to job <code>jobId</code> and filtered by a prefix pattern
@@ -354,10 +350,10 @@ public interface RestClient {
      * @return a list of tasks' name
      */
     @GET
-    @Path("/scheduler/jobs/{jobid}/tasks/tags/startsWith/{prefix}")
+    @Path("jobs/{jobid}/tasks/tags/startsWith/{prefix}")
     @Produces("application/json")
     InputStream getJobTaskTagsPrefix(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("prefix") String prefix);
+                                     @PathParam("prefix") String prefix);
 
     /**
      * Gets the state of a certain job.
@@ -366,19 +362,19 @@ public interface RestClient {
      * @return a ClientResponse containing the response status and an InputStream containing information about the state of the job.
      */
     @GET
-    @Path("/scheduler/jobs/{jobid}")
+    @Path("jobs/{jobid}")
     @Produces("application/json")
     InputStream job(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
-     * Returns the job info associated to the job referenced by the 
+     * Returns the job info associated to the job referenced by the
      * id <code>jobid</code>
      * @param sessionId a valid session id
      * @return  a ClientResponse containing the job info of the corresponding job
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/info")
+    @Path("jobs/{jobid}/info")
     @Produces("application/json")
     InputStream jobInfo(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -390,7 +386,7 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/xml")
+    @Path("jobs/{jobid}/xml")
     @Produces("application/xml")
     InputStream getJobXML(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -398,13 +394,13 @@ public interface RestClient {
      * Changes the priority of a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job
-     * @param priorityName the new priority of the job 
+     * @param priorityName the new priority of the job
      */
     @PUT
-    @Path("/scheduler/jobs/{jobid}/priority/byname/{name}")
+    @Path("jobs/{jobid}/priority/byname/{name}")
     void schedulerChangeJobPriorityByName(@HeaderParam("sessionid")
-    final String sessionId, @PathParam("jobid")
-    final String jobId, @PathParam("name") String priorityName);
+                                          final String sessionId, @PathParam("jobid")
+                                          final String jobId, @PathParam("name") String priorityName);
 
     /**
      * Pauses the Scheduler.
@@ -413,9 +409,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/pause")
+    @Path("pause")
     InputStream pauseScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                               final String sessionId);
 
     /**
      * Resumes the Scheduler.
@@ -424,9 +420,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/resume")
+    @Path("resume")
     InputStream resumeScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                                final String sessionId);
 
     /**
      * Freezes the Scheduler.
@@ -435,9 +431,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/freeze")
+    @Path("freeze")
     InputStream freezeScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                                final String sessionId);
 
     /**
      * Kills the Scheduler.
@@ -446,9 +442,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/kill")
+    @Path("kill")
     InputStream killScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                              final String sessionId);
 
     /**
      * Shutdown the Scheduler.
@@ -457,9 +453,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/shutdown")
+    @Path("shutdown")
     InputStream shutdownScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                                  final String sessionId);
 
     /**
      * Starts the Scheduler.
@@ -468,9 +464,9 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/start")
+    @Path("start")
     InputStream startScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                               final String sessionId);
 
     /**
      * Stops the Scheduler.
@@ -479,18 +475,18 @@ public interface RestClient {
      * failure
      */
     @PUT
-    @Path("/scheduler/stop")
+    @Path("stop")
     InputStream stopScheduler(@HeaderParam("sessionid")
-    final String sessionId);
+                              final String sessionId);
 
     /**
-     * Gets the tasks ids for a job. 
+     * Gets the tasks ids for a job.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job for which the list of task ids is asked for
      * @return a ClientResponse containing the response status and a list of strings which represent the list of tasks ids
      */
     @GET
-    @Path("/scheduler/jobs/{jobid}/tasks")
+    @Path("jobs/{jobid}/tasks")
     @Produces("application/json")
     InputStream getJobTasksIds(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -498,43 +494,43 @@ public interface RestClient {
      * Gets all the logs for a finished task.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/log/all")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/log/all")
     @Produces("application/json")
     String tasklog(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                   @PathParam("taskid") String taskId);
 
     /**
      * Gets the logs for a finished task, only on stdout
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/log/out")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/log/out")
     @Produces("application/json")
     String taskStdout(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                      @PathParam("taskid") String taskId);
 
     /**
      * Gets the logs for a finished task, only on stderr
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the logs
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/log/err")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/log/err")
     @Produces("application/json")
     String taskStderr(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                      @PathParam("taskid") String taskId);
 
     /**
      * Stream the output of job identified by the id <code>jobid</code>
@@ -545,7 +541,7 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/livelog")
+    @Path("jobs/{jobid}/livelog")
     @Produces("application/json")
     String getLiveLogJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -555,7 +551,7 @@ public interface RestClient {
      * @param jobId the id of the job to retrieve
      */
     @GET
-    @Path("/scheduler/jobs/{jobid}/livelog/available")
+    @Path("jobs/{jobid}/livelog/available")
     @Produces("application/json")
     String getLiveLogJobAvailable(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -565,7 +561,7 @@ public interface RestClient {
      * @param jobId the id of the job to retrieve
      */
     @DELETE
-    @Path("/scheduler/jobs/{jobid}/livelog")
+    @Path("jobs/{jobid}/livelog")
     @Produces("application/json")
     InputStream deleteLiveLogJob(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -573,15 +569,15 @@ public interface RestClient {
      * Gets server logs for a given task.
      * @param sessionId the session id of the user which is logged in
      * @param jobId the id of the job to which the task corresponds to
-     * @param taskId the id of the task 
+     * @param taskId the id of the task
      * @return a ClientResponse containing the response status and a string with the server logs
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/log/server")
+    @Path("jobs/{jobid}/tasks/{taskid}/log/server")
     @Produces("application/json")
     String taskServerLogs(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                          @PathParam("taskid") String taskId);
 
     /**
      * Gets server logs for a given job.
@@ -591,7 +587,7 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/log/server")
+    @Path("jobs/{jobid}/log/server")
     @Produces("application/json")
     String jobServerLogs(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -604,10 +600,10 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/value")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/value")
     @Produces("*/*")
     InputStream taskresult(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                           @PathParam("taskid") String taskId);
 
     /**
      * Gets the result of a task.
@@ -618,10 +614,10 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/metadata")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/metadata")
     @Produces("application/json")
     InputStream taskResultMetadata(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                                   @PathParam("taskid") String taskId);
 
     /**
      * @param sessionId the session id of the user which is logged in
@@ -630,7 +626,7 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/results/precious/metadata")
+    @Path("jobs/{jobid}/tasks/results/precious/metadata")
     @Produces("application/json")
     InputStream getPreciousTaskName(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
@@ -644,10 +640,10 @@ public interface RestClient {
      */
     @GET
     @GZIP
-    @Path("/scheduler/jobs/{jobid}/tasks/{taskid}/result/serializedvalue")
+    @Path("jobs/{jobid}/tasks/{taskid}/result/serializedvalue")
     @Produces("*/*")
     InputStream taskSerializedResult(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
-            @PathParam("taskid") String taskId);
+                                     @PathParam("taskid") String taskId);
 
     /**
      * returns statistics about the scheduler
@@ -655,10 +651,10 @@ public interface RestClient {
      * @return a string containing the statistics
      */
     @GET
-    @Path("/scheduler/stats")
+    @Path("stats")
     @Produces("application/json")
     String getStatistics(@HeaderParam("sessionid")
-    final String sessionId);
+                         final String sessionId);
 
     /**
      * returns a string containing some data regarding the user's account
@@ -666,10 +662,10 @@ public interface RestClient {
      * @return a string containing some data regarding the user's account
      */
     @GET
-    @Path("/scheduler/stats/myaccount")
+    @Path("stats/myaccount")
     @Produces("application/json")
     String getStatisticsOnMyAccount(@HeaderParam("sessionid")
-    final String sessionId);
+                                    final String sessionId);
 
     /**
      * Returns the revision number of the scheduler state
@@ -677,7 +673,7 @@ public interface RestClient {
      * @return the revision of the scheduler state
      */
     @GET
-    @Path("/scheduler/state/revision")
+    @Path("state/revision")
     @Produces({ "application/json", "application/xml" })
     String schedulerStateRevision(@HeaderParam("sessionid") String sessionId);
 
@@ -688,74 +684,74 @@ public interface RestClient {
      * @return an html visualization corresponding of a <code>jobId</code>
      */
     @GET
-    @Path("/scheduler/jobs/{jobid}/html")
+    @Path("jobs/{jobid}/html")
     @Produces("application/json;charset=utf-8")
     InputStream getJobHtml(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
      * Users currently connected to the scheduler
-     * 
+     *
      * @param sessionId the session id associated to this new connection
      */
     @GET
     @GZIP
-    @Path("/scheduler/users")
+    @Path("users")
     @Produces({ "application/json", "application/xml" })
     InputStream getSchedulerUsers(@HeaderParam("sessionid") String sessionId);
 
     /**
      * Users having jobs in the scheduler
-     * 
+     *
      * @param sessionId the session id associated to this new connection
      */
     @GET
     @GZIP
-    @Path("/scheduler/userswithjobs")
+    @Path("userswithjobs")
     @Produces({ "application/json", "application/xml" })
     InputStream getSchedulerUsersWithJobs(@HeaderParam("sessionid") String sessionId);
 
     /**
-     * Returns the Scheduler status as a String, 
+     * Returns the Scheduler status as a String,
      * ie org.ow2.proactive.scheduler.common.SchedulerStatus.toString()
      * @param sessionId a valid session id
      * @return a String describing the current scheduler status
      */
     @GET
-    @Path("/scheduler/status")
+    @Path("status")
     String schedulerStatus(@HeaderParam("sessionid") String sessionId);
 
     @GET
-    @Path("/scheduler/version")
+    @Path("version")
     InputStream getVersion();
 
     @GET
-    @Path("/scheduler/usage/myaccount")
+    @Path("usage/myaccount")
     @Produces("application/json")
     InputStream getUsageOnMyAccount(@HeaderParam("sessionid") String sessionId,
-            @QueryParam("startdate") String startDate, @QueryParam("enddate") String endDate);
+                                    @QueryParam("startdate") String startDate, @QueryParam("enddate") String endDate);
 
     @GET
-    @Path("/scheduler/usage/account")
+    @Path("usage/account")
     @Produces("application/json")
     InputStream getUsageOnAccount(@HeaderParam("sessionid") String sessionId, @QueryParam("user") String user,
-            @QueryParam("startdate") String startDate, @QueryParam("enddate") String endDate);
+                                  @QueryParam("startdate") String startDate, @QueryParam("enddate") String endDate);
 
     @POST
-    @Path("/scheduler/credentials/{key}")
+    @Path("/credentials/{key}")
     void putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key,
-            @FormParam("value") String value);
+                                 @FormParam("value") String value);
 
     @DELETE
-    @Path("/scheduler/credentials/{key}")
+    @Path("/credentials/{key}")
     void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key);
 
     @GET
-    @Path("/scheduler/credentials/")
+    @Path("/credentials/")
     @Produces("application/json")
     InputStream thirdPartyCredentialsKeySet(@HeaderParam("sessionid") String sessionId);
 
     @GET
-    @Path("/scheduler/configuration/portal")
+    @Path("configuration/portal")
     @Produces("application/json")
     Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
 

@@ -76,6 +76,7 @@ import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
+import org.ow2.proactive_grid_cloud_portal.common.server.CommonRestClient;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -1167,8 +1168,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     @Override
     public String portalAccess(String sessionId) throws ServiceException, RestServerException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.portalAccess(sessionId,
-                "scheduler"));
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.portalAccess(sessionId,
+                "scheduler"), false);
     }
 
     /**
@@ -1272,9 +1273,32 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         return executeFunctionReturnStreamAsString(function, false);
     }
 
+
+
     private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function, boolean keepNewLines)
             throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToString(inputStream, keepNewLines);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private String executeFunctionReturnStreamAsStringCommon(Function<CommonRestClient, InputStream> function, boolean keepNewLines)
+            throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
 
         InputStream inputStream = null;
 
@@ -1304,6 +1328,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
 
         return target.proxy(RestClient.class);
+    }
+
+    private CommonRestClient getCommonRestClient() {
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        builder.register(AcceptEncodingGZIPFilter.class);
+        builder.register(GZIPDecodingInterceptor.class);
+        builder.register(GZIPEncodingInterceptor.class);
+        ResteasyClient client = builder.asyncExecutor(threadPool)
+                .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                .build();
+        ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
+
+        return target.proxy(CommonRestClient.class);
     }
 
     private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
