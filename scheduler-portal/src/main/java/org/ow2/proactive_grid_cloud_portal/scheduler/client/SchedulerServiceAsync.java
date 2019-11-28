@@ -165,12 +165,12 @@ public interface SchedulerServiceAsync {
     Request getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter, AsyncCallback<String> callback);
 
-    Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
-            boolean running, boolean finished, int offset, int limit,
-            TasksCentricController.SortSpecifierRestContainer sortParameters, AsyncCallback<String> callback);
+    Request getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, String statusFilter,
+            int offset, int limit, TasksCentricController.SortSpecifierRestContainer sortParameters,
+            AsyncCallback<String> callback);
 
     Request getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks,
-            boolean pending, boolean running, boolean finished, int offset, int limit,
+            String statusFilter, int offset, int limit,
             TasksCentricController.SortSpecifierRestContainer sortParameters, AsyncCallback<String> callback);
 
     /**

@@ -632,33 +632,29 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
-            final boolean pending, final boolean running, final boolean finished, final int offset, final int limit,
+            String statusFilter, final int offset, final int limit,
             final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStates(sessionId,
                                                                                           fromDate,
                                                                                           toDate,
                                                                                           myTasks,
-                                                                                          running,
-                                                                                          pending,
-                                                                                          finished,
+                                                                                          statusFilter,
                                                                                           offset,
                                                                                           limit,
                                                                                           sortParameters));
     }
 
     public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate,
-            final boolean myTasks, final boolean pending, final boolean running, final boolean finished,
-            final int offset, final int limit, final TasksCentricController.SortSpecifierRestContainer sortParameters)
+            final boolean myTasks, String statusFilter, final int offset, final int limit,
+            final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStatesByTag(sessionId,
                                                                                                tag,
                                                                                                fromDate,
                                                                                                toDate,
                                                                                                myTasks,
-                                                                                               running,
-                                                                                               pending,
-                                                                                               finished,
+                                                                                               statusFilter,
                                                                                                offset,
                                                                                                limit,
                                                                                                sortParameters));
