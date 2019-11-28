@@ -1165,6 +1165,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    @Override
+    public String portalAccess(String sessionId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.portalAccess(sessionId,
+                "scheduler"));
+    }
+
     /**
      * Execute a graphQL query. The queries should be built using the GraphQLQueries class
      */

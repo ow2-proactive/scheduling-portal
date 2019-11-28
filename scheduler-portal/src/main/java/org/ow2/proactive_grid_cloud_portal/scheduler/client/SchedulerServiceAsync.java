@@ -393,4 +393,10 @@ public interface SchedulerServiceAsync {
     void removeThirdPartyCredential(String sessionId, String key, AsyncCallback<Void> asyncCallback);
 
     Request getPreciousTaskName(String sessionId, String jobId, AsyncCallback<String> callback);
+
+    /**
+     * @param sessionId d of the current session
+     * @return true if user has right to access RM portal
+     */
+    void portalAccess(String sessionId, AsyncCallback<String> callback);
 }
