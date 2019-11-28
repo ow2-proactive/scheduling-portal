@@ -47,6 +47,10 @@ import org.jboss.resteasy.annotations.GZIP;
 @Path("/")
 public interface RestClient {
 
+    @GET
+    @Path("/common/permissions/portals/{portal}")
+    InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
+
     @POST
     @Path("/rm/disconnect")
     @Produces("application/json")

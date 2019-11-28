@@ -133,6 +133,12 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String portalAccess(String sessionId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.portalAccess(sessionId,
+                                                                                                        "rm"));
+    }
+
+    @Override
     public String login(String login, String pass, File cred, String ssh) throws RestServerException, ServiceException {
         HttpPost httpPost = new HttpPost(RMConfig.get().getRestUrl() + "/rm/login");
 

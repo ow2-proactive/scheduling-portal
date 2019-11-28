@@ -222,20 +222,36 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     @Override
     public void login(final String sessionId, final String login) {
         stopTryingLoginIfLoggedInScheduler();
-        rm.getVersion(new AsyncCallback<String>() {
-            public void onSuccess(String result) {
-                JSONObject obj = JSONParser.parseStrict(result).isObject();
-                String rmVer = obj.get("rm").isString().stringValue();
-                String restVer = obj.get("rest").isString().stringValue();
-                Config.get().set(RMConfig.RM_VERSION, rmVer);
-                Config.get().set(RMConfig.REST_VERSION, restVer);
-
-                __login(sessionId, login);
-            }
-
+        rm.portalAccess(sessionId, new AsyncCallback<String>() {
+            @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (result.contains("true")) {
+                    rm.getVersion(new AsyncCallback<String>() {
+                        public void onSuccess(String result) {
+                            JSONObject obj = JSONParser.parseStrict(result).isObject();
+                            String rmVer = obj.get("rm").isString().stringValue();
+                            String restVer = obj.get("rest").isString().stringValue();
+                            Config.get().set(RMConfig.RM_VERSION, rmVer);
+                            Config.get().set(RMConfig.REST_VERSION, restVer);
+
+                            __login(sessionId, login);
+                        }
+
+                        public void onFailure(Throwable caught) {
+                            String msg = JSONUtils.getJsonErrorMessage(caught);
+                            LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                        }
+                    });
+                } else {
+                    RMController.this.loginPage = new LoginPage(RMController.this,
+                                                                "You do not have rights to access Resource Manager portal");
+                }
             }
         });
     }

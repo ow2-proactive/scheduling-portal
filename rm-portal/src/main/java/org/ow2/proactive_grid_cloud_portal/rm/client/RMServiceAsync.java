@@ -60,6 +60,12 @@ public interface RMServiceAsync {
     void logout(String sessionId, AsyncCallback<Void> callback);
 
     /**
+     * @param sessionId d of the current session
+     * @return true if user has right to access RM portal
+     */
+    void portalAccess(String sessionId, AsyncCallback<String> callback);
+
+    /**
      * Limited info about the current RM State : freeNodesNumber, totalAliveNodesNumber, totalNodesNumber
      * @param sessionId current session
      * @param callback async callback to return freeNodesNumber, totalAliveNodesNumber, 
