@@ -1168,8 +1168,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     @Override
     public String portalAccess(String sessionId) throws ServiceException, RestServerException {
-        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.portalAccess(sessionId,
-                "scheduler"), false);
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.portalAccess(sessionId, "scheduler"),
+                                                         false);
     }
 
     /**
@@ -1273,8 +1273,6 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         return executeFunctionReturnStreamAsString(function, false);
     }
 
-
-
     private String executeFunctionReturnStreamAsString(Function<RestClient, InputStream> function, boolean keepNewLines)
             throws ServiceException, RestServerException {
         RestClient restClientProxy = getRestClientProxy();
@@ -1296,8 +1294,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
-    private String executeFunctionReturnStreamAsStringCommon(Function<CommonRestClient, InputStream> function, boolean keepNewLines)
-            throws ServiceException, RestServerException {
+    private String executeFunctionReturnStreamAsStringCommon(Function<CommonRestClient, InputStream> function,
+            boolean keepNewLines) throws ServiceException, RestServerException {
         CommonRestClient restClientProxy = getCommonRestClient();
 
         InputStream inputStream = null;
@@ -1336,8 +1334,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         builder.register(GZIPDecodingInterceptor.class);
         builder.register(GZIPEncodingInterceptor.class);
         ResteasyClient client = builder.asyncExecutor(threadPool)
-                .httpEngine(new ApacheHttpClient4Engine(httpClient))
-                .build();
+                                       .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                                       .build();
         ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
 
         return target.proxy(CommonRestClient.class);

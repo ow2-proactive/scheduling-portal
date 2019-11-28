@@ -272,12 +272,13 @@ public class SchedulerController extends Controller implements UncaughtException
 
                                 public void onFailure(Throwable caught) {
                                     String msg = JSONUtils.getJsonErrorMessage(caught);
-                                    LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                                    LogModel.getInstance()
+                                            .logImportantMessage("Failed to get REST server version: " + msg);
                                 }
                             });
                         } else {
                             SchedulerController.this.loginView = new LoginPage(SchedulerController.this,
-                                    "You do not have rights to access Scheduling portal");
+                                                                               "You do not have rights to access Scheduling portal");
                         }
                     }
                 });
