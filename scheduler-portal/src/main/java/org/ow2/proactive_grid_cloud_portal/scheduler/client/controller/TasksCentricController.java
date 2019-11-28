@@ -106,18 +106,13 @@ public class TasksCentricController extends TasksController {
 
         ExecutionsModel executionsModel = this.model.getParentModel().getExecutionsModel();
         boolean myTasksOnly = executionsModel.isFetchMyExecutionsOnly();
-        boolean pending = executionsModel.isFetchPendingExecutions();
-        boolean running = executionsModel.isFetchRunningExecutions();
-        boolean finished = executionsModel.isFetchFinishedExecutions();
 
         if (tagFilter.isEmpty()) {
             this.taskUpdateRequest = scheduler.getTaskCentric(sessionId,
                                                               fromDate,
                                                               toDate,
                                                               myTasksOnly,
-                                                              pending,
-                                                              running,
-                                                              finished,
+                                                              this.model.getTasksNavigationModel().getStatusFilter(),
                                                               offset,
                                                               limit,
                                                               getSortParameters(),
@@ -128,9 +123,8 @@ public class TasksCentricController extends TasksController {
                                                                    fromDate,
                                                                    toDate,
                                                                    myTasksOnly,
-                                                                   pending,
-                                                                   running,
-                                                                   finished,
+                                                                   this.model.getTasksNavigationModel()
+                                                                             .getStatusFilter(),
                                                                    offset,
                                                                    limit,
                                                                    getSortParameters(),

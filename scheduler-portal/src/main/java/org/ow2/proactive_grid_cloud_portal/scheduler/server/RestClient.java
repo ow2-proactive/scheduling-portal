@@ -289,9 +289,6 @@ public interface RestClient {
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
      * @param to  the end scheduled end date to stop fetching tasks. The format is in Epoch time.
      * @param mytasks  <code>True</code> if you want to fetch only the user's tasks. Default value is <code>False</code>.
-     * @param running  fetch running tasks. Default value is <code>True</code>.
-     * @param pending  fetch pending tasks. Default value is <code>True</code>.
-     * @param finished  fetch finished tasks. Default value is <code>True</code>.
      * @param offset  the index of the first task to fetch (for pagination).
      * @param limit  the index of the last (excluded) task to fetch (for pagination).
      * @param sortParameters  the tasks sorting parameters.
@@ -304,9 +301,7 @@ public interface RestClient {
     InputStream getTaskStates(@HeaderParam("sessionid") String sessionId,
             @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
             @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
-            @QueryParam("running") @DefaultValue("true") boolean running,
-            @QueryParam("pending") @DefaultValue("true") boolean pending,
-            @QueryParam("finished") @DefaultValue("true") boolean finished,
+            @QueryParam("statusFilter") @DefaultValue("") String statusFilter,
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
             @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
 
@@ -321,9 +316,6 @@ public interface RestClient {
      * @param from  the scheduled date to which we start fetching tasks. The format is in Epoch time.
      * @param to  the end scheduled end date to stop fetching tasks. The format is in Epoch time.
      * @param mytasks <code>True</code> if you want to fetch only the user's tasks. <code>False</code> will fetch everything.
-     * @param running  fetch running tasks. Default value is <code>True</code>.
-     * @param pending  fetch pending tasks. Default value is <code>True</code>.
-     * @param finished  fetch finished tasks. Default value is <code>True</code>.
      * @param offset  the index of the first task to fetch (for pagination).
      * @param limit  the index of the last (excluded) task to fetch (for pagination).
      * @param sortParameters  the tasks sorting parameters.
@@ -336,9 +328,7 @@ public interface RestClient {
     InputStream getTaskStatesByTag(@HeaderParam("sessionid") String sessionId, @PathParam("tasktag") String taskTag,
             @QueryParam("from") @DefaultValue("0") long from, @QueryParam("to") @DefaultValue("0") long to,
             @QueryParam("mytasks") @DefaultValue("false") boolean mytasks,
-            @QueryParam("running") @DefaultValue("true") boolean running,
-            @QueryParam("pending") @DefaultValue("true") boolean pending,
-            @QueryParam("finished") @DefaultValue("true") boolean finished,
+            @QueryParam("statusFilter") @DefaultValue("") String statusFilter,
             @QueryParam("offset") @DefaultValue("0") int offset, @QueryParam("limit") @DefaultValue("-1") int limit,
             @QueryParam("sortparameters") TasksCentricController.SortSpecifierRestContainer sortParameters);
 
