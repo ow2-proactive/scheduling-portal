@@ -76,6 +76,7 @@ import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
+import org.ow2.proactive_grid_cloud_portal.common.server.CommonRestClient;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -632,33 +633,29 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
-            final boolean pending, final boolean running, final boolean finished, final int offset, final int limit,
+            String statusFilter, final int offset, final int limit,
             final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStates(sessionId,
                                                                                           fromDate,
                                                                                           toDate,
                                                                                           myTasks,
-                                                                                          running,
-                                                                                          pending,
-                                                                                          finished,
+                                                                                          statusFilter,
                                                                                           offset,
                                                                                           limit,
                                                                                           sortParameters));
     }
 
     public String getTaskCentricByTag(final String sessionId, final String tag, final long fromDate, final long toDate,
-            final boolean myTasks, final boolean pending, final boolean running, final boolean finished,
-            final int offset, final int limit, final TasksCentricController.SortSpecifierRestContainer sortParameters)
+            final boolean myTasks, String statusFilter, final int offset, final int limit,
+            final TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsString(restClient -> restClient.getTaskStatesByTag(sessionId,
                                                                                                tag,
                                                                                                fromDate,
                                                                                                toDate,
                                                                                                myTasks,
-                                                                                               running,
-                                                                                               pending,
-                                                                                               finished,
+                                                                                               statusFilter,
                                                                                                offset,
                                                                                                limit,
                                                                                                sortParameters));
@@ -1165,6 +1162,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    @Override
+    public String portalAccess(String sessionId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.portalAccess(sessionId, "scheduler"),
+                                                         false);
+    }
+
     /**
      * Execute a graphQL query. The queries should be built using the GraphQLQueries class
      */
@@ -1287,6 +1290,27 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    private String executeFunctionReturnStreamAsStringCommon(Function<CommonRestClient, InputStream> function,
+            boolean keepNewLines) throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToString(inputStream, keepNewLines);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
     private RestClient getRestClientProxy() {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         builder.register(AcceptEncodingGZIPFilter.class);
@@ -1298,6 +1322,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
 
         return target.proxy(RestClient.class);
+    }
+
+    private CommonRestClient getCommonRestClient() {
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        builder.register(AcceptEncodingGZIPFilter.class);
+        builder.register(GZIPDecodingInterceptor.class);
+        builder.register(GZIPEncodingInterceptor.class);
+        ResteasyClient client = builder.asyncExecutor(threadPool)
+                                       .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                                       .build();
+        ResteasyWebTarget target = client.target(SchedulerConfig.get().getRestUrl());
+
+        return target.proxy(CommonRestClient.class);
     }
 
     private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
