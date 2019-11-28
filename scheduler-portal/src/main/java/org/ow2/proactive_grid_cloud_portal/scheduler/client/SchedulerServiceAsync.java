@@ -396,7 +396,6 @@ public interface SchedulerServiceAsync {
 
     /**
      * @param sessionId d of the current session
-     * @return true if user has right to access RM portal
      */
     void portalAccess(String sessionId, AsyncCallback<String> callback);
 }
