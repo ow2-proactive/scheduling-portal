@@ -183,7 +183,7 @@ public class LoginPage {
             description = "Connect to resources and menage state<br/> and auto-scaling";
         }
         Label label = new Label("<nobr style='color:#003168;font-size:1.2em;font-weight: bold;'><img src=\"" +
-                                GWT.getHostPageBaseURL() + "images/" + controller.getLogoRM() +
+                                GWT.getHostPageBaseURL() + "images/" + controller.getPortalLogo() +
                                 "\" style='width: 50px;height: 50px;float: right;margin-right: 10px;' alt='studio icon'/><span style='font-size:23px;'>" +
                                 Config.get().getApplicationName() + "</span><br>" + description +
                                 Config.get().getMotdUrl() + "</nobr>");

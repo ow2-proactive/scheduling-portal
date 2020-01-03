@@ -112,7 +112,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     @Override
-    public String getLogoRM() {
+    public String getPortalLogo() {
         return RMImagesUnbundled.pps_deploy;
     }
 

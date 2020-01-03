@@ -71,7 +71,7 @@ public abstract class Controller {
     /**
      * @return URL of the large application logo
      */
-    public abstract String getLogoRM();
+    public abstract String getPortalLogo();
 
     /**
      * Perform server logout,

@@ -98,7 +98,7 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     @Override
-    public String getLogoRM() {
+    public String getPortalLogo() {
         return SchedulerImagesUnbundled.pps_run;
     }
 
