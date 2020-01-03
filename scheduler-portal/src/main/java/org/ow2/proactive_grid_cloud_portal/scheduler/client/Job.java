@@ -80,7 +80,7 @@ public class Job implements Serializable, Comparable<Job> {
 
     private final ImmutableMap<String, String> genericInformation;
 
-    private final ImmutableMap<String, String> variables;
+    private final Map<String, String> variables;
 
     private final ImmutableMap<String, String> resultMap;
 
@@ -149,7 +149,10 @@ public class Job implements Serializable, Comparable<Job> {
         this.inErrorTime = inErrorTime;
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
-        this.variables = ImmutableMap.copyOf(variables);
+        this.variables = variables;
+        this.variables.replaceAll((key, value) -> {
+            return value.toString().matches("ENC((.*))") ? "*******" : value;
+        });
         this.resultMap = ImmutableMap.copyOf(resultMap);
         this.description = description;
     }
