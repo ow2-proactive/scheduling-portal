@@ -97,6 +97,11 @@ public class SchedulerController extends Controller implements UncaughtException
         return SchedulerImagesUnbundled.LOGO_350;
     }
 
+    @Override
+    public String getLogoRM() {
+        return SchedulerImagesUnbundled.pps_run;
+    }
+
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
     private String localSessionNum;
 

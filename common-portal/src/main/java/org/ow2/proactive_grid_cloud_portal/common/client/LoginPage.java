@@ -166,9 +166,9 @@ public class LoginPage {
         authSelLayout.setVisible(false);
 
         optsLabel = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>" + "more options</nobr>");
-        optsLabel.setHeight(30);
+        optsLabel.setMargin(10);
         optsLabel.setIcon(Images.instance.expand_16().getSafeUri().asString());
-        optsLabel.setAlign(Alignment.RIGHT);
+        optsLabel.setAlign(Alignment.LEFT);
         optsLabel.setValign(VerticalAlignment.TOP);
         optsLabel.setWidth100();
 
@@ -176,8 +176,19 @@ public class LoginPage {
         final Layout credLayout = getCredAuth();
         credLayout.hide();
 
-        Label label = new Label("<nobr style='color:#003168;font-size:1.2em;'><strong>" +
-                                Config.get().getApplicationName() + "</strong> login</nobr>");
+        String description = "";
+        if (Config.get().getApplicationName() == "Scheduler") {
+            description = "Manage execution, priorites, errors, logs";
+        } else {
+            description = "Connect to resources and menage state<br/> and auto-scaling";
+        }
+        Label label = new Label("<nobr style='color:#003168;font-size:1.2em;font-weight: bold;'><img src=\"" +
+                                GWT.getHostPageBaseURL() + "images/" + controller.getLogoRM() +
+                                "\" style='width: 50px;height: 50px;float: right;margin-right: 10px;' alt='studio icon'/><span style='font-size:23px;'>" +
+                                Config.get().getApplicationName() + "</span><br>" + description +
+                                Config.get().getMotdUrl() + "</nobr>");
+
+        label.setWidth(320);
         label.setHeight(30);
         label.setValign(VerticalAlignment.TOP);
 
@@ -187,7 +198,12 @@ public class LoginPage {
         HLayout labelLayout = new HLayout();
         labelLayout.setWidth100();
         labelLayout.setHeight(30);
-        labelLayout.setMembers(label, optsLabel);
+        labelLayout.setMembers(label);
+
+        HLayout OptionsLayout = new HLayout();
+        OptionsLayout.setWidth100();
+        OptionsLayout.setHeight(30);
+        OptionsLayout.setMembers(optsLabel);
 
         motdCanvas = new HLayout();
         motdCanvas.setPadding(5);
@@ -250,6 +266,7 @@ public class LoginPage {
         }
 
         auth.addMember(labelLayout);
+        auth.addMember(OptionsLayout);
         auth.addMember(authSelLayout);
         auth.addMember(plainLayout);
         auth.addMember(credLayout);
@@ -350,7 +367,7 @@ public class LoginPage {
          * the pretty widgets and the nice features
          */
 
-        TextItem loginField = new TextItem("login", "User");
+        TextItem loginField = new TextItem("login", "Username");
         loginField.setRequired(true);
 
         PasswordItem passwordField = new PasswordItem("password", "Password");
