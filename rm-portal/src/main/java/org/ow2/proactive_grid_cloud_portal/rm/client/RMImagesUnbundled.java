@@ -29,8 +29,6 @@ public class RMImagesUnbundled {
 
     public static final String LOGO_350 = "logo_350.png";
 
-    public static final String pps_run = "pps-run.png";
-
     public static final String pps_deploy = "pps-deploy.png";
 
     public static final String AE_LOGO = "AE-Logo.png";
