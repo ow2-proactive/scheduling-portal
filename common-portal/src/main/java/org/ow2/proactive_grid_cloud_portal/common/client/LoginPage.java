@@ -177,10 +177,10 @@ public class LoginPage {
         credLayout.hide();
 
         String description = "";
-        if (Config.get().getApplicationName() == "Scheduler") {
+        if ((Config.get().getApplicationName()).equals("Scheduler")) {
             description = "Manage execution, priorites, errors, logs";
         } else {
-            description = "Connect to resources and menage state<br/> and auto-scaling";
+            description = "Connect to resources and manage state<br/> and auto-scaling";
         }
         Label label = new Label("<nobr style='color:#003168;font-size:1.2em;font-weight: bold;'><img src=\"" +
                                 GWT.getHostPageBaseURL() + "images/" + controller.getPortalLogo() +

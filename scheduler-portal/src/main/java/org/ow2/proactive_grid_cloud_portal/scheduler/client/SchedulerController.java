@@ -99,7 +99,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
     @Override
     public String getPortalLogo() {
-        return SchedulerImagesUnbundled.pps_run;
+        return SchedulerImagesUnbundled.PPS_RUN;
     }
 
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */

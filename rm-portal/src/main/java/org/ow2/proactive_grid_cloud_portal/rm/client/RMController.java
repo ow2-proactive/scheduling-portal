@@ -113,7 +113,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     @Override
     public String getPortalLogo() {
-        return RMImagesUnbundled.pps_deploy;
+        return RMImagesUnbundled.PPS_DEPLOY;
     }
 
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
