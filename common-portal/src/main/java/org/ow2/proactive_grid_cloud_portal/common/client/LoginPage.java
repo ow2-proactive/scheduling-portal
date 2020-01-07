@@ -152,7 +152,6 @@ public class LoginPage {
 
         authSelLayout = new HLayout();
         authSelLayout.setAlign(Alignment.CENTER);
-        //authSel.setMargin(5);
         authSelLayout.setWidth100();
         authSelLayout.setHeight(20);
 
@@ -165,11 +164,9 @@ public class LoginPage {
         authSelLayout.addMember(authTypeSelectForm);
         authSelLayout.setVisible(false);
 
-        optsLabel = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer'>" + "more options</nobr>");
-        optsLabel.setMargin(10);
+        optsLabel = new Label("<nobr style='color:#003168;font-size: 1.2em;cursor:pointer;'>" + "more options</nobr>");
         optsLabel.setIcon(Images.instance.expand_16().getSafeUri().asString());
-        optsLabel.setAlign(Alignment.LEFT);
-        optsLabel.setValign(VerticalAlignment.TOP);
+        optsLabel.setAlign(Alignment.CENTER);
         optsLabel.setWidth100();
 
         final Layout plainLayout = getPlainAuth();
@@ -184,7 +181,7 @@ public class LoginPage {
         }
         Label label = new Label("<nobr style='color:#003168;font-size:1.2em;font-weight: bold;'><img src=\"" +
                                 GWT.getHostPageBaseURL() + "images/" + controller.getPortalLogo() +
-                                "\" style='width: 50px;height: 50px;float: right;margin-right: 10px;' alt='studio icon'/><span style='font-size:23px;'>" +
+                                "\" style='width: 50px;height: 50px;float: left;margin-right: 10px;' alt='studio icon'/><span style='font-size:23px;'>" +
                                 Config.get().getApplicationName() + "</span><br>" + description +
                                 Config.get().getMotdUrl() + "</nobr>");
 
