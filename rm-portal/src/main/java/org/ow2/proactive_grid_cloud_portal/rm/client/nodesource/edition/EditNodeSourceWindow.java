@@ -63,6 +63,7 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
     private void setAttributesAndBuildForm(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
         buildForm();
+        buildForm();
     }
 
     @Override
