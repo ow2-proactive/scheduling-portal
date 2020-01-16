@@ -62,6 +62,14 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     private void setAttributesAndBuildForm(String nodeSourceName) {
         this.nodeSourceName = nodeSourceName;
+        // Before for editing dynamic parameters,
+        // we were calling it twice (once in EditDynamicParametersWindow constructor,
+        // and once in its parent EditNodeSourceWindow).
+        // But to edit undeployed NS, we were calling EditNodeSourceWindow
+        // which calls buildForm only once. It does not work when called once.
+        // So now, for both editing dynamic parameters and editing undeployed NS
+        // we will call it twice.
+        buildForm();
         buildForm();
     }
 
