@@ -650,12 +650,15 @@ public abstract class NodeSourceWindow {
                     }
                 });
             } else if (pluginField.isCheckbox()) {
-                CheckboxItem checkboxItem = new CheckboxItem(plugin.getPluginName() + pluginField.getName(),
-                                                             pluginField.getName());
-                checkboxItem.setShowTitle(true);
-                checkboxItem.setShowLabel(false);
-                checkboxItem.setLabelAsTitle(true);
-                formItemsForField.add(checkboxItem);
+                LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
+                radioOptions.put("true", "true");
+                radioOptions.put("false", "false");
+                RadioGroupItem editOrUploadFormItem = new RadioGroupItem(plugin.getPluginName() + pluginField.getName(),
+                        pluginField.getName());
+                editOrUploadFormItem.setVertical(false);
+                editOrUploadFormItem.setValueMap(radioOptions);
+                editOrUploadFormItem.setDefaultValue("");
+                formItemsForField.add(editOrUploadFormItem);
             } else {
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
@@ -665,7 +668,7 @@ public abstract class NodeSourceWindow {
                     formItem.setTitleStyle("important-message");
                 }
                 if (pluginField.isCheckbox()) {
-                    formItem.setDefaultValue(Boolean.parseBoolean(pluginField.getValue()));
+                    formItem.setDefaultValue(pluginField.getValue());
                 } else {
                     formItem.setValue(pluginField.getValue());
                 }
@@ -794,6 +797,7 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
+
         if (!isAdvanced.getValueAsBoolean()) {
             this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
                                                 hiddenItems.get(infrastructureSelectItem.getValueAsString()));
