@@ -650,15 +650,14 @@ public abstract class NodeSourceWindow {
                     }
                 });
             } else if (pluginField.isCheckbox()) {
-                LinkedHashMap<String, String> radioOptions = new LinkedHashMap<>();
-                radioOptions.put("true", "true");
-                radioOptions.put("false", "false");
-                RadioGroupItem editOrUploadFormItem = new RadioGroupItem(plugin.getPluginName() + pluginField.getName(),
-                        pluginField.getName());
-                editOrUploadFormItem.setVertical(false);
-                editOrUploadFormItem.setValueMap(radioOptions);
-                editOrUploadFormItem.setDefaultValue("");
-                formItemsForField.add(editOrUploadFormItem);
+                LinkedHashMap<String, String> trueFalseKeyValue = new LinkedHashMap<>();
+                trueFalseKeyValue.put("true", "true");
+                trueFalseKeyValue.put("false", "false");
+                RadioGroupItem pseudoCheckBox = new RadioGroupItem(plugin.getPluginName() + pluginField.getName(),
+                                                                   pluginField.getName());
+                pseudoCheckBox.setVertical(false);
+                pseudoCheckBox.setValueMap(trueFalseKeyValue);
+                formItemsForField.add(pseudoCheckBox);
             } else {
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
