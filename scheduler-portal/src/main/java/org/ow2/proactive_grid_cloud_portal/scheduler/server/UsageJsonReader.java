@@ -39,7 +39,7 @@ public class UsageJsonReader {
 
     public static List<JobUsage> readJobUsages(String jsonString) throws JSONException {
         JSONArray jsonArray = new JSONArray(jsonString);
-        List<JobUsage> jobUsages = new ArrayList<JobUsage>();
+        List<JobUsage> jobUsages = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jobUsageAsJson = jsonArray.getJSONObject(i);
             JobUsage jobUsage = read(jobUsageAsJson);
@@ -54,8 +54,14 @@ public class UsageJsonReader {
         String jobId = json.getString("jobId");
         String jobName = json.getString("jobName");
         long jobDuration = json.getLong("jobDuration");
+        String status = json.getString("status");
+        long submittedTime = json.getLong("submittedTime");
+        Long parentId = null;
+        if (!json.isNull("parentId")) {
+            parentId = json.getLong("parentId");
+        }
 
-        JobUsage jobUsage = new JobUsage(owner, project, jobId, jobName, jobDuration);
+        JobUsage jobUsage = new JobUsage(owner, project, jobId, jobName, jobDuration, status, submittedTime, parentId);
 
         JSONArray tasks = json.getJSONArray("taskUsages");
         for (int i = 0; i < tasks.length(); i++) {
@@ -72,6 +78,26 @@ public class UsageJsonReader {
         long taskFinishedTime = json.getLong("taskFinishedTime");
         long taskExecutionDuration = json.getLong("taskExecutionDuration");
         long taskNodeNumber = json.getInt("taskNodeNumber");
-        return new TaskUsage(taskId, taskName, taskStartTime, taskFinishedTime, taskExecutionDuration, taskNodeNumber);
+        String taskStatus = json.getString("taskStatus");
+        String taskTag = json.getString("taskTag");
+        String taskDescription = json.getString("taskDescription");
+        String executionHostName = json.getString("executionHostName");
+        int numberOfExecutionLeft = json.getInt("numberOfExecutionLeft");
+        int numberOfExecutionOnFailureLeft = json.getInt("numberOfExecutionOnFailureLeft");
+        int maxNumberOfExecution = json.getInt("maxNumberOfExecution");
+
+        return new TaskUsage(taskId,
+                             taskName,
+                             taskStartTime,
+                             taskFinishedTime,
+                             taskExecutionDuration,
+                             taskNodeNumber,
+                             taskStatus,
+                             taskTag,
+                             taskDescription,
+                             executionHostName,
+                             numberOfExecutionLeft,
+                             numberOfExecutionOnFailureLeft,
+                             maxNumberOfExecution);
     }
 }

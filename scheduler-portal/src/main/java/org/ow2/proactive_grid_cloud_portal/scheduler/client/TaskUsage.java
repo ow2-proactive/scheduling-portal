@@ -41,14 +41,37 @@ public class TaskUsage implements IsSerializable {
 
     private long taskNodeNumber;
 
+    private String taskStatus;
+
+    private String taskTag;
+
+    private String taskDescription;
+
+    private String executionHostName;
+
+    private int numberOfExecutionLeft;
+
+    private int numberOfExecutionOnFailureLeft;
+
+    private int maxNumberOfExecution;
+
     public TaskUsage(String taskId, String taskName, long taskStartTime, long taskFinishedTime,
-            long taskExecutionDuration, long taskNodeNumber) {
+            long taskExecutionDuration, long taskNodeNumber, String taskStatus, String taskTag, String taskDescription,
+            String executionHostName, int numberOfExecutionLeft, int numberOfExecutionOnFailureLeft,
+            int maxNumberOfExecution) {
         this.taskId = taskId;
         this.taskName = taskName;
         this.taskStartTime = taskStartTime;
         this.taskFinishedTime = taskFinishedTime;
         this.taskExecutionDuration = taskExecutionDuration;
         this.taskNodeNumber = taskNodeNumber;
+        this.taskStatus = taskStatus;
+        this.taskTag = taskTag;
+        this.taskDescription = taskDescription;
+        this.executionHostName = executionHostName;
+        this.numberOfExecutionLeft = numberOfExecutionLeft;
+        this.numberOfExecutionOnFailureLeft = numberOfExecutionOnFailureLeft;
+        this.maxNumberOfExecution = maxNumberOfExecution;
     }
 
     public TaskUsage() {
@@ -76,5 +99,33 @@ public class TaskUsage implements IsSerializable {
 
     public long getTaskNodeNumber() {
         return taskNodeNumber;
+    }
+
+    public String getTaskStatus() {
+        return taskStatus;
+    }
+
+    public String getTaskTag() {
+        return taskTag;
+    }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public String getExecutionHostName() {
+        return executionHostName;
+    }
+
+    public int getNumberOfExecutionLeft() {
+        return numberOfExecutionLeft;
+    }
+
+    public int getNumberOfExecutionOnFailureLeft() {
+        return numberOfExecutionOnFailureLeft;
+    }
+
+    public int getMaxNumberOfExecution() {
+        return maxNumberOfExecution;
     }
 }
