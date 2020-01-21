@@ -91,6 +91,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
+        // Selected node
         this.nodeDetails = new DetailViewer();
         this.nodeDetails.setWidth100();
         this.nodeDetails.setHeight100();
@@ -116,6 +117,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.nodeCanvas.addMember(this.nodeDetails);
         this.nodeCanvas.hide();
 
+        // Selected node source
         this.nsDetails = new DetailViewer();
         this.nsDetails.setWidth100();
         this.nsDetails.setHeight100();
@@ -125,7 +127,8 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField n3 = new DetailViewerField("nodeProvider", "Owner");
         DetailViewerField n4 = new DetailViewerField("hosts", "Hosts");
         DetailViewerField n5 = new DetailViewerField("nodes", "Nodes");
-        this.nsDetails.setFields(n1, n2, n3, n4, n5);
+        DetailViewerField n6 = new DetailViewerField("additionalInformations", "Additional Informations");
+        this.nsDetails.setFields(n1, n2, n3, n4, n5, n6);
         this.nsCanvas = new VLayout();
         this.nsCanvas.setWidth100();
         this.nsCanvas.setHeight100();
@@ -172,9 +175,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.selNode = null;
     }
 
-    public void nodesUpdated(Map<String, NodeSource> nodes) {
+    public void nodesUpdated(Map<String, NodeSource> nodeSources) {
         if (selNode != null) {
-            for (NodeSource ns : nodes.values()) {
+            for (NodeSource ns : nodeSources.values()) {
                 if (selNode.getSourceName().equals(ns.getSourceName())) {
 
                     Node depl = ns.getDeploying().get(selNode.getNodeUrl());
@@ -199,7 +202,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
                 }
             }
         } else if (selHost != null) {
-            for (NodeSource ns : nodes.values()) {
+            for (NodeSource ns : nodeSources.values()) {
                 if (ns.getSourceName().equals(selHost.getSourceName())) {
 
                     for (Host h : ns.getHosts().values()) {
@@ -212,7 +215,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
                 }
             }
         } else if (selNS != null) {
-            for (NodeSource ns : nodes.values()) {
+            for (NodeSource ns : nodeSources.values()) {
                 if (ns.getSourceName().equals(selNS.getSourceName())) {
                     nodeSourceSelected(ns);
                     return;
@@ -285,6 +288,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
+        dv.setAttribute("additionalInformations", "<pre>" + ns.getAdditionalInformations() + "</pre>");
 
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
         this.nodeSourceLabel.setIcon(ns.getIcon());

@@ -120,7 +120,7 @@ public class RMPage implements LogListener {
 
     private ScriptConsoleView scriptConsoleView = null;
 
-    private ThreadDumpView threadDumpView;
+    private ThreadDumpView threadDumpView = null;
 
     /** bot right : graphs */
     private RMStatsView rmStatsView = null;
@@ -421,45 +421,55 @@ public class RMPage implements LogListener {
         hl.setWidth100();
         hl.setHeight100();
 
-        this.infoView = new InfoView(controller);
-        this.statsView = new StatisticsView(controller);
-        this.scriptConsoleView = new ScriptConsoleView(controller);
-        this.threadDumpView = new ThreadDumpView(controller);
-
-        final Canvas infoCanvas = this.infoView.build();
-        Canvas statsCanvas = this.statsView.build();
-        Canvas scriptConsoleCanvas = this.scriptConsoleView.build();
-        Canvas threadDumpCanvas = this.threadDumpView.build();
-
-        Tab selectionTab = new Tab("Selection");
-        selectionTab.setPane(infoCanvas);
-
-        Tab nodesTab = new Tab("Nodes");
-        nodesTab.setPane(statsCanvas);
-
-        Tab scriptConsoleTab = new Tab("Script Console");
-        scriptConsoleTab.setPane(scriptConsoleCanvas);
-
+        // Left tabs (bottom left)
         final TabSet leftTabs = new TabSet();
         leftTabs.setWidth("50%");
         leftTabs.setShowResizeBar(true);
-        leftTabs.setTabs(selectionTab, nodesTab, scriptConsoleTab);
 
-        hl.addMember(leftTabs);
+        // "Selection" tab
+        this.infoView = new InfoView(controller);
+        final Canvas infoCanvas = this.infoView.build();
+        Tab selectionTab = new Tab("Selection");
+        selectionTab.setPane(infoCanvas);
+        leftTabs.addTab(selectionTab);
 
+        // "Nodes" tab
+        this.statsView = new StatisticsView(controller);
+        Canvas statsCanvas = this.statsView.build();
+        Tab nodesTab = new Tab("Nodes");
+        nodesTab.setPane(statsCanvas);
+        leftTabs.addTab(nodesTab);
+
+        // "Script Console" tab
+        this.scriptConsoleView = new ScriptConsoleView(controller);
+        Canvas scriptConsoleCanvas = this.scriptConsoleView.build();
+        Tab scriptConsoleTab = new Tab("Script Console");
+        scriptConsoleTab.setPane(scriptConsoleCanvas);
+        leftTabs.addTab(scriptConsoleTab);
+
+        // "Thread Dump" tab
+        this.threadDumpView = new ThreadDumpView(controller);
+        Canvas threadDumpCanvas = this.threadDumpView.build();
         Tab threadDumpTab = new Tab("Thread Dump");
         threadDumpTab.setPane(threadDumpCanvas);
         leftTabs.addTab(threadDumpTab);
 
-        Tab monitoringTab = new Tab("Monitoring");
-        monitoringView = new MonitoringView(controller);
+        // "Monitoring" tab
+        this.monitoringView = new MonitoringView(controller);
         Canvas monitoringCanvas = monitoringView.build();
+        Tab monitoringTab = new Tab("Monitoring");
         monitoringTab.setPane(monitoringCanvas);
         leftTabs.addTab(monitoringTab);
 
-        rmStatsView = new RMStatsView(controller);
+        // ADD the left tabs to the layout
+        hl.addMember(leftTabs);
+
+        // Stats view
+        this.rmStatsView = new RMStatsView(controller);
         final Canvas rmStatsCanvas = rmStatsView.build();
         rmStatsCanvas.setWidth("50%");
+
+        // ADD the right view to the layout
         hl.addMember(rmStatsCanvas);
 
         return hl;
