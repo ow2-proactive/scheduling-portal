@@ -1091,7 +1091,17 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             String endDateAsString = df.format(endDate);
 
             if (user != null) {
-                inputStream = restClientProxy.getUsageOnAccount(sessionId, user, startDateAsString, endDateAsString);
+                if (user.equals("All Users")) {
+                    inputStream = restClientProxy.getUsageOnAccount(sessionId,
+                                                                    null,
+                                                                    startDateAsString,
+                                                                    endDateAsString);
+                } else {
+                    inputStream = restClientProxy.getUsageOnAccount(sessionId,
+                                                                    user,
+                                                                    startDateAsString,
+                                                                    endDateAsString);
+                }
             } else {
                 inputStream = restClientProxy.getUsageOnMyAccount(sessionId, startDateAsString, endDateAsString);
             }
