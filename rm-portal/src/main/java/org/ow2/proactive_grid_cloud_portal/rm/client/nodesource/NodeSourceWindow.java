@@ -650,6 +650,14 @@ public abstract class NodeSourceWindow {
                     }
                 });
             } else if (pluginField.isCheckbox()) {
+                // We use radio buttons insread of checkbox
+                // because we cannot figure out how to keep checkbox value
+                // when it is not changed.
+                // Example, set checkbox to true
+                // open NodeSourceWindow, save it, without changing anything,
+                // DynamicForm would send "" as value of the checkbox
+                // we observed this only for checkboxes, so in the end,
+                // we decided to use radio buttons.
                 LinkedHashMap<String, String> trueFalseKeyValue = new LinkedHashMap<>();
                 trueFalseKeyValue.put("true", "true");
                 trueFalseKeyValue.put("false", "false");
