@@ -55,10 +55,12 @@ public class TaskUsage implements IsSerializable {
 
     private int maxNumberOfExecution;
 
+    private int maxNumberOfExecutionOnFailure;
+
     public TaskUsage(String taskId, String taskName, long taskStartTime, long taskFinishedTime,
             long taskExecutionDuration, long taskNodeNumber, String taskStatus, String taskTag, String taskDescription,
             String executionHostName, int numberOfExecutionLeft, int numberOfExecutionOnFailureLeft,
-            int maxNumberOfExecution) {
+            int maxNumberOfExecution, int maxNumberOfExecutionOnFailure) {
         this.taskId = taskId;
         this.taskName = taskName;
         this.taskStartTime = taskStartTime;
@@ -72,6 +74,7 @@ public class TaskUsage implements IsSerializable {
         this.numberOfExecutionLeft = numberOfExecutionLeft;
         this.numberOfExecutionOnFailureLeft = numberOfExecutionOnFailureLeft;
         this.maxNumberOfExecution = maxNumberOfExecution;
+        this.maxNumberOfExecutionOnFailure = maxNumberOfExecutionOnFailure;
     }
 
     public TaskUsage() {
@@ -127,5 +130,9 @@ public class TaskUsage implements IsSerializable {
 
     public int getMaxNumberOfExecution() {
         return maxNumberOfExecution;
+    }
+
+    public int getMaxNumberOfExecutionOnFailure() {
+        return maxNumberOfExecutionOnFailure;
     }
 }

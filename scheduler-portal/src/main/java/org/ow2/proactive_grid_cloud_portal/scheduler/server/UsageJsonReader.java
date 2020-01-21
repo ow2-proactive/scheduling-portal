@@ -71,6 +71,14 @@ public class UsageJsonReader {
         return jobUsage;
     }
 
+    private static String nullToEmpty(JSONObject json, String propertyName) throws JSONException {
+        if (json.isNull(propertyName)) {
+            return "";
+        } else {
+            return json.getString(propertyName);
+        }
+    }
+
     private static TaskUsage parseJsonTask(JSONObject json) throws JSONException {
         String taskId = json.getString("taskId");
         String taskName = json.getString("taskName");
@@ -79,12 +87,13 @@ public class UsageJsonReader {
         long taskExecutionDuration = json.getLong("taskExecutionDuration");
         long taskNodeNumber = json.getInt("taskNodeNumber");
         String taskStatus = json.getString("taskStatus");
-        String taskTag = json.getString("taskTag");
+        String taskTag = nullToEmpty(json, "taskTag");
         String taskDescription = json.getString("taskDescription");
         String executionHostName = json.getString("executionHostName");
         int numberOfExecutionLeft = json.getInt("numberOfExecutionLeft");
         int numberOfExecutionOnFailureLeft = json.getInt("numberOfExecutionOnFailureLeft");
         int maxNumberOfExecution = json.getInt("maxNumberOfExecution");
+        int maxNumberOfExecutionOnFailure = json.getInt("maxNumberOfExecutionOnFailure");
 
         return new TaskUsage(taskId,
                              taskName,
@@ -98,6 +107,7 @@ public class UsageJsonReader {
                              executionHostName,
                              numberOfExecutionLeft,
                              numberOfExecutionOnFailureLeft,
-                             maxNumberOfExecution);
+                             maxNumberOfExecution,
+                             maxNumberOfExecutionOnFailure);
     }
 }
