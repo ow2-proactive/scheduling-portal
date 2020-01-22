@@ -60,16 +60,19 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
+    private String additionalInformations = "";
+
     private String eventType;
 
     public NodeSource(String sourceName) {
         this.sourceName = sourceName;
     }
 
-    NodeSource(String sourceName, String sourceDescription, String nodeSourceAdmin, String nodeSourceStatus,
-            String eventType) {
+    NodeSource(String sourceName, String sourceDescription, String additionalInformations, String nodeSourceAdmin,
+            String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
+        this.additionalInformations = additionalInformations;
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
@@ -80,6 +83,7 @@ public class NodeSource {
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
+        this.additionalInformations = t.additionalInformations;
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.nodeSourceStatus = t.nodeSourceStatus;
@@ -151,6 +155,10 @@ public class NodeSource {
 
     public String getSourceDescription() {
         return sourceDescription;
+    }
+
+    public String getAdditionalInformations() {
+        return additionalInformations;
     }
 
     public String getNodeSourceAdmin() {
