@@ -25,15 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -769,7 +761,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
-        String additionalInformations = getJsonStringNullable(nsObj, "additionalInformations");
+        HashMap<String, String> additionalInformations = getJsonMapNullable(nsObj, "additionalInformations");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
@@ -842,6 +834,24 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         eventType,
                         usageInfo,
                         tokens);
+    }
+
+    private HashMap<String, String> getJsonMapNullable(JSONObject jsonObject, String attributeName) {
+        JSONObject mapAsJSONObject = jsonObject.get(attributeName).isObject();
+
+        if (mapAsJSONObject == null) {
+            return (HashMap<String, String>) Collections.EMPTY_MAP;
+        }
+
+        HashMap<String, String> result = new HashMap<String, String>();
+        Iterator<String> mapAsJSONObjectKeysIterator = mapAsJSONObject.keySet().iterator();
+        while (mapAsJSONObjectKeysIterator.hasNext()) {
+            String currentKey = mapAsJSONObjectKeysIterator.next();
+            String currentValue = mapAsJSONObject.get(currentKey).isString().stringValue();
+            result.put(currentKey, currentValue);
+        }
+
+        return result;
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {

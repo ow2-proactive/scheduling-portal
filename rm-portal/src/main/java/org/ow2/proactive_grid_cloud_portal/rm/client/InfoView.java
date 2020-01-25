@@ -288,7 +288,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
-        dv.setAttribute("additionalInformations", "<pre>" + ns.getAdditionalInformations() + "</pre>");
+        dv.setAttribute("additionalInformations", "<pre>" + ns.getAdditionalInformationsAsString() + "</pre>");
 
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
         this.nodeSourceLabel.setIcon(ns.getIcon());

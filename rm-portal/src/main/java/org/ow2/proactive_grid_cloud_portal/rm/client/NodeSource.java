@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
@@ -60,7 +61,7 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
-    private String additionalInformations = "";
+    private HashMap<String, String> additionalInformations = null;
 
     private String eventType;
 
@@ -68,11 +69,11 @@ public class NodeSource {
         this.sourceName = sourceName;
     }
 
-    NodeSource(String sourceName, String sourceDescription, String additionalInformations, String nodeSourceAdmin,
-            String nodeSourceStatus, String eventType) {
+    NodeSource(String sourceName, String sourceDescription, HashMap<String, String> additionalInformations,
+            String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
-        this.additionalInformations = additionalInformations;
+        this.additionalInformations = new HashMap<String, String>(additionalInformations);
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
@@ -83,7 +84,7 @@ public class NodeSource {
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
-        this.additionalInformations = t.additionalInformations;
+        this.additionalInformations = new HashMap<String, String>(t.additionalInformations);
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.nodeSourceStatus = t.nodeSourceStatus;
@@ -157,8 +158,11 @@ public class NodeSource {
         return sourceDescription;
     }
 
-    public String getAdditionalInformations() {
-        return additionalInformations;
+    public String getAdditionalInformationsAsString() {
+        return this.additionalInformations.keySet()
+                                          .stream()
+                                          .map(key -> key + ":" + additionalInformations.get(key))
+                                          .collect(Collectors.joining("\n"));
     }
 
     public String getNodeSourceAdmin() {
