@@ -32,6 +32,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFac
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.util.StringUtil;
 
 
 /**
@@ -131,7 +132,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
      */
     protected void buildDetailsColumns(Record record, Task item) {
         record.setAttribute(HOST_ATTR.getName(), (item.getHostName().equals("null") ? "" : item.getHostName()));
-        record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
+        record.setAttribute(DESCRIPTION_ATTR.getName(), StringUtil.asHTML(item.getDescription()));
 
         if (item.getStartTime() > 0)
             record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
