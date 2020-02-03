@@ -61,7 +61,7 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
-    private HashMap<String, String> additionalInformations = null;
+    private HashMap<String, String> additionalInformation = null;
 
     private String eventType;
 
@@ -69,11 +69,11 @@ public class NodeSource {
         this.sourceName = sourceName;
     }
 
-    NodeSource(String sourceName, String sourceDescription, HashMap<String, String> additionalInformations,
+    NodeSource(String sourceName, String sourceDescription, HashMap<String, String> additionalInformation,
             String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
-        this.additionalInformations = new HashMap<String, String>(additionalInformations);
+        this.additionalInformation = new HashMap<>(additionalInformation);
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
@@ -84,7 +84,7 @@ public class NodeSource {
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
-        this.additionalInformations = new HashMap<String, String>(t.additionalInformations);
+        this.additionalInformation = new HashMap<>(t.additionalInformation);
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.nodeSourceStatus = t.nodeSourceStatus;
@@ -158,13 +158,6 @@ public class NodeSource {
         return sourceDescription;
     }
 
-    public String getAdditionalInformationsAsString() {
-        return this.additionalInformations.keySet()
-                                          .stream()
-                                          .map(key -> key + ":" + additionalInformations.get(key))
-                                          .collect(Collectors.joining("\n"));
-    }
-
     public String getNodeSourceAdmin() {
         return nodeSourceAdmin;
     }
@@ -175,6 +168,13 @@ public class NodeSource {
 
     public void setNodeSourceStatus(NodeSourceStatus nodeSourceStatus) {
         this.nodeSourceStatus = nodeSourceStatus;
+    }
+
+    public String getAdditionalInformationsAsString() {
+        return this.additionalInformation.keySet()
+                                         .stream()
+                                         .map(key -> key + ":" + this.additionalInformation.get(key))
+                                         .collect(Collectors.joining("\n"));
     }
 
     public String getIcon() {

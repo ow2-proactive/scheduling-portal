@@ -127,7 +127,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField n3 = new DetailViewerField("nodeProvider", "Owner");
         DetailViewerField n4 = new DetailViewerField("hosts", "Hosts");
         DetailViewerField n5 = new DetailViewerField("nodes", "Nodes");
-        DetailViewerField n6 = new DetailViewerField("additionalInformations", "Additional Informations");
+        DetailViewerField n6 = new DetailViewerField("additionalInformation", "Additional Information");
         this.nsDetails.setFields(n1, n2, n3, n4, n5, n6);
         this.nsCanvas = new VLayout();
         this.nsCanvas.setWidth100();
@@ -288,7 +288,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
-        dv.setAttribute("additionalInformations", "<pre>" + ns.getAdditionalInformationsAsString() + "</pre>");
+        dv.setAttribute("additionalInformation", "<pre>" + ns.getAdditionalInformationsAsString() + "</pre>");
 
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
         this.nodeSourceLabel.setIcon(ns.getIcon());

@@ -27,13 +27,9 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.*;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -51,13 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -761,13 +751,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
-        HashMap<String, String> additionalInformations = getJsonMapNullable(nsObj, "additionalInformations");
+        HashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
         return new NodeSource(sourceName,
                               sourceDescription,
-                              additionalInformations,
+                              additionalInformation,
                               nodeSourceAdmin,
                               nodeSourceStatus,
                               eventType);
