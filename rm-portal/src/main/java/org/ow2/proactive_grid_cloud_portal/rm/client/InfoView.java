@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
@@ -78,6 +80,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
 
     private NodeSource selNS = null;
 
+    // To keep a track of additional information canvas which must be removed from nsCanvas
+    private ArrayList<Canvas> additionalInformationCanvasList = new ArrayList<>();
+
     InfoView(RMController controller) {
         controller.getEventDispatcher().addNodeSelectedListener(this);
         controller.getEventDispatcher().addNodesListener(this);
@@ -91,7 +96,12 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.label.setWidth100();
         this.label.setAlign(Alignment.CENTER);
 
-        // Selected node
+        // Selected node ---------------
+        // Node label
+        this.nodeLabel = new Label("<h3>Node</h3>");
+        this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
+        this.nodeLabel.setHeight(16);
+        // Node details
         this.nodeDetails = new DetailViewer();
         this.nodeDetails.setWidth100();
         this.nodeDetails.setHeight100();
@@ -108,16 +118,19 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField d10 = new DetailViewerField("access", "Usage restrictions");
         DetailViewerField d11 = new DetailViewerField("tokens", "Tokens");
         this.nodeDetails.setFields(d1, d5, d6, d2, d3, d4, d7, d8, d9, d10, d11);
+        // Define node canvas and append sections
         this.nodeCanvas = new VLayout();
         this.nodeCanvas.setWidth100();
-        this.nodeLabel = new Label("<h3>Node</h3>");
-        this.nodeLabel.setIcon(RMImages.instance.node_add_16().getSafeUri().asString());
-        this.nodeLabel.setHeight(16);
         this.nodeCanvas.addMember(this.nodeLabel);
         this.nodeCanvas.addMember(this.nodeDetails);
         this.nodeCanvas.hide();
 
-        // Selected node source
+        // Selected node source ---------------
+        // Node source label
+        this.nodeSourceLabel = new Label("<h3>Node Source</h3>");
+        this.nodeSourceLabel.setHeight(16);
+        this.nodeSourceLabel.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
+        // Node source details
         this.nsDetails = new DetailViewer();
         this.nsDetails.setWidth100();
         this.nsDetails.setHeight100();
@@ -127,18 +140,16 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         DetailViewerField n3 = new DetailViewerField("nodeProvider", "Owner");
         DetailViewerField n4 = new DetailViewerField("hosts", "Hosts");
         DetailViewerField n5 = new DetailViewerField("nodes", "Nodes");
-        DetailViewerField n6 = new DetailViewerField("additionalInformation", "Additional Information");
-        this.nsDetails.setFields(n1, n2, n3, n4, n5, n6);
+        this.nsDetails.setFields(n1, n2, n3, n4, n5);
+        // Define node source canvas and append sections
         this.nsCanvas = new VLayout();
         this.nsCanvas.setWidth100();
         this.nsCanvas.setHeight100();
-        this.nodeSourceLabel = new Label("<h3>Node Source</h3>");
-        this.nodeSourceLabel.setHeight(16);
-        this.nodeSourceLabel.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         this.nsCanvas.addMember(this.nodeSourceLabel);
         this.nsCanvas.addMember(this.nsDetails);
         this.nsCanvas.hide();
 
+        // Selected host ---------------
         this.hostDetails = new DetailViewer();
         this.hostDetails.setWidth100();
         this.hostDetails.setHeight100();
@@ -270,6 +281,56 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         }
     }
 
+    private void clearAndUpdateAdditionalInformationCanvasList(NodeSource ns) {
+
+        // CLear additionalInformationCanvasList
+        this.additionalInformationCanvasList.clear();
+
+        // Fill additionalInformationMap with new additional information (from ns)
+        LinkedHashMap<String, LinkedHashMap<String, String>> additionalInformationMap = new LinkedHashMap<>();
+
+        ns.getAdditionalInformation().forEach((categoryAndKey, value) -> {
+            // (key,value) in additionalInformation map: ("Azure Billing|Currency","USD")
+            // category: "Azure Billing"
+            // key: "Currency"
+            // value: "USD"
+            //LogModel.getInstance().logMessage("COUCOU CONSIDERING (" + categoryAndKey + "," + value + ")");
+            String[] categoryAndKeyArr = categoryAndKey.split("\\|");
+            String category = categoryAndKeyArr[0];
+            String key = categoryAndKeyArr[1];
+
+            if (!additionalInformationMap.containsKey(category)) {
+                additionalInformationMap.put(category, new LinkedHashMap<>());
+            }
+            additionalInformationMap.get(category).put(key, value);
+        });
+
+        // Add to additionalInformationCanvasList a Label and a DetailViewer (which includes additional information of the same category) per category
+        for (Map.Entry<String, LinkedHashMap<String, String>> entry1 : additionalInformationMap.entrySet()) {
+
+            // Category Label
+            Label categoryLabel = new Label("<h3>" + entry1.getKey() + "</h3>");
+            categoryLabel.setHeight(16);
+            this.additionalInformationCanvasList.add(categoryLabel);
+
+            // Additional information DetailViewer with as many fields as additional information
+            DetailViewer additionalInformationDetailViewer = new DetailViewer();
+            additionalInformationDetailViewer.setWidth100();
+            additionalInformationDetailViewer.setHeight100();
+            additionalInformationDetailViewer.setCanSelectText(true);
+
+            ArrayList<DetailViewerField> detailViewerFieldList = new ArrayList<>();
+            DetailViewerRecord detailViewerRecord = new DetailViewerRecord();
+            for (Map.Entry<String, String> entry2 : entry1.getValue().entrySet()) {
+                detailViewerFieldList.add(new DetailViewerField(entry2.getKey(), entry2.getKey()));
+                detailViewerRecord.setAttribute(entry2.getKey(), entry2.getValue());
+            }
+            additionalInformationDetailViewer.setFields(detailViewerFieldList.toArray(new DetailViewerField[0]));
+            additionalInformationDetailViewer.setData(new DetailViewerRecord[] { detailViewerRecord });
+            this.additionalInformationCanvasList.add(additionalInformationDetailViewer);
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -277,21 +338,31 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
+
+        // Update node source title -----------
+        this.nodeSourceLabel.setIcon(ns.getIcon());
+
+        // Update node source details -----------
         DetailViewerRecord dv = new DetailViewerRecord();
-
         int numNodes = 0;
-        for (Host h : ns.getHosts().values())
+        for (Host h : ns.getHosts().values()) {
             numNodes += h.getNodes().size();
-
+        }
         dv.setAttribute("sourceName", ns.getSourceName());
         dv.setAttribute("description", ns.getSourceDescription());
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
-        dv.setAttribute("additionalInformation", "<pre>" + ns.getAdditionalInformationsAsString() + "</pre>");
-
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
-        this.nodeSourceLabel.setIcon(ns.getIcon());
+
+        // Update additional information -----------
+
+        // Remove the previous additional information canvas
+        this.nsCanvas.removeMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
+        // clean and update additionalInformationCanvasList with new additional information
+        clearAndUpdateAdditionalInformationCanvasList(ns);
+        // update nsCanvas with additionalInformationCanvasList
+        this.nsCanvas.addMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
 
         this.label.hide();
         this.nodeCanvas.hide();

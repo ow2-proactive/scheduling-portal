@@ -751,7 +751,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
-        HashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
+        LinkedHashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
@@ -826,14 +826,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         tokens);
     }
 
-    private HashMap<String, String> getJsonMapNullable(JSONObject jsonObject, String attributeName) {
+    private LinkedHashMap<String, String> getJsonMapNullable(JSONObject jsonObject, String attributeName) {
         JSONObject mapAsJSONObject = jsonObject.get(attributeName).isObject();
 
         if (mapAsJSONObject == null) {
-            return (HashMap<String, String>) Collections.EMPTY_MAP;
+            return (LinkedHashMap<String, String>) Collections.EMPTY_MAP;
         }
 
-        HashMap<String, String> result = new HashMap<String, String>();
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
         Iterator<String> mapAsJSONObjectKeysIterator = mapAsJSONObject.keySet().iterator();
         while (mapAsJSONObjectKeysIterator.hasNext()) {
             String currentKey = mapAsJSONObjectKeysIterator.next();

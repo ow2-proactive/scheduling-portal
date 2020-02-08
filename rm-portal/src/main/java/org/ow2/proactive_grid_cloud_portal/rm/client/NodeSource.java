@@ -25,11 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
@@ -61,7 +57,7 @@ public class NodeSource {
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
-    private HashMap<String, String> additionalInformation = null;
+    private LinkedHashMap<String, String> additionalInformation = null;
 
     private String eventType;
 
@@ -69,11 +65,11 @@ public class NodeSource {
         this.sourceName = sourceName;
     }
 
-    NodeSource(String sourceName, String sourceDescription, HashMap<String, String> additionalInformation,
+    NodeSource(String sourceName, String sourceDescription, LinkedHashMap<String, String> additionalInformation,
             String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
-        this.additionalInformation = new HashMap<>(additionalInformation);
+        this.additionalInformation = new LinkedHashMap<>(additionalInformation);
         this.nodeSourceAdmin = nodeSourceAdmin;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
@@ -84,7 +80,7 @@ public class NodeSource {
 
     NodeSource(NodeSource t) {
         this.sourceDescription = t.sourceDescription;
-        this.additionalInformation = new HashMap<>(t.additionalInformation);
+        this.additionalInformation = new LinkedHashMap<>(t.additionalInformation);
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
         this.nodeSourceStatus = t.nodeSourceStatus;
@@ -170,11 +166,8 @@ public class NodeSource {
         this.nodeSourceStatus = nodeSourceStatus;
     }
 
-    public String getAdditionalInformationsAsString() {
-        return this.additionalInformation.keySet()
-                                         .stream()
-                                         .map(key -> key + ":" + this.additionalInformation.get(key))
-                                         .collect(Collectors.joining("\n"));
+    public LinkedHashMap<String, String> getAdditionalInformation() {
+        return this.additionalInformation;
     }
 
     public String getIcon() {
