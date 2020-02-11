@@ -298,6 +298,10 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             // key: "Currency"
             // value: "USD"
             String[] categoryAndKeyArr = categoryAndKeyAndValue.getKey().split("\\|");
+
+            if (categoryAndKeyArr.length != 2)
+                continue;
+
             String category = categoryAndKeyArr[0];
             String key = categoryAndKeyArr[1];
             String value = categoryAndKeyAndValue.getValue();
