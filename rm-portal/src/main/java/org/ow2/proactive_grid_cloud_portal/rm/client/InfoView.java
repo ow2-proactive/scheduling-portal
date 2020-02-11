@@ -83,6 +83,8 @@ public class InfoView implements NodeSelectedListener, NodesListener {
     // To keep a track of additional information canvas which must be removed from nsCanvas
     private ArrayList<Canvas> additionalInformationCanvasList = new ArrayList<>();
 
+    private String allAdditionalInformationAsString = "";
+
     InfoView(RMController controller) {
         controller.getEventDispatcher().addNodeSelectedListener(this);
         controller.getEventDispatcher().addNodesListener(this);
@@ -281,35 +283,49 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         }
     }
 
-    private void clearAndUpdateAdditionalInformationCanvasList(NodeSource ns) {
-
-        // CLear additionalInformationCanvasList
-        this.additionalInformationCanvasList.clear();
+    private LinkedHashMap<String, LinkedHashMap<String, String>> getAdditionalInformationAsMapOfMap(NodeSource ns) {
+        // We build a String of additional information to compare it with allAdditionalInformationAsString
+        // and update or not rm portal
+        String allNewAdditionalInformationAsString = "";
 
         // Fill additionalInformationMap with new additional information (from ns)
         LinkedHashMap<String, LinkedHashMap<String, String>> additionalInformationMap = new LinkedHashMap<>();
 
-        ns.getAdditionalInformation().forEach((categoryAndKey, value) -> {
+        for (Map.Entry<String, String> categoryAndKeyAndValue : ns.getAdditionalInformation().entrySet()) {
+
             // (key,value) in additionalInformation map: ("Azure Billing|Currency","USD")
             // category: "Azure Billing"
             // key: "Currency"
             // value: "USD"
-            //LogModel.getInstance().logMessage("COUCOU CONSIDERING (" + categoryAndKey + "," + value + ")");
-            String[] categoryAndKeyArr = categoryAndKey.split("\\|");
+            String[] categoryAndKeyArr = categoryAndKeyAndValue.getKey().split("\\|");
             String category = categoryAndKeyArr[0];
             String key = categoryAndKeyArr[1];
+            String value = categoryAndKeyAndValue.getValue();
 
+            // Update additionalInformationMap
             if (!additionalInformationMap.containsKey(category)) {
                 additionalInformationMap.put(category, new LinkedHashMap<>());
             }
             additionalInformationMap.get(category).put(key, value);
-        });
+
+            // Update allNewAdditionalInformationAsString
+            allNewAdditionalInformationAsString += category + key + value;
+        }
+        if (!this.allAdditionalInformationAsString.equals(allNewAdditionalInformationAsString)) {
+            this.allAdditionalInformationAsString = allNewAdditionalInformationAsString;
+            return additionalInformationMap;
+        }
+        return null;
+    }
+
+    private void updateAdditionalInformationCanvasList(
+            LinkedHashMap<String, LinkedHashMap<String, String>> additionalInformationMap) {
 
         // Add to additionalInformationCanvasList a Label and a DetailViewer (which includes additional information of the same category) per category
-        for (Map.Entry<String, LinkedHashMap<String, String>> entry1 : additionalInformationMap.entrySet()) {
+        for (Map.Entry<String, LinkedHashMap<String, String>> categoryAndKeyAndValue : additionalInformationMap.entrySet()) {
 
             // Category Label
-            Label categoryLabel = new Label("<h3>" + entry1.getKey() + "</h3>");
+            Label categoryLabel = new Label("<h3>" + categoryAndKeyAndValue.getKey() + "</h3>");
             categoryLabel.setHeight(16);
             this.additionalInformationCanvasList.add(categoryLabel);
 
@@ -321,9 +337,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
 
             ArrayList<DetailViewerField> detailViewerFieldList = new ArrayList<>();
             DetailViewerRecord detailViewerRecord = new DetailViewerRecord();
-            for (Map.Entry<String, String> entry2 : entry1.getValue().entrySet()) {
-                detailViewerFieldList.add(new DetailViewerField(entry2.getKey(), entry2.getKey()));
-                detailViewerRecord.setAttribute(entry2.getKey(), entry2.getValue());
+            for (Map.Entry<String, String> keyAndValue : categoryAndKeyAndValue.getValue().entrySet()) {
+                detailViewerFieldList.add(new DetailViewerField(keyAndValue.getKey(), keyAndValue.getKey()));
+                detailViewerRecord.setAttribute(keyAndValue.getKey(), keyAndValue.getValue());
             }
             additionalInformationDetailViewer.setFields(detailViewerFieldList.toArray(new DetailViewerField[0]));
             additionalInformationDetailViewer.setData(new DetailViewerRecord[] { detailViewerRecord });
@@ -356,13 +372,17 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
 
         // Update additional information -----------
-
-        // Remove the previous additional information canvas
-        this.nsCanvas.removeMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
-        // clean and update additionalInformationCanvasList with new additional information
-        clearAndUpdateAdditionalInformationCanvasList(ns);
-        // update nsCanvas with additionalInformationCanvasList
-        this.nsCanvas.addMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
+        LinkedHashMap<String, LinkedHashMap<String, String>> newAdditionalInformationAsMapOfMap = getAdditionalInformationAsMapOfMap(ns);
+        if (newAdditionalInformationAsMapOfMap != null) {
+            // Remove the previous additional information canvas
+            this.nsCanvas.removeMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
+            // CLear additionalInformationCanvasList
+            this.additionalInformationCanvasList.clear();
+            // clean and update additionalInformationCanvasList with new additional information
+            updateAdditionalInformationCanvasList(newAdditionalInformationAsMapOfMap);
+            // update nsCanvas with additionalInformationCanvasList
+            this.nsCanvas.addMembers(this.additionalInformationCanvasList.toArray(new Canvas[0]));
+        }
 
         this.label.hide();
         this.nodeCanvas.hide();
