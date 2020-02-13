@@ -25,23 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -59,13 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -769,10 +751,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
+        LinkedHashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
-        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus, eventType);
+        return new NodeSource(sourceName,
+                              sourceDescription,
+                              additionalInformation,
+                              nodeSourceAdmin,
+                              nodeSourceStatus,
+                              eventType);
     }
 
     private Node parseNode(JSONObject nodeObj) {
@@ -836,6 +824,24 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         eventType,
                         usageInfo,
                         tokens);
+    }
+
+    private LinkedHashMap<String, String> getJsonMapNullable(JSONObject jsonObject, String attributeName) {
+        JSONObject mapAsJSONObject = jsonObject.get(attributeName).isObject();
+
+        if (mapAsJSONObject == null) {
+            return (LinkedHashMap<String, String>) Collections.EMPTY_MAP;
+        }
+
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        Iterator<String> mapAsJSONObjectKeysIterator = mapAsJSONObject.keySet().iterator();
+        while (mapAsJSONObjectKeysIterator.hasNext()) {
+            String currentKey = mapAsJSONObjectKeysIterator.next();
+            String currentValue = mapAsJSONObject.get(currentKey).isString().stringValue();
+            result.put(currentKey, currentValue);
+        }
+
+        return result;
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
