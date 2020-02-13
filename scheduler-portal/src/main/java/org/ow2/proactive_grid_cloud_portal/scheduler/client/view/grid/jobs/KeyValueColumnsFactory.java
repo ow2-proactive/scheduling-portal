@@ -33,6 +33,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumn
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.util.StringUtil;
 
 
 /**
@@ -59,7 +60,7 @@ public class KeyValueColumnsFactory implements ColumnsFactory<Map.Entry<String, 
         else if (JobColumnsUtil.DOCUMENTATION.equals(item.getKey()))
             record.setAttribute(VALUE_ATTR.getName(), new Anchor(item.getValue(), item.getValue(), "_blank"));
         else
-            record.setAttribute(VALUE_ATTR.getName(), item.getValue());
+            record.setAttribute(VALUE_ATTR.getName(), StringUtil.asHTML(item.getValue()));
     }
 
 }
