@@ -43,14 +43,24 @@ public class JobUsage implements IsSerializable {
 
     private long jobDuration;
 
-    private List<TaskUsage> taskUsages = new ArrayList<TaskUsage>();
+    private List<TaskUsage> taskUsages = new ArrayList<>();
 
-    public JobUsage(String owner, String project, String jobId, String jobName, long jobDuration) {
+    private String status;
+
+    private long submittedTime;
+
+    private Long parentId;
+
+    public JobUsage(String owner, String project, String jobId, String jobName, long jobDuration, String status,
+            long submittedTime, Long parentId) {
         this.owner = owner;
         this.project = project;
         this.jobId = jobId;
         this.jobName = jobName;
         this.jobDuration = jobDuration;
+        this.status = status;
+        this.submittedTime = submittedTime;
+        this.parentId = parentId;
     }
 
     public JobUsage() {
@@ -82,5 +92,17 @@ public class JobUsage implements IsSerializable {
 
     public List<TaskUsage> getTaskUsages() {
         return taskUsages;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public long getSubmittedTime() {
+        return submittedTime;
+    }
+
+    public Long getParentId() {
+        return parentId;
     }
 }

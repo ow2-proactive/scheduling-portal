@@ -87,29 +87,43 @@ public class ExportUsageServlet extends HttpServlet {
 
     private String csvExport(String sessionId, String user, Date startDate, Date endDate)
             throws ServiceException, RestServerException, IOException {
-        Object[] header = { "Owner", "Project", "Job Id", "Job Name", "Job Duration", "Task Id", "Task Name",
-                            "Task Node Number", "Task Start Time", "Task Finished Time", "Task Duration" };
+        Object[] header = { "Owner", "Project", "Job Id", "Parent Job Id", "Job Status", "Job Name", "Submitted Time",
+                            "Job Duration", "Task Id", "Task Name", "Task Status", "Task Tag",
+                            "Task Execution Host Name", "Task Node Number", "Executions", "Node Failures",
+                            "Task Start Time", "Task Finished Time", "Task Duration", "Task Description" };
         List<JobUsage> jobUsages = ((SchedulerServiceImpl) Service.get()).getUsage(sessionId, user, startDate, endDate);
         StringBuilder sb = new StringBuilder();
-        CSVPrinter csvFilePrinter = null;
         CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(LINE_SEPARATOR);
-        csvFilePrinter = new CSVPrinter(sb, csvFileFormat);
+        CSVPrinter csvFilePrinter = new CSVPrinter(sb, csvFileFormat);
         csvFilePrinter.printRecord(header);
         for (JobUsage jobUsage : jobUsages) {
             for (TaskUsage taskUsage : jobUsage.getTaskUsages()) {
                 csvFilePrinter.printRecord(jobUsage.getOwner(),
                                            jobUsage.getProject(),
                                            jobUsage.getJobId(),
+                                           jobUsage.getParentId(),
+                                           jobUsage.getStatus(),
                                            jobUsage.getJobName(),
+                                           jobUsage.getSubmittedTime(),
                                            jobUsage.getJobDuration(),
                                            taskUsage.getTaskId(),
                                            taskUsage.getTaskName(),
+                                           taskUsage.getTaskStatus(),
+                                           taskUsage.getTaskTag() == null ? "" : taskUsage.getTaskTag(),
+                                           taskUsage.getExecutionHostName(),
                                            taskUsage.getTaskNodeNumber(),
+                                           (taskUsage.getMaxNumberOfExecution() -
+                                            taskUsage.getNumberOfExecutionLeft()) + " / " +
+                                                                          taskUsage.getMaxNumberOfExecution(),
+                                           (taskUsage.getMaxNumberOfExecutionOnFailure() -
+                                            taskUsage.getNumberOfExecutionOnFailureLeft()) + " / " + taskUsage.getMaxNumberOfExecutionOnFailure(),
                                            taskUsage.getTaskStartTime(),
                                            taskUsage.getTaskFinishedTime(),
-                                           taskUsage.getTaskExecutionDuration());
+                                           taskUsage.getTaskExecutionDuration(),
+                                           taskUsage.getTaskDescription());
             }
         }
+
         csvFilePrinter.close();
         return sb.toString();
     }

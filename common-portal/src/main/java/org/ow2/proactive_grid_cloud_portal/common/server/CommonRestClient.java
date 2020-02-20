@@ -23,20 +23,21 @@
  * If needed, contact us to obtain a release under GPL Version 2 or 3
  * or a different license than the AGPL.
  */
-package org.ow2.proactive_grid_cloud_portal.rm.client;
+package org.ow2.proactive_grid_cloud_portal.common.server;
 
-public class RMImagesUnbundled {
+import java.io.InputStream;
 
-    public static final String LOGO_350 = "logo_350.png";
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
-    public static final String PPS_DEPLOY = "pps-deploy.png";
 
-    public static final String AE_LOGO = "AE-Logo.png";
+@Path("/common/")
+public interface CommonRestClient {
 
-    public static final String EXTRA_LOGO_CENTER = "extra-logo-center.png";
-
-    public static final String COMPANY_ICON = "company-icon-squared.png";
-
-    public static final String PA_ICON = "proactive_32.png";
+    @GET
+    @Path("/permissions/portals/{portal}")
+    InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
 
 }

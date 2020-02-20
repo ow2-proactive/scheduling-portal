@@ -178,13 +178,12 @@ public interface SchedulerService extends RemoteService {
     String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter) throws RestServerException, ServiceException;
 
-    String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, boolean pending,
-            boolean running, boolean finished, int offset, int limit,
-            TasksCentricController.SortSpecifierRestContainer sortParameters)
+    String getTaskCentric(String sessionId, long fromDate, long toDate, boolean myTasks, String statusFilter,
+            int offset, int limit, TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException;
 
     String getTaskCentricByTag(String sessionId, String tag, long fromDate, long toDate, boolean myTasks,
-            boolean pending, boolean running, boolean finished, int offset, int limit,
+            String statusFilter, int offset, int limit,
             TasksCentricController.SortSpecifierRestContainer sortParameters)
             throws RestServerException, ServiceException;
 
@@ -429,5 +428,11 @@ public interface SchedulerService extends RemoteService {
     void removeThirdPartyCredential(String sessionId, String key) throws RestServerException;
 
     String getPreciousTaskName(String sessionId, String jobId) throws ServiceException, RestServerException;
+
+    /**
+     * @param sessionId d of the current session
+     * @return true if user has right to access RM portal
+     */
+    String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
 }

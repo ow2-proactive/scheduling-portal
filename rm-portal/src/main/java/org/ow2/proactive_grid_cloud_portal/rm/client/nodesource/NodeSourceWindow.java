@@ -650,12 +650,22 @@ public abstract class NodeSourceWindow {
                     }
                 });
             } else if (pluginField.isCheckbox()) {
-                CheckboxItem checkboxItem = new CheckboxItem(plugin.getPluginName() + pluginField.getName(),
-                                                             pluginField.getName());
-                checkboxItem.setShowTitle(true);
-                checkboxItem.setShowLabel(false);
-                checkboxItem.setLabelAsTitle(true);
-                formItemsForField.add(checkboxItem);
+                // We use radio buttons insread of checkbox
+                // because we cannot figure out how to keep checkbox value
+                // when it is not changed.
+                // Example, set checkbox to true
+                // open NodeSourceWindow, save it, without changing anything,
+                // DynamicForm would send "" as value of the checkbox
+                // we observed this only for checkboxes, so in the end,
+                // we decided to use radio buttons.
+                LinkedHashMap<String, String> trueFalseKeyValue = new LinkedHashMap<>();
+                trueFalseKeyValue.put("true", "true");
+                trueFalseKeyValue.put("false", "false");
+                RadioGroupItem pseudoCheckBox = new RadioGroupItem(plugin.getPluginName() + pluginField.getName(),
+                                                                   pluginField.getName());
+                pseudoCheckBox.setVertical(false);
+                pseudoCheckBox.setValueMap(trueFalseKeyValue);
+                formItemsForField.add(pseudoCheckBox);
             } else {
                 formItemsForField.add(new TextItem(plugin.getPluginName() + pluginField.getName(),
                                                    pluginField.getName()));
@@ -665,7 +675,7 @@ public abstract class NodeSourceWindow {
                     formItem.setTitleStyle("important-message");
                 }
                 if (pluginField.isCheckbox()) {
-                    formItem.setDefaultValue(Boolean.parseBoolean(pluginField.getValue()));
+                    formItem.setDefaultValue(pluginField.getValue());
                 } else {
                     formItem.setValue(pluginField.getValue());
                 }
@@ -794,6 +804,7 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
+
         if (!isAdvanced.getValueAsBoolean()) {
             this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
                                                 hiddenItems.get(infrastructureSelectItem.getValueAsString()));
