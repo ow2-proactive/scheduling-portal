@@ -30,6 +30,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.util.StringUtil;
 
 
 public class JobsDetailColumnsFactory extends JobsColumnsFactory {
@@ -93,8 +94,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(STARTED_TIME_ATTR.getName(), (startTime > submitTime) ? JSUtil.getTime(startTime) : "");
         record.setAttribute(FINISHED_TIME_ATTR.getName(), (finishTime > startTime) ? JSUtil.getTime(finishTime) : "");
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
-        record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
-        record.setAttribute(DESCRIPTION_ATTR.getName(), item.getDescription());
+        record.setAttribute(DESCRIPTION_ATTR.getName(), StringUtil.asHTML(item.getDescription()));
     }
 }
