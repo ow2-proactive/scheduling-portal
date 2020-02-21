@@ -180,3 +180,7 @@
                 font-size : 11px;
                 margin-left : 60px;
 }
+
+pre {
+                margin:0;
+}
