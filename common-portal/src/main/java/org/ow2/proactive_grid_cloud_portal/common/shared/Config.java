@@ -184,7 +184,7 @@ public abstract class Config {
 
     private static final String d_ABOUT = "<h3>ProActive @application_name@ Portal</h3>" + "Version: @version@" +
                                           "<br><br>" + "Copyright (C) 1997-" + getCurrentYear() +
-                                          " INRIA/University of Nice-Sophia Antipolis/ActiveEon<br><br>" +
+                                          ", Activeeon, All rights reserved<br><br>" +
                                           "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
                                           "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
                                           "Contact: +33 (0)9 88 777 660, <a target='_blank' href='mailto:contact@activeeon.com'>contact@activeeon.com</a>" +
