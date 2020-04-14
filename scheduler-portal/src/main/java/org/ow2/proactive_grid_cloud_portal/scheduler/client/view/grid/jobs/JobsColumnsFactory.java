@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.util.JobColumnsUtil;
@@ -61,9 +62,31 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns PROJECT_NAME_ATTR = new GridColumns("project", "Project", -1, true, false);
 
+    public static final GridColumns SUBMIT_TIME_ATTR = new GridColumns("submitTime",
+                                                                       "Submitted at",
+                                                                       120,
+                                                                       true,
+                                                                       false,
+                                                                       true);
+
+    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime",
+                                                                      "Started at",
+                                                                      120,
+                                                                      true,
+                                                                      false,
+                                                                      true);
+
+    public static final GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime",
+                                                                         "Finished at",
+                                                                         120,
+                                                                         true,
+                                                                         false,
+                                                                         true);
+
     private static final GridColumns[] COLUMNS = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
                                                                      PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR,
-                                                                     NAME_ATTR, PROJECT_NAME_ATTR };
+                                                                     NAME_ATTR, PROJECT_NAME_ATTR, SUBMIT_TIME_ATTR,
+                                                                     START_TIME_ATTR, FINISHED_TIME_ATTR };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
@@ -115,7 +138,11 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         }
 
         record.setAttribute(DURATION_ATTR.getName(), duration);
-
+        record.setAttribute(SUBMIT_TIME_ATTR.getName(), JSUtil.getTime(item.getSubmitTime()));
+        record.setAttribute(START_TIME_ATTR.getName(),
+                            (item.getStartTime() > item.getSubmitTime()) ? JSUtil.getTime(item.getStartTime()) : "");
+        record.setAttribute(FINISHED_TIME_ATTR.getName(),
+                            (item.getFinishTime() > item.getStartTime()) ? JSUtil.getTime(item.getFinishTime()) : "");
         for (GridColumns extraColumn : EXTRA_COLUMNS) {
             String columnName = extraColumn.getName();
             //Fetch value associated to a column
