@@ -534,9 +534,11 @@ public abstract class NodeSourceWindow {
         this.infrastructureSelectItem = new SelectItem(INFRASTRUCTURE_FORM_KEY, "Infrastructure");
         this.infrastructureSelectItem.setRequired(true);
         this.infrastructureSelectItem.setWidth(300);
+        this.infrastructureSelectItem.setTitleStyle("generalParametersStyle");
         this.policySelectItem = new SelectItem(POLICY_FORM_KEY, "Policy");
         this.policySelectItem.setRequired(true);
         this.policySelectItem.setWidth(300);
+        this.policySelectItem.setTitleStyle("generalParametersStyle");
 
         this.formItemsByName.put(NS_NAME_FORM_KEY, Collections.singletonList(new HiddenItem(NS_NAME_FORM_KEY)));
         this.formItemsByName.put(DEPLOY_FORM_KEY, Collections.singletonList(new HiddenItem(DEPLOY_FORM_KEY)));
@@ -948,6 +950,7 @@ public abstract class NodeSourceWindow {
 
     private void replaceInfrastructureItemsInItemList(PluginDescriptor infrastructurePluginDescriptor,
             List<FormItem> allNodeSourcePluginsFormItems) {
+
         validateInfrastructureNameOrFail(infrastructurePluginDescriptor.getPluginName());
         allNodeSourcePluginsFormItems.stream()
                                      .filter(formItem -> formItem.getName()

@@ -343,7 +343,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             DetailViewerRecord detailViewerRecord = new DetailViewerRecord();
             for (Map.Entry<String, String> keyAndValue : categoryAndKeyAndValue.getValue().entrySet()) {
                 detailViewerFieldList.add(new DetailViewerField(keyAndValue.getKey(), keyAndValue.getKey()));
-                detailViewerRecord.setAttribute(keyAndValue.getKey(), keyAndValue.getValue());
+                detailViewerRecord.setAttribute(keyAndValue.getKey(), "<pre>" + keyAndValue.getValue() + "</pre>");
             }
             additionalInformationDetailViewer.setFields(detailViewerFieldList.toArray(new DetailViewerField[0]));
             additionalInformationDetailViewer.setData(new DetailViewerRecord[] { detailViewerRecord });
