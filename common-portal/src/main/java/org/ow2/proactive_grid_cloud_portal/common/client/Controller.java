@@ -69,6 +69,11 @@ public abstract class Controller {
     public abstract String getLogo350Url();
 
     /**
+     * @return URL of the large application logo
+     */
+    public abstract String getPortalLogo();
+
+    /**
      * Perform server logout,
      * updates the page accordingly
      */

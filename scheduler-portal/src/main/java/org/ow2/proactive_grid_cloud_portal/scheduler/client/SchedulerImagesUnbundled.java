@@ -29,6 +29,8 @@ public class SchedulerImagesUnbundled {
 
     public static final String LOGO_350 = "logo_350.png";
 
+    public static final String PPS_RUN = "pps-run.png";
+
     public static final String PA_ICON = "proactive_32.png";
 
     public static final String EXTRA_LOGO_CENTER = "extra-logo-center.png";

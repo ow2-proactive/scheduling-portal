@@ -148,9 +148,9 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
         this.nodes = nodes;
     }
 
-    void nodesUpdate(Map<String, NodeSource> nodes) {
+    void nodesUpdate(Map<String, NodeSource> nodeSources) {
         for (NodesListener list : this.nodesListeners) {
-            list.nodesUpdated(nodes);
+            list.nodesUpdated(nodeSources);
         }
     }
 

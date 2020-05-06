@@ -181,7 +181,8 @@ public class UsageView implements SchedulerListeners.UsageListener {
         controller.getEventDispatcher().addUsersWithJobsListener(new SchedulerListeners.UsersListener() {
             @Override
             public void usersUpdated(List<SchedulerUser> users) {
-                ArrayList<String> formatted = new ArrayList<String>(users.size());
+                ArrayList<String> formatted = new ArrayList<>(users.size());
+                formatted.add(0, "All Users");
                 for (SchedulerUser user : users) {
                     formatted.add(user.getUsername());
                 }

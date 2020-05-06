@@ -9,7 +9,8 @@
 	white-space: nowrap;
 }
 
-.generalParametersStyle {
+.generalParametersStyle, .generalParametersStyleFocused {
+    font-size: 15px;
     font-weight: bold;
     color: #003168;
     white-space: nowrap;
@@ -21,6 +22,8 @@
 }
 
 .sectionParametersStyle {
+    font-size: 12px;
+    text-decoration: underline;
     color: #003168;
     white-space: nowrap;
 }
@@ -105,4 +108,8 @@
 .gwt-FileUpload {
                 font-size : 11px;
                 margin-left : 60px;
+}
+
+pre {
+                margin:0;
 }

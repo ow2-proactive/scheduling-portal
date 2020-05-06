@@ -97,6 +97,11 @@ public class SchedulerController extends Controller implements UncaughtException
         return SchedulerImagesUnbundled.LOGO_350;
     }
 
+    @Override
+    public String getPortalLogo() {
+        return SchedulerImagesUnbundled.PPS_RUN;
+    }
+
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
     private String localSessionNum;
 
@@ -250,20 +255,36 @@ public class SchedulerController extends Controller implements UncaughtException
 
             private void login() {
                 stopTryingLoginIfLoggerInRm();
-                scheduler.getVersion(new AsyncCallback<String>() {
-                    public void onSuccess(String result) {
-                        JSONObject obj = JSONParser.parseStrict(result).isObject();
-                        String schedVer = obj.get("scheduler").isString().stringValue();
-                        String restVer = obj.get("rest").isString().stringValue();
-                        Config.get().set(SchedulerConfig.SCHED_VERSION, schedVer);
-                        Config.get().set(SchedulerConfig.REST_VERSION, restVer);
-
-                        __login(sessionId, login);
-                    }
-
+                scheduler.portalAccess(sessionId, new AsyncCallback<String>() {
                     public void onFailure(Throwable caught) {
                         String msg = JSONUtils.getJsonErrorMessage(caught);
                         LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        if (result.contains("true")) {
+                            scheduler.getVersion(new AsyncCallback<String>() {
+                                public void onSuccess(String result) {
+                                    JSONObject obj = JSONParser.parseStrict(result).isObject();
+                                    String schedVer = obj.get("scheduler").isString().stringValue();
+                                    String restVer = obj.get("rest").isString().stringValue();
+                                    Config.get().set(SchedulerConfig.SCHED_VERSION, schedVer);
+                                    Config.get().set(SchedulerConfig.REST_VERSION, restVer);
+
+                                    __login(sessionId, login);
+                                }
+
+                                public void onFailure(Throwable caught) {
+                                    String msg = JSONUtils.getJsonErrorMessage(caught);
+                                    LogModel.getInstance()
+                                            .logImportantMessage("Failed to get REST server version: " + msg);
+                                }
+                            });
+                        } else {
+                            SchedulerController.this.loginView = new LoginPage(SchedulerController.this,
+                                                                               "You do not have rights to access Scheduling portal");
+                        }
                     }
                 });
             }

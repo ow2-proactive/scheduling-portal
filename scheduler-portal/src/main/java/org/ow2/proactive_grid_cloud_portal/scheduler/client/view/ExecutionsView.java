@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.Arrays;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -34,6 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -136,15 +139,20 @@ public class ExecutionsView implements ExecutionDisplayModeListener {
             case JOB_CENTRIC:
                 this.tasksPane.hide();
                 this.jobsPane.show();
-                chkMy.setTitle("My jobs");
-                chkMy.redraw();
+                showJobFilters();
                 break;
             case TASK_CENTRIC:
                 this.jobsPane.hide();
                 this.tasksPane.show();
-                chkMy.setTitle("My tasks");
-                chkMy.redraw();
+                hideJobFilters();
         }
+    }
 
+    private void hideJobFilters() {
+        Arrays.asList(chkPending, chkRunning, chkFinished).forEach(FormItem::hide);
+    }
+
+    private void showJobFilters() {
+        Arrays.asList(chkPending, chkRunning, chkFinished).forEach(FormItem::show);
     }
 }

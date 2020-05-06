@@ -50,7 +50,6 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
 
     public EditDynamicParametersWindow(RMController controller, String nodeSourceName) {
         super(controller, nodeSourceName, WINDOW_TITLE);
-        buildForm();
     }
 
     @Override

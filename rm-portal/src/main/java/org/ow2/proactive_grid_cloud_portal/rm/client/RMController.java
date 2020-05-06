@@ -25,23 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
-import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory.Range;
-import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -59,13 +47,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -109,6 +91,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     @Override
     public String getLogo350Url() {
         return RMImagesUnbundled.LOGO_350;
+    }
+
+    @Override
+    public String getPortalLogo() {
+        return RMImagesUnbundled.PPS_DEPLOY;
     }
 
     /** if this is different than LOCAL_SESSION cookie, we need to disconnect */
@@ -222,20 +209,36 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     @Override
     public void login(final String sessionId, final String login) {
         stopTryingLoginIfLoggedInScheduler();
-        rm.getVersion(new AsyncCallback<String>() {
-            public void onSuccess(String result) {
-                JSONObject obj = JSONParser.parseStrict(result).isObject();
-                String rmVer = obj.get("rm").isString().stringValue();
-                String restVer = obj.get("rest").isString().stringValue();
-                Config.get().set(RMConfig.RM_VERSION, rmVer);
-                Config.get().set(RMConfig.REST_VERSION, restVer);
-
-                __login(sessionId, login);
-            }
-
+        rm.portalAccess(sessionId, new AsyncCallback<String>() {
+            @Override
             public void onFailure(Throwable caught) {
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (result.contains("true")) {
+                    rm.getVersion(new AsyncCallback<String>() {
+                        public void onSuccess(String result) {
+                            JSONObject obj = JSONParser.parseStrict(result).isObject();
+                            String rmVer = obj.get("rm").isString().stringValue();
+                            String restVer = obj.get("rest").isString().stringValue();
+                            Config.get().set(RMConfig.RM_VERSION, rmVer);
+                            Config.get().set(RMConfig.REST_VERSION, restVer);
+
+                            __login(sessionId, login);
+                        }
+
+                        public void onFailure(Throwable caught) {
+                            String msg = JSONUtils.getJsonErrorMessage(caught);
+                            LogModel.getInstance().logImportantMessage("Failed to get REST server version: " + msg);
+                        }
+                    });
+                } else {
+                    RMController.this.loginPage = new LoginPage(RMController.this,
+                                                                "You do not have rights to access Resource Manager portal");
+                }
             }
         });
     }
@@ -748,10 +751,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private NodeSource parseNodeSource(JSONObject nsObj) {
         String sourceName = nsObj.get("sourceName").isString().stringValue();
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
+        LinkedHashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
-        return new NodeSource(sourceName, sourceDescription, nodeSourceAdmin, nodeSourceStatus, eventType);
+        return new NodeSource(sourceName,
+                              sourceDescription,
+                              additionalInformation,
+                              nodeSourceAdmin,
+                              nodeSourceStatus,
+                              eventType);
     }
 
     private Node parseNode(JSONObject nodeObj) {
@@ -815,6 +824,24 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         eventType,
                         usageInfo,
                         tokens);
+    }
+
+    private LinkedHashMap<String, String> getJsonMapNullable(JSONObject jsonObject, String attributeName) {
+        JSONObject mapAsJSONObject = jsonObject.get(attributeName).isObject();
+
+        if (mapAsJSONObject == null) {
+            return (LinkedHashMap<String, String>) Collections.EMPTY_MAP;
+        }
+
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        Iterator<String> mapAsJSONObjectKeysIterator = mapAsJSONObject.keySet().iterator();
+        while (mapAsJSONObjectKeysIterator.hasNext()) {
+            String currentKey = mapAsJSONObjectKeysIterator.next();
+            String currentValue = mapAsJSONObject.get(currentKey).isString().stringValue();
+            result.put(currentKey, currentValue);
+        }
+
+        return result;
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
