@@ -92,7 +92,7 @@ public abstract class ItemsListGrid<I> extends ListGrid {
 
     /**
      *  a datasource for the grid.
-     * 
+     *
      */
     protected class ItemDS extends DataSource {
 
