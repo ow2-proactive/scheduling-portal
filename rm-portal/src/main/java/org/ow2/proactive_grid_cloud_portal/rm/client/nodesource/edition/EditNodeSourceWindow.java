@@ -52,15 +52,19 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
 
     public EditNodeSourceWindow(RMController controller, String nodeSourceName) {
         super(controller, WINDOW_TITLE, WAITING_MESSAGE);
-        setAttributesAndBuildForm(nodeSourceName);
+        // Hiding advanced configuration causes the problem of losing advanced configuration value
+        // when editing a node source. So before fixing the problem of losing form value, we show advanced configuration
+        // by default when editing a node source.
+        setAttributesAndBuildForm(nodeSourceName, true);
     }
 
-    protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle) {
+    protected EditNodeSourceWindow(RMController controller, String nodeSourceName, String windowTitle,
+            boolean showAdvanced) {
         super(controller, windowTitle, WAITING_MESSAGE);
-        setAttributesAndBuildForm(nodeSourceName);
+        setAttributesAndBuildForm(nodeSourceName, showAdvanced);
     }
 
-    private void setAttributesAndBuildForm(String nodeSourceName) {
+    private void setAttributesAndBuildForm(String nodeSourceName, boolean showAdvanced) {
         this.nodeSourceName = nodeSourceName;
         // Before for editing dynamic parameters,
         // we were calling it twice (once in EditDynamicParametersWindow constructor,
@@ -69,8 +73,8 @@ public class EditNodeSourceWindow extends NodeSourceWindow {
         // which calls buildForm only once. It does not work when called once.
         // So now, for both editing dynamic parameters and editing undeployed NS
         // we will call it twice.
-        buildForm();
-        buildForm();
+        buildForm(showAdvanced);
+        buildForm(showAdvanced);
     }
 
     @Override
