@@ -211,7 +211,7 @@ public abstract class NodeSourceWindow {
      */
     protected abstract void beforeSubmit();
 
-    protected void buildForm() {
+    protected void buildForm(boolean showAdvanced) {
         VLayout nodeSourceWindowLayout = new VLayout();
         nodeSourceWindowLayout.setMargin(5);
         nodeSourceWindowLayout.setMembersMargin(0);
@@ -263,7 +263,7 @@ public abstract class NodeSourceWindow {
 
         isAdvanced = new CheckboxItem();
         isAdvanced.setTitle("Advanced configuration");
-        isAdvanced.setDefaultValue(false);
+        isAdvanced.setDefaultValue(showAdvanced);
         isAdvanced.addChangedHandler(e -> {
             isAdvanceChangedHandler();
         });
