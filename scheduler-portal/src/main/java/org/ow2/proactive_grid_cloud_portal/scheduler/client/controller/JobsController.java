@@ -68,6 +68,7 @@ import com.smartgwt.client.widgets.layout.Layout;
  * @author the activeeon team
  */
 public class JobsController {
+    public static final String STUDIO_URL = "/studio/#workflowscheduler/";
 
     /**
      * Model for the jobs logic.
@@ -160,7 +161,7 @@ public class JobsController {
 
     /**
      * Pauses the given job, depending its current state
-     * 
+     *
      * @param jobId id of the job to pause/resume
      */
     public void pauseJobs(List<String> jobId) {
@@ -218,7 +219,7 @@ public class JobsController {
 
     /**
      * Pauses or resumes the given job, depending its current state
-     * 
+     *
      * @param jobId id of the job to pause/resume
      */
     public void resumeJobs(List<String> jobId) {
@@ -243,7 +244,7 @@ public class JobsController {
 
     /**
      * Removes a job
-     * 
+     *
      * @param jobId id of the job
      */
     public void removeJob(List<String> jobId) {
@@ -267,7 +268,7 @@ public class JobsController {
 
     /**
      * Kills a list of jobs
-     * 
+     *
      * @param jobId id of the job
      */
     public void killJobs(List<String> jobId) {
@@ -308,7 +309,7 @@ public class JobsController {
 
     /**
      * Apply the specified priority to the given job
-     * 
+     *
      * @param jobId id of the job
      * @param priority new priority
      */
@@ -404,6 +405,18 @@ public class JobsController {
     }
 
     /**
+     * Open a job in Studio.
+     * Open the workflow of selected job in the studio on a new browser tab.
+     *
+     * @param jobId id of the job
+     */
+    public void openStudio(String jobId) {
+
+        com.google.gwt.user.client.Window.open(STUDIO_URL + jobId, "_blank", "");
+
+    }
+
+    /**
      * Gets the jobs pagination controller.
      * @return the jobs pagination controller.
      */
@@ -422,7 +435,7 @@ public class JobsController {
     /**
      * Add a fake submitted job to the list
      * the name is not important, it will be updated
-     * 
+     *
      * @param jobId id of the job
      * @param name name of the job
      */
