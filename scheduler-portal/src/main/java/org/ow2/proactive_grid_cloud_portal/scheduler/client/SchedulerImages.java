@@ -32,7 +32,7 @@ import com.google.gwt.resources.client.ImageResource;
 
 /**
  * Image Bundle to optimizes external resource handling
- * 
+ *
  * @author mschnoor
  *
  */
@@ -127,6 +127,9 @@ public interface SchedulerImages extends ClientBundle {
 
     @Source("images/usage_16.png")
     ImageResource usage_16();
+
+    @Source("images/pa_16.png")
+    ImageResource pa_16();
 
     @Source("images/calendar.png")
     ImageResource calendar();

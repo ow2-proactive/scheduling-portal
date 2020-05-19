@@ -28,14 +28,20 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.HashMap;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -51,6 +57,10 @@ public class VisualizationViewHtml implements VisualizationView {
     private HTML htmlPanel;
 
     private HashMap<String, Element> task2Dom = null;
+
+    private IButton button = new IButton("Open in Studio");
+
+    Job job = null;
 
     private List<Task> currentTasks = null;
 
@@ -74,6 +84,9 @@ public class VisualizationViewHtml implements VisualizationView {
     public void jobSelected(Job job) {
         noJobSelectedMessage.setVisible(false);
         noVisualizationMessage.setVisible(false);
+        button.setVisible(true);
+        this.job = job;
+
     }
 
     public void jobUnselected() {
@@ -82,6 +95,7 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.setHeight100();
         noJobSelectedMessage.setVisible(true);
         noVisualizationMessage.setVisible(false);
+        button.setVisible(false);
     }
 
     public void visualizationUnavailable(String jobId) {
@@ -90,6 +104,7 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.setHeight100();
         noVisualizationMessage.setVisible(true);
         noJobSelectedMessage.setVisible(false);
+        button.setVisible(false);
     }
 
     public void tasksUpdating() {
@@ -178,6 +193,15 @@ public class VisualizationViewHtml implements VisualizationView {
         this.noJobSelectedMessage.setAlign(Alignment.CENTER);
         this.noJobSelectedMessage.setWidth100();
         wrapper.addMember(noJobSelectedMessage);
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        hp.setWidth("40%");
+        hp.setHeight(button.getHeight() + 5 + "px");
+        button.setAutoFit(true);
+        button.setVisible(false);
+        button.addClickHandler(openStudio());
+        hp.add(button);
+        wrapper.addMember(hp);
 
         this.noVisualizationMessage = new Label("The graphical Visualization is not available for this Workflow. To get one for the next execution, please open the Workflow in the Studio, and store it in the Catalog.");
         this.noVisualizationMessage.setAlign(Alignment.CENTER);
@@ -189,6 +213,17 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.addMember(htmlPanel);
 
         layout.addMember(wrapper);
+    }
+
+    private ClickHandler openStudio() {
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                com.google.gwt.user.client.Window.open(JobsController.STUDIO_URL + job.getId().toString(),
+                                                       "_blank",
+                                                       "");
+            }
+        };
     }
 
     private String extractCss(String html, String cssName) {

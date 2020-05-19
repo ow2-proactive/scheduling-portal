@@ -49,7 +49,7 @@ public class EditDynamicParametersWindow extends EditNodeSourceWindow {
     public static final String WINDOW_TITLE = "Update Dynamic Parameters";
 
     public EditDynamicParametersWindow(RMController controller, String nodeSourceName) {
-        super(controller, nodeSourceName, WINDOW_TITLE);
+        super(controller, nodeSourceName, WINDOW_TITLE, false);
     }
 
     @Override

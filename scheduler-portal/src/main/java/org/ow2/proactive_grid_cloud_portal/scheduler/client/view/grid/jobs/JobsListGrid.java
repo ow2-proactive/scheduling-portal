@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
@@ -418,6 +417,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
         resubmitItem.setEnabled(selSingleSelected);
 
+        MenuItem openItem = new MenuItem("Open in Studio", SchedulerImages.instance.pa_16().getSafeUri().asString());
+        openItem.addClickHandler(event -> controller.openStudio(ids.get(0)));
+        openItem.setEnabled(selSingleSelected);
+
         MenuItem exportXmlItem = new MenuItem("Export XML",
                                               SchedulerImages.instance.job_export_32().getSafeUri().asString());
         // Allow exporting job's XML only & only if a single job is selected.
@@ -436,6 +439,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                       killItem,
                       killAndResubmitItem,
                       resubmitItem,
+                      openItem,
                       exportXmlItem,
                       removeItem);
     }
