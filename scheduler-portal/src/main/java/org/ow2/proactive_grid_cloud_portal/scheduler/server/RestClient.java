@@ -490,7 +490,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/all")
-    @Produces("application/json")
+    @Produces("text/plain")
     String tasklog(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("taskid") String taskId);
 
@@ -504,7 +504,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/out")
-    @Produces("application/json")
+    @Produces("text/plain")
     String taskStdout(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("taskid") String taskId);
 
@@ -518,7 +518,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/result/log/err")
-    @Produces("application/json")
+    @Produces("text/plain")
     String taskStderr(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("taskid") String taskId);
 
@@ -565,7 +565,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/tasks/{taskid}/log/server")
-    @Produces("application/json")
+    @Produces("text/plain")
     String taskServerLogs(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("taskid") String taskId);
 
@@ -578,7 +578,7 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("jobs/{jobid}/log/server")
-    @Produces("application/json")
+    @Produces("text/plain")
     String jobServerLogs(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId);
 
     /**
