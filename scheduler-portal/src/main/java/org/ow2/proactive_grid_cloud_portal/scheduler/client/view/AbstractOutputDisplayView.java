@@ -122,12 +122,12 @@ public abstract class AbstractOutputDisplayView<M extends AbstractSelectedTarget
      */
     protected void showContent(String content) {
         this.label.hide();
-        this.text.show();
         if (content.isEmpty()) {
             this.text.setContents(" ");
         } else {
             this.text.setContents(content);
         }
+        this.text.show();
     }
 
     /**
