@@ -181,22 +181,15 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
     protected void update(Collection<List<String>> lines) {
         StringBuilder builder = new StringBuilder();
 
-        // alternate bgcolors for each entry
-        boolean even = false;
         for (List<String> outputLines : lines) {
             if (!outputLines.isEmpty()) {
-                builder.append("<div");
-                if (even) {
-                    builder.append("style ='background-color:#FAFAFA; border-bottom: 1px solid #EDEDED; border-top: 1px solid #EDEDED;'");
-                }
-                builder.append(">");
+                builder.append("<div>");
                 for (String outputLine : outputLines) {
                     builder.append("<nobr>");
                     builder.append(outputLine);
                     builder.append("</nobr>");
                 }
                 builder.append("</div>");
-                even = !even;
             }
         }
 
