@@ -316,6 +316,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
             this.changeCurrentOutput(null, false);
         } else {
             this.changeCurrentOutput(job.getId().toString(), true);
+            this.view.refreshOutputModeSelect(model.getOutputMode());
             this.checkLiveEnabled(job);
             if (this.model.isLive()) {
                 this.startLiveOutput();
@@ -341,6 +342,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
         boolean changed = this.model.setOutputMode(outputMode);
         if (changed) {
             this.refreshOutput();
+            this.view.refreshOutputModeSelect(outputMode);
         }
     }
 
