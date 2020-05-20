@@ -149,6 +149,11 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         this.label.show();
     }
 
+    public void refreshOutputModeSelect(OutputMode mode) {
+        this.outSelect.setValue(mode.label);
+        this.outSelect.redraw();
+    }
+
     /**
      * Updates the output view to display the given output after update.
      */
