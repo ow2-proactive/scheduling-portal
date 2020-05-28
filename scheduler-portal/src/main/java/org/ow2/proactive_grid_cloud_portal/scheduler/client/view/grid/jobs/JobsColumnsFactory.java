@@ -46,7 +46,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns ID_ATTR = new GridColumns("id", "Id", 80, true, true);
 
-    public static final GridColumns STATE_ATTR = new GridColumns("state", "State", 80, true, false);
+    public static final GridColumns STATE_ATTR = new GridColumns("status", "Status", 80, true, false);
 
     public static final GridColumns ISSUES_ATTR = new GridColumns("issues", "Issues", 80, true, false);
 
