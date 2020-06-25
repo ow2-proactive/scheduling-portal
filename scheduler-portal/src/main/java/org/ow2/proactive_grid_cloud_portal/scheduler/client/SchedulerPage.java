@@ -366,8 +366,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
      * |+- Portal v -++- Admin v -++- Help v -+|+ Submit ++ Logout +   +- Img ---+|
      * || Submit     || Start     || Logs     ||+--------++--------+   | PA logo ||
      * || Settings   || Stop      || About    |                        +---------+|
-     * +| Credentials|| Freeze    |+----------+-----------------------------------+
-     *  | Logout     || Pause     |
+     * +| Credentials|| Freeze    || Tutorials||
+     *  | Logout     || Pause     |+----------+
      *  +------------+| Resume    |
      *                | Kill      |
      *                +-----------+
@@ -437,9 +437,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> SchedulerPage.this.aboutWindow.show());
+
+        // Icon created by https://www.flaticon.com/authors/srip
+        MenuItem tutorialsMenuItem = new MenuItem("Tutorials",
+                                                  Images.instance.icon_graduation_cap_16().getSafeUri().asString());
+        tutorialsMenuItem.addClickHandler(event -> Window.open("https://try.activeeon.com/tutorials.html",
+                                                               "Tutorials",
+                                                               ""));
+
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
-        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
+        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem, tutorialsMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
         ToolStripButton submitButton = new ToolStripButton("Submit job");
