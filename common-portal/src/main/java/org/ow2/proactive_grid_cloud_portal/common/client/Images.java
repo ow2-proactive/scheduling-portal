@@ -116,4 +116,7 @@ public interface Images extends ClientBundle {
     @Source("images/filter_32.png")
     ImageResource filter_32();
 
+    @Source("images/icon_graduation_cap_16.png")
+    ImageResource icon_graduation_cap_16();
+
 }
