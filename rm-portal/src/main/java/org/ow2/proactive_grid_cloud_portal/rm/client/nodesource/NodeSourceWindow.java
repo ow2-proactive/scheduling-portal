@@ -59,6 +59,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.HTML;
 import com.smartgwt.client.types.*;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -864,9 +865,10 @@ public abstract class NodeSourceWindow {
     }
 
     public void importNodeSourceFromJson(String importedNodeSourceJsonString) {
+        String unescapedNodeSourceJsonString = new HTML(importedNodeSourceJsonString).getText();
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
-            nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
+            nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(unescapedNodeSourceJsonString);
             this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             fillPluginFormItems(nodeSourceConfiguration);
