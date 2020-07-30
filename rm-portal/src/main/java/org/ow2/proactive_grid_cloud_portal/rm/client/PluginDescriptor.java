@@ -141,6 +141,14 @@ public class PluginDescriptor {
         public boolean isImportant() {
             return important;
         }
+
+        @Override
+        public String toString() {
+            return "Field{" + "name='" + name + '\'' + ", value='" + value + '\'' + ", description='" + description +
+                   '\'' + ", password=" + password + ", credential=" + credential + ", file=" + file + ", textarea=" +
+                   textarea + ", checkbox=" + checkbox + ", dynamic=" + dynamic + ", sectionSelector=" +
+                   sectionSelector + ", important=" + important + '}';
+        }
     }
 
     public PluginDescriptor(String pluginName, String pluginDescription, Map<Integer, String> sectionDescriptions,

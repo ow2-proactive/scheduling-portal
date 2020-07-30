@@ -151,6 +151,8 @@ public abstract class NodeSourceWindow {
      */
     private Map<String, List<FormItem>> formItemsByName;
 
+    private Map<String, List<FormItem>> advancedFormItems = new HashMap<>();
+
     private Map<String, String> hiddenItems = new HashMap<>();
 
     /**
@@ -335,12 +337,33 @@ public abstract class NodeSourceWindow {
         this.window.centerInPage();
     }
 
+    public static native void nativeConsoleLog(String s)
+    /*-{ console.log( s ); }-*/;
+
+    private void addAdvancedFormItems(String pluginName, FormItem formItem) {
+        List<FormItem> items = advancedFormItems.getOrDefault(pluginName, new ArrayList<>());
+        items.add(formItem);
+        advancedFormItems.put(pluginName, items);
+    }
+
     private void isAdvanceChangedHandler() {
-        hideAllPluginFormItems();
-        populateFormValues(() -> {
-            resetFormForInfrastructureSelectChange();
-            resetFormForPolicySelectChange();
-        });
+        //TODO
+        nativeConsoleLog("advancedFormItems " + advancedFormItems);
+        if (isAdvanced.getValueAsBoolean()) {
+            this.advancedFormItems.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                  .stream()
+                                  .forEach(FormItem::show);
+            this.advancedFormItems.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                  .stream()
+                                  .forEach(FormItem::show);
+        } else {
+            this.advancedFormItems.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                  .stream()
+                                  .forEach(FormItem::hide);
+            this.advancedFormItems.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                  .stream()
+                                  .forEach(FormItem::hide);
+        }
     }
 
     private void createButtons(VLayout nodeSourceWindowLayout) {
@@ -676,6 +699,8 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 if (pluginField.isImportant()) {
                     formItem.setTitleStyle("important-message");
+                } else {
+                    addAdvancedFormItems(plugin.getPluginName(), formItem);
                 }
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
