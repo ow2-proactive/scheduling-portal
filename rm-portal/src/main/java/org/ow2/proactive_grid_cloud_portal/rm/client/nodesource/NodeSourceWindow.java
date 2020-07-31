@@ -106,6 +106,8 @@ public abstract class NodeSourceWindow {
 
     private static final String HIDDEN_INFRA = "hidden-infra";
 
+    private static final String FORM_ITEM_ATTR_ADVANCED = "advanced";
+
     public static final String FIELD_SEPARATOR = "\u0003";
 
     public static final String ROW_SEPARATOR = "\u0006";
@@ -340,20 +342,20 @@ public abstract class NodeSourceWindow {
         if (isAdvanced.getValueAsBoolean()) {
             this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
                                 .stream()
-                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .filter(i -> i.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED))
                                 .forEach(FormItem::show);
             this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
                                 .stream()
-                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .filter(i -> i.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED))
                                 .forEach(FormItem::show);
         } else {
             this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
                                 .stream()
-                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .filter(i -> i.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED))
                                 .forEach(FormItem::hide);
             this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
                                 .stream()
-                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .filter(i -> i.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED))
                                 .forEach(FormItem::hide);
         }
     }
@@ -438,7 +440,7 @@ public abstract class NodeSourceWindow {
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
             // when isAdvanced is unchecked, the advanced form items should be hidden.
-            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean("advanced")) {
+            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED)) {
                 formItem.hide();
             }
         }
@@ -501,7 +503,7 @@ public abstract class NodeSourceWindow {
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
             // when isAdvanced is unchecked, the advanced form items should be hidden.
-            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean("advanced")) {
+            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean(FORM_ITEM_ATTR_ADVANCED)) {
                 formItem.hide();
             }
         }
@@ -699,7 +701,7 @@ public abstract class NodeSourceWindow {
                 if (pluginField.isImportant()) {
                     formItem.setTitleStyle("important-message");
                 }
-                formItem.setAttribute("advanced", !pluginField.isImportant());
+                formItem.setAttribute(FORM_ITEM_ATTR_ADVANCED, !pluginField.isImportant());
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
@@ -772,13 +774,21 @@ public abstract class NodeSourceWindow {
                 if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
                     RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
                                                                     currentSectionSelector);
-                    allFormItems.add(rowSpacerItem);
                     StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() + "staticTextItem" +
                                                                        currentSectionSelector,
                                                                        plugin.getSectionDescriptions()
                                                                              .get(pluginField.getSectionSelector()) +
                                                                                                ":");
                     staticTextItem.setTitleStyle("sectionParametersStyle");
+                    // check whether the section is visible when "isAdvanced" is not checked (i.e., not showing not-important fields).
+                    final int finalCurrentSectionSelector = currentSectionSelector;
+                    // if this section contains none of important fields, the section title related form items should be hidden when "isAdvanced" is not checked.
+                    boolean advancedSection = pluginFields.stream()
+                                                          .filter(p -> p.getSectionSelector() == finalCurrentSectionSelector)
+                                                          .noneMatch(p -> p.isImportant());
+                    rowSpacerItem.setAttribute(FORM_ITEM_ATTR_ADVANCED, advancedSection);
+                    staticTextItem.setAttribute(FORM_ITEM_ATTR_ADVANCED, advancedSection);
+                    allFormItems.add(rowSpacerItem);
                     allFormItems.add(staticTextItem);
                 }
             }
