@@ -35,6 +35,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -66,7 +67,12 @@ public abstract class ImportLayout extends VLayout {
 
     public abstract CatalogKind getKind();
 
-    public abstract void handleImport(String submitResult);
+    public void unescapeAndImport(String submitResult) {
+        String unescapedNodeSourceJsonString = new HTML(submitResult).getText();
+        handleImport(unescapedNodeSourceJsonString);
+    }
+
+    protected abstract void handleImport(String submitResult);
 
     private void createImportPanel(String layoutTitle) {
         this.importPanel = new VerticalPanel();
@@ -102,7 +108,7 @@ public abstract class ImportLayout extends VLayout {
         this.selectedImportMethodPanel.clear();
         String selectedOption = this.importMethodList.getSelectedValue();
         if (selectedOption.equals(ImportFromFilePanel.FILE_OPTION_NAME)) {
-            this.selectedImportMethodPanel.add(new ImportFromFilePanel(importCompleteEvent -> handleImport(importCompleteEvent.getResults())));
+            this.selectedImportMethodPanel.add(new ImportFromFilePanel(importCompleteEvent -> unescapeAndImport(importCompleteEvent.getResults())));
         } else if (selectedOption.equals(ImportFromCatalogPanel.CATALOG_OPTION_NAME)) {
             addImportFromCatalogPanelOrFail();
         }
@@ -113,7 +119,7 @@ public abstract class ImportLayout extends VLayout {
             this.selectedImportMethodPanel.add(new ImportFromCatalogPanel(getKind(), new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    handleImport(response.getText());
+                    unescapeAndImport(response.getText());
                 }
 
                 @Override

@@ -896,10 +896,9 @@ public abstract class NodeSourceWindow {
     }
 
     public void importNodeSourceFromJson(String importedNodeSourceJsonString) {
-        String unescapedNodeSourceJsonString = new HTML(importedNodeSourceJsonString).getText();
         NodeSourceConfiguration nodeSourceConfiguration;
         try {
-            nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(unescapedNodeSourceJsonString);
+            nodeSourceConfiguration = new NodeSourceConfigurationParser().parseNodeSourceConfiguration(importedNodeSourceJsonString);
             this.nodeSourceNameText.setValue(nodeSourceConfiguration.getNodeSourceName());
             this.nodesRecoverableCheckbox.setValue(nodeSourceConfiguration.getNodesRecoverable());
             fillPluginFormItems(nodeSourceConfiguration);
