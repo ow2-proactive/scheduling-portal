@@ -151,8 +151,6 @@ public abstract class NodeSourceWindow {
      */
     private Map<String, List<FormItem>> formItemsByName;
 
-    private Map<String, List<FormItem>> advancedFormItems = new HashMap<>();
-
     private Map<String, String> hiddenItems = new HashMap<>();
 
     /**
@@ -267,9 +265,7 @@ public abstract class NodeSourceWindow {
         isAdvanced = new CheckboxItem();
         isAdvanced.setTitle("Advanced configuration");
         isAdvanced.setDefaultValue(showAdvanced);
-        isAdvanced.addChangedHandler(e -> {
-            isAdvanceChangedHandler();
-        });
+        isAdvanced.addChangedHandler(e -> isAdvanceChangedHandler());
 
         DynamicForm formIsAdvanced = new DynamicForm();
         formIsAdvanced.setWidth100();
@@ -340,29 +336,25 @@ public abstract class NodeSourceWindow {
     public static native void nativeConsoleLog(String s)
     /*-{ console.log( s ); }-*/;
 
-    private void addAdvancedFormItems(String pluginName, FormItem formItem) {
-        List<FormItem> items = advancedFormItems.getOrDefault(pluginName, new ArrayList<>());
-        items.add(formItem);
-        advancedFormItems.put(pluginName, items);
-    }
-
     private void isAdvanceChangedHandler() {
-        //TODO
-        nativeConsoleLog("advancedFormItems " + advancedFormItems);
         if (isAdvanced.getValueAsBoolean()) {
-            this.advancedFormItems.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
-                                  .stream()
-                                  .forEach(FormItem::show);
-            this.advancedFormItems.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
-                                  .stream()
-                                  .forEach(FormItem::show);
+            this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .forEach(FormItem::show);
+            this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .forEach(FormItem::show);
         } else {
-            this.advancedFormItems.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
-                                  .stream()
-                                  .forEach(FormItem::hide);
-            this.advancedFormItems.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
-                                  .stream()
-                                  .forEach(FormItem::hide);
+            this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .forEach(FormItem::hide);
+            this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> i.getAttributeAsBoolean("advanced"))
+                                .forEach(FormItem::hide);
         }
     }
 
@@ -421,6 +413,7 @@ public abstract class NodeSourceWindow {
 
             afterItemsCreation();
 
+            isAdvanceChangedHandler();
             this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
                                                                      .stream()
                                                                      .flatMap(Collection::stream)
@@ -444,6 +437,10 @@ public abstract class NodeSourceWindow {
         for (FormItem formItem : this.formItemsByName.getOrDefault(policyPluginName,
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
+            // when isAdvanced is unchecked, the advanced form items should be hidden.
+            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean("advanced")) {
+                formItem.hide();
+            }
         }
         this.previousSelectedPolicy = policyPluginName;
     }
@@ -503,6 +500,10 @@ public abstract class NodeSourceWindow {
         for (FormItem formItem : this.formItemsByName.getOrDefault(infrastructurePluginName,
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
             formItem.show();
+            // when isAdvanced is unchecked, the advanced form items should be hidden.
+            if ((!isAdvanced.getValueAsBoolean()) && formItem.getAttributeAsBoolean("advanced")) {
+                formItem.hide();
+            }
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
 
@@ -638,8 +639,6 @@ public abstract class NodeSourceWindow {
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
                                                           .stream()
-                                                          .filter(field -> isAdvanced.getValueAsBoolean() ||
-                                                                           field.isImportant())
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
@@ -699,9 +698,8 @@ public abstract class NodeSourceWindow {
             formItemsForField.forEach(formItem -> {
                 if (pluginField.isImportant()) {
                     formItem.setTitleStyle("important-message");
-                } else {
-                    addAdvancedFormItems(plugin.getPluginName(), formItem);
                 }
+                formItem.setAttribute("advanced", !pluginField.isImportant());
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
@@ -969,9 +967,11 @@ public abstract class NodeSourceWindow {
     }
 
     public void replaceInfrastructureItems(PluginDescriptor infrastructurePluginDescriptor) {
+        nativeConsoleLog("replaceInfrastructureItems");
         List<FormItem> allNodeSourcePluginsFormItems = Arrays.stream(this.nodeSourcePluginsForm.getFields())
                                                              .collect(Collectors.toList());
         replaceInfrastructureItemsInItemList(infrastructurePluginDescriptor, allNodeSourcePluginsFormItems);
+        nativeConsoleLog("replaceInfrastructureItemsInItemList");
         this.nodeSourcePluginsForm.setFields(allNodeSourcePluginsFormItems.toArray(new FormItem[0]));
     }
 
