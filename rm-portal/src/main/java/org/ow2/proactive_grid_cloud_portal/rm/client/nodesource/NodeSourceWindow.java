@@ -59,6 +59,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.ui.HTML;
 import com.smartgwt.client.types.*;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -104,6 +105,8 @@ public abstract class NodeSourceWindow {
     private static final String HIDDEN_POLICY = "hidden-policy";
 
     private static final String HIDDEN_INFRA = "hidden-infra";
+
+    private static final String IMPORTANT_ITEM_ATTR = "importantField";
 
     public static final String FIELD_SEPARATOR = "\u0003";
 
@@ -264,9 +267,7 @@ public abstract class NodeSourceWindow {
         isAdvanced = new CheckboxItem();
         isAdvanced.setTitle("Advanced configuration");
         isAdvanced.setDefaultValue(showAdvanced);
-        isAdvanced.addChangedHandler(e -> {
-            isAdvanceChangedHandler();
-        });
+        isAdvanced.addChangedHandler(e -> isAdvanceChangedHandler());
 
         DynamicForm formIsAdvanced = new DynamicForm();
         formIsAdvanced.setWidth100();
@@ -335,11 +336,27 @@ public abstract class NodeSourceWindow {
     }
 
     private void isAdvanceChangedHandler() {
-        hideAllPluginFormItems();
-        populateFormValues(() -> {
-            resetFormForInfrastructureSelectChange();
-            resetFormForPolicySelectChange();
-        });
+        if (isAdvanced.getValueAsBoolean()) {
+            // when checked isAdvanced, all the not-important fields should be shown.
+            this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> !i.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
+                                .forEach(FormItem::show);
+            this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> !i.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
+                                .forEach(FormItem::show);
+        } else {
+            // when unchecked isAdvanced, all the not-important fields should be hidden.
+            this.formItemsByName.getOrDefault(infrastructureSelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> !i.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
+                                .forEach(FormItem::hide);
+            this.formItemsByName.getOrDefault(policySelectItem.getValueAsString(), new ArrayList<>())
+                                .stream()
+                                .filter(i -> !i.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
+                                .forEach(FormItem::hide);
+        }
     }
 
     private void createButtons(VLayout nodeSourceWindowLayout) {
@@ -397,6 +414,7 @@ public abstract class NodeSourceWindow {
 
             afterItemsCreation();
 
+            isAdvanceChangedHandler();
             this.nodeSourcePluginsForm.setFields(this.formItemsByName.values()
                                                                      .stream()
                                                                      .flatMap(Collection::stream)
@@ -419,7 +437,10 @@ public abstract class NodeSourceWindow {
         String policyPluginName = this.policySelectItem.getValueAsString();
         for (FormItem formItem : this.formItemsByName.getOrDefault(policyPluginName,
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
-            formItem.show();
+            // when unchecked "isAdvanced", only the important fields should be shown, otherwise, all the fields should be shown.
+            if (isAdvanced.getValueAsBoolean() || formItem.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR)) {
+                formItem.show();
+            }
         }
         this.previousSelectedPolicy = policyPluginName;
     }
@@ -478,7 +499,10 @@ public abstract class NodeSourceWindow {
         String infrastructurePluginName = this.infrastructureSelectItem.getValueAsString();
         for (FormItem formItem : this.formItemsByName.getOrDefault(infrastructurePluginName,
                                                                    (List<FormItem>) Collections.EMPTY_LIST)) {
-            formItem.show();
+            // when unchecked "isAdvanced", only the important fields should be shown, otherwise, all the fields should be shown.
+            if (isAdvanced.getValueAsBoolean() || formItem.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR)) {
+                formItem.show();
+            }
         }
         this.previousSelectedInfrastructure = infrastructurePluginName;
 
@@ -614,8 +638,6 @@ public abstract class NodeSourceWindow {
     private List<FormItem> getPrefilledFormItems(PluginDescriptor plugin) {
         List<PluginDescriptor.Field> pluginFields = plugin.getConfigurableFields()
                                                           .stream()
-                                                          .filter(field -> isAdvanced.getValueAsBoolean() ||
-                                                                           field.isImportant())
                                                           .sorted(Comparator.comparing(PluginDescriptor.Field::getSectionSelector))
                                                           .collect(Collectors.toList());
         List<FormItem> allFormItems = new ArrayList<>(pluginFields.size());
@@ -676,6 +698,7 @@ public abstract class NodeSourceWindow {
                 if (pluginField.isImportant()) {
                     formItem.setTitleStyle("important-message");
                 }
+                formItem.setAttribute(IMPORTANT_ITEM_ATTR, pluginField.isImportant());
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
@@ -748,13 +771,22 @@ public abstract class NodeSourceWindow {
                 if (plugin.getSectionDescriptions().containsKey(pluginField.getSectionSelector())) {
                     RowSpacerItem rowSpacerItem = new RowSpacerItem(plugin.getPluginName() + "separator" +
                                                                     currentSectionSelector);
-                    allFormItems.add(rowSpacerItem);
                     StaticTextItem staticTextItem = new StaticTextItem(plugin.getPluginName() + "staticTextItem" +
                                                                        currentSectionSelector,
                                                                        plugin.getSectionDescriptions()
                                                                              .get(pluginField.getSectionSelector()) +
                                                                                                ":");
                     staticTextItem.setTitleStyle("sectionParametersStyle");
+                    // check whether the section is visible when "isAdvanced" is not checked (i.e., not showing not-important fields).
+                    final int finalCurrentSectionSelector = currentSectionSelector;
+                    // if this section contains any of important fields, the section title related form items should always be shown.
+                    // Otherwise, it should be hidden when "isAdvanced" is not checked.
+                    boolean importantSection = pluginFields.stream()
+                                                           .filter(p -> p.getSectionSelector() == finalCurrentSectionSelector)
+                                                           .anyMatch(PluginDescriptor.Field::isImportant);
+                    rowSpacerItem.setAttribute(IMPORTANT_ITEM_ATTR, importantSection);
+                    staticTextItem.setAttribute(IMPORTANT_ITEM_ATTR, importantSection);
+                    allFormItems.add(rowSpacerItem);
                     allFormItems.add(staticTextItem);
                 }
             }
