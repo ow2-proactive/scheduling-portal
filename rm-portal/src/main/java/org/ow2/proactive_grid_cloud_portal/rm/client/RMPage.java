@@ -72,7 +72,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 /**
  * Page shown when an user is logged
- * 
+ *
  * @author mschnoor
  *
  */
@@ -281,6 +281,8 @@ public class RMPage implements LogListener {
 
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
+        Img customBrandLogo = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        paShortcutsStrip.addMember(customBrandLogo);
         paShortcutsStrip.addButton(automationDashboardLinkButton);
         paShortcutsStrip.addSpacer(4);
         paShortcutsStrip.addButton(studioLinkButton);
@@ -382,24 +384,11 @@ public class RMPage implements LogListener {
         errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("10%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.CENTER);
-        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
         tools.addButton(errorButton);
-        tools.addFill();
-        tools.addMember(additionalLogoCenter);
 
         return tools;
     }
