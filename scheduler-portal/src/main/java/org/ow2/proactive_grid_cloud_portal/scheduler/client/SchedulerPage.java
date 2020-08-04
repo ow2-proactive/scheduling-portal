@@ -319,6 +319,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
+        Img customBrandLogo = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        paShortcutsStrip.addMember(customBrandLogo);
         paShortcutsStrip.addButton(automationDashboardLinkButton);
         paShortcutsStrip.addSpacer(4);
         paShortcutsStrip.addButton(studioLinkButton);
@@ -544,17 +546,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("10%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.RIGHT);
-        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -566,8 +557,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(errorButton);
         tools.addFill();
         tools.addMember(schedulerStatusLabelLayout);
-        tools.addFill();
-        tools.addMember(additionalLogoCenter);
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.LOADING);
