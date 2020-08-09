@@ -1,12 +1,12 @@
 .rmHeadline {
-	font-size: 18px;
-	color: #777;
-	float: left;
-	padding-top: 10px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-	white-space: nowrap;
+    font-size: 18px;
+    color: #777;
+    float: left;
+    padding-top: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .generalParametersStyle, .generalParametersStyleFocused {
@@ -29,63 +29,69 @@
 }
 
 .paddingLeftAndRight {
-	padding-left: 10px;
-	padding-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-.brand-logo{
-	padding-left: 6px;
-	padding-right: 6px;
-	top: 0px!important;
+.brand-logo {
+    padding-left: 6px;
+    padding-right: 6px;
+    top: 0px !important;
+}
+
+.custom-brand-logo {
+    width: auto !important;
+    margin-right: 50px;
+    top: 0px !important;
 }
 
 .pa-shortcuts > div {
-	position:static!important;
-	display: -webkit-inline-flex!important;;
-	display: -ms-inline-flexbox!important;;
-	display: -moz-flex!important;;
-	display: inline-flex!important;
+    position: static !important;
+    display: -webkit-inline-flex !important;;
+    display: -ms-inline-flexbox !important;;
+    display: -moz-flex !important;;
+    display: inline-flex !important;
 }
 
 .pa-shortcuts > div > div {
-	overflow-x: hidden;
-	transition: width 300ms;
-	transition-timing-function: ease;
-	-webkit-transition: width 300ms;
-	-webkit-transition-timing-function: ease;
-	margin-left: 4px!important;
-	position: static!important;
+    overflow-x: hidden;
+    transition: width 300ms;
+    transition-timing-function: ease;
+    -webkit-transition: width 300ms;
+    -webkit-transition-timing-function: ease;
+    margin-left: 4px !important;
+    position: static !important;
 }
 
 .pa-shortcuts > .active {
-	background-color: #E86D1F;
-	color: white;
+    background-color: #E86D1F;
+    color: white;
 }
 
 .pa-shortcuts {
-	padding-left: 0px!important;
-	padding-right: 0px!important;
-	transition: width 500ms;
-	transition-timing-function: ease;
-	-webkit-transition: width 500ms;
-	-webkit-transition-timing-function: ease;
-	display: -webkit-inline-flex;
-	display: -ms-inline-flexbox;
-	display: -moz-flex;
-	display: inline-flex;
-	float: right;
-	width: auto!important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    transition: width 500ms;
+    transition-timing-function: ease;
+    -webkit-transition: width 500ms;
+    -webkit-transition-timing-function: ease;
+    display: -webkit-inline-flex;
+    display: -ms-inline-flexbox;
+    display: -moz-flex;
+    display: inline-flex;
+    float: right;
+    width: auto !important;
 }
 
-.no-hover{
-	box-shadow: none;
-	background-image: none;
+.no-hover {
+    box-shadow: none;
+    background-image: none;
 }
 
 .toolStripButton, .toolStripButtonOver, .toolStripButtonFocused, .toolStripButtonFocusedOver, .toolStripButtonDown, .toolStripButtonFocusedDown, .toolStripButtonSelected, .toolStripButtonSelectedFocused, .toolStripButtonSelectedDown, .toolStripButtonSelectedFocusedDown, .toolStripButtonSelectedOver, .toolStripButtonSelectedFocusedOver, .toolStripButtonDisabled, .toolStripButtonSelectedDisabled {
     color: #777 !important;
     font-size: 14px !important;
-	padding: 3px 5px !important;
+    padding: 3px 5px !important;
 }
 
 .error-message {
@@ -106,10 +112,10 @@
 }
 
 .gwt-FileUpload {
-                font-size : 11px;
-                margin-left : 60px;
+    font-size: 11px;
+    margin-left: 60px;
 }
 
 pre {
-                margin:0;
+    margin: 0;
 }

@@ -1,186 +1,192 @@
 .searchBox {
-	background-image: url('images/magnifying_glass.png');
-	background-repeat: no-repeat;
-	background-position: right 2px center;
-	background-size: 15px 15px;
-	vertical-align: top;
-	padding-left: 5px;
-	border-right-style: none;
-	margin-top: 6px;
+    background-image: url('images/magnifying_glass.png');
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    background-size: 15px 15px;
+    vertical-align: top;
+    padding-left: 5px;
+    border-right-style: none;
+    margin-top: 6px;
 }
 
 .schedulerHeadline {
-	font-size: 18px;
-	color: #777;
-	float: left;
-	padding-top: 10px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-	white-space: nowrap;
+    font-size: 18px;
+    color: #777;
+    float: left;
+    padding-top: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .paddingLeftAndRight {
-	padding-left: 10px;
-	padding-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-.brand-logo{
-	padding-left: 6px;
-	padding-right: 6px;
-    top: 0px!important;
+.brand-logo {
+    padding-left: 6px;
+    padding-right: 6px;
+    top: 0px !important;
+}
+
+.custom-brand-logo {
+    width: auto !important;
+    margin-right: 50px;
+    top: 0px !important;
 }
 
 .pa-shortcuts > div {
-	position:static!important;
-    display: -webkit-inline-flex!important;;
-    display: -ms-inline-flexbox!important;;
-    display: -moz-flex!important;;
-    display: inline-flex!important;
+    position: static !important;
+    display: -webkit-inline-flex !important;;
+    display: -ms-inline-flexbox !important;;
+    display: -moz-flex !important;;
+    display: inline-flex !important;
 }
 
 .pa-shortcuts > div > div {
-	overflow-x: hidden;
-	transition: width 300ms;
-	transition-timing-function: ease;
-	-webkit-transition: width 300ms;
-	-webkit-transition-timing-function: ease;
-	margin-left: 4px!important;
-	position: static!important;
+    overflow-x: hidden;
+    transition: width 300ms;
+    transition-timing-function: ease;
+    -webkit-transition: width 300ms;
+    -webkit-transition-timing-function: ease;
+    margin-left: 4px !important;
+    position: static !important;
 }
 
 .pa-shortcuts > .active {
-	background-color: #E86D1F;
-	color: white;
+    background-color: #E86D1F;
+    color: white;
 }
 
-.no-hover{
-	box-shadow: none;
-	background-image: none;
+.no-hover {
+    box-shadow: none;
+    background-image: none;
 }
 
 .pa-shortcuts {
-    padding-left: 0px!important;
-    padding-right: 0px!important;
-	transition: width 500ms;
-	transition-timing-function: ease;
-	-webkit-transition: width 500ms;
-	-webkit-transition-timing-function: ease;
-	display: -webkit-inline-flex;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    transition: width 500ms;
+    transition-timing-function: ease;
+    -webkit-transition: width 500ms;
+    -webkit-transition-timing-function: ease;
+    display: -webkit-inline-flex;
     display: -ms-inline-flexbox;
     display: inline-flex;
     float: right;
-    width: auto!important;
+    width: auto !important;
 }
 
 .toolStripButton, .toolStripButtonOver, .toolStripButtonFocused, .toolStripButtonFocusedOver, .toolStripButtonDown, .toolStripButtonFocusedDown, .toolStripButtonSelected, .toolStripButtonSelectedFocused, .toolStripButtonSelectedDown, .toolStripButtonSelectedFocusedDown, .toolStripButtonSelectedOver, .toolStripButtonSelectedFocusedOver, .toolStripButtonDisabled, .toolStripButtonSelectedDisabled {
     color: #777 !important;
     font-size: 14px !important;
-	padding: 3px 5px !important;
+    padding: 3px 5px !important;
 }
 
 
 .txtPageNumber, .searchBox {
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
-	height: 18px;
-	border-style: solid;
-	border-color: rgb(171, 171, 171);
-	border-width: 1px;
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 11px;
+    height: 18px;
+    border-style: solid;
+    border-color: rgb(171, 171, 171);
+    border-width: 1px;
 }
 
-.txtPageNumber{
-	margin-top: 3px;
-	text-align: center;
+.txtPageNumber {
+    margin-top: 3px;
+    text-align: center;
 }
 
-.labelPaginationLayout{
-	top: 0px !important;
+.labelPaginationLayout {
+    top: 0px !important;
 }
 
 .executionView .labelPaginationLayout {
-	top: 3px !important;
+    top: 3px !important;
 }
 
 .btnBoxCombo {
-	padding: 0 8px;
-	font-size: 11px;
-	font-family: Arial, Verdana, sans-serif;
-	border-top-right-radius: 5px;
-	border-bottom-right-radius: 5px;
-	border-style: solid;
-	border-color: rgb(171, 171, 171);
-	border-width: 1px;
-	border-left-style: none;
-	margin-top: 6px;
-	height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-family: Arial, Verdana, sans-serif;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-style: solid;
+    border-color: rgb(171, 171, 171);
+    border-width: 1px;
+    border-left-style: none;
+    margin-top: 6px;
+    height: 22px;
 }
 
 .gwt-SuggestBoxPopup {
-	z-index: 300000;
-	background-color: white;
-	border-style: solid;
-	border-color: rgb(171, 171, 171);
-	border-width: 1px;
-	width: 145px;
-	max-height: 200px;
+    z-index: 300000;
+    background-color: white;
+    border-style: solid;
+    border-color: rgb(171, 171, 171);
+    border-width: 1px;
+    width: 145px;
+    max-height: 200px;
 }
 
 .suggestPopupContent {
-	max-height: 200px;
-	overflow-y: auto;
-	width: 145px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 145px;
 }
 
 .suggestPopupContent .item {
-	width: 145px;
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
+    width: 145px;
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 11px;
 }
 
 .suggestPopupContent .item-selected {
-	width: 145px;
-	background-color: rgb(235, 235, 235);
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
+    width: 145px;
+    background-color: rgb(235, 235, 235);
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 11px;
 }
 
 
 .navPreviousPaginationButton, .navNextPaginationButton {
-	position: relative !important;
-	left: 0 !important;
-	top: 6px !important;
+    position: relative !important;
+    left: 0 !important;
+    top: 6px !important;
 }
 
 .navPreviousPaginationButton {
-	float: left;
+    float: left;
 }
 
 .navNextPaginationButton {
-	float: right;
+    float: right;
 }
 
 .itemViewNav .form {
-	top: 5px !important;
+    top: 5px !important;
 }
 
 .executionView .itemViewNav {
-	left: 5px !important;
+    left: 5px !important;
 }
 
 .errorMessage {
-	color: red;
+    color: red;
 }
 
 .infoMessage {
-	color: green;
+    color: green;
 }
 
 .gwt-FileUpload {
-                font-size : 11px;
-                margin-left : 60px;
+    font-size: 11px;
+    margin-left: 60px;
 }
 
 pre {
-                margin:0;
+    margin: 0;
 }
