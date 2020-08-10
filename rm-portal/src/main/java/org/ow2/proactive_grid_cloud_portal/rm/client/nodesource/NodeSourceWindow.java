@@ -59,7 +59,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.ui.HTML;
 import com.smartgwt.client.types.*;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -106,7 +105,13 @@ public abstract class NodeSourceWindow {
 
     private static final String HIDDEN_INFRA = "hidden-infra";
 
+    // mark whether the form item correspond an important field (i.e., whether it should be shown when hiding advanced configuration)
     private static final String IMPORTANT_ITEM_ATTR = "importantField";
+
+    // mark whether the form item containing the value of a plugin field
+    private static final String VALUE_ITEM_ATTR = "valueField";
+
+    private static final String FIELD_TYPE_ITEM_ATTR = "fieldType";
 
     public static final String FIELD_SEPARATOR = "\u0003";
 
@@ -357,6 +362,12 @@ public abstract class NodeSourceWindow {
                                 .filter(i -> !i.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
                                 .forEach(FormItem::hide);
         }
+        if (infrastructureSelectItem.getValueAsString() != null) {
+            populateHiddenFormItems(infrastructureSelectItem.getValueAsString());
+        }
+        if (policySelectItem.getValueAsString() != null) {
+            populateHiddenFormItems(policySelectItem.getValueAsString());
+        }
     }
 
     private void createButtons(VLayout nodeSourceWindowLayout) {
@@ -601,6 +612,29 @@ public abstract class NodeSourceWindow {
         this.fullPolicyValueMap = selectItemValues;
     }
 
+    // populate hiddenItems from current form items value.
+    private void populateHiddenFormItems(String pluginName) {
+        if (!isAdvanced.getValueAsBoolean()) {
+            String collect = formItemsByName.getOrDefault(pluginName, new ArrayList<>())
+                                            .stream()
+                                            .filter(item -> !item.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
+                                            .filter(item -> item.getAttributeAsBoolean(VALUE_ITEM_ATTR, false))
+                                            .filter(item -> !item.isDisabled())
+                                            .map(this::integrateHiddenItemInfo)
+                                            .collect(Collectors.joining(ROW_SEPARATOR));
+            hiddenItems.put(pluginName, collect);
+        } else {
+            hiddenItems.clear();
+        }
+    }
+
+    private String integrateHiddenItemInfo(FormItem item) {
+        String fieldId = item.getName();
+        String fieldType = item.getAttributeAsString(FIELD_TYPE_ITEM_ATTR);
+        String itemValue = item.getDisplayValue();
+        return String.join(FIELD_SEPARATOR, fieldType, fieldId, itemValue);
+    }
+
     private void addAllPluginValuesToAllFormItems(Collection<PluginDescriptor> allPluginDescriptors,
             LinkedHashMap<String, String> selectItemValues) {
         for (PluginDescriptor pluginDescriptor : allPluginDescriptors.stream()
@@ -610,28 +644,6 @@ public abstract class NodeSourceWindow {
             selectItemValues.put(pluginDescriptor.getPluginName(), shortName);
             List<FormItem> currentPluginFormItems = getPrefilledFormItems(pluginDescriptor);
             this.formItemsByName.put(pluginDescriptor.getPluginName(), currentPluginFormItems);
-            populateHiddenItemsIfNecessary(pluginDescriptor);
-        }
-    }
-
-    private void populateHiddenItemsIfNecessary(PluginDescriptor pluginDescriptor) {
-        if (!isAdvanced.getValueAsBoolean()) {
-            String collect = pluginDescriptor.getConfigurableFields()
-                                             .stream()
-                                             .filter(field -> !field.isImportant())
-                                             .map(field -> {
-                                                 String fieldId = pluginDescriptor.getPluginName() + field.getName();
-                                                 String fieldType = field.isFile() || field.isCredential() ? FILE
-                                                                                                           : FIELD;
-                                                 return String.join(FIELD_SEPARATOR,
-                                                                    fieldType,
-                                                                    fieldId,
-                                                                    field.getValue());
-                                             })
-                                             .collect(Collectors.joining(ROW_SEPARATOR));
-            this.hiddenItems.put(pluginDescriptor.getPluginName(), collect);
-        } else {
-            this.hiddenItems.clear();
         }
     }
 
@@ -699,6 +711,12 @@ public abstract class NodeSourceWindow {
                     formItem.setTitleStyle("important-message");
                 }
                 formItem.setAttribute(IMPORTANT_ITEM_ATTR, pluginField.isImportant());
+                String fieldType = pluginField.isFile() || pluginField.isCredential() ? FILE : FIELD;
+                formItem.setAttribute(FIELD_TYPE_ITEM_ATTR, fieldType);
+                if (formItem.getName().equals(plugin.getPluginName() + pluginField.getName()) ||
+                    formItem.getName().equals(plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX)) {
+                    formItem.setAttribute(VALUE_ITEM_ATTR, true);
+                }
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
@@ -838,7 +856,6 @@ public abstract class NodeSourceWindow {
         this.nodeSourcePluginsForm.setValue(POLICY_PARAM_FILE_ORDER_KEY,
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
-
         if (!isAdvanced.getValueAsBoolean()) {
             this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
                                                 hiddenItems.get(infrastructureSelectItem.getValueAsString()));
