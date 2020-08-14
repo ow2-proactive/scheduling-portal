@@ -857,6 +857,8 @@ public abstract class NodeSourceWindow {
                                             pluginParamOrders.get(policySelectItem.getValueAsString() +
                                                                   POLICY_PARAM_FILE_ORDER_KEY));
         if (!isAdvanced.getValueAsBoolean()) {
+            populateHiddenFormItems(infrastructureSelectItem.getValueAsString());
+            populateHiddenFormItems(policySelectItem.getValueAsString());
             this.nodeSourcePluginsForm.setValue(HIDDEN_INFRA,
                                                 hiddenItems.get(infrastructureSelectItem.getValueAsString()));
             this.nodeSourcePluginsForm.setValue(HIDDEN_POLICY, hiddenItems.get(policySelectItem.getValueAsString()));

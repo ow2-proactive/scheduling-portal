@@ -243,6 +243,7 @@ public class NSCreationServlet extends HttpServlet {
 
             write(response, createJavascriptPayload(callbackName, jsonResponsePayload));
         } catch (Throwable t) {
+            LOGGER.error("Error during handling the request of the node source action " + nodeSourceAction, t);
             write(response,
                   createJavascriptPayload(callbackName, createEscapedSimpleJsonPair("errorMessage", t.getMessage())));
         }
