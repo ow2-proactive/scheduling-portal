@@ -108,7 +108,7 @@ public abstract class NodeSourceWindow {
     // mark whether the form item correspond an important field (i.e., whether it should be shown when hiding advanced configuration)
     private static final String IMPORTANT_ITEM_ATTR = "importantField";
 
-    // mark whether the form item containing the value of a plugin field
+    // mark whether the form item containing the value of a plugin field which may be hidden
     private static final String VALUE_ITEM_ATTR = "valueField";
 
     private static final String FIELD_TYPE_ITEM_ATTR = "fieldType";
@@ -619,7 +619,6 @@ public abstract class NodeSourceWindow {
                                             .stream()
                                             .filter(item -> !item.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
                                             .filter(item -> item.getAttributeAsBoolean(VALUE_ITEM_ATTR, false))
-                                            .filter(item -> !item.isDisabled())
                                             .map(this::integrateHiddenItemInfo)
                                             .collect(Collectors.joining(ROW_SEPARATOR));
             hiddenItems.put(pluginName, collect);
@@ -678,6 +677,12 @@ public abstract class NodeSourceWindow {
                                                        pluginField.getName()));
             } else if (pluginField.isFile() || pluginField.isCredential()) {
                 formItemsForField.addAll(handleNonTextualPluginField(plugin, pluginField));
+                if (formItemsForField.stream().noneMatch(item -> item.getName().endsWith(EDIT_FORM_ITEM_SUFFIX))) {
+                    formItemsForField.stream()
+                                     .filter(item -> item.getName()
+                                                         .equals(plugin.getPluginName() + pluginField.getName()))
+                                     .forEach(item -> item.setAttribute(VALUE_ITEM_ATTR, true));
+                }
             } else if (pluginField.isTextarea()) {
                 formItemsForField.add(new TextAreaItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()) {
@@ -713,8 +718,13 @@ public abstract class NodeSourceWindow {
                 formItem.setAttribute(IMPORTANT_ITEM_ATTR, pluginField.isImportant());
                 String fieldType = pluginField.isFile() || pluginField.isCredential() ? FILE : FIELD;
                 formItem.setAttribute(FIELD_TYPE_ITEM_ATTR, fieldType);
-                if (formItem.getName().equals(plugin.getPluginName() + pluginField.getName()) ||
-                    formItem.getName().equals(plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX)) {
+                String valueItemName = plugin.getPluginName() + pluginField.getName();
+                if (FILE.equals(fieldType)) {
+                    // since when the field is hidden, UploadItem value can't be submitted to the server
+                    // so when the hidden field is file / credential type, we only mark the value of its editable text area item to be saved
+                    valueItemName = plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX;
+                }
+                if (formItem.getName().equals(valueItemName)) {
                     formItem.setAttribute(VALUE_ITEM_ATTR, true);
                 }
                 if (pluginField.isCheckbox()) {
