@@ -108,7 +108,7 @@ public abstract class NodeSourceWindow {
     // mark whether the form item correspond an important field (i.e., whether it should be shown when hiding advanced configuration)
     private static final String IMPORTANT_ITEM_ATTR = "importantField";
 
-    // mark whether the form item containing the value of a plugin field
+    // mark whether the form item containing the value of a plugin field which may be hidden
     private static final String VALUE_ITEM_ATTR = "valueField";
 
     private static final String FIELD_TYPE_ITEM_ATTR = "fieldType";
@@ -619,7 +619,6 @@ public abstract class NodeSourceWindow {
                                             .stream()
                                             .filter(item -> !item.getAttributeAsBoolean(IMPORTANT_ITEM_ATTR))
                                             .filter(item -> item.getAttributeAsBoolean(VALUE_ITEM_ATTR, false))
-                                            .filter(item -> !item.isDisabled())
                                             .map(this::integrateHiddenItemInfo)
                                             .collect(Collectors.joining(ROW_SEPARATOR));
             hiddenItems.put(pluginName, collect);
@@ -713,10 +712,13 @@ public abstract class NodeSourceWindow {
                 formItem.setAttribute(IMPORTANT_ITEM_ATTR, pluginField.isImportant());
                 String fieldType = pluginField.isFile() || pluginField.isCredential() ? FILE : FIELD;
                 formItem.setAttribute(FIELD_TYPE_ITEM_ATTR, fieldType);
-                if (formItem.getName().equals(plugin.getPluginName() + pluginField.getName()) ||
-                    formItem.getName().equals(plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX)) {
-                    formItem.setAttribute(VALUE_ITEM_ATTR, true);
+                String valueItemName = plugin.getPluginName() + pluginField.getName();
+                if (FILE.equals(fieldType)) {
+                    // since when the field is hidden, UploadItem value can't be submitted to the server
+                    // so when the hidden field is file / credential type, we only mark the value of its editable text area item to be saved
+                    valueItemName = plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX;
                 }
+                formItem.setAttribute(VALUE_ITEM_ATTR, formItem.getName().equals(valueItemName));
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
