@@ -677,6 +677,12 @@ public abstract class NodeSourceWindow {
                                                        pluginField.getName()));
             } else if (pluginField.isFile() || pluginField.isCredential()) {
                 formItemsForField.addAll(handleNonTextualPluginField(plugin, pluginField));
+                if (formItemsForField.stream().noneMatch(item -> item.getName().endsWith(EDIT_FORM_ITEM_SUFFIX))) {
+                    formItemsForField.stream()
+                                     .filter(item -> item.getName()
+                                                         .equals(plugin.getPluginName() + pluginField.getName()))
+                                     .forEach(item -> item.setAttribute(VALUE_ITEM_ATTR, true));
+                }
             } else if (pluginField.isTextarea()) {
                 formItemsForField.add(new TextAreaItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()) {
@@ -718,7 +724,9 @@ public abstract class NodeSourceWindow {
                     // so when the hidden field is file / credential type, we only mark the value of its editable text area item to be saved
                     valueItemName = plugin.getPluginName() + pluginField.getName() + EDIT_FORM_ITEM_SUFFIX;
                 }
-                formItem.setAttribute(VALUE_ITEM_ATTR, formItem.getName().equals(valueItemName));
+                if (formItem.getName().equals(valueItemName)) {
+                    formItem.setAttribute(VALUE_ITEM_ATTR, true);
+                }
                 if (pluginField.isCheckbox()) {
                     formItem.setDefaultValue(pluginField.getValue());
                 } else {
