@@ -319,6 +319,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
+        Img customBrandLogo = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        customBrandLogo.setAutoWidth();
+        customBrandLogo.setStyleName("custom-brand-logo");
+        paShortcutsStrip.addMember(customBrandLogo);
         paShortcutsStrip.addButton(automationDashboardLinkButton);
         paShortcutsStrip.addSpacer(4);
         paShortcutsStrip.addButton(studioLinkButton);
@@ -366,8 +370,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
      * |+- Portal v -++- Admin v -++- Help v -+|+ Submit ++ Logout +   +- Img ---+|
      * || Submit     || Start     || Logs     ||+--------++--------+   | PA logo ||
      * || Settings   || Stop      || About    |                        +---------+|
-     * +| Credentials|| Freeze    |+----------+-----------------------------------+
-     *  | Logout     || Pause     |
+     * +| Credentials|| Freeze    || Tutorials||
+     *  | Logout     || Pause     |+----------+
      *  +------------+| Resume    |
      *                | Kill      |
      *                +-----------+
@@ -437,9 +441,17 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> SchedulerPage.this.aboutWindow.show());
+
+        // Icon created by https://www.flaticon.com/authors/srip
+        MenuItem tutorialsMenuItem = new MenuItem("Tutorials",
+                                                  Images.instance.icon_graduation_cap_16().getSafeUri().asString());
+        tutorialsMenuItem.addClickHandler(event -> Window.open("https://try.activeeon.com/tutorials.html",
+                                                               "Tutorials",
+                                                               ""));
+
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
-        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
+        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem, tutorialsMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
         ToolStripButton submitButton = new ToolStripButton("Submit job");
@@ -536,17 +548,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("10%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(logoStripBackgroundColor);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.RIGHT);
-        Img logoAzureImg = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -558,8 +559,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(errorButton);
         tools.addFill();
         tools.addMember(schedulerStatusLabelLayout);
-        tools.addFill();
-        tools.addMember(additionalLogoCenter);
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.LOADING);

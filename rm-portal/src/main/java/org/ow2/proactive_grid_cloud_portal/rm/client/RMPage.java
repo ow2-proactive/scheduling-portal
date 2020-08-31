@@ -72,7 +72,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripSeparator;
 
 /**
  * Page shown when an user is logged
- * 
+ *
  * @author mschnoor
  *
  */
@@ -281,6 +281,10 @@ public class RMPage implements LogListener {
 
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
+        Img customBrandLogo = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        customBrandLogo.setAutoWidth();
+        customBrandLogo.setStyleName("custom-brand-logo");
+        paShortcutsStrip.addMember(customBrandLogo);
         paShortcutsStrip.addButton(automationDashboardLinkButton);
         paShortcutsStrip.addSpacer(4);
         paShortcutsStrip.addButton(studioLinkButton);
@@ -358,9 +362,17 @@ public class RMPage implements LogListener {
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> RMPage.this.aboutWindow.show());
+
+        // Icon created by https://www.flaticon.com/authors/srip
+        MenuItem tutorialsMenuItem = new MenuItem("Tutorials",
+                                                  Images.instance.icon_graduation_cap_16().getSafeUri().asString());
+        tutorialsMenuItem.addClickHandler(event -> Window.open("https://try.activeeon.com/tutorials.html",
+                                                               "Tutorials",
+                                                               ""));
+
         ToolStripMenuButton helpMenuButton = new ToolStripMenuButton("Help");
         Menu helpMenu = new Menu();
-        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem);
+        helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem, tutorialsMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
         ToolStripButton nsButton = new ToolStripButton("Add Node Source");
@@ -374,24 +386,11 @@ public class RMPage implements LogListener {
         errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
-        ToolStrip additionalLogoCenter = new ToolStrip();
-        additionalLogoCenter.setHeight(logoStripHeight);
-        additionalLogoCenter.setWidth("10%");
-        additionalLogoCenter.setBackgroundImage("");
-        additionalLogoCenter.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
-        additionalLogoCenter.setMargin(0);
-        additionalLogoCenter.setBorder(logoStripBorder);
-        additionalLogoCenter.setAlign(Alignment.CENTER);
-        Img logoAzureImg = new Img(RMImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
-        additionalLogoCenter.addMember(logoAzureImg);
-
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
         tools.addButton(errorButton);
-        tools.addFill();
-        tools.addMember(additionalLogoCenter);
 
         return tools;
     }
