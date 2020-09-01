@@ -115,9 +115,11 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         this.setSelectionType(SelectionStyle.SINGLE);
         this.setSelectionProperty("isSelected");
         this.sort(TasksCentricColumnsFactory.JOB_ID_ATTR.getName(), SortDirection.DESCENDING);
-        //        These lines break task centric scrolling
-        //        this.setShowRecordComponents(true);
-        //        this.setShowRecordComponentsByCell(true);
+        //These settings are needed to show the remote visu, but in the task-centric view, they break task centric scrolling
+        if (!usedWithTaskCentricView) {
+            this.setShowRecordComponents(true);
+            this.setShowRecordComponentsByCell(true);
+        }
     }
 
     protected Map<GridColumns, ListGridField> buildListGridField() {
