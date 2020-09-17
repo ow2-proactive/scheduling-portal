@@ -319,7 +319,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         // Shortcut buttons strip
         ToolStrip paShortcutsStrip = new ToolStrip();
-        Img customBrandLogo = new Img(SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
+        Img customBrandLogo = new Img("../../" + SchedulerImagesUnbundled.EXTRA_LOGO_CENTER, 135, logoStripHeight);
         customBrandLogo.setAutoWidth();
         customBrandLogo.setStyleName("custom-brand-logo");
         paShortcutsStrip.addMember(customBrandLogo);
