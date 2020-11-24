@@ -64,13 +64,19 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
 
     public static final GridColumns HOST_ATTR = new GridColumns("host", "Host", 120, true, false);
 
-    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 120, true, false);
+    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime",
+                                                                      "Started at",
+                                                                      120,
+                                                                      true,
+                                                                      false,
+                                                                      true);
 
     public static final GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime",
                                                                          "Finished at",
                                                                          120,
                                                                          true,
-                                                                         false);
+                                                                         false,
+                                                                         true);
 
     public static final GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", -1, true, false);
 
