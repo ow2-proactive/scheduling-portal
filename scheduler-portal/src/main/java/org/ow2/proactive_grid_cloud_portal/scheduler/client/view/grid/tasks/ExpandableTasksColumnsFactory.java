@@ -37,7 +37,7 @@ public class ExpandableTasksColumnsFactory extends TasksColumnsFactory {
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[] { ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, EXEC_DURATION_ATTR, NODE_COUNT_ATTR,
-                                   EXECUTIONS_ATTR, NODE_FAILURE_ATTR, VISU_ATTR };
+        return new GridColumns[] { ID_ATTR, STATUS_ATTR, NAME_ATTR, TAG_ATTR, START_TIME_ATTR, FINISHED_TIME_ATTR,
+                                   EXEC_DURATION_ATTR, NODE_COUNT_ATTR, EXECUTIONS_ATTR, NODE_FAILURE_ATTR, VISU_ATTR };
     }
 }

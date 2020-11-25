@@ -64,13 +64,19 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
 
     public static final GridColumns HOST_ATTR = new GridColumns("host", "Host", 120, true, false);
 
-    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime", "Started at", 120, true, false);
+    public static final GridColumns START_TIME_ATTR = new GridColumns("startTime",
+                                                                      "Started at",
+                                                                      120,
+                                                                      true,
+                                                                      false,
+                                                                      true);
 
     public static final GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime",
                                                                          "Finished at",
                                                                          120,
                                                                          true,
-                                                                         false);
+                                                                         false,
+                                                                         true);
 
     public static final GridColumns DESCRIPTION_ATTR = new GridColumns("description", "Description", -1, true, false);
 
@@ -88,6 +94,8 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
                                                                                 TasksColumnsFactory.STATUS_ATTR,
                                                                                 TasksColumnsFactory.NAME_ATTR,
                                                                                 TasksColumnsFactory.TAG_ATTR,
+                                                                                TasksColumnsFactory.START_TIME_ATTR,
+                                                                                TasksColumnsFactory.FINISHED_TIME_ATTR,
                                                                                 TasksColumnsFactory.EXEC_DURATION_ATTR,
                                                                                 TasksColumnsFactory.NODE_COUNT_ATTR,
                                                                                 TasksColumnsFactory.EXECUTIONS_ATTR,
@@ -119,6 +127,8 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
         record.setAttribute(STATUS_ATTR.getName(), taskStatus.toString());
+        record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
+        record.setAttribute(FINISHED_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
         record.setAttribute(EXEC_DURATION_ATTR.getName(), executionDuration);
         record.setAttribute(EXECUTIONS_ATTR.getName(), currentExecutionNumber);
         record.setAttribute(NODE_FAILURE_ATTR.getName(), currentFailureNumber);
