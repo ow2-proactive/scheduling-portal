@@ -32,14 +32,14 @@ import java.util.Map;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 
 import com.smartgwt.client.data.AdvancedCriteria;
-import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
-import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
+import com.smartgwt.client.widgets.events.DrawEvent;
+import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.events.*;
@@ -159,6 +159,19 @@ public abstract class ItemsListGrid<I> extends ListGrid {
                 selectionUpdatedHandler(event);
             }
         });
+
+        this.addFieldStateChangedHandler(new FieldStateChangedHandler() {
+            public void onFieldStateChanged(FieldStateChangedEvent event) {
+                fieldStateChangedHandler(event);
+            }
+        });
+
+        this.addDrawHandler(new DrawHandler() {
+            public void onDraw(DrawEvent event) {
+                drawHandler(event);
+            }
+        });
+
     }
 
     /**
@@ -210,6 +223,19 @@ public abstract class ItemsListGrid<I> extends ListGrid {
     protected abstract void selectionChangedHandler(SelectionEvent event);
 
     protected abstract void selectionUpdatedHandler(SelectionUpdatedEvent event);
+
+    /**
+     * Called when the grid state is changed to save the grid view state in the local storage
+     * The possible actions that might trigger this function are: resize of a column, change sorting, hide/show columns
+     * @param event
+     */
+    protected abstract void fieldStateChangedHandler(FieldStateChangedEvent event);
+
+    /**
+     * Called when the grid is loaded (page refresh, or login in) to restore the previous grid view state from the local storage
+     * @param event
+     */
+    protected abstract void drawHandler(DrawEvent event);
 
     /**
      * Apply the local filter to the grid.

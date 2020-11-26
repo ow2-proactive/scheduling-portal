@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
@@ -52,9 +54,11 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.SortNormalizer;
+import com.smartgwt.client.widgets.grid.events.FieldStateChangedEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.menu.Menu;
@@ -67,6 +71,9 @@ import com.smartgwt.client.widgets.menu.MenuItem;
  * @author The activeeon team.
  */
 public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListener {
+
+    //specifies the variable name of the job grid view state in the local storage
+    private static final String JOBS_GRID_VIEW_STATE = "jobsGridViewState";
 
     private static final SortSpecifier[] DEFAULT_SORT = new SortSpecifier[] { new SortSpecifier(STATE_ATTR.getName(),
                                                                                                 SortDirection.ASCENDING),
@@ -93,6 +100,25 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         super.build();
         this.setSelectionProperty("isSelected");
         this.setSort(DEFAULT_SORT);
+    }
+
+    @Override
+    protected void fieldStateChangedHandler(FieldStateChangedEvent event) {
+        //save the view state in the local storage
+        Settings.get().setSetting(JOBS_GRID_VIEW_STATE, this.getViewState());
+    }
+
+    @Override
+    protected void drawHandler(DrawEvent event) {
+        try {
+            final String viewState = Settings.get().getSetting(JOBS_GRID_VIEW_STATE);
+            if (viewState != null) {
+                // restore any previously saved view state for this grid
+                this.setViewState(viewState);
+            }
+        } catch (Exception e) {
+            LogModel.getInstance().logImportantMessage("Failed to restore jobs grid view state " + e);
+        }
     }
 
     @Override

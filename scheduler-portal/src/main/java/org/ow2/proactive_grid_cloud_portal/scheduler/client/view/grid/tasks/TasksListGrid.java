@@ -30,7 +30,6 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tas
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.STATUS_ATTR;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +60,11 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.events.FieldStateChangedEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -475,6 +476,16 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
 
     @Override
     protected void selectionUpdatedHandler(SelectionUpdatedEvent event) {
+        // Nothing to do
+    }
+
+    @Override
+    protected void fieldStateChangedHandler(FieldStateChangedEvent event) {
+        // Nothing to do
+    }
+
+    @Override
+    protected void drawHandler(DrawEvent event) {
         // Nothing to do
     }
 
