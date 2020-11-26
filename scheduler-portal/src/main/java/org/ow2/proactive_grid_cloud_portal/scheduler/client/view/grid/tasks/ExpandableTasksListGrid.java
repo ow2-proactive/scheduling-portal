@@ -25,12 +25,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.events.FieldStateChangedEvent;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
@@ -43,6 +47,9 @@ import com.smartgwt.client.widgets.viewer.DetailViewerRecord;
  *
  */
 public class ExpandableTasksListGrid extends TasksListGrid {
+
+    //specifies the variable name of the task grid view state in the local storage
+    private static final String TASKS_GRID_VIEW_STATE = "tasksGridViewState";
 
     /**
      * The record for the expand component to be shown.
@@ -110,5 +117,25 @@ public class ExpandableTasksListGrid extends TasksListGrid {
             this.expandRecord = record;
         }
         return record;
+    }
+
+    @Override
+    protected void fieldStateChangedHandler(FieldStateChangedEvent event) {
+        //save the view state in the local storage
+        Settings.get().setSetting(TASKS_GRID_VIEW_STATE, this.getViewState());
+    }
+
+    @Override
+    protected void drawHandler(DrawEvent event) {
+        try {
+            String viewTaskState = Settings.get().getSetting(TASKS_GRID_VIEW_STATE);
+            if (viewTaskState != null) {
+                // restore any previously saved view state for this grid
+                this.setViewState(viewTaskState);
+            }
+        } catch (Exception e) {
+            LogModel.getInstance().logImportantMessage("Failed to restore tasks grid view state " + e);
+        }
+
     }
 }
