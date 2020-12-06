@@ -73,6 +73,10 @@ public class Task implements Serializable, Comparable<Task> {
 
     private int numberOfExecOnFailureLeft;
 
+    private boolean visualizationActivated = false;
+
+    private String visualizationConnectionString;
+
     private int nodeCount;
 
     private long jobId = 0;
@@ -100,10 +104,13 @@ public class Task implements Serializable, Comparable<Task> {
      * @param numberOfExecLeft number of executions left
      * @param maxNumberOfExecOnFailure maximum number of executions on failure
      * @param numberOfExecOnFailureLeft maximum number of executions on failure left
+     * @param visualizationActivated is remote visualization activated
+     * @param visualizationConnectionString visualization connection string
      */
     public Task(long id, String name, TaskStatus status, String hostName, long startTime, long inErrorTime,
             long finishedTime, long executionDuration, String description, int nodeCount, int maxNumberOfExec,
-            int numberOfExecLeft, int maxNumberOfExecOnFailure, int numberOfExecOnFailureLeft) {
+            int numberOfExecLeft, int maxNumberOfExecOnFailure, int numberOfExecOnFailureLeft,
+            boolean visualizationActivated, String visualizationConnectionString) {
 
         this.id = id;
         this.name = name;
@@ -120,6 +127,8 @@ public class Task implements Serializable, Comparable<Task> {
         this.numberOfExecLeft = numberOfExecLeft;
         this.maxNumberOfExecOnFailure = maxNumberOfExecOnFailure;
         this.numberOfExecOnFailureLeft = numberOfExecOnFailureLeft;
+        this.visualizationActivated = visualizationActivated;
+        this.visualizationConnectionString = visualizationConnectionString;
     }
 
     /**
@@ -274,6 +283,22 @@ public class Task implements Serializable, Comparable<Task> {
         return numberOfExecOnFailureLeft;
     }
 
+    public boolean isVisualizationActivated() {
+        return visualizationActivated;
+    }
+
+    public void setVisualizationActivated(boolean visualizationActivated) {
+        this.visualizationActivated = visualizationActivated;
+    }
+
+    public String getVisualizationConnectionString() {
+        return visualizationConnectionString;
+    }
+
+    public void setVisualizationConnectionString(String visualizationConnectionString) {
+        this.visualizationConnectionString = visualizationConnectionString;
+    }
+
     public int getNodeCount() {
         return this.nodeCount;
     }
@@ -391,6 +416,19 @@ public class Task implements Serializable, Comparable<Task> {
         int execLeft = (int) taskInfo.get("numberOfExecutionLeft").isNumber().doubleValue();
         int execOnFailureLeft = (int) taskInfo.get("numberOfExecutionOnFailureLeft").isNumber().doubleValue();
         int maxExecOnFailure = (int) jsonTask.get("maxNumberOfExecutionOnFailure").isNumber().doubleValue();
+        boolean visualizationActivated = false;
+        String visualizationConnectionString = "";
+        if (taskInfo.containsKey("visualizationActivated") &&
+            taskInfo.get("visualizationActivated").isBoolean() != null) {
+            visualizationActivated = (boolean) taskInfo.get("visualizationActivated").isBoolean().booleanValue();
+        }
+        if (taskInfo.containsKey("visualizationConnectionString") &&
+            taskInfo.get("visualizationConnectionString").isString() != null) {
+            visualizationConnectionString = (String) taskInfo.get("visualizationConnectionString")
+                                                             .isString()
+                                                             .stringValue();
+        }
+
         int nodes = 1;
         if (jsonTask.containsKey("parallelEnvironment")) {
             JSONObject parEnv = jsonTask.get("parallelEnvironment").isObject();
@@ -412,7 +450,9 @@ public class Task implements Serializable, Comparable<Task> {
                                maxExec,
                                execLeft,
                                maxExecOnFailure,
-                               execOnFailureLeft);
+                               execOnFailureLeft,
+                               visualizationActivated,
+                               visualizationConnectionString);
         result.setTag(tag);
         result.setJobId(jobId);
         result.setJobName(jobName);
