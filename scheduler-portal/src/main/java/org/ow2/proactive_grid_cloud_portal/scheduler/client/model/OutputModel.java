@@ -114,7 +114,7 @@ public class OutputModel extends AbstractSelectedTargetModel {
 
     protected void processRemoteVisuLines(List<String> lines) {
         for (String line : lines) {
-            this.parentModel.getTasksModel().addRemoteHint(line);
+            this.parentModel.getTasksModel().addRemoteHint(line, true);
         }
     }
 

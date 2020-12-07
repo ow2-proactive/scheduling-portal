@@ -105,6 +105,14 @@ public class TasksModel {
     public void setTasks(List<Task> tasks, long totalTasks) {
         this.tasks = tasks;
         this.tasksNavigationModel.getPaginationModel().setTotalItems(totalTasks);
+        if (tasks != null) {
+            for (Task task : tasks) {
+                if (task.isVisualizationActivated()) {
+                    // we add the remote hint but do not trigger notifications as tasksUpdated will create the buttons
+                    addRemoteHint(task.getVisualizationConnectionString(), false);
+                }
+            }
+        }
         for (TasksUpdatedListener list : this.tasksUpdatedListeners) {
             list.tasksUpdated(tasks, totalTasks);
         }
@@ -161,7 +169,7 @@ public class TasksModel {
      * 
      * @param remoteHint a string containing PA_REMOTE_CONNECTION
      */
-    public void addRemoteHint(String remoteHint) {
+    public void addRemoteHint(String remoteHint, boolean notify) {
         String[] expl = remoteHint.split(PA_REMOTE_CONNECTION);
         if (expl.length < 2)
             return;
@@ -176,10 +184,15 @@ public class TasksModel {
         rh.type = expl[3];
         rh.argument = expl[4];
 
-        this.remoteHints.add(rh);
+        if (this.remoteHints.stream().noneMatch(hint -> hint.jobId.equals(rh.jobId) && hint.taskId.equals(rh.taskId))) {
+            // We add the hint only if it's not already present
+            this.remoteHints.add(rh);
+        }
 
-        for (RemoteHintListener rhl : this.remoteHintListeners) {
-            rhl.remoteHintRead(rh);
+        if (notify) {
+            for (RemoteHintListener rhl : this.remoteHintListeners) {
+                rhl.remoteHintRead(rh);
+            }
         }
     }
 
