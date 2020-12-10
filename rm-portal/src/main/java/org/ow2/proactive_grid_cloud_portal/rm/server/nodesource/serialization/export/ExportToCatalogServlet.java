@@ -72,22 +72,24 @@ public class ExportToCatalogServlet extends HttpServlet {
             apiClient.setBasePath(new CatalogUrlRmServerBuilder().getCatalogUrl());
             if (catalogObjectAction.isRevised()) {
                 CatalogObjectRevisionControllerApi catalogObjectController = new CatalogObjectRevisionControllerApi(apiClient);
-                catalogObjectController.createUsingPOST2(catalogObjectAction.getBucketName(),
+                catalogObjectController.createUsingPOST2(catalogObjectAction.getSessionId(),
+                                                         catalogObjectAction.getBucketName(),
                                                          catalogObjectAction.getCatalogObjectName(),
                                                          catalogObjectAction.getCommitMessage(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
-                                                         catalogObjectAction.getSessionId());
+                                                         catalogObjectAction.getProjectName());
                 LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectName() +
                             " in bucket " + catalogObjectAction.getBucketName());
             } else {
                 CatalogObjectControllerApi catalogObjectController = new CatalogObjectControllerApi(apiClient);
-                catalogObjectController.createUsingPOST1(catalogObjectAction.getBucketName(),
+                catalogObjectController.createUsingPOST1(catalogObjectAction.getSessionId(),
+                                                         catalogObjectAction.getBucketName(),
                                                          catalogObjectAction.getKind(),
                                                          catalogObjectAction.getCommitMessage(),
                                                          catalogObjectAction.getObjectContentType(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
-                                                         catalogObjectAction.getSessionId(),
-                                                         catalogObjectAction.getCatalogObjectName());
+                                                         catalogObjectAction.getCatalogObjectName(),
+                                                         catalogObjectAction.getProjectName());
                 LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectName() + " in bucket " +
                             catalogObjectAction.getBucketName());
             }
@@ -110,6 +112,9 @@ public class ExportToCatalogServlet extends HttpServlet {
                         break;
                     case NAME_PARAM:
                         catalogObjectAction.setCatalogObjectName(fieldValue);
+                        break;
+                    case PROJECT_NAME_PARAM:
+                        catalogObjectAction.setProjectName(fieldValue);
                         break;
                     case FILE_CONTENT_PARAM:
                         File catalogObjectJsonFile = File.createTempFile("catalog-object-configuration", ".json");
