@@ -37,6 +37,8 @@ public class CatalogObjectAction implements AutoCloseable {
 
     private String catalogObjectName;
 
+    private String projectName;
+
     private File catalogObjectJsonFile;
 
     private String kind;
@@ -69,6 +71,14 @@ public class CatalogObjectAction implements AutoCloseable {
 
     public void setCatalogObjectName(String catalogObjectName) {
         this.catalogObjectName = catalogObjectName;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public File getCatalogObjectJsonFile() {
