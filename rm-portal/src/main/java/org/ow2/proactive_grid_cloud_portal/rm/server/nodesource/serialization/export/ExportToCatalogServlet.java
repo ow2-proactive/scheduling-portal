@@ -113,6 +113,9 @@ public class ExportToCatalogServlet extends HttpServlet {
                     case NAME_PARAM:
                         catalogObjectAction.setCatalogObjectName(fieldValue);
                         break;
+                    case PROJECT_NAME_PARAM:
+                        catalogObjectAction.setProjectName(fieldValue);
+                        break;
                     case FILE_CONTENT_PARAM:
                         File catalogObjectJsonFile = File.createTempFile("catalog-object-configuration", ".json");
                         try (PrintWriter writer = new PrintWriter(catalogObjectJsonFile)) {
