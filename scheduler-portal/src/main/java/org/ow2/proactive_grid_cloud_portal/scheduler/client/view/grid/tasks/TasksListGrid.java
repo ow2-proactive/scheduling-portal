@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TaskRecord.getTask;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.COLUMNS_TO_ALIGN;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.EXEC_DURATION_ATTR;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.tasks.TasksColumnsFactory.NAME_ATTR;
@@ -64,6 +65,7 @@ import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.SortNormalizer;
 import com.smartgwt.client.widgets.grid.events.FieldStateChangedEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.grid.events.SelectionUpdatedEvent;
@@ -141,6 +143,12 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                 }
             }
         });
+
+        ListGridField startTime = fields.get(TasksColumnsFactory.START_TIME_ATTR);
+        startTime.setSortNormalizer(customDateSorting("startTime"));
+
+        ListGridField finishTime = fields.get(TasksColumnsFactory.FINISHED_TIME_ATTR);
+        finishTime.setSortNormalizer(customDateSorting("finishTime"));
 
         return fields;
     }
@@ -363,11 +371,28 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
                                                return !!(elem.getContext && elem.getContext('2d'));
                                                }-*/;
 
+    /**
+     * A custom sort for task start, and finish times:
+     * dates are sorted according to the task epoch time and not
+     * according to the String representation of the date
+     * given by JSUtil.getTime(long Time)
+     */
+    private SortNormalizer customDateSorting(String date) {
+        return (record, fieldName) -> {
+            Task task = getTask(record);
+            if (date.equals("startTime")) {
+                return task.getStartTime();
+            }
+            return task.getFinishTime();
+
+        };
+    }
+
     @Override
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(NAME_ATTR.getName());
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(STATUS_ATTR.getName());
-        final Integer jobId = (int) TaskRecord.getTask(this.getSelectedRecord()).getJobId();
+        final Integer jobId = (int) getTask(this.getSelectedRecord()).getJobId();
 
         MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
         restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {

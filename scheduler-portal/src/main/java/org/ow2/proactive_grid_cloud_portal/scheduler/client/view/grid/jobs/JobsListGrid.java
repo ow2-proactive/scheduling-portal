@@ -312,6 +312,15 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         });
 
+        ListGridField startTime = fields.get(JobsColumnsFactory.START_TIME_ATTR);
+        startTime.setSortNormalizer(customDateSorting("startTime"));
+
+        ListGridField finishTime = fields.get(JobsColumnsFactory.FINISHED_TIME_ATTR);
+        finishTime.setSortNormalizer(customDateSorting("finishTime"));
+
+        ListGridField submitTime = fields.get(JobsColumnsFactory.SUBMIT_TIME_ATTR);
+        submitTime.setSortNormalizer(customDateSorting("submitTime"));
+
         return fields;
     }
 
@@ -340,6 +349,24 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             } else {
                 return 2;
             }
+        };
+    }
+
+    /**
+     * A custom sort for job submit, start, and finish times:
+     * dates are sorted according to the job epoch time and not
+     * according to the String representation given by JSUtil.getTime(long Time)
+     */
+    private SortNormalizer customDateSorting(String date) {
+        return (record, fieldName) -> {
+            Job job = JobRecord.getJob(record);
+            if (date.equals("startTime")) {
+                return job.getStartTime();
+            }
+            if (date.equals("finishTime")) {
+                return job.getFinishTime();
+            }
+            return job.getSubmitTime();
         };
     }
 
