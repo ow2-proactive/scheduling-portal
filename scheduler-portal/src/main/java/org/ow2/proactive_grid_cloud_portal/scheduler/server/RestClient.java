@@ -93,6 +93,20 @@ public interface RestClient {
             @FormParam("selectionScriptExtension") String selectionScriptExtension);
 
     /**
+     * Re-submit a list of jobs to the scheduler
+     *
+     * @param sessionId
+     *          a valid session id
+     * @param jobsId
+     *          a list of job ids of already submitted jobs
+     * @return a list of job ids of the newly created jobs. If a job submission fails, it will be discarded with a log message.
+     */
+    @POST
+    @Path("jobs/resubmit")
+    @Produces("application/json")
+    InputStream reSubmitAll(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
+
+    /**
      * Deletes a job from the Scheduler.
      * @param sessionId the session id of the user that performs the deletion
      * @param jobId the id of the job that will be deleted

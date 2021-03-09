@@ -405,6 +405,35 @@ public class JobsController {
     }
 
     /**
+     * Resubmit a list of jobs
+     *
+     * @param jobIds List of job Ids
+     */
+    public void resubmitAllJobs(List<String> jobIds) {
+        final List<Integer> selectedJobIds = new ArrayList<>(jobIds.size());
+        for (String id : jobIds) {
+            selectedJobIds.add(Integer.parseInt(id));
+        }
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.resubmitAllJobs(LoginModel.getInstance().getSessionId(),
+                                  selectedJobIds,
+                                  new AsyncCallback<Integer>() {
+                                      public void onSuccess(Integer result) {
+                                          LogModel.getInstance().logMessage("Successfully resubmitted " + result + "/" +
+                                                                            selectedJobIds.size() + STR_JOB);
+
+                                      }
+
+                                      public void onFailure(Throwable caught) {
+                                          String message = JSONUtils.getJsonErrorMessage(caught);
+                                          LogModel.getInstance()
+                                                  .logImportantMessage("Failed to resubmit selected jobs : " + message);
+                                      }
+                                  });
+    }
+
+    /**
      * Open a job in Studio.
      * Open the workflow of selected job in the studio on a new browser tab.
      *
