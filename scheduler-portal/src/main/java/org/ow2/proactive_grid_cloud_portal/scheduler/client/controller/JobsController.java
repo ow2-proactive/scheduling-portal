@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -410,11 +411,7 @@ public class JobsController {
      * @param jobIds List of job Ids
      */
     public void resubmitAllJobs(List<String> jobIds) {
-        final List<Integer> selectedJobIds = new ArrayList<>(jobIds.size());
-        for (String id : jobIds) {
-            selectedJobIds.add(Integer.parseInt(id));
-        }
-
+        final List<Integer> selectedJobIds = jobIds.stream().map(Integer::parseInt).collect(Collectors.toList());
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.resubmitAllJobs(LoginModel.getInstance().getSessionId(),
                                   selectedJobIds,
