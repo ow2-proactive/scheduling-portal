@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -402,6 +403,31 @@ public class JobsController {
             }
         });
         req.send();
+    }
+
+    /**
+     * Resubmit a list of jobs
+     *
+     * @param jobIds List of job Ids
+     */
+    public void resubmitAllJobs(List<String> jobIds) {
+        final List<Integer> selectedJobIds = jobIds.stream().map(Integer::parseInt).collect(Collectors.toList());
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.resubmitAllJobs(LoginModel.getInstance().getSessionId(),
+                                  selectedJobIds,
+                                  new AsyncCallback<Integer>() {
+                                      public void onSuccess(Integer result) {
+                                          LogModel.getInstance().logMessage("Successfully resubmitted " + result + "/" +
+                                                                            selectedJobIds.size() + STR_JOB);
+
+                                      }
+
+                                      public void onFailure(Throwable caught) {
+                                          String message = JSONUtils.getJsonErrorMessage(caught);
+                                          LogModel.getInstance()
+                                                  .logImportantMessage("Failed to resubmit selected jobs : " + message);
+                                      }
+                                  });
     }
 
     /**

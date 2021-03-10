@@ -89,6 +89,14 @@ public interface SchedulerService extends RemoteService {
     int resumeJobs(String sessionId, List<Integer> list) throws RestServerException, ServiceException;
 
     /**
+     * resbumit several jobs.
+     * @param sessionId the session id of the user that resubmits the jobs
+     * @param jobIdList the list of the job ids that are to be resubmitted
+     * @return number of resubmitted jobs
+     */
+    int resubmitAllJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException;
+
+    /**
      * Kills several jobs.
      * @param sessionId the session id of the user that resumes the job
      * @param list the list of the job ids that are to be resumed
