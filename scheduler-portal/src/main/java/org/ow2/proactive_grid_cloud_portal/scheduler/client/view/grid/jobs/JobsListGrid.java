@@ -312,6 +312,15 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         });
 
+        ListGridField startTime = fields.get(JobsColumnsFactory.START_TIME_ATTR);
+        startTime.setSortNormalizer(customDateSorting("startTime"));
+
+        ListGridField finishTime = fields.get(JobsColumnsFactory.FINISHED_TIME_ATTR);
+        finishTime.setSortNormalizer(customDateSorting("finishTime"));
+
+        ListGridField submitTime = fields.get(JobsColumnsFactory.SUBMIT_TIME_ATTR);
+        submitTime.setSortNormalizer(customDateSorting("submitTime"));
+
         return fields;
     }
 
@@ -340,6 +349,24 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             } else {
                 return 2;
             }
+        };
+    }
+
+    /**
+     * A custom sort for job submit, start, and finish times:
+     * dates are sorted according to the job epoch time and not
+     * according to the String representation given by JSUtil.getTime(long Time)
+     */
+    private SortNormalizer customDateSorting(String date) {
+        return (record, fieldName) -> {
+            Job job = JobRecord.getJob(record);
+            if (date.equals("startTime")) {
+                return job.getStartTime();
+            }
+            if (date.equals("finishTime")) {
+                return job.getFinishTime();
+            }
+            return job.getSubmitTime();
         };
     }
 
@@ -439,9 +466,13 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         MenuItem resubmitItem = new MenuItem("Re-Submit",
                                              SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
-        // Allow re-submitting a job only & only if a single job is selected.
-        resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
-        resubmitItem.setEnabled(selSingleSelected);
+        if (ids.size() > 1) {
+            // Allow re-submitting many jobs without showing the submit window, when more than one job is selected
+            resubmitItem.addClickHandler(event -> controller.resubmitAllJobs(ids));
+        } else {
+            // Allow re-submitting a job only with a submit window, only if a single job is selected.
+            resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
+        }
 
         MenuItem openItem = new MenuItem("Open in Studio", SchedulerImages.instance.pa_16().getSafeUri().asString());
         openItem.addClickHandler(event -> controller.openStudio(ids.get(0)));

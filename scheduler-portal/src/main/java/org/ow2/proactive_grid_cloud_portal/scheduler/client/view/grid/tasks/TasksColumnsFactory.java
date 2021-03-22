@@ -128,7 +128,7 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
         record.setAttribute(STATUS_ATTR.getName(), taskStatus.toString());
         record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
-        record.setAttribute(FINISHED_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
+        record.setAttribute(FINISHED_TIME_ATTR.getName(), JSUtil.getTime(item.getFinishTime()));
         record.setAttribute(EXEC_DURATION_ATTR.getName(), executionDuration);
         record.setAttribute(EXECUTIONS_ATTR.getName(), currentExecutionNumber);
         record.setAttribute(NODE_FAILURE_ATTR.getName(), currentFailureNumber);

@@ -93,6 +93,15 @@ public interface SchedulerServiceAsync {
     void resumeJobs(String sessionId, List<Integer> list, AsyncCallback<Integer> asyncCallback);
 
     /**
+     * resbumit several jobs.
+     * @param sessionId the session id of the user that resubmits the jobs
+     * @param jobIdList the list of the job ids that are to be resubmitted
+     * @param asyncCallback
+     * @return number of resubmitted jobs
+     */
+    void resubmitAllJobs(final String sessionId, List<Integer> jobIdList, AsyncCallback<Integer> asyncCallback);
+
+    /**
      * By making an asynchronous call to the server, several jobs are killed.
      * @param sessionId the session id of the user which is logged in
      * @param list the list of jobs which are to be killed

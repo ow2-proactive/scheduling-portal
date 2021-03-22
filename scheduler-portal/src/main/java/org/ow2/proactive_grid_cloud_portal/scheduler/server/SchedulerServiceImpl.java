@@ -410,6 +410,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
+    public int resubmitAllJobs(final String sessionId, List<Integer> jobIdList)
+            throws RestServerException, ServiceException {
+        for (List<Integer> chunk : Lists.partition(jobIdList, LIMIT_QUERY_PARAMS_NUMBER)) {
+            executeFunction(restClient -> restClient.reSubmitAll(sessionId,
+                                                                 chunk.stream()
+                                                                      .map(Object::toString)
+                                                                      .collect(Collectors.toList())));
+        }
+
+        return jobIdList.size();
+    }
+
+    @Override
     public int killJobs(final String sessionId, List<Integer> jobIdList) throws RestServerException, ServiceException {
         for (List<Integer> chunk : Lists.partition(jobIdList, LIMIT_QUERY_PARAMS_NUMBER)) {
             executeFunction(restClient -> restClient.killJobs(sessionId,
