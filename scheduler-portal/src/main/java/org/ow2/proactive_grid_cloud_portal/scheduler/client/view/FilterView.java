@@ -27,6 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
@@ -34,16 +36,22 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Action;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.*;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.HStack;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -54,9 +62,19 @@ import com.smartgwt.client.widgets.layout.VStack;
  */
 public class FilterView extends VStack {
 
+    private boolean importActivated = false;
+
+    private FormPanel importFromFileformPanel;
+
+    private HLayout fromFilePanel;
+
+    private FileUpload fileUpload;
+
     private RadioButton matchAllButton;
 
     private RadioButton matchAnyButton;
+
+    private TextBox filterNameTextBox;
 
     private VStack filterPanel;
 
@@ -67,6 +85,12 @@ public class FilterView extends VStack {
     private final static ImageResource ADD_BUTTON_IMAGE = SchedulerImages.instance.add();
 
     private final static ImageResource REMOVE_BUTTON_IMAGE = SchedulerImages.instance.remove();
+
+    private final static ImageResource DELETE_BUTTON_IMAGE = SchedulerImages.instance.cancel_14();
+
+    private final static ImageResource IMPORT_BUTTON_IMAGE = SchedulerImages.instance.open();
+
+    private final static ImageResource EXPORT_BUTTON_IMAGE = SchedulerImages.instance.job_export_16();
 
     private static final String DATE_FORMAT_FULL = "yyyy-MM-dd HH:mm:ss ZZ";
 
@@ -154,6 +178,8 @@ public class FilterView extends VStack {
             model.addConstraint(field, action, value);
         }
 
+        Settings.get().setSetting("filterConfig", generateFilterJsonString());
+
         return model;
     }
 
@@ -162,26 +188,224 @@ public class FilterView extends VStack {
         addRow();
     }
 
+    public String generateFilterJsonString() {
+        JSONObject jsonObject = new JSONObject();
+        int widgetCount = filterPanel.getMembersLength();
+        JSONArray constraintsArray = new JSONArray();
+        for (int i = 0; i < widgetCount; i++) {
+            RowFilter row = (RowFilter) filterPanel.getMember(i);
+            String field = row.fieldsList.getSelectedValue();
+            String action = row.actionList.getSelectedValue();
+            String value = row.getValue();
+
+            JSONObject constraintObject = new JSONObject();
+            constraintObject.put("field", new JSONString(field.toString()));
+            constraintObject.put("action", new JSONString(action.toString()));
+            constraintObject.put("value", new JSONString(value.toString()));
+
+            constraintsArray.set(i, constraintObject);
+        }
+        jsonObject.put("filterName", new JSONString(filterNameTextBox.getText()));
+        jsonObject.put("matchAny", new JSONString(matchAnyButton.getValue().toString()));
+        jsonObject.put("constraints", constraintsArray);
+
+        return jsonObject.toString();
+    }
+
+    public void exportFilterConfiguration() {
+        String jsonConfig = generateFilterJsonString();
+        Settings.get().setSetting("filterConfig", jsonConfig);
+
+        String url = GWT.getModuleBaseURL() + "exportfilter";
+        url += "?filterConfigJson=" + jsonConfig;
+        url += "&filterName=" + filterNameTextBox.getText();
+
+        Window.open(url, "_blank", "");
+    }
+
+    public void loadFilterConfiguration(String jsonContent) {
+        JSONObject jsonObject = null;
+
+        try {
+            JSONValue parsedJsonString = JSONParser.parseStrict(new HTML(jsonContent).getText());
+            jsonObject = parsedJsonString.isObject();
+
+        } catch (JSONException e) {
+            LogModel.getInstance().logCriticalMessage(e.getMessage());
+        }
+
+        filterPanel.removeMembers(filterPanel.getMembers());
+
+        JSONString filterName = jsonObject.get("filterName").isString();
+        JSONString matchAny = jsonObject.get("matchAny").isString();
+        JSONArray constraints = jsonObject.get("constraints").isArray();
+        for (int i = 0; i < constraints.size(); i++) {
+            JSONObject field = constraints.get(i).isObject();
+            RowFilter newRow = new RowFilter();
+            newRow.fieldsList.setSelectedIndex(getSelectedValueIndex(newRow.fieldsList,
+                                                                     field.get("field").isString().stringValue()));
+            newRow.setActionsAccordingToSelectedField();
+            newRow.actionList.setSelectedIndex(getSelectedValueIndex(newRow.actionList,
+                                                                     field.get("action").isString().stringValue()));
+            newRow.setValue(field.get("value").isString().stringValue());
+            filterPanel.addMember(newRow);
+            updateRemoveButtonStatus();
+        }
+        if (matchAny.isString().stringValue().equals("true")) {
+            matchAnyButton.setValue(true);
+        } else {
+            matchAllButton.setValue(true);
+        }
+        filterNameTextBox.setText(filterName.stringValue());
+        updateRemoveButtonStatus();
+
+    }
+
+    private void filterUploader() {
+        fileUpload = new FileUpload();
+        fileUpload.setName("filter");
+
+        importFromFileformPanel = new FormPanel();
+        fileUpload.addChangeHandler(onFileChosen -> {
+            if (!fileUpload.getFilename().isEmpty()) {
+                importFromFileformPanel.submit();
+
+            }
+        });
+        importFromFileformPanel.setHeight("15px");
+        importFromFileformPanel.add(fileUpload);
+        importFromFileformPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+        importFromFileformPanel.setMethod(FormPanel.METHOD_POST);
+        importFromFileformPanel.setAction(GWT.getModuleBaseURL() + "importfilter");
+        importFromFileformPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                String jsonContent = event.getResults();
+                fileUpload.setVisible(false);
+                importFromFileformPanel.reset();
+                fromFilePanel.setVisible(false);
+                removeMember(fromFilePanel);
+                loadFilterConfiguration(jsonContent);
+                importActivated = false;
+
+            }
+        });
+
+        fromFilePanel = new HLayout();
+        fromFilePanel.setAlign(Alignment.RIGHT);
+        fromFilePanel.addChild(importFromFileformPanel);
+        fromFilePanel.setHeight("15px");
+
+    }
+
+    //This method is used to retrieve the index of an input string in a listBox. Unfortunately, GWT does not provide such functionality
+    private int getSelectedValueIndex(ListBox fieldsList, String str) {
+        int indexToFind = -1;
+        for (int i = 0; i < fieldsList.getItemCount(); i++) {
+            if (fieldsList.getItemText(i).equals(str)) {
+                indexToFind = i;
+            }
+        }
+        return indexToFind;
+    }
+
     private void setLayout() {
         HorizontalPanel radioPanel = new HorizontalPanel();
         radioPanel.add(matchAllButton);
         radioPanel.add(matchAnyButton);
         radioPanel.setHeight("30px");
-        radioPanel.setSpacing(10);
 
         VStack rowsPanel = new VStack();
         rowsPanel.addMember(filterPanel);
         rowsPanel.addMember(addButton);
 
+        HorizontalPanel importExportPanel = new HorizontalPanel();
+        importExportPanel.setHeight("30px");
+        importExportPanel.setSpacing(5);
+
+        filterNameTextBox.setStyleName("filter-name-textbox");
+        filterNameTextBox.setEnabled(true);
+        filterNameTextBox.getElement().setPropertyString("placeholder", "Enter filter name");
+        filterNameTextBox.getElement().getStyle().setColor("black");
+        filterNameTextBox.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+        filterNameTextBox.setVisibleLength(26);
+        Image deleteNameImage = new Image(DELETE_BUTTON_IMAGE);
+
+        deleteNameImage.setTitle("Delete filter name");
+        deleteNameImage.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                filterNameTextBox.setText("");
+            }
+        });
+
+        IButton importButton = new IButton("Import");
+        importButton.setTooltip("Import a filter configuration from a JSON file");
+        importButton.setIcon(IMPORT_BUTTON_IMAGE.getSafeUri().asString());
+        importButton.setShowDisabledIcon(false);
+        importButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
+            @Override
+            public void onClick(com.smartgwt.client.widgets.events.ClickEvent event) {
+                if (importActivated) {
+                    fileUpload.setVisible(false);
+                    importFromFileformPanel.reset();
+                    fromFilePanel.setVisible(false);
+                    removeMember(fromFilePanel);
+                    importActivated = false;
+                } else {
+                    filterUploader();
+                    addMember(fromFilePanel, 1);
+                    importActivated = true;
+                }
+            }
+        });
+
+        IButton exportButton = new IButton("Export");
+        exportButton.setTooltip("Export the filter configuration as a JSON file");
+        exportButton.setIcon(EXPORT_BUTTON_IMAGE.getSafeUri().asString());
+        exportButton.setShowDisabledIcon(false);
+        exportButton.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler() {
+            @Override
+            public void onClick(com.smartgwt.client.widgets.events.ClickEvent event) {
+                if (filterNameTextBox.getText().isEmpty()) {
+                    displayErrorMessage("The name of the filter cannot be empty");
+                } else {
+                    clearMessagePanel();
+                    exportFilterConfiguration();
+                }
+            }
+        });
+
+        HLayout buttonsLayout = new HLayout();
+        buttonsLayout.setAlign(Alignment.RIGHT);
+        buttonsLayout.setHeight(20);
+        buttonsLayout.setMembersMargin(5);
+        buttonsLayout.setMembers(importButton, exportButton);
+
+        importExportPanel.add(buttonsLayout);
+        importExportPanel.add(filterNameTextBox);
+        importExportPanel.add(deleteNameImage);
+
+        HTML html = new HTML("<hr  style=\"width:460px;\" />");
+
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(html);
+        hp.setHeight("10px");
+        hp.setSpacing(5);
+
+        addMember(importExportPanel);
+        addMember(hp);
         addMember(radioPanel);
         addMember(rowsPanel);
         setWidth100();
     }
 
     private void initComp() {
+        filterNameTextBox = new TextBox();
+        filterNameTextBox.setTitle("Click to edit filter name");
         matchAllButton = new RadioButton("matchGroup", "Match All");
         matchAllButton.setValue(true);
+        matchAllButton.setTitle("Use \"Match All\" to filter jobs that match all filter criteria");
         matchAnyButton = new RadioButton("matchGroup", "Match Any");
+        matchAnyButton.setTitle("Use \"Match Any\" to filter jobs that match any filter criteria");
 
         filterPanel = new VStack();
         filterPanel.setWidth100();
@@ -295,6 +519,18 @@ public class FilterView extends VStack {
             if (valueWidget == dateTextBox)
                 return dateTextBox.getText();
             return textBox.getText();
+        }
+
+        public void setValue(String value) {
+            Widget valueWidget = valuePanel.getWidget();
+            if (valueWidget == priorityList)
+                priorityList.setSelectedIndex(getSelectedValueIndex(priorityList, value));
+            if (valueWidget == stateList)
+                stateList.setSelectedIndex(getSelectedValueIndex(stateList, value));
+            if (valueWidget == dateTextBox)
+                dateTextBox.setText(value);
+            if (valueWidget == textBox)
+                textBox.setText(value);
         }
 
         private void setActionsAccordingToSelectedField() {
