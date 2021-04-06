@@ -199,9 +199,9 @@ public class FilterView extends VStack {
             String value = row.getValue();
 
             JSONObject constraintObject = new JSONObject();
-            constraintObject.put("field", new JSONString(field.toString()));
-            constraintObject.put("action", new JSONString(action.toString()));
-            constraintObject.put("value", new JSONString(value.toString()));
+            constraintObject.put("field", new JSONString(field));
+            constraintObject.put("action", new JSONString(action));
+            constraintObject.put("value", new JSONString(value));
 
             constraintsArray.set(i, constraintObject);
         }
@@ -251,7 +251,7 @@ public class FilterView extends VStack {
             filterPanel.addMember(newRow);
             updateRemoveButtonStatus();
         }
-        if (matchAny.isString().stringValue().equals("true")) {
+        if ("true".equals(matchAny.isString().stringValue())) {
             matchAnyButton.setValue(true);
         } else {
             matchAllButton.setValue(true);
