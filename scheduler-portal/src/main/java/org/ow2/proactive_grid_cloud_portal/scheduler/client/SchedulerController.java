@@ -148,17 +148,17 @@ public class SchedulerController extends Controller implements UncaughtException
 
     protected ResultController resultController;
 
-    protected boolean statusUpdated = false;
+    private boolean statusUpdated = false;
 
-    protected boolean executionsUpdated = false;
+    private boolean executionsUpdated = false;
 
-    protected boolean executionsDataUpdated = false;
+    private boolean executionsDataUpdated = false;
 
-    protected boolean usersUpdated = false;
+    private boolean usersUpdated = false;
 
-    protected boolean statsUpdated = false;
+    private boolean statsUpdated = false;
 
-    protected boolean myAccountUpdated = false;
+    private boolean myAccountUpdated = false;
 
     /**
      * Default constructor
@@ -244,7 +244,7 @@ public class SchedulerController extends Controller implements UncaughtException
         this.executionsDataUpdated = false;
     }
 
-    public boolean allUpdated() {
+    private boolean allUpdated() {
         return statsUpdated && executionsUpdated && executionsDataUpdated && usersUpdated && statsUpdated &&
                myAccountUpdated;
     }
