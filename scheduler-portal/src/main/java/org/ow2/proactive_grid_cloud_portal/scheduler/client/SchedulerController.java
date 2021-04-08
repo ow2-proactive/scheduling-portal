@@ -249,7 +249,7 @@ public class SchedulerController extends Controller implements UncaughtException
                myAccountUpdated;
     }
 
-    public void setStatusUpdated(boolean statusUpdated) {
+    private void setStatusUpdated(boolean statusUpdated) {
         this.statusUpdated = statusUpdated;
         if (allUpdated()) {
             restartTimer();
@@ -270,14 +270,14 @@ public class SchedulerController extends Controller implements UncaughtException
         }
     }
 
-    public void setUsersUpdated(boolean usersUpdated) {
+    private void setUsersUpdated(boolean usersUpdated) {
         this.usersUpdated = usersUpdated;
         if (allUpdated()) {
             restartTimer();
         }
     }
 
-    public void setStatsUpdated(boolean statsUpdated) {
+    private void setStatsUpdated(boolean statsUpdated) {
         this.statsUpdated = statsUpdated;
         if (allUpdated()) {
             restartTimer();
