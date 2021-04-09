@@ -552,6 +552,7 @@ public class JobsController {
                                                           .logCriticalMessage("Error while fetching jobs:\n" +
                                                                               JSONUtils.getJsonErrorMessage(caught));
                                               }
+                                              parentController.getParentController().setExecutionsDataUpdated(true);
                                           }
 
                                           public void onSuccess(String result) {
@@ -572,6 +573,7 @@ public class JobsController {
                                                   LogModel.getInstance().logCriticalMessage(e.getMessage());
                                                   LOGGER.log(Level.SEVERE, e.getMessage());
                                               }
+                                              parentController.getParentController().setExecutionsDataUpdated(true);
                                           }
                                       });
     }
@@ -641,10 +643,12 @@ public class JobsController {
                 }
                 LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " +
                                                           JSONUtils.getJsonErrorMessage(caught));
+                parentController.getParentController().setExecutionsUpdated(true);
             }
 
             public void onSuccess(Long result) {
                 fetchJobs(false);
+                parentController.getParentController().setExecutionsUpdated(true);
             }
         });
     }
