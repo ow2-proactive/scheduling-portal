@@ -140,4 +140,10 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/remove.png")
     ImageResource remove();
 
+    @Source("images/job_export_16.png")
+    ImageResource job_export_16();
+
+    @Source("images/open_16.png")
+    ImageResource open();
+
 }

@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
@@ -113,6 +114,7 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
     @Override
     protected void clearAction() {
         filterView.clearCriteria();
+        Settings.get().setSetting("filterConfig", filterView.generateFilterJsonString());
         controller.getModel().setFilterModel(new FilterModel());
         controller.fetchJobs(true);
     }
@@ -126,13 +128,17 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
     @Override
     protected Widget getBuiltFilterPane() {
         filterView = new FilterView();
+        String filterConfig = Settings.get().getSetting("filterConfig");
+        if (filterConfig != null) {
+            filterView.loadFilterConfiguration(filterConfig);
+        }
         return filterView;
     }
 
     @Override
     protected Label getLabel() {
-        Label label = new Label("Use filters to restrict the number of jobs currently displayed.<br>Be aware that <b> using \"Match all\" with multiple filters on the same criteria</b> (id, priority,..) leads, in most cases, to <b>only consider your last filter</b>.");
-        label.setHeight(20);
+        Label label = new Label("Use filters to restrict the number of jobs currently displayed.");
+        label.setHeight(10);
         return label;
     }
 
