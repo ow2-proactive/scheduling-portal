@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
@@ -77,124 +78,135 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
     @Override
     public void processResult(String result) {
 
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
+        try {
 
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
+            JSONObject object = controller.parseJSON(result).isObject();
+            if (object != null) {
 
-            addXLabel(timeStamp);
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                                 .format(new Date(System.currentTimeMillis()));
 
-            boolean initColumns = super.initColumns();
+                addXLabel(timeStamp);
 
-            if (initColumns) {
-                time = new long[object.size()];
-                txBytes = new long[object.size()];
-                String[] datasourceNames = object.keySet()
-                                                 .stream()
-                                                 .sorted()
-                                                 .map(this::beautifyName)
-                                                 .toArray(String[]::new);
+                boolean initColumns = super.initColumns();
 
-                setDatasourceNames(datasourceNames);
+                if (initColumns) {
+                    time = new long[object.size()];
+                    txBytes = new long[object.size()];
+                    String[] datasourceNames = object.keySet()
+                                                     .stream()
+                                                     .sorted()
+                                                     .map(this::beautifyName)
+                                                     .toArray(String[]::new);
+
+                    setDatasourceNames(datasourceNames);
+                }
+
+                int colIndex = 0;
+
+                for (String key : object.keySet().stream().sorted().collect(Collectors.toList())) {
+
+                    long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
+                    long t = System.currentTimeMillis();
+                    double bytePerMilliSec = (value - txBytes[colIndex]) / (t - time[colIndex]);
+                    double kbPerSec = bytePerMilliSec * 1000 / 1024;
+                    addPointToDataset(colIndex, kbPerSec);
+
+                    txBytes[colIndex] = value;
+                    time[colIndex] = t;
+
+                    colIndex++;
+                }
+
+                chart.update();
             }
-
-            int colIndex = 0;
-
-            for (String key : object.keySet().stream().sorted().collect(Collectors.toList())) {
-
-                long value = Long.parseLong(object.get(key).isArray().get(0).isObject().get("value").toString());
-                long t = System.currentTimeMillis();
-                double bytePerMilliSec = (value - txBytes[colIndex]) / (t - time[colIndex]);
-                double kbPerSec = bytePerMilliSec * 1000 / 1024;
-                addPointToDataset(colIndex, kbPerSec);
-
-                txBytes[colIndex] = value;
-                time[colIndex] = t;
-
-                colIndex++;
-            }
-
-            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
     }
 
     @Override
     public void processHistoryResult(String result) {
-        result = removingInternalEscaping(result);
+        try {
+            result = removingInternalEscaping(result);
 
-        JSONValue resultVal = controller.parseJSON(result);
-        JSONObject json = resultVal.isObject();
+            JSONValue resultVal = controller.parseJSON(result);
+            JSONObject json = resultVal.isObject();
 
-        if (json == null) {
-            return;
-        }
-
-        long now = new Date().getTime() / 1000;
-        long dur = timeRange.getDuration();
-        int size = getJsonInternalSize(json);
-        long step = dur / size;
-
-        final int length = getJsonSlice(json, 0).length;
-
-        List<Dataset> datasets = new ArrayList<>();
-        List<Double>[] dpss = new List[length];
-
-        for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) createDataset(i);
-
-            datasets.add(dataset);
-
-            dpss[i] = new ArrayList<>();
-        }
-        List<String> datasourceNames = new ArrayList<>();
-
-        for (int i = 0; i < size; i++) {
-
-            double[] slice = getJsonSlice(json, i);
-
-            if (i == 1) {
-                time = new long[slice.length];
-                txBytes = new long[slice.length];
+            if (json == null) {
+                return;
             }
 
-            long t = now - dur + step * i;
-            DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
-            String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+            long now = new Date().getTime() / 1000;
+            long dur = timeRange.getDuration();
+            int size = getJsonInternalSize(json);
+            long step = dur / size;
 
-            datasourceNames.add(timeStamp);
+            final int length = getJsonSlice(json, 0).length;
 
-            for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+            List<Dataset> datasets = new ArrayList<>();
+            List<Double>[] dpss = new List[length];
 
-                long value = (long) slice[sliceIndex];
+            for (int i = 0; i < length; ++i) {
+                LineDataset dataset = (LineDataset) createDataset(i);
 
-                if (i > 1) {
-                    double bytePerSec = (value - txBytes[sliceIndex]) / (t - time[sliceIndex]);
-                    double kbPerSec = bytePerSec / 1024;
+                datasets.add(dataset);
 
-                    if (kbPerSec < 0) {
-                        // rx counter is reset
-                        kbPerSec = 0;
-                    }
+                dpss[i] = new ArrayList<>();
+            }
+            List<String> datasourceNames = new ArrayList<>();
 
-                    dpss[sliceIndex].add(kbPerSec);
+            for (int i = 0; i < size; i++) {
+
+                double[] slice = getJsonSlice(json, i);
+
+                if (i == 1) {
+                    time = new long[slice.length];
+                    txBytes = new long[slice.length];
                 }
 
-                txBytes[sliceIndex] = value;
-                time[sliceIndex] = t;
+                long t = now - dur + step * i;
+                DateTimeFormat.PredefinedFormat format = timeRange.getFormat();
+                String timeStamp = DateTimeFormat.getFormat(format).format(new Date(t * 1000));
+
+                datasourceNames.add(timeStamp);
+
+                for (int sliceIndex = 0; sliceIndex < slice.length; sliceIndex++) {
+
+                    long value = (long) slice[sliceIndex];
+
+                    if (i > 1) {
+                        double bytePerSec = (value - txBytes[sliceIndex]) / (t - time[sliceIndex]);
+                        double kbPerSec = bytePerSec / 1024;
+
+                        if (kbPerSec < 0) {
+                            // rx counter is reset
+                            kbPerSec = 0;
+                        }
+
+                        dpss[sliceIndex].add(kbPerSec);
+                    }
+
+                    txBytes[sliceIndex] = value;
+                    time[sliceIndex] = t;
+                }
             }
+
+            chart.getData().setLabels(datasourceNames.toArray(new String[0]));
+
+            chart.getOptions().getLegend().setPosition(Position.RIGHT);
+            for (int i = 0; i < length; ++i) {
+                datasets.get(i).setData(dpss[i]);
+            }
+
+            chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
-
-        chart.getData().setLabels(datasourceNames.toArray(new String[0]));
-
-        chart.getOptions().getLegend().setPosition(Position.RIGHT);
-        for (int i = 0; i < length; ++i) {
-            datasets.get(i).setData(dpss[i]);
-        }
-
-        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
-
-        chart.update();
 
     }
 

@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
@@ -55,22 +56,27 @@ public class MBeanTimeAreaChart extends MBeanChart {
 
     @Override
     public void processResult(String result) {
-        JSONValue json = controller.parseJSON(result);
-        JSONArray array = json.isArray();
+        try {
+            JSONValue json = controller.parseJSON(result);
+            JSONArray array = json.isArray();
 
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
+            if (array != null) {
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                                 .format(new Date(System.currentTimeMillis()));
 
-            addXLabel(timeStamp);
+                addXLabel(timeStamp);
 
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+                for (int i = 0; i < attrs.length; i++) {
+                    double value = array.get(i).isObject().get("value").isNumber().doubleValue();
 
-                addPointToDataset(i, value);
+                    addPointToDataset(i, value);
+                }
+
+                chart.update();
             }
-
-            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
 
     }
