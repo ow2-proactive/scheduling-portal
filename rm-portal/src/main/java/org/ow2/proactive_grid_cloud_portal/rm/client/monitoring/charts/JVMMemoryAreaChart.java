@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -55,17 +56,22 @@ public class JVMMemoryAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
-            double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
+        try {
+            JSONArray array = controller.parseJSON(result).isArray();
+            if (array != null) {
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                                 .format(new Date(System.currentTimeMillis()));
+                double value = array.get(0).isObject().get("value").isObject().get("used").isNumber().doubleValue();
 
-            addXLabel(timeStamp);
+                addXLabel(timeStamp);
 
-            addPointToDataset(0, value);
+                addPointToDataset(0, value);
 
-            chart.update();
+                chart.update();
+            }
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
     }
 }

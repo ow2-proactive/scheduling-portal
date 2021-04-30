@@ -1347,12 +1347,21 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
-     * Issue an error message to the user and exit the schedulerView
+     * Issue an error message to the user
      *
      * @param reason error message to display
      */
     private void error(String reason) {
         LogModel.getInstance().logCriticalMessage(reason);
+    }
+
+    /**
+     * Issue a warning message to the user
+     *
+     * @param reason warning message to display
+     */
+    private void warning(String reason) {
+        LogModel.getInstance().logImportantMessage(reason);
     }
 
     /**
@@ -1406,7 +1415,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     public void onUncaughtException(Throwable e) {
         e.printStackTrace();
-        error(e.getMessage());
+        warning(e.getMessage());
     }
 
     private String parseAllScriptResults(String jsonString) {

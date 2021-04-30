@@ -99,36 +99,41 @@ public class MBeanSourceDetailedView extends DetailViewer {
 
                 LogModel.getInstance()
                         .logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
-                JSONArray array = controller.parseJSON(result).isArray();
-                if (array != null) {
-                    DetailViewerRecord dv = new DetailViewerRecord();
-                    for (int i = 0; i < array.size(); i++) {
-                        try {
-                            JSONObject property = array.get(i).isObject();
-                            String name = property.get("name").isString().stringValue();
-                            JSONValue value = property.get("value");
-                            String valueStr = "";
+                try {
+                    JSONArray array = controller.parseJSON(result).isArray();
+                    if (array != null) {
+                        DetailViewerRecord dv = new DetailViewerRecord();
+                        for (int i = 0; i < array.size(); i++) {
+                            try {
+                                JSONObject property = array.get(i).isObject();
+                                String name = property.get("name").isString().stringValue();
+                                JSONValue value = property.get("value");
+                                String valueStr = "";
 
-                            if (value.isString() != null) {
-                                valueStr = value.isString().stringValue();
-                            } else if (value.isNumber() != null) {
-                                valueStr = value.isNumber().toString();
-                            } else if (value.isArray() != null) {
-                                JSONArray values = value.isArray();
-                                for (int j = 0; j < values.size(); j++)
-                                    valueStr += values.get(j).isString().stringValue() + " ";
-                            } else if (value.isObject() != null) {
-                                valueStr = value.toString();
-                            } else {
-                                valueStr = value.toString();
+                                if (value.isString() != null) {
+                                    valueStr = value.isString().stringValue();
+                                } else if (value.isNumber() != null) {
+                                    valueStr = value.isNumber().toString();
+                                } else if (value.isArray() != null) {
+                                    JSONArray values = value.isArray();
+                                    for (int j = 0; j < values.size(); j++)
+                                        valueStr += values.get(j).isString().stringValue() + " ";
+                                } else if (value.isObject() != null) {
+                                    valueStr = value.toString();
+                                } else {
+                                    valueStr = value.toString();
+                                }
+
+                                dv.setAttribute(name, valueStr);
+                            } catch (Exception e) {
+                                // ignore it
                             }
-
-                            dv.setAttribute(name, valueStr);
-                        } catch (Exception e) {
-                            // ignore it
                         }
+                        setData(new DetailViewerRecord[] { dv });
                     }
-                    setData(new DetailViewerRecord[] { dv });
+                } catch (Exception e) {
+                    LogModel.getInstance().logMessage("Error when processing " + this.getClass().getName() +
+                                                      " result : " + e.getMessage());
                 }
 
             }
