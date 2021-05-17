@@ -52,6 +52,8 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -60,6 +62,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.grid.ListGrid;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -842,6 +846,79 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
 
         return result;
+    }
+
+    public void fetchLoggersSettings(ListGrid loggersGrid) {
+        this.rm.getCurrentLoggers(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+            public void onSuccess(String loggersJson) {
+                JSONObject loggersObject = JSONParser.parseStrict(loggersJson).isObject();
+                if (loggersObject == null) {
+                    LogModel.getInstance()
+                            .logCriticalMessage("Failed to parse the JSON loggers object: " + loggersObject);
+                } else {
+                    Map<String, String> loggersMap = new HashMap<>();
+                    loggersObject.keySet()
+                                 .forEach(key -> loggersMap.put(key, loggersObject.get(key).isString().stringValue()));
+                    model.setLoggersConfiguration(loggersMap);
+                    updateLoggersGrid(loggersGrid);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage(
+                                                          "Failed to get the map of (logger_name, level) from the server: " +
+                                                          caught.getMessage());
+            }
+        });
+    }
+
+    public void updateLoggersGrid(ListGrid loggersGrid) {
+        int i = 0;
+        Map<String, String> parsedLoggers = model.getLoggersConfiguration();
+        ListGridRecord[] loggersRecords = new ListGridRecord[parsedLoggers.size()];
+
+        for (Map.Entry mapentry : parsedLoggers.entrySet()) {
+            ListGridRecord newLoggerRecord = new ListGridRecord();
+            newLoggerRecord.setAttribute("logger", mapentry.getKey().toString());
+            newLoggerRecord.setAttribute("level", mapentry.getValue().toString());
+            newLoggerRecord.set_canRemove(false);
+
+            loggersRecords[i] = newLoggerRecord;
+            i++;
+        }
+        loggersGrid.setData(loggersRecords);
+
+    }
+
+    public void setLoggersSettings(ListGrid loggersGrid) {
+
+        RecordList loggersData = new RecordList();
+
+        for (int i = 0; i < loggersGrid.getTotalRows(); i++) {
+            loggersData.add(loggersGrid.getEditedRecord(i));
+        }
+        Record[] records = loggersData.duplicate();
+
+        Map<String, String> loggersMap = new HashMap<>();
+
+        for (Record record : records) {
+            loggersMap.put(record.getAttribute("logger"), record.getAttribute("level"));
+        }
+
+        this.rm.setLogLevelMultiple(LoginModel.getInstance().getSessionId(), loggersMap, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Error updating loggers on the server");
+                JSONUtils.getJsonErrorMessage(caught);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                loggersGrid.redraw();
+                fetchLoggersSettings(loggersGrid);
+                LogModel.getInstance().logMessage("Successfully updating loggers configration: " + loggersMap);
+            }
+        });
     }
 
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
