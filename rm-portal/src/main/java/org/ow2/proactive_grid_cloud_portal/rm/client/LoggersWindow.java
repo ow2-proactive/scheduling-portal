@@ -102,7 +102,7 @@ public class LoggersWindow {
         removeField.setCanSort(false);
         removeField.setDefaultValue("blank.png");
 
-        loggersGrid.setFields(new ListGridField[] { loggerField, levelField, removeField });
+        loggersGrid.setFields(loggerField, levelField, removeField);
         loggersGrid.setCanResizeFields(true);
         loggersGrid.setValidateOnChange(true);
 
@@ -127,7 +127,6 @@ public class LoggersWindow {
                 newRecord.set_canEdit(true);
                 loggersGrid.startEditing(loggersGrid.getRowNum(newRecord));
                 newRecord.setAttribute("logger", "");
-                newRecord.set_canRemove(true);
             }
         });
 

@@ -881,7 +881,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             ListGridRecord newLoggerRecord = new ListGridRecord();
             newLoggerRecord.setAttribute("logger", mapentry.getKey().toString());
             newLoggerRecord.setAttribute("level", mapentry.getValue().toString());
-            newLoggerRecord.set_canRemove(false);
 
             loggersRecords[i] = newLoggerRecord;
             i++;
@@ -916,7 +915,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             public void onSuccess(String result) {
                 loggersGrid.redraw();
                 fetchLoggersSettings(loggersGrid);
-                LogModel.getInstance().logMessage("Successfully updating loggers configration: " + loggersMap);
+                LogModel.getInstance().logMessage("Successfully updating loggers configuration: " + loggersMap);
             }
         });
     }
