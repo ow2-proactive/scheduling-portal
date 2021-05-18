@@ -74,6 +74,23 @@ public interface RMServiceAsync {
     void getState(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * List currently available loggers and their associated levels
+     *
+     * @param sessionId current session id
+     * @param callback async callback to return list of loggers in a JSON string
+     */
+    void getCurrentLoggers(String sessionId, AsyncCallback<String> callback);
+
+    /**
+     * Change multiple loggers level.
+     *
+     * @param sessionId current session id
+     * @param loggersConfiguration map of (logger_name, level)
+     */
+    void setLogLevelMultiple(String sessionId, Map<String, String> loggersConfiguration,
+            AsyncCallback<String> callback);
+
+    /**
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others	
      * @param sessionId current session
