@@ -36,6 +36,8 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.form.validator.CustomValidator;
+import com.smartgwt.client.widgets.form.validator.Validator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -90,7 +92,18 @@ public class LoggersWindow {
         loggersGrid.setShowAllRecords(true);
 
         ListGridField loggerField = new ListGridField("logger", "Logger", 385);
-        loggerField.setRequired(true);
+        // prevent logger field validation if cell is empty or contains white spaces
+        Validator loggerValidator = new CustomValidator() {
+            @Override
+            protected boolean condition(Object value) {
+                if (((value == null || value.toString().trim().isEmpty()))) {
+                    return false;
+                }
+                return true;
+            }
+        };
+        loggerValidator.setErrorMessage("Field is required");
+        loggerField.setValidators(loggerValidator);
 
         ListGridField levelField = new ListGridField("level", "Level");
         levelField.setValueMap("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF");
@@ -192,7 +205,6 @@ public class LoggersWindow {
         this.window.addItem(layout);
         this.window.setWidth(532);
         this.window.setHeight(380);
-        this.window.setCanDragResize(true);
         this.window.centerInPage();
         this.window.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClickEvent event) {
