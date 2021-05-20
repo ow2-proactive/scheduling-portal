@@ -96,7 +96,7 @@ public class LoggersWindow {
         Validator loggerValidator = new CustomValidator() {
             @Override
             protected boolean condition(Object value) {
-                if (((value == null || value.toString().trim().isEmpty()))) {
+                if (value == null || value.toString().trim().isEmpty()) {
                     return false;
                 }
                 return true;
