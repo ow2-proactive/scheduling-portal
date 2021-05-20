@@ -80,7 +80,7 @@ public class LoggersWindow {
         layout.setAutoHeight();
         layout.setMargin(10);
 
-        Label label = new Label("Edit existing loggers levels and/or add a new logger/level. Please note that changes are made in memory and not persisted.");
+        Label label = new Label("Edit current loggers levels of server instance and/or add new logger/level configurations. Please note that changes are made in memory and not persisted.");
         label.setHeight(30);
 
         loggersGrid = new ListGrid();
@@ -131,7 +131,7 @@ public class LoggersWindow {
         });
 
         IButton resetGridButton = new IButton("Reset");
-        resetGridButton.setTooltip("Reset loggers settings");
+        resetGridButton.setTooltip("Reset to current server configuration");
         resetGridButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 controller.fetchLoggersSettings(loggersGrid);
