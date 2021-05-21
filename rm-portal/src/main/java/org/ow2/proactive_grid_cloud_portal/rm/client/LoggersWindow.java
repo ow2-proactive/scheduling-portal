@@ -82,7 +82,7 @@ public class LoggersWindow {
         layout.setAutoHeight();
         layout.setMargin(10);
 
-        Label label = new Label("Edit current loggers levels of server instance and/or add new logger/level configurations. Please note that changes are made in memory and not persisted.");
+        Label label = new Label("Edit current loggers levels of server instance or add new logger/level configurations. Please note that changes are made in memory and not persisted.");
         label.setHeight(30);
 
         loggersGrid = new ListGrid();
@@ -141,7 +141,7 @@ public class LoggersWindow {
         });
 
         IButton resetGridButton = new IButton("Reset");
-        resetGridButton.setTooltip("Reset to current server configuration");
+        resetGridButton.setTooltip("Cancel the current modifications and keep previous configuration");
         resetGridButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 controller.fetchLoggersSettings(loggersGrid);
@@ -150,7 +150,7 @@ public class LoggersWindow {
         });
 
         IButton applyChangesButton = new IButton("Apply");
-        applyChangesButton.setTooltip("Apply changes");
+        applyChangesButton.setTooltip("Apply modifications");
         applyChangesButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
         applyChangesButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -176,7 +176,7 @@ public class LoggersWindow {
         });
 
         IButton cancelChangesButton = new IButton("Cancel");
-        cancelChangesButton.setTooltip("Cancel changes");
+        cancelChangesButton.setTooltip("Cancel the current modifications and close window");
         cancelChangesButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
         cancelChangesButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
