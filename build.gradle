@@ -79,7 +79,9 @@ subprojects {
         compile 'commons-fileupload:commons-fileupload:1.2'
         compile 'org.apache.httpcomponents:httpclient:4.3.6'
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
-        compile("org.ow2.proactive:common-http:${schedulingPortalVersion}")
+        compile("org.ow2.proactive:common-http:${schedulingPortalVersion}") {
+            exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        }
         compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-client-gwt:${schedulingPortalVersion}")
@@ -139,7 +141,8 @@ project(':rm-portal') {
         compile 'codemirror:codemirror2-gwt:1.2.0'
         compile 'org.jboss.resteasy:resteasy-client:3.0.26.Final'
 
-        runtime 'org.slf4j:slf4j-log4j12:1.7.16'
+        runtime 'org.apache.logging.log4j:log4j-web:2.4.1'
+        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.4.1'
         testRuntime 'org.slf4j:slf4j-simple:1.7.16'
         compile 'org.codehaus.jettison:jettison:1.2'
         compile project(':common-portal')
@@ -163,8 +166,8 @@ project(':scheduler-portal') {
         compile 'org.apache.commons:commons-csv:1.1'
 
         compile project(':common-portal')
-
-        runtime 'org.slf4j:slf4j-log4j12:1.7.16'
+        runtime 'org.apache.logging.log4j:log4j-web:2.4.1'
+        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.4.1'
         testRuntime 'org.slf4j:slf4j-simple:1.7.16'
     }
 
