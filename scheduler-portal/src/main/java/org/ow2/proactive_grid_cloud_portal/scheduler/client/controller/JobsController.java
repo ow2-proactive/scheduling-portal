@@ -627,6 +627,8 @@ public class JobsController {
                                            job.getId().toString(),
                                            "getJobState",
                                            new AsyncCallback<String>() {
+
+                                               @Override
                                                public void onFailure(Throwable caught) {
                                                    String msg = JSONUtils.getJsonErrorMessage(caught);
                                                    LogModel.getInstance().logImportantMessage(
