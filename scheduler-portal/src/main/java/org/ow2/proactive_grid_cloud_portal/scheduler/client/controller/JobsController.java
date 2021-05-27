@@ -25,16 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.xhr.client.XMLHttpRequest;
-import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.layout.Layout;
+import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
+
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -47,12 +44,16 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.xhr.client.XMLHttpRequest;
+import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.Layout;
 
 
 /**
@@ -618,29 +619,31 @@ public class JobsController {
                                                         });
     }
 
-    public void jobVariablesAccess(Job job, Label label, KeyValueGrid variablesGrid,
+    public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
             KeyValueGrid genericInformationGrid) {
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.jobVariablesAccess(LoginModel.getInstance().getSessionId(),
-                                     job.getId().toString(),
-                                     "getJobState",
-                                     new AsyncCallback<String>() {
-                                         public void onFailure(Throwable caught) {
-                                             String msg = JSONUtils.getJsonErrorMessage(caught);
-                                             LogModel.getInstance()
-                                                     .logImportantMessage("Failed to access REST server endpoint : " + msg);
-                                         }
-                                         @Override
-                                         public void onSuccess(String result) {
-                                             if (result.contains("false")) {
-                                                 label.setContents("You are not authorized to see this job's variables");
-                                                 label.show();
-                                                 variablesGrid.hide();
-                                                 genericInformationGrid.hide();
-                                             }
-                                         }
-                                     });
+        scheduler.checkJobPermissionMethod(LoginModel.getInstance().getSessionId(),
+                                           job.getId().toString(),
+                                           "getJobState",
+                                           new AsyncCallback<String>() {
+                                               public void onFailure(Throwable caught) {
+                                                   String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                   LogModel.getInstance().logImportantMessage(
+                                                                                              "Failed to access REST server endpoint : " +
+                                                                                              msg);
+                                               }
+
+                                               @Override
+                                               public void onSuccess(String result) {
+                                                   if (result.contains("false")) {
+                                                       label.setContents("You are not authorized to see this job's variables");
+                                                       label.show();
+                                                       variablesGrid.hide();
+                                                       genericInformationGrid.hide();
+                                                   }
+                                               }
+                                           });
     }
 
     /**

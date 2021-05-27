@@ -25,18 +25,20 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.HeaderParam;
+
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
-import javax.ws.rs.HeaderParam;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 
 /**
@@ -384,7 +386,7 @@ public interface SchedulerService extends RemoteService {
      * @param method method to request access
      * @return true if the user can access the variables, false otherwise
      */
-    String jobVariablesAccess(String sessionId, String jobId, String method)
+    String checkJobPermissionMethod(String sessionId, String jobId, String method)
             throws RestServerException, ServiceException;;
 
     /**

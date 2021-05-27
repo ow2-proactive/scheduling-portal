@@ -25,15 +25,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import org.jboss.resteasy.annotations.GZIP;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+
+import org.jboss.resteasy.annotations.GZIP;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 
 
 /**
@@ -787,7 +788,7 @@ public interface RestClient {
     @GET
     @Path("job/{jobid}/permission/{method}")
     @Produces(MediaType.APPLICATION_JSON)
-    InputStream jobVariablesAccess(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
+    InputStream checkJobPermissionMethod(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("method") String method);
 
 }
