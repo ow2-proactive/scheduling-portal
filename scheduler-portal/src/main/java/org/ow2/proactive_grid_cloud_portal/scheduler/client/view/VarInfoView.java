@@ -25,8 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Map;
-
+import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VStack;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -36,11 +38,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
-
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VStack;
 
 
 /**
@@ -83,6 +80,9 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
 
     @Override
     public void jobSelected(Job job) {
+        controller.getExecutionController()
+                  .getJobsController()
+                  .jobVariablesAccess(job, label, variablesGrid, genericInformationGrid);
         variablesGrid.buildEntries(job.getVariables());
         genericInformationGrid.buildEntries(job.getGenericInformation());
 

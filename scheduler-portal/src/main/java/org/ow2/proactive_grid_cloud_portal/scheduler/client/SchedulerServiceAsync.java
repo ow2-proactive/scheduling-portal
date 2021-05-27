@@ -25,16 +25,15 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import com.google.gwt.http.client.Request;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
-
-import com.google.gwt.http.client.Request;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 
 /**
@@ -394,6 +393,8 @@ public interface SchedulerServiceAsync {
             AsyncCallback<List<JobUsage>> asyncCallback);
 
     void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
+
+    void jobVariablesAccess(String sessionId, String jobId, String method, AsyncCallback<String> asyncCallback);
 
     void putThirdPartyCredential(String sessionId, String key, String value, AsyncCallback<Void> async);
 

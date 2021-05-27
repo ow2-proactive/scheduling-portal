@@ -25,20 +25,18 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.HeaderParam;
-
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import javax.ws.rs.HeaderParam;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -378,6 +376,16 @@ public interface SchedulerService extends RemoteService {
      */
     String getJobHtml(@HeaderParam("sessionid") String sessionId, String jobId)
             throws RestServerException, ServiceException;
+
+    /**
+     * Check job variables access permission.
+     * @param sessionId the session id of the user which is logged in.
+     * @param jobId the job id for which the details are asked.
+     * @param method method to request access
+     * @return true if the user can access the variables, false otherwise
+     */
+    String jobVariablesAccess(String sessionId, String jobId, String method)
+            throws RestServerException, ServiceException;;
 
     /**
      * Returns the Scheduler status as a JSON String
