@@ -785,4 +785,10 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
 
+    @GET
+    @Path("job/{jobid}/permission/{method}")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkJobPermissionMethod(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
+            @PathParam("method") String method);
+
 }
