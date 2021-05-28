@@ -115,10 +115,10 @@ public class TasksPaginationView extends PaginationView<TasksPaginationControlle
         labelLayout.addMember(this.pageMaxLabel);
         labelLayout.addMember(this.offsetRangeLabel);
 
-        this.pageFirstButton.setTitle("<< Newest Tasks");
-        this.pagePreviousButton.setTitle("< Newer Tasks");
-        this.pageNextButton.setTitle("Older Tasks >");
-        this.pageLastButton.setTitle("Oldest Tasks >>");
+        this.pageFirstButton.setTitle("<< Last Tasks");
+        this.pagePreviousButton.setTitle("< Next Tasks");
+        this.pageNextButton.setTitle("Previous Tasks >");
+        this.pageLastButton.setTitle("First Tasks >>");
 
         paginationLayout.addMember(this.pageFirstButton);
         paginationLayout.addMember(this.pagePreviousButton);
