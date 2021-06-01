@@ -380,6 +380,16 @@ public interface SchedulerService extends RemoteService {
             throws RestServerException, ServiceException;
 
     /**
+     * Check job variables access permission.
+     * @param sessionId the session id of the user which is logged in.
+     * @param jobId the job id for which the details are asked.
+     * @param method method to request access
+     * @return true if the user can access the variables, false otherwise
+     */
+    String checkJobPermissionMethod(String sessionId, String jobId, String method)
+            throws RestServerException, ServiceException;;
+
+    /**
      * Returns the Scheduler status as a JSON String
      * @param sessionId a valid session id
      * @return the current scheduler status

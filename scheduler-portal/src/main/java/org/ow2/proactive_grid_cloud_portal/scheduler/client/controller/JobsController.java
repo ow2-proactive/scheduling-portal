@@ -27,11 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,17 +36,13 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -60,6 +52,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -624,6 +617,35 @@ public class JobsController {
                                                                 }
                                                             }
                                                         });
+    }
+
+    public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
+            KeyValueGrid genericInformationGrid) {
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.checkJobPermissionMethod(LoginModel.getInstance().getSessionId(),
+                                           job.getId().toString(),
+                                           "getJobState",
+                                           new AsyncCallback<String>() {
+
+                                               @Override
+                                               public void onFailure(Throwable caught) {
+                                                   String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                   LogModel.getInstance().logImportantMessage(
+                                                                                              "Failed to access REST server endpoint : " +
+                                                                                              msg);
+                                               }
+
+                                               @Override
+                                               public void onSuccess(String result) {
+                                                   if (result.contains("false")) {
+                                                       label.setContents("You are not authorized to see this job's variables");
+                                                       label.show();
+                                                       variablesGrid.hide();
+                                                       genericInformationGrid.hide();
+                                                   }
+                                               }
+                                           });
     }
 
     /**
