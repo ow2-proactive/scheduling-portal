@@ -215,6 +215,7 @@ configure([project(':scheduler-portal'), project(':rm-portal')]) {
         args = ["org.ow2.proactive_grid_cloud_portal.${project.name.capitalize() - "-portal"}",
                 '-war', "$buildDir/portal",
                 '-logLevel', 'ALL',
+                '-style', 'DETAILED',
                 '-localWorkers', '2',
                 '-generateJsInteropExports'
         ]
