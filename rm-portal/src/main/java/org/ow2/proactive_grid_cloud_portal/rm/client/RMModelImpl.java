@@ -25,11 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.StatsListener;
@@ -70,6 +66,8 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
     private NodeSourceConfiguration editedNodeSourceConfiguration = null;
 
     private HashMap<String, PluginDescriptor> infrastructures = null;
+
+    private Map<String, String> loggersConfiguration = null;
 
     private HashMap<String, PluginDescriptor> policies = null;
 
@@ -128,6 +126,7 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
         this.nodes = new HashMap<>();
         this.infrastructures = new HashMap<>();
+        this.loggersConfiguration = new HashMap<>();
         this.policies = new HashMap<>();
         this.infraPolicyMapping = new HashMap<>();
         this.requestedStatHistoryRange = new HashMap<>();
@@ -290,6 +289,15 @@ public class RMModelImpl extends RMModel implements RMEventDispatcher {
 
     void setSupportedInfrastructures(HashMap<String, PluginDescriptor> inf) {
         this.infrastructures = inf;
+    }
+
+    @Override
+    public Map<String, String> getLoggersConfiguration() {
+        return this.loggersConfiguration;
+    }
+
+    void setLoggersConfiguration(Map<String, String> loggers) {
+        this.loggersConfiguration = loggers;
     }
 
     @Override

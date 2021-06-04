@@ -25,6 +25,11 @@
     padding-right: 10px;
 }
 
+.filter-name-textbox{
+background-color: transparent;
+border-color: gainsboro;
+}
+
 .brand-logo {
     padding-left: 6px;
     padding-right: 6px;

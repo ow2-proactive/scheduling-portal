@@ -27,19 +27,12 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.annotations.GZIP;
 
@@ -49,53 +42,67 @@ public interface RestClient {
 
     @GET
     @Path("/common/permissions/portals/{portal}")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
 
     @POST
     @Path("/rm/disconnect")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     void logout(@HeaderParam("sessionid") String sessionId);
 
     @GET
     @Path("/rm/state")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream state(@HeaderParam("sessionid") String sessionId);
 
     @GET
     @GZIP
+    @Path("/common/logger/current")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getCurrentLoggers(@HeaderParam("sessionid") String sessionId);
+
+    @POST
+    @Path("/common/logger")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream setLogLevelMultiple(@HeaderParam("sessionid") String sessionId,
+            Map<String, String> loggersConfiguration);
+
+    @GET
+    @GZIP
     @Path("/rm/monitoring")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream monitoring(@HeaderParam("sessionid") String sessionId,
             @HeaderParam("clientCounter") @DefaultValue("-1") String counter);
 
     @GET
     @GZIP
     @Path("/rm/infrastructures")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream infrastructures(@HeaderParam("sessionid") String sessionId);
 
     @GET
     @Path("/rm/policies")
     @GZIP
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream policies(@HeaderParam("sessionid") String sessionId);
 
     @GET
-    @Path("/rm/infrastructures/mapping")
     @GZIP
-    @Produces("application/json")
+    @Path("/rm/infrastructures/mapping")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getInfrasToPoliciesMapping(@HeaderParam("sessionid") String sessionId);
 
     @GET
     @GZIP
     @Path("/rm/nodesource/configuration")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeSourceConfiguration(@HeaderParam("sessionid") String sessionId,
             @QueryParam("nodeSourceName") String nodeSourceName);
 
     @POST
     @Path("/rm/nodesource")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream defineNodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
@@ -107,7 +114,7 @@ public interface RestClient {
 
     @PUT
     @Path("/rm/nodesource/edit")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream editNodeSource(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
@@ -119,7 +126,7 @@ public interface RestClient {
 
     @PUT
     @Path("/rm/nodesource/parameter")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream updateDynamicParameters(@HeaderParam("sessionId") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName,
             @FormParam("infrastructureType") String infrastructureType,
@@ -130,78 +137,79 @@ public interface RestClient {
 
     @PUT
     @Path("/rm/nodesource/deploy")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream deployNodeSource(@HeaderParam("sessionid") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName);
 
     @PUT
     @Path("/rm/nodesource/undeploy")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream undeployNodeSource(@HeaderParam("sessionid") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName, @FormParam("preempt") boolean preempt);
 
     @POST
     @Path("/rm/node/lock")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream lockNodes(@HeaderParam("sessionid") String sessionId, @FormParam("nodeurls") Set<String> nodeUrls);
 
     @POST
     @Path("/rm/node/unlock")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream unlockNodes(@HeaderParam("sessionid") String sessionId, @FormParam("nodeurls") Set<String> nodeUrls);
 
     @POST
     @Path("/rm/nodesource/remove")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream removeNodesource(@HeaderParam("sessionId") String sessionId, @FormParam("name") String nsName,
             @FormParam("preempt") boolean preempt);
 
     @POST
     @Path("/rm/node/remove")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream removeNode(@HeaderParam("sessionId") String sessionId, @FormParam("url") String url,
             @FormParam("preempt") boolean preempt);
 
     @POST
     @Path("/rm/node/release")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream releaseNode(@HeaderParam("sessionId") String sessionId, @FormParam("url") String url);
 
     @GET
     @Path("/rm/version")
+    @Produces(MediaType.TEXT_PLAIN)
     InputStream getVersion();
 
     @GET
     @GZIP
     @Path("/rm/info/{name}")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getMBeanInfo(@HeaderParam("sessionid") String sessionId, @PathParam("name") ObjectName name,
             @QueryParam("attr") List<String> attrs);
 
     @GET
-    @Produces("application/json")
     @Path("/rm/node/mbean")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeMBeanInfo(@HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectName,
             @QueryParam("attrs") List<String> attrs);
 
     @GET
-    @Produces("application/json")
     @Path("/rm/node/mbean/history")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeMBeanHistory(@HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectName,
             @QueryParam("attrs") List<String> attrs, @QueryParam("range") String range);
 
     @GET
-    @Produces("application/json")
     @Path("/rm/node/mbeans")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeMBeansInfo(@HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectNames,
             @QueryParam("attrs") List<String> attrs);
 
     @GET
-    @Produces("application/json")
     @Path("/rm/node/mbeans/history")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeMBeansHistory(@HeaderParam("sessionid") String sessionId,
             @QueryParam("nodejmxurl") String nodeJmxUrl, @QueryParam("objectname") String objectNames,
             @QueryParam("attrs") List<String> attrs, @QueryParam("range") String range);
@@ -209,20 +217,20 @@ public interface RestClient {
     @GET
     @GZIP
     @Path("/rm/stathistory")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getStatHistory(@HeaderParam("sessionid") String sessionId, @QueryParam("range") String range);
 
     @POST
     @GZIP
     @Path("/rm/node/script")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream executeNodeScript(@HeaderParam("sessionid") String sessionId, @FormParam("nodeurl") String nodeUrl,
             @FormParam("script") String script, @FormParam("scriptEngine") String scriptEngine);
 
     @POST
     @GZIP
     @Path("/rm/nodesource/script")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream executeNodeSourceScript(@HeaderParam("sessionid") String sessionId,
             @FormParam("nodesource") String nodeSource, @FormParam("script") String script,
             @FormParam("scriptEngine") String scriptEngine);
@@ -230,26 +238,26 @@ public interface RestClient {
     @POST
     @GZIP
     @Path("/rm/host/script")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream executeHostScript(@HeaderParam("sessionid") String sessionId, @FormParam("host") String host,
             @FormParam("script") String script, @FormParam("scriptEngine") String scriptEngine);
 
     @GET
     @GZIP
     @Path("/rm/threaddump")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getRMThreadDump(@HeaderParam("sessionid") String sessionId);
 
     @GET
     @GZIP
     @Path("/rm/node/threaddump")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     InputStream getNodeThreadDump(@HeaderParam("sessionid") String sessionId, @QueryParam("nodeurl") String nodeUrl);
 
     @POST
     @GZIP
     @Path("/rm/node/tokens")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     void setNodeTokens(@HeaderParam("sessionid") String sessionId, @HeaderParam("nodeurl") String nodeUrl,
             @QueryParam("tokens") List<String> tokens);
 }

@@ -1134,6 +1134,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
+    public String checkJobPermissionMethod(final String sessionId, final String jobId, final String method)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsString(restClient -> restClient.checkJobPermissionMethod(sessionId,
+                                                                                                     jobId,
+                                                                                                     method));
+    }
+
+    @Override
     public void putThirdPartyCredential(String sessionId, String key, String value) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
 

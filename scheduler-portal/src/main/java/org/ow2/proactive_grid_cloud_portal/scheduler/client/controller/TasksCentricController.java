@@ -91,7 +91,7 @@ public class TasksCentricController extends TasksController {
             this.model.notifyTasksChanging(false);
         }
 
-        AsyncCallback<String> callback = new TasksAsyncUpdater(model);
+        AsyncCallback<String> callback = new TasksAsyncUpdater(model, parentController);
 
         TasksCentricNavigationModel navigationModel = (TasksCentricNavigationModel) this.model.getTasksNavigationModel();
         String tagFilter = navigationModel.getCurrentTagFilter();

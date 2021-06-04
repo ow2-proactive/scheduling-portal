@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.data.Dataset;
 import org.pepstock.charba.client.data.LineDataset;
@@ -78,105 +79,115 @@ public class NetworkDetailedAreaChart extends MBeanTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONArray array = controller.parseJSON(result).isArray();
-        if (array != null) {
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
+        try {
+            JSONArray array = controller.parseJSON(result).isArray();
+            if (array != null) {
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                                 .format(new Date(System.currentTimeMillis()));
 
-            addXLabel(timeStamp);
+                addXLabel(timeStamp);
 
-            for (int i = 0; i < attrs.length; i++) {
-                double value = array.get(i).isObject().get("value").isNumber().doubleValue();
-                long t = System.currentTimeMillis();
-                if (history[i] > 0) {
-                    double bytePerMilliSec = (value - history[i]) / (t - time[i]);
-                    double kbPerSec = bytePerMilliSec * 1000 / 1024;
+                for (int i = 0; i < attrs.length; i++) {
+                    double value = array.get(i).isObject().get("value").isNumber().doubleValue();
+                    long t = System.currentTimeMillis();
+                    if (history[i] > 0) {
+                        double bytePerMilliSec = (value - history[i]) / (t - time[i]);
+                        double kbPerSec = bytePerMilliSec * 1000 / 1024;
 
-                    addPointToDataset(i, kbPerSec);
-                } else {
-                    addPointToDataset(i, 0);
+                        addPointToDataset(i, kbPerSec);
+                    } else {
+                        addPointToDataset(i, 0);
+                    }
+
+                    history[i] = (long) value;
+                    time[i] = t;
                 }
 
-                history[i] = (long) value;
-                time[i] = t;
+                chart.update();
             }
-
-            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
     }
 
     @Override
     public void processHistoryResult(String result) {
-        result = removingInternalEscaping(result);
+        try {
+            result = removingInternalEscaping(result);
 
-        JSONValue resultVal = controller.parseJSON(result);
-        JSONObject json = resultVal.isObject();
+            JSONValue resultVal = controller.parseJSON(result);
+            JSONObject json = resultVal.isObject();
 
-        if (json == null) {
-            return;
-        }
-
-        long now = new Date().getTime() / 1000;
-        long dur = timeRange.getDuration();
-        int size = getJsonInternalSize(json);
-        long step = dur / size;
-        final int length = getJsonSlice(json, 0).length;
-
-        List<Dataset> datasets = new ArrayList<>();
-        List<Double>[] dpss = new List[length];
-        for (int i = 0; i < length; ++i) {
-            LineDataset dataset = (LineDataset) createDataset(i);
-
-            datasets.add(dataset);
-
-            dpss[i] = new ArrayList<>();
-        }
-        List<String> labels = new ArrayList<>(size);
-
-        for (int i = 1; i < size; i++) {
-
-            double[] slice = getJsonSlice(json, i);
-
-            if (i == 1) {
-                time = new long[slice.length];
-                history = new long[slice.length];
+            if (json == null) {
+                return;
             }
 
-            long t = now - dur + step * (i - 1);
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
+            long now = new Date().getTime() / 1000;
+            long dur = timeRange.getDuration();
+            int size = getJsonInternalSize(json);
+            long step = dur / size;
+            final int length = getJsonSlice(json, 0).length;
 
-            labels.add(timeStamp);
+            List<Dataset> datasets = new ArrayList<>();
+            List<Double>[] dpss = new List[length];
+            for (int i = 0; i < length; ++i) {
+                LineDataset dataset = (LineDataset) createDataset(i);
 
-            for (int j = 0; j < slice.length; j++) {
-                long value = (long) slice[j];
+                datasets.add(dataset);
 
-                if (i > 1) {
-                    double bytePerSec = (value - history[j]) / (t - time[j]);
-                    double kbPerSec = bytePerSec / 1024;
+                dpss[i] = new ArrayList<>();
+            }
+            List<String> labels = new ArrayList<>(size);
 
-                    if (kbPerSec < 0) {
-                        // rx counter is reset
-                        kbPerSec = 0;
-                    }
+            for (int i = 1; i < size; i++) {
 
-                    dpss[j].add(kbPerSec);
+                double[] slice = getJsonSlice(json, i);
 
+                if (i == 1) {
+                    time = new long[slice.length];
+                    history = new long[slice.length];
                 }
 
-                history[j] = value;
-                time[j] = t;
+                long t = now - dur + step * (i - 1);
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE).format(new Date(t * 1000));
+
+                labels.add(timeStamp);
+
+                for (int j = 0; j < slice.length; j++) {
+                    long value = (long) slice[j];
+
+                    if (i > 1) {
+                        double bytePerSec = (value - history[j]) / (t - time[j]);
+                        double kbPerSec = bytePerSec / 1024;
+
+                        if (kbPerSec < 0) {
+                            // rx counter is reset
+                            kbPerSec = 0;
+                        }
+
+                        dpss[j].add(kbPerSec);
+
+                    }
+
+                    history[j] = value;
+                    time[j] = t;
+                }
             }
+
+            chart.getData().setLabels(labels.toArray(new String[0]));
+
+            for (int i = 0; i < length; ++i) {
+                datasets.get(i).setData(dpss[i]);
+            }
+
+            chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
+
+            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
-
-        chart.getData().setLabels(labels.toArray(new String[0]));
-
-        for (int i = 0; i < length; ++i) {
-            datasets.get(i).setData(dpss[i]);
-        }
-
-        chart.getData().setDatasets(datasets.toArray(new Dataset[0]));
-
-        chart.update();
     }
 
 }

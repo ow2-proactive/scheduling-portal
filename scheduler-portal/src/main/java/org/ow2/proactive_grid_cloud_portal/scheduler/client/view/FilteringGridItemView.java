@@ -34,11 +34,7 @@ import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.MouseOutEvent;
-import com.smartgwt.client.widgets.events.MouseOutHandler;
-import com.smartgwt.client.widgets.events.MouseOverEvent;
-import com.smartgwt.client.widgets.events.MouseOverHandler;
+import com.smartgwt.client.widgets.events.*;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -70,10 +66,12 @@ public abstract class FilteringGridItemView<T> extends AbstractGridItemsView<T> 
         gridFilterPane.setWidth100();
         gridFilterPane.setHeight(90);
 
-        IButton ok = new IButton("Apply");
+        IButton ok = new IButton("Save & Apply");
+        ok.setTooltip("Save and apply filters");
         ok.setHeight(20);
         ok.addClickHandler(event -> applyAction());
         IButton clear = new IButton("Clear");
+        clear.setTooltip("Clear all filters");
         clear.setHeight(20);
         clear.addClickHandler(event -> clearAction());
 

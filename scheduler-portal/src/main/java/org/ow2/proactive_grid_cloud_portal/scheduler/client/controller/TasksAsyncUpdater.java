@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
@@ -42,8 +43,11 @@ public class TasksAsyncUpdater implements AsyncCallback<String> {
 
     private TasksModel model;
 
-    public TasksAsyncUpdater(TasksModel model) {
+    private SchedulerController parentController;
+
+    public TasksAsyncUpdater(TasksModel model, SchedulerController parentController) {
         this.model = model;
+        this.parentController = parentController;
     }
 
     @Override
@@ -51,6 +55,7 @@ public class TasksAsyncUpdater implements AsyncCallback<String> {
         String msg = JSONUtils.getJsonErrorMessage(caught);
         model.taskUpdateError(msg);
         LogModel.getInstance().logImportantMessage("Failed to update tasks for job : " + msg);
+        parentController.setExecutionsUpdated(true);
     }
 
     @Override
@@ -63,5 +68,6 @@ public class TasksAsyncUpdater implements AsyncCallback<String> {
         } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
             LogModel.getInstance().logCriticalMessage(e.getMessage());
         }
+        parentController.setExecutionsUpdated(true);
     }
 }
