@@ -25,28 +25,25 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
@@ -79,6 +76,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                                                                                                 SortDirection.ASCENDING),
                                                                               new SortSpecifier(ID_ATTR.getName(),
                                                                                                 SortDirection.DESCENDING) };
+
+    public static final String PREFIX_SIGNAL_READY = "ready_";
 
     //Specifies if the job id given in the URL has already been automatically selected when loading the page where it is
     private boolean isJobFromUrlAutoSelected = false;
@@ -488,17 +487,58 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(pauseItem,
-                      restartInErrorTaskItem,
-                      resumeItem,
-                      resumeAndRestartItemTask,
-                      priorityItem,
-                      killItem,
-                      killAndResubmitItem,
-                      resubmitItem,
-                      openItem,
-                      exportXmlItem,
-                      removeItem);
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        boolean finalSelPauseOrRunning = selPauseOrRunning;
+        scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), ids.get(0), new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                Set<String> signals = parseSignals(result);
+                MenuItem actionsItem = new MenuItem("Actions",
+                                                    SchedulerImages.instance.job_kill_16().getSafeUri().asString());
+                Menu signalsMenu = new Menu();
+                for (final String signal : signals) {
+                    MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
+                    item.addClickHandler(event2 -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1),
+                                                                           ids.get(0)));
+                    signalsMenu.addItem(item);
+                }
+                actionsItem.setSubmenu(signalsMenu);
+                actionsItem.setEnabled(selSingleSelected && finalSelPauseOrRunning && !signals.isEmpty());
+
+                menu.setItems(pauseItem,
+                              restartInErrorTaskItem,
+                              resumeItem,
+                              resumeAndRestartItemTask,
+                              priorityItem,
+                              killItem,
+                              killAndResubmitItem,
+                              resubmitItem,
+                              openItem,
+                              exportXmlItem,
+                              removeItem,
+                              actionsItem);
+
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logCriticalMessage("Failed to get job details : " + message);
+            }
+        });
+    }
+
+    private Set<String> parseSignals(String result) {
+        Set<String> signals = new HashSet<>();
+        JSONValue jsonValue = null;
+        try {
+            jsonValue = SchedulerJSONUtils.parseJSON(result);
+        } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+            String message = JSONUtils.getJsonErrorMessage(e);
+            LogModel.getInstance().logCriticalMessage("Failed to parse signals : " + message);
+        }
+        JSONObject jsonJobInfo = jsonValue.isObject();
+        signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
+        signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
+        return signals;
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
