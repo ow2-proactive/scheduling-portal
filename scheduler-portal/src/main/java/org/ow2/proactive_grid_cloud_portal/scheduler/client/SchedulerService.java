@@ -443,4 +443,6 @@ public interface SchedulerService extends RemoteService {
      */
     String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
+    void addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException;
+
 }

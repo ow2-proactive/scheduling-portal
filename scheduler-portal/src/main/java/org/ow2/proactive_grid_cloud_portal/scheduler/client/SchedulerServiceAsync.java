@@ -407,4 +407,6 @@ public interface SchedulerServiceAsync {
      * @param sessionId d of the current session
      */
     void portalAccess(String sessionId, AsyncCallback<String> callback);
+
+    void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Void> asyncCallback);
 }

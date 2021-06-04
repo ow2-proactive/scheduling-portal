@@ -34,11 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
@@ -1362,6 +1358,16 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     private String rethrowRestServerException(WebApplicationException e) throws RestServerException {
         throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
+    }
+
+    @Override
+    public void addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+        try {
+            restClientProxy.addJobSignal(sessionId, signal, jobId);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+        }
     }
 
 }

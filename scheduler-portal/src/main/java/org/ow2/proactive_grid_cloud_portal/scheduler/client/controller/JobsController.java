@@ -27,11 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,12 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
@@ -263,6 +254,26 @@ public class JobsController {
             public void onFailure(Throwable caught) {
                 String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to remove jobs : " + message);
+            }
+        });
+    }
+
+    /**
+     * Send signal to a job
+     *
+     * @param signal signal that will be send to the job
+     * @param jobId id of the job
+     */
+    public void addJobSignal(String signal, String jobId) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.addJobSignal(LoginModel.getInstance().getSessionId(), signal, jobId, new AsyncCallback<Void>() {
+            public void onSuccess(Void result) {
+                LogModel.getInstance().logMessage("Successfully add signal " + result);
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to add job signals : " + message);
             }
         });
     }
