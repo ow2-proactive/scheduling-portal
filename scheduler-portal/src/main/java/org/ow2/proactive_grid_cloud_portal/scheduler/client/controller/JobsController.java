@@ -268,7 +268,7 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.addJobSignal(LoginModel.getInstance().getSessionId(), signal, jobId, new AsyncCallback<Void>() {
             public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully add signal " + result );
+                LogModel.getInstance().logMessage("Successfully add signal " + result);
             }
 
             public void onFailure(Throwable caught) {
