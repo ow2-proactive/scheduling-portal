@@ -77,6 +77,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                                                                               new SortSpecifier(ID_ATTR.getName(),
                                                                                                 SortDirection.DESCENDING) };
 
+    //The job signal that contains the ready_ prefix specifies that the job is ready to receive the given signal
     public static final String PREFIX_SIGNAL_READY = "ready_";
 
     //Specifies if the job id given in the URL has already been automatically selected when loading the page where it is
@@ -521,7 +522,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
             public void onFailure(Throwable caught) {
                 String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logCriticalMessage("Failed to get job details : " + message);
+                LogModel.getInstance().logImportantMessage("Failed to get job details : " + message);
             }
         });
     }
@@ -533,7 +534,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             jsonValue = SchedulerJSONUtils.parseJSON(result);
         } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
             String message = JSONUtils.getJsonErrorMessage(e);
-            LogModel.getInstance().logCriticalMessage("Failed to parse signals : " + message);
+            LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
         }
         JSONObject jsonJobInfo = jsonValue.isObject();
         signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));

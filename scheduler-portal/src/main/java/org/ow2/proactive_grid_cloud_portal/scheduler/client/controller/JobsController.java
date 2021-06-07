@@ -263,14 +263,15 @@ public class JobsController {
     /**
      * Send signal to a job
      *
-     * @param signal signal that will be send to the job
+     * @param signal the signal that will be sent to the job
      * @param jobId id of the job
      */
     public void addJobSignal(String signal, String jobId) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.addJobSignal(LoginModel.getInstance().getSessionId(), signal, jobId, new AsyncCallback<Void>() {
             public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully add signal " + result);
+                LogModel.getInstance().logMessage("Successfully add signal " + signal + " job " + jobId +
+                                                  " has the following signals " + result);
             }
 
             public void onFailure(Throwable caught) {

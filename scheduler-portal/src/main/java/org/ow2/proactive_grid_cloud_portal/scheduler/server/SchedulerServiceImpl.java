@@ -1369,13 +1369,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
-    public void addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException {
+    public Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
         try {
-            restClientProxy.addJobSignal(sessionId, signal, jobId);
+            return restClientProxy.addJobSignal(sessionId, signal, jobId);
         } catch (WebApplicationException e) {
             rethrowRestServerException(e);
         }
+        return null;
     }
-
 }
