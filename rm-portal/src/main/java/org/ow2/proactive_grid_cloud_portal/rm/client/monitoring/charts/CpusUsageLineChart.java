@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts;
 import java.util.Date;
 import java.util.function.Function;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.LineChart;
@@ -68,31 +69,36 @@ public class CpusUsageLineChart extends MBeansTimeAreaChart {
 
     @Override
     public void processResult(String result) {
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
+        try {
+            JSONObject object = controller.parseJSON(result).isObject();
+            if (object != null) {
 
-            String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
-                                             .format(new Date(System.currentTimeMillis()));
+                String timeStamp = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE)
+                                                 .format(new Date(System.currentTimeMillis()));
 
-            addXLabel(timeStamp);
+                addXLabel(timeStamp);
 
-            //            boolean initColumns = super.initColumns();
-            int colIndex = 0;
-            for (String key : object.keySet()) {
+                //            boolean initColumns = super.initColumns();
+                int colIndex = 0;
+                for (String key : object.keySet()) {
 
-                //                if (initColumns) {
-                //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
-                //                }
+                    //                if (initColumns) {
+                    //                    loadTable.addColumn(ColumnType.NUMBER, beautifyName(key));
+                    //                }
 
-                double value = 0;
-                JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
-                if (jsonVal != null && jsonVal.isNumber() != null) {
-                    value = jsonVal.isNumber().doubleValue();
+                    double value = 0;
+                    JSONValue jsonVal = object.get(key).isArray().get(0).isObject().get("value");
+                    if (jsonVal != null && jsonVal.isNumber() != null) {
+                        value = jsonVal.isNumber().doubleValue();
+                    }
+                    addPointToDataset(colIndex++, value);
                 }
-                addPointToDataset(colIndex++, value);
-            }
 
-            chart.update();
+                chart.update();
+            }
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
     }
 

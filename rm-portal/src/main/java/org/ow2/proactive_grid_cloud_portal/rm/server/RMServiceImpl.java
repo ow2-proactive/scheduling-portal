@@ -201,6 +201,18 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String getCurrentLoggers(String sessionId) throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.getCurrentLoggers(sessionId));
+    }
+
+    @Override
+    public String setLogLevelMultiple(String sessionId, Map<String, String> loggersConfiguration)
+            throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.setLogLevelMultiple(sessionId,
+                                                                                                               loggersConfiguration));
+    }
+
+    @Override
     public String getMonitoring(String sessionId, Long counter) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.monitoring(sessionId,
                                                                                                       counter.toString()));

@@ -42,6 +42,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsMode
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -51,6 +52,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -563,6 +565,7 @@ public class JobsController {
                                                           .logCriticalMessage("Error while fetching jobs:\n" +
                                                                               JSONUtils.getJsonErrorMessage(caught));
                                               }
+                                              parentController.getParentController().setExecutionsDataUpdated(true);
                                           }
 
                                           public void onSuccess(String result) {
@@ -583,6 +586,7 @@ public class JobsController {
                                                   LogModel.getInstance().logCriticalMessage(e.getMessage());
                                                   LOGGER.log(Level.SEVERE, e.getMessage());
                                               }
+                                              parentController.getParentController().setExecutionsDataUpdated(true);
                                           }
                                       });
     }
@@ -635,6 +639,35 @@ public class JobsController {
                                                         });
     }
 
+    public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
+            KeyValueGrid genericInformationGrid) {
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.checkJobPermissionMethod(LoginModel.getInstance().getSessionId(),
+                                           job.getId().toString(),
+                                           "getJobState",
+                                           new AsyncCallback<String>() {
+
+                                               @Override
+                                               public void onFailure(Throwable caught) {
+                                                   String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                   LogModel.getInstance().logImportantMessage(
+                                                                                              "Failed to access REST server endpoint : " +
+                                                                                              msg);
+                                               }
+
+                                               @Override
+                                               public void onSuccess(String result) {
+                                                   if (result.contains("false")) {
+                                                       label.setContents("You are not authorized to see this job's variables");
+                                                       label.show();
+                                                       variablesGrid.hide();
+                                                       genericInformationGrid.hide();
+                                                   }
+                                               }
+                                           });
+    }
+
     /**
      * Fetch jobs state revision. If revision is more recent, fetch jobs.
      */
@@ -652,10 +685,12 @@ public class JobsController {
                 }
                 LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " +
                                                           JSONUtils.getJsonErrorMessage(caught));
+                parentController.getParentController().setExecutionsUpdated(true);
             }
 
             public void onSuccess(Long result) {
                 fetchJobs(false);
+                parentController.getParentController().setExecutionsUpdated(true);
             }
         });
     }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.pepstock.charba.client.AbstractChart;
 import org.pepstock.charba.client.PieChart;
@@ -85,33 +86,38 @@ public class DiskPieChart extends MBeansChart {
 
     @Override
     public void processResult(String result) {
-        JSONObject object = controller.parseJSON(result).isObject();
-        if (object != null) {
+        try {
+            JSONObject object = controller.parseJSON(result).isObject();
+            if (object != null) {
 
-            PieDataset dataset = (PieDataset) chart.newDataset();
-            dataset.setBackgroundColor(getColors());
-            List<String> labels = new ArrayList<>();
-            List<Double> values = new ArrayList<>();
-            total = 0;
-            for (String key : object.keySet()) {
+                PieDataset dataset = (PieDataset) chart.newDataset();
+                dataset.setBackgroundColor(getColors());
+                List<String> labels = new ArrayList<>();
+                List<Double> values = new ArrayList<>();
+                total = 0;
+                for (String key : object.keySet()) {
 
-                double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
-                long inKB = (long) value;
+                    double value = object.get(key).isArray().get(0).isObject().get("value").isNumber().doubleValue();
+                    long inKB = (long) value;
 
-                total += inKB;
+                    total += inKB;
 
-                labels.add(beautifyName(key));
+                    labels.add(beautifyName(key));
 
-                values.add((double) inKB);
+                    values.add((double) inKB);
+                }
+
+                dataset.setData(values);
+
+                chart.getData().setLabels(labels.toArray(new String[0]));
+
+                chart.getData().setDatasets(dataset);
+
+                chart.update();
             }
-
-            dataset.setData(values);
-
-            chart.getData().setLabels(labels.toArray(new String[0]));
-
-            chart.getData().setDatasets(dataset);
-
-            chart.update();
+        } catch (Exception e) {
+            LogModel.getInstance()
+                    .logMessage("Error when processing " + this.getClass().getName() + " result : " + e.getMessage());
         }
     }
 

@@ -88,28 +88,33 @@ public class MBeanDetailedView extends DetailViewer {
 
                 LogModel.getInstance()
                         .logMessage("Fetched JVM Runtime info in " + (System.currentTimeMillis() - t) + "ms");
-                JSONArray array = controller.parseJSON(result).isArray();
-                if (array != null) {
-                    DetailViewerRecord dv = new DetailViewerRecord();
-                    for (int i = 0; i < array.size(); i++) {
-                        try {
-                            JSONObject property = array.get(i).isObject();
-                            String name = property.get("name").isString().stringValue();
-                            JSONValue value = property.get("value");
-                            String valueStr = "";
+                try {
+                    JSONArray array = controller.parseJSON(result).isArray();
+                    if (array != null) {
+                        DetailViewerRecord dv = new DetailViewerRecord();
+                        for (int i = 0; i < array.size(); i++) {
+                            try {
+                                JSONObject property = array.get(i).isObject();
+                                String name = property.get("name").isString().stringValue();
+                                JSONValue value = property.get("value");
+                                String valueStr = "";
 
-                            if (value.isString() != null) {
-                                valueStr = value.isString().stringValue();
-                            } else if (value.isNumber() != null) {
-                                valueStr = value.isNumber().toString();
+                                if (value.isString() != null) {
+                                    valueStr = value.isString().stringValue();
+                                } else if (value.isNumber() != null) {
+                                    valueStr = value.isNumber().toString();
+                                }
+
+                                dv.setAttribute(name, valueStr);
+                            } catch (Exception e) {
+                                // ignore it
                             }
-
-                            dv.setAttribute(name, valueStr);
-                        } catch (Exception e) {
-                            // ignore it
                         }
+                        setData(new DetailViewerRecord[] { dv });
                     }
-                    setData(new DetailViewerRecord[] { dv });
+                } catch (Exception e) {
+                    LogModel.getInstance().logMessage("Error when processing " + this.getClass().getName() +
+                                                      " result : " + e.getMessage());
                 }
 
             }

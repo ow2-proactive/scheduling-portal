@@ -395,6 +395,8 @@ public interface SchedulerServiceAsync {
 
     void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
 
+    void checkJobPermissionMethod(String sessionId, String jobId, String method, AsyncCallback<String> asyncCallback);
+
     void putThirdPartyCredential(String sessionId, String key, String value, AsyncCallback<Void> async);
 
     void thirdPartyCredentialKeySet(String sessionId, AsyncCallback<Set<String>> asyncCallback);

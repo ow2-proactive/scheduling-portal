@@ -25,13 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
-import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
@@ -54,11 +49,7 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.LayoutSpacer;
-import com.smartgwt.client.widgets.layout.SectionStack;
-import com.smartgwt.client.widgets.layout.SectionStackSection;
-import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.layout.*;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
@@ -93,6 +84,9 @@ public class RMPage implements LogListener {
 
     /** client settings */
     private SettingsWindow settingsWindow = null;
+
+    /** logger settings */
+    private LoggersWindow loggersWindow = null;
 
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
@@ -156,6 +150,7 @@ public class RMPage implements LogListener {
         this.aboutWindow = new AboutWindow();
         this.addNodeWindow = new AddNodeWindow();
         this.settingsWindow = new SettingsWindow(controller);
+        this.loggersWindow = new LoggersWindow(controller);
         this.credentialsWindow = new CredentialsWindow();
 
         final Canvas header = buildTools();
@@ -337,6 +332,9 @@ public class RMPage implements LogListener {
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(event -> RMPage.this.settingsWindow.show());
 
+        MenuItem loggersMenuItem = new MenuItem("Loggers", Images.instance.log_16().getSafeUri().asString());
+        loggersMenuItem.addClickHandler(event -> RMPage.this.loggersWindow.show());
+
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
         credMenuItem.addClickHandler(event -> RMPage.this.credentialsWindow.show());
 
@@ -352,7 +350,12 @@ public class RMPage implements LogListener {
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
-        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+        portalMenu.setItems(credMenuItem,
+                            nodeMenuItem,
+                            settingsMenuItem,
+                            loggersMenuItem,
+                            new MenuItemSeparator(),
+                            logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
@@ -481,6 +484,7 @@ public class RMPage implements LogListener {
         this.logWindow.destroy();
         this.credentialsWindow.destroy();
         this.settingsWindow.destroy();
+        this.loggersWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
         this.destroyNodeSourceWindow();

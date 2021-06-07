@@ -119,4 +119,7 @@ public interface Images extends ClientBundle {
     @Source("images/icon_graduation_cap_16.png")
     ImageResource icon_graduation_cap_16();
 
+    @Source("images/remove.png")
+    ImageResource remove();
+
 }

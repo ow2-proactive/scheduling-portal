@@ -148,6 +148,18 @@ public class SchedulerController extends Controller implements UncaughtException
 
     protected ResultController resultController;
 
+    private boolean statusUpdated = false;
+
+    private boolean executionsUpdated = false;
+
+    private boolean executionsDataUpdated = false;
+
+    private boolean usersUpdated = false;
+
+    private boolean statsUpdated = false;
+
+    private boolean myAccountUpdated = false;
+
     /**
      * Default constructor
      *
@@ -221,6 +233,62 @@ public class SchedulerController extends Controller implements UncaughtException
      */
     public SchedulerModel getModel() {
         return this.model;
+    }
+
+    public void resetUpdateStatus() {
+        this.statusUpdated = false;
+        this.executionsUpdated = false;
+        this.usersUpdated = false;
+        this.statsUpdated = false;
+        this.myAccountUpdated = false;
+        this.executionsDataUpdated = false;
+    }
+
+    private boolean allUpdated() {
+        return statsUpdated && executionsUpdated && executionsDataUpdated && usersUpdated && statsUpdated &&
+               myAccountUpdated;
+    }
+
+    private void setStatusUpdated(boolean statusUpdated) {
+        this.statusUpdated = statusUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
+    }
+
+    public void setExecutionsUpdated(boolean executionsUpdated) {
+        this.executionsUpdated = executionsUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
+    }
+
+    public void setExecutionsDataUpdated(boolean executionsDataUpdated) {
+        this.executionsDataUpdated = executionsDataUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
+    }
+
+    private void setUsersUpdated(boolean usersUpdated) {
+        this.usersUpdated = usersUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
+    }
+
+    private void setStatsUpdated(boolean statsUpdated) {
+        this.statsUpdated = statsUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
+    }
+
+    public void setMyAccountUpdated(boolean myAccountUpdated) {
+        this.myAccountUpdated = myAccountUpdated;
+        if (allUpdated()) {
+            restartTimer();
+        }
     }
 
     /**
@@ -589,6 +657,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             long t = (System.currentTimeMillis() - t1);
                             LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched " + users.size() +
                                                               " users in " + t + " ms</span>");
+                            SchedulerController.this.setUsersUpdated(true);
                         }
 
                         public void onFailure(Throwable caught) {
@@ -596,8 +665,11 @@ public class SchedulerController extends Controller implements UncaughtException
                                 return;
 
                             error("Failed to fetch scheduler users:<br>" + JSONUtils.getJsonErrorMessage(caught));
+                            SchedulerController.this.setUsersUpdated(true);
                         }
                     });
+                } else {
+                    SchedulerController.this.setUsersUpdated(true);
                 }
 
                 if (timerUpdate % statsFetchTick == 0) {
@@ -609,6 +681,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             if (!LoginModel.getInstance().isLoggedIn())
                                 return;
                             error("Failed to fetch scheduler stats:<br>" + msg);
+                            SchedulerController.this.setStatsUpdated(true);
                         }
 
                         public void onSuccess(String result) {
@@ -661,6 +734,7 @@ public class SchedulerController extends Controller implements UncaughtException
                             long t = (System.currentTimeMillis() - t1);
                             LogModel.getInstance().logMessage("<span style='color:gray;'>Fetched sched stats: " +
                                                               result.length() + " chars in " + t + " ms</span>");
+                            SchedulerController.this.setStatsUpdated(true);
                         }
                     });
 
@@ -673,6 +747,7 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                    return;
                                                                error("Failed to fetch account stats:<br>" +
                                                                      JSONUtils.getJsonErrorMessage(caught));
+                                                               SchedulerController.this.setMyAccountUpdated(true);
                                                            }
 
                                                            public void onSuccess(String result) {
@@ -706,13 +781,17 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                        .logMessage("<span style='color:gray;'>Fetched account stats: " +
                                                                                    result.length() + " chars in " + t +
                                                                                    " ms</span>");
+                                                               SchedulerController.this.setMyAccountUpdated(true);
                                                            }
                                                        });
+                } else {
+                    SchedulerController.this.setStatsUpdated(true);
+                    SchedulerController.this.setMyAccountUpdated(true);
                 }
                 timerUpdate++;
             }
         };
-        this.schedulerTimerUpdate.scheduleRepeating(SchedulerConfig.get().getClientRefreshTime());
+        this.schedulerTimerUpdate.schedule(SchedulerConfig.get().getClientRefreshTime());
     }
 
     /**
@@ -747,6 +826,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 error("Error while fetching status:\n" + caught.getClass().getName() + " " + msg);
                 LogModel.getInstance().logImportantMessage("Error while fetching status: " + msg);
+                SchedulerController.this.setStatusUpdated(true);
             }
 
             public void onSuccess(String result) {
@@ -760,6 +840,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 } else if (result.equals(SchedulerStatus.KILLED)) {
                     error("The Scheduler has been killed, exiting");
                 }
+                SchedulerController.this.setStatusUpdated(true);
                 // do not model.logMessage() : this is repeated by a timer
             }
 
@@ -817,6 +898,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
         this.schedulerTimerUpdate.cancel();
         this.schedulerTimerUpdate = null;
+        this.resetUpdateStatus();
     }
 
     public void onUncaughtException(Throwable e) {

@@ -77,13 +77,35 @@ public interface RMService extends RemoteService {
     String getState(String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * List currently available loggers and their associated levels
+     *
+     * @param sessionId current session id
+     * @return a map of loggers and associated levels
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getCurrentLoggers(String sessionId) throws ServiceException, RestServerException;
+
+    /**
+     * Change multiple loggers level.
+     *
+     * @param sessionId current session id
+     * @param loggersConfiguration map of (logger_name, level)
+     * @return true if any logger level has been changed, false otherwise
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String setLogLevelMultiple(String sessionId, Map<String, String> loggersConfiguration)
+            throws ServiceException, RestServerException;
+
+    /**
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others
      * @param sessionId current session
      * @param clientCounter latest counter client is aware of
      * @return a JSON object containing two arrays named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
-     * @throws RestServerException 
+     * @throws RestServerException
      * @throws ServiceException
      */
     String getMonitoring(String sessionId, Long clientCounter) throws RestServerException, ServiceException;

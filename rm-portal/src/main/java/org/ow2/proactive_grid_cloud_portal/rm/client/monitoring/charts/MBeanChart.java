@@ -289,7 +289,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
                                        String.valueOf(timeRange.getChar()),
                                        callback);
             } catch (Exception e) {
-                LogModel.getInstance().logCriticalMessage(e.getMessage());
+                LogModel.getInstance().logMessage(e.getMessage());
             }
         }
     }

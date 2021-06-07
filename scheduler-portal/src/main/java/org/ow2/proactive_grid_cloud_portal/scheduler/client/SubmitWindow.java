@@ -428,7 +428,7 @@ public class SubmitWindow {
         }
 
         if (documentation != null) {
-            widgetDocumentation = "<b>Documentation :</b> <a href=" + documentation + " target=_blank>" +
+            widgetDocumentation = "<b>Documentation :</b> <a href=/doc/" + documentation + " target=_blank>" +
                                   documentation + " </a><br>";
         }
 

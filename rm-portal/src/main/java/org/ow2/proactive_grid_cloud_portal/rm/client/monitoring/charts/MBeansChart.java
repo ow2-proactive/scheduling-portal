@@ -97,7 +97,7 @@ public abstract class MBeansChart extends MBeanChart {
                                         String.valueOf(timeRange.getChar()),
                                         callback);
             } catch (Exception e) {
-                LogModel.getInstance().logCriticalMessage(e.getMessage());
+                LogModel.getInstance().logMessage(e.getMessage());
             }
         }
     }
