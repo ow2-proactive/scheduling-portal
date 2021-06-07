@@ -786,16 +786,16 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
 
-   @GET
+    @GET
     @Path("job/{jobid}/permission/{method}")
     @Produces(MediaType.APPLICATION_JSON)
     InputStream checkJobPermissionMethod(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("method") String method);
-  
+
     @POST
     @Path("job/{jobid}/signals")
     @Consumes(value = MediaType.APPLICATION_JSON)
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     Set<String> addJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
             @PathParam("jobid") String jobId);
 

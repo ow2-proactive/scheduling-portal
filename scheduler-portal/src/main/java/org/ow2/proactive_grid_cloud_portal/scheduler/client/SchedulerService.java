@@ -453,6 +453,13 @@ public interface SchedulerService extends RemoteService {
      */
     String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
+    /**
+     *
+     * @param sessionId the current session
+     * @param signal signals that is to be send to the job
+     * @param jobId id of the job
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
     void addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException;
 
 }
