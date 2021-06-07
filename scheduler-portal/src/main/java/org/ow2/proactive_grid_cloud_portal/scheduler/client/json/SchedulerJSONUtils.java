@@ -26,6 +26,8 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -268,18 +270,15 @@ public class SchedulerJSONUtils extends JSONUtils {
     }
 
     public static Set<String> extractSet(JSONValue setValue) {
-        if (setValue != null) {
+        if (setValue == null || setValue.isArray() == null) {
+            return Collections.emptySet();
+        } else {
             JSONArray keyValueArray = setValue.isArray();
-            if (keyValueArray != null) {
-                int arraySize = keyValueArray.size();
-                Set<String> resultSet = new HashSet<>(arraySize);
-                for (int i = 0; i < keyValueArray.size(); i++) {
-                    JSONString jsonString = keyValueArray.get(i).isString();
-                    resultSet.add(jsonString.stringValue());
-                }
-                return resultSet;
-            }
+            return IntStream.range(0, keyValueArray.size())
+                            .mapToObj(keyValueArray::get)
+                            .map(JSONValue::isString)
+                            .map(JSONString::stringValue)
+                            .collect(Collectors.toSet());
         }
-        return Collections.emptySet();
     }
 }
