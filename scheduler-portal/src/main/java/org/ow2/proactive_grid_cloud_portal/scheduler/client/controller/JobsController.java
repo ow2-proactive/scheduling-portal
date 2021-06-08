@@ -269,6 +269,7 @@ public class JobsController {
 
     /**
      * Gets the signals of a job
+     *
      * @param jobId id of the job
      * @param menu the menu of a job
      * @param jobsListGrid
