@@ -30,20 +30,14 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
-import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.data.SortSpecifier;
@@ -77,9 +71,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                                                                               new SortSpecifier(ID_ATTR.getName(),
                                                                                                 SortDirection.DESCENDING) };
 
-    //The job signal that contains the ready_ prefix specifies that the job is ready to receive the given signal
-    public static final String PREFIX_SIGNAL_READY = "ready_";
-
     //Specifies if the job id given in the URL has already been automatically selected when loading the page where it is
     private boolean isJobFromUrlAutoSelected = false;
 
@@ -87,6 +78,18 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      * The controller for the jobs grid.
      */
     protected JobsController controller;
+
+    private boolean selPause = true; // ALL selected jobs are paused
+
+    private boolean selRunning = true; // ALL selected jobs are running/stalled/pending
+
+    private boolean selFinished = true; // ALL selected jobs are finished
+
+    private boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
+
+    private boolean selInError = false;
+
+    private boolean selSingleSelected;
 
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
@@ -371,13 +374,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     protected void buildCellContextualMenu(Menu menu) {
-        boolean selPause = true; // ALL selected jobs are paused
-        boolean selRunning = true; // ALL selected jobs are running/stalled/pending
-        boolean selFinished = true; // ALL selected jobs are finished
-        boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
-        boolean selInError = false;
-        boolean selSingleSelected = this.getSelectedRecords().length == 1;
 
+        selSingleSelected = this.getSelectedRecords().length == 1;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
             JobStatus status = getJobStatus(rec);
@@ -488,58 +486,36 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        boolean finalSelPauseOrRunning = selPauseOrRunning;
-        scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), ids.get(0), new AsyncCallback<String>() {
-            public void onSuccess(String result) {
-                Set<String> signals = parseSignals(result);
-                MenuItem actionsItem = new MenuItem("Actions",
-                                                    SchedulerImages.instance.job_kill_16().getSafeUri().asString());
-                Menu signalsMenu = new Menu();
-                for (final String signal : signals) {
-                    MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
-                    item.addClickHandler(event2 -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1),
-                                                                           ids.get(0)));
-                    signalsMenu.addItem(item);
-                }
-                actionsItem.setSubmenu(signalsMenu);
-                actionsItem.setEnabled(selSingleSelected && finalSelPauseOrRunning && !signals.isEmpty());
+        menu.setItems(pauseItem,
+                      restartInErrorTaskItem,
+                      resumeItem,
+                      resumeAndRestartItemTask,
+                      priorityItem,
+                      killItem,
+                      killAndResubmitItem,
+                      resubmitItem,
+                      openItem,
+                      exportXmlItem,
+                      removeItem);
 
-                menu.setItems(pauseItem,
-                              restartInErrorTaskItem,
-                              resumeItem,
-                              resumeAndRestartItemTask,
-                              priorityItem,
-                              killItem,
-                              killAndResubmitItem,
-                              resubmitItem,
-                              openItem,
-                              exportXmlItem,
-                              removeItem,
-                              actionsItem);
+        controller.getJobSignals(ids.get(0), menu, this);
 
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to get job details : " + message);
-            }
-        });
     }
 
-    private Set<String> parseSignals(String result) {
-        Set<String> signals = new HashSet<>();
-        JSONValue jsonValue = null;
-        try {
-            jsonValue = SchedulerJSONUtils.parseJSON(result);
-        } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
-            String message = JSONUtils.getJsonErrorMessage(e);
-            LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
+    public void addActionsMenu(String jobId, Menu menu, Set<String> signals) {
+        MenuItem actionsItem = new MenuItem("Actions",
+                                            SchedulerImages.instance.section_right_10().getSafeUri().asString());
+        Menu signalsMenu = new Menu();
+        for (final String signal : signals) {
+            MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
+            item.addClickHandler(event2 -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
+            signalsMenu.addItem(item);
         }
-        JSONObject jsonJobInfo = jsonValue.isObject();
-        signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
-        signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
-        return signals;
+        actionsItem.setSubmenu(signalsMenu);
+
+        actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
+
+        menu.addItem(actionsItem);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {

@@ -43,17 +43,21 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.menu.Menu;
 
 
 /**
@@ -89,6 +93,9 @@ public class JobsController {
     private static final String STR_JOB = " jobs";
 
     private static final String HEADER_PA_ERROR = "proactive_error";
+
+    //The job signal that contains the ready_ prefix specifies that the job is ready to receive the given signal
+    public static final String PREFIX_SIGNAL_READY = "ready_";
 
     /**
      * Builds a jobs controller from a parent scheduler controller.
@@ -261,7 +268,28 @@ public class JobsController {
     }
 
     /**
-     * Send signal to a job
+     * Gets the signals of a job
+     * @param jobId id of the job
+     * @param menu the menu of a job
+     * @param jobsListGrid
+     */
+    public void getJobSignals(String jobId, Menu menu, JobsListGrid jobsListGrid) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                Set<String> signals = parseSignals(result);
+                jobsListGrid.addActionsMenu(jobId, menu, signals);
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get job details : " + message);
+            }
+        });
+    }
+
+    /**
+     * Sends signal to a job
      *
      * @param signal the signal that will be sent to the job
      * @param jobId id of the job
@@ -694,6 +722,21 @@ public class JobsController {
                 parentController.getParentController().setExecutionsUpdated(true);
             }
         });
+    }
+
+    private Set<String> parseSignals(String result) {
+        Set<String> signals = new HashSet<>();
+        JSONValue jsonValue = null;
+        try {
+            jsonValue = SchedulerJSONUtils.parseJSON(result);
+        } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+            String message = JSONUtils.getJsonErrorMessage(e);
+            LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
+        }
+        JSONObject jsonJobInfo = jsonValue.isObject();
+        signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
+        signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
+        return signals;
     }
 
 }
