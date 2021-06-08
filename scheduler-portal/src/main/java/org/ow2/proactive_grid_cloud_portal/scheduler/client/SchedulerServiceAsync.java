@@ -412,8 +412,8 @@ public interface SchedulerServiceAsync {
 
     /**
      *
-     * @param sessionId current session
-     * @param signal the signal that is to be sent to the job
+     * @param sessionId current session id
+     * @param signal the signal to be sent to the job
      * @param jobId id of the job
      * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
      */

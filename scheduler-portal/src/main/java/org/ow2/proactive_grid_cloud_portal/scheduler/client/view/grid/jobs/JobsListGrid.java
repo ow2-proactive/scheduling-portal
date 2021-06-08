@@ -503,8 +503,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     public void addActionsMenu(String jobId, Menu menu, Set<String> signals) {
-        MenuItem actionsItem = new MenuItem("Actions",
-                                            SchedulerImages.instance.section_right_10().getSafeUri().asString());
+        MenuItem actionsItem = new MenuItem("Actions");
         Menu signalsMenu = new Menu();
         for (final String signal : signals) {
             MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));

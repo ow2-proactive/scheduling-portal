@@ -455,8 +455,8 @@ public interface SchedulerService extends RemoteService {
 
     /**
      *
-     * @param sessionId the current session
-     * @param signal the signal that is to be sent to the job
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
      * @param jobId id of the job
      * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
      */
