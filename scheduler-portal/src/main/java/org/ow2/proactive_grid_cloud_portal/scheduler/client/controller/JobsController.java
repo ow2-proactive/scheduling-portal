@@ -57,7 +57,6 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.menu.Menu;
 
 
 /**
