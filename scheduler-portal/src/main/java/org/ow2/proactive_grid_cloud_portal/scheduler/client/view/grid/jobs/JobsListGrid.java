@@ -79,15 +79,15 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      */
     protected JobsController controller;
 
-    private boolean selPause = true; // ALL selected jobs are paused
+    private boolean selPause; // ALL selected jobs are paused
 
-    private boolean selRunning = true; // ALL selected jobs are running/stalled/pending
+    private boolean selRunning; // ALL selected jobs are running/stalled/pending
 
-    private boolean selFinished = true; // ALL selected jobs are finished
+    private boolean selFinished; // ALL selected jobs are finished
 
-    private boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
+    private boolean selPauseOrRunning; // ALL selected jobs are running/pending/paused/stalled
 
-    private boolean selInError = false;
+    private boolean selInError;
 
     private boolean selSingleSelected;
 
@@ -375,6 +375,11 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     protected void buildCellContextualMenu(Menu menu) {
 
+        selPause = true;
+        selRunning = true;
+        selFinished = true;
+        selPauseOrRunning = true;
+        selInError = false;
         selSingleSelected = this.getSelectedRecords().length == 1;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
