@@ -271,15 +271,14 @@ public class JobsController {
      * Gets the signals of a job
      *
      * @param jobId id of the job
-     * @param menu the menu of a job
      * @param jobsListGrid
      */
-    public void getJobSignals(String jobId, Menu menu, JobsListGrid jobsListGrid) {
+    public void getJobSignals(String jobId, JobsListGrid jobsListGrid) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
             public void onSuccess(String result) {
                 Set<String> signals = parseSignals(result);
-                jobsListGrid.addActionsMenu(jobId, menu, signals);
+                jobsListGrid.addActionsMenu(jobId, signals);
             }
 
             public void onFailure(Throwable caught) {
@@ -612,7 +611,7 @@ public class JobsController {
                                                               .logMessage("<span style='color:gray;'>Fetched " + jn +
                                                                           " jobs in " + t + " ms</span>");
                                                   }
-                                              } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                                              } catch (JSONException e) {
                                                   LogModel.getInstance().logCriticalMessage(e.getMessage());
                                                   LOGGER.log(Level.SEVERE, e.getMessage());
                                               }
@@ -730,7 +729,7 @@ public class JobsController {
         JSONValue jsonValue = null;
         try {
             jsonValue = SchedulerJSONUtils.parseJSON(result);
-        } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+        } catch (JSONException e) {
             String message = JSONUtils.getJsonErrorMessage(e);
             LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
         }

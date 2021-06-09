@@ -91,6 +91,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private boolean selSingleSelected;
 
+    private Menu menu;
+
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
@@ -381,6 +383,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         selPauseOrRunning = true;
         selInError = false;
         selSingleSelected = this.getSelectedRecords().length == 1;
+        this.menu = menu;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
             JobStatus status = getJobStatus(rec);
@@ -491,28 +494,28 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(pauseItem,
-                      restartInErrorTaskItem,
-                      resumeItem,
-                      resumeAndRestartItemTask,
-                      priorityItem,
-                      killItem,
-                      killAndResubmitItem,
-                      resubmitItem,
-                      openItem,
-                      exportXmlItem,
-                      removeItem);
+        this.menu.setItems(pauseItem,
+                           restartInErrorTaskItem,
+                           resumeItem,
+                           resumeAndRestartItemTask,
+                           priorityItem,
+                           killItem,
+                           killAndResubmitItem,
+                           resubmitItem,
+                           openItem,
+                           exportXmlItem,
+                           removeItem);
 
-        controller.getJobSignals(ids.get(0), menu, this);
+        controller.getJobSignals(ids.get(0), this);
 
     }
 
-    public void addActionsMenu(String jobId, Menu menu, Set<String> signals) {
+    public void addActionsMenu(String jobId, Set<String> signals) {
         MenuItem actionsItem = new MenuItem("Actions");
         Menu signalsMenu = new Menu();
-        for (final String signal : signals) {
+        for (String signal : signals) {
             MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
-            item.addClickHandler(event2 -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
+            item.addClickHandler(event -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
             signalsMenu.addItem(item);
         }
         actionsItem.setSubmenu(signalsMenu);

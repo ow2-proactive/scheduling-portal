@@ -1375,7 +1375,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             return restClientProxy.addJobSignal(sessionId, signal, jobId);
         } catch (WebApplicationException e) {
             rethrowRestServerException(e);
+            return null;
         }
-        return null;
     }
 }
