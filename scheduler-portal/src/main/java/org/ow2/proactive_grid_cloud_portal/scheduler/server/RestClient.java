@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -790,5 +791,12 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     InputStream checkJobPermissionMethod(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
             @PathParam("method") String method);
+
+    @POST
+    @Path("job/{jobid}/signals")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    Set<String> addJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
+            @PathParam("jobid") String jobId);
 
 }

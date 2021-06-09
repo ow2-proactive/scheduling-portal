@@ -409,4 +409,13 @@ public interface SchedulerServiceAsync {
      * @param sessionId d of the current session
      */
     void portalAccess(String sessionId, AsyncCallback<String> callback);
+
+    /**
+     *
+     * @param sessionId current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Void> asyncCallback);
 }

@@ -1368,4 +1368,14 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
     }
 
+    @Override
+    public Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+        try {
+            return restClientProxy.addJobSignal(sessionId, signal, jobId);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return null;
+        }
+    }
 }

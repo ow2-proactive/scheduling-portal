@@ -25,22 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
@@ -87,6 +78,20 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      * The controller for the jobs grid.
      */
     protected JobsController controller;
+
+    private boolean selPause; // ALL selected jobs are paused
+
+    private boolean selRunning; // ALL selected jobs are running/stalled/pending
+
+    private boolean selFinished; // ALL selected jobs are finished
+
+    private boolean selPauseOrRunning; // ALL selected jobs are running/pending/paused/stalled
+
+    private boolean selInError;
+
+    private boolean selSingleSelected;
+
+    private Menu menu;
 
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
@@ -371,13 +376,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     protected void buildCellContextualMenu(Menu menu) {
-        boolean selPause = true; // ALL selected jobs are paused
-        boolean selRunning = true; // ALL selected jobs are running/stalled/pending
-        boolean selFinished = true; // ALL selected jobs are finished
-        boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
-        boolean selInError = false;
-        boolean selSingleSelected = this.getSelectedRecords().length == 1;
 
+        selPause = true;
+        selRunning = true;
+        selFinished = true;
+        selPauseOrRunning = true;
+        selInError = false;
+        selSingleSelected = this.getSelectedRecords().length == 1;
+        this.menu = menu;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
             JobStatus status = getJobStatus(rec);
@@ -488,17 +494,35 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(pauseItem,
-                      restartInErrorTaskItem,
-                      resumeItem,
-                      resumeAndRestartItemTask,
-                      priorityItem,
-                      killItem,
-                      killAndResubmitItem,
-                      resubmitItem,
-                      openItem,
-                      exportXmlItem,
-                      removeItem);
+        this.menu.setItems(pauseItem,
+                           restartInErrorTaskItem,
+                           resumeItem,
+                           resumeAndRestartItemTask,
+                           priorityItem,
+                           killItem,
+                           killAndResubmitItem,
+                           resubmitItem,
+                           openItem,
+                           exportXmlItem,
+                           removeItem);
+
+        controller.getJobSignals(ids.get(0), this);
+
+    }
+
+    public void addActionsMenu(String jobId, Set<String> signals) {
+        MenuItem actionsItem = new MenuItem("Actions");
+        Menu signalsMenu = new Menu();
+        for (String signal : signals) {
+            MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
+            item.addClickHandler(event -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
+            signalsMenu.addItem(item);
+        }
+        actionsItem.setSubmenu(signalsMenu);
+
+        actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
+
+        menu.addItem(actionsItem);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
