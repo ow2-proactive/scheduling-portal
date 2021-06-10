@@ -93,6 +93,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private Menu menu;
 
+    public static final int ACTIONS_MENU_POSITION = 0; // the position of "Actions" option on the right click menu
+
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
@@ -522,7 +524,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
 
-        menu.addItem(actionsItem);
+        menu.addItem(actionsItem, ACTIONS_MENU_POSITION);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
