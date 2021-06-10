@@ -71,6 +71,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                                                                               new SortSpecifier(ID_ATTR.getName(),
                                                                                                 SortDirection.DESCENDING) };
 
+    // the position of "Actions" option on the right click menu
+    public static final int ACTIONS_MENU_POSITION = 0;
+
     //Specifies if the job id given in the URL has already been automatically selected when loading the page where it is
     private boolean isJobFromUrlAutoSelected = false;
 
@@ -522,7 +525,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
 
-        menu.addItem(actionsItem);
+        menu.addItem(actionsItem, ACTIONS_MENU_POSITION);
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
