@@ -247,7 +247,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
      */
     public void nodeSelected(Node node) {
-        if (node.hasTheSameParams(selNode))
+        if (node.checkNodeDetailsEquals(selNode))
             return;
 
         DetailViewerRecord dv = new DetailViewerRecord();
@@ -362,7 +362,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      */
     public void nodeSourceSelected(NodeSource ns) {
 
-        if (ns.hasTheSameParams(selNS))
+        if (ns.checkNodeSourceDetailsEquals(selNS))
             return;
 
         // Update node source title -----------
@@ -413,7 +413,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      */
     public void hostSelected(Host h) {
 
-        if (h.hasTheSameParams(selHost))
+        if (h.checkHostDetailsEquals(selHost))
             return;
 
         DetailViewerRecord dv = new DetailViewerRecord();

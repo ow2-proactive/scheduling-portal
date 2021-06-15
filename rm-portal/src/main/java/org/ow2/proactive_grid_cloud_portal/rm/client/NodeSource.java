@@ -118,7 +118,7 @@ public class NodeSource {
         return sourceName != null ? sourceName.hashCode() : 0;
     }
 
-    public boolean hasTheSameParams(Object o) {
+    public boolean checkNodeSourceDetailsEquals(Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
         NodeSource nodeSource = (NodeSource) o;
@@ -247,7 +247,7 @@ public class NodeSource {
             return hostName != null ? hostName.hashCode() : 0;
         }
 
-        public boolean hasTheSameParams(Object o) {
+        public boolean checkHostDetailsEquals(Object o) {
             if (o == null || getClass() != o.getClass())
                 return false;
             Host host = (Host) o;
@@ -464,7 +464,7 @@ public class NodeSource {
                 return nodeUrl != null ? nodeUrl.hashCode() : 0;
             }
 
-            public boolean hasTheSameParams(Object o) {
+            public boolean checkNodeDetailsEquals(Object o) {
                 if (o == null || getClass() != o.getClass())
                     return false;
                 Node node = (Node) o;

@@ -92,7 +92,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
         final MBeanChart cpuUsage = new CpuUsageAreaChart(controller, nodeUrl);
 
-        if (!node.hasTheSameParams(previousSelectedNode)) {
+        if (!node.checkNodeDetailsEquals(previousSelectedNode)) {
             t2 = new Tab("JVM Summary");
             String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
                                   "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
