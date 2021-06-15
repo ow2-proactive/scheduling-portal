@@ -118,6 +118,25 @@ public class NodeSource {
         return sourceName != null ? sourceName.hashCode() : 0;
     }
 
+    public boolean hasTheSameParams(Object o) {
+        if (o == null || getClass() != o.getClass())
+            return false;
+        NodeSource nodeSource = (NodeSource) o;
+
+        if (this.getSourceName().equals(nodeSource.getSourceName()) &&
+            this.getSourceDescription().equals(nodeSource.getSourceDescription()) &&
+            this.getNodeSourceAdmin().equals(nodeSource.getNodeSourceAdmin()) &&
+            this.getIcon().equals(nodeSource.getIcon()) && this.getHosts() != null && nodeSource.getHosts() != null &&
+            this.getHosts().size() == nodeSource.getHosts().size()) {
+            int nodeSourceNumNodes = nodeSource.getHosts().values().stream().mapToInt(s -> s.getNodes().size()).sum();
+            int currentNumNodes = this.getHosts().values().stream().mapToInt(s -> s.getNodes().size()).sum();
+            if (nodeSourceNumNodes == currentNumNodes) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isRemoved() {
         return "NODESOURCE_REMOVED".equalsIgnoreCase(eventType);
     }
@@ -226,6 +245,18 @@ public class NodeSource {
         @Override
         public int hashCode() {
             return hostName != null ? hostName.hashCode() : 0;
+        }
+
+        public boolean hasTheSameParams(Object o) {
+            if (o == null || getClass() != o.getClass())
+                return false;
+            Host host = (Host) o;
+
+            if (this.getHostName().equals(host.getHostName()) && this.getNodes().size() == host.getNodes().size() &&
+                this.isVirtual() == host.isVirtual()) {
+                return true;
+            }
+            return false;
         }
 
         public Map<String, Node> getNodes() {
@@ -431,6 +462,24 @@ public class NodeSource {
             @Override
             public int hashCode() {
                 return nodeUrl != null ? nodeUrl.hashCode() : 0;
+            }
+
+            public boolean hasTheSameParams(Object o) {
+                if (o == null || getClass() != o.getClass())
+                    return false;
+                Node node = (Node) o;
+
+                if (this.getNodeUrl().equals(node.getNodeUrl()) && this.getNodeState().equals(node.getNodeState()) &&
+                    this.getTimeStamp() == node.getTimeStamp() &&
+                    this.getNodeProvider().equals(node.getNodeProvider()) &&
+                    this.getNodeOwner().equals(node.getNodeOwner()) && this.getHostName().equals(node.getHostName()) &&
+                    this.getSourceName().equals(node.getSourceName()) && this.getVmName().equals(node.getVmName()) &&
+                    this.getDescription().equals(node.getDescription()) &&
+                    this.getUsageInfo().equals(node.getUsageInfo()) &&
+                    this.getUserAccessTypeLocal().equals(node.getUserAccessTypeLocal()) &&
+                    this.getTokens().equals(node.getTokens()))
+                    return true;
+                return false;
             }
 
             public boolean isRemoved() {
