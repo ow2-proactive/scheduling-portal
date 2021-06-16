@@ -361,7 +361,6 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
-
         if (ns.checkNodeSourceDetailsEquals(selNS)) {
             return;
         }
@@ -412,7 +411,6 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
      */
     public void hostSelected(Host h) {
-
         if (h.checkHostDetailsEquals(selHost)) {
             return;
         }
