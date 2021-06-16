@@ -119,8 +119,9 @@ public class NodeSource {
     }
 
     public boolean checkNodeSourceDetailsEquals(Object o) {
-        if (o == null || getClass() != o.getClass())
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
         NodeSource nodeSource = (NodeSource) o;
 
         if (this.getSourceName().equals(nodeSource.getSourceName()) &&
@@ -248,8 +249,9 @@ public class NodeSource {
         }
 
         public boolean checkHostDetailsEquals(Object o) {
-            if (o == null || getClass() != o.getClass())
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             Host host = (Host) o;
 
             if (this.getHostName().equals(host.getHostName()) && this.getNodes().size() == host.getNodes().size() &&
@@ -465,8 +467,9 @@ public class NodeSource {
             }
 
             public boolean checkNodeDetailsEquals(Object o) {
-                if (o == null || getClass() != o.getClass())
+                if (o == null || getClass() != o.getClass()) {
                     return false;
+                }
                 Node node = (Node) o;
 
                 if (this.getNodeUrl().equals(node.getNodeUrl()) && this.getNodeState().equals(node.getNodeState()) &&
@@ -477,8 +480,9 @@ public class NodeSource {
                     this.getDescription().equals(node.getDescription()) &&
                     this.getUsageInfo().equals(node.getUsageInfo()) &&
                     this.getUserAccessTypeLocal().equals(node.getUserAccessTypeLocal()) &&
-                    this.getTokens().equals(node.getTokens()))
+                    this.getTokens().equals(node.getTokens())) {
                     return true;
+                }
                 return false;
             }
 
