@@ -70,7 +70,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         this.controller = controller;
     }
 
-    private Node previousSelectedNode = null;
+    public static Node previousSelectedNode = null;
 
     public void init(Node node) {
 
