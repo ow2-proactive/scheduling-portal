@@ -414,7 +414,6 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         if (h.checkHostDetailsEquals(selHost)) {
             return;
         }
-
         DetailViewerRecord dv = new DetailViewerRecord();
 
         dv.setAttribute("hostName", h.getHostName());
