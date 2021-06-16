@@ -247,6 +247,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node)
      */
     public void nodeSelected(Node node) {
+        if (node.checkNodeDetailsEquals(selNode)) {
+            return;
+        }
         DetailViewerRecord dv = new DetailViewerRecord();
 
         dv.setAttribute("nodeUrl", node.getNodeUrl());
@@ -358,7 +361,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * nodeSourceSelected(org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource)
      */
     public void nodeSourceSelected(NodeSource ns) {
-
+        if (ns.checkNodeSourceDetailsEquals(selNS)) {
+            return;
+        }
         // Update node source title -----------
         this.nodeSourceLabel.setIcon(ns.getIcon());
 
@@ -406,6 +411,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
      * .ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host)
      */
     public void hostSelected(Host h) {
+        if (h.checkHostDetailsEquals(selHost)) {
+            return;
+        }
         DetailViewerRecord dv = new DetailViewerRecord();
 
         dv.setAttribute("hostName", h.getHostName());
