@@ -123,7 +123,8 @@ public interface RestClient {
     @DELETE
     @Path("jobs")
     @Produces(MediaType.APPLICATION_JSON)
-    InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
+    InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId,
+            @QueryParam("olderThan") long olderThan);
 
     /**
      * Pauses a job.
