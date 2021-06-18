@@ -376,7 +376,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             executeFunction(restClient -> restClient.removeJobs(sessionId,
                                                                 chunk.stream()
                                                                      .map(Object::toString)
-                                                                     .collect(Collectors.toList())));
+                                                                     .collect(Collectors.toList()),
+                                                                0));
         }
 
         return jobIdList.size();
