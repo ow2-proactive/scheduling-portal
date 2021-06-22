@@ -130,6 +130,7 @@ public class TasksCentricController extends TasksController {
                                                                    getSortParameters(),
                                                                    callback);
         }
+        this.parentController.setExecutionsUpdated(true);
     }
 
     private SortSpecifierRestContainer getSortParameters() {
