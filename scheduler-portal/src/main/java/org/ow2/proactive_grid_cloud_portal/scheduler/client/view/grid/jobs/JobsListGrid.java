@@ -93,7 +93,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private Menu menu;
 
-    public static final int ACTIONS_MENU_POSITION = 0; // the position of "Actions" option on the right click menu
+    private MenuItem actionsItem;
 
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
@@ -496,7 +496,11 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        this.menu.setItems(pauseItem,
+        actionsItem = new MenuItem("Actions");
+        actionsItem.setEnabled(false);
+
+        this.menu.setItems(actionsItem,
+                           pauseItem,
                            restartInErrorTaskItem,
                            resumeItem,
                            resumeAndRestartItemTask,
@@ -513,7 +517,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     public void addActionsMenu(String jobId, Set<String> signals) {
-        MenuItem actionsItem = new MenuItem("Actions");
         Menu signalsMenu = new Menu();
         for (String signal : signals) {
             MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
@@ -521,10 +524,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             signalsMenu.addItem(item);
         }
         actionsItem.setSubmenu(signalsMenu);
-
         actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
-
-        menu.addItem(actionsItem, ACTIONS_MENU_POSITION);
+        menu.redraw();
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
