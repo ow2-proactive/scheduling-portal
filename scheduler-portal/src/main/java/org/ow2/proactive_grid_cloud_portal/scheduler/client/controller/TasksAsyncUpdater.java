@@ -55,7 +55,7 @@ public class TasksAsyncUpdater implements AsyncCallback<String> {
         String msg = JSONUtils.getJsonErrorMessage(caught);
         model.taskUpdateError(msg);
         LogModel.getInstance().logImportantMessage("Failed to update tasks for job : " + msg);
-        parentController.setExecutionsUpdated(true);
+        parentController.setExecutionsDataUpdated(true);
     }
 
     @Override
@@ -68,6 +68,6 @@ public class TasksAsyncUpdater implements AsyncCallback<String> {
         } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
             LogModel.getInstance().logCriticalMessage(e.getMessage());
         }
-        parentController.setExecutionsUpdated(true);
+        parentController.setExecutionsDataUpdated(true);
     }
 }

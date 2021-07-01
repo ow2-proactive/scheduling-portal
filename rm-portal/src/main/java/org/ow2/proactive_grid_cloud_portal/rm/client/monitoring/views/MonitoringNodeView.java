@@ -64,9 +64,13 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
     private RMController controller;
 
+    Tab t2; //JVM Summary tab
+
     public MonitoringNodeView(RMController controller) {
         this.controller = controller;
     }
+
+    public static Node previousSelectedNode = null;
 
     public void init(Node node) {
 
@@ -88,13 +92,19 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
         final MBeanChart cpuUsage = new CpuUsageAreaChart(controller, nodeUrl);
 
-        String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
-                              "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
+        if (!node.checkNodeDetailsEquals(previousSelectedNode)) {
+            t2 = new Tab("JVM Summary");
+            String[] jvmAttrs = { "ManagementSpecVersion", "Name", "SpecName", "SpecVendor", "StartTime", "Uptime",
+                                  "VmName", "VmVendor", "VmVersion", "BootClassPath", "ClassPath", "LibraryPath" };
 
-        MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
-        jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
-        jvmDetails.setWidth100();
+            MBeanDetailedView jvmDetails = new MBeanDetailedView(this);
+            jvmDetails.setCanSelectText(true);
+            jvmDetails.load(controller, nodeUrl, "java.lang:type=Runtime", Arrays.asList(jvmAttrs));
+            jvmDetails.setWidth100();
 
+            t2.setPane(jvmDetails);
+            previousSelectedNode = node;
+        }
         chain = new ReloadableChain(heapMemory, threads, classes, cpuUsage);
 
         HLayout firstRow = new HLayout();
@@ -119,8 +129,6 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
         Tab t1 = new Tab("Overview");
         t1.setPane(graphs);
-        Tab t2 = new Tab("JVM Summary");
-        t2.setPane(jvmDetails);
 
         tabs = new TabSet();
         tabs.setWidth100();
