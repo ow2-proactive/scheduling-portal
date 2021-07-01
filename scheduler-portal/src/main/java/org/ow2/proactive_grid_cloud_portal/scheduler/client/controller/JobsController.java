@@ -328,6 +328,7 @@ public class JobsController {
             public void onFailure(Throwable caught) {
                 String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
+                SC.warn("Failed to kill jobs: " + message);
             }
         });
     }
