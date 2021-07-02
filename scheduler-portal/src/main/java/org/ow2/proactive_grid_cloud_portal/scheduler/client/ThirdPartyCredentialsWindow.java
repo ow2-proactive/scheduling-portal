@@ -118,11 +118,9 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
         final TextItem shortValue = new PasswordItem("shortValue", "Credential");
         shortValue.setWidth(208);
         shortValue.setHeight(26);
-        shortValue.setDefaultValue("");
         final TextAreaItem longValue = new TextAreaItem("longValue", "Credential");
         longValue.setWidth(208);
         longValue.setHeight(26);
-        longValue.setDefaultValue("");
         longValue.hide();
 
         addEntryForm.setTitleOrientation(TitleOrientation.TOP);
@@ -168,7 +166,7 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
                 } else {
                     value = addEntryForm.getValueAsString("shortValue");
                 }
-                controller.putThirdPartyCredential(key.trim(), value);
+                controller.putThirdPartyCredential(key.trim(), value == null ? "" : value);
                 addEntryForm.clearValues();
             }
         });
