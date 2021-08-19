@@ -89,6 +89,11 @@ public class VisualizationViewHtml implements VisualizationView {
 
     }
 
+    public void disableOpenInStudioButton(boolean disabled) {
+        button.setDisabled(disabled);
+        wrapper.redraw();
+    }
+
     public void jobUnselected() {
         htmlPanel.setHTML("");
         wrapper.setWidth100();

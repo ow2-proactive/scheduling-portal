@@ -32,6 +32,8 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
+import com.google.gwt.http.client.Request;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -407,5 +409,11 @@ public interface RMService extends RemoteService {
     String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException;
 
     void setNodeTokens(String sessionId, String nodeurl, List<String> tokens);
+
+    Map<String, Boolean> checkNodesPermission(String sessionId, Set<String> nodeUrls)
+            throws RestServerException, ServiceException;
+
+    Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+            throws RestServerException, ServiceException;
 
 }

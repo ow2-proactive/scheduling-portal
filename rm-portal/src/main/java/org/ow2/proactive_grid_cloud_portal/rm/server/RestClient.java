@@ -260,4 +260,11 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     void setNodeTokens(@HeaderParam("sessionid") String sessionId, @HeaderParam("nodeurl") String nodeUrl,
             @QueryParam("tokens") List<String> tokens);
+
+    @POST
+    @Path("/rm/nodes/permission")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkNodesPermission(@HeaderParam("sessionid") String sessionId, Set<String> nodeUrls);
+
 }

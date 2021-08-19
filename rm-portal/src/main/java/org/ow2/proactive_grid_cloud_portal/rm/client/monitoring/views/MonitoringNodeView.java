@@ -173,6 +173,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         status.setContents("Monitoring is unavailable on this node. <br>" +
                            "Either monitoring was disabled with the disableMonitoring option or an error occurred. <br>" +
                            "More information are available inside the node logs.");
+        controller.getRmPage().setMonitoringTabPageDisabled(true);
     }
 
     @Override
@@ -183,5 +184,6 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
             addMember(tabs);
             tabs.show();
         }
+        controller.getRmPage().setMonitoringTabPageDisabled(false);
     }
 }

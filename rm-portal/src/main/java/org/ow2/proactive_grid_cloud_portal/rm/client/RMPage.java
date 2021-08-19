@@ -133,6 +133,16 @@ public class RMPage implements LogListener {
 
     private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
 
+    private ToolStripButton nsButton;
+
+    private Tab monitoringTab;
+
+    private Tab scriptConsoleTab;
+
+    private Tab threadDumpTab;
+
+    private MenuItem loggersMenuItem;
+
     RMPage(RMController controller) {
         this.controller = controller;
         LogModel.getInstance().addLogListener(this);
@@ -332,7 +342,7 @@ public class RMPage implements LogListener {
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(event -> RMPage.this.settingsWindow.show());
 
-        MenuItem loggersMenuItem = new MenuItem("Loggers", Images.instance.log_16().getSafeUri().asString());
+        loggersMenuItem = new MenuItem("Loggers", Images.instance.log_16().getSafeUri().asString());
         loggersMenuItem.addClickHandler(event -> RMPage.this.loggersWindow.show());
 
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
@@ -380,7 +390,7 @@ public class RMPage implements LogListener {
         helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem, tutorialsMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
-        ToolStripButton nsButton = new ToolStripButton("Add Node Source");
+        nsButton = new ToolStripButton("Add Node Source");
         nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
         nsButton.setTooltip("Create and add a new Node Source");
         nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
@@ -398,6 +408,17 @@ public class RMPage implements LogListener {
         tools.addButton(errorButton);
 
         return tools;
+    }
+
+    public void disableNsButton() {
+        nsButton.setTooltip("User is not authorized to create or add a new Node Source");
+        nsButton.setIcon(null);
+        nsButton.setDisabled(true);
+        nsButton.redraw();
+    }
+
+    public void disableLoggersMenuItem() {
+        loggersMenuItem.setEnabled(false);
     }
 
     private Canvas buildTopPane() {
@@ -447,21 +468,21 @@ public class RMPage implements LogListener {
         // "Script Console" tab
         this.scriptConsoleView = new ScriptConsoleView(controller);
         Canvas scriptConsoleCanvas = this.scriptConsoleView.build();
-        Tab scriptConsoleTab = new Tab("Script Console");
+        scriptConsoleTab = new Tab("Script Console");
         scriptConsoleTab.setPane(scriptConsoleCanvas);
         leftTabs.addTab(scriptConsoleTab);
 
         // "Thread Dump" tab
         this.threadDumpView = new ThreadDumpView(controller);
         Canvas threadDumpCanvas = this.threadDumpView.build();
-        Tab threadDumpTab = new Tab("Thread Dump");
+        threadDumpTab = new Tab("Thread Dump");
         threadDumpTab.setPane(threadDumpCanvas);
         leftTabs.addTab(threadDumpTab);
 
         // "Monitoring" tab
         this.monitoringView = new MonitoringView(controller);
         Canvas monitoringCanvas = monitoringView.build();
-        Tab monitoringTab = new Tab("Monitoring");
+        monitoringTab = new Tab("Monitoring");
         monitoringTab.setPane(monitoringCanvas);
         leftTabs.addTab(monitoringTab);
 
@@ -477,6 +498,18 @@ public class RMPage implements LogListener {
         hl.addMember(rmStatsCanvas);
 
         return hl;
+    }
+
+    public void setScriptConsoleTabPageDisabled(boolean disabled) {
+        scriptConsoleTab.setDisabled(disabled);
+    }
+
+    public void setMonitoringTabPageDisabled(boolean disabled) {
+        monitoringTab.setDisabled(disabled);
+    }
+
+    public void setThreadDumpTabPageDisabled(boolean disabled) {
+        threadDumpTab.setDisabled(disabled);
     }
 
     void destroy() {

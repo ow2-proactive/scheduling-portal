@@ -29,6 +29,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public final class HttpUtils {
@@ -53,6 +57,11 @@ public final class HttpUtils {
             throw e;
         }
         return sb.toString();
+    }
+
+    public static Map<String, Boolean> convertToHashMap(InputStream inputStream) throws IOException {
+        Map<String, Boolean> jsonMap = new ObjectMapper().readValue(inputStream, HashMap.class);
+        return jsonMap;
     }
 
     public static String convertToString(InputStream inputStream) throws IOException {

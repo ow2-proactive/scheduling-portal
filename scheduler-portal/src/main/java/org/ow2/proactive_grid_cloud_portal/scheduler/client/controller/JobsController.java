@@ -82,6 +82,10 @@ public class JobsController {
      */
     protected ExecutionsController parentController;
 
+    public ExecutionsController getParentController() {
+        return parentController;
+    }
+
     /**
      * The view controlled by this controller.
      */
@@ -157,6 +161,8 @@ public class JobsController {
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
         }
+        parentController.getParentController().getTasksController().updateTasks(false);
+        checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
     }
 
     /**
@@ -626,45 +632,40 @@ public class JobsController {
             metadataRequest.cancel();
             metadataRequest = null;
         }
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = loginModel.getSessionId();
         Integer jobId = model.getSelectedJob().getId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        metadataRequest = scheduler.getPreciousTaskName(LoginModel.getInstance().getSessionId(),
-                                                        jobId.toString(),
-                                                        new AsyncCallback<String>() {
+        metadataRequest = scheduler.getPreciousTaskName(sessionId, jobId.toString(), new AsyncCallback<String>() {
 
-                                                            @Override
-                                                            public void onFailure(Throwable caught) {
-                                                                String msg = JSONUtils.getJsonErrorMessage(caught);
-                                                                if (msg.contains("HTTP 403 Forbidden")) {
-                                                                    getModel().preciousTaskNamesNotAuthorized();
-                                                                    LogModel.getInstance()
-                                                                            .logImportantMessage(JobResultView.NOT_AUTHORIZED);
-                                                                } else {
-                                                                    LogModel.getInstance()
-                                                                            .logImportantMessage("Error while fetching metadata of precious results:\n" +
-                                                                                                 JSONUtils.getJsonErrorMessage(caught));
-                                                                }
-                                                            }
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                if (msg.contains("HTTP 403 Forbidden")) {
+                    getModel().preciousTaskNamesNotAuthorized();
+                    LogModel.getInstance().logImportantMessage(JobResultView.NOT_AUTHORIZED);
+                } else {
+                    LogModel.getInstance().logImportantMessage("Error while fetching metadata of precious results:\n" +
+                                                               JSONUtils.getJsonErrorMessage(caught));
+                }
+            }
 
-                                                            @Override
-                                                            public void onSuccess(String jsonString) {
-                                                                try {
-                                                                    JSONArray array = parseJSON(jsonString).isArray();
-                                                                    List<String> preciousTaskNames = new ArrayList<>(array.size());
-                                                                    for (int i = 0; i < array.size(); ++i) {
-                                                                        String taskName = array.get(i)
-                                                                                               .isString()
-                                                                                               .stringValue();
-                                                                        preciousTaskNames.add(taskName);
-                                                                    }
+            @Override
+            public void onSuccess(String jsonString) {
+                try {
+                    JSONArray array = parseJSON(jsonString).isArray();
+                    List<String> preciousTaskNames = new ArrayList<>(array.size());
+                    for (int i = 0; i < array.size(); ++i) {
+                        String taskName = array.get(i).isString().stringValue();
+                        preciousTaskNames.add(taskName);
+                    }
 
-                                                                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
-                                                                } catch (JSONException e) {
-                                                                    LogModel.getInstance()
-                                                                            .logCriticalMessage(e.getMessage());
-                                                                }
-                                                            }
-                                                        });
+                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
+                } catch (JSONException e) {
+                    LogModel.getInstance().logCriticalMessage(e.getMessage());
+                }
+            }
+        });
     }
 
     public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
@@ -736,6 +737,72 @@ public class JobsController {
         signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
         signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
         return signals;
+    }
+
+    /**
+     * Checks the permission of the current user for the given jobIds
+     * @param jobIds the selected job ids
+     * @param jobsListGrid current jobs listGrid
+     */
+    public void checkJobsPermissionMethods(List<String> jobIds, JobsListGrid jobsListGrid) {
+
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = loginModel.getSessionId();
+        List<String> methods = loginModel.getJobPermissionMethods();
+
+        if (loginModel.permissionCashedForJobIds(jobIds)) {
+            setTabsStatus(jobIds, jobsListGrid);
+            return;
+        }
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.checkJobsPermissionMethods(sessionId,
+                                             jobIds,
+                                             methods,
+                                             new AsyncCallback<Map<String, Map<String, Boolean>>>() {
+                                                 public void onSuccess(Map<String, Map<String, Boolean>> result) {
+                                                     loginModel.addSchedulerPermissions(result);
+                                                     setTabsStatus(jobIds, jobsListGrid);
+                                                 }
+
+                                                 public void onFailure(Throwable caught) {
+                                                     String message = JSONUtils.getJsonErrorMessage(caught);
+                                                     LogModel.getInstance().logImportantMessage(
+                                                                                                "Failed to check jobs permission methods : " +
+                                                                                                message);
+                                                 }
+                                             });
+    }
+
+    private void setTabsStatus(List<String> jobIds, JobsListGrid jobsListGrid) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userDoesNotHavePermissionToGetJobServerLogs(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableServerLogsTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableServerLogsTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobState(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableOutputTab(true);
+            parentController.getParentController().getSchedulerPage().disableVarInfoTab(true);
+            parentController.getParentController().getSchedulerPage().disableTasksTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableOutputTab(false);
+            parentController.getParentController().getSchedulerPage().disableVarInfoTab(false);
+            parentController.getParentController().getSchedulerPage().disableTasksTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableVisualizationTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableVisualizationTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobResult(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableJobResultsTab(false);
+        }
+        if (jobsListGrid != null) {
+            jobsListGrid.setMenuItemsStatus(jobIds);
+        }
     }
 
 }

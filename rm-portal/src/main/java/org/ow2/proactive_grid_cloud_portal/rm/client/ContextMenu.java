@@ -28,9 +28,11 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditDynamicParametersWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditNodeSourceWindow;
 
@@ -59,6 +61,12 @@ public class ContextMenu extends Menu {
     private NodeSource.Host host;
 
     private NodeSource.Host.Node node;
+
+    private MenuItem lockItem;
+
+    private MenuItem unlockItem;
+
+    private MenuItem removeItem;
 
     public static Menu createContextMenuFromTreeView(RMController controller, Object related, Tree tree) {
 
@@ -106,9 +114,9 @@ public class ContextMenu extends Menu {
         MenuItem copyItem = copyMenu.getCopyItem();
 
         LockMenu lockMenu = new LockMenu(controller, menu).build();
-        MenuItem lockItem = lockMenu.getLockItem();
-        MenuItem unlockItem = lockMenu.getUnlockItem();
-        MenuItem removeItem = lockMenu.getRemoveItem();
+        menu.lockItem = lockMenu.getLockItem();
+        menu.unlockItem = lockMenu.getUnlockItem();
+        menu.removeItem = lockMenu.getRemoveItem();
 
         String nodeSourceName = menu.nodesource == null ? "" : menu.nodesource.getSourceName();
 
@@ -133,11 +141,11 @@ public class ContextMenu extends Menu {
         if (menu.node != null) {
             copyItem.setEnabled(true);
             if (menu.node.isLocked()) {
-                lockItem.setEnabled(false);
-                unlockItem.setEnabled(true);
+                menu.lockItem.setEnabled(false);
+                menu.unlockItem.setEnabled(true);
             } else {
-                lockItem.setEnabled(true);
-                unlockItem.setEnabled(false);
+                menu.lockItem.setEnabled(true);
+                menu.unlockItem.setEnabled(false);
             }
         } else {
             editTokens.setEnabled(false);
@@ -181,9 +189,9 @@ public class ContextMenu extends Menu {
             items.add(new MenuItemSeparator());
         }
 
-        items.add(lockItem);
-        items.add(unlockItem);
-        items.add(removeItem);
+        items.add(menu.lockItem);
+        items.add(menu.unlockItem);
+        items.add(menu.removeItem);
 
         if (menu.nodesource != null) {
             items.add(new MenuItemSeparator());
@@ -198,9 +206,34 @@ public class ContextMenu extends Menu {
             items.add(editTokens);
         }
 
+        controller.checkPermissionsToLockMenu(menu);
         menu.setItems(items.toArray(new MenuItem[0]));
 
         return menu;
+    }
+
+    public void setLockMenuItemsState(ContextMenu menu, Set<String> nodeUrls) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (!loginModel.userHasPermissionForAllSelectedNodes(nodeUrls)) {
+            disableLockMenuItem(menu);
+            disableUnlockMenuItem(menu);
+            disableRemoveMenuItem(menu);
+        }
+    }
+
+    public void disableLockMenuItem(ContextMenu menu) {
+        menu.lockItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableUnlockMenuItem(ContextMenu menu) {
+        menu.unlockItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableRemoveMenuItem(ContextMenu menu) {
+        menu.removeItem.setEnabled(false);
+        menu.redraw();
     }
 
     private void init(Object related) {
