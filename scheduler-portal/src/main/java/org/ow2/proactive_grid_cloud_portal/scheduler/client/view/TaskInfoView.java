@@ -107,6 +107,8 @@ public class TaskInfoView extends InfoView<Task>
         controller.getSchedulerPage().disableOutputTab(false);
         controller.getSchedulerPage().disableJobResultsTab(false);
         controller.getSchedulerPage().disableVarInfoTab(false);
+        controller.getSchedulerPage().disableTaskResultTab(false);
+        controller.getSchedulerPage().disableTaskInfoTab(false);
     }
 
 }

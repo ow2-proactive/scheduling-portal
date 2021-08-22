@@ -778,28 +778,28 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         rightTabSet.setHeight100();
         rightTabSet.setTabBarPosition(Side.TOP);
 
-        Tab jobinfoTab = new Tab("Job Info", SchedulerImages.instance.info_16().getSafeUri().asString());
+        Tab jobinfoTab = new Tab("Job Info", ImagesUnbundled.INFO_16);
         this.jobInfo = new JobInfoView(this.controller, new JobsDetailColumnsFactory());
         jobinfoTab.setPane(this.jobInfo.build());
 
-        varInfoTab = new Tab("Job Variables", SchedulerImages.instance.info_16().getSafeUri().asString());
+        varInfoTab = new Tab("Job Variables", ImagesUnbundled.INFO_16);
         this.varInfoView = new VarInfoView(this.controller);
         varInfoTab.setPane(this.varInfoView.build());
 
-        taskinfoTab = new Tab("Task Info", SchedulerImages.instance.info_16().getSafeUri().asString());
+        taskinfoTab = new Tab("Task Info", ImagesUnbundled.INFO_16);
         this.taskInfo = new TaskInfoView(this.controller, new TaskDetailColumnsFactory());
         taskinfoTab.setPane(this.taskInfo.build());
 
-        outputTab = new Tab("Output", SchedulerImages.instance.output_16().getSafeUri().asString());
+        outputTab = new Tab("Output", ImagesUnbundled.OUTPUT_16);
         outputTab.setPane(this.controller.buildOutputView());
 
-        serverLogsTab = new Tab("Server Logs", SchedulerImages.instance.output_16().getSafeUri().asString());
+        serverLogsTab = new Tab("Server Logs", ImagesUnbundled.OUTPUT_16);
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
-        taskResultTab = new Tab("Task Preview", Images.instance.search_16().getSafeUri().asString());
+        taskResultTab = new Tab("Task Preview", ImagesUnbundled.SEARCH_16);
         taskResultTab.setPane(this.controller.buildPreviewView());
 
-        jobResultTab = new Tab("Job Results", Images.instance.search_16().getSafeUri().asString());
+        jobResultTab = new Tab("Job Results", ImagesUnbundled.SEARCH_16);
         this.jobResultView = new JobResultView(this.controller);
         jobResultTab.setPane(this.jobResultView.build());
 
@@ -884,7 +884,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     protected void buildTasksTab() {
-        tasksTab = new Tab("Tasks", SchedulerImages.instance.monitoring_16().getSafeUri().asString());
+        tasksTab = new Tab("Tasks", ImagesUnbundled.MONITORING_16);
         tasksTab.setPane(tasksPane);
         Job selectedJob = controller.getExecutionController().getModel().getSelectedJob();
         LoginModel loginModel = LoginModel.getInstance();
@@ -892,7 +892,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             loginModel.userDoesNotHavePermissionToGetJobState(new ArrayList<>(Collections.singleton(selectedJob.getId()
                                                                                                                .toString())))) {
             tasksTab.setDisabled(true);
-            tasksTab.setIcon(null);
             disableTaskInfoTab(true);
             disableTaskResultTab(true);
         } else {
@@ -902,17 +901,15 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         }
     }
 
-    private void disableTaskInfoTab(boolean disabled) {
+    public void disableTaskInfoTab(boolean disabled) {
         if (taskinfoTab != null) {
             taskinfoTab.setDisabled(disabled);
-            taskinfoTab.setIcon(disabled ? null : SchedulerImages.instance.info_16().getSafeUri().asString());
         }
     }
 
-    private void disableTaskResultTab(boolean disabled) {
+    public void disableTaskResultTab(boolean disabled) {
         if (taskResultTab != null) {
             taskResultTab.setDisabled(disabled);
-            taskResultTab.setIcon(disabled ? null : Images.instance.search_16().getSafeUri().asString());
         }
     }
 
@@ -926,12 +923,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     public void disableVarInfoTab(boolean disabled) {
         varInfoTab.setDisabled(disabled);
-        varInfoTab.setIcon(disabled ? null : SchedulerImages.instance.info_16().getSafeUri().asString());
     }
 
     public void disableJobResultsTab(boolean disabled) {
         jobResultTab.setDisabled(disabled);
-        jobResultTab.setIcon(disabled ? null : Images.instance.search_16().getSafeUri().asString());
     }
 
     public void disableVisualizationTab(boolean disabled) {
@@ -944,12 +939,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     public void disableServerLogsTab(boolean disabled) {
         serverLogsTab.setDisabled(disabled);
-        serverLogsTab.setIcon(disabled ? null : SchedulerImages.instance.output_16().getSafeUri().asString());
     }
 
     public void disableOutputTab(boolean disabled) {
         outputTab.setDisabled(disabled);
-        outputTab.setIcon(disabled ? null : SchedulerImages.instance.output_16().getSafeUri().asString());
     }
 
     protected void buildVisuTab() {
@@ -961,7 +954,6 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             loginModel.userDoesNotHavePermissionToGetContent(new ArrayList<>(Collections.singleton(selectedJob.getId()
                                                                                                               .toString())))) {
             visuTab.setDisabled(true);
-            visuTab.setIcon(null);
             visuView.getHtmlView().disableOpenInStudioButton(true);
         } else {
             visuTab.setDisabled(false);
