@@ -1115,13 +1115,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private void disableLockMenuItems(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (loginModel.userDoesNotHavePermissionToLockNodes()) {
+        if (!loginModel.userHasPermissionToLockNodes()) {
             contextMenu.disableLockMenuItem(contextMenu);
         }
-        if (loginModel.userDoesNotHavePermissionToUnLockNodes()) {
+        if (!loginModel.userHasPermissionToUnLockNodes()) {
             contextMenu.disableUnlockMenuItem(contextMenu);
         }
-        if (loginModel.userDoesNotHavePermissionToRemoveNodes()) {
+        if (!loginModel.userHasPermissionToRemoveNodes()) {
             contextMenu.disableRemoveMenuItem(contextMenu);
         }
         if (loginModel.userHasPermissionToLockNodes() || loginModel.userHasPermissionToUnLockNodes() ||

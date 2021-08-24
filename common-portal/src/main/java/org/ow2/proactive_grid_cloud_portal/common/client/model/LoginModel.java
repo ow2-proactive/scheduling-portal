@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.common.client.model;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class LoginModel {
@@ -144,7 +143,7 @@ public class LoginModel {
         this.sessionId = id;
     }
 
-    public static void addSchedulerPermissions(Map<String, Map<String, Boolean>> permissions) {//TODO OANA AICI
+    public static void addSchedulerPermissions(Map<String, Map<String, Boolean>> permissions) {
         permissions.forEach((key, value) -> instance.schedulerPermissions.put(key, value));
     }
 
@@ -258,69 +257,51 @@ public class LoginModel {
         return methods;
     }
 
-    public boolean userHasPermissionToStartJob() {
+    public boolean userHasPermissionToStartScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_START) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_START);
     }
 
-    public boolean userHasPermissionToStopJob() {
+    public boolean userHasPermissionToStopScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_STOP) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_STOP);
     }
 
-    public boolean userHasPermissionToFreezeJob() {
+    public boolean userHasPermissionToFreezeScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_FREEZE) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_FREEZE);
     }
 
-    public boolean userHasPermissionToResumeJob() {
+    public boolean userHasPermissionToResumeScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_RESUME) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_RESUME);
     }
 
-    public boolean userHasPermissionToPauseJob() {
+    public boolean userHasPermissionToPauseScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_PAUSE) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_PAUSE);
     }
 
-    public boolean userHasPermissionToShutDownJob() {
+    public boolean userHasPermissionToShutDownScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_SHUTDOWN) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_SHUTDOWN);
     }
 
-    public boolean userHasPermissionToKillJob() {
+    public boolean userHasPermissionToKillScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_KILL) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_KILL);
     }
 
     public boolean userHasPermissionToLockNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_LOCK_NODES) &&
-               sessionPermissions.get(PERMISSION_RM_LOCK_NODES);
-    }
-
-    public boolean userDoesNotHavePermissionToLockNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_LOCK_NODES) &&
-               !sessionPermissions.get(PERMISSION_RM_LOCK_NODES);
+        return sessionPermissions.get(PERMISSION_RM_LOCK_NODES);
     }
 
     public boolean userHasPermissionToUnLockNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_UNLOCK_NODES) &&
-               sessionPermissions.get(PERMISSION_RM_UNLOCK_NODES);
-    }
-
-    public boolean userDoesNotHavePermissionToUnLockNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_UNLOCK_NODES) &&
-               !sessionPermissions.get(PERMISSION_RM_UNLOCK_NODES);
+        return sessionPermissions.get(PERMISSION_RM_UNLOCK_NODES);
     }
 
     public boolean userHasPermissionToRemoveNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_REMOVE_NODES) &&
-               !sessionPermissions.get(PERMISSION_RM_REMOVE_NODES);
-    }
-
-    public boolean userDoesNotHavePermissionToRemoveNodes() {
-        return sessionPermissions.containsKey(PERMISSION_RM_REMOVE_NODES) &&
-               !sessionPermissions.get(PERMISSION_RM_REMOVE_NODES);
+        return sessionPermissions.get(PERMISSION_RM_REMOVE_NODES);
     }
 
     public boolean userDoesNotHavePermissionToExecuteScript() {
@@ -350,7 +331,7 @@ public class LoginModel {
      * Add the user permissions for the nodes to the cashed map to avoid sending unnecessary requests
      * @param permissions the map the node and true/false if the user has or has not the permission to the node
      */
-    public static void addRMPermissions(Map<String, Boolean> permissions) {
+    public void addRMPermissions(Map<String, Boolean> permissions) {
         permissions.forEach((key, value) -> instance.RMNodePermissions.put(key, value));
     }
 
@@ -360,11 +341,7 @@ public class LoginModel {
      * @return true if the user has permissions to all of the given nodes
      */
     public boolean userHasPermissionForAllSelectedNodes(Set<String> nodeUrls) {
-        List<String> resultNodes = nodeUrls.stream()
-                                           .filter(node -> RMNodePermissions.containsKey(node) &&
-                                                           !RMNodePermissions.get(node))
-                                           .collect(Collectors.toList());
-        return resultNodes.isEmpty() ? true : false;
+        return nodeUrls.stream().allMatch(node -> RMNodePermissions.containsKey(node) && RMNodePermissions.get(node));
     }
 
 }

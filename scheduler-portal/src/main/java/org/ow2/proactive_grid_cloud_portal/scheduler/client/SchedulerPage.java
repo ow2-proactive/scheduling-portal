@@ -626,43 +626,43 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 break;
             case FROZEN:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopJob());
+                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
-                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeJob());
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillJob());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownJob());
+                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeScheduler());
+                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
                 break;
             case PAUSED:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopJob());
+                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
-                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeJob());
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillJob());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownJob());
+                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeScheduler());
+                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
                 break;
             case STARTED:
             case UNLINKED:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopJob());
-                schedFreezeButton.setEnabled(true && loginModel.userHasPermissionToFreezeJob());
-                schedPauseButton.setEnabled(true && loginModel.userHasPermissionToPauseJob());
+                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
+                schedFreezeButton.setEnabled(true && loginModel.userHasPermissionToFreezeScheduler());
+                schedPauseButton.setEnabled(true && loginModel.userHasPermissionToPauseScheduler());
                 schedResumeButton.setEnabled(false);
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillJob());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownJob());
+                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
                 break;
             case STOPPED:
-                schedStartButton.setEnabled(true && loginModel.userHasPermissionToStartJob());
+                schedStartButton.setEnabled(true && loginModel.userHasPermissionToStartScheduler());
                 schedStopButton.setEnabled(false);
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillJob());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownJob());
+                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
             default:
