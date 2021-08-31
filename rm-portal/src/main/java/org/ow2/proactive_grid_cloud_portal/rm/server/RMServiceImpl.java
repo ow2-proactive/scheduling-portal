@@ -25,18 +25,17 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.server;
 
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToHashMap;
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -60,6 +59,7 @@ import org.jboss.resteasy.plugins.interceptors.encoding.AcceptEncodingGZIPFilter
 import org.jboss.resteasy.plugins.interceptors.encoding.GZIPDecodingInterceptor;
 import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
+import org.ow2.proactive_grid_cloud_portal.common.server.CommonRestClient;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
 import org.ow2.proactive_grid_cloud_portal.common.server.Service;
@@ -480,6 +480,79 @@ public class RMServiceImpl extends Service implements RMService {
     public void setNodeTokens(String sessionId, String nodeurl, List<String> tokens) {
         RestClient restClientProxy = getRestClientProxy();
         restClientProxy.setNodeTokens(sessionId, nodeurl, tokens);
+    }
+
+    @Override
+    public Map<String, Boolean> checkNodesPermission(String sessionId, Set<String> urls)
+            throws RestServerException, ServiceException {
+        Map<String, Boolean> map = executeFunctionReturnStreamAsMapWithoutNewLines(restClient -> restClient.checkNodesPermission(sessionId,
+                                                                                                                                 urls));
+        return map;
+    }
+
+    private Map<String, Boolean> executeFunctionReturnStreamAsMapWithoutNewLines(
+            Function<RestClient, InputStream> function) throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToHashMap(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            HashMap map = new HashMap<String, Boolean>();
+            map.put(rethrowRestServerException(e), null);
+            return map;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    @Override
+    public Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkPermissions(sessionId, methods));
+    }
+
+    private Map<String, Boolean>
+            executeFunctionReturnStreamAsMapCommon(java.util.function.Function<CommonRestClient, InputStream> function)
+                    throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToHashMap(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            HashMap map = new HashMap<String, Boolean>();
+            map.put(rethrowRestServerException(e), null);
+            return map;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private CommonRestClient getCommonRestClient() {
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        builder.register(AcceptEncodingGZIPFilter.class);
+        builder.register(GZIPDecodingInterceptor.class);
+        builder.register(GZIPEncodingInterceptor.class);
+        ResteasyClient client = builder.asyncExecutor(threadPool)
+                                       .httpEngine(new ApacheHttpClient4Engine(httpClient))
+                                       .build();
+        ResteasyWebTarget target = client.target(RMConfig.get().getRestUrl());
+
+        return target.proxy(CommonRestClient.class);
     }
 
     private RestClient getRestClientProxy() {

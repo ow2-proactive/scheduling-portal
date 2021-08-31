@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToHashMap;
 import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
 
 import java.io.File;
@@ -72,6 +73,7 @@ import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.server.CommonRestClient;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
@@ -1339,6 +1341,29 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    private Map<String, Boolean> executeFunctionReturnStreamAsMapCommon(
+            Function<CommonRestClient, InputStream> function) throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToHashMap(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            HashMap map = new HashMap<String, Boolean>();
+            map.put(rethrowRestServerException(e), null);
+            return map;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
     private RestClient getRestClientProxy() {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         builder.register(AcceptEncodingGZIPFilter.class);
@@ -1379,4 +1404,67 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             return null;
         }
     }
+
+    @Override
+    public Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkPermissions(sessionId, methods));
+    }
+
+    @Override
+    public Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobIds,
+            List<String> methods) throws RestServerException, ServiceException {
+        HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/permission/methods");
+
+        try {
+            ObjectMapper oMapper = new ObjectMapper();
+            method.setEntity(getEntityForPermission(jobIds, methods));
+            method.setHeader("Accept", "application/json");
+            method.addHeader("content-type", "application/json");
+            method.setHeader("sessionid", sessionId);
+
+            HttpResponse response = httpClient.execute(method);
+
+            Map<String, Map<String, Boolean>> responseAsMap = new HashMap<>();
+            Map<String, Object> responseAsObjectMap = new ObjectMapper().readValue(response.getEntity().getContent(),
+                                                                                   HashMap.class);
+            for (String jobId : responseAsObjectMap.keySet()) {
+                responseAsMap.put(jobId, oMapper.convertValue(responseAsObjectMap.get(jobId), HashMap.class));
+            }
+
+            switch (response.getStatusLine().getStatusCode()) {
+                case 200:
+                    return responseAsMap;
+                default:
+                    HashMap map = new HashMap<String, Boolean>();
+                    WebApplicationException e = new WebApplicationException(responseAsMap.toString(),
+                                                                            response.getStatusLine().getStatusCode());
+                    map.put(rethrowRestServerException(e), null);
+                    return map;
+            }
+
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    private StringEntity getEntityForPermission(List<String> jobIds, List<String> methods)
+            throws UnsupportedEncodingException {
+
+        Map<String, List<String>> map = new HashMap<>();
+        map.put("jobids", jobIds);
+        map.put("methods", methods);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String json = mapper.writeValueAsString(map);
+            return new StringEntity(json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

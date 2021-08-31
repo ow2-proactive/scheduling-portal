@@ -30,4 +30,13 @@ public class ImagesUnbundled {
     public static final String ABOUT_115 = "about_115.png";
 
     public static final String PA_16 = "pa_16.png";
+
+    public static final String OUTPUT_16 = "output_16.png";
+
+    public static final String SEARCH_16 = "search_16.png";
+
+    public static final String INFO_16 = "info_16.png";
+
+    public static final String MONITORING_16 = "monitoring_16.png";
+
 }

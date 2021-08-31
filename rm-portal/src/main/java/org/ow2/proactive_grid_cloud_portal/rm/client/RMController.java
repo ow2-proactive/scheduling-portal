@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
@@ -279,6 +280,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         // than the one in the domain cookie, then we exit
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
+
+        checkPermissionForTabs();
+        checkToFetchSupportedInfrastructures();
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ")");
@@ -868,6 +872,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 LogModel.getInstance().logCriticalMessage(
                                                           "Failed to get the map of (logger_name, level) from the server: " +
                                                           caught.getMessage());
+                rmPage.disableLoggersMenuItem();
             }
         });
     }
@@ -1010,6 +1015,24 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
+     * Check to see if the user has permission to fetch and store NS Infrastructure
+     *
+     */
+    public void checkToFetchSupportedInfrastructures() {
+        rm.getInfrastructures(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logMessage("Failed to fetch supported infrastructures:<br>" + msg);
+                rmPage.disableNsButton();
+            }
+
+            public void onSuccess(String result) {
+                LogModel.getInstance().logMessage("Successfully fetched supported infrastructures:<br>" + result);
+            }
+        });
+    }
+
+    /**
      * Fetch and store in the model the current configuration of a node source
      *
      * @param success call this when it's done
@@ -1055,6 +1078,119 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     public void lockNodes() {
         lockNodes(getSelectedNodesUrls());
+    }
+
+    /**
+     * Check if the logged user has permissions to lock, unlock and remove node
+     * If the check has already been send for the logged user, the request will not be send
+     * If it does not have the permissions, the lockMenu will be disabled
+     */
+    public void checkPermissionsToLockMenu(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        Set<String> nodeUrls = getSelectedNodesUrls();
+        List<String> methods = loginModel.getRmNodesPermissionMethods();
+        List<String> notCashedMethods = methods.stream()
+                                               .filter(method -> !loginModel.sessionPermissionWasReceivedForMethod(method))
+                                               .collect(Collectors.toList());
+        if (notCashedMethods.isEmpty()) {
+            disableLockMenuItems(contextMenu);
+            return;
+        }
+
+        rm.checkPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");
+                contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
+            }
+
+            @Override
+            public void onSuccess(Map<String, Boolean> result) {
+                loginModel.addSessionPermissions(result);
+                disableLockMenuItems(contextMenu);
+            }
+        });
+
+    }
+
+    private void disableLockMenuItems(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (!loginModel.userHasPermissionToLockNodes()) {
+            contextMenu.disableLockMenuItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToUnLockNodes()) {
+            contextMenu.disableUnlockMenuItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToRemoveNodes()) {
+            contextMenu.disableRemoveMenuItem(contextMenu);
+        }
+        if (loginModel.userHasPermissionToLockNodes() || loginModel.userHasPermissionToUnLockNodes() ||
+            loginModel.userHasPermissionToRemoveNodes()) {
+            checkNodePermissions(contextMenu);
+        }
+    }
+
+    /**
+     * Check if the logged user has permissions to the selected nodes
+     * If it does not have the permissions, the lockMenu will be disabled
+     * If map of requestManagerPermissions already contains the permission of the logged user for the selected jobs, the request will not be send
+     * After sending the request, the cashed map from LoginModel will add the newly permissions per node received from the backend to avoid sending unnecessary requests
+     */
+    private void checkNodePermissions(ContextMenu contextMenu) {
+        Set<String> nodeUrls = getSelectedNodesUrls();
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> resultNodes = nodeUrls.stream()
+                                           .filter(node -> !loginModel.userPermissionWasReceivedForNode(node))
+                                           .collect(Collectors.toList());
+        if (resultNodes.isEmpty()) {
+            contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
+            return;
+        }
+        rm.checkNodesPermission(loginModel.getSessionId(), nodeUrls, new AsyncCallback<Map<String, Boolean>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeUrls.size() +
+                                                           " nodes: " + JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(Map<String, Boolean> result) {
+                loginModel.addRMPermissions(result);
+                contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
+            }
+        });
+    }
+
+    public void checkPermissionForTabs() {
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> methods = loginModel.getRmTabsPermissionMethods();
+        List<String> notCashedMethods = methods.stream()
+                                               .filter(method -> !loginModel.sessionPermissionWasReceivedForMethod(method))
+                                               .collect(Collectors.toList());
+        if (notCashedMethods.isEmpty()) {
+            setTabsStatus();
+            return;
+        }
+
+        rm.checkPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");
+            }
+
+            @Override
+            public void onSuccess(Map<String, Boolean> result) {
+                loginModel.addSessionPermissions(result);
+                setTabsStatus();
+            }
+        });
+    }
+
+    private void setTabsStatus() {
+        LoginModel loginModel = LoginModel.getInstance();
+        rmPage.setThreadDumpTabPageDisabled(loginModel.userDoesNotHavePermissionToGetNodeThreadDump() &&
+                                            loginModel.userDoesNotHavePermissionToGetRmThreadDump());
+        rmPage.setScriptConsoleTabPageDisabled(loginModel.userDoesNotHavePermissionToExecuteScript());
     }
 
     private Set<String> getSelectedNodesUrls() {
@@ -1373,6 +1509,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     public RMServiceAsync getRMService() {
         return this.rm;
+    }
+
+    public RMPage getRmPage() {
+        return this.rmPage;
     }
 
     /**
