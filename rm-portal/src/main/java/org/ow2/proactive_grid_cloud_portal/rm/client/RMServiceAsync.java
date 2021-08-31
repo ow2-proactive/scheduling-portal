@@ -372,4 +372,8 @@ public interface RMServiceAsync {
     void getNodeThreadDump(String sessionId, String nodeUrl, AsyncCallback<String> callback);
 
     void setNodeTokens(String sessionId, String nodeurl, List<String> tokens, AsyncCallback<Void> callback);
+
+    Request checkNodesPermission(String sessionId, Set<String> nodeUrls, AsyncCallback<Map<String, Boolean>> callback);
+
+    Request checkPermissions(String sessionId, List<String> methods, AsyncCallback<Map<String, Boolean>> asyncCallback);
 }

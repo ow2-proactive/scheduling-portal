@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -211,6 +212,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         status.setContents("Monitoring is unavailable on this host. <br>" +
                            "Either monitoring was disabled with the disableMonitoring option or an error occurred. <br>" +
                            "More information are available inside the node logs.");
+        controller.getRmPage().setMonitoringTabPageDisabled(true);
     }
 
     @Override
@@ -220,5 +222,6 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
             addMember(tabs);
             tabs.show();
         }
+        controller.getRmPage().setMonitoringTabPageDisabled(false);
     }
 }
