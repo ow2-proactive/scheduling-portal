@@ -391,7 +391,7 @@ public class RMPage implements LogListener {
         helpMenuButton.setMenu(helpMenu);
 
         nsButton = new ToolStripButton("Add Node Source");
-        nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
+        nsButton.setIcon(ImagesUnbundled.NODESOURCE_DEPLOYED);
         nsButton.setTooltip("Create and add a new Node Source");
         nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 
@@ -412,9 +412,7 @@ public class RMPage implements LogListener {
 
     public void disableNsButton() {
         nsButton.setTooltip("User is not authorized to create or add a new Node Source");
-        nsButton.setIcon(null);
         nsButton.setDisabled(true);
-        nsButton.redraw();
     }
 
     public void disableLoggersMenuItem() {
