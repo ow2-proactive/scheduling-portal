@@ -39,4 +39,6 @@ public class ImagesUnbundled {
 
     public static final String MONITORING_16 = "monitoring_16.png";
 
+    public static final String NODESOURCE_DEPLOYED = "nodesource_deployed.png";
+
 }
