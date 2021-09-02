@@ -43,6 +43,6 @@ public interface CommonRestClient {
     @Path("/permissions/methods")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    InputStream checkPermissions(@HeaderParam("sessionid") String sessionId, List<String> methods);
+    InputStream checkMethodsPermissions(@HeaderParam("sessionid") String sessionId, List<String> methods);
 
 }

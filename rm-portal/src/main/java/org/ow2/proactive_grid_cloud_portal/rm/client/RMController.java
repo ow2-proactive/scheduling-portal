@@ -281,7 +281,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
-        checkPermissionForTabs();
+        checkRmMethodsPermissions();
         checkToFetchSupportedInfrastructures();
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
@@ -869,9 +869,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             }
 
             public void onFailure(Throwable caught) {
-                LogModel.getInstance().logCriticalMessage(
-                                                          "Failed to get the map of (logger_name, level) from the server: " +
-                                                          caught.getMessage());
+                LogModel.getInstance().logImportantMessage(
+                                                           "Failed to get the map of (logger_name, level) from the server: " +
+                                                           caught.getMessage());
                 rmPage.disableLoggersMenuItem();
             }
         });
@@ -1080,40 +1080,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         lockNodes(getSelectedNodesUrls());
     }
 
-    /**
-     * Check if the logged user has permissions to lock, unlock and remove node
-     * If the check has already been send for the logged user, the request will not be send
-     * If it does not have the permissions, the lockMenu will be disabled
-     */
-    public void checkPermissionsToLockMenu(ContextMenu contextMenu) {
-        LoginModel loginModel = LoginModel.getInstance();
-        Set<String> nodeUrls = getSelectedNodesUrls();
-        List<String> methods = loginModel.getRmNodesPermissionMethods();
-        List<String> notCashedMethods = methods.stream()
-                                               .filter(method -> !loginModel.sessionPermissionWasReceivedForMethod(method))
-                                               .collect(Collectors.toList());
-        if (notCashedMethods.isEmpty()) {
-            disableLockMenuItems(contextMenu);
-            return;
-        }
-
-        rm.checkPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");
-                contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
-            }
-
-            @Override
-            public void onSuccess(Map<String, Boolean> result) {
-                loginModel.addSessionPermissions(result);
-                disableLockMenuItems(contextMenu);
-            }
-        });
-
-    }
-
-    private void disableLockMenuItems(ContextMenu contextMenu) {
+    public void setStatusForLockMenuItems(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
         if (!loginModel.userHasPermissionToLockNodes()) {
             contextMenu.disableLockMenuItem(contextMenu);
@@ -1123,6 +1090,20 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
         if (!loginModel.userHasPermissionToRemoveNodes()) {
             contextMenu.disableRemoveMenuItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToUndeployNodeSource()) {
+            contextMenu.disableUndeployItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToDeployNodeSource()) {
+            contextMenu.disableDeployItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
+            contextMenu.disableEditItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToGetNodeSourceConfiguration()) {
+            contextMenu.disableExportInfrastructureItem(contextMenu);
+            contextMenu.disableExportPolicyItem(contextMenu);
+            contextMenu.disableExportNodeSourceItem(contextMenu);
         }
         if (loginModel.userHasPermissionToLockNodes() || loginModel.userHasPermissionToUnLockNodes() ||
             loginModel.userHasPermissionToRemoveNodes()) {
@@ -1161,9 +1142,13 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
-    public void checkPermissionForTabs() {
+    /**
+     * Check if the logged user has permissions to the methods from loginModel.getRmSessionPermissionMethods()
+     * If the request has already been send for the logged user, the permissions will be loaded from the cashed list
+     */
+    public void checkRmMethodsPermissions() {
         LoginModel loginModel = LoginModel.getInstance();
-        List<String> methods = loginModel.getRmTabsPermissionMethods();
+        List<String> methods = loginModel.getRmSessionPermissionMethods();
         List<String> notCashedMethods = methods.stream()
                                                .filter(method -> !loginModel.sessionPermissionWasReceivedForMethod(method))
                                                .collect(Collectors.toList());
@@ -1172,7 +1157,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             return;
         }
 
-        rm.checkPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
+        rm.checkMethodsPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
             @Override
             public void onFailure(Throwable caught) {
                 LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");

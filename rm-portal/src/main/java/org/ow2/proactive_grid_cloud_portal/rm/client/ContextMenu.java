@@ -68,6 +68,18 @@ public class ContextMenu extends Menu {
 
     private MenuItem removeItem;
 
+    private MenuItem deployItem;
+
+    private MenuItem undeployItem;
+
+    private MenuItem editItem;
+
+    private MenuItem exportNodeSourceItem;
+
+    private MenuItem exportPolicyItem;
+
+    private MenuItem exportInfrastructureItem;
+
     public static Menu createContextMenuFromTreeView(RMController controller, Object related, Tree tree) {
 
         MenuItem expandItem = new MenuItem("Expand all", Images.instance.expand_16().getSafeUri().asString());
@@ -121,14 +133,14 @@ public class ContextMenu extends Menu {
         String nodeSourceName = menu.nodesource == null ? "" : menu.nodesource.getSourceName();
 
         NodeSourceMenu nodeSourceMenu = new NodeSourceMenu(controller, menu, nodeSourceName).build();
-        MenuItem editItem = nodeSourceMenu.getEditItem();
-        MenuItem undeployItem = nodeSourceMenu.getUndeployItem();
-        MenuItem deployItem = nodeSourceMenu.getDeployItem();
+        menu.editItem = nodeSourceMenu.getEditItem();
+        menu.undeployItem = nodeSourceMenu.getUndeployItem();
+        menu.deployItem = nodeSourceMenu.getDeployItem();
 
         ExportMenu exportMenu = new ExportMenu(controller, menu, nodeSourceName).build();
-        MenuItem exportNodeSourceItem = exportMenu.getExportNodeSourceItem();
-        MenuItem exportInfrastructureItem = exportMenu.getExportInfrastructureItem();
-        MenuItem exportPolicyItem = exportMenu.getExportPolicyItem();
+        menu.exportNodeSourceItem = exportMenu.getExportNodeSourceItem();
+        menu.exportInfrastructureItem = exportMenu.getExportInfrastructureItem();
+        menu.exportPolicyItem = exportMenu.getExportPolicyItem();
 
         MenuItem editTokens = new MenuItem("Edit Tokens");
         editTokens.addClickHandler(x -> {
@@ -155,25 +167,25 @@ public class ContextMenu extends Menu {
         if (menu.nodesource != null) {
             switch (menu.nodesource.getNodeSourceStatus()) {
                 case NODES_DEPLOYED:
-                    editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
-                    menu.enableItems(undeployItem);
-                    menu.disableItems(deployItem);
+                    menu.editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
+                    menu.enableItems(menu.undeployItem);
+                    menu.disableItems(menu.deployItem);
                     break;
                 case NODES_UNDEPLOYED:
-                    editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
-                    menu.enableItems(deployItem);
-                    menu.disableItems(undeployItem);
+                    menu.editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
+                    menu.enableItems(menu.deployItem);
+                    menu.disableItems(menu.undeployItem);
                     break;
                 default:
-                    menu.disableItems(deployItem, undeployItem, editItem);
+                    menu.disableItems(menu.deployItem, menu.undeployItem, menu.editItem);
             }
         } else {
-            menu.disableItems(deployItem,
-                              undeployItem,
-                              editItem,
-                              exportNodeSourceItem,
-                              exportInfrastructureItem,
-                              exportPolicyItem);
+            menu.disableItems(menu.deployItem,
+                              menu.undeployItem,
+                              menu.editItem,
+                              menu.exportNodeSourceItem,
+                              menu.exportInfrastructureItem,
+                              menu.exportPolicyItem);
         }
 
         List<MenuItem> items = new ArrayList<>();
@@ -183,9 +195,9 @@ public class ContextMenu extends Menu {
         }
 
         if (menu.nodesource != null) {
-            items.add(deployItem);
-            items.add(undeployItem);
-            items.add(editItem);
+            items.add(menu.deployItem);
+            items.add(menu.undeployItem);
+            items.add(menu.editItem);
             items.add(new MenuItemSeparator());
         }
 
@@ -195,9 +207,9 @@ public class ContextMenu extends Menu {
 
         if (menu.nodesource != null) {
             items.add(new MenuItemSeparator());
-            items.add(exportNodeSourceItem);
-            items.add(exportInfrastructureItem);
-            items.add(exportPolicyItem);
+            items.add(menu.exportNodeSourceItem);
+            items.add(menu.exportInfrastructureItem);
+            items.add(menu.exportPolicyItem);
 
         }
 
@@ -206,7 +218,7 @@ public class ContextMenu extends Menu {
             items.add(editTokens);
         }
 
-        controller.checkPermissionsToLockMenu(menu);
+        controller.setStatusForLockMenuItems(menu);
         menu.setItems(items.toArray(new MenuItem[0]));
 
         return menu;
@@ -233,6 +245,36 @@ public class ContextMenu extends Menu {
 
     public void disableRemoveMenuItem(ContextMenu menu) {
         menu.removeItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableDeployItem(ContextMenu menu) {
+        menu.deployItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableUndeployItem(ContextMenu menu) {
+        menu.undeployItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableEditItem(ContextMenu menu) {
+        menu.editItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableExportNodeSourceItem(ContextMenu menu) {
+        menu.exportNodeSourceItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableExportPolicyItem(ContextMenu menu) {
+        menu.exportPolicyItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableExportInfrastructureItem(ContextMenu menu) {
+        menu.exportInfrastructureItem.setEnabled(false);
         menu.redraw();
     }
 

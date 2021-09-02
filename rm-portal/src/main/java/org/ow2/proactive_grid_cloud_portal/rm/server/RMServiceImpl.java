@@ -35,7 +35,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -513,9 +512,10 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+    public Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkPermissions(sessionId, methods));
+        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkMethodsPermissions(sessionId,
+                                                                                                       methods));
     }
 
     private Map<String, Boolean>
