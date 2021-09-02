@@ -419,7 +419,8 @@ public interface SchedulerServiceAsync {
      */
     void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Void> asyncCallback);
 
-    Request checkPermissions(String sessionId, List<String> methods, AsyncCallback<Map<String, Boolean>> asyncCallback);
+    Request checkMethodsPermissions(String sessionId, List<String> methods,
+            AsyncCallback<Map<String, Boolean>> asyncCallback);
 
     Request checkJobsPermissionMethods(String sessionId, List<String> jobId, List<String> methods,
             AsyncCallback<Map<String, Map<String, Boolean>>> asyncCallback);

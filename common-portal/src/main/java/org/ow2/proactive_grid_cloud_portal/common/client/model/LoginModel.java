@@ -84,6 +84,14 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_REMOVE_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.removeNode";
 
+    private static final String PERMISSION_GET_NODE_SOURCE_CONFIGURATION = "org.ow2.proactive.resourcemanager.core.RMCore.getNodeSourceConfiguration";
+
+    private static final String PERMISSION_UPDATE_DYNAMIC_PARAMETERS = "org.ow2.proactive.resourcemanager.core.RMCore.updateDynamicParameters";
+
+    private static final String PERMISSION_UNDEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.undeployNodeSource";
+
+    private static final String PERMISSION_DEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.deployNodeSource";
+
     // a map containing the job id as key and another map as value containing the method name and true/false if the user has
     // the permission to the method for the current jobId
     Map<String, Map<String, Boolean>> schedulerPermissions = null;
@@ -241,19 +249,18 @@ public class LoginModel {
         return methods;
     }
 
-    public List getRmTabsPermissionMethods() {
-        List<String> methods = new ArrayList<>();
-        methods.add(PERMISSION_RM_EXECUTE_SCRIPT);
-        methods.add(PERMISSION_RM_GET_RM_THREAD_DUMP);
-        methods.add(PERMISSION_RM_GET_NODE_THREAD_DUMP);
-        return methods;
-    }
-
-    public List getRmNodesPermissionMethods() {
+    public List getRmSessionPermissionMethods() {
         List<String> methods = new ArrayList<>();
         methods.add(PERMISSION_RM_LOCK_NODES);
         methods.add(PERMISSION_RM_UNLOCK_NODES);
         methods.add(PERMISSION_RM_REMOVE_NODES);
+        methods.add(PERMISSION_GET_NODE_SOURCE_CONFIGURATION);
+        methods.add(PERMISSION_UPDATE_DYNAMIC_PARAMETERS);
+        methods.add(PERMISSION_UNDEPLOY_NODE_SOURCE);
+        methods.add(PERMISSION_DEPLOY_NODE_SOURCE);
+        methods.add(PERMISSION_RM_EXECUTE_SCRIPT);
+        methods.add(PERMISSION_RM_GET_RM_THREAD_DUMP);
+        methods.add(PERMISSION_RM_GET_NODE_THREAD_DUMP);
         return methods;
     }
 
@@ -302,6 +309,22 @@ public class LoginModel {
 
     public boolean userHasPermissionToRemoveNodes() {
         return sessionPermissions.get(PERMISSION_RM_REMOVE_NODES);
+    }
+
+    public boolean userHasPermissionToGetNodeSourceConfiguration() {
+        return sessionPermissions.get(PERMISSION_GET_NODE_SOURCE_CONFIGURATION);
+    }
+
+    public boolean userHasPermissionToUpdateDynamicParameters() {
+        return sessionPermissions.get(PERMISSION_UPDATE_DYNAMIC_PARAMETERS);
+    }
+
+    public boolean userHasPermissionToUndeployNodeSource() {
+        return sessionPermissions.get(PERMISSION_UNDEPLOY_NODE_SOURCE);
+    }
+
+    public boolean userHasPermissionToDeployNodeSource() {
+        return sessionPermissions.get(PERMISSION_DEPLOY_NODE_SOURCE);
     }
 
     public boolean userDoesNotHavePermissionToExecuteScript() {
