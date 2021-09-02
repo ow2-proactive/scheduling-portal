@@ -462,7 +462,7 @@ public interface SchedulerService extends RemoteService {
      */
     Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException;
 
-    Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+    Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException;
 
     Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobId,

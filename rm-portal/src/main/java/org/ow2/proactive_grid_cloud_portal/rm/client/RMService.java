@@ -413,7 +413,7 @@ public interface RMService extends RemoteService {
     Map<String, Boolean> checkNodesPermission(String sessionId, Set<String> nodeUrls)
             throws RestServerException, ServiceException;
 
-    Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+    Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException;
 
 }

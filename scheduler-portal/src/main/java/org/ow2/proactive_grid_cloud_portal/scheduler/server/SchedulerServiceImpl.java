@@ -73,7 +73,6 @@ import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.server.CommonRestClient;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigReader;
 import org.ow2.proactive_grid_cloud_portal.common.server.ConfigUtils;
@@ -1406,9 +1405,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
-    public Map<String, Boolean> checkPermissions(final String sessionId, List<String> methods)
+    public Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkPermissions(sessionId, methods));
+        return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkMethodsPermissions(sessionId,
+                                                                                                       methods));
     }
 
     @Override

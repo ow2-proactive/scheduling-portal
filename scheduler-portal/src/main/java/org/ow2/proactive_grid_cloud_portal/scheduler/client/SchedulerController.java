@@ -405,7 +405,7 @@ public class SchedulerController extends Controller implements UncaughtException
         List<String> methods = loginModel.getSchedulerPermissionMethods();
         String sessionId = loginModel.getSessionId();
 
-        scheduler.checkPermissions(sessionId, methods, new AsyncCallback<Map<String, Boolean>>() {
+        scheduler.checkMethodsPermissions(sessionId, methods, new AsyncCallback<Map<String, Boolean>>() {
             public void onSuccess(Map<String, Boolean> result) {
                 loginModel.addSessionPermissions(result);
             }
