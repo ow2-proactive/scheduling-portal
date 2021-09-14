@@ -282,7 +282,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
         checkRmMethodsPermissions();
-        checkToFetchSupportedInfrastructures();
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ")");
@@ -1015,24 +1014,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     /**
-     * Check to see if the user has permission to fetch and store NS Infrastructure
-     *
-     */
-    public void checkToFetchSupportedInfrastructures() {
-        rm.getInfrastructures(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-                String msg = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logMessage("Failed to fetch supported infrastructures:<br>" + msg);
-                rmPage.disableNsButton();
-            }
-
-            public void onSuccess(String result) {
-                LogModel.getInstance().logMessage("Successfully fetched supported infrastructures:<br>" + result);
-            }
-        });
-    }
-
-    /**
      * Fetch and store in the model the current configuration of a node source
      *
      * @param success call this when it's done
@@ -1080,16 +1061,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         lockNodes(getSelectedNodesUrls());
     }
 
-    public void setStatusForLockMenuItems(ContextMenu contextMenu) {
+    public void checkPermissionOfContextMenuItems(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
+        checkStatusOfRemoveItem(contextMenu);
         if (!loginModel.userHasPermissionToLockNodes()) {
             contextMenu.disableLockMenuItem(contextMenu);
         }
         if (!loginModel.userHasPermissionToUnLockNodes()) {
             contextMenu.disableUnlockMenuItem(contextMenu);
-        }
-        if (!loginModel.userHasPermissionToRemoveNodes()) {
-            contextMenu.disableRemoveMenuItem(contextMenu);
         }
         if (!loginModel.userHasPermissionToUndeployNodeSource()) {
             contextMenu.disableUndeployItem(contextMenu);
@@ -1097,47 +1076,139 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (!loginModel.userHasPermissionToDeployNodeSource()) {
             contextMenu.disableDeployItem(contextMenu);
         }
-        if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
-            contextMenu.disableEditItem(contextMenu);
-        }
+        checkStatusOfEditButton(contextMenu);
         if (!loginModel.userHasPermissionToGetNodeSourceConfiguration()) {
             contextMenu.disableExportInfrastructureItem(contextMenu);
             contextMenu.disableExportPolicyItem(contextMenu);
             contextMenu.disableExportNodeSourceItem(contextMenu);
         }
         if (loginModel.userHasPermissionToLockNodes() || loginModel.userHasPermissionToUnLockNodes() ||
-            loginModel.userHasPermissionToRemoveNodes()) {
-            checkNodePermissions(contextMenu);
+            loginModel.userHasPermissionToRemoveNode()) {
+            checkNodePermission(contextMenu, true);
+        }
+        if ((loginModel.userHasPermissionToUndeployNodeSource() || loginModel.userHasPermissionToDeployNodeSource()) &&
+            model.getSelectedNodeSource() != null) {
+            checkNodePermission(contextMenu, false);
+        }
+    }
+
+    private void checkStatusOfRemoveItem(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (contextMenu.getNodesource() == null) {
+            if (!loginModel.userHasPermissionToRemoveNode()) {
+                contextMenu.disableRemoveMenuItem(contextMenu);
+            }
+        } else {
+            if (!loginModel.userHasPermissionToRemoveNodeSource()) {
+                contextMenu.disableRemoveMenuItem(contextMenu);
+            }
+        }
+    }
+
+    private void checkStatusOfEditButton(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        NodeSource selectedNodeSource = contextMenu.getNodesource();
+        if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
+            if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
+                contextMenu.disableEditItem(contextMenu);
+            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+                contextMenu.disableEditItem(contextMenu);
+            }
+        } else if (selectedNodeSource != null &&
+                   selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
+            if (!loginModel.userHasPermissionToEditNodeSource()) {
+                contextMenu.disableEditItem(contextMenu);
+            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+                contextMenu.disableEditItem(contextMenu);
+            }
         }
     }
 
     /**
-     * Check if the logged user has permissions to the selected nodes
-     * If it does not have the permissions, the lockMenu will be disabled
-     * If map of requestManagerPermissions already contains the permission of the logged user for the selected jobs, the request will not be send
-     * After sending the request, the cashed map from LoginModel will add the newly permissions per node received from the backend to avoid sending unnecessary requests
-     */
-    private void checkNodePermissions(ContextMenu contextMenu) {
-        Set<String> nodeUrls = getSelectedNodesUrls();
+     * Checks if the logged user has admin permissions to the selected nodes
+     * If map from LoginModel already contains the permission of the logged user for the selected node/nodeSource, the request will not be send
+     *
+     * @param contextMenu the current contextMenu
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+    */
+    private void checkNodePermission(ContextMenu contextMenu, boolean provider) {
         LoginModel loginModel = LoginModel.getInstance();
-        List<String> resultNodes = nodeUrls.stream()
-                                           .filter(node -> !loginModel.userPermissionWasReceivedForNode(node))
-                                           .collect(Collectors.toList());
-        if (resultNodes.isEmpty()) {
-            contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
-            return;
+        String url = null;
+        if (model.getSelectedNodeSource() != null) {
+            url = model.getSelectedNodeSource().getSourceName();
+        } else if (model.getSelectedNode() != null) {
+            url = model.getSelectedNode().getNodeUrl();
         }
-        rm.checkNodesPermission(loginModel.getSessionId(), nodeUrls, new AsyncCallback<Map<String, Boolean>>() {
+
+        if (provider && loginModel.userProviderPermissionWasReceivedForNode(url)) {
+            contextMenu.disableProviderItems(contextMenu, url);
+            return;
+        } else if (!provider && loginModel.userAdminPermissionWasReceivedForNode(url)) {
+            contextMenu.disableAdminItems(contextMenu, url);
+            return;
+        } else {
+            if (model.getSelectedNodeSource() != null) {
+                sendNodeSourcePermissionRequest(contextMenu, url, provider);
+            } else if (model.getSelectedNode() != null) {
+                sendNodePermissionRequest(contextMenu, url, provider);
+            }
+
+        }
+    }
+
+    /**
+     * Send request in order to get the node permission for the current user
+     * After sending the request, the cashed map from LoginModel will add the newly permissions per node received from the backend to avoid sending unnecessary requests
+     *
+     * @param contextMenu the current contextMenu
+     * @param nodeUrl the node url
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+     */
+    private void sendNodePermissionRequest(ContextMenu contextMenu, String nodeUrl, boolean provider) {
+        LoginModel loginModel = LoginModel.getInstance();
+        rm.checkNodePermission(loginModel.getSessionId(), nodeUrl, provider, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeUrls.size() +
-                                                           " nodes: " + JSONUtils.getJsonErrorMessage(caught));
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeUrl +
+                                                           JSONUtils.getJsonErrorMessage(caught));
             }
 
             @Override
-            public void onSuccess(Map<String, Boolean> result) {
-                loginModel.addRMPermissions(result);
-                contextMenu.setLockMenuItemsState(contextMenu, nodeUrls);
+            public void onSuccess(String result) {
+                loginModel.addRMProviderPermissions(nodeUrl, Boolean.parseBoolean(result));
+                contextMenu.disableProviderItems(contextMenu, nodeUrl);
+            }
+        });
+    }
+
+    /**
+     * Send request in order to get the node source permission for the current user
+     * After sending the request, the cashed map from LoginModel will add the newly permissions per node source received from the backend to avoid sending unnecessary requests
+     *
+     * @param contextMenu the current contextMenu
+     * @param nodeSourceName the node source name
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+     */
+    private void sendNodeSourcePermissionRequest(ContextMenu contextMenu, String nodeSourceName, boolean provider) {
+        LoginModel loginModel = LoginModel.getInstance();
+        rm.checkNodeSourcePermission(loginModel.getSessionId(), nodeSourceName, provider, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeSourceName +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (provider) {
+                    loginModel.addRMProviderPermissions(nodeSourceName, Boolean.parseBoolean(result));
+                    contextMenu.disableProviderItems(contextMenu, nodeSourceName);
+                } else {
+                    loginModel.addRMAdminPermissions(nodeSourceName, Boolean.parseBoolean(result));
+                    contextMenu.disableAdminItems(contextMenu, nodeSourceName);
+                }
             }
         });
     }
@@ -1173,9 +1244,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private void setTabsStatus() {
         LoginModel loginModel = LoginModel.getInstance();
-        rmPage.setThreadDumpTabPageDisabled(loginModel.userDoesNotHavePermissionToGetNodeThreadDump() &&
-                                            loginModel.userDoesNotHavePermissionToGetRmThreadDump());
-        rmPage.setScriptConsoleTabPageDisabled(loginModel.userDoesNotHavePermissionToExecuteScript());
+        rmPage.setThreadDumpTabPageDisabled(!loginModel.userHasPermissionToGetNodeThreadDump() ||
+                                            !loginModel.userHasPermissionToGetRmThreadDump());
+        rmPage.setScriptConsoleTabPageDisabled(!loginModel.userHasPermissionToExecuteScript());
+        rmPage.setNSButtonStatus(!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                                 !loginModel.userHasPermissionToGetSupportedNodeSourceInfras());
     }
 
     private Set<String> getSelectedNodesUrls() {

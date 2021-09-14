@@ -78,19 +78,27 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_GET_NODE_THREAD_DUMP = "org.ow2.proactive.resourcemanager.core.RMCore.getNodeThreadDump";
 
-    private static final String PERMISSION_RM_LOCK_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.lockNodes";
+    private static final String PERMISSION_RM_LOCK_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.lockNodes";
 
-    private static final String PERMISSION_RM_UNLOCK_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.unlockNodes";
+    private static final String PERMISSION_RM_UNLOCK_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.unlockNodes";
 
-    private static final String PERMISSION_RM_REMOVE_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.removeNode";
+    private static final String PERMISSION_RM_REMOVE_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.removeNode";
 
-    private static final String PERMISSION_GET_NODE_SOURCE_CONFIGURATION = "org.ow2.proactive.resourcemanager.core.RMCore.getNodeSourceConfiguration";
+    private static final String PERMISSION_RM_REMOVE_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.removeNodeSource";
 
-    private static final String PERMISSION_UPDATE_DYNAMIC_PARAMETERS = "org.ow2.proactive.resourcemanager.core.RMCore.updateDynamicParameters";
+    private static final String PERMISSION_RM_GET_NODE_SOURCE_CONFIGURATION = "org.ow2.proactive.resourcemanager.core.RMCore.getNodeSourceConfiguration";
 
-    private static final String PERMISSION_UNDEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.undeployNodeSource";
+    private static final String PERMISSION_RM_UPDATE_DYNAMIC_PARAMETERS = "org.ow2.proactive.resourcemanager.core.RMCore.updateDynamicParameters";
 
-    private static final String PERMISSION_DEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.deployNodeSource";
+    private static final String PERMISSION_RM_EDIT_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.editNodeSource";
+
+    private static final String PERMISSION_RM_UNDEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.undeployNodeSource";
+
+    private static final String PERMISSION_RM_DEPLOY_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.deployNodeSource";
+
+    private static final String PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES = "org.ow2.proactive.resourcemanager.core.RMCore.getSupportedNodeSourceInfrastructures";
+
+    private static final String PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING = "org.ow2.proactive.resourcemanager.core.RMCore.getInfrasToPoliciesMapping";
 
     // a map containing the job id as key and another map as value containing the method name and true/false if the user has
     // the permission to the method for the current jobId
@@ -100,15 +108,19 @@ public class LoginModel {
     // this permissions are set per user session
     private Map<String, Boolean> sessionPermissions = null;
 
-    // a map containing the node name and true if the user has the permission to access the node
-    private Map<String, Boolean> RMNodePermissions = null;
+    // a map containing the node name and true if the user has the admin or provider permission for the node/nodeSource
+    private Map<String, Boolean> RMNodeProviderPermissions = null;
+
+    // a map containing the node name and true if the user has the admin permission for the node/nodeSource
+    private Map<String, Boolean> RMNodeAdminPermissions = null;
 
     public static LoginModel getInstance() {
         if (instance == null) {
             instance = new LoginModel();
             instance.schedulerPermissions = new HashMap<>();
             instance.sessionPermissions = new HashMap<>();
-            instance.RMNodePermissions = new HashMap<>();
+            instance.RMNodeProviderPermissions = new HashMap<>();
+            instance.RMNodeAdminPermissions = new HashMap<>();
         }
         return instance;
     }
@@ -126,7 +138,8 @@ public class LoginModel {
         this.login = null;
         this.schedulerPermissions = new HashMap<>();
         this.sessionPermissions = new HashMap<>();
-        this.RMNodePermissions = new HashMap<>();
+        this.RMNodeProviderPermissions = new HashMap<>();
+        this.RMNodeAdminPermissions = new HashMap<>();
     }
 
     /**
@@ -251,16 +264,20 @@ public class LoginModel {
 
     public List getRmSessionPermissionMethods() {
         List<String> methods = new ArrayList<>();
-        methods.add(PERMISSION_RM_LOCK_NODES);
-        methods.add(PERMISSION_RM_UNLOCK_NODES);
-        methods.add(PERMISSION_RM_REMOVE_NODES);
-        methods.add(PERMISSION_GET_NODE_SOURCE_CONFIGURATION);
-        methods.add(PERMISSION_UPDATE_DYNAMIC_PARAMETERS);
-        methods.add(PERMISSION_UNDEPLOY_NODE_SOURCE);
-        methods.add(PERMISSION_DEPLOY_NODE_SOURCE);
+        methods.add(PERMISSION_RM_LOCK_NODE);
+        methods.add(PERMISSION_RM_UNLOCK_NODE);
+        methods.add(PERMISSION_RM_REMOVE_NODE);
+        methods.add(PERMISSION_RM_REMOVE_NODE_SOURCE);
+        methods.add(PERMISSION_RM_GET_NODE_SOURCE_CONFIGURATION);
+        methods.add(PERMISSION_RM_UPDATE_DYNAMIC_PARAMETERS);
+        methods.add(PERMISSION_RM_EDIT_NODE_SOURCE);
+        methods.add(PERMISSION_RM_UNDEPLOY_NODE_SOURCE);
+        methods.add(PERMISSION_RM_DEPLOY_NODE_SOURCE);
         methods.add(PERMISSION_RM_EXECUTE_SCRIPT);
         methods.add(PERMISSION_RM_GET_RM_THREAD_DUMP);
         methods.add(PERMISSION_RM_GET_NODE_THREAD_DUMP);
+        methods.add(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
+        methods.add(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
         return methods;
     }
 
@@ -300,50 +317,67 @@ public class LoginModel {
     }
 
     public boolean userHasPermissionToLockNodes() {
-        return sessionPermissions.get(PERMISSION_RM_LOCK_NODES);
+        return sessionPermissions.get(PERMISSION_RM_LOCK_NODE);
     }
 
     public boolean userHasPermissionToUnLockNodes() {
-        return sessionPermissions.get(PERMISSION_RM_UNLOCK_NODES);
+        return sessionPermissions.get(PERMISSION_RM_UNLOCK_NODE);
     }
 
-    public boolean userHasPermissionToRemoveNodes() {
-        return sessionPermissions.get(PERMISSION_RM_REMOVE_NODES);
+    public boolean userHasPermissionToRemoveNode() {
+        return sessionPermissions.get(PERMISSION_RM_REMOVE_NODE);
+    }
+
+    public boolean userHasPermissionToRemoveNodeSource() {
+        return sessionPermissions.get(PERMISSION_RM_REMOVE_NODE_SOURCE);
     }
 
     public boolean userHasPermissionToGetNodeSourceConfiguration() {
-        return sessionPermissions.get(PERMISSION_GET_NODE_SOURCE_CONFIGURATION);
+        return sessionPermissions.get(PERMISSION_RM_GET_NODE_SOURCE_CONFIGURATION);
     }
 
     public boolean userHasPermissionToUpdateDynamicParameters() {
-        return sessionPermissions.get(PERMISSION_UPDATE_DYNAMIC_PARAMETERS);
+        return sessionPermissions.get(PERMISSION_RM_UPDATE_DYNAMIC_PARAMETERS);
+    }
+
+    public boolean userHasPermissionToEditNodeSource() {
+        return sessionPermissions.get(PERMISSION_RM_EDIT_NODE_SOURCE);
     }
 
     public boolean userHasPermissionToUndeployNodeSource() {
-        return sessionPermissions.get(PERMISSION_UNDEPLOY_NODE_SOURCE);
+        return sessionPermissions.get(PERMISSION_RM_UNDEPLOY_NODE_SOURCE);
     }
 
     public boolean userHasPermissionToDeployNodeSource() {
-        return sessionPermissions.get(PERMISSION_DEPLOY_NODE_SOURCE);
+        return sessionPermissions.get(PERMISSION_RM_DEPLOY_NODE_SOURCE);
     }
 
-    public boolean userDoesNotHavePermissionToExecuteScript() {
-        return sessionPermissions.containsKey(PERMISSION_RM_EXECUTE_SCRIPT) &&
-               !sessionPermissions.get(PERMISSION_RM_EXECUTE_SCRIPT);
+    public boolean userHasPermissionToExecuteScript() {
+        return sessionPermissions.get(PERMISSION_RM_EXECUTE_SCRIPT);
     }
 
-    public boolean userDoesNotHavePermissionToGetNodeThreadDump() {
-        return sessionPermissions.containsKey(PERMISSION_RM_GET_NODE_THREAD_DUMP) &&
-               !sessionPermissions.get(PERMISSION_RM_GET_NODE_THREAD_DUMP);
+    public boolean userHasPermissionToGetNodeThreadDump() {
+        return sessionPermissions.get(PERMISSION_RM_GET_NODE_THREAD_DUMP);
     }
 
-    public boolean userDoesNotHavePermissionToGetRmThreadDump() {
-        return sessionPermissions.containsKey(PERMISSION_RM_GET_RM_THREAD_DUMP) &&
-               !sessionPermissions.get(PERMISSION_RM_GET_RM_THREAD_DUMP);
+    public boolean userHasPermissionToGetRmThreadDump() {
+        return sessionPermissions.get(PERMISSION_RM_GET_RM_THREAD_DUMP);
     }
 
-    public boolean userPermissionWasReceivedForNode(String node) {
-        return RMNodePermissions.containsKey(node);
+    public boolean userHasPermissionToGetInfrasToPoliciesMapping() {
+        return sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
+    }
+
+    public boolean userHasPermissionToGetSupportedNodeSourceInfras() {
+        return sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
+    }
+
+    public boolean userProviderPermissionWasReceivedForNode(String node) {
+        return RMNodeProviderPermissions.containsKey(node);
+    }
+
+    public boolean userAdminPermissionWasReceivedForNode(String node) {
+        return RMNodeAdminPermissions.containsKey(node);
     }
 
     public boolean sessionPermissionWasReceivedForMethod(String method) {
@@ -351,20 +385,39 @@ public class LoginModel {
     }
 
     /**
-     * Add the user permissions for the nodes to the cashed map to avoid sending unnecessary requests
-     * @param permissions the map the node and true/false if the user has or has not the permission to the node
+     * Add the user admin and provider permissions for the nodes/nodeSources to the cashed map to avoid sending unnecessary requests
+     * @param url the node/nodeSource url
+     * @param permission true/false if the user has or has not the admin or provider permission to the nodeSource
      */
-    public void addRMPermissions(Map<String, Boolean> permissions) {
-        permissions.forEach((key, value) -> instance.RMNodePermissions.put(key, value));
+    public void addRMProviderPermissions(String url, boolean permission) {
+        instance.RMNodeProviderPermissions.put(url, permission);
     }
 
     /**
-     * Check if the user has permissions to all of the given nodes
-     * @param nodeUrls the list of nodes
-     * @return true if the user has permissions to all of the given nodes
+     * Add the user admin permissions for the nodes/nodeSources to the cashed map to avoid sending unnecessary requests
+     * @param url the node/nodeSource url
+     * @param permission true/false if the user has or has not the admin permission to the nodeSource
      */
-    public boolean userHasPermissionForAllSelectedNodes(Set<String> nodeUrls) {
-        return nodeUrls.stream().allMatch(node -> RMNodePermissions.containsKey(node) && RMNodePermissions.get(node));
+    public void addRMAdminPermissions(String url, boolean permission) {
+        instance.RMNodeAdminPermissions.put(url, permission);
+    }
+
+    /**
+     * Check if the user has the admin or provider permissions to all of the given nodes
+     * @param url the url of the node source
+     * @return true if the user has admin or provider permissions to all of the given nodes
+     */
+    public boolean userHasProviderPermissionForNodeSource(String url) {
+        return RMNodeProviderPermissions.containsKey(url) && RMNodeProviderPermissions.get(url);
+    }
+
+    /**
+     * Check if the user has the admin permissions to all of the given nodes
+     * @param url the url of the node source
+     * @return true if the user has admin permissions to all of the given nodes
+     */
+    public boolean userHasAdminPermissionForNodeSource(String url) {
+        return RMNodeAdminPermissions.containsKey(url) && RMNodeAdminPermissions.get(url);
     }
 
 }

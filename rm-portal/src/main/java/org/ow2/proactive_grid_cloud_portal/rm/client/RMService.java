@@ -410,7 +410,10 @@ public interface RMService extends RemoteService {
 
     void setNodeTokens(String sessionId, String nodeurl, List<String> tokens);
 
-    Map<String, Boolean> checkNodesPermission(String sessionId, Set<String> nodeUrls)
+    String checkNodePermission(String sessionId, String nodeUrl, boolean provider)
+            throws RestServerException, ServiceException;
+
+    String checkNodeSourcePermission(String sessionId, String nodeSourceName, boolean provider)
             throws RestServerException, ServiceException;
 
     Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
