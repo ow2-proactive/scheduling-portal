@@ -78,9 +78,9 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_GET_NODE_THREAD_DUMP = "org.ow2.proactive.resourcemanager.core.RMCore.getNodeThreadDump";
 
-    private static final String PERMISSION_RM_LOCK_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.lockNodes";
+    private static final String PERMISSION_RM_LOCK_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.lockNodes";
 
-    private static final String PERMISSION_RM_UNLOCK_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.unlockNodes";
+    private static final String PERMISSION_RM_UNLOCK_NODES = "org.ow2.proactive.resourcemanager.core.RMCore.unlockNodes";
 
     private static final String PERMISSION_RM_REMOVE_NODE = "org.ow2.proactive.resourcemanager.core.RMCore.removeNode";
 
@@ -264,8 +264,8 @@ public class LoginModel {
 
     public List getRmSessionPermissionMethods() {
         List<String> methods = new ArrayList<>();
-        methods.add(PERMISSION_RM_LOCK_NODE);
-        methods.add(PERMISSION_RM_UNLOCK_NODE);
+        methods.add(PERMISSION_RM_LOCK_NODES);
+        methods.add(PERMISSION_RM_UNLOCK_NODES);
         methods.add(PERMISSION_RM_REMOVE_NODE);
         methods.add(PERMISSION_RM_REMOVE_NODE_SOURCE);
         methods.add(PERMISSION_RM_GET_NODE_SOURCE_CONFIGURATION);
@@ -317,11 +317,11 @@ public class LoginModel {
     }
 
     public boolean userHasPermissionToLockNodes() {
-        return sessionPermissions.get(PERMISSION_RM_LOCK_NODE);
+        return sessionPermissions.get(PERMISSION_RM_LOCK_NODES);
     }
 
     public boolean userHasPermissionToUnLockNodes() {
-        return sessionPermissions.get(PERMISSION_RM_UNLOCK_NODE);
+        return sessionPermissions.get(PERMISSION_RM_UNLOCK_NODES);
     }
 
     public boolean userHasPermissionToRemoveNode() {
@@ -386,8 +386,9 @@ public class LoginModel {
 
     /**
      * Add the user admin and provider permissions for the nodes/nodeSources to the cashed map to avoid sending unnecessary requests
+     *
      * @param url the node/nodeSource url
-     * @param permission true/false if the user has or has not the admin or provider permission to the nodeSource
+     * @param permission true/false if the user has or has not admin or provider permission to the nodeSource
      */
     public void addRMProviderPermissions(String url, boolean permission) {
         instance.RMNodeProviderPermissions.put(url, permission);
@@ -395,15 +396,17 @@ public class LoginModel {
 
     /**
      * Add the user admin permissions for the nodes/nodeSources to the cashed map to avoid sending unnecessary requests
+     *
      * @param url the node/nodeSource url
-     * @param permission true/false if the user has or has not the admin permission to the nodeSource
+     * @param permission true/false if the user has or has not  admin permission to the nodeSource
      */
     public void addRMAdminPermissions(String url, boolean permission) {
         instance.RMNodeAdminPermissions.put(url, permission);
     }
 
     /**
-     * Check if the user has the admin or provider permissions to all of the given nodes
+     * Check if the user has admin or provider permissions to all of the given nodes
+     *
      * @param url the url of the node source
      * @return true if the user has admin or provider permissions to all of the given nodes
      */
@@ -412,7 +415,8 @@ public class LoginModel {
     }
 
     /**
-     * Check if the user has the admin permissions to all of the given nodes
+     * Check if the user has admin permissions to all of the given nodes
+     *
      * @param url the url of the node source
      * @return true if the user has admin permissions to all of the given nodes
      */
