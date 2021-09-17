@@ -373,7 +373,10 @@ public interface RMServiceAsync {
 
     void setNodeTokens(String sessionId, String nodeurl, List<String> tokens, AsyncCallback<Void> callback);
 
-    Request checkNodesPermission(String sessionId, Set<String> nodeUrls, AsyncCallback<Map<String, Boolean>> callback);
+    void checkNodePermission(String sessionId, String nodeUrl, boolean provider, AsyncCallback<String> callback);
+
+    void checkNodeSourcePermission(String sessionId, String nodeSourceName, boolean provider,
+            AsyncCallback<String> callback);
 
     Request checkMethodsPermissions(String sessionId, List<String> methods,
             AsyncCallback<Map<String, Boolean>> asyncCallback);
