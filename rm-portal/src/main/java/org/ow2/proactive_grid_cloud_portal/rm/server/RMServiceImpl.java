@@ -482,11 +482,19 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
-    public Map<String, Boolean> checkNodesPermission(String sessionId, Set<String> urls)
+    public String checkNodePermission(String sessionId, String nodeUrl, boolean provider)
             throws RestServerException, ServiceException {
-        Map<String, Boolean> map = executeFunctionReturnStreamAsMapWithoutNewLines(restClient -> restClient.checkNodesPermission(sessionId,
-                                                                                                                                 urls));
-        return map;
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.checkNodePermission(sessionId,
+                                                                                                               nodeUrl,
+                                                                                                               provider));
+    }
+
+    @Override
+    public String checkNodeSourcePermission(String sessionId, String nodeSourceName, boolean provider)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.checkNodeSourcePermission(sessionId,
+                                                                                                                     nodeSourceName,
+                                                                                                                     provider));
     }
 
     private Map<String, Boolean> executeFunctionReturnStreamAsMapWithoutNewLines(

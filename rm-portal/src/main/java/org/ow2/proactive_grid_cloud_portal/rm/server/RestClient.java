@@ -265,6 +265,13 @@ public interface RestClient {
     @Path("/rm/nodes/permission")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    InputStream checkNodesPermission(@HeaderParam("sessionid") String sessionId, Set<String> nodeUrls);
+    InputStream checkNodePermission(@HeaderParam("sessionid") String sessionId, String nodeUrl,
+            @QueryParam("provider") boolean provider);
+
+    @POST
+    @Path("/rm/nodeSource/permission")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkNodeSourcePermission(@HeaderParam("sessionid") String sessionId,
+            @HeaderParam("nodeSourceName") String nodeSourceName, @QueryParam("provider") boolean provider);
 
 }

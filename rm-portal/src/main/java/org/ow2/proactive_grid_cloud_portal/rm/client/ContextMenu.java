@@ -28,7 +28,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -218,17 +217,26 @@ public class ContextMenu extends Menu {
             items.add(editTokens);
         }
 
-        controller.setStatusForLockMenuItems(menu);
+        controller.checkPermissionOfContextMenuItems(menu);
         menu.setItems(items.toArray(new MenuItem[0]));
 
         return menu;
     }
 
-    public void setLockMenuItemsState(ContextMenu menu, Set<String> nodeUrls) {
+    public void disableProviderItems(ContextMenu menu, String url) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (!loginModel.userHasPermissionForAllSelectedNodes(nodeUrls)) {
+        if (!loginModel.userHasProviderPermissionForNodeSource(url)) {
             disableLockMenuItem(menu);
             disableUnlockMenuItem(menu);
+            disableRemoveMenuItem(menu);
+        }
+    }
+
+    public void disableAdminItems(ContextMenu menu, String url) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (!loginModel.userHasAdminPermissionForNodeSource(url)) {
+            disableDeployItem(menu);
+            disableUndeployItem(menu);
             disableRemoveMenuItem(menu);
         }
     }
@@ -276,6 +284,10 @@ public class ContextMenu extends Menu {
     public void disableExportInfrastructureItem(ContextMenu menu) {
         menu.exportInfrastructureItem.setEnabled(false);
         menu.redraw();
+    }
+
+    public NodeSource getNodesource() {
+        return nodesource;
     }
 
     private void init(Object related) {
