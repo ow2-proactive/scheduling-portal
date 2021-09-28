@@ -183,7 +183,7 @@ public abstract class Config {
     private static final String ABOUT = "about";
 
     private static final String d_ABOUT = "<h3>ProActive @application_name@ Portal</h3>" + "Version: @version@" +
-                                          "<br><br>" + "Copyright (C) 1997-" + getCurrentYear() +
+                                          "<br><br>" + "Copyright (C) 2007-" + getCurrentYear() +
                                           ", Activeeon, All rights reserved<br><br>" +
                                           "Visit <a target='_blank' href='http://proactive.inria.fr/'>http://proactive.inria.fr/</a> " +
                                           "and <a target='_blank' href='http://www.activeeon.com/'>http://www.activeeon.com/</a><br>" +
