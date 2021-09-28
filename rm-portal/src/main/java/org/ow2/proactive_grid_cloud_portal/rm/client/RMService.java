@@ -32,6 +32,8 @@ import java.util.Set;
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 
+import com.google.gwt.http.client.Request;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -77,13 +79,35 @@ public interface RMService extends RemoteService {
     String getState(String sessionId) throws RestServerException, ServiceException;
 
     /**
+     * List currently available loggers and their associated levels
+     *
+     * @param sessionId current session id
+     * @return a map of loggers and associated levels
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String getCurrentLoggers(String sessionId) throws ServiceException, RestServerException;
+
+    /**
+     * Change multiple loggers level.
+     *
+     * @param sessionId current session id
+     * @param loggersConfiguration map of (logger_name, level)
+     * @return true if any logger level has been changed, false otherwise
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String setLogLevelMultiple(String sessionId, Map<String, String> loggersConfiguration)
+            throws ServiceException, RestServerException;
+
+    /**
      * Detailed info about the nodes currently held by the RM
      * presented as two arrays of nodes and nodesources referencing each others
      * @param sessionId current session
      * @param clientCounter latest counter client is aware of
      * @return a JSON object containing two arrays named nodesList and nodeSources, that contain all info about current
      * 		nodes and nodesources in the RM
-     * @throws RestServerException 
+     * @throws RestServerException
      * @throws ServiceException
      */
     String getMonitoring(String sessionId, Long clientCounter) throws RestServerException, ServiceException;
@@ -385,5 +409,14 @@ public interface RMService extends RemoteService {
     String getNodeThreadDump(String sessionId, String nodeUrl) throws ServiceException, RestServerException;
 
     void setNodeTokens(String sessionId, String nodeurl, List<String> tokens);
+
+    String checkNodePermission(String sessionId, String nodeUrl, boolean provider)
+            throws RestServerException, ServiceException;
+
+    String checkNodeSourcePermission(String sessionId, String nodeSourceName, boolean provider)
+            throws RestServerException, ServiceException;
+
+    Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
+            throws RestServerException, ServiceException;
 
 }

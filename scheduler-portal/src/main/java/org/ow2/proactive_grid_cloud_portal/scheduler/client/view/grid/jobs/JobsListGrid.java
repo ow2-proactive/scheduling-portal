@@ -25,22 +25,14 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.COLUMNS_TO_ALIGN;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ID_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.ISSUES_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.PROGRESS_ATTR;
-import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.STATE_ATTR;
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerImages;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
@@ -87,6 +79,44 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      * The controller for the jobs grid.
      */
     protected JobsController controller;
+
+    private boolean selPause; // ALL selected jobs are paused
+
+    private boolean selRunning; // ALL selected jobs are running/stalled/pending
+
+    private boolean selFinished; // ALL selected jobs are finished
+
+    private boolean selPauseOrRunning; // ALL selected jobs are running/pending/paused/stalled
+
+    private boolean selInError;
+
+    private boolean selSingleSelected;
+
+    private Menu menu;
+
+    private MenuItem actionsItem;
+
+    private MenuItem killItem;
+
+    private MenuItem pauseItem;
+
+    private MenuItem resumeItem;
+
+    private MenuItem resumeAndRestartItemTask;
+
+    private MenuItem priorityItem;
+
+    private MenuItem exportXmlItem;
+
+    private MenuItem removeItem;
+
+    private MenuItem killAndResubmitItem;
+
+    private MenuItem resubmitItem;
+
+    private MenuItem restartInErrorTaskItem;
+
+    private MenuItem openItem;
 
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
@@ -371,13 +401,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     protected void buildCellContextualMenu(Menu menu) {
-        boolean selPause = true; // ALL selected jobs are paused
-        boolean selRunning = true; // ALL selected jobs are running/stalled/pending
-        boolean selFinished = true; // ALL selected jobs are finished
-        boolean selPauseOrRunning = true; // ALL selected jobs are running/pending/paused/stalled
-        boolean selInError = false;
-        boolean selSingleSelected = this.getSelectedRecords().length == 1;
 
+        selPause = true;
+        selRunning = true;
+        selFinished = true;
+        selPauseOrRunning = true;
+        selInError = false;
+        selSingleSelected = this.getSelectedRecords().length == 1;
+        this.menu = menu;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
             JobStatus status = getJobStatus(rec);
@@ -412,34 +443,29 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             ids.add(rec.getAttribute(ID_ATTR.getName()));
         }
 
-        MenuItem pauseItem = new MenuItem("Pause",
-                                          SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
+        pauseItem = new MenuItem("Pause", SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
         pauseItem.addClickHandler(event -> controller.pauseJobs(ids));
         pauseItem.setEnabled(selRunning);
 
-        MenuItem restartInErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
-                                                       SchedulerImages.instance.scheduler_resume_16()
-                                                                               .getSafeUri()
-                                                                               .asString());
+        restartInErrorTaskItem = new MenuItem("Restart All In-Error Tasks",
+                                              SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         restartInErrorTaskItem.addClickHandler(event -> controller.restartAllInErrorTasks(ids));
         restartInErrorTaskItem.setEnabled(selInError);
 
-        MenuItem resumeItem = new MenuItem("Resume All Paused Tasks",
-                                           SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
+        resumeItem = new MenuItem("Resume All Paused Tasks",
+                                  SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         resumeItem.addClickHandler(event -> controller.resumeJobs(ids));
         resumeItem.setEnabled(selPause);
 
-        MenuItem resumeAndRestartItemTask = new MenuItem("Resume All Paused Tasks  & Restart All In-Error Tasks",
-                                                         SchedulerImages.instance.scheduler_resume_16()
-                                                                                 .getSafeUri()
-                                                                                 .asString());
+        resumeAndRestartItemTask = new MenuItem("Resume All Paused Tasks  & Restart All In-Error Tasks",
+                                                SchedulerImages.instance.scheduler_resume_16().getSafeUri().asString());
         resumeAndRestartItemTask.addClickHandler(event -> {
             controller.resumeJobs(ids);
             controller.restartAllInErrorTasks(ids);
         });
         resumeAndRestartItemTask.setEnabled(selInError || selPause);
 
-        MenuItem priorityItem = new MenuItem("Priority");
+        priorityItem = new MenuItem("Priority");
         Menu priorityMenu = new Menu();
         for (final JobPriority p : JobPriority.values()) {
             MenuItem item = new MenuItem(p.toString());
@@ -452,20 +478,17 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         priorityItem.setSubmenu(priorityMenu);
 
-        MenuItem killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
+        killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(event -> controller.killJobs(ids));
         killItem.setEnabled(selPauseOrRunning);
 
-        MenuItem killAndResubmitItem = new MenuItem("Kill & Re-Submit",
-                                                    SchedulerImages.instance.job_kill_resubmit_22()
-                                                                            .getSafeUri()
-                                                                            .asString());
+        killAndResubmitItem = new MenuItem("Kill & Re-Submit",
+                                           SchedulerImages.instance.job_kill_resubmit_22().getSafeUri().asString());
         // Allow killing & re-submitting a job only & only if a single job is selected.
         killAndResubmitItem.addClickHandler(event -> controller.killAndResubmit(ids.get(0)));
         killAndResubmitItem.setEnabled(selSingleSelected && selPauseOrRunning);
 
-        MenuItem resubmitItem = new MenuItem("Re-Submit",
-                                             SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
+        resubmitItem = new MenuItem("Re-Submit", SchedulerImages.instance.job_resubmit_22().getSafeUri().asString());
         if (ids.size() > 1) {
             // Allow re-submitting many jobs without showing the submit window, when more than one job is selected
             resubmitItem.addClickHandler(event -> controller.resubmitAllJobs(ids));
@@ -474,35 +497,87 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
         }
 
-        MenuItem openItem = new MenuItem("Open in Studio", SchedulerImages.instance.pa_16().getSafeUri().asString());
+        openItem = new MenuItem("Open in Studio", SchedulerImages.instance.pa_16().getSafeUri().asString());
         openItem.addClickHandler(event -> controller.openStudio(ids.get(0)));
         openItem.setEnabled(selSingleSelected);
 
-        MenuItem exportXmlItem = new MenuItem("Export XML",
-                                              SchedulerImages.instance.job_export_32().getSafeUri().asString());
+        exportXmlItem = new MenuItem("Export XML", SchedulerImages.instance.job_export_32().getSafeUri().asString());
         // Allow exporting job's XML only & only if a single job is selected.
         exportXmlItem.addClickHandler(event -> controller.exportJobXML(ids.get(0)));
         exportXmlItem.setEnabled(selSingleSelected);
 
-        MenuItem removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
+        removeItem = new MenuItem("Remove", SchedulerImages.instance.job_kill_16().getSafeUri().asString());
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        menu.setItems(pauseItem,
-                      restartInErrorTaskItem,
-                      resumeItem,
-                      resumeAndRestartItemTask,
-                      priorityItem,
-                      killItem,
-                      killAndResubmitItem,
-                      resubmitItem,
-                      openItem,
-                      exportXmlItem,
-                      removeItem);
+        actionsItem = new MenuItem("Actions");
+        actionsItem.setEnabled(false);
+
+        this.menu.setItems(actionsItem,
+                           pauseItem,
+                           restartInErrorTaskItem,
+                           resumeItem,
+                           resumeAndRestartItemTask,
+                           priorityItem,
+                           killItem,
+                           killAndResubmitItem,
+                           resubmitItem,
+                           openItem,
+                           exportXmlItem,
+                           removeItem);
+
+        controller.getJobSignals(ids.get(0), this);
+        controller.checkJobsPermissionMethods(ids, this);
+
+    }
+
+    public void addActionsMenu(String jobId, Set<String> signals) {
+        Menu signalsMenu = new Menu();
+        for (String signal : signals) {
+            MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
+            item.addClickHandler(event -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
+            signalsMenu.addItem(item);
+        }
+        actionsItem.setSubmenu(signalsMenu);
+        actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
+        menu.redraw();
     }
 
     private JobStatus getJobStatus(ListGridRecord rec) {
         String jobStatusName = rec.getAttribute(STATE_ATTR.getName());
         return JobStatus.from(jobStatusName);
+    }
+
+    public void setMenuItemsStatus(List<String> jobIds) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userDoesNotHavePermissionToPauseTob(jobIds)) {
+            pauseItem.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToRestartAllInErrorTask(jobIds)) {
+            restartInErrorTaskItem.setEnabled(false);
+            resumeAndRestartItemTask.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToResumeJob(jobIds)) {
+            resumeItem.setEnabled(false);
+            resumeAndRestartItemTask.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToChangeJobPriority(jobIds)) {
+            priorityItem.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToKillJob(jobIds)) {
+            killItem.setEnabled(false);
+            killAndResubmitItem.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
+            resubmitItem.setEnabled(false);
+            exportXmlItem.setEnabled(false);
+            openItem.setEnabled(false);
+            killAndResubmitItem.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToRemoveJob(jobIds)) {
+            removeItem.setEnabled(false);
+            menu.redraw();
+        }
+        menu.redraw();
     }
 }

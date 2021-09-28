@@ -45,6 +45,7 @@ import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.validator.RegExpValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -56,6 +57,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
 
 
 public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPartyCredentialsListener {
+
+    public static final String PATTERN_NOT_BLANK = "(.|\\s)*\\S(.|\\s)*";
 
     private Window window;
 
@@ -101,16 +104,21 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
         addEntryForm.setAutoHeight();
         addEntryForm.setWidth(350);
 
+        RegExpValidator blankValidator = new RegExpValidator();
+        blankValidator.setExpression(PATTERN_NOT_BLANK);
+        blankValidator.setErrorMessage("Field cannot be blank");
+
         TextItem key = new TextItem("key", "Key");
         key.setRequired(true);
         key.setWidth(142);
         key.setHeight(26);
+        key.setValidators(blankValidator);
+        key.setValidateOnChange(true);
+
         final TextItem shortValue = new PasswordItem("shortValue", "Credential");
-        shortValue.setRequired(true);
         shortValue.setWidth(208);
         shortValue.setHeight(26);
         final TextAreaItem longValue = new TextAreaItem("longValue", "Credential");
-        longValue.setRequired(true);
         longValue.setWidth(208);
         longValue.setHeight(26);
         longValue.hide();
@@ -158,7 +166,7 @@ public class ThirdPartyCredentialsWindow implements SchedulerListeners.ThirdPart
                 } else {
                     value = addEntryForm.getValueAsString("shortValue");
                 }
-                controller.putThirdPartyCredential(key, value);
+                controller.putThirdPartyCredential(key.trim(), value == null ? "" : value);
                 addEntryForm.clearValues();
             }
         });

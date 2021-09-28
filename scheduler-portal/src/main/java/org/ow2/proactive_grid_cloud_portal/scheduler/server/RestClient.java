@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -122,7 +123,8 @@ public interface RestClient {
     @DELETE
     @Path("jobs")
     @Produces(MediaType.APPLICATION_JSON)
-    InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId);
+    InputStream removeJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("jobsid") List<String> jobsId,
+            @QueryParam("olderThan") long olderThan);
 
     /**
      * Pauses a job.
@@ -784,5 +786,18 @@ public interface RestClient {
     @Path("configuration/portal")
     @Produces(MediaType.APPLICATION_JSON)
     Map<Object, Object> getSchedulerPortalDisplayProperties(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @Path("job/{jobid}/permission/{method}")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkJobPermissionMethod(@HeaderParam("sessionid") String sessionId, @PathParam("jobid") String jobId,
+            @PathParam("method") String method);
+
+    @POST
+    @Path("job/{jobid}/signals")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    Set<String> addJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
+            @PathParam("jobid") String jobId);
 
 }

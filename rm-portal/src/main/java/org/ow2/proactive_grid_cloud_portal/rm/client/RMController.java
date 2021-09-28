@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Model.StatHistory;
@@ -52,6 +53,8 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -60,6 +63,8 @@ import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.grid.ListGrid;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -275,6 +280,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         // than the one in the domain cookie, then we exit
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
+
+        checkRmMethodsPermissions();
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ")");
@@ -844,6 +851,79 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         return result;
     }
 
+    public void fetchLoggersSettings(ListGrid loggersGrid) {
+        this.rm.getCurrentLoggers(LoginModel.getInstance().getSessionId(), new AsyncCallback<String>() {
+            public void onSuccess(String loggersJson) {
+                JSONObject loggersObject = JSONParser.parseStrict(loggersJson).isObject();
+                if (loggersObject == null) {
+                    LogModel.getInstance()
+                            .logCriticalMessage("Failed to parse the JSON loggers object: " + loggersObject);
+                } else {
+                    Map<String, String> loggersMap = new HashMap<>();
+                    loggersObject.keySet()
+                                 .forEach(key -> loggersMap.put(key, loggersObject.get(key).isString().stringValue()));
+                    model.setLoggersConfiguration(loggersMap);
+                    updateLoggersGrid(loggersGrid);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage(
+                                                           "Failed to get the map of (logger_name, level) from the server: " +
+                                                           caught.getMessage());
+                rmPage.disableLoggersMenuItem();
+            }
+        });
+    }
+
+    public void updateLoggersGrid(ListGrid loggersGrid) {
+        int i = 0;
+        Map<String, String> parsedLoggers = model.getLoggersConfiguration();
+        ListGridRecord[] loggersRecords = new ListGridRecord[parsedLoggers.size()];
+
+        for (Map.Entry mapentry : parsedLoggers.entrySet()) {
+            ListGridRecord newLoggerRecord = new ListGridRecord();
+            newLoggerRecord.setAttribute("logger", mapentry.getKey().toString());
+            newLoggerRecord.setAttribute("level", mapentry.getValue().toString());
+
+            loggersRecords[i] = newLoggerRecord;
+            i++;
+        }
+        loggersGrid.setData(loggersRecords);
+
+    }
+
+    public void setLoggersSettings(ListGrid loggersGrid) {
+
+        RecordList loggersData = new RecordList();
+
+        for (int i = 0; i < loggersGrid.getTotalRows(); i++) {
+            loggersData.add(loggersGrid.getEditedRecord(i));
+        }
+        Record[] records = loggersData.duplicate();
+
+        Map<String, String> loggersMap = new HashMap<>();
+
+        for (Record record : records) {
+            loggersMap.put(record.getAttribute("logger"), record.getAttribute("level"));
+        }
+
+        this.rm.setLogLevelMultiple(LoginModel.getInstance().getSessionId(), loggersMap, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Error updating loggers on the server");
+                JSONUtils.getJsonErrorMessage(caught);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                loggersGrid.redraw();
+                fetchLoggersSettings(loggersGrid);
+                LogModel.getInstance().logMessage("Successfully updating loggers configuration: " + loggersMap);
+            }
+        });
+    }
+
     private String getJsonStringNullable(JSONObject jsonObject, String attributeName) {
         return getJsonStringNullable(jsonObject, attributeName, "");
     }
@@ -979,6 +1059,196 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     public void lockNodes() {
         lockNodes(getSelectedNodesUrls());
+    }
+
+    public void checkPermissionOfContextMenuItems(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        checkStatusOfRemoveItem(contextMenu);
+        if (!loginModel.userHasPermissionToLockNodes()) {
+            contextMenu.disableLockMenuItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToUnLockNodes()) {
+            contextMenu.disableUnlockMenuItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToUndeployNodeSource()) {
+            contextMenu.disableUndeployItem(contextMenu);
+        }
+        if (!loginModel.userHasPermissionToDeployNodeSource()) {
+            contextMenu.disableDeployItem(contextMenu);
+        }
+        checkStatusOfEditButton(contextMenu);
+        if (!loginModel.userHasPermissionToGetNodeSourceConfiguration()) {
+            contextMenu.disableExportInfrastructureItem(contextMenu);
+            contextMenu.disableExportPolicyItem(contextMenu);
+            contextMenu.disableExportNodeSourceItem(contextMenu);
+        }
+        if (loginModel.userHasPermissionToLockNodes() || loginModel.userHasPermissionToUnLockNodes() ||
+            loginModel.userHasPermissionToRemoveNode()) {
+            checkNodePermission(contextMenu, true);
+        }
+        if ((loginModel.userHasPermissionToUndeployNodeSource() || loginModel.userHasPermissionToDeployNodeSource()) &&
+            model.getSelectedNodeSource() != null) {
+            checkNodePermission(contextMenu, false);
+        }
+    }
+
+    private void checkStatusOfRemoveItem(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (contextMenu.getNodesource() == null) {
+            if (!loginModel.userHasPermissionToRemoveNode()) {
+                contextMenu.disableRemoveMenuItem(contextMenu);
+            }
+        } else {
+            if (!loginModel.userHasPermissionToRemoveNodeSource()) {
+                contextMenu.disableRemoveMenuItem(contextMenu);
+            }
+        }
+    }
+
+    private void checkStatusOfEditButton(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        NodeSource selectedNodeSource = contextMenu.getNodesource();
+        if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
+            if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
+                contextMenu.disableEditItem(contextMenu);
+            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+                contextMenu.disableEditItem(contextMenu);
+            }
+        } else if (selectedNodeSource != null &&
+                   selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
+            if (!loginModel.userHasPermissionToEditNodeSource()) {
+                contextMenu.disableEditItem(contextMenu);
+            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+                contextMenu.disableEditItem(contextMenu);
+            }
+        }
+    }
+
+    /**
+     * Checks if the logged user has admin permissions to the selected nodes
+     * If map from LoginModel already contains the permission of the logged user for the selected node/nodeSource, the request will not be send
+     *
+     * @param contextMenu the current contextMenu
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+    */
+    private void checkNodePermission(ContextMenu contextMenu, boolean provider) {
+        LoginModel loginModel = LoginModel.getInstance();
+        String url = null;
+        if (model.getSelectedNodeSource() != null) {
+            url = model.getSelectedNodeSource().getSourceName();
+        } else if (model.getSelectedNode() != null) {
+            url = model.getSelectedNode().getNodeUrl();
+        }
+
+        if (provider && loginModel.userProviderPermissionWasReceivedForNode(url)) {
+            contextMenu.disableProviderItems(contextMenu, url);
+            return;
+        } else if (!provider && loginModel.userAdminPermissionWasReceivedForNode(url)) {
+            contextMenu.disableAdminItems(contextMenu, url);
+            return;
+        } else {
+            if (model.getSelectedNodeSource() != null) {
+                sendNodeSourcePermissionRequest(contextMenu, url, provider);
+            } else if (model.getSelectedNode() != null) {
+                sendNodePermissionRequest(contextMenu, url, provider);
+            }
+
+        }
+    }
+
+    /**
+     * Send request in order to get the node permission for the current user
+     * After sending the request, the cashed map from LoginModel will add the newly permissions per node received from the backend to avoid sending unnecessary requests
+     *
+     * @param contextMenu the current contextMenu
+     * @param nodeUrl the node url
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+     */
+    private void sendNodePermissionRequest(ContextMenu contextMenu, String nodeUrl, boolean provider) {
+        LoginModel loginModel = LoginModel.getInstance();
+        rm.checkNodePermission(loginModel.getSessionId(), nodeUrl, provider, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeUrl +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                loginModel.addRMProviderPermissions(nodeUrl, Boolean.parseBoolean(result));
+                contextMenu.disableProviderItems(contextMenu, nodeUrl);
+            }
+        });
+    }
+
+    /**
+     * Send request in order to get the node source permission for the current user
+     * After sending the request, the cashed map from LoginModel will add the newly permissions per node source received from the backend to avoid sending unnecessary requests
+     *
+     * @param contextMenu the current contextMenu
+     * @param nodeSourceName the node source name
+     * @param provider if true, the request will check if the user has admin and provider permission, if false, it will check just for admin permission
+     */
+    private void sendNodeSourcePermissionRequest(ContextMenu contextMenu, String nodeSourceName, boolean provider) {
+        LoginModel loginModel = LoginModel.getInstance();
+        rm.checkNodeSourcePermission(loginModel.getSessionId(), nodeSourceName, provider, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + nodeSourceName +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (provider) {
+                    loginModel.addRMProviderPermissions(nodeSourceName, Boolean.parseBoolean(result));
+                    contextMenu.disableProviderItems(contextMenu, nodeSourceName);
+                } else {
+                    loginModel.addRMAdminPermissions(nodeSourceName, Boolean.parseBoolean(result));
+                    contextMenu.disableAdminItems(contextMenu, nodeSourceName);
+                }
+            }
+        });
+    }
+
+    /**
+     * Check if the logged user has permissions to the methods from loginModel.getRmSessionPermissionMethods()
+     * If the request has already been send for the logged user, the permissions will be loaded from the cashed list
+     */
+    public void checkRmMethodsPermissions() {
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> methods = loginModel.getRmSessionPermissionMethods();
+        List<String> notCashedMethods = methods.stream()
+                                               .filter(method -> !loginModel.sessionPermissionWasReceivedForMethod(method))
+                                               .collect(Collectors.toList());
+        if (notCashedMethods.isEmpty()) {
+            setTabsStatus();
+            return;
+        }
+
+        rm.checkMethodsPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");
+            }
+
+            @Override
+            public void onSuccess(Map<String, Boolean> result) {
+                loginModel.addSessionPermissions(result);
+                setTabsStatus();
+            }
+        });
+    }
+
+    private void setTabsStatus() {
+        LoginModel loginModel = LoginModel.getInstance();
+        rmPage.setThreadDumpTabPageDisabled(!loginModel.userHasPermissionToGetNodeThreadDump() ||
+                                            !loginModel.userHasPermissionToGetRmThreadDump());
+        rmPage.setScriptConsoleTabPageDisabled(!loginModel.userHasPermissionToExecuteScript());
+        rmPage.setNSButtonStatus(!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
+                                 !loginModel.userHasPermissionToGetSupportedNodeSourceInfras());
     }
 
     private Set<String> getSelectedNodesUrls() {
@@ -1297,6 +1567,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     public RMServiceAsync getRMService() {
         return this.rm;
+    }
+
+    public RMPage getRmPage() {
+        return this.rmPage;
     }
 
     /**

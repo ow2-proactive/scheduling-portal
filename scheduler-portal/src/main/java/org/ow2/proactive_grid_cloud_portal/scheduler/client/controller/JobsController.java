@@ -27,11 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import static org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils.parseJSON;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,26 +36,26 @@ import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.SubmitWindow;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 
 
@@ -86,6 +82,10 @@ public class JobsController {
      */
     protected ExecutionsController parentController;
 
+    public ExecutionsController getParentController() {
+        return parentController;
+    }
+
     /**
      * The view controlled by this controller.
      */
@@ -96,6 +96,9 @@ public class JobsController {
     private static final String STR_JOB = " jobs";
 
     private static final String HEADER_PA_ERROR = "proactive_error";
+
+    //The job signal that contains the ready_ prefix specifies that the job is ready to receive the given signal
+    public static final String PREFIX_SIGNAL_READY = "ready_";
 
     /**
      * Builds a jobs controller from a parent scheduler controller.
@@ -158,6 +161,8 @@ public class JobsController {
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
         }
+        parentController.getParentController().getTasksController().updateTasks(false);
+        checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
     }
 
     /**
@@ -268,6 +273,48 @@ public class JobsController {
     }
 
     /**
+     * Gets the signals of a job
+     *
+     * @param jobId id of the job
+     * @param jobsListGrid
+     */
+    public void getJobSignals(String jobId, JobsListGrid jobsListGrid) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
+            public void onSuccess(String result) {
+                Set<String> signals = parseSignals(result);
+                jobsListGrid.addActionsMenu(jobId, signals);
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get job details : " + message);
+            }
+        });
+    }
+
+    /**
+     * Sends signal to a job
+     *
+     * @param signal the signal that will be sent to the job
+     * @param jobId id of the job
+     */
+    public void addJobSignal(String signal, String jobId) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.addJobSignal(LoginModel.getInstance().getSessionId(), signal, jobId, new AsyncCallback<Void>() {
+            public void onSuccess(Void result) {
+                LogModel.getInstance().logMessage("Successfully add signal " + signal + " job " + jobId +
+                                                  " has the following signals " + result);
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to add job signals : " + message);
+            }
+        });
+    }
+
+    /**
      * Kills a list of jobs
      *
      * @param jobId id of the job
@@ -287,6 +334,7 @@ public class JobsController {
             public void onFailure(Throwable caught) {
                 String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to kill jobs : " + message);
+                SC.warn("Failed to kill jobs: " + message);
             }
         });
     }
@@ -569,7 +617,7 @@ public class JobsController {
                                                               .logMessage("<span style='color:gray;'>Fetched " + jn +
                                                                           " jobs in " + t + " ms</span>");
                                                   }
-                                              } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                                              } catch (JSONException e) {
                                                   LogModel.getInstance().logCriticalMessage(e.getMessage());
                                                   LOGGER.log(Level.SEVERE, e.getMessage());
                                               }
@@ -585,45 +633,69 @@ public class JobsController {
             metadataRequest.cancel();
             metadataRequest = null;
         }
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = loginModel.getSessionId();
         Integer jobId = model.getSelectedJob().getId();
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        metadataRequest = scheduler.getPreciousTaskName(LoginModel.getInstance().getSessionId(),
-                                                        jobId.toString(),
-                                                        new AsyncCallback<String>() {
+        metadataRequest = scheduler.getPreciousTaskName(sessionId, jobId.toString(), new AsyncCallback<String>() {
 
-                                                            @Override
-                                                            public void onFailure(Throwable caught) {
-                                                                String msg = JSONUtils.getJsonErrorMessage(caught);
-                                                                if (msg.contains("HTTP 403 Forbidden")) {
-                                                                    getModel().preciousTaskNamesNotAuthorized();
-                                                                    LogModel.getInstance()
-                                                                            .logImportantMessage(JobResultView.NOT_AUTHORIZED);
-                                                                } else {
-                                                                    LogModel.getInstance()
-                                                                            .logImportantMessage("Error while fetching metadata of precious results:\n" +
-                                                                                                 JSONUtils.getJsonErrorMessage(caught));
-                                                                }
-                                                            }
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                if (msg.contains("HTTP 403 Forbidden")) {
+                    getModel().preciousTaskNamesNotAuthorized();
+                    LogModel.getInstance().logImportantMessage(JobResultView.NOT_AUTHORIZED);
+                } else {
+                    LogModel.getInstance().logImportantMessage("Error while fetching metadata of precious results:\n" +
+                                                               JSONUtils.getJsonErrorMessage(caught));
+                }
+            }
 
-                                                            @Override
-                                                            public void onSuccess(String jsonString) {
-                                                                try {
-                                                                    JSONArray array = parseJSON(jsonString).isArray();
-                                                                    List<String> preciousTaskNames = new ArrayList<>(array.size());
-                                                                    for (int i = 0; i < array.size(); ++i) {
-                                                                        String taskName = array.get(i)
-                                                                                               .isString()
-                                                                                               .stringValue();
-                                                                        preciousTaskNames.add(taskName);
-                                                                    }
+            @Override
+            public void onSuccess(String jsonString) {
+                try {
+                    JSONArray array = parseJSON(jsonString).isArray();
+                    List<String> preciousTaskNames = new ArrayList<>(array.size());
+                    for (int i = 0; i < array.size(); ++i) {
+                        String taskName = array.get(i).isString().stringValue();
+                        preciousTaskNames.add(taskName);
+                    }
 
-                                                                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
-                                                                } catch (JSONException e) {
-                                                                    LogModel.getInstance()
-                                                                            .logCriticalMessage(e.getMessage());
-                                                                }
-                                                            }
-                                                        });
+                    getModel().setPreciousTaskNamesLoaded(preciousTaskNames);
+                } catch (JSONException e) {
+                    LogModel.getInstance().logCriticalMessage(e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
+            KeyValueGrid genericInformationGrid) {
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.checkJobPermissionMethod(LoginModel.getInstance().getSessionId(),
+                                           job.getId().toString(),
+                                           "getJobState",
+                                           new AsyncCallback<String>() {
+
+                                               @Override
+                                               public void onFailure(Throwable caught) {
+                                                   String msg = JSONUtils.getJsonErrorMessage(caught);
+                                                   LogModel.getInstance().logImportantMessage(
+                                                                                              "Failed to access REST server endpoint : " +
+                                                                                              msg);
+                                               }
+
+                                               @Override
+                                               public void onSuccess(String result) {
+                                                   if (result.contains("false")) {
+                                                       label.setContents("You are not authorized to see this job's variables");
+                                                       label.show();
+                                                       variablesGrid.hide();
+                                                       genericInformationGrid.hide();
+                                                   }
+                                               }
+                                           });
     }
 
     /**
@@ -651,6 +723,87 @@ public class JobsController {
                 parentController.getParentController().setExecutionsUpdated(true);
             }
         });
+    }
+
+    private Set<String> parseSignals(String result) {
+        Set<String> signals = new HashSet<>();
+        JSONValue jsonValue = null;
+        try {
+            jsonValue = SchedulerJSONUtils.parseJSON(result);
+        } catch (JSONException e) {
+            String message = JSONUtils.getJsonErrorMessage(e);
+            LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
+        }
+        JSONObject jsonJobInfo = jsonValue.isObject();
+        signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
+        signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
+        return signals;
+    }
+
+    /**
+     * Checks the permission of the current user for the given jobIds
+     * @param jobIds the selected job ids
+     * @param jobsListGrid current jobs listGrid
+     */
+    public void checkJobsPermissionMethods(List<String> jobIds, JobsListGrid jobsListGrid) {
+
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = loginModel.getSessionId();
+        List<String> methods = loginModel.getJobPermissionMethods();
+
+        if (loginModel.permissionCashedForJobIds(jobIds)) {
+            setTabsStatus(jobIds, jobsListGrid);
+            return;
+        }
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.checkJobsPermissionMethods(sessionId,
+                                             jobIds,
+                                             methods,
+                                             new AsyncCallback<Map<String, Map<String, Boolean>>>() {
+                                                 public void onSuccess(Map<String, Map<String, Boolean>> result) {
+                                                     loginModel.addSchedulerPermissions(result);
+                                                     setTabsStatus(jobIds, jobsListGrid);
+                                                 }
+
+                                                 public void onFailure(Throwable caught) {
+                                                     String message = JSONUtils.getJsonErrorMessage(caught);
+                                                     LogModel.getInstance().logImportantMessage(
+                                                                                                "Failed to check jobs permission methods : " +
+                                                                                                message);
+                                                 }
+                                             });
+    }
+
+    private void setTabsStatus(List<String> jobIds, JobsListGrid jobsListGrid) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userDoesNotHavePermissionToGetJobServerLogs(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableServerLogsTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableServerLogsTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobState(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableOutputTab(true);
+            parentController.getParentController().getSchedulerPage().disableVarInfoTab(true);
+            parentController.getParentController().getSchedulerPage().disableTasksTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableOutputTab(false);
+            parentController.getParentController().getSchedulerPage().disableVarInfoTab(false);
+            parentController.getParentController().getSchedulerPage().disableTasksTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableVisualizationTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableVisualizationTab(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobResult(jobIds)) {
+            parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
+        } else {
+            parentController.getParentController().getSchedulerPage().disableJobResultsTab(false);
+        }
+        if (jobsListGrid != null) {
+            jobsListGrid.setMenuItemsStatus(jobIds);
+        }
     }
 
 }

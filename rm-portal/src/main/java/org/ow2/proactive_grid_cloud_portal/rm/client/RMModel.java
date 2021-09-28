@@ -165,6 +165,11 @@ public abstract class RMModel implements Model {
      */
     public abstract int getNumUndeployedNodeSources();
 
+    /**
+     * @return current loggers and levels
+     */
+    public abstract Map<String, String> getLoggersConfiguration();
+
     public abstract int getNeededNodes();
 
     public abstract void setNeededNodes(int neededNodes);

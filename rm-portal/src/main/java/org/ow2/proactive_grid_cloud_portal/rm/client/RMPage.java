@@ -25,13 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
-import org.ow2.proactive_grid_cloud_portal.common.client.LogWindow;
-import org.ow2.proactive_grid_cloud_portal.common.client.ToolButtonsRender;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
@@ -54,11 +49,7 @@ import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
-import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.LayoutSpacer;
-import com.smartgwt.client.widgets.layout.SectionStack;
-import com.smartgwt.client.widgets.layout.SectionStackSection;
-import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.layout.*;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemSeparator;
@@ -93,6 +84,9 @@ public class RMPage implements LogListener {
 
     /** client settings */
     private SettingsWindow settingsWindow = null;
+
+    /** logger settings */
+    private LoggersWindow loggersWindow = null;
 
     /** create and download credentials files */
     private CredentialsWindow credentialsWindow = null;
@@ -139,6 +133,16 @@ public class RMPage implements LogListener {
 
     private ToolButtonsRender toolButtonsRender = new ToolButtonsRender();
 
+    private ToolStripButton nsButton;
+
+    private Tab monitoringTab;
+
+    private Tab scriptConsoleTab;
+
+    private Tab threadDumpTab;
+
+    private MenuItem loggersMenuItem;
+
     RMPage(RMController controller) {
         this.controller = controller;
         LogModel.getInstance().addLogListener(this);
@@ -156,6 +160,7 @@ public class RMPage implements LogListener {
         this.aboutWindow = new AboutWindow();
         this.addNodeWindow = new AddNodeWindow();
         this.settingsWindow = new SettingsWindow(controller);
+        this.loggersWindow = new LoggersWindow(controller);
         this.credentialsWindow = new CredentialsWindow();
 
         final Canvas header = buildTools();
@@ -337,6 +342,9 @@ public class RMPage implements LogListener {
         MenuItem settingsMenuItem = new MenuItem("Settings", Images.instance.settings_16().getSafeUri().asString());
         settingsMenuItem.addClickHandler(event -> RMPage.this.settingsWindow.show());
 
+        loggersMenuItem = new MenuItem("Loggers", Images.instance.log_16().getSafeUri().asString());
+        loggersMenuItem.addClickHandler(event -> RMPage.this.loggersWindow.show());
+
         MenuItem credMenuItem = new MenuItem("Create credentials", Images.instance.key_16().getSafeUri().asString());
         credMenuItem.addClickHandler(event -> RMPage.this.credentialsWindow.show());
 
@@ -352,7 +360,12 @@ public class RMPage implements LogListener {
 
         ToolStripMenuButton portalMenuButton = new ToolStripMenuButton("Portal");
         Menu portalMenu = new Menu();
-        portalMenu.setItems(credMenuItem, nodeMenuItem, settingsMenuItem, new MenuItemSeparator(), logoutMenuItem);
+        portalMenu.setItems(credMenuItem,
+                            nodeMenuItem,
+                            settingsMenuItem,
+                            loggersMenuItem,
+                            new MenuItemSeparator(),
+                            logoutMenuItem);
         portalMenuButton.setMenu(portalMenu);
 
         MenuItem logMenuItem = new MenuItem("Display logs", Images.instance.log_16().getSafeUri().asString());
@@ -377,8 +390,8 @@ public class RMPage implements LogListener {
         helpMenu.setItems(logMenuItem, documentationMenuItem, aboutMenuItem, tutorialsMenuItem);
         helpMenuButton.setMenu(helpMenu);
 
-        ToolStripButton nsButton = new ToolStripButton("Add Node Source");
-        nsButton.setIcon(RMImages.instance.nodesource_deployed().getSafeUri().asString());
+        nsButton = new ToolStripButton("Add Node Source");
+        nsButton.setIcon(ImagesUnbundled.NODESOURCE_DEPLOYED);
         nsButton.setTooltip("Create and add a new Node Source");
         nsButton.addClickHandler(e -> showNodeSourceCreationWindow());
 
@@ -395,6 +408,15 @@ public class RMPage implements LogListener {
         tools.addButton(errorButton);
 
         return tools;
+    }
+
+    public void setNSButtonStatus(boolean disable) {
+        nsButton.setTooltip("User is not authorized to create or add a new Node Source");
+        nsButton.setDisabled(disable);
+    }
+
+    public void disableLoggersMenuItem() {
+        loggersMenuItem.setEnabled(false);
     }
 
     private Canvas buildTopPane() {
@@ -444,21 +466,21 @@ public class RMPage implements LogListener {
         // "Script Console" tab
         this.scriptConsoleView = new ScriptConsoleView(controller);
         Canvas scriptConsoleCanvas = this.scriptConsoleView.build();
-        Tab scriptConsoleTab = new Tab("Script Console");
+        scriptConsoleTab = new Tab("Script Console");
         scriptConsoleTab.setPane(scriptConsoleCanvas);
         leftTabs.addTab(scriptConsoleTab);
 
         // "Thread Dump" tab
         this.threadDumpView = new ThreadDumpView(controller);
         Canvas threadDumpCanvas = this.threadDumpView.build();
-        Tab threadDumpTab = new Tab("Thread Dump");
+        threadDumpTab = new Tab("Thread Dump");
         threadDumpTab.setPane(threadDumpCanvas);
         leftTabs.addTab(threadDumpTab);
 
         // "Monitoring" tab
         this.monitoringView = new MonitoringView(controller);
         Canvas monitoringCanvas = monitoringView.build();
-        Tab monitoringTab = new Tab("Monitoring");
+        monitoringTab = new Tab("Monitoring");
         monitoringTab.setPane(monitoringCanvas);
         leftTabs.addTab(monitoringTab);
 
@@ -476,11 +498,24 @@ public class RMPage implements LogListener {
         return hl;
     }
 
+    public void setScriptConsoleTabPageDisabled(boolean disabled) {
+        scriptConsoleTab.setDisabled(disabled);
+    }
+
+    public void setMonitoringTabPageDisabled(boolean disabled) {
+        monitoringTab.setDisabled(disabled);
+    }
+
+    public void setThreadDumpTabPageDisabled(boolean disabled) {
+        threadDumpTab.setDisabled(disabled);
+    }
+
     void destroy() {
         this.rootLayout.destroy();
         this.logWindow.destroy();
         this.credentialsWindow.destroy();
         this.settingsWindow.destroy();
+        this.loggersWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
         this.destroyNodeSourceWindow();

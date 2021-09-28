@@ -395,6 +395,8 @@ public interface SchedulerServiceAsync {
 
     void getJobHtml(String sessionId, String jobId, AsyncCallback<String> asyncCallback);
 
+    void checkJobPermissionMethod(String sessionId, String jobId, String method, AsyncCallback<String> asyncCallback);
+
     void putThirdPartyCredential(String sessionId, String key, String value, AsyncCallback<Void> async);
 
     void thirdPartyCredentialKeySet(String sessionId, AsyncCallback<Set<String>> asyncCallback);
@@ -407,4 +409,20 @@ public interface SchedulerServiceAsync {
      * @param sessionId d of the current session
      */
     void portalAccess(String sessionId, AsyncCallback<String> callback);
+
+    /**
+     *
+     * @param sessionId current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Void> asyncCallback);
+
+    Request checkMethodsPermissions(String sessionId, List<String> methods,
+            AsyncCallback<Map<String, Boolean>> asyncCallback);
+
+    Request checkJobsPermissionMethods(String sessionId, List<String> jobId, List<String> methods,
+            AsyncCallback<Map<String, Map<String, Boolean>>> asyncCallback);
+
 }

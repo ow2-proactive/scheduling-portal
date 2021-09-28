@@ -51,6 +51,10 @@ public class VisualizationViewSwitcher
 
     private VisualizationViewHtml htmlView;
 
+    public VisualizationViewHtml getHtmlView() {
+        return htmlView;
+    }
+
     private VisualizationViewImage imageView;
 
     private VisualizationView activeVisualization;

@@ -25,11 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.json;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
@@ -37,11 +35,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsPaginationModel;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 
 
 /**
@@ -273,5 +267,18 @@ public class SchedulerJSONUtils extends JSONUtils {
             }
         }
         return Collections.emptyMap();
+    }
+
+    public static Set<String> extractSet(JSONValue setValue) {
+        if (setValue == null || setValue.isArray() == null) {
+            return Collections.emptySet();
+        } else {
+            JSONArray keyValueArray = setValue.isArray();
+            return IntStream.range(0, keyValueArray.size())
+                            .mapToObj(keyValueArray::get)
+                            .map(JSONValue::isString)
+                            .map(JSONString::stringValue)
+                            .collect(Collectors.toSet());
+        }
     }
 }

@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -392,9 +391,30 @@ public class SchedulerController extends Controller implements UncaughtException
         // than the one in the domain cookie, then we exit
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
-
+        setSessionPermissions();
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ", login=" + loginModel.getLogin() + ")");
+    }
+
+    /**
+     * Sets the scheduler permissions of the current user
+     */
+    public void setSessionPermissions() {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> methods = loginModel.getSchedulerPermissionMethods();
+        String sessionId = loginModel.getSessionId();
+
+        scheduler.checkMethodsPermissions(sessionId, methods, new AsyncCallback<Map<String, Boolean>>() {
+            public void onSuccess(Map<String, Boolean> result) {
+                loginModel.addSessionPermissions(result);
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to set permission: " + message);
+            }
+        });
     }
 
     /**
@@ -1044,5 +1064,9 @@ public class SchedulerController extends Controller implements UncaughtException
 
     public Job getSelectedJob() {
         return this.model.getExecutionsModel().getSelectedJob();
+    }
+
+    public SchedulerPage getSchedulerPage() {
+        return schedulerView;
     }
 }

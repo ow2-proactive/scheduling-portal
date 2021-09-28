@@ -27,19 +27,11 @@ package org.ow2.proactive_grid_cloud_portal.rm.server;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.annotations.GZIP;
@@ -62,6 +54,19 @@ public interface RestClient {
     @Path("/rm/state")
     @Produces(MediaType.APPLICATION_JSON)
     InputStream state(@HeaderParam("sessionid") String sessionId);
+
+    @GET
+    @GZIP
+    @Path("/common/logger/current")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getCurrentLoggers(@HeaderParam("sessionid") String sessionId);
+
+    @POST
+    @Path("/common/logger")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream setLogLevelMultiple(@HeaderParam("sessionid") String sessionId,
+            Map<String, String> loggersConfiguration);
 
     @GET
     @GZIP
@@ -255,4 +260,18 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     void setNodeTokens(@HeaderParam("sessionid") String sessionId, @HeaderParam("nodeurl") String nodeUrl,
             @QueryParam("tokens") List<String> tokens);
+
+    @POST
+    @Path("/rm/nodes/permission")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkNodePermission(@HeaderParam("sessionid") String sessionId, String nodeUrl,
+            @QueryParam("provider") boolean provider);
+
+    @POST
+    @Path("/rm/nodeSource/permission")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkNodeSourcePermission(@HeaderParam("sessionid") String sessionId,
+            @HeaderParam("nodeSourceName") String nodeSourceName, @QueryParam("provider") boolean provider);
+
 }

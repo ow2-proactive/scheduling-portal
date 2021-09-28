@@ -380,6 +380,16 @@ public interface SchedulerService extends RemoteService {
             throws RestServerException, ServiceException;
 
     /**
+     * Check job variables access permission.
+     * @param sessionId the session id of the user which is logged in.
+     * @param jobId the job id for which the details are asked.
+     * @param method method to request access
+     * @return true if the user can access the variables, false otherwise
+     */
+    String checkJobPermissionMethod(String sessionId, String jobId, String method)
+            throws RestServerException, ServiceException;;
+
+    /**
      * Returns the Scheduler status as a JSON String
      * @param sessionId a valid session id
      * @return the current scheduler status
@@ -443,4 +453,18 @@ public interface SchedulerService extends RemoteService {
      */
     String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
+    /**
+     *
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
+    Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException;
+
+    Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
+            throws RestServerException, ServiceException;
+
+    Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobId,
+            List<String> methods) throws RestServerException, ServiceException;
 }

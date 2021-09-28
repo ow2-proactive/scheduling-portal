@@ -165,6 +165,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
             }
         });
         chain.reload();
+        MonitoringNodeView.previousSelectedNode = null;
     }
 
     public void close() {
@@ -192,6 +193,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
             errorMessage = "Monitoring is not available on this node source";
         }
         status.setContents(errorMessage);
+        controller.getRmPage().setMonitoringTabPageDisabled(true);
     }
 
     @Override
@@ -204,5 +206,6 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
             addMember(tabs);
             tabs.show();
         }
+        controller.getRmPage().setMonitoringTabPageDisabled(false);
     }
 }

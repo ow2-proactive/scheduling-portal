@@ -26,11 +26,10 @@
 package org.ow2.proactive_grid_cloud_portal.common.server;
 
 import java.io.InputStream;
+import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 
 
 @Path("/common/")
@@ -39,5 +38,11 @@ public interface CommonRestClient {
     @GET
     @Path("/permissions/portals/{portal}")
     InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
+
+    @POST
+    @Path("/permissions/methods")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream checkMethodsPermissions(@HeaderParam("sessionid") String sessionId, List<String> methods);
 
 }

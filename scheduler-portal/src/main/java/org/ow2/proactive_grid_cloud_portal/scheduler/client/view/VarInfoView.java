@@ -25,8 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
-import java.util.Map;
-
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -83,6 +81,9 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
 
     @Override
     public void jobSelected(Job job) {
+        controller.getExecutionController()
+                  .getJobsController()
+                  .checkJobPermissionMethod(job, label, variablesGrid, genericInformationGrid);
         variablesGrid.buildEntries(job.getVariables());
         genericInformationGrid.buildEntries(job.getGenericInformation());
 

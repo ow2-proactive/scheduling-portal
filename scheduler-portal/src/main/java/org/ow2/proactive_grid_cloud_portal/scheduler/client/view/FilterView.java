@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Date;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobPriority;
@@ -84,7 +85,7 @@ public class FilterView extends VStack {
 
     private final static ImageResource ADD_BUTTON_IMAGE = SchedulerImages.instance.add();
 
-    private final static ImageResource REMOVE_BUTTON_IMAGE = SchedulerImages.instance.remove();
+    private final static ImageResource REMOVE_BUTTON_IMAGE = Images.instance.remove();
 
     private final static ImageResource DELETE_BUTTON_IMAGE = SchedulerImages.instance.cancel_14();
 
