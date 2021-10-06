@@ -27,7 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.*;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -43,9 +42,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
-import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
 
 
@@ -69,7 +66,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
     private Label submittedJobVariablesLabel;
 
     /** Advanced checkBox value */
-    private boolean advance = false;
+    private boolean advanced = false;
 
     /** Hidden checkBox value */
     private boolean hidden = false;
@@ -151,7 +148,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         Map<String, Set<String>> variablesByGroup = new TreeMap<>();
         job.getDetailedVariables().keySet().forEach(variableName -> {
             if ((!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) ||
-                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) == advance) &&
+                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) == advanced) &&
                 (!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) ||
                  Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) == hidden)) {
                 String group = job.getDetailedVariables().get(variableName).get("group");
@@ -209,9 +206,9 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         checkBoxLayout.setAutoHeight();
 
         CheckBox advancedCheckBox = new CheckBox("Advanced", HasDirection.Direction.RTL);
-        advancedCheckBox.setValue(advance);
+        advancedCheckBox.setValue(advanced);
         advancedCheckBox.addClickHandler(event -> {
-            advance = advancedCheckBox.getValue();
+            advanced = advancedCheckBox.getValue();
             buildVariablesEntries(selectedJob);
         });
         checkBoxLayout.addMember(advancedCheckBox);

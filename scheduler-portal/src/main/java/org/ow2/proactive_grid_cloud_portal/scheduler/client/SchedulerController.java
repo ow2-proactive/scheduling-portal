@@ -1047,7 +1047,6 @@ public class SchedulerController extends Controller implements UncaughtException
 
             @Override
             public void onFailure(Throwable caught) {
-                caught.printStackTrace();
                 String msg = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance()
                         .logImportantMessage("Failed to get job info for job " + job.getId().toString() + ": " + msg);
