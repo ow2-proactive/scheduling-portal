@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import java.util.*;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -35,9 +38,14 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsMode
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
+import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.layout.VStack;
 
 
@@ -57,11 +65,28 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
     /** Label to show that now Job Is selected */
     private Label label;
 
+    /** Submitted Job Variables label */
+    private Label submittedJobVariablesLabel;
+
+    /** Advanced checkBox value */
+    private boolean advance = false;
+
+    /** Hidden checkBox value */
+    private boolean hidden = false;
+
+    /** CheckBox layout*/
+    private Layout checkBoxLayout;
+
     /** Generic information grid */
     private KeyValueGrid genericInformationGrid;
 
-    /** Variables grid */
-    private KeyValueGrid variablesGrid;
+    /** List of variables grids */
+    private List<KeyValueGrid> variablesGrids;
+
+    private VStack root;
+
+    /** Currently selected job */
+    private Job selectedJob;
 
     /**
      * @param controller the Controller that created this View
@@ -83,18 +108,68 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
     public void jobSelected(Job job) {
         controller.getExecutionController()
                   .getJobsController()
-                  .checkJobPermissionMethod(job, label, variablesGrid, genericInformationGrid);
-        variablesGrid.buildEntries(job.getVariables());
-        genericInformationGrid.buildEntries(job.getGenericInformation());
+                  .checkJobPermissionMethod(job, label, variablesGrids, genericInformationGrid);
 
+        controller.setJobDetailedVariables(job, this);
+    }
+
+    public void buildVariablesEntries(Job job) {
+        selectedJob = job;
+        variablesGrids.forEach(variablesGrid -> root.removeChild(variablesGrid));
+        variablesGrids.clear();
+        root.removeChild(genericInformationGrid);
+        root.removeChild(checkBoxLayout);
+        root.redraw();
+        root.addMember(checkBoxLayout);
+        Map<String, Set<String>> variablesByGroup = getVariablesByGroup(job);
+        buildDetailedVariablesEntries(job, variablesByGroup);
+        genericInformationGrid.buildEntries(job.getGenericInformation());
+        root.addMember(genericInformationGrid);
         label.hide();
-        variablesGrid.show();
+        submittedJobVariablesLabel.show();
+        checkBoxLayout.show();
         genericInformationGrid.show();
+    }
+
+    private void buildDetailedVariablesEntries(Job job, Map<String, Set<String>> variablesByGroup) {
+        variablesByGroup.keySet().forEach(group -> {
+            KeyValueGrid variablesGrid = new KeyValueGrid("<u>" + group + "</u>");
+            variablesGrid.showTopMargin();
+            variablesGrid.setWidth100();
+            variablesGrids.add(variablesGrid);
+            root.addMember(variablesGrid);
+            Map<String, String> variables = new HashMap<>();
+            variablesByGroup.get(group)
+                            .forEach(variableName -> variables.put(variableName, job.getVariables().get(variableName)));
+            variablesGrid.buildEntries(variables);
+            variablesGrid.setVariableDescription(job.getDetailedVariables());
+            variablesGrid.show();
+        });
+    }
+
+    private Map<String, Set<String>> getVariablesByGroup(Job job) {
+        Map<String, Set<String>> variablesByGroup = new TreeMap<>();
+        job.getDetailedVariables().keySet().forEach(variableName -> {
+            if ((!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) ||
+                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) == advance) &&
+                (!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) ||
+                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) == hidden)) {
+                String group = job.getDetailedVariables().get(variableName).get("group");
+                Set<String> variableNames = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
+                                                                                : new HashSet<>();
+                variableNames.add(variableName);
+                variablesByGroup.put(group, variableNames);
+            }
+        });
+        return variablesByGroup;
     }
 
     public void jobUnselected() {
         label.show();
-        variablesGrid.hide();
+        submittedJobVariablesLabel.hide();
+        checkBoxLayout.hide();
+        variablesGrids.clear();
+        variablesGrids.forEach(variablesGrid -> variablesGrid.hide());
         genericInformationGrid.hide();
     }
 
@@ -114,7 +189,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
     }
 
     protected Layout getLayout() {
-        VStack root = new VStack();
+        root = new VStack();
         root.setWidth100();
 
         label = new Label("No job selected");
@@ -122,13 +197,38 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         label.setAlign(Alignment.CENTER);
         root.addMember(label);
 
-        variablesGrid = new KeyValueGrid(JOB_VARIABLES_LABEL_TEXT);
-        variablesGrid.showTopMargin();
-        variablesGrid.setWidth100();
-        variablesGrid.hide();
-        root.addMember(variablesGrid);
+        submittedJobVariablesLabel = new Label("<b><u>" + JOB_VARIABLES_LABEL_TEXT + "</u></b>");
+        submittedJobVariablesLabel.setValign(VerticalAlignment.BOTTOM);
+        submittedJobVariablesLabel.setAutoHeight();
+        submittedJobVariablesLabel.hide();
+        root.addMember(submittedJobVariablesLabel);
 
-        genericInformationGrid = new KeyValueGrid(GENERIC_INFORMATION_LABEL_TEXT);
+        checkBoxLayout = new Layout();
+        checkBoxLayout.setAlign(Alignment.RIGHT);
+        checkBoxLayout.setPadding(0);
+        checkBoxLayout.setAutoHeight();
+
+        CheckBox advancedCheckBox = new CheckBox("Advanced", HasDirection.Direction.RTL);
+        advancedCheckBox.setValue(advance);
+        advancedCheckBox.addClickHandler(event -> {
+            advance = advancedCheckBox.getValue();
+            buildVariablesEntries(selectedJob);
+        });
+        checkBoxLayout.addMember(advancedCheckBox);
+
+        CheckBox hiddenCheckBox = new CheckBox("Hidden", HasDirection.Direction.RTL);
+        hiddenCheckBox.setValue(hidden);
+        hiddenCheckBox.addClickHandler(event -> {
+            hidden = hiddenCheckBox.getValue();
+            buildVariablesEntries(selectedJob);
+        });
+        checkBoxLayout.addMember(hiddenCheckBox);
+        checkBoxLayout.hide();
+        root.addMember(checkBoxLayout);
+
+        variablesGrids = new ArrayList<>();
+
+        genericInformationGrid = new KeyValueGrid("<b><u>" + GENERIC_INFORMATION_LABEL_TEXT + "</u></b><br>");
         genericInformationGrid.showTopMargin();
         genericInformationGrid.setWidth100();
         genericInformationGrid.hide();

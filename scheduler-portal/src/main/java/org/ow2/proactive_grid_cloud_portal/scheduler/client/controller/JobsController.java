@@ -523,6 +523,7 @@ public class JobsController {
                         new HashMap<>(),
                         new HashMap<>(),
                         new HashMap<>(),
+                        new HashMap<>(),
                         0,
                         0,
                         0,
@@ -669,7 +670,7 @@ public class JobsController {
         });
     }
 
-    public void checkJobPermissionMethod(Job job, Label label, KeyValueGrid variablesGrid,
+    public void checkJobPermissionMethod(Job job, Label label, List<KeyValueGrid> variablesGrids,
             KeyValueGrid genericInformationGrid) {
 
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
@@ -691,7 +692,7 @@ public class JobsController {
                                                    if (result.contains("false")) {
                                                        label.setContents("You are not authorized to see this job's variables");
                                                        label.show();
-                                                       variablesGrid.hide();
+                                                       variablesGrids.forEach(variablesGrid -> variablesGrid.hide());
                                                        genericInformationGrid.hide();
                                                    }
                                                }

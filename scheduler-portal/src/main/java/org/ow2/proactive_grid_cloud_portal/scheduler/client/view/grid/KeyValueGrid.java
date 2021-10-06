@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.KeyValueColumnsFactory.KEY_ATTR;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +36,7 @@ import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.grid.HoverCustomizer;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -64,7 +67,7 @@ public class KeyValueGrid extends VStack {
 
         keyValueColumnsFactory = new KeyValueColumnsFactory();
 
-        keyValueGridLabel = new Label("<b>" + gridLabel + "</b>");
+        keyValueGridLabel = new Label(gridLabel);
         keyValueGridLabel.setValign(VerticalAlignment.BOTTOM);
         keyValueGridLabel.setAutoHeight();
 
@@ -76,6 +79,7 @@ public class KeyValueGrid extends VStack {
         keyValueGrid.setOverflow(Overflow.VISIBLE);
         keyValueGrid.setHeight(1);
         keyValueGrid.setBodyOverflow(Overflow.VISIBLE);
+        keyValueGrid.setShowHeader(false);
 
         GridColumns[] columns = keyValueColumnsFactory.getColumns();
         ListGridField[] fields = new ListGridField[columns.length];
@@ -122,4 +126,20 @@ public class KeyValueGrid extends VStack {
         keyValueGrid.setData(records);
     }
 
+    /**
+     * Sets the variable description as tool tip text on the corresponding listGrid field
+     * @param detailedVariables of the job
+     */
+    public void setVariableDescription(Map<String, Map<String, String>> detailedVariables) {
+        for (int i = 0; i < keyValueGrid.getFields().length; i++) {
+            ListGridField lg = keyValueGrid.getField(i);
+            lg.setShowHover(true);
+            lg.setHoverCustomizer(new HoverCustomizer() {
+                public String hoverHTML(Object value, ListGridRecord record, int rowNum, int colNum) {
+                    String variableName = record.getAttribute(KEY_ATTR.getName());
+                    return detailedVariables.get(variableName).get("description");
+                }
+            });
+        }
+    }
 }

@@ -76,7 +76,7 @@ public class SchedulerJSONUtils extends JSONUtils {
         return jsonObject;
     }
 
-    private static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
+    public static JSONValue getProperty(JSONObject obj, String propertyName) throws JSONException {
         JSONValue jsonValue = obj.get(propertyName);
         if (jsonValue == null) {
             throw new JSONException("Expected JSON Object with attribute " + propertyName + ": " + obj.toString());
@@ -225,6 +225,16 @@ public class SchedulerJSONUtils extends JSONUtils {
         }
 
         return Job.parseJSONInfo(jsonJobInfo);
+    }
+
+    public static Map<String, Map<String, String>> getDetailedVariables(String jsonString,
+            Map<String, String> variables) throws JSONException {
+        JSONValue val = parseJSON(jsonString);
+        JSONObject jsonJobInfo = val.isObject();
+        if (jsonJobInfo == null) {
+            throw new JSONException("Expected JSON Object: " + jsonString);
+        }
+        return Job.parseJSONDetailedVariables(jsonJobInfo, variables);
     }
 
     public static Long getLongOrElse(JSONObject jsonObject, String attributeName, Long defaultValue) {
