@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -48,6 +49,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONException;
@@ -59,6 +61,7 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -110,6 +113,12 @@ public class SubmitWindow {
     private static final String KEY_OF_NAME = "name";
 
     private static final String KEY_OF_VALUE = "value";
+
+    private static final String KEY_OF_GROUP = "group";
+
+    private static final String KEY_OF_HIDDEN = "hidden";
+
+    private static final String KEY_OF_ADVANCED = "advanced";
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
 
@@ -264,6 +273,10 @@ public class SubmitWindow {
 
     private Boolean isExecCalendarValueNull = true; // capture if EXECUTION_CALENDAR value is null
 
+    private boolean isAdvanced = false;
+
+    private String currentJobDescriptor;
+
     /**
      * Default constructor
      *
@@ -405,16 +418,52 @@ public class SubmitWindow {
     }
 
     private void fillVarsPart(String jobDescriptor) {
-        DynamicForm variablesVisualForm = initVariablesVisualForm();
-        Layout hiddenVarsLayout = initVariablesActualForm();
         initVarsLayout();
         getGenericInformationAttributes(jobDescriptor);
-        Widget worfklowMetaDataWidget = prepareWorlflowInformationWidget();
-        varsLayout.addMember(worfklowMetaDataWidget);
-        varsLayout.addMember(variablesVisualForm);
+        Widget workflowMetaDataWidget = prepareWorlflowInformationWidget();
+        varsLayout.addMember(workflowMetaDataWidget);
+        Layout checkBoxLayout = createCheckBoxLayout();
+        varsLayout.addMember(checkBoxLayout);
+        setVarsLayout();
+        Layout hiddenVarsLayout = initVariablesActualForm();
         varsLayout.addMember(hiddenVarsLayout);
         rootPage.addMember(varsLayout);
         rootPage.reflow();
+    }
+
+    private Layout createCheckBoxLayout() {
+        Layout checkBoxLayout = new Layout();
+        CheckBox advancedCheckBox = new CheckBox("Advanced", HasDirection.Direction.RTL);
+        advancedCheckBox.setValue(isAdvanced);
+        advancedCheckBox.addClickHandler(event -> {
+            isAdvanced = advancedCheckBox.getValue();
+            redrawVariables(currentJobDescriptor);
+        });
+        checkBoxLayout.addMember(advancedCheckBox);
+        checkBoxLayout.setAlign(Alignment.RIGHT);
+        return checkBoxLayout;
+    }
+
+    private void setVarsLayout() {
+        Map<String, Map<String, JobVariable>> variablesByGroup = getVariablesByGroup();
+        variablesByGroup.keySet().forEach(group -> {
+            DynamicForm variablesVisualForm = initVariablesVisualForm(variablesByGroup.get(group), group);
+            varsLayout.addMember(variablesVisualForm);
+        });
+    }
+
+    private Map<String, Map<String, JobVariable>> getVariablesByGroup() {
+        Map<String, Map<String, JobVariable>> variablesByGroup = new TreeMap<>();
+        variables.entrySet().forEach(variable -> {
+            if (variable.getValue().showVariable(isAdvanced)) {
+                String group = variable.getValue().getGroup() == null ? "" : variable.getValue().getGroup();
+                Map<String, JobVariable> variablesSameGroup = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
+                                                                                                  : new TreeMap<>();
+                variablesSameGroup.put(variable.getKey(), variable.getValue());
+                variablesByGroup.put(group, variablesSameGroup);
+            }
+        });
+        return variablesByGroup;
     }
 
     private Widget prepareWorlflowInformationWidget() {
@@ -490,18 +539,23 @@ public class SubmitWindow {
         }
     }
 
-    private DynamicForm initVariablesVisualForm() {
+    private DynamicForm initVariablesVisualForm(Map<String, JobVariable> variablesByGroup, String group) {
         // presentation form
         DynamicForm variablesVisualForm;
         variablesVisualForm = new DynamicForm();
         variablesVisualForm.setNumCols(3);
         variablesVisualForm.setColWidths("25%", "50%", "25%");
 
-        fields = new FormItem[variables.size() * 2];
+        fields = new FormItem[variablesByGroup.size() * 2 + 1];
 
         int i = 0;
+        BlurbItem groupLabel = new BlurbItem();
+        groupLabel.setDefaultValue("<u><b>" + group + "</b></u>");
+        groupLabel.setStartRow(false);
+        groupLabel.setEndRow(true);
+        fields[i++] = groupLabel;
 
-        for (Entry<String, JobVariable> var : variables.entrySet()) {
+        for (Entry<String, JobVariable> var : variablesByGroup.entrySet()) {
             TextItem variableItem = createVariableItem(var);
             fields[i++] = variableItem;
             String model = var.getValue().getModel();
@@ -660,7 +714,6 @@ public class SubmitWindow {
         startAtLayout.addMember(planJobPanel);
 
         rootPage.addMember(startAtLayout);
-
     }
 
     private void updateScheduledTimeAt() {
@@ -1147,6 +1200,7 @@ public class SubmitWindow {
     }
 
     private void redrawVariables(String job) {
+        currentJobDescriptor = job;
         removeBottomMembers();
         setEnabledStartAtPart(true);
         fillVarsPart(job);
@@ -1357,15 +1411,19 @@ public class SubmitWindow {
             String name = extractNodeValue(attrs, KEY_OF_NAME);
             String value = extractNodeValue(attrs, KEY_OF_VALUE);
             String model = extractNodeValue(attrs, KEY_OF_MODEL);
-            createJobVariable(ret, name, value, model);
+            String group = extractNodeValue(attrs, KEY_OF_GROUP);
+            boolean hidden = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_HIDDEN));
+            boolean advanced = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_ADVANCED));
+            createJobVariable(ret, name, value, model, group, hidden, advanced);
         }
     }
 
-    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model) {
+    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model, String group,
+            boolean hidden, boolean advanced) {
         if (name != null && value != null && name.matches("[A-Za-z0-9._]+")) {
             // this won't necessarily be a problem at job submission,
             // but it definitely will be here in the client; don't bother
-            ret.put(name, new JobVariable(name, value, model));
+            ret.put(name, new JobVariable(name, value, model, group, hidden, advanced));
         }
     }
 
@@ -1452,10 +1510,47 @@ public class SubmitWindow {
 
         private String model;
 
-        public JobVariable(String name, String value, String model) {
+        private String group;
+
+        private boolean hidden;
+
+        private boolean advanced;
+
+        public JobVariable(String name, String value, String model, String group, boolean hidden, boolean advanced) {
             this.name = name;
             this.value = value;
             this.model = model;
+            this.group = group;
+            this.hidden = hidden;
+            this.advanced = advanced;
+        }
+
+        public void setModel(String model) {
+            this.model = model;
+        }
+
+        public String getGroup() {
+            return group;
+        }
+
+        public void setGroup(String group) {
+            this.group = group;
+        }
+
+        public boolean isHidden() {
+            return hidden;
+        }
+
+        public void setHidden(boolean hidden) {
+            this.hidden = hidden;
+        }
+
+        public boolean isAdvanced() {
+            return advanced;
+        }
+
+        public void setAdvanced(boolean advanced) {
+            this.advanced = advanced;
         }
 
         public String getName() {
@@ -1472,6 +1567,10 @@ public class SubmitWindow {
 
         public String getModel() {
             return model;
+        }
+
+        public boolean showVariable(boolean isAdvanced) {
+            return !hidden && ((isAdvanced && advanced) || (!advanced));
         }
 
     }

@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ServerLog
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.VarInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 
@@ -1029,6 +1030,39 @@ public class SchedulerController extends Controller implements UncaughtException
             public void onSuccess(Void result) {
                 LogModel.getInstance().logMessage("Successfully deleted third-party credential for " + key + ".");
                 refreshThirdPartyCredentialsKeys();
+            }
+        });
+    }
+
+    /**
+     * Sends a request in order to get the detailed variables of the job
+     *
+     * @param job the selected job
+     * @param varInfoView the variable info view
+     */
+    public void setJobDetailedVariables(Job job, VarInfoView varInfoView) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        String sessionId = LoginModel.getInstance().getSessionId();
+        scheduler.getJobInfo(sessionId, job.getId().toString(), new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance()
+                        .logImportantMessage("Failed to get job info for job " + job.getId().toString() + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                try {
+                    Map<String, Map<String, String>> detailedVariables = SchedulerJSONUtils.getDetailedVariables(result,
+                                                                                                                 job.getVariables());
+                    job.setDetailsVariables(detailedVariables);
+                    varInfoView.buildVariablesEntries(job);
+                } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                    LogModel.getInstance().logImportantMessage("Failed to parse detailed variables for job " +
+                                                               job.getId().toString());
+                }
             }
         });
     }

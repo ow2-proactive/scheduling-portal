@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
@@ -82,6 +83,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private final Map<String, String> variables;
 
+    private final Map<String, Map<String, String>> detailedVariables;
+
     private final ImmutableMap<String, String> resultMap;
 
     /**
@@ -90,6 +93,7 @@ public class Job implements Serializable, Comparable<Job> {
     public Job() {
         this.genericInformation = ImmutableMap.of();
         this.variables = ImmutableMap.of();
+        this.detailedVariables = ImmutableMap.of();
         this.resultMap = ImmutableMap.of();
     }
 
@@ -126,9 +130,10 @@ public class Job implements Serializable, Comparable<Job> {
      * @param description job description
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
-            Map<String, String> genericInformation, Map<String, String> variables, Map<String, String> resultMap,
-            int pending, int running, int finished, int total, int failed, int faulty, int inError, long submitTime,
-            long startTime, long inErrorTime, long finishTime, String description) {
+            Map<String, String> genericInformation, Map<String, String> variables,
+            Map<String, Map<String, String>> detailedVariables, Map<String, String> resultMap, int pending, int running,
+            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
+            long inErrorTime, long finishTime, String description) {
         this.id = id;
         this.name = name;
         this.projectName = projectName;
@@ -150,6 +155,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.finishTime = finishTime;
         this.genericInformation = ImmutableMap.copyOf(genericInformation);
         this.variables = variables;
+        this.detailedVariables = detailedVariables;
         this.variables.replaceAll((key, value) -> {
             return value.toString().matches("ENC((.*))") ? "*******" : value;
         });
@@ -418,6 +424,7 @@ public class Job implements Serializable, Comparable<Job> {
                        user,
                        genericInformation,
                        variables,
+                       new HashMap<>(),
                        resultMap,
                        pending,
                        running,
@@ -431,6 +438,26 @@ public class Job implements Serializable, Comparable<Job> {
                        inErrorTime,
                        finishedTime,
                        description);
+    }
+
+    public static Map<String, Map<String, String>> parseJSONDetailedVariables(JSONObject jsonJobInfo,
+            Map<String, String> variables) {
+        Map<String, Map<String, String>> detailedVariablesMap = new HashMap<>();
+        JSONObject jobInfoObject = jsonJobInfo.get("jobInfo").isObject();
+        JSONObject detailedVariablesObject = jobInfoObject.get("detailedVariables").isObject();
+        for (String variable : variables.keySet()) {
+            Map<String, String> variableMap = new HashMap<>();
+            JSONObject nameObject = detailedVariablesObject.get(variable).isObject();
+            variableMap.put("name", SchedulerJSONUtils.getStringOrDefault(nameObject.get("name")));
+            variableMap.put("value", SchedulerJSONUtils.getStringOrDefault(nameObject.get("value")));
+            variableMap.put("model", SchedulerJSONUtils.getStringOrDefault(nameObject.get("model")));
+            variableMap.put("description", SchedulerJSONUtils.getStringOrDefault(nameObject.get("description")));
+            variableMap.put("group", SchedulerJSONUtils.getStringOrDefault(nameObject.get("group")));
+            variableMap.put("advanced", nameObject.get("advanced").isBoolean().toString());
+            variableMap.put("hidden", nameObject.get("hidden").isBoolean().toString());
+            detailedVariablesMap.put(variable, variableMap);
+        }
+        return detailedVariablesMap;
     }
 
     /**
@@ -491,6 +518,11 @@ public class Job implements Serializable, Comparable<Job> {
         this.pendingTasks = pending;
     }
 
+    public void setDetailsVariables(Map<String, Map<String, String>> detailedVariables) {
+        this.detailedVariables.clear();
+        this.detailedVariables.putAll(detailedVariables);
+    }
+
     public void setTotalTasks(int total) {
         this.totalTasks = total;
     }
@@ -501,6 +533,10 @@ public class Job implements Serializable, Comparable<Job> {
 
     public Map<String, String> getVariables() {
         return variables;
+    }
+
+    public Map<String, Map<String, String>> getDetailedVariables() {
+        return detailedVariables;
     }
 
     public Map<String, String> getResultMap() {
