@@ -160,9 +160,9 @@ public class JobsController {
         if (job != null) {
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
+            parentController.getParentController().getTasksController().updateTasks(false);
+            checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
         }
-        parentController.getParentController().getTasksController().updateTasks(false);
-        checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
     }
 
     /**
@@ -748,32 +748,37 @@ public class JobsController {
      */
     public void checkJobsPermissionMethods(List<String> jobIds, JobsListGrid jobsListGrid) {
 
-        LoginModel loginModel = LoginModel.getInstance();
-        String sessionId = loginModel.getSessionId();
-        List<String> methods = loginModel.getJobPermissionMethods();
+        LogModel.getInstance().logCriticalMessage("jobIds " + jobIds);
+        try {
+            LoginModel loginModel = LoginModel.getInstance();
+            String sessionId = loginModel.getSessionId();
+            List<String> methods = loginModel.getJobPermissionMethods();
 
-        if (loginModel.permissionCashedForJobIds(jobIds)) {
-            setTabsStatus(jobIds, jobsListGrid);
-            return;
+            if (loginModel.permissionCashedForJobIds(jobIds)) {
+                setTabsStatus(jobIds, jobsListGrid);
+                return;
+            }
+
+            SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+            scheduler.checkJobsPermissionMethods(sessionId,
+                                                 jobIds,
+                                                 methods,
+                                                 new AsyncCallback<Map<String, Map<String, Boolean>>>() {
+                                                     public void onSuccess(Map<String, Map<String, Boolean>> result) {
+                                                         loginModel.addSchedulerPermissions(result);
+                                                         setTabsStatus(jobIds, jobsListGrid);
+                                                     }
+
+                                                     public void onFailure(Throwable caught) {
+                                                         String message = JSONUtils.getJsonErrorMessage(caught);
+                                                         LogModel.getInstance().logImportantMessage(
+                                                                                                    "Failed to check jobs permission methods : " +
+                                                                                                    message);
+                                                     }
+                                                 });
+        } catch (Exception e) {
+            LogModel.getInstance().logCriticalMessage("Exception " + e.getMessage() + " " + e.toString());
         }
-
-        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.checkJobsPermissionMethods(sessionId,
-                                             jobIds,
-                                             methods,
-                                             new AsyncCallback<Map<String, Map<String, Boolean>>>() {
-                                                 public void onSuccess(Map<String, Map<String, Boolean>> result) {
-                                                     loginModel.addSchedulerPermissions(result);
-                                                     setTabsStatus(jobIds, jobsListGrid);
-                                                 }
-
-                                                 public void onFailure(Throwable caught) {
-                                                     String message = JSONUtils.getJsonErrorMessage(caught);
-                                                     LogModel.getInstance().logImportantMessage(
-                                                                                                "Failed to check jobs permission methods : " +
-                                                                                                message);
-                                                 }
-                                             });
     }
 
     private void setTabsStatus(List<String> jobIds, JobsListGrid jobsListGrid) {
