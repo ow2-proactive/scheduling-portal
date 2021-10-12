@@ -160,9 +160,9 @@ public class JobsController {
         if (job != null) {
             this.parentController.getTasksController().updatingTasks();
             this.parentController.getParentController().visuFetch(job.getId().toString());
+            parentController.getParentController().getTasksController().updateTasks(false);
+            checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
         }
-        parentController.getParentController().getTasksController().updateTasks(false);
-        checkJobsPermissionMethods(new ArrayList<>(Collections.singleton(job.getId().toString())), null);
     }
 
     /**
