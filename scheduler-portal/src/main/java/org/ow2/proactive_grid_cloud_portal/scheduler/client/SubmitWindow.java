@@ -422,8 +422,10 @@ public class SubmitWindow {
         getGenericInformationAttributes(jobDescriptor);
         Widget workflowMetaDataWidget = prepareWorlflowInformationWidget();
         varsLayout.addMember(workflowMetaDataWidget);
-        Layout checkBoxLayout = createCheckBoxLayout();
-        varsLayout.addMember(checkBoxLayout);
+        if (variables != null && !variables.isEmpty()) {
+            Layout checkBoxLayout = createCheckBoxLayout();
+            varsLayout.addMember(checkBoxLayout);
+        }
         setVarsLayout();
         Layout hiddenVarsLayout = initVariablesActualForm();
         varsLayout.addMember(hiddenVarsLayout);
@@ -1162,7 +1164,7 @@ public class SubmitWindow {
             private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
                     String val = "";
-                    if (fields[2 * i].getValue() != null) {
+                    if (fields[2 * i] != null && fields[2 * i].getValue() != null) {
                         val = fields[2 * i].getValue().toString();
                     }
                     _fields[i].setValue(val);
