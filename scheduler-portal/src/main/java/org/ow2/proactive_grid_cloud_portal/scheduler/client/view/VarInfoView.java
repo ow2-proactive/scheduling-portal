@@ -165,8 +165,8 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         label.show();
         submittedJobVariablesLabel.hide();
         checkBoxLayout.hide();
-        variablesGrids.clear();
         variablesGrids.forEach(variablesGrid -> variablesGrid.hide());
+        variablesGrids.clear();
         genericInformationGrid.hide();
     }
 
