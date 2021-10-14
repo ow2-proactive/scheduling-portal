@@ -1068,6 +1068,10 @@ public class SubmitWindow {
                 }
             }
 
+            /**
+             * Sets the values of the variables on _fields when click on Submit button
+             * _fields is used to create the listGrid from Job Variables tab
+             */
             private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
                     int finalI = i;
@@ -1165,6 +1169,10 @@ public class SubmitWindow {
                 }
             }
 
+            /**
+             * Sets the values of the variables on _fields when click on Check button
+             * _fields is used to create the listGrid from Job Variables tab
+             */
             private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
                     int finalI = i;
