@@ -1070,11 +1070,15 @@ public class SubmitWindow {
 
             private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
-                    String val = "";
-                    if (fields[2 * i].getValue() != null) {
-                        val = fields[2 * i].getValue().toString();
+                    int finalI = i;
+                    String name = variables.keySet()
+                                           .stream()
+                                           .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
+                                           .findAny()
+                                           .orElse(null);
+                    if (name != null) {
+                        _fields[finalI].setValue(variables.get(name).getValue());
                     }
-                    _fields[i].setValue(val);
                 }
             }
         };
@@ -1163,11 +1167,15 @@ public class SubmitWindow {
 
             private void setAllValuesAsString() {
                 for (int i = 0; i < _fields.length; i++) {
-                    String val = "";
-                    if (fields[2 * i] != null && fields[2 * i].getValue() != null) {
-                        val = fields[2 * i].getValue().toString();
+                    int finalI = i;
+                    String name = variables.keySet()
+                                           .stream()
+                                           .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
+                                           .findAny()
+                                           .orElse(null);
+                    if (name != null) {
+                        _fields[finalI].setValue(variables.get(name).getValue());
                     }
-                    _fields[i].setValue(val);
                 }
             }
         };
