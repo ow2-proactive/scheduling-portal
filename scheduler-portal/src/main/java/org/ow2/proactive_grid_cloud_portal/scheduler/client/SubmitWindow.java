@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -84,6 +85,7 @@ import com.google.gwt.xml.client.XMLParser;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.DateChooser;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -1073,15 +1075,15 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (int i = 0; i < _fields.length; i++) {
-                    int finalI = i;
-                    String name = variables.keySet()
-                                           .stream()
-                                           .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
-                                           .findAny()
-                                           .orElse(null);
-                    if (name != null) {
-                        _fields[finalI].setValue(variables.get(name).getValue());
+                for (Canvas canvas : varsLayout.getMembers()) {
+                    if (canvas instanceof DynamicForm) {
+                        DynamicForm dynamicForm = (DynamicForm) canvas;
+                        for (FormItem field : dynamicForm.getFields()) {
+                            Arrays.stream(_fields)
+                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
+                                  .findAny()
+                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
+                        }
                     }
                 }
             }
@@ -1098,6 +1100,7 @@ public class SubmitWindow {
                     JSONString variableJsonString = variableJsonValue.isString();
                     if (variableJsonString != null) {
                         variable.setValue(variableJsonString.stringValue());
+                        LogModel.getInstance().logCriticalMessage("value " + variableJsonString.stringValue());
                     }
 
                 }
@@ -1174,15 +1177,15 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (int i = 0; i < _fields.length; i++) {
-                    int finalI = i;
-                    String name = variables.keySet()
-                                           .stream()
-                                           .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
-                                           .findAny()
-                                           .orElse(null);
-                    if (name != null) {
-                        _fields[finalI].setValue(variables.get(name).getValue());
+                for (Canvas canvas : varsLayout.getMembers()) {
+                    if (canvas instanceof DynamicForm) {
+                        DynamicForm dynamicForm = (DynamicForm) canvas;
+                        for (FormItem field : dynamicForm.getFields()) {
+                            Arrays.stream(_fields)
+                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
+                                  .findAny()
+                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
+                        }
                     }
                 }
             }
