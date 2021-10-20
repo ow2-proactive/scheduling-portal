@@ -457,7 +457,7 @@ public class SubmitWindow {
     }
 
     private Map<String, Map<String, JobVariable>> getVariablesByGroup() {
-        Map<String, Map<String, JobVariable>> variablesByGroup = new TreeMap<>();
+        Map<String, Map<String, JobVariable>> variablesByGroup = new LinkedHashMap<>();
         variables.entrySet().forEach(variable -> {
             if (variable.getValue().showVariable(isAdvanced)) {
                 String group = variable.getValue().getGroup() == null ? "" : variable.getValue().getGroup();
@@ -1075,19 +1075,35 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (Canvas canvas : varsLayout.getMembers()) {
-                    if (canvas instanceof DynamicForm) {
-                        DynamicForm dynamicForm = (DynamicForm) canvas;
-                        for (FormItem field : dynamicForm.getFields()) {
-                            Arrays.stream(_fields)
-                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
-                                  .findAny()
-                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
-                        }
-                    }
-                }
+                setVariablesOnFields();
+                setFormVariableOnFields();
             }
         };
+    }
+
+    private void setFormVariableOnFields() {
+        for (Canvas canvas : varsLayout.getMembers()) {
+            if (canvas instanceof DynamicForm) {
+                DynamicForm dynamicForm = (DynamicForm) canvas;
+                for (FormItem field : dynamicForm.getFields()) {
+                    Arrays.stream(_fields)
+                          .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
+                          .findAny()
+                          .ifPresent(_field -> _field.setValue(field.getValue().toString()));
+                }
+            }
+        }
+    }
+
+    private void setVariablesOnFields() {
+        for (int i = 0; i < _fields.length; i++) {
+            int finalI = i;
+            variables.keySet()
+                     .stream()
+                     .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
+                     .findAny()
+                     .ifPresent(name -> _fields[finalI].setValue(variables.get(name).getValue()));
+        }
     }
 
     private void updateVariables(JSONValue updatedVariablesJsonValue) {
@@ -1176,17 +1192,8 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (Canvas canvas : varsLayout.getMembers()) {
-                    if (canvas instanceof DynamicForm) {
-                        DynamicForm dynamicForm = (DynamicForm) canvas;
-                        for (FormItem field : dynamicForm.getFields()) {
-                            Arrays.stream(_fields)
-                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
-                                  .findAny()
-                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
-                        }
-                    }
-                }
+                setVariablesOnFields();
+                setFormVariableOnFields();
             }
         };
     }

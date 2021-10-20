@@ -41,7 +41,9 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VStack;
 
@@ -85,6 +87,16 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
     /** Currently selected job */
     private Job selectedJob;
 
+    /** Advanced CheckBox layout*/
+    private HLayout advancedCheckBoxLayout;
+
+    /** Hidden CheckBox layout*/
+    private HLayout hiddenCheckBoxLayout;
+
+    private CheckBox advancedCheckBox;
+
+    private CheckBox hiddenCheckBox;
+
     /**
      * @param controller the Controller that created this View
      */
@@ -110,12 +122,13 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         controller.setJobDetailedVariables(job, this);
     }
 
-    public void buildVariablesEntries(Job job) {
+    public void buildVariablesEntries(Job job, boolean shouldResetCheckboxes) {
         selectedJob = job;
         variablesGrids.forEach(variablesGrid -> root.removeChild(variablesGrid));
         variablesGrids.clear();
         root.removeChild(genericInformationGrid);
         root.removeChild(checkBoxLayout);
+        resetCheckBoxes(shouldResetCheckboxes);
         root.redraw();
         root.addMember(checkBoxLayout);
         Map<String, Set<String>> variablesByGroup = getVariablesByGroup(job);
@@ -128,44 +141,106 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         genericInformationGrid.show();
     }
 
+    private void resetCheckBoxes(boolean shouldResetCheckboxes) {
+        if (shouldResetCheckboxes) {
+            advanced = false;
+            hidden = false;
+        }
+    }
+
     private void buildDetailedVariablesEntries(Job job, Map<String, Set<String>> variablesByGroup) {
+        checkIfVariablesAreEmpty(job, variablesByGroup);
         variablesByGroup.keySet().forEach(group -> {
             KeyValueGrid variablesGrid = new KeyValueGrid("<u>" + group + "</u>");
             variablesGrid.showTopMargin();
             variablesGrid.setWidth100();
             variablesGrids.add(variablesGrid);
             root.addMember(variablesGrid);
-            Map<String, String> variables = new HashMap<>();
+            Map<String, String> variables = new LinkedHashMap<>();
             variablesByGroup.get(group)
                             .forEach(variableName -> variables.put(variableName, job.getVariables().get(variableName)));
             variablesGrid.buildEntries(variables);
             variablesGrid.setVariableDescription(job.getDetailedVariables());
             variablesGrid.show();
         });
+
+    }
+
+    private void checkIfVariablesAreEmpty(Job job, Map<String, Set<String>> variablesByGroup) {
+        if (variablesByGroup.keySet().isEmpty()) {
+            Arrays.asList(advancedCheckBoxLayout.getMembers()).forEach(Canvas::hide);
+            Arrays.asList(hiddenCheckBoxLayout.getMembers()).forEach(Canvas::hide);
+            variablesByGroup.put("", new HashSet<>());
+        } else {
+            checkAdvanceOrHiddenVars(job.getDetailedVariables());
+        }
+        advancedCheckBoxLayout.redraw();
+        hiddenCheckBoxLayout.redraw();
+        root.redraw();
+    }
+
+    private void checkAdvanceOrHiddenVars(Map<String, Map<String, String>> detailedVariables) {
+        String advancedVar = detailedVariables.keySet()
+                                              .stream()
+                                              .filter(varName -> Boolean.parseBoolean(detailedVariables.get(varName)
+                                                                                                       .get("advanced")))
+                                              .findFirst()
+                                              .orElse(null);
+        String hiddenVar = detailedVariables.keySet()
+                                            .stream()
+                                            .filter(varName -> Boolean.parseBoolean(detailedVariables.get(varName)
+                                                                                                     .get("hidden")))
+                                            .findFirst()
+                                            .orElse(null);
+        advancedCheckBox.setValue(advanced);
+        hiddenCheckBox.setValue(hidden);
+        if (advancedVar == null) {
+            Arrays.asList(advancedCheckBoxLayout.getMembers()).forEach(Canvas::hide);
+        } else {
+            Arrays.asList(advancedCheckBoxLayout.getMembers()).forEach(Canvas::show);
+        }
+        if (hiddenVar == null) {
+            Arrays.asList(hiddenCheckBoxLayout.getMembers()).forEach(Canvas::hide);
+        } else {
+            Arrays.asList(hiddenCheckBoxLayout.getMembers()).forEach(Canvas::show);
+        }
     }
 
     private Map<String, Set<String>> getVariablesByGroup(Job job) {
-        Map<String, Set<String>> variablesByGroup = new TreeMap<>();
+        Map<String, Set<String>> variablesByGroup = new LinkedHashMap<>();
+        Map<String, Set<String>> finalVariablesByGroup = new LinkedHashMap<>();
+        Set<String> mainVariables = new LinkedHashSet<>();
         job.getDetailedVariables().keySet().forEach(variableName -> {
-            if ((!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) ||
-                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("advanced")) == advanced) &&
-                (!Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) ||
-                 Boolean.valueOf(job.getDetailedVariables().get(variableName).get("hidden")) == hidden)) {
+            if (shouldShowVariable(job.getDetailedVariables().get(variableName))) {
                 String group = job.getDetailedVariables().get(variableName).get("group");
-                Set<String> variableNames = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
-                                                                                : new HashSet<>();
-                variableNames.add(variableName);
-                variablesByGroup.put(group, variableNames);
+                if (group == null || group.isEmpty()) {
+                    mainVariables.add(variableName);
+                } else {
+                    Set<String> variableNames = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
+                                                                                    : new LinkedHashSet<>();
+                    variableNames.add(variableName);
+                    variablesByGroup.put(group, variableNames);
+                }
             }
         });
-        return variablesByGroup;
+        if (!mainVariables.isEmpty()) {
+            finalVariablesByGroup.put("Main Variables", mainVariables);
+        }
+        finalVariablesByGroup.putAll(variablesByGroup);
+        return finalVariablesByGroup;
+    }
+
+    private boolean shouldShowVariable(Map<String, String> variableMap) {
+        boolean advancedValue = Boolean.parseBoolean(variableMap.get("advanced"));
+        boolean hiddenValue = Boolean.parseBoolean(variableMap.get("hidden"));
+        return (!advancedValue || advanced) && (!hiddenValue || hidden);
     }
 
     public void jobUnselected() {
         label.show();
         submittedJobVariablesLabel.hide();
         checkBoxLayout.hide();
-        variablesGrids.forEach(variablesGrid -> variablesGrid.hide());
+        variablesGrids.forEach(Canvas::hide);
         variablesGrids.clear();
         genericInformationGrid.hide();
     }
@@ -205,22 +280,37 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         checkBoxLayout.setPadding(0);
         checkBoxLayout.setAutoHeight();
 
-        CheckBox advancedCheckBox = new CheckBox("Advanced", HasDirection.Direction.RTL);
+        advancedCheckBoxLayout = new HLayout();
+        advancedCheckBoxLayout.setAlign(Alignment.RIGHT);
+        advancedCheckBoxLayout.setPadding(0);
+        advancedCheckBoxLayout.setAutoHeight();
+        advancedCheckBoxLayout.setWidth(10);
+
+        advancedCheckBox = new CheckBox("Advanced", HasDirection.Direction.RTL);
         advancedCheckBox.setValue(advanced);
         advancedCheckBox.addClickHandler(event -> {
             advanced = advancedCheckBox.getValue();
-            buildVariablesEntries(selectedJob);
+            buildVariablesEntries(selectedJob, false);
         });
-        checkBoxLayout.addMember(advancedCheckBox);
+        advancedCheckBoxLayout.addMember(advancedCheckBox);
+        checkBoxLayout.addMember(advancedCheckBoxLayout);
 
-        CheckBox hiddenCheckBox = new CheckBox("Hidden", HasDirection.Direction.RTL);
+        hiddenCheckBoxLayout = new HLayout();
+        hiddenCheckBoxLayout.setAlign(Alignment.RIGHT);
+        hiddenCheckBoxLayout.setPadding(0);
+        hiddenCheckBoxLayout.setAutoHeight();
+        hiddenCheckBoxLayout.setWidth(10);
+
+        hiddenCheckBox = new CheckBox("Hidden", HasDirection.Direction.RTL);
         hiddenCheckBox.setValue(hidden);
         hiddenCheckBox.addClickHandler(event -> {
             hidden = hiddenCheckBox.getValue();
-            buildVariablesEntries(selectedJob);
+            buildVariablesEntries(selectedJob, false);
         });
-        checkBoxLayout.addMember(hiddenCheckBox);
+        hiddenCheckBoxLayout.addMember(hiddenCheckBox);
+        checkBoxLayout.addMember(hiddenCheckBoxLayout);
         checkBoxLayout.hide();
+
         root.addMember(checkBoxLayout);
 
         variablesGrids = new ArrayList<>();

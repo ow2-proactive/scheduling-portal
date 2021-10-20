@@ -195,3 +195,14 @@ border-color: gainsboro;
 pre {
     margin: 0;
 }
+
+.tooltipStyle{
+    color:#FFFFFF;
+    background-color:#000000;
+    border:1px solid #000000;
+    box-shadow:0 1px 6px #000000;
+    padding:5px 10px;
+    border-radius:6px;
+    font-size:13px;
+    margin: -10px;
+}

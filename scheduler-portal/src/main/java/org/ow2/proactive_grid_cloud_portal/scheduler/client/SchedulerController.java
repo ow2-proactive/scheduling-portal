@@ -1043,7 +1043,7 @@ public class SchedulerController extends Controller implements UncaughtException
     public void setJobDetailedVariables(Job job, VarInfoView varInfoView) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         String sessionId = LoginModel.getInstance().getSessionId();
-        scheduler.getJobInfo(sessionId, job.getId().toString(), new AsyncCallback<String>() {
+        scheduler.getJobInfoDetails(sessionId, job.getId().toString(), new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -1055,10 +1055,9 @@ public class SchedulerController extends Controller implements UncaughtException
             @Override
             public void onSuccess(String result) {
                 try {
-                    Map<String, Map<String, String>> detailedVariables = SchedulerJSONUtils.getDetailedVariables(result,
-                                                                                                                 job.getVariables());
+                    Map<String, Map<String, String>> detailedVariables = SchedulerJSONUtils.getDetailedVariables(result);
                     job.setDetailsVariables(detailedVariables);
-                    varInfoView.buildVariablesEntries(job);
+                    varInfoView.buildVariablesEntries(job, true);
                 } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
                     LogModel.getInstance().logImportantMessage("Failed to parse detailed variables for job " +
                                                                job.getId().toString());

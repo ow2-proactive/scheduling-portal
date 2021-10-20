@@ -137,7 +137,10 @@ public class KeyValueGrid extends VStack {
             lg.setHoverCustomizer(new HoverCustomizer() {
                 public String hoverHTML(Object value, ListGridRecord record, int rowNum, int colNum) {
                     String variableName = record.getAttribute(KEY_ATTR.getName());
-                    return detailedVariables.get(variableName).get("description");
+                    String description = detailedVariables.get(variableName).get("description");
+                    return description != null && !description.isEmpty() ? "<div class='tooltipStyle'>" + description +
+                                                                           "</div>"
+                                                                         : null;
                 }
             });
         }
