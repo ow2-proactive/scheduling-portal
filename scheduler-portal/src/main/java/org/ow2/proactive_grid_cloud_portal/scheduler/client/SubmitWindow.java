@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -118,6 +117,8 @@ public class SubmitWindow {
 
     private static final String KEY_OF_GROUP = "group";
 
+    private static final String KEY_OF_DESCRIPTION = "description";
+
     private static final String KEY_OF_HIDDEN = "hidden";
 
     private static final String KEY_OF_ADVANCED = "advanced";
@@ -148,9 +149,9 @@ public class SubmitWindow {
 
     private static final String ERROR_MESSAGE_REGEX = "\"errorMessage\":\"(.*)\",\"stackTrace\"";
 
-    private static final int WINDOW_WIDTH = 600;
+    private static final int WINDOW_WIDTH = 800;
 
-    private static final int WINDOW_HEIGHT = 600;
+    private static final int WINDOW_HEIGHT = 700;
 
     private Window window;
 
@@ -175,7 +176,7 @@ public class SubmitWindow {
 
     private FileUpload fileUpload; // ------------------- FileUpload button
 
-    private VerticalPanel selectWorkflowButtonsPanel; // Panel that holds the
+    private HorizontalPanel selectWorkflowButtonsPanel; // Panel that holds the
     // strategic items to
     // get a wf
 
@@ -279,6 +280,8 @@ public class SubmitWindow {
 
     private String currentJobDescriptor;
 
+    private int noOfFields;
+
     /**
      * Default constructor
      *
@@ -347,13 +350,13 @@ public class SubmitWindow {
         selectWfLayout = new VLayout();
         selectWfLayout.setGroupTitle("1. Select workflow");
         selectWfLayout.setIsGroup(true);
-        selectWfLayout.setHeight("130px");
+        selectWfLayout.setHeight("70px");
 
         // This panel changes depending on the selected method of getting a
         // workflow
-        selectWorkflowButtonsPanel = new VerticalPanel();
+        selectWorkflowButtonsPanel = new HorizontalPanel();
         selectWorkflowButtonsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
+        selectWorkflowButtonsPanel.setHeight("50px");
         selectWorkflowButtonsPanel.setSpacing(5);
 
         final VerticalPanel getWfMethodsPanel = new VerticalPanel();
@@ -450,24 +453,42 @@ public class SubmitWindow {
 
     private void setVarsLayout() {
         Map<String, Map<String, JobVariable>> variablesByGroup = getVariablesByGroup();
+
+        DynamicForm variablesVisualForm;
+        variablesVisualForm = new DynamicForm();
+        variablesVisualForm.setNumCols(3);
+        variablesVisualForm.setColWidths("25%", "50%", "25%");
+        fields = new FormItem[variablesByGroup.size() * 2 + 1];
+        noOfFields = 0;
         variablesByGroup.keySet().forEach(group -> {
-            DynamicForm variablesVisualForm = initVariablesVisualForm(variablesByGroup.get(group), group);
-            varsLayout.addMember(variablesVisualForm);
+            initVariablesVisualForm(variablesByGroup.get(group), group);
         });
+        variablesVisualForm.setFields(fields);
+        varsLayout.addMember(variablesVisualForm);
     }
 
     private Map<String, Map<String, JobVariable>> getVariablesByGroup() {
-        Map<String, Map<String, JobVariable>> variablesByGroup = new TreeMap<>();
+        Map<String, Map<String, JobVariable>> finalVariablesByGroup = new LinkedHashMap<>();
+        Map<String, Map<String, JobVariable>> variablesByGroup = new LinkedHashMap<>();
+        Map<String, JobVariable> mainVariables = new LinkedHashMap<>();
         variables.entrySet().forEach(variable -> {
             if (variable.getValue().showVariable(isAdvanced)) {
-                String group = variable.getValue().getGroup() == null ? "" : variable.getValue().getGroup();
-                Map<String, JobVariable> variablesSameGroup = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
-                                                                                                  : new TreeMap<>();
-                variablesSameGroup.put(variable.getKey(), variable.getValue());
-                variablesByGroup.put(group, variablesSameGroup);
+                String group = variable.getValue().getGroup();
+                if (group == null || group.isEmpty()) {
+                    mainVariables.put(variable.getKey(), variable.getValue());
+                } else {
+                    Map<String, JobVariable> variablesSameGroup = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
+                                                                                                      : new LinkedHashMap<>();
+                    variablesSameGroup.put(variable.getKey(), variable.getValue());
+                    variablesByGroup.put(group, variablesSameGroup);
+                }
             }
         });
-        return variablesByGroup;
+        if (!mainVariables.isEmpty()) {
+            finalVariablesByGroup.put("Main Variables", mainVariables);
+        }
+        finalVariablesByGroup.putAll(variablesByGroup);
+        return finalVariablesByGroup;
     }
 
     private Widget prepareWorlflowInformationWidget() {
@@ -543,32 +564,21 @@ public class SubmitWindow {
         }
     }
 
-    private DynamicForm initVariablesVisualForm(Map<String, JobVariable> variablesByGroup, String group) {
-        // presentation form
-        DynamicForm variablesVisualForm;
-        variablesVisualForm = new DynamicForm();
-        variablesVisualForm.setNumCols(3);
-        variablesVisualForm.setColWidths("25%", "50%", "25%");
-
-        fields = new FormItem[variablesByGroup.size() * 2 + 1];
-
-        int i = 0;
+    private void initVariablesVisualForm(Map<String, JobVariable> variablesByGroup, String group) {
         BlurbItem groupLabel = new BlurbItem();
         groupLabel.setDefaultValue("<u><b>" + group + "</b></u>");
         groupLabel.setStartRow(false);
         groupLabel.setEndRow(true);
-        fields[i++] = groupLabel;
+        fields[noOfFields++] = groupLabel;
 
         for (Entry<String, JobVariable> var : variablesByGroup.entrySet()) {
             TextItem variableItem = createVariableItem(var);
-            fields[i++] = variableItem;
+            variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
+            fields[noOfFields++] = variableItem;
             String model = var.getValue().getModel();
             BlurbItem modelItem = createModelItem(model);
-            fields[i++] = modelItem;
+            fields[noOfFields++] = modelItem;
         }
-
-        variablesVisualForm.setFields(fields);
-        return variablesVisualForm;
     }
 
     private Layout initVariablesActualForm() {
@@ -600,9 +610,7 @@ public class SubmitWindow {
         varsLayout.setIsGroup(true);
         varsLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 1 : 2) + ". Fill workflow variables");
         varsLayout.setWidth100();
-        // In case of re-submit, give more height to Variables Panel.
-        varsLayout.setHeight(isResubmit || isKillAndResubmit ? "280px" : "150px");
-        varsLayout.setMaxHeight(150);
+        varsLayout.setMinHeight(150);
         varsLayout.setPadding(5);
         varsLayout.setOverflow(Overflow.AUTO);
     }
@@ -649,6 +657,7 @@ public class SubmitWindow {
         startAtLayout = new VLayout();
         startAtLayout.setIsGroup(true);
         startAtLayout.setGroupTitle((isResubmit || isKillAndResubmit ? 2 : 3) + ". Scheduled time");
+        startAtLayout.setHeight("120px");
 
         startAtParameter = new Hidden("START_AT");
         planParameter = new Hidden("PLAN");
@@ -742,6 +751,7 @@ public class SubmitWindow {
         messagePanel = new VLayout();
         messagePanel.setIsGroup(true);
         messagePanel.setGroupTitle("Messages");
+        messagePanel.setHeight("90px");
         rootPage.addMember(messagePanel);
     }
 
@@ -1075,19 +1085,31 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (Canvas canvas : varsLayout.getMembers()) {
-                    if (canvas instanceof DynamicForm) {
-                        DynamicForm dynamicForm = (DynamicForm) canvas;
-                        for (FormItem field : dynamicForm.getFields()) {
-                            Arrays.stream(_fields)
-                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
-                                  .findAny()
-                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
-                        }
-                    }
-                }
+                setVariablesOnFields();
+                setFormVariableOnFields();
             }
         };
+    }
+
+    private void setFormVariableOnFields() {
+        for (FormItem field : fields) {
+            Arrays.stream(_fields)
+                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
+                  .findAny()
+                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
+
+        }
+    }
+
+    private void setVariablesOnFields() {
+        for (int i = 0; i < _fields.length; i++) {
+            int finalI = i;
+            variables.keySet()
+                     .stream()
+                     .filter(key -> ("var_" + key).equals(_fields[finalI].getName()))
+                     .findAny()
+                     .ifPresent(name -> _fields[finalI].setValue(variables.get(name).getValue()));
+        }
     }
 
     private void updateVariables(JSONValue updatedVariablesJsonValue) {
@@ -1176,17 +1198,8 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                for (Canvas canvas : varsLayout.getMembers()) {
-                    if (canvas instanceof DynamicForm) {
-                        DynamicForm dynamicForm = (DynamicForm) canvas;
-                        for (FormItem field : dynamicForm.getFields()) {
-                            Arrays.stream(_fields)
-                                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
-                                  .findAny()
-                                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
-                        }
-                    }
-                }
+                setVariablesOnFields();
+                setFormVariableOnFields();
             }
         };
     }
@@ -1432,18 +1445,19 @@ public class SubmitWindow {
             String value = extractNodeValue(attrs, KEY_OF_VALUE);
             String model = extractNodeValue(attrs, KEY_OF_MODEL);
             String group = extractNodeValue(attrs, KEY_OF_GROUP);
+            String description = extractNodeValue(attrs, KEY_OF_DESCRIPTION);
             boolean hidden = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_HIDDEN));
             boolean advanced = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_ADVANCED));
-            createJobVariable(ret, name, value, model, group, hidden, advanced);
+            createJobVariable(ret, name, value, model, group, description, hidden, advanced);
         }
     }
 
     private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model, String group,
-            boolean hidden, boolean advanced) {
+            String description, boolean hidden, boolean advanced) {
         if (name != null && value != null && name.matches("[A-Za-z0-9._]+")) {
             // this won't necessarily be a problem at job submission,
             // but it definitely will be here in the client; don't bother
-            ret.put(name, new JobVariable(name, value, model, group, hidden, advanced));
+            ret.put(name, new JobVariable(name, value, model, group, description, hidden, advanced));
         }
     }
 
@@ -1532,15 +1546,19 @@ public class SubmitWindow {
 
         private String group;
 
+        private String description;
+
         private boolean hidden;
 
         private boolean advanced;
 
-        public JobVariable(String name, String value, String model, String group, boolean hidden, boolean advanced) {
+        public JobVariable(String name, String value, String model, String group, String description, boolean hidden,
+                boolean advanced) {
             this.name = name;
             this.value = value;
             this.model = model;
             this.group = group;
+            this.description = description;
             this.hidden = hidden;
             this.advanced = advanced;
         }
@@ -1555,6 +1573,14 @@ public class SubmitWindow {
 
         public void setGroup(String group) {
             this.group = group;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void settDescription(String description) {
+            this.description = description;
         }
 
         public boolean isHidden() {

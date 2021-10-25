@@ -227,14 +227,13 @@ public class SchedulerJSONUtils extends JSONUtils {
         return Job.parseJSONInfo(jsonJobInfo);
     }
 
-    public static Map<String, Map<String, String>> getDetailedVariables(String jsonString,
-            Map<String, String> variables) throws JSONException {
+    public static Map<String, Map<String, String>> getDetailedVariables(String jsonString) throws JSONException {
         JSONValue val = parseJSON(jsonString);
         JSONObject jsonJobInfo = val.isObject();
         if (jsonJobInfo == null) {
             throw new JSONException("Expected JSON Object: " + jsonString);
         }
-        return Job.parseJSONDetailedVariables(jsonJobInfo, variables);
+        return Job.parseJSONDetailedVariables(jsonJobInfo);
     }
 
     public static Long getLongOrElse(JSONObject jsonObject, String attributeName, Long defaultValue) {
@@ -266,7 +265,7 @@ public class SchedulerJSONUtils extends JSONUtils {
             JSONArray keyValueArray = mapValue.isArray();
             if (keyValueArray != null) {
                 int arraySize = keyValueArray.size();
-                Map<String, String> resultMap = new HashMap<>(arraySize);
+                Map<String, String> resultMap = new LinkedHashMap<>(arraySize);
                 for (int i = 0; i < keyValueArray.size(); i++) {
                     JSONObject object = keyValueArray.get(i).isObject();
                     String key = object.get("key").isString().stringValue();

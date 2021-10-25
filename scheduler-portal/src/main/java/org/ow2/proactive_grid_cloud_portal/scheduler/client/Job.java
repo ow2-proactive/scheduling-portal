@@ -27,7 +27,9 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
 
@@ -440,12 +442,12 @@ public class Job implements Serializable, Comparable<Job> {
                        description);
     }
 
-    public static Map<String, Map<String, String>> parseJSONDetailedVariables(JSONObject jsonJobInfo,
-            Map<String, String> variables) {
-        Map<String, Map<String, String>> detailedVariablesMap = new HashMap<>();
-        JSONObject jobInfoObject = jsonJobInfo.get("jobInfo").isObject();
-        JSONObject detailedVariablesObject = jobInfoObject.get("detailedVariables").isObject();
-        for (String variable : variables.keySet()) {
+    public static Map<String, Map<String, String>> parseJSONDetailedVariables(JSONObject jsonJobInfo) {
+        Map<String, Map<String, String>> detailedVariablesMap = new LinkedHashMap<>();
+        JSONObject detailedVariablesObject = jsonJobInfo.get("detailedVariables").isObject();
+        JSONObject variablesObject = jsonJobInfo.get("variables").isObject();
+        Set<String> variables = variablesObject.keySet();
+        for (String variable : variables) {
             Map<String, String> variableMap = new HashMap<>();
             JSONObject nameObject = detailedVariablesObject.get(variable).isObject();
             variableMap.put("name", SchedulerJSONUtils.getStringOrDefault(nameObject.get("name")));
