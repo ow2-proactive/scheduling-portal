@@ -573,7 +573,9 @@ public class SubmitWindow {
 
         for (Entry<String, JobVariable> var : variablesByGroup.entrySet()) {
             TextItem variableItem = createVariableItem(var);
-            variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
+            if (var.getValue().getDescription() != null && !var.getValue().getDescription().isEmpty()) {
+                variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
+            }
             fields[noOfFields++] = variableItem;
             String model = var.getValue().getModel();
             BlurbItem modelItem = createModelItem(model);
