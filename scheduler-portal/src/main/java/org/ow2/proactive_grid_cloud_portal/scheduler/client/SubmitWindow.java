@@ -1128,7 +1128,7 @@ public class SubmitWindow {
                     }
                     updateAdvanced(updatedVariablesJson, varName, variable);
                     updateHidden(updatedVariablesJson, varName, variable);
-                    updateGroups(updatedVariablesJson, varName, variable);
+                    updateGroup(updatedVariablesJson, varName, variable);
                     updateModel(updatedVariablesJson, varName, variable);
                     updateDescription(updatedVariablesJson, varName, variable);
                 }
@@ -1154,7 +1154,7 @@ public class SubmitWindow {
         }
     }
 
-    private void updateGroups(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+    private void updateGroup(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
         JSONValue updatedVGroupsVariablesJsonValue = updatedVariablesJson.get("updatedGroups");
         JSONObject objGroupsVariables = updatedVGroupsVariablesJsonValue.isObject();
         JSONString variableJsonGroups = objGroupsVariables.get(varName).isString();
