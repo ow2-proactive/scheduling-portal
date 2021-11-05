@@ -1038,7 +1038,7 @@ public class SubmitWindow {
                         if (obj != null && obj.containsKey("valid")) {
                             if (((JSONBoolean) obj.get("valid")).booleanValue()) {
                                 if (obj.containsKey("updatedVariables")) {
-                                    updateVariables(obj.get("updatedVariables"));
+                                    updateVariables(obj);
                                     redrawVariables(job);
                                 }
                                 LogModel.getInstance().logMessage("Job validated");
@@ -1114,7 +1114,8 @@ public class SubmitWindow {
         }
     }
 
-    private void updateVariables(JSONValue updatedVariablesJsonValue) {
+    private void updateVariables(JSONObject updatedVariablesJson) {
+        JSONValue updatedVariablesJsonValue = updatedVariablesJson.get("updatedVariables");
         JSONObject obj = updatedVariablesJsonValue.isObject();
         if (obj != null) {
             for (String varName : obj.keySet()) {
@@ -1125,9 +1126,58 @@ public class SubmitWindow {
                     if (variableJsonString != null) {
                         variable.setValue(variableJsonString.stringValue());
                     }
-
+                    updateAdvanced(updatedVariablesJson, varName, variable);
+                    updateHidden(updatedVariablesJson, varName, variable);
+                    updateGroups(updatedVariablesJson, varName, variable);
+                    updateModel(updatedVariablesJson, varName, variable);
+                    updateDescription(updatedVariablesJson, varName, variable);
                 }
             }
+        }
+    }
+
+    private void updateDescription(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+        JSONValue updatedDescriptionsVariablesJsonValue = updatedVariablesJson.get("updatedDescriptions");
+        JSONObject objDescriptionVariables = updatedDescriptionsVariablesJsonValue.isObject();
+        JSONString variableDescriptionGroups = objDescriptionVariables.get(varName).isString();
+        if (variableDescriptionGroups != null) {
+            variable.settDescription(variableDescriptionGroups.stringValue());
+        }
+    }
+
+    private void updateModel(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+        JSONValue updatedModelVariablesJsonValue = updatedVariablesJson.get("updatedModels");
+        JSONObject objModelVariables = updatedModelVariablesJsonValue.isObject();
+        JSONString variableJsonModel = objModelVariables.get(varName).isString();
+        if (variableJsonModel != null) {
+            variable.setModel(variableJsonModel.stringValue());
+        }
+    }
+
+    private void updateGroups(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+        JSONValue updatedVGroupsVariablesJsonValue = updatedVariablesJson.get("updatedGroups");
+        JSONObject objGroupsVariables = updatedVGroupsVariablesJsonValue.isObject();
+        JSONString variableJsonGroups = objGroupsVariables.get(varName).isString();
+        if (variableJsonGroups != null) {
+            variable.setGroup(variableJsonGroups.stringValue());
+        }
+    }
+
+    private void updateHidden(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+        JSONValue updatedHiddenVariablesJsonValue = updatedVariablesJson.get("updatedHidden");
+        JSONObject objHiddenVariables = updatedHiddenVariablesJsonValue.isObject();
+        JSONBoolean variableJsonHidden = objHiddenVariables.get(varName).isBoolean();
+        if (variableJsonHidden != null) {
+            variable.setHidden(variableJsonHidden.booleanValue());
+        }
+    }
+
+    private void updateAdvanced(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
+        JSONValue updatedAdvancedVariablesJsonValue = updatedVariablesJson.get("updatedAdvanced");
+        JSONObject objAdvancedVariables = updatedAdvancedVariablesJsonValue.isObject();
+        JSONBoolean variableJsonAdvanced = objAdvancedVariables.get(varName).isBoolean();
+        if (variableJsonAdvanced != null) {
+            variable.setAdvanced(variableJsonAdvanced.booleanValue());
         }
     }
 
