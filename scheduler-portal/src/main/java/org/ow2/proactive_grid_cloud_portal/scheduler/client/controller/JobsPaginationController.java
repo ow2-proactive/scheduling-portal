@@ -96,7 +96,7 @@ public class JobsPaginationController extends PaginationController<JobsPaginatio
     @Override
     public boolean hasPrevious() {
         //GraphQL fetches the jobs starting from the oldest
-        return model.hasNextPage();
+        return model.hasNextPage() && model.getPage() > 0;
     }
 
     @Override
