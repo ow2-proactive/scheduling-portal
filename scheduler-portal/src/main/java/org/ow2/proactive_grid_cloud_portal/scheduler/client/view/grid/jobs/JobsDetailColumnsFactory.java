@@ -49,6 +49,8 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
 
     public static GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime", "Finished time", 50, true, false);
 
+    public static GridColumns IN_ERROR_TIME_ATTR = new GridColumns("inErrorTime", "In error time", 50, true, false);
+
     public static GridColumns PENDING_DURATION_ATTR = new GridColumns("pendingDuration",
                                                                       "Pending duration",
                                                                       50,
@@ -63,8 +65,8 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
     public GridColumns[] getColumns() {
         return new GridColumns[] { ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, PENDING_TASKS_ATTR,
                                    RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR, SUBMITTED_TIME_ATTR,
-                                   STARTED_TIME_ATTR, FINISHED_TIME_ATTR, PENDING_DURATION_ATTR, DURATION_ATTR,
-                                   TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
+                                   STARTED_TIME_ATTR, FINISHED_TIME_ATTR, IN_ERROR_TIME_ATTR, PENDING_DURATION_ATTR,
+                                   DURATION_ATTR, TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
     }
 
     @Override
@@ -74,6 +76,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         long submitTime = item.getSubmitTime();
         long startTime = item.getStartTime();
         long finishTime = item.getFinishTime();
+        long inErrorTime = item.getInErrorTime();
 
         String pendingDuration = "";
         if (startTime > submitTime)
@@ -93,6 +96,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(SUBMITTED_TIME_ATTR.getName(), JSUtil.getTime(submitTime));
         record.setAttribute(STARTED_TIME_ATTR.getName(), (startTime > submitTime) ? JSUtil.getTime(startTime) : "");
         record.setAttribute(FINISHED_TIME_ATTR.getName(), (finishTime > startTime) ? JSUtil.getTime(finishTime) : "");
+        record.setAttribute(IN_ERROR_TIME_ATTR.getName(), JSUtil.getTime(inErrorTime));
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
         record.setAttribute(DESCRIPTION_ATTR.getName(), StringUtil.asHTML(item.getDescription()));

@@ -71,6 +71,20 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
                                                                       false,
                                                                       true);
 
+    public static final GridColumns IN_ERROR_TIME_ATTR = new GridColumns("inErrorTime",
+                                                                         "In error time",
+                                                                         120,
+                                                                         true,
+                                                                         false,
+                                                                         true);
+
+    public static final GridColumns SCHEDULED_TIME_ATTR = new GridColumns("scheduledTime",
+                                                                          "Scheduled time",
+                                                                          120,
+                                                                          true,
+                                                                          false,
+                                                                          true);
+
     public static final GridColumns FINISHED_TIME_ATTR = new GridColumns("finishedTime",
                                                                          "Finished at",
                                                                          120,
@@ -128,6 +142,8 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
         record.setAttribute(TAG_ATTR.getName(), item.getTag());
         record.setAttribute(STATUS_ATTR.getName(), taskStatus.toString());
         record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
+        record.setAttribute(IN_ERROR_TIME_ATTR.getName(), JSUtil.getTime(item.getInErrorTime()));
+        record.setAttribute(SCHEDULED_TIME_ATTR.getName(), JSUtil.getTime(item.getScheduledTime()));
         record.setAttribute(FINISHED_TIME_ATTR.getName(), JSUtil.getTime(item.getFinishTime()));
         record.setAttribute(EXEC_DURATION_ATTR.getName(), executionDuration);
         record.setAttribute(EXECUTIONS_ATTR.getName(), currentExecutionNumber);
@@ -146,6 +162,10 @@ public abstract class TasksColumnsFactory implements ColumnsFactory<Task> {
 
         if (item.getStartTime() > 0)
             record.setAttribute(START_TIME_ATTR.getName(), JSUtil.getTime(item.getStartTime()));
+        if (item.getInErrorTime() > 0)
+            record.setAttribute(IN_ERROR_TIME_ATTR.getName(), JSUtil.getTime(item.getInErrorTime()));
+        if (item.getScheduledTime() > 0)
+            record.setAttribute(SCHEDULED_TIME_ATTR.getName(), JSUtil.getTime(item.getScheduledTime()));
         if (item.getFinishTime() > item.getStartTime())
             record.setAttribute(FINISHED_TIME_ATTR.getName(), JSUtil.getTime(item.getFinishTime()));
         if (item.getStartAtTime() > 0)
