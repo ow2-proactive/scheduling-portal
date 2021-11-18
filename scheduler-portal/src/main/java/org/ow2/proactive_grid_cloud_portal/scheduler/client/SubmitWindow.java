@@ -430,8 +430,8 @@ public class SubmitWindow {
         if (variables != null && !variables.isEmpty()) {
             Layout checkBoxLayout = createCheckBoxLayout();
             varsLayout.addMember(checkBoxLayout);
+            setVarsLayout();
         }
-        setVarsLayout();
         Layout hiddenVarsLayout = initVariablesActualForm();
         varsLayout.addMember(hiddenVarsLayout);
         rootPage.addMember(varsLayout);
