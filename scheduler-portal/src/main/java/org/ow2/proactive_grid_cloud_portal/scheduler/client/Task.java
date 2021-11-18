@@ -55,6 +55,8 @@ public class Task implements Serializable, Comparable<Task> {
 
     private long inErrorTime;
 
+    private long scheduledTime;
+
     private long finishTime;
 
     private long executionDuration;
@@ -108,8 +110,8 @@ public class Task implements Serializable, Comparable<Task> {
      * @param visualizationConnectionString visualization connection string
      */
     public Task(long id, String name, TaskStatus status, String hostName, long startTime, long inErrorTime,
-            long finishedTime, long executionDuration, String description, int nodeCount, int maxNumberOfExec,
-            int numberOfExecLeft, int maxNumberOfExecOnFailure, int numberOfExecOnFailureLeft,
+            long finishedTime, long scheduledTime, long executionDuration, String description, int nodeCount,
+            int maxNumberOfExec, int numberOfExecLeft, int maxNumberOfExecOnFailure, int numberOfExecOnFailureLeft,
             boolean visualizationActivated, String visualizationConnectionString) {
 
         this.id = id;
@@ -118,6 +120,7 @@ public class Task implements Serializable, Comparable<Task> {
         this.hostName = hostName;
         this.startTime = startTime;
         this.inErrorTime = inErrorTime;
+        this.scheduledTime = scheduledTime;
         this.finishTime = finishedTime;
         this.executionDuration = executionDuration;
         this.startAtTime = -1L;
@@ -265,6 +268,14 @@ public class Task implements Serializable, Comparable<Task> {
 
     public void setInErrorTime(long inErrorTime) {
         this.inErrorTime = inErrorTime;
+    }
+
+    public long getScheduledTime() {
+        return scheduledTime;
+    }
+
+    public void setScheduledTime(long scheduledTime) {
+        this.scheduledTime = scheduledTime;
     }
 
     public int getMaxNumberOfExec() {
@@ -436,6 +447,7 @@ public class Task implements Serializable, Comparable<Task> {
                 nodes = (int) parEnv.get("nodesNumber").isNumber().doubleValue();
             }
         }
+        long scheduledTime = (long) taskInfo.get("scheduledTime").isNumber().doubleValue();
 
         Task result = new Task(id,
                                name,
@@ -444,6 +456,7 @@ public class Task implements Serializable, Comparable<Task> {
                                startTime,
                                inErrorTime,
                                finishedTime,
+                               scheduledTime,
                                executionDuration,
                                description,
                                nodes,
@@ -457,7 +470,6 @@ public class Task implements Serializable, Comparable<Task> {
         result.setJobId(jobId);
         result.setJobName(jobName);
 
-        long scheduledTime = (long) taskInfo.get("scheduledTime").isNumber().doubleValue();
         result.setStartAtTime(scheduledTime);
         return result;
     }
