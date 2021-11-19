@@ -1038,7 +1038,9 @@ public class SubmitWindow {
                         if (obj != null && obj.containsKey("valid")) {
                             if (((JSONBoolean) obj.get("valid")).booleanValue()) {
                                 if (obj.containsKey("updatedVariables")) {
-                                    updateVariables(obj);
+                                    if (variables != null && !variables.isEmpty()) {
+                                        updateVariables(obj);
+                                    }
                                     redrawVariables(job);
                                 }
                                 LogModel.getInstance().logMessage("Job validated");
@@ -1087,8 +1089,10 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                setVariablesOnFields();
-                setFormVariableOnFields();
+                if (variables != null && !variables.isEmpty()) {
+                    setVariablesOnFields();
+                    setFormVariableOnFields();
+                }
             }
         };
     }
@@ -1250,8 +1254,10 @@ public class SubmitWindow {
              * _fields is used to create the listGrid from Job Variables tab
              */
             private void setAllValuesAsString() {
-                setVariablesOnFields();
-                setFormVariableOnFields();
+                if (variables != null && !variables.isEmpty()) {
+                    setVariablesOnFields();
+                    setFormVariableOnFields();
+                }
             }
         };
     }
