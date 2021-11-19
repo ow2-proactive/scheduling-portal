@@ -914,11 +914,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     public void disableTasksTab(boolean disabled) {
-        leftTabSet.updateTab(tasksTab, null);
-        leftTabSet.removeTab(tasksTab);
-        buildTasksTab();
-        leftTabSet.addTab(this.tasksTab, 0);
-        leftTabSet.redraw();
+        tasksTab.setDisabled(disabled);
     }
 
     public void disableVarInfoTab(boolean disabled) {
@@ -930,11 +926,14 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     public void disableVisualizationTab(boolean disabled) {
-        leftTabSet.updateTab(visuTab, null);
-        leftTabSet.removeTab(visuTab);
-        buildVisuTab();
-        leftTabSet.addTab(visuTab, 1);
-        leftTabSet.redraw();
+        if (disabled) {
+            leftTabSet.updateTab(visuTab, null);
+            leftTabSet.removeTab(visuTab);
+            buildVisuTab();
+            leftTabSet.addTab(visuTab, 1);
+            leftTabSet.redraw();
+        }
+        visuTab.setDisabled(disabled);
     }
 
     public void disableServerLogsTab(boolean disabled) {
