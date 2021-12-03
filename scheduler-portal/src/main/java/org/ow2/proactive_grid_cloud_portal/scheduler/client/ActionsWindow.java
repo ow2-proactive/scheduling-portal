@@ -360,8 +360,8 @@ public class ActionsWindow {
     private String extractVariableName(String variablePatternCheck) {
         return variables.keySet()
                         .stream()
-                        .filter(variableName -> variablePatternCheck.equals("$" + variableName) ||
-                                                variablePatternCheck.equals("${" + variableName + "}"))
+                        .filter(variableName -> variablePatternCheck.contains("$" + variableName) ||
+                                                variablePatternCheck.contains("${" + variableName + "}"))
                         .findFirst()
                         .orElse(null);
     }
