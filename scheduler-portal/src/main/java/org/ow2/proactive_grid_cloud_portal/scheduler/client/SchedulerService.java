@@ -454,6 +454,7 @@ public interface SchedulerService extends RemoteService {
     String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
     /**
+     * Adds a signal to given job
      *
      * @param sessionId the current session id
      * @param signal the signal to be sent to the job
@@ -462,9 +463,48 @@ public interface SchedulerService extends RemoteService {
      */
     Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException;
 
+    /**
+     * Adds a signal with variables to given job
+     *
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param updatedVariables the updated variables
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
+    Set<String> addJobSignalWithVariables(final String sessionId, String signal, String jobId,
+            Map<String, String> updatedVariables) throws RestServerException, ServiceException;
+
+    /**
+     * Validates signal variables
+     *
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param updatedVariables the updated variables
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
+    String validateJobSignal(final String sessionId, String signal, String jobId, Map<String, String> updatedVariables)
+            throws RestServerException, ServiceException;
+
+    /**
+     * Check if user has permission to access given methods
+     *
+     * @param sessionId the current session id
+     * @param methods the the list of methods to be checked
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
     Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException;
 
+    /**
+     * Check if user has permission to given methods for the given jobs
+     *
+     * @param sessionId the current session id
+     * @param jobId the list of job ids
+     * @param methods the list of methods to be checked
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     */
     Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobId,
             List<String> methods) throws RestServerException, ServiceException;
 }

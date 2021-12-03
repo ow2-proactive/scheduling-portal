@@ -55,6 +55,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -282,34 +283,17 @@ public class JobsController {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.getJobInfoDetails(LoginModel.getInstance().getSessionId(), jobId, new AsyncCallback<String>() {
             public void onSuccess(String result) {
-                Set<String> signals = parseSignals(result);
-                jobsListGrid.addActionsMenu(jobId, signals);
+                try {
+                    Map<String, Map<String, Map<String, String>>> detailedSignals = SchedulerJSONUtils.getDetailedSignals(result);
+                    jobsListGrid.addActionsMenu(jobId, detailedSignals);
+                } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
+                    LogModel.getInstance().logImportantMessage("Failed to parse detailed variables for job " + jobId);
+                }
             }
 
             public void onFailure(Throwable caught) {
                 String message = JSONUtils.getJsonErrorMessage(caught);
                 LogModel.getInstance().logImportantMessage("Failed to get job details : " + message);
-            }
-        });
-    }
-
-    /**
-     * Sends signal to a job
-     *
-     * @param signal the signal that will be sent to the job
-     * @param jobId id of the job
-     */
-    public void addJobSignal(String signal, String jobId) {
-        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
-        scheduler.addJobSignal(LoginModel.getInstance().getSessionId(), signal, jobId, new AsyncCallback<Void>() {
-            public void onSuccess(Void result) {
-                LogModel.getInstance().logMessage("Successfully add signal " + signal + " job " + jobId +
-                                                  " has the following signals " + result);
-            }
-
-            public void onFailure(Throwable caught) {
-                String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to add job signals : " + message);
             }
         });
     }
@@ -692,7 +676,7 @@ public class JobsController {
                                                    if (result.contains("false")) {
                                                        label.setContents("You are not authorized to see this job's variables");
                                                        label.show();
-                                                       variablesGrids.forEach(variablesGrid -> variablesGrid.hide());
+                                                       variablesGrids.forEach(Canvas::hide);
                                                        genericInformationGrid.hide();
                                                    }
                                                }

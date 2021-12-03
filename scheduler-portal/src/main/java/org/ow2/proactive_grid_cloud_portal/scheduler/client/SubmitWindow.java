@@ -36,6 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobVariable;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 
 import com.google.gwt.core.client.GWT;
@@ -84,7 +85,6 @@ import com.google.gwt.xml.client.XMLParser;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
-import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.DateChooser;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -428,8 +428,14 @@ public class SubmitWindow {
         Widget workflowMetaDataWidget = prepareWorlflowInformationWidget();
         varsLayout.addMember(workflowMetaDataWidget);
         if (variables != null && !variables.isEmpty()) {
-            Layout checkBoxLayout = createCheckBoxLayout();
-            varsLayout.addMember(checkBoxLayout);
+            long noOfAdvancedVariables = variables.values()
+                                                  .stream()
+                                                  .filter(jobVariable -> jobVariable.isAdvanced())
+                                                  .count();
+            if (noOfAdvancedVariables > 0) {
+                Layout checkBoxLayout = createCheckBoxLayout();
+                varsLayout.addMember(checkBoxLayout);
+            }
             setVarsLayout();
         }
         Layout hiddenVarsLayout = initVariablesActualForm();
@@ -460,9 +466,8 @@ public class SubmitWindow {
         variablesVisualForm.setColWidths("25%", "50%", "25%");
         fields = new FormItem[variablesByGroup.size() * 2 + 1];
         noOfFields = 0;
-        variablesByGroup.keySet().forEach(group -> {
-            initVariablesVisualForm(variablesByGroup.get(group), group);
-        });
+        noOfFields = 0;
+        variablesByGroup.keySet().forEach(group -> initVariablesVisualForm(variablesByGroup.get(group), group));
         variablesVisualForm.setFields(fields);
         varsLayout.addMember(variablesVisualForm);
     }
@@ -471,15 +476,15 @@ public class SubmitWindow {
         Map<String, Map<String, JobVariable>> finalVariablesByGroup = new LinkedHashMap<>();
         Map<String, Map<String, JobVariable>> variablesByGroup = new LinkedHashMap<>();
         Map<String, JobVariable> mainVariables = new LinkedHashMap<>();
-        variables.entrySet().forEach(variable -> {
-            if (variable.getValue().showVariable(isAdvanced)) {
-                String group = variable.getValue().getGroup();
+        variables.forEach((key, value) -> {
+            if (!value.isHidden() && (isAdvanced || !value.isAdvanced())) {
+                String group = value.getGroup();
                 if (group == null || group.isEmpty()) {
-                    mainVariables.put(variable.getKey(), variable.getValue());
+                    mainVariables.put(key, value);
                 } else {
                     Map<String, JobVariable> variablesSameGroup = variablesByGroup.containsKey(group) ? variablesByGroup.get(group)
                                                                                                       : new LinkedHashMap<>();
-                    variablesSameGroup.put(variable.getKey(), variable.getValue());
+                    variablesSameGroup.put(key, value);
                     variablesByGroup.put(group, variablesSameGroup);
                 }
             }
@@ -1098,13 +1103,13 @@ public class SubmitWindow {
     }
 
     private void setFormVariableOnFields() {
-        for (FormItem field : fields) {
-            Arrays.stream(_fields)
-                  .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
-                  .findAny()
-                  .ifPresent(_field -> _field.setValue(field.getValue().toString()));
+        Arrays.stream(fields)
+              .forEach(field -> Arrays.stream(_fields)
+                                      .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
+                                      .findAny()
+                                      .ifPresent(_field -> _field.setValue(field.getValue().toString()))
 
-        }
+        );
     }
 
     private void setVariablesOnFields() {
@@ -1127,7 +1132,7 @@ public class SubmitWindow {
                 if (variable != null) {
                     JSONValue variableJsonValue = obj.get(varName);
                     JSONString variableJsonString = variableJsonValue.isString();
-                    if (variableJsonString != null) {
+                    if (variableJsonString != null && !matchesCopyPattern(variable.getName())) {
                         variable.setValue(variableJsonString.stringValue());
                     }
                     updateAdvanced(updatedVariablesJson, varName, variable);
@@ -1140,12 +1145,33 @@ public class SubmitWindow {
         }
     }
 
+    private boolean matchesCopyPattern(String variableName) {
+        FormItem matchField = Arrays.stream(fields)
+                                    .filter(field -> field.getName().equals(variableName))
+                                    .findFirst()
+                                    .orElse(null);
+        if (matchField != null && matchField.getValue() != null) {
+            String matchVariableName = extractVariableName(matchField.getValue().toString());
+            return matchVariableName != null;
+        }
+        return false;
+    }
+
+    private String extractVariableName(String variablePatternCheck) {
+        return variables.keySet()
+                        .stream()
+                        .filter(variableName -> variablePatternCheck.equals("$" + variableName) ||
+                                                variablePatternCheck.equals("${" + variableName + "}"))
+                        .findFirst()
+                        .orElse(null);
+    }
+
     private void updateDescription(JSONObject updatedVariablesJson, String varName, JobVariable variable) {
         JSONValue updatedDescriptionsVariablesJsonValue = updatedVariablesJson.get("updatedDescriptions");
         JSONObject objDescriptionVariables = updatedDescriptionsVariablesJsonValue.isObject();
         JSONString variableDescriptionGroups = objDescriptionVariables.get(varName).isString();
         if (variableDescriptionGroups != null) {
-            variable.settDescription(variableDescriptionGroups.stringValue());
+            variable.setDescription(variableDescriptionGroups.stringValue());
         }
     }
 
@@ -1506,16 +1532,16 @@ public class SubmitWindow {
             String description = extractNodeValue(attrs, KEY_OF_DESCRIPTION);
             boolean hidden = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_HIDDEN));
             boolean advanced = Boolean.parseBoolean(extractNodeValue(attrs, KEY_OF_ADVANCED));
-            createJobVariable(ret, name, value, model, group, description, hidden, advanced);
+            createJobVariable(ret, name, value, model, description, group, advanced, hidden);
         }
     }
 
-    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model, String group,
-            String description, boolean hidden, boolean advanced) {
+    private void createJobVariable(Map<String, JobVariable> ret, String name, String value, String model,
+            String description, String group, boolean advanced, boolean hidden) {
         if (name != null && value != null && name.matches("[A-Za-z0-9._]+")) {
             // this won't necessarily be a problem at job submission,
             // but it definitely will be here in the client; don't bother
-            ret.put(name, new JobVariable(name, value, model, group, description, hidden, advanced));
+            ret.put(name, new JobVariable(name, value, model, description, group, advanced, hidden));
         }
     }
 
@@ -1595,87 +1621,4 @@ public class SubmitWindow {
         return false;
     }
 
-    class JobVariable {
-        private String name;
-
-        private String value;
-
-        private String model;
-
-        private String group;
-
-        private String description;
-
-        private boolean hidden;
-
-        private boolean advanced;
-
-        public JobVariable(String name, String value, String model, String group, String description, boolean hidden,
-                boolean advanced) {
-            this.name = name;
-            this.value = value;
-            this.model = model;
-            this.group = group;
-            this.description = description;
-            this.hidden = hidden;
-            this.advanced = advanced;
-        }
-
-        public void setModel(String model) {
-            this.model = model;
-        }
-
-        public String getGroup() {
-            return group;
-        }
-
-        public void setGroup(String group) {
-            this.group = group;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void settDescription(String description) {
-            this.description = description;
-        }
-
-        public boolean isHidden() {
-            return hidden;
-        }
-
-        public void setHidden(boolean hidden) {
-            this.hidden = hidden;
-        }
-
-        public boolean isAdvanced() {
-            return advanced;
-        }
-
-        public void setAdvanced(boolean advanced) {
-            this.advanced = advanced;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getModel() {
-            return model;
-        }
-
-        public boolean showVariable(boolean isAdvanced) {
-            return !hidden && ((isAdvanced && advanced) || (!advanced));
-        }
-
-    }
 }
