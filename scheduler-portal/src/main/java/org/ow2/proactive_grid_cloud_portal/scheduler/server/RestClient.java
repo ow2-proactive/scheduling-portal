@@ -795,9 +795,24 @@ public interface RestClient {
 
     @POST
     @Path("job/{jobid}/signals")
-    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Consumes(value = MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.APPLICATION_JSON)
     Set<String> addJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
             @PathParam("jobid") String jobId);
+
+    @POST
+    @Path("job/{jobid}/signals")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream addJobSignalWithVariables(@HeaderParam("sessionid") String sessionId,
+            @QueryParam("signal") String signal, @PathParam("jobid") String jobId,
+            Map<String, String> updatedVariables);
+
+    @POST
+    @Path("job/{jobid}/signals/validate")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    String validateJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
+            @PathParam("jobid") String jobId, Map<String, String> updatedVariables);
 
 }

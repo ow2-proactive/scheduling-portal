@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController.PREFIX_SIGNAL_READY;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUt
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 
 
 /**
@@ -459,6 +462,35 @@ public class Job implements Serializable, Comparable<Job> {
             variableMap.put("hidden", nameObject.get("hidden").isBoolean().toString());
             detailedVariablesMap.put(variable, variableMap);
         }
+        return detailedVariablesMap;
+    }
+
+    public static Map<String, Map<String, Map<String, String>>> parseJSONDetailedSignals(JSONObject jsonJobInfo) {
+        Map<String, Map<String, Map<String, String>>> detailedVariablesMap = new LinkedHashMap<>();
+        JSONObject detailedSignalsObject = jsonJobInfo.get("detailedSignals").isObject();
+        Set<String> signals = SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals"));
+
+        signals.forEach(signal -> {
+            Map<String, Map<String, String>> signalMap = new HashMap<>();
+            JSONValue jsonValue = detailedSignalsObject.get(signal.substring(PREFIX_SIGNAL_READY.length()));
+            if (jsonValue != null) {
+                JSONObject signalObject = jsonValue.isObject();
+                signalObject.keySet().forEach(variable -> {
+                    Map<String, String> variableMap = new HashMap<>();
+                    JSONObject variableObject = signalObject.get(variable).isObject();
+                    variableMap.put("name", SchedulerJSONUtils.getStringOrDefault(variableObject.get("name")));
+                    variableMap.put("value", SchedulerJSONUtils.getStringOrDefault(variableObject.get("value")));
+                    variableMap.put("model", SchedulerJSONUtils.getStringOrDefault(variableObject.get("model")));
+                    variableMap.put("description",
+                                    SchedulerJSONUtils.getStringOrDefault(variableObject.get("description")));
+                    variableMap.put("group", SchedulerJSONUtils.getStringOrDefault(variableObject.get("group")));
+                    variableMap.put("advanced", variableObject.get("advanced").isBoolean().toString());
+                    variableMap.put("hidden", variableObject.get("hidden").isBoolean().toString());
+                    signalMap.put(variable, variableMap);
+                });
+                detailedVariablesMap.put(signal, signalMap);
+            }
+        });
         return detailedVariablesMap;
     }
 

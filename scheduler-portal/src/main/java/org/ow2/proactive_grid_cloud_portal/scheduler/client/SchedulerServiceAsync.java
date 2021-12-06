@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
@@ -411,17 +412,58 @@ public interface SchedulerServiceAsync {
     void portalAccess(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * Adds a signal to given job
      *
-     * @param sessionId current session id
+     * @param sessionId the current session id
      * @param signal the signal to be sent to the job
      * @param jobId id of the job
      * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
      */
-    void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Void> asyncCallback);
+    void addJobSignal(String sessionId, String signal, String jobId, AsyncCallback<Set<String>> asyncCallback);
 
+    /**
+     * Adds a signal with variables to given job
+     *
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param updatedVariables the updated variables
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    void addJobSignalWithVariables(String sessionId, String signal, String jobId, Map<String, String> updatedVariables,
+            AsyncCallback<Set<String>> asyncCallback);
+
+    /**
+     * Validates signal variables
+     *
+     * @param sessionId the current session id
+     * @param signal the signal to be sent to the job
+     * @param jobId id of the job
+     * @param updatedVariables the updated variables
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    void validateJobSignal(String sessionId, String signal, String jobId, Map<String, String> updatedVariables,
+            AsyncCallback<String> asyncCallback);
+
+    /**
+     * Check if user has permission to access given methods
+     *
+     * @param sessionId the current session id
+     * @param methods the the list of methods to be checked
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
     Request checkMethodsPermissions(String sessionId, List<String> methods,
             AsyncCallback<Map<String, Boolean>> asyncCallback);
 
+    /**
+     * Check if user has permission to given methods for the given jobs
+     *
+     * @param sessionId the current session id
+     * @param jobId the list of job ids
+     * @param methods the list of methods to be checked
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
     Request checkJobsPermissionMethods(String sessionId, List<String> jobId, List<String> methods,
             AsyncCallback<Map<String, Map<String, Boolean>>> asyncCallback);
 

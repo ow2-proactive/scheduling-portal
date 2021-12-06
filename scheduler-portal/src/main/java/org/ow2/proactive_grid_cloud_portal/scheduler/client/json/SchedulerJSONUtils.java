@@ -236,6 +236,16 @@ public class SchedulerJSONUtils extends JSONUtils {
         return Job.parseJSONDetailedVariables(jsonJobInfo);
     }
 
+    public static Map<String, Map<String, Map<String, String>>> getDetailedSignals(String jsonString)
+            throws JSONException {
+        JSONValue val = parseJSON(jsonString);
+        JSONObject jsonJobInfo = val.isObject();
+        if (jsonJobInfo == null) {
+            throw new JSONException("Expected JSON Object: " + jsonString);
+        }
+        return Job.parseJSONDetailedSignals(jsonJobInfo);
+    }
+
     public static Long getLongOrElse(JSONObject jsonObject, String attributeName, Long defaultValue) {
         if (!jsonObject.containsKey(attributeName)) {
             return defaultValue;

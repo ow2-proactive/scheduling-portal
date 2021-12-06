@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController.PREFIX_SIGNAL_READY;
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
 
 import java.util.*;
@@ -34,6 +35,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.*;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ActionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
@@ -79,6 +81,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
      * The controller for the jobs grid.
      */
     protected JobsController controller;
+
+    private ActionsWindow actionsWindow;
 
     private boolean selPause; // ALL selected jobs are paused
 
@@ -531,15 +535,35 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     }
 
-    public void addActionsMenu(String jobId, Set<String> signals) {
+    public void addActionsMenu(String jobId, Map<String, Map<String, Map<String, String>>> detailedSignals) {
         Menu signalsMenu = new Menu();
-        for (String signal : signals) {
-            MenuItem item = new MenuItem(signal.substring(signal.indexOf("_") + 1));
-            item.addClickHandler(event -> controller.addJobSignal(signal.substring(signal.indexOf("_") + 1), jobId));
+        for (String signal : detailedSignals.keySet()) {
+            MenuItem item = new MenuItem(signal.substring(PREFIX_SIGNAL_READY.length()));
+            boolean signalDoesNotHaveVariables = detailedSignals.get(signal)
+                                                                .values()
+                                                                .stream()
+                                                                .allMatch(Objects::isNull);
+            boolean allVariablesAreHidden = detailedSignals.get(signal)
+                                                           .values()
+                                                           .stream()
+                                                           .allMatch(entry -> Boolean.parseBoolean(entry.get("hidden")));
+            item.addClickHandler(event -> {
+                if (signalDoesNotHaveVariables || allVariablesAreHidden) {
+                    ActionsController actionsController = new ActionsController(signal.substring(PREFIX_SIGNAL_READY.length()),
+                                                                                jobId);
+                    actionsController.addJobSignal();
+                } else {
+                    actionsWindow = new ActionsWindow(signal.substring(PREFIX_SIGNAL_READY.length()),
+                                                      detailedSignals.get(signal),
+                                                      jobId);
+                    actionsWindow.show();
+                }
+            });
+
             signalsMenu.addItem(item);
         }
         actionsItem.setSubmenu(signalsMenu);
-        actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !signals.isEmpty());
+        actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !detailedSignals.keySet().isEmpty());
         menu.redraw();
     }
 

@@ -1405,6 +1405,43 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
+    public Set<String> addJobSignalWithVariables(final String sessionId, String signal, String jobId,
+            Map<String, String> updatedVariables) throws RestServerException, ServiceException {
+        InputStream inputStream = null;
+        RestClient restClientProxy = getRestClientProxy();
+        try {
+            inputStream = restClientProxy.addJobSignalWithVariables(sessionId, signal, jobId, updatedVariables);
+
+            String responseAsString = convertToString(inputStream);
+
+            JSONArray jsonArray = new JSONArray(responseAsString);
+            HashSet<String> result = new HashSet<>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                result.add(jsonArray.getString(i));
+            }
+            return result;
+        } catch (IOException | JSONException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+            return null;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    @Override
+    public String validateJobSignal(final String sessionId, String signal, String jobId,
+            Map<String, String> updatedVariables) throws RestServerException {
+        try {
+            return getRestClientProxy().validateJobSignal(sessionId, signal, jobId, updatedVariables);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+        }
+        return null;
+    }
+
+    @Override
     public Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkMethodsPermissions(sessionId,
