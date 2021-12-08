@@ -405,4 +405,8 @@ public class ActionsWindow {
             variable.setAdvanced(variableJsonAdvanced.booleanValue());
         }
     }
+
+    public FormItem[] getFields() {
+        return fields;
+    }
 }

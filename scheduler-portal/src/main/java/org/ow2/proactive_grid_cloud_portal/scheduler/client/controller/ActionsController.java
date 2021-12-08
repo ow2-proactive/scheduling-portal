@@ -148,8 +148,10 @@ public class ActionsController {
             LogModel.getInstance().logImportantMessage("Successfully validated variables " + updatedVariables +
                                                        " for signal " + signalName + " on job " + jobId);
             setLabelMessage(messageLayout, "Variables are valid", "infoMessage");
-            actionsWindow.updateVariables(result);
-            actionsWindow.setVarsLayout();
+            if (actionsWindow.getFields() != null && actionsWindow.getFields().length > 0) {
+                actionsWindow.updateVariables(result);
+                actionsWindow.setVarsLayout();
+            }
             if (addSignal) {
                 addJobSignalWithVariables(updatedVariables);
             }
