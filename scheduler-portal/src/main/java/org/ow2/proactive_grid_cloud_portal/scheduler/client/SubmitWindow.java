@@ -637,7 +637,7 @@ public class SubmitWindow {
 
     private TextItem createVariableItem(Entry<String, JobVariable> var) {
         TextItem t = new TextItem(var.getKey(), var.getKey());
-        t.setValue(var.getValue().getValue());
+        t.setValue(var.getValue().getValue().replaceAll("ENC((.*))", "*******"));
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);
