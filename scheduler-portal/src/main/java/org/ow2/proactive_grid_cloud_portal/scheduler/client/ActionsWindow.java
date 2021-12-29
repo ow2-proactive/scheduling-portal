@@ -296,7 +296,7 @@ public class ActionsWindow {
 
     private TextItem createVariableItem(String name, String value) {
         TextItem t = new TextItem(name, name);
-        t.setValue(value);
+        t.setValue(value.replaceAll("ENC((.*))", "*******"));
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);
