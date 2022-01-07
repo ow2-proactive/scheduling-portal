@@ -141,8 +141,8 @@ project(':rm-portal') {
         compile 'codemirror:codemirror2-gwt:1.2.0'
         compile 'org.jboss.resteasy:resteasy-client:3.0.26.Final'
 
-        runtime 'org.apache.logging.log4j:log4j-web:2.17.0'
-        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+        runtime 'org.apache.logging.log4j:log4j-web:2.17.1'
+        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
         testRuntime 'org.slf4j:slf4j-simple:1.7.25'
         compile 'org.codehaus.jettison:jettison:1.2'
         compile project(':common-portal')
@@ -166,8 +166,8 @@ project(':scheduler-portal') {
         compile 'org.apache.commons:commons-csv:1.1'
 
         compile project(':common-portal')
-        runtime 'org.apache.logging.log4j:log4j-web:2.17.0'
-        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+        runtime 'org.apache.logging.log4j:log4j-web:2.17.1'
+        runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
         testRuntime 'org.slf4j:slf4j-simple:1.7.25'
     }
 
