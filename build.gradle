@@ -132,7 +132,7 @@ project(':applet') {
 project(':rm-portal') {
     dependencies {
         compile 'codemirror:codemirror2-gwt:1.2.0'
-        compile 'org.jboss.resteasy:resteasy-client:3.0.26.Final''
+        compile 'org.jboss.resteasy:resteasy-client:3.0.26.Final'
         
         runtime 'org.slf4j:slf4j-simple:1.7.25'
         compile 'org.codehaus.jettison:jettison:1.2'
