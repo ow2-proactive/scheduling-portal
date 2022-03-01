@@ -334,8 +334,8 @@ public class ExportToCatalogConfirmWindow extends Window {
                 JSONArray bucketsArray = JSONParser.parseStrict(response.getText()).isArray();
                 for (int i = 0; i < bucketsArray.size(); i++) {
                     JSONObject bucketObject = bucketsArray.get(i).isObject();
-                    if (bucketObject.get("rights").isString().stringValue().equals("admin") ||
-                        bucketObject.get("rights").isString().stringValue().equals("write")) {
+                    String rights = bucketObject.get("rights").isString().stringValue().toLowerCase();
+                    if (rights.matches("admin|write")) {
                         bucketList.addItem(bucketObject.get("name").isString().stringValue());
                     }
                 }
