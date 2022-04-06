@@ -459,17 +459,17 @@ public class SubmitWindow {
 
     private void setVarsLayout() {
         Map<String, Map<String, JobVariable>> variablesByGroup = getVariablesByGroup();
-
-        DynamicForm variablesVisualForm;
-        variablesVisualForm = new DynamicForm();
-        variablesVisualForm.setNumCols(3);
-        variablesVisualForm.setColWidths("25%", "50%", "25%");
-        fields = new FormItem[variablesByGroup.size() * 2 + 1];
-        noOfFields = 0;
-        noOfFields = 0;
-        variablesByGroup.keySet().forEach(group -> initVariablesVisualForm(variablesByGroup.get(group), group));
-        variablesVisualForm.setFields(fields);
-        varsLayout.addMember(variablesVisualForm);
+        if (variablesByGroup.size() > 0) {
+            DynamicForm variablesVisualForm;
+            variablesVisualForm = new DynamicForm();
+            variablesVisualForm.setNumCols(3);
+            variablesVisualForm.setColWidths("25%", "50%", "25%");
+            fields = new FormItem[variablesByGroup.size() * 2 + 1];
+            noOfFields = 0;
+            variablesByGroup.keySet().forEach(group -> initVariablesVisualForm(variablesByGroup.get(group), group));
+            variablesVisualForm.setFields(fields);
+            varsLayout.addMember(variablesVisualForm);
+        }
     }
 
     private Map<String, Map<String, JobVariable>> getVariablesByGroup() {
