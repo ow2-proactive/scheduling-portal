@@ -25,13 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
+import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -165,12 +165,7 @@ public class UploadServlet extends HttpServlet {
 
     private void fetchFromCatalogAndWriteResponse(String catalogUrl, String bucketName, String workflowName,
             String sessionId, HttpServletResponse response) {
-        String encodedWorkflowName;
-        try {
-            encodedWorkflowName = URLEncoder.encode(workflowName, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            encodedWorkflowName = workflowName;
-        }
+        String encodedWorkflowName = urlPathSegmentEscaper().escape(workflowName);
         String url = catalogUrl + "/buckets/" + bucketName + "/resources/" + encodedWorkflowName + "/raw";
         LOGGER.info("Sending request to catalog: {}", url);
 
