@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -948,11 +950,13 @@ public class SubmitWindow {
             public void onResponseReceived(Request request, Response response) {
                 JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
+                Set<String> sortedBucketNames = new TreeSet<>();
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get(KEY_OF_NAME).isString().stringValue();
-                    bucketsListBox.addItem(bucketName);
+                    sortedBucketNames.add(bucketName);
                 }
+                sortedBucketNames.forEach(bucketName -> bucketsListBox.addItem(bucketName));
                 bucketsListBox.setEnabled(true);
             }
 
