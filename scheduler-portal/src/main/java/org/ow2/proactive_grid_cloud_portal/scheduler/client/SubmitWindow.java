@@ -25,11 +25,16 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -124,6 +129,8 @@ public class SubmitWindow {
     private static final String KEY_OF_HIDDEN = "hidden";
 
     private static final String KEY_OF_ADVANCED = "advanced";
+
+    private static final String KEY_OF_PROJECT = "project_name";
 
     private static final String CATALOG_SELECT_BUCKET = "Select a Bucket";
 
@@ -910,6 +917,7 @@ public class SubmitWindow {
             String selectedBucket = bucketsListBox.getSelectedValue();
             if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                 String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
+                List<Entry<String, String>> listOfWorkflowEntries = new ArrayList<>();
                 RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                 req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                 req.setCallback(new RequestCallback() {
@@ -923,8 +931,19 @@ public class SubmitWindow {
                         for (int i = 0; i < workflowsSize; i++) {
                             JSONObject workflow = workflows.get(i).isObject();
                             String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
-                            workflowsListBox.addItem(workflowName);
+                            String projectName = workflow.get(KEY_OF_PROJECT).isString().stringValue();
+                            listOfWorkflowEntries.add(new AbstractMap.SimpleEntry<>(projectName, workflowName));
                         }
+                        Comparator<Entry<String, String>> valueComparator = (workflow1, workflow2) -> {
+                            if (Objects.equals(workflow1.getKey(), workflow2.getKey())) {
+                                return workflow1.getValue().compareTo(workflow2.getValue());
+                            } else {
+                                return workflow1.getKey().compareTo(workflow2.getKey());
+                            }
+                        };
+                        listOfWorkflowEntries.sort(valueComparator);
+                        listOfWorkflowEntries.forEach(entry -> workflowsListBox.addItem(entry.getKey() + " - " +
+                                                                                        entry.getValue()));
                         workflowsListBox.setEnabled(true);
                     }
 
@@ -977,8 +996,8 @@ public class SubmitWindow {
         fromCatalogPanel.add(bucketsListBox);
         fromCatalogPanel.add(workflowsListBox);
 
-        bucketsListBox.setWidth("130px");
-        workflowsListBox.setWidth("230px");
+        bucketsListBox.setWidth("150px");
+        workflowsListBox.setWidth("330px");
 
         VerticalPanel formContent = new VerticalPanel();
         formContent.setHeight("30px");
