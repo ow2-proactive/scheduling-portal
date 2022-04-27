@@ -1329,7 +1329,10 @@ public class SubmitWindow {
         return event -> {
             // filter only valid items
             if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
+                String selectedWorkflowLabel = workflowsListBox.getSelectedValue().substring(
+                                                                                             workflowsListBox.getSelectedValue()
+                                                                                                             .indexOf(" - ") +
+                                                                                             2);
                 String selectedBucketName = bucketsListBox.getSelectedValue();
                 formContent.add(new Hidden("bucketName", selectedBucketName));
                 formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
