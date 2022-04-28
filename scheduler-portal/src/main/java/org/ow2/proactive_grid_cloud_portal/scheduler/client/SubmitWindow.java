@@ -942,8 +942,12 @@ public class SubmitWindow {
                             }
                         };
                         listOfWorkflowEntries.sort(valueComparator);
-                        listOfWorkflowEntries.forEach(entry -> workflowsListBox.addItem(entry.getKey() + " - " +
-                                                                                        entry.getValue()));
+                        listOfWorkflowEntries.forEach(entry -> workflowsListBox.addItem(entry.getKey() == null ||
+                                                                                        entry.getKey()
+                                                                                             .isEmpty() ? entry.getValue()
+                                                                                                        : entry.getKey() +
+                                                                                                          "\t\t-\t\t" +
+                                                                                                          entry.getValue()));
                         workflowsListBox.setEnabled(true);
                     }
 
@@ -1329,7 +1333,12 @@ public class SubmitWindow {
         return event -> {
             // filter only valid items
             if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
+                String selectedWorkflowLabel = workflowsListBox.getSelectedValue()
+                                                               .contains("\t\t-\t\t") ? workflowsListBox.getSelectedValue()
+                                                                                                        .substring(workflowsListBox.getSelectedValue()
+                                                                                                                                   .indexOf("\t\t-\t\t") +
+                                                                                                                   5)
+                                                                                      : workflowsListBox.getSelectedValue();
                 String selectedBucketName = bucketsListBox.getSelectedValue();
                 formContent.add(new Hidden("bucketName", selectedBucketName));
                 formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
