@@ -942,7 +942,6 @@ public class SubmitWindow {
                             }
                         };
                         listOfWorkflowEntries.sort(valueComparator);
-
                         listOfWorkflowEntries.forEach(entry -> workflowsListBox.addItem(entry.getKey() == null ||
                                                                                         entry.getKey()
                                                                                              .isEmpty() ? entry.getValue()
