@@ -1340,7 +1340,6 @@ public class SubmitWindow {
                                                                                                                                    .indexOf("\t\t-\t\t") +
                                                                                                                    5)
                                                                                       : workflowsListBox.getSelectedValue();
-                LogModel.getInstance().logCriticalMessage("selectedWorkflowLabel: " + selectedWorkflowLabel);
                 String selectedBucketName = bucketsListBox.getSelectedValue();
                 formContent.add(new Hidden("bucketName", selectedBucketName));
                 formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
