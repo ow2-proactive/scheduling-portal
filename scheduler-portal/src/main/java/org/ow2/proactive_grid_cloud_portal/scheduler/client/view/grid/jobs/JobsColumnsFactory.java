@@ -52,6 +52,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns USER_ATTR = new GridColumns("user", "User", 120, true, false);
 
+    public static final GridColumns TENANT_ATTR = new GridColumns("tenant", "Tenant", 120, true, false, true);
+
     public static final GridColumns PROGRESS_ATTR = new GridColumns("progress", "Progress", 120, true, false);
 
     public static final GridColumns PRIORITY_ATTR = new GridColumns("priority", "Priority", 100, true, false);
@@ -84,13 +86,14 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                          true);
 
     private static final GridColumns[] COLUMNS = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
-                                                                     PROGRESS_ATTR, PRIORITY_ATTR, DURATION_ATTR,
-                                                                     NAME_ATTR, PROJECT_NAME_ATTR, SUBMIT_TIME_ATTR,
-                                                                     START_TIME_ATTR, FINISHED_TIME_ATTR };
+                                                                     TENANT_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
+                                                                     DURATION_ATTR, NAME_ATTR, PROJECT_NAME_ATTR,
+                                                                     SUBMIT_TIME_ATTR, START_TIME_ATTR,
+                                                                     FINISHED_TIME_ATTR };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
-                                                                                USER_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
-                                                                                DURATION_ATTR };
+                                                                                USER_ATTR, TENANT_ATTR, PROGRESS_ATTR,
+                                                                                PRIORITY_ATTR, DURATION_ATTR };
 
     private static GridColumns[] EXTRA_COLUMNS;
 
@@ -125,6 +128,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         record.setAttribute(STATE_ATTR.getName(), item.getStatus().toString());
         record.setAttribute(ISSUES_ATTR.getName(), buildIssuesAttr(item));
         record.setAttribute(USER_ATTR.getName(), item.getUser());
+        record.setAttribute(TENANT_ATTR.getName(), item.getTenant());
         record.setAttribute(PRIORITY_ATTR.getName(), item.getPriority().toString());
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(PROJECT_NAME_ATTR.getName(), item.getProjectName());

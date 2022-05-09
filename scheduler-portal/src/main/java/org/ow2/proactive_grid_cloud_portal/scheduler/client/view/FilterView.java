@@ -547,6 +547,7 @@ public class FilterView extends VStack {
                 }
                 case PROJECT_NAME:
                 case USER:
+                case TENANT:
                 case NAME: {
                     actionList.addItem(Action.EQUALS.getName());
                     actionList.addItem(Action.NOT_EQUAL.getName());

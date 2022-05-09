@@ -53,6 +53,8 @@ public class UsersView implements UsersListener {
 
     private static final String USER_ATTR = "userName";
 
+    private static final String TENANT_ATTR = "tenant";
+
     private static final String CONN_TIME_ATTR = "connectionTime";
 
     private static final String SUBMIT_TIME_ATTR = "submitTime";
@@ -67,6 +69,7 @@ public class UsersView implements UsersListener {
         public UserRecord(SchedulerUser user) {
             setAttribute(HOST_ATTR, user.getHostName());
             setAttribute(USER_ATTR, user.getUsername());
+            setAttribute(TENANT_ATTR, user.getTenant());
 
             if (user.getConnectionTime() > 0)
                 setAttribute(CONN_TIME_ATTR, getDate(user.getConnectionTime()));
@@ -119,6 +122,10 @@ public class UsersView implements UsersListener {
         userField.setWidth(120);
         alignCenter(userField);
 
+        ListGridField tenantField = new ListGridField(TENANT_ATTR, "Tenant");
+        userField.setWidth(120);
+        alignCenter(tenantField);
+
         ListGridField connField = new ListGridField(CONN_TIME_ATTR, "Connected at");
         alignCenter(connField);
         ListGridField subTimeField = new ListGridField(SUBMIT_TIME_ATTR, "Last submit");
@@ -128,7 +135,7 @@ public class UsersView implements UsersListener {
         subNumField.setWidth(80);
         alignCenter(subNumField);
 
-        this.usersGrid.setFields(userField, subNumField, connField, subTimeField, hostField);
+        this.usersGrid.setFields(userField, tenantField, subNumField, connField, subTimeField, hostField);
 
         this.root.addMember(this.usersGrid);
 

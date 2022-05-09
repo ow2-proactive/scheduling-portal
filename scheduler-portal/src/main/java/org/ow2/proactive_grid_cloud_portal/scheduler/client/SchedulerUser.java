@@ -48,6 +48,8 @@ public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
 
     private String username = null;
 
+    private String tenant = null;
+
     private long connectionTime;
 
     private long lastSubmitTime;
@@ -62,13 +64,16 @@ public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
      * 
      * @param hostName hostname of the user's connection endpoint
      * @param userName name of the user
+     * @param tenant user tenant
      * @param connectionTime time when the user joined the scheduler
      * @param lastSubmitTime last time the user submitted a job
      * @param submitNumber number of jobs this user submitted in this session
      */
-    public SchedulerUser(String hostName, String userName, long connectionTime, long lastSubmitTime, int submitNumber) {
+    public SchedulerUser(String hostName, String userName, String tenant, long connectionTime, long lastSubmitTime,
+            int submitNumber) {
         this.hostName = hostName;
         this.username = userName;
+        this.tenant = tenant;
         this.connectionTime = connectionTime;
         this.lastSubmitTime = lastSubmitTime;
         this.submitNumber = submitNumber;
@@ -80,6 +85,10 @@ public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 
     public long getConnectionTime() {
@@ -95,7 +104,8 @@ public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
     }
 
     public String toString() {
-        return "[" + hostName + ";" + username + ";" + connectionTime + ";" + lastSubmitTime + ";" + submitNumber + "]";
+        return "[" + hostName + ";" + username + ";" + tenant + ";" + connectionTime + ";" + lastSubmitTime + ";" +
+               submitNumber + "]";
     }
 
     public int compareTo(SchedulerUser o) {
@@ -119,11 +129,16 @@ public class SchedulerUser implements Serializable, Comparable<SchedulerUser> {
                 host = str.stringValue();
         }
         String user = jsonUser.get("username").isString().stringValue();
+        String tenant = "";
+        JSONString tenantStr = jsonUser.get("tenant").isString();
+        if (tenantStr != null) {
+            tenant = tenantStr.stringValue();
+        }
         long connTime = (long) jsonUser.get("connectionTime").isNumber().doubleValue();
         long subTime = (long) jsonUser.get("lastSubmitTime").isNumber().doubleValue();
         int subNum = (int) jsonUser.get("submitNumber").isNumber().doubleValue();
 
-        return new SchedulerUser(host, user, connTime, subTime, subNum);
+        return new SchedulerUser(host, user, tenant, connTime, subTime, subNum);
     }
 
 }
