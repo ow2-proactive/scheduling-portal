@@ -504,6 +504,7 @@ public class JobsController {
                         JobStatus.PENDING,
                         JobPriority.NORMAL,
                         LoginModel.getInstance().getLogin(),
+                        "",
                         new HashMap<>(),
                         new HashMap<>(),
                         new HashMap<>(),

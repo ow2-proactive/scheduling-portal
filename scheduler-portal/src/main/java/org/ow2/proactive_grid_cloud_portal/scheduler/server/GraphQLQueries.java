@@ -166,6 +166,7 @@ public final class GraphQLQueries {
         String status = null;
         String priority = null;
         String userFilter = null;
+        String tenantFilter = null;
         String name = null;
         String projectName = null;
         long afterSubmittedTime = -1;
@@ -259,6 +260,18 @@ public final class GraphQLQueries {
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             userFilter = filter;
+                        break;
+                    }
+
+                    case TENANT: {
+
+                        if (constraint.getAction() == Action.EQUALS) {
+                            if (tenantFilter == null)
+                                tenantFilter = value;
+                            else if (!value.equals(tenantFilter))
+                                return input.jobName(RETURN_NOTHING_FILTER).build();
+                        } else if ((filter = getFilter(constraint, value)) != null)
+                            tenantFilter = filter;
                         break;
                     }
 
@@ -566,6 +579,9 @@ public final class GraphQLQueries {
             input.owner(userFilter);
         else if (user != null)
             input.owner(user);
+
+        if (tenantFilter != null)
+            input.tenant(tenantFilter);
 
         if (name != null)
             input.jobName(name);

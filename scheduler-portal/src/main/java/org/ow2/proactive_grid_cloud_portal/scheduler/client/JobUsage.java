@@ -35,6 +35,8 @@ public class JobUsage implements IsSerializable {
 
     private String owner;
 
+    private String tenant;
+
     private String project;
 
     private String jobId;
@@ -51,9 +53,10 @@ public class JobUsage implements IsSerializable {
 
     private Long parentId;
 
-    public JobUsage(String owner, String project, String jobId, String jobName, long jobDuration, String status,
-            long submittedTime, Long parentId) {
+    public JobUsage(String owner, String tenant, String project, String jobId, String jobName, long jobDuration,
+            String status, long submittedTime, Long parentId) {
         this.owner = owner;
+        this.tenant = tenant;
         this.project = project;
         this.jobId = jobId;
         this.jobName = jobName;
@@ -72,6 +75,10 @@ public class JobUsage implements IsSerializable {
 
     public String getOwner() {
         return owner;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 
     public String getProject() {

@@ -60,6 +60,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String user;
 
+    private String tenant;
+
     private String description;
 
     private int pendingTasks;
@@ -120,6 +122,7 @@ public class Job implements Serializable, Comparable<Job> {
      * @param status the job status
      * @param priority the job priority
      * @param user the username of the user that submitted the job
+     * @param tenant the tenant associated with the user that submitted the job
      * @param genericInformation the job generic information
      * @param pending number of pending tasks
      * @param running number of running tasks
@@ -135,7 +138,7 @@ public class Job implements Serializable, Comparable<Job> {
      * @param description job description
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
-            Map<String, String> genericInformation, Map<String, String> variables,
+            String tenant, Map<String, String> genericInformation, Map<String, String> variables,
             Map<String, Map<String, String>> detailedVariables, Map<String, String> resultMap, int pending, int running,
             int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
             long inErrorTime, long finishTime, String description) {
@@ -145,6 +148,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.setStatus(status);
         this.setPriority(priority);
         this.setUser(user);
+        this.setTenant(tenant);
         this.pendingTasks = pending;
         this.runningTasks = running;
         this.finishedTasks = finished;
@@ -270,6 +274,14 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public String getUser() {
         return user;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
     }
 
     /**
@@ -398,6 +410,7 @@ public class Job implements Serializable, Comparable<Job> {
 
     public static Job parseJSONInfo(JSONObject jsonJobInfo) {
         String user = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("owner"));
+        String tenant = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("tenant"));
         String priority = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("priority"));
         String status = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("status"));
         int pending = (int) jsonJobInfo.get("numberOfPendingTasks").isNumber().doubleValue();
@@ -427,6 +440,7 @@ public class Job implements Serializable, Comparable<Job> {
                        JobStatus.valueOf(status),
                        JobPriority.findPriority(priority),
                        user,
+                       tenant,
                        genericInformation,
                        variables,
                        new HashMap<>(),

@@ -63,10 +63,10 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
 
     @Override
     public GridColumns[] getColumns() {
-        return new GridColumns[] { ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, PENDING_TASKS_ATTR,
-                                   RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR, SUBMITTED_TIME_ATTR,
-                                   STARTED_TIME_ATTR, FINISHED_TIME_ATTR, IN_ERROR_TIME_ATTR, PENDING_DURATION_ATTR,
-                                   DURATION_ATTR, TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
+        return new GridColumns[] { ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, TENANT_ATTR,
+                                   PENDING_TASKS_ATTR, RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR,
+                                   SUBMITTED_TIME_ATTR, STARTED_TIME_ATTR, FINISHED_TIME_ATTR, IN_ERROR_TIME_ATTR,
+                                   PENDING_DURATION_ATTR, DURATION_ATTR, TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
     }
 
     @Override

@@ -87,8 +87,8 @@ public class ExportUsageServlet extends HttpServlet {
 
     private String csvExport(String sessionId, String user, Date startDate, Date endDate)
             throws ServiceException, RestServerException, IOException {
-        Object[] header = { "Owner", "Project", "Job Id", "Parent Job Id", "Job Status", "Job Name", "Submitted Time",
-                            "Job Duration", "Task Id", "Task Name", "Task Status", "Task Tag",
+        Object[] header = { "Owner", "Tenant", "Project", "Job Id", "Parent Job Id", "Job Status", "Job Name",
+                            "Submitted Time", "Job Duration", "Task Id", "Task Name", "Task Status", "Task Tag",
                             "Task Execution Host Name", "Task Node Number", "Executions", "Node Failures",
                             "Task Start Time", "Task Finished Time", "Task Duration", "Task Description" };
         List<JobUsage> jobUsages = ((SchedulerServiceImpl) Service.get()).getUsage(sessionId, user, startDate, endDate);
@@ -99,6 +99,7 @@ public class ExportUsageServlet extends HttpServlet {
         for (JobUsage jobUsage : jobUsages) {
             for (TaskUsage taskUsage : jobUsage.getTaskUsages()) {
                 csvFilePrinter.printRecord(jobUsage.getOwner(),
+                                           jobUsage.getTenant() == null ? "" : jobUsage.getTenant(),
                                            jobUsage.getProject(),
                                            jobUsage.getJobId(),
                                            jobUsage.getParentId(),
