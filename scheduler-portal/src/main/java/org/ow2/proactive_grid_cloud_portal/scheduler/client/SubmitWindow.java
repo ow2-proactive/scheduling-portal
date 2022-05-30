@@ -25,18 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
@@ -917,7 +910,6 @@ public class SubmitWindow {
             String selectedBucket = bucketsListBox.getSelectedValue();
             if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
                 String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
-                List<Entry<String, String>> listOfWorkflowEntries = new ArrayList<>();
                 RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                 req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                 req.setCallback(new RequestCallback() {
@@ -932,22 +924,10 @@ public class SubmitWindow {
                             JSONObject workflow = workflows.get(i).isObject();
                             String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
                             String projectName = workflow.get(KEY_OF_PROJECT).isString().stringValue();
-                            listOfWorkflowEntries.add(new AbstractMap.SimpleEntry<>(projectName, workflowName));
+                            workflowsListBox.addItem(projectName == null ||
+                                                     projectName.isEmpty() ? workflowName
+                                                                           : projectName + "\t\t-\t\t" + workflowName);
                         }
-                        Comparator<Entry<String, String>> valueComparator = (workflow1, workflow2) -> {
-                            if (Objects.equals(workflow1.getKey(), workflow2.getKey())) {
-                                return workflow1.getValue().compareTo(workflow2.getValue());
-                            } else {
-                                return workflow1.getKey().compareTo(workflow2.getKey());
-                            }
-                        };
-                        listOfWorkflowEntries.sort(valueComparator);
-                        listOfWorkflowEntries.forEach(entry -> workflowsListBox.addItem(entry.getKey() == null ||
-                                                                                        entry.getKey()
-                                                                                             .isEmpty() ? entry.getValue()
-                                                                                                        : entry.getKey() +
-                                                                                                          "\t\t-\t\t" +
-                                                                                                          entry.getValue()));
                         workflowsListBox.setEnabled(true);
                     }
 
@@ -973,13 +953,11 @@ public class SubmitWindow {
             public void onResponseReceived(Request request, Response response) {
                 JSONArray buckets = JSONParser.parseStrict(response.getText()).isArray();
                 int bucketSize = buckets.size();
-                Set<String> sortedBucketNames = new TreeSet<>();
                 for (int i = 0; i < bucketSize; i++) {
                     JSONObject bucket = buckets.get(i).isObject();
                     String bucketName = bucket.get(KEY_OF_NAME).isString().stringValue();
-                    sortedBucketNames.add(bucketName);
+                    bucketsListBox.addItem(bucketName);
                 }
-                sortedBucketNames.forEach(bucketName -> bucketsListBox.addItem(bucketName));
                 bucketsListBox.setEnabled(true);
             }
 

@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.l
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.serialization.CatalogRequestBuilder;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
@@ -92,19 +90,15 @@ public class ImportFromCatalogPanelFeeder {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 JSONArray nodeSources = JSONParser.parseStrict(response.getText()).isArray();
-                Set<String> sortedNodeSourceNames = new TreeSet<>();
                 for (int i = 0; i < nodeSources.size(); i++) {
                     JSONObject nodeSource = nodeSources.get(i).isObject();
                     String nodeSourceName = nodeSource.get(NAME_KEY).isString().stringValue();
-                    sortedNodeSourceNames.add(nodeSourceName);
-                }
-                sortedNodeSourceNames.forEach(nodeSourceName -> {
                     ImportFromCatalogPanelFeeder.this.bucketNamePerNodeSourceName.put(nodeSourceName, bucketName);
                     ImportFromCatalogPanelFeeder.this.importFromCatalogPanel.addItemToNodeSourceListBox(bucketName +
                                                                                                         " - " +
                                                                                                         nodeSourceName,
                                                                                                         nodeSourceName);
-                });
+                }
             }
 
             @Override
