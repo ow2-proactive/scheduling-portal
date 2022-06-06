@@ -772,10 +772,12 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableOutputTab(true);
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(true);
             parentController.getParentController().getSchedulerPage().disableTasksTab(true);
+            parentController.getParentController().getSchedulerPage().disableTaskInfoTab(true);
         } else {
             parentController.getParentController().getSchedulerPage().disableOutputTab(false);
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(false);
             parentController.getParentController().getSchedulerPage().disableTasksTab(false);
+            parentController.getParentController().getSchedulerPage().disableTaskInfoTab(false);
         }
         if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableVisualizationTab(true);
@@ -784,8 +786,10 @@ public class JobsController {
         }
         if (loginModel.userDoesNotHavePermissionToGetJobResult(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
+            parentController.getParentController().getSchedulerPage().disableTaskResultTab(true);
         } else {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(false);
+            parentController.getParentController().getSchedulerPage().disableTaskResultTab(false);
         }
         if (jobsListGrid != null) {
             jobsListGrid.setMenuItemsStatus(jobIds);
