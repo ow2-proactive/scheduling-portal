@@ -284,6 +284,8 @@ public class SubmitWindow {
 
     private int noOfFields;
 
+    private boolean checkVariables = false;
+
     /**
      * Default constructor
      *
@@ -1004,6 +1006,7 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                checkVariables = true;
                 setAllValuesAsString();
                 handleStartAt();
                 enableValidation(true);
@@ -1221,6 +1224,7 @@ public class SubmitWindow {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                checkVariables = false;
                 setAllValuesAsString();
                 enableValidation(false);
                 handleRadioButton();
@@ -1232,7 +1236,9 @@ public class SubmitWindow {
                 variablesActualForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
                     @Override
                     public void onSubmitComplete(SubmitCompleteEvent event) {
-                        handleJobSubmission(event);
+                        if (!checkVariables) {
+                            handleJobSubmission(event);
+                        }
                     }
 
                     private void handleJobSubmission(SubmitCompleteEvent event) {
