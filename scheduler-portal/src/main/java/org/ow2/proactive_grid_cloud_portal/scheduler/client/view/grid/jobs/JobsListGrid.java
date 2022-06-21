@@ -378,7 +378,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             if (status.equals(JobStatus.PENDING.toString())) {
                 return 0;
             } else if (status.equals(JobStatus.RUNNING.toString()) || status.equals(JobStatus.STALLED.toString()) ||
-                       status.equals(JobStatus.PAUSED.toString())) {
+                       status.equals(JobStatus.PAUSED.toString()) || status.equals(JobStatus.IN_ERROR.toString())) {
                 return 1;
             } else {
                 return 2;
