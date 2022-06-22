@@ -306,7 +306,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
 
     public void downloadFullTaskLogs(String sessionId, String jobId, String taskName) {
         String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId +
-                     "/tasks/" + taskName + "/result/log/full?sessionid=" + sessionId;
+                     "/tasks/" + taskName.replace("#", "%23") + "/result/log/full?sessionid=" + sessionId;
         Window.open(url, "_blank", "");
     }
 
