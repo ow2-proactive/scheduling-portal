@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.OutputView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -306,7 +307,7 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
 
     public void downloadFullTaskLogs(String sessionId, String jobId, String taskName) {
         String url = SchedulerConfig.get().getRestPublicUrlIfDefinedOrOverridden() + "/scheduler/jobs/" + jobId +
-                     "/tasks/" + taskName + "/result/log/full?sessionid=" + sessionId;
+                     "/tasks/" + URL.encodeQueryString(taskName) + "/result/log/full?sessionid=" + sessionId;
         Window.open(url, "_blank", "");
     }
 
