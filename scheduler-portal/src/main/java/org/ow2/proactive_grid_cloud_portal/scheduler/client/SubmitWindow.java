@@ -926,9 +926,14 @@ public class SubmitWindow {
                             JSONObject workflow = workflows.get(i).isObject();
                             String workflowName = workflow.get(KEY_OF_NAME).isString().stringValue();
                             String projectName = workflow.get(KEY_OF_PROJECT).isString().stringValue();
-                            workflowsListBox.addItem(projectName == null ||
-                                                     projectName.isEmpty() ? workflowName
-                                                                           : projectName + "\t\t-\t\t" + workflowName);
+                            String workflowListItem = projectName == null ||
+                                                      projectName.isEmpty() ? workflowName
+                                                                            : projectName + "\t\t-\t\t" + workflowName;
+                            workflowsListBox.addItem(workflowListItem.length() > 85 ? workflowListItem.substring(0,
+                                                                                                                 85) +
+                                                                                      "..."
+                                                                                    : workflowListItem,
+                                                     workflowName);
                         }
                         workflowsListBox.setEnabled(true);
                     }
@@ -1317,12 +1322,7 @@ public class SubmitWindow {
         return event -> {
             // filter only valid items
             if (bucketsListBox.getSelectedIndex() > 0 && workflowsListBox.getSelectedIndex() > 0) {
-                String selectedWorkflowLabel = workflowsListBox.getSelectedValue()
-                                                               .contains("\t\t-\t\t") ? workflowsListBox.getSelectedValue()
-                                                                                                        .substring(workflowsListBox.getSelectedValue()
-                                                                                                                                   .indexOf("\t\t-\t\t") +
-                                                                                                                   5)
-                                                                                      : workflowsListBox.getSelectedValue();
+                String selectedWorkflowLabel = workflowsListBox.getSelectedValue();
                 String selectedBucketName = bucketsListBox.getSelectedValue();
                 formContent.add(new Hidden("bucketName", selectedBucketName));
                 formContent.add(new Hidden("workflowName", selectedWorkflowLabel));
