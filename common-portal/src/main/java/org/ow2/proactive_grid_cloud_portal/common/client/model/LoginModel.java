@@ -105,7 +105,7 @@ public class LoginModel {
     Map<String, Map<String, Boolean>> schedulerPermissions = null;
 
     // a map containing the method name and true if the user has the permission to the method (eg: the user has the permission to kill a job)
-    // this permissions are set per user session
+    // these permissions are set per user session
     private Map<String, Boolean> sessionPermissions = null;
 
     // a map containing the node name and true if the user has the admin or provider permission for the node/nodeSource
@@ -165,11 +165,11 @@ public class LoginModel {
     }
 
     public static void addSchedulerPermissions(Map<String, Map<String, Boolean>> permissions) {
-        permissions.forEach((key, value) -> instance.schedulerPermissions.put(key, value));
+        instance.schedulerPermissions.putAll(permissions);
     }
 
     public static void addSessionPermissions(Map<String, Boolean> permissions) {
-        permissions.forEach((key, value) -> instance.sessionPermissions.put(key, value));
+        instance.sessionPermissions.putAll(permissions);
     }
 
     public boolean userDoesNotHavePermissionToPauseTob(List<String> jobIds) {
@@ -235,7 +235,7 @@ public class LoginModel {
         return true;
     }
 
-    public List getJobPermissionMethods() {
+    public List<String> getJobPermissionMethods() {
         List<String> methods = new ArrayList<>();
         methods.add(PERMISSION_PAUSE_JOB);
         methods.add(PERMISSION_RESTART_ALL_IN_ERROR_TASKS);
@@ -250,7 +250,7 @@ public class LoginModel {
         return methods;
     }
 
-    public List getSchedulerPermissionMethods() {
+    public List<String> getSchedulerPermissionMethods() {
         List<String> methods = new ArrayList<>();
         methods.add(PERMISSION_SCHEDULER_FRONTEND_START);
         methods.add(PERMISSION_SCHEDULER_FRONTEND_STOP);
@@ -262,7 +262,7 @@ public class LoginModel {
         return methods;
     }
 
-    public List getRmSessionPermissionMethods() {
+    public List<String> getRmSessionPermissionMethods() {
         List<String> methods = new ArrayList<>();
         methods.add(PERMISSION_RM_LOCK_NODES);
         methods.add(PERMISSION_RM_UNLOCK_NODES);
@@ -364,11 +364,11 @@ public class LoginModel {
         return sessionPermissions.get(PERMISSION_RM_GET_RM_THREAD_DUMP);
     }
 
-    public boolean userHasPermissionToGetInfrasToPoliciesMapping() {
+    public boolean userDoesNotHavePermissionToGetInfrasToPoliciesMapping() {
         return sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
     }
 
-    public boolean userHasPermissionToGetSupportedNodeSourceInfras() {
+    public boolean userDoesNotHavePermissionToGetSupportedNodeSourceInfras() {
         return sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
     }
 

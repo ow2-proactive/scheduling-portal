@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.ExecutionDisplayModeListener;
@@ -90,6 +91,10 @@ public class ExecutionsModel {
             default:
                 return null;
         }
+    }
+
+    public List<Integer> getSelectedJobIds() {
+        return this.jobsModel.getSelectedJobsIds();
     }
 
     public void addExecutionsDisplayModeListener(ExecutionDisplayModeListener listener) {

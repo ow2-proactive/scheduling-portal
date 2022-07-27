@@ -1111,16 +1111,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
             if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
                 contextMenu.disableEditItem(contextMenu);
-            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
-                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+            } else if (loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
+                       loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras()) {
                 contextMenu.disableEditItem(contextMenu);
             }
         } else if (selectedNodeSource != null &&
                    selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
             if (!loginModel.userHasPermissionToEditNodeSource()) {
                 contextMenu.disableEditItem(contextMenu);
-            } else if (!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
-                       !loginModel.userHasPermissionToGetSupportedNodeSourceInfras()) {
+            } else if (loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
+                       loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras()) {
                 contextMenu.disableEditItem(contextMenu);
             }
         }
@@ -1144,10 +1144,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         if (provider && loginModel.userProviderPermissionWasReceivedForNode(url)) {
             contextMenu.disableProviderItems(contextMenu, url);
-            return;
         } else if (!provider && loginModel.userAdminPermissionWasReceivedForNode(url)) {
             contextMenu.disableAdminItems(contextMenu, url);
-            return;
         } else {
             if (model.getSelectedNodeSource() != null) {
                 sendNodeSourcePermissionRequest(contextMenu, url, provider);
@@ -1236,7 +1234,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             @Override
             public void onSuccess(Map<String, Boolean> result) {
-                loginModel.addSessionPermissions(result);
+                LoginModel.addSessionPermissions(result);
                 setTabsStatus();
             }
         });
@@ -1247,8 +1245,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rmPage.setThreadDumpTabPageDisabled(!loginModel.userHasPermissionToGetNodeThreadDump() ||
                                             !loginModel.userHasPermissionToGetRmThreadDump());
         rmPage.setScriptConsoleTabPageDisabled(!loginModel.userHasPermissionToExecuteScript());
-        rmPage.setNSButtonStatus(!loginModel.userHasPermissionToGetInfrasToPoliciesMapping() ||
-                                 !loginModel.userHasPermissionToGetSupportedNodeSourceInfras());
+        rmPage.setNSButtonStatus(loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
+                                 loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras());
     }
 
     private Set<String> getSelectedNodesUrls() {

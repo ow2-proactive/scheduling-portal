@@ -28,7 +28,9 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
@@ -626,43 +628,43 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 break;
             case FROZEN:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
+                schedStopButton.setEnabled(loginModel.userHasPermissionToStopScheduler());
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
-                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeScheduler());
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
+                schedResumeButton.setEnabled(loginModel.userHasPermissionToResumeScheduler());
+                schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
                 break;
             case PAUSED:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
+                schedStopButton.setEnabled(loginModel.userHasPermissionToStopScheduler());
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
-                schedResumeButton.setEnabled(true && loginModel.userHasPermissionToResumeScheduler());
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
+                schedResumeButton.setEnabled(loginModel.userHasPermissionToResumeScheduler());
+                schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
                 break;
             case STARTED:
             case UNLINKED:
                 schedStartButton.setEnabled(false);
-                schedStopButton.setEnabled(true && loginModel.userHasPermissionToStopScheduler());
-                schedFreezeButton.setEnabled(true && loginModel.userHasPermissionToFreezeScheduler());
-                schedPauseButton.setEnabled(true && loginModel.userHasPermissionToPauseScheduler());
+                schedStopButton.setEnabled(loginModel.userHasPermissionToStopScheduler());
+                schedFreezeButton.setEnabled(loginModel.userHasPermissionToFreezeScheduler());
+                schedPauseButton.setEnabled(loginModel.userHasPermissionToPauseScheduler());
                 schedResumeButton.setEnabled(false);
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
+                schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
                 break;
             case STOPPED:
-                schedStartButton.setEnabled(true && loginModel.userHasPermissionToStartScheduler());
+                schedStartButton.setEnabled(loginModel.userHasPermissionToStartScheduler());
                 schedStopButton.setEnabled(false);
                 schedFreezeButton.setEnabled(false);
                 schedPauseButton.setEnabled(false);
                 schedResumeButton.setEnabled(false);
-                schedKillButton.setEnabled(true && loginModel.userHasPermissionToKillScheduler());
-                schedShutdownButton.setEnabled(true && loginModel.userHasPermissionToShutDownScheduler());
+                schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
+                schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
             default:
@@ -864,11 +866,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 this.buildVisuTab();
                 leftTabSet.addTab(tasksTab, 0);
                 leftTabSet.addTab(visuTab, 1);
-                Job selectedJob = controller.getExecutionController().getModel().getSelectedJob();
-                controller.getExecutionController().getJobsController().checkJobsPermissionMethods(
-                                                                                                   new ArrayList<>(Collections.singleton(selectedJob.getId()
-                                                                                                                                                    .toString())),
-                                                                                                   null);
+                List<Integer> selectedJobIds = controller.getExecutionController().getModel().getSelectedJobIds();
+                controller.getExecutionController()
+                          .getJobsController()
+                          .checkJobsPermissionMethods(selectedJobIds.stream()
+                                                                    .map(String::valueOf)
+                                                                    .collect(Collectors.toList()),
+                                                      null);
                 break;
             case TASK_CENTRIC:
                 leftTabSet.updateTab(tasksTab, null);
@@ -914,7 +918,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     public void disableTasksTab(boolean disabled) {
+        leftTabSet.updateTab(tasksTab, null);
+        leftTabSet.removeTab(tasksTab);
+        tasksTab = new Tab("Tasks", ImagesUnbundled.MONITORING_16);
+        tasksTab.setPane(tasksPane);
         tasksTab.setDisabled(disabled);
+        leftTabSet.addTab(tasksTab, 0);
+        leftTabSet.redraw();
     }
 
     public void disableVarInfoTab(boolean disabled) {
@@ -926,14 +936,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     public void disableVisualizationTab(boolean disabled) {
-        if (disabled) {
-            leftTabSet.updateTab(visuTab, null);
-            leftTabSet.removeTab(visuTab);
-            buildVisuTab();
-            leftTabSet.addTab(visuTab, 1);
-            leftTabSet.redraw();
-        }
+        leftTabSet.updateTab(visuTab, null);
+        leftTabSet.removeTab(visuTab);
+        visuTab = new Tab("Visualization", ImagesUnbundled.PA_16);
+        visuTab.setPane(this.visuPane);
         visuTab.setDisabled(disabled);
+        leftTabSet.addTab(visuTab, 1);
+        leftTabSet.redraw();
     }
 
     public void disableServerLogsTab(boolean disabled) {
