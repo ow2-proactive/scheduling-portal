@@ -365,11 +365,11 @@ public class LoginModel {
     }
 
     public boolean userDoesNotHavePermissionToGetInfrasToPoliciesMapping() {
-        return sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
+        return !sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
     }
 
     public boolean userDoesNotHavePermissionToGetSupportedNodeSourceInfras() {
-        return sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
+        return !sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
     }
 
     public boolean userProviderPermissionWasReceivedForNode(String node) {
