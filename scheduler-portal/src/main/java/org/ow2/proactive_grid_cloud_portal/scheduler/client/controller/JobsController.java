@@ -711,21 +711,6 @@ public class JobsController {
         });
     }
 
-    private Set<String> parseSignals(String result) {
-        Set<String> signals = new HashSet<>();
-        JSONValue jsonValue = null;
-        try {
-            jsonValue = SchedulerJSONUtils.parseJSON(result);
-        } catch (JSONException e) {
-            String message = JSONUtils.getJsonErrorMessage(e);
-            LogModel.getInstance().logImportantMessage("Failed to parse signals : " + message);
-        }
-        JSONObject jsonJobInfo = jsonValue.isObject();
-        signals.addAll(SchedulerJSONUtils.extractSet(jsonJobInfo.get("signals")));
-        signals.removeIf(s -> !s.startsWith(PREFIX_SIGNAL_READY));
-        return signals;
-    }
-
     /**
      * Checks the permission of the current user for the given jobIds
      * @param jobIds the selected job ids
@@ -748,7 +733,7 @@ public class JobsController {
                                              methods,
                                              new AsyncCallback<Map<String, Map<String, Boolean>>>() {
                                                  public void onSuccess(Map<String, Map<String, Boolean>> result) {
-                                                     loginModel.addSchedulerPermissions(result);
+                                                     LoginModel.addSchedulerPermissions(result);
                                                      setTabsStatus(jobIds, jobsListGrid);
                                                  }
 
@@ -763,11 +748,9 @@ public class JobsController {
 
     private void setTabsStatus(List<String> jobIds, JobsListGrid jobsListGrid) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (loginModel.userDoesNotHavePermissionToGetJobServerLogs(jobIds)) {
-            parentController.getParentController().getSchedulerPage().disableServerLogsTab(true);
-        } else {
-            parentController.getParentController().getSchedulerPage().disableServerLogsTab(false);
-        }
+        parentController.getParentController()
+                        .getSchedulerPage()
+                        .disableServerLogsTab(loginModel.userDoesNotHavePermissionToGetJobServerLogs(jobIds));
         if (loginModel.userDoesNotHavePermissionToGetJobState(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableOutputTab(true);
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(true);
@@ -779,11 +762,6 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableTasksTab(false);
             parentController.getParentController().getSchedulerPage().disableTaskInfoTab(false);
         }
-        if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
-            parentController.getParentController().getSchedulerPage().disableVisualizationTab(true);
-        } else {
-            parentController.getParentController().getSchedulerPage().disableVisualizationTab(false);
-        }
         if (loginModel.userDoesNotHavePermissionToGetJobResult(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
             parentController.getParentController().getSchedulerPage().disableTaskResultTab(true);
@@ -791,6 +769,9 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(false);
             parentController.getParentController().getSchedulerPage().disableTaskResultTab(false);
         }
+        parentController.getParentController()
+                        .getSchedulerPage()
+                        .disableVisualizationTab(loginModel.userDoesNotHavePermissionToGetContent(jobIds));
         if (jobsListGrid != null) {
             jobsListGrid.setMenuItemsStatus(jobIds);
         }
