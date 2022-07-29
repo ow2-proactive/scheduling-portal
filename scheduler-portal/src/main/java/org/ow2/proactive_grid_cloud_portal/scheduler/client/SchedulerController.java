@@ -87,8 +87,6 @@ public class SchedulerController extends Controller implements UncaughtException
 
     private static final int AUTO_LOGIN_TIMER_PERIOD_IN_MS = 1000;
 
-    private Job previouslySelectedJob;
-
     @Override
     public String getLoginSettingKey() {
         return LOGIN_SETTING;
@@ -1059,8 +1057,7 @@ public class SchedulerController extends Controller implements UncaughtException
                 try {
                     Map<String, Map<String, String>> detailedVariables = SchedulerJSONUtils.getDetailedVariables(result);
                     job.setDetailsVariables(detailedVariables);
-                    varInfoView.buildVariablesEntries(job, !job.equals(previouslySelectedJob));
-                    previouslySelectedJob = job;
+                    varInfoView.buildVariablesEntries(job);
                 } catch (org.ow2.proactive_grid_cloud_portal.common.client.json.JSONException e) {
                     LogModel.getInstance().logImportantMessage("Failed to parse detailed variables for job " +
                                                                job.getId().toString());

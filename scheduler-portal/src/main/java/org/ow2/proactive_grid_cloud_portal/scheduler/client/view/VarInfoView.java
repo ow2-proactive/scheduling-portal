@@ -122,13 +122,13 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         controller.setJobDetailedVariables(job, this);
     }
 
-    public void buildVariablesEntries(Job job, boolean shouldResetCheckboxes) {
-        selectedJob = job;
+    public void buildVariablesEntries(Job job) {
         variablesGrids.forEach(variablesGrid -> root.removeChild(variablesGrid));
         variablesGrids.clear();
         root.removeChild(genericInformationGrid);
         root.removeChild(checkBoxLayout);
-        resetCheckBoxes(shouldResetCheckboxes);
+        resetCheckBoxes(!job.equals(selectedJob));
+        selectedJob = job;
         root.redraw();
         root.addMember(checkBoxLayout);
         Map<String, Set<String>> variablesByGroup = getVariablesByGroup(job);
@@ -290,7 +290,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         advancedCheckBox.setValue(advanced);
         advancedCheckBox.addClickHandler(event -> {
             advanced = advancedCheckBox.getValue();
-            buildVariablesEntries(selectedJob, false);
+            buildVariablesEntries(selectedJob);
         });
         advancedCheckBoxLayout.addMember(advancedCheckBox);
         checkBoxLayout.addMember(advancedCheckBoxLayout);
@@ -305,7 +305,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         hiddenCheckBox.setValue(hidden);
         hiddenCheckBox.addClickHandler(event -> {
             hidden = hiddenCheckBox.getValue();
-            buildVariablesEntries(selectedJob, false);
+            buildVariablesEntries(selectedJob);
         });
         hiddenCheckBoxLayout.addMember(hiddenCheckBox);
         checkBoxLayout.addMember(hiddenCheckBoxLayout);
