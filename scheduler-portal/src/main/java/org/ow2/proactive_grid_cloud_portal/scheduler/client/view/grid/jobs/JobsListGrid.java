@@ -29,6 +29,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Jo
 import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsColumnsFactory.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -172,6 +173,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             selectedJobsIds.add(JobRecord.getJob(selectedRecord).getId());
         }
         controller.getModel().setSelectedJobsIds(selectedJobsIds);
+        controller.checkJobsPermissionMethods(selectedJobsIds.stream()
+                                                             .map(String::valueOf)
+                                                             .collect(Collectors.toList()),
+                                              this);
     }
 
     @Override
