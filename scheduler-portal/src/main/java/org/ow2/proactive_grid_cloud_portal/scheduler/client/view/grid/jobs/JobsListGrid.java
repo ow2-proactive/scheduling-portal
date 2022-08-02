@@ -579,31 +579,31 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     public void setMenuItemsStatus(List<String> jobIds) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (loginModel.userDoesNotHavePermissionToPauseTob(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToPauseJobs(jobIds)) {
             pauseItem.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToRestartAllInErrorTask(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToRestartAllInErrorTasks(jobIds)) {
             restartInErrorTaskItem.setEnabled(false);
             resumeAndRestartItemTask.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToResumeJob(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToResumeJobs(jobIds)) {
             resumeItem.setEnabled(false);
             resumeAndRestartItemTask.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToChangeJobPriority(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToChangeJobsPriority(jobIds)) {
             priorityItem.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToKillJob(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToKillJobs(jobIds)) {
             killItem.setEnabled(false);
             killAndResubmitItem.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToGetContent(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToGetJobsContent(jobIds)) {
             resubmitItem.setEnabled(false);
             exportXmlItem.setEnabled(false);
             openItem.setEnabled(false);
             killAndResubmitItem.setEnabled(false);
         }
-        if (loginModel.userDoesNotHavePermissionToRemoveJob(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToRemoveJobs(jobIds)) {
             removeItem.setEnabled(false);
             menu.redraw();
         }

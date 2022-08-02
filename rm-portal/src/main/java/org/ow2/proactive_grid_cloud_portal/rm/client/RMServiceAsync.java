@@ -380,4 +380,6 @@ public interface RMServiceAsync {
 
     Request checkMethodsPermissions(String sessionId, List<String> methods,
             AsyncCallback<Map<String, Boolean>> asyncCallback);
+
+    Request portalsAccess(String sessionId, List<String> portals, AsyncCallback<List<String>> asyncCallback);
 }

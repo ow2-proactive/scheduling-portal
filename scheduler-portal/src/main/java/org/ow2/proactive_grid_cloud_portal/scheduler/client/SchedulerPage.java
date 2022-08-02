@@ -205,6 +205,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private JobResultView jobResultView = null;
 
+    private ToolStrip paShortcutsStrip = null;
+
+    private ToolStrip logoStrip = null;
+
     /**
      * Default constructor
      *
@@ -320,6 +324,24 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         logoImg.addClickHandler(clickEvent -> Window.open("http://activeeon.com/", "", ""));
         logoAE.addMember(logoImg);
 
+        paShortcutsStrip = buildShortcutStrip(true, true, true, true);
+
+        // Navbar Header
+        logoStrip = new ToolStrip();
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(logoStripBackgroundColor);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+
+        logoStrip.addMember(logoAE);
+        logoStrip.addMember(paShortcutsStrip);
+
+        return logoStrip;
+    }
+
+    private ToolStrip buildShortcutStrip(boolean automationDashboard, boolean studio, boolean scheduler, boolean rm) {
         String login = LoginModel.getInstance().getLogin();
         if (login != null) {
             login = " <b>" + login + "</b>";
@@ -341,14 +363,22 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         customBrandLogo.setAutoWidth();
         customBrandLogo.setStyleName("custom-brand-logo");
         paShortcutsStrip.addMember(customBrandLogo);
-        paShortcutsStrip.addButton(automationDashboardLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(studioLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(schedulerLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(resourceManagerLinkButton);
-        paShortcutsStrip.addSpacer(4);
+        if (automationDashboard) {
+            paShortcutsStrip.addButton(automationDashboardLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (studio) {
+            paShortcutsStrip.addButton(studioLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (scheduler) {
+            paShortcutsStrip.addButton(schedulerLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (rm) {
+            paShortcutsStrip.addButton(resourceManagerLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
         ToolStripSeparator separator = new ToolStripSeparator();
         separator.setHeight(40);
         paShortcutsStrip.addMember(separator);
@@ -364,20 +394,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         paShortcutsStrip.setStyleName("pa-shortcuts");
         paShortcutsStrip.setPosition("static");
         paShortcutsStrip.setAlign(Alignment.RIGHT);
-
-        // Navbar Header
-        ToolStrip logoStrip = new ToolStrip();
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(logoStripBackgroundColor);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
-
-        logoStrip.addMember(logoAE);
-        logoStrip.addMember(paShortcutsStrip);
-
-        return logoStrip;
+        return paShortcutsStrip;
     }
 
     /**
@@ -893,8 +910,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Job selectedJob = controller.getExecutionController().getModel().getSelectedJob();
         LoginModel loginModel = LoginModel.getInstance();
         if (selectedJob != null &&
-            loginModel.userDoesNotHavePermissionToGetJobState(new ArrayList<>(Collections.singleton(selectedJob.getId()
-                                                                                                               .toString())))) {
+            loginModel.userDoesNotHavePermissionToGetJobsState(new ArrayList<>(Collections.singleton(selectedJob.getId()
+                                                                                                                .toString())))) {
             tasksTab.setDisabled(true);
             disableTaskInfoTab(true);
             disableTaskResultTab(true);
@@ -903,6 +920,13 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             disableTaskInfoTab(false);
             disableTaskResultTab(false);
         }
+    }
+
+    public void rebuildShortcutStrip(boolean automationDashboard, boolean studio, boolean scheduler, boolean rm) {
+        logoStrip.removeMember(paShortcutsStrip);
+        paShortcutsStrip = buildShortcutStrip(automationDashboard, studio, scheduler, rm);
+        logoStrip.addMember(paShortcutsStrip);
+        logoStrip.redraw();
     }
 
     public void disableTaskInfoTab(boolean disabled) {
@@ -959,8 +983,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         Job selectedJob = controller.getExecutionController().getModel().getSelectedJob();
         LoginModel loginModel = LoginModel.getInstance();
         if (selectedJob != null &&
-            loginModel.userDoesNotHavePermissionToGetContent(new ArrayList<>(Collections.singleton(selectedJob.getId()
-                                                                                                              .toString())))) {
+            loginModel.userDoesNotHavePermissionToGetJobsContent(new ArrayList<>(Collections.singleton(selectedJob.getId()
+                                                                                                                  .toString())))) {
             visuTab.setDisabled(true);
             visuView.getHtmlView().disableOpenInStudioButton(true);
         } else {

@@ -39,6 +39,10 @@ public interface CommonRestClient {
     @Path("/permissions/portals/{portal}")
     InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
 
+    @GET
+    @Path("/permissions/portals")
+    InputStream portalsAccess(@HeaderParam("sessionid") String sessionId, @QueryParam("portals") List<String> portals);
+
     @POST
     @Path("/permissions/methods")
     @Consumes(MediaType.APPLICATION_JSON)

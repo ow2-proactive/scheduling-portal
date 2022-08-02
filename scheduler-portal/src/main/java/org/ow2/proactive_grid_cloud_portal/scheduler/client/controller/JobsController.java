@@ -49,8 +49,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -750,8 +748,8 @@ public class JobsController {
         LoginModel loginModel = LoginModel.getInstance();
         parentController.getParentController()
                         .getSchedulerPage()
-                        .disableServerLogsTab(loginModel.userDoesNotHavePermissionToGetJobServerLogs(jobIds));
-        if (loginModel.userDoesNotHavePermissionToGetJobState(jobIds)) {
+                        .disableServerLogsTab(loginModel.userDoesNotHavePermissionToGetJobsServerLogs(jobIds));
+        if (loginModel.userDoesNotHavePermissionToGetJobsState(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableOutputTab(true);
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(true);
             parentController.getParentController().getSchedulerPage().disableTasksTab(true);
@@ -762,7 +760,7 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableTasksTab(false);
             parentController.getParentController().getSchedulerPage().disableTaskInfoTab(false);
         }
-        if (loginModel.userDoesNotHavePermissionToGetJobResult(jobIds)) {
+        if (loginModel.userDoesNotHavePermissionToGetJobsResult(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
             parentController.getParentController().getSchedulerPage().disableTaskResultTab(true);
         } else {
@@ -771,7 +769,7 @@ public class JobsController {
         }
         parentController.getParentController()
                         .getSchedulerPage()
-                        .disableVisualizationTab(loginModel.userDoesNotHavePermissionToGetContent(jobIds));
+                        .disableVisualizationTab(loginModel.userDoesNotHavePermissionToGetJobsContent(jobIds));
         if (jobsListGrid != null) {
             jobsListGrid.setMenuItemsStatus(jobIds);
         }

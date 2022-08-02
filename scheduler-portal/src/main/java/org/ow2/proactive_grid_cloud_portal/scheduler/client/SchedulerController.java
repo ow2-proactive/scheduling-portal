@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
@@ -392,9 +393,34 @@ public class SchedulerController extends Controller implements UncaughtException
         // than the one in the domain cookie, then we exit
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
+        checkPortalsPermissions();
         setSessionPermissions();
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ", login=" + loginModel.getLogin() + ")");
+    }
+
+    public void checkPortalsPermissions() {
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> portals = loginModel.getPortalsPermissionsNames();
+        List<String> notCashedPermissions = portals.stream()
+                                                   .filter(portal -> !loginModel.sessionPermissionWasReceivedForPortal(portal))
+                                                   .collect(Collectors.toList());
+        if (notCashedPermissions.isEmpty()) {
+            showHidePortalsShortcuts();
+        }
+        scheduler.portalsAccess(loginModel.getSessionId(), portals, new AsyncCallback<List<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check portals permissions: " +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(List<String> result) {
+                LoginModel.addPortalsPermissions(result);
+                showHidePortalsShortcuts();
+            }
+        });
     }
 
     /**
@@ -446,6 +472,14 @@ public class SchedulerController extends Controller implements UncaughtException
         // or it may try to update stuff while disconnected
         teardown(null);
         tryToLoginIfLoggedInRm();
+    }
+
+    private void showHidePortalsShortcuts() {
+        LoginModel loginModel = LoginModel.getInstance();
+        schedulerView.rebuildShortcutStrip(loginModel.userHasPermissionToAutomationDashboard(),
+                                           loginModel.userHasPermissionToStudio(),
+                                           loginModel.userHasPermissionToScheduler(),
+                                           loginModel.userHasPermissionToRm());
     }
 
     public Layout buildTaskView() {
