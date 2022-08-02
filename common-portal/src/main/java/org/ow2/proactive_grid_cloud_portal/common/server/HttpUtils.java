@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +63,11 @@ public final class HttpUtils {
     public static Map<String, Boolean> convertToHashMap(InputStream inputStream) throws IOException {
         Map<String, Boolean> jsonMap = new ObjectMapper().readValue(inputStream, HashMap.class);
         return jsonMap;
+    }
+
+    public static List<String> convertToList(InputStream inputStream) throws IOException {
+        List<String> jsonList = new ObjectMapper().readValue(inputStream, List.class);
+        return jsonList;
     }
 
     public static String convertToString(InputStream inputStream) throws IOException {

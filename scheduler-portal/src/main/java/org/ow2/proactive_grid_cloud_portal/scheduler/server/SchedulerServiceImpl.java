@@ -25,8 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 
-import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToHashMap;
-import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.convertToString;
+import static org.ow2.proactive_grid_cloud_portal.common.server.HttpUtils.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -1197,6 +1196,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                          false);
     }
 
+    @Override
+    public List<String> portalsAccess(String sessionId, List<String> portals)
+            throws ServiceException, RestServerException {
+        return executeFunctionReturnStreamAsListCommon(restClient -> restClient.portalsAccess(sessionId, portals));
+    }
+
     /**
      * Execute a graphQL query. The queries should be built using the GraphQLQueries class
      */
@@ -1358,6 +1363,30 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             HashMap map = new HashMap<String, Boolean>();
             map.put(rethrowRestServerException(e), null);
             return map;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private List<String>
+            executeFunctionReturnStreamAsListCommon(java.util.function.Function<CommonRestClient, InputStream> function)
+                    throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToList(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            List list = new ArrayList<String>();
+            list.add(rethrowRestServerException(e));
+            return list;
         } finally {
             IOUtils.closeQuietly(inputStream);
         }

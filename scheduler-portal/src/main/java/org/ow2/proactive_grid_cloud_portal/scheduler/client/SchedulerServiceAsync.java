@@ -412,6 +412,12 @@ public interface SchedulerServiceAsync {
     void portalAccess(String sessionId, AsyncCallback<String> callback);
 
     /**
+     * @param sessionId d of the current session
+     * @param portals list of portals requiring access
+     */
+    Request portalsAccess(String sessionId, List<String> portals, AsyncCallback<List<String>> callback);
+
+    /**
      * Adds a signal to given job
      *
      * @param sessionId the current session id

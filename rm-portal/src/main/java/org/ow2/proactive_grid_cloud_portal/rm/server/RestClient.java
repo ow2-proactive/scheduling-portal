@@ -45,6 +45,10 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     InputStream portalAccess(@HeaderParam("sessionid") String sessionId, @PathParam("portal") String portal);
 
+    @GET
+    @Path("/common/permissions/portals")
+    InputStream portalsAccess(@HeaderParam("sessionid") String sessionId, @QueryParam("portal") List<String> portals);
+
     @POST
     @Path("/rm/disconnect")
     @Produces(MediaType.APPLICATION_JSON)

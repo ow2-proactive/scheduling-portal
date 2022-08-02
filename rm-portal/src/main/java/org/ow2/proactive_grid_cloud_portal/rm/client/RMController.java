@@ -281,6 +281,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.localSessionNum = "" + System.currentTimeMillis() + "_" + Random.nextInt();
         Cookies.setCookie(LOCAL_SESSION_COOKIE, this.localSessionNum);
 
+        checkPortalsPermissions();
         checkRmMethodsPermissions();
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
@@ -1211,6 +1212,30 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
+    public void checkPortalsPermissions() {
+        LoginModel loginModel = LoginModel.getInstance();
+        List<String> portals = loginModel.getPortalsPermissionsNames();
+        List<String> notCashedPermissions = portals.stream()
+                                                   .filter(portal -> !loginModel.sessionPermissionWasReceivedForPortal(portal))
+                                                   .collect(Collectors.toList());
+        if (notCashedPermissions.isEmpty()) {
+            showHidePortalsShortcuts();
+        }
+        rm.portalsAccess(loginModel.getSessionId(), portals, new AsyncCallback<List<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logImportantMessage("Failed to check portals permissions: " +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(List<String> result) {
+                LoginModel.addPortalsPermissions(result);
+                showHidePortalsShortcuts();
+            }
+        });
+    }
+
     /**
      * Check if the logged user has permissions to the methods from loginModel.getRmSessionPermissionMethods()
      * If the request has already been send for the logged user, the permissions will be loaded from the cashed list
@@ -1229,7 +1254,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rm.checkMethodsPermissions(loginModel.getSessionId(), methods, new AsyncCallback<Map<String, Boolean>>() {
             @Override
             public void onFailure(Throwable caught) {
-                LogModel.getInstance().logImportantMessage("Failed to check methods permissions ");
+                LogModel.getInstance().logImportantMessage("Failed to check methods permissions: " +
+                                                           JSONUtils.getJsonErrorMessage(caught));
             }
 
             @Override
@@ -1247,6 +1273,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         rmPage.setScriptConsoleTabPageDisabled(!loginModel.userHasPermissionToExecuteScript());
         rmPage.setNSButtonStatus(loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
                                  loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras());
+    }
+
+    private void showHidePortalsShortcuts() {
+        LoginModel loginModel = LoginModel.getInstance();
+        rmPage.rebuildShortcutStrip(loginModel.userHasPermissionToAutomationDashboard(),
+                                    loginModel.userHasPermissionToStudio(),
+                                    loginModel.userHasPermissionToScheduler(),
+                                    loginModel.userHasPermissionToRm());
     }
 
     private Set<String> getSelectedNodesUrls() {
