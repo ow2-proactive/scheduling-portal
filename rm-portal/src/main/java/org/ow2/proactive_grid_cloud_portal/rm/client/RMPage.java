@@ -143,6 +143,10 @@ public class RMPage implements LogListener {
 
     private MenuItem loggersMenuItem;
 
+    private ToolStrip paShortcutsStrip;
+
+    private ToolStrip logoStrip;
+
     RMPage(RMController controller) {
         this.controller = controller;
         LogModel.getInstance().addLogListener(this);
@@ -271,6 +275,24 @@ public class RMPage implements LogListener {
         logoImg.addClickHandler(clickEvent -> Window.open("http://activeeon.com/", "", ""));
         logoAE.addMember(logoImg);
 
+        paShortcutsStrip = buildShortcutStrip(true, true, true, true);
+
+        // Navbar Header
+        logoStrip = new ToolStrip();
+        logoStrip.setHeight(logoStripHeight);
+        logoStrip.setWidth100();
+        logoStrip.setBackgroundImage("");
+        logoStrip.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
+        logoStrip.setBorder(logoStripBorder);
+        logoStrip.setMargin(0);
+
+        logoStrip.addMember(logoAE);
+        logoStrip.addMember(paShortcutsStrip);
+
+        return logoStrip;
+    }
+
+    private ToolStrip buildShortcutStrip(boolean automationDashboard, boolean studio, boolean scheduler, boolean rm) {
         String login = LoginModel.getInstance().getLogin();
         if (login != null) {
             login = " <b>" + login + "</b>";
@@ -292,14 +314,22 @@ public class RMPage implements LogListener {
         customBrandLogo.setAutoWidth();
         customBrandLogo.setStyleName("custom-brand-logo");
         paShortcutsStrip.addMember(customBrandLogo);
-        paShortcutsStrip.addButton(automationDashboardLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(studioLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(schedulerLinkButton);
-        paShortcutsStrip.addSpacer(4);
-        paShortcutsStrip.addButton(resourceManagerLinkButton);
-        paShortcutsStrip.addSpacer(4);
+        if (automationDashboard) {
+            paShortcutsStrip.addButton(automationDashboardLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (studio) {
+            paShortcutsStrip.addButton(studioLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (scheduler) {
+            paShortcutsStrip.addButton(schedulerLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
+        if (rm) {
+            paShortcutsStrip.addButton(resourceManagerLinkButton);
+            paShortcutsStrip.addSpacer(4);
+        }
         ToolStripSeparator separator = new ToolStripSeparator();
         separator.setHeight(40);
         paShortcutsStrip.addMember(separator);
@@ -315,20 +345,7 @@ public class RMPage implements LogListener {
         paShortcutsStrip.setStyleName("pa-shortcuts");
         paShortcutsStrip.setPosition("static");
         paShortcutsStrip.setAlign(Alignment.RIGHT);
-
-        // Navbar Header
-        ToolStrip logoStrip = new ToolStrip();
-        logoStrip.setHeight(logoStripHeight);
-        logoStrip.setWidth100();
-        logoStrip.setBackgroundImage("");
-        logoStrip.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
-        logoStrip.setBorder(logoStripBorder);
-        logoStrip.setMargin(0);
-
-        logoStrip.addMember(logoAE);
-        logoStrip.addMember(paShortcutsStrip);
-
-        return logoStrip;
+        return paShortcutsStrip;
     }
 
     private ToolStrip buildTools() {
@@ -508,6 +525,13 @@ public class RMPage implements LogListener {
 
     public void setThreadDumpTabPageDisabled(boolean disabled) {
         threadDumpTab.setDisabled(disabled);
+    }
+
+    public void rebuildShortcutStrip(boolean automationDashboard, boolean studio, boolean scheduler, boolean rm) {
+        logoStrip.removeMember(paShortcutsStrip);
+        paShortcutsStrip = buildShortcutStrip(automationDashboard, studio, scheduler, rm);
+        logoStrip.addMember(paShortcutsStrip);
+        logoStrip.redraw();
     }
 
     void destroy() {

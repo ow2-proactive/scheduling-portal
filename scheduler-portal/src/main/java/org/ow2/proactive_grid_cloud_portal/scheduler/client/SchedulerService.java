@@ -454,6 +454,14 @@ public interface SchedulerService extends RemoteService {
     String portalAccess(String sessionId) throws ServiceException, RestServerException;
 
     /**
+     *
+     * @param sessionId id of the current session
+     * @param portals list of portals requiring access
+     * @return a list of portals with authorized access
+     */
+    List<String> portalsAccess(String sessionId, List<String> portals) throws ServiceException, RestServerException;
+
+    /**
      * Adds a signal to given job
      *
      * @param sessionId the current session id

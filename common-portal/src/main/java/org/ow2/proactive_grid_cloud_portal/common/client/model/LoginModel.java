@@ -100,6 +100,23 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING = "org.ow2.proactive.resourcemanager.core.RMCore.getInfrasToPoliciesMapping";
 
+    public static final String AUTOMATION_DASHBOARD_PORTAL = "automation-dashboard";
+
+    public static final String[] AUTOMATION_DASHBOARD_PORTALS = new String[] { "catalog-portal", "workflow-execution",
+                                                                               "service-automation", "job-analytics",
+                                                                               "job-gantt", "node-gantt",
+                                                                               "job-planner-calendar-def",
+                                                                               "job-planner-calendar-def-workflows",
+                                                                               "job-planner-execution-planning",
+                                                                               "job-planner-gantt-chart",
+                                                                               "notification-portal" };
+
+    public static final String STUDIO_PORTAL = "studio";
+
+    public static final String SCHEDULER_PORTAL = "scheduler";
+
+    public static final String RM_PORTAL = "rm";
+
     // a map containing the job id as key and another map as value containing the method name and true/false if the user has
     // the permission to the method for the current jobId
     Map<String, Map<String, Boolean>> schedulerPermissions = null;
@@ -114,6 +131,8 @@ public class LoginModel {
     // a map containing the node name and true if the user has the admin permission for the node/nodeSource
     private Map<String, Boolean> RMNodeAdminPermissions = null;
 
+    private Map<String, Boolean> portalsAccess = null;
+
     public static LoginModel getInstance() {
         if (instance == null) {
             instance = new LoginModel();
@@ -121,6 +140,7 @@ public class LoginModel {
             instance.sessionPermissions = new HashMap<>();
             instance.RMNodeProviderPermissions = new HashMap<>();
             instance.RMNodeAdminPermissions = new HashMap<>();
+            instance.portalsAccess = new HashMap<>();
         }
         return instance;
     }
@@ -140,6 +160,7 @@ public class LoginModel {
         this.sessionPermissions = new HashMap<>();
         this.RMNodeProviderPermissions = new HashMap<>();
         this.RMNodeAdminPermissions = new HashMap<>();
+        this.portalsAccess = new HashMap<>();
     }
 
     /**
@@ -172,43 +193,59 @@ public class LoginModel {
         instance.sessionPermissions.putAll(permissions);
     }
 
-    public boolean userDoesNotHavePermissionToPauseTob(List<String> jobIds) {
+    public static void addPortalsPermissions(List<String> allowedPortals) {
+        List<String> dashboardPortals = Arrays.asList(AUTOMATION_DASHBOARD_PORTALS);
+        for (String portal : dashboardPortals) {
+            instance.portalsAccess.put(portal, false);
+        }
+        instance.portalsAccess.put(STUDIO_PORTAL, false);
+        instance.portalsAccess.put(SCHEDULER_PORTAL, false);
+        instance.portalsAccess.put(RM_PORTAL, false);
+        for (String portal : allowedPortals) {
+            instance.portalsAccess.put(portal, true);
+        }
+        if (allowedPortals.stream().anyMatch(portal -> dashboardPortals.contains(portal))) {
+            instance.portalsAccess.put(AUTOMATION_DASHBOARD_PORTAL, true);
+        }
+    }
+
+    public boolean userDoesNotHavePermissionToPauseJobs(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_PAUSE_JOB);
     }
 
-    public boolean userDoesNotHavePermissionToRestartAllInErrorTask(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToRestartAllInErrorTasks(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_RESTART_ALL_IN_ERROR_TASKS);
     }
 
-    public boolean userDoesNotHavePermissionToResumeJob(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToResumeJobs(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_RESUME_JOB);
     }
 
-    public boolean userDoesNotHavePermissionToChangeJobPriority(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToChangeJobsPriority(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_CHANGE_JOB_PRIORITY);
     }
 
-    public boolean userDoesNotHavePermissionToKillJob(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToKillJobs(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_KILL_JOB);
     }
 
-    public boolean userDoesNotHavePermissionToGetContent(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToGetJobsContent(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_GET_JOB_CONTENT);
     }
 
-    public boolean userDoesNotHavePermissionToRemoveJob(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToRemoveJobs(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_REMOVE_JOB);
     }
 
-    public boolean userDoesNotHavePermissionToGetJobServerLogs(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToGetJobsServerLogs(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_GET_JOB_SERVER_LOGS);
     }
 
-    public boolean userDoesNotHavePermissionToGetJobState(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToGetJobsState(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_GET_JOB_STATE);
     }
 
-    public boolean userDoesNotHavePermissionToGetJobResult(List<String> jobIds) {
+    public boolean userDoesNotHavePermissionToGetJobsResult(List<String> jobIds) {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_GET_JOB_RESULT);
     }
 
@@ -279,6 +316,32 @@ public class LoginModel {
         methods.add(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
         methods.add(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
         return methods;
+    }
+
+    public List<String> getPortalsPermissionsNames() {
+        List<String> portals = new ArrayList<>();
+        portals.addAll(Arrays.asList(AUTOMATION_DASHBOARD_PORTALS));
+        portals.add(STUDIO_PORTAL);
+        portals.add(SCHEDULER_PORTAL);
+        portals.add(RM_PORTAL);
+        return portals;
+    }
+
+    public boolean userHasPermissionToAutomationDashboard() {
+        return portalsAccess.get(AUTOMATION_DASHBOARD_PORTAL) != null ? portalsAccess.get(AUTOMATION_DASHBOARD_PORTAL)
+                                                                      : false;
+    }
+
+    public boolean userHasPermissionToStudio() {
+        return portalsAccess.get(STUDIO_PORTAL) != null ? portalsAccess.get(STUDIO_PORTAL) : false;
+    }
+
+    public boolean userHasPermissionToScheduler() {
+        return portalsAccess.get(SCHEDULER_PORTAL) != null ? portalsAccess.get(SCHEDULER_PORTAL) : false;
+    }
+
+    public boolean userHasPermissionToRm() {
+        return portalsAccess.get(RM_PORTAL) != null ? portalsAccess.get(RM_PORTAL) : false;
     }
 
     public boolean userHasPermissionToStartScheduler() {
@@ -382,6 +445,10 @@ public class LoginModel {
 
     public boolean sessionPermissionWasReceivedForMethod(String method) {
         return sessionPermissions.containsKey(method);
+    }
+
+    public boolean sessionPermissionWasReceivedForPortal(String portal) {
+        return portalsAccess.containsKey(portal);
     }
 
     /**
