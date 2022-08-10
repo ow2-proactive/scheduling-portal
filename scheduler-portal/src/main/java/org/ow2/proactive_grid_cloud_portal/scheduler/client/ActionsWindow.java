@@ -50,6 +50,7 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.BlurbItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -283,7 +284,7 @@ public class ActionsWindow {
         groupLabel.setEndRow(true);
         fields[noOfFields++] = groupLabel;
         for (Map.Entry<String, JobVariable> var : variablesByGroup.entrySet()) {
-            TextItem variableItem = createVariableItem(var.getKey(), var.getValue().getValue());
+            FormItem variableItem = getVariableItem(var);
             if (var.getValue().getDescription() != null && !var.getValue().getDescription().isEmpty()) {
                 variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
             }
@@ -292,6 +293,24 @@ public class ActionsWindow {
             BlurbItem modelItem = createModelItem(model);
             fields[noOfFields++] = modelItem;
         }
+    }
+
+    private FormItem getVariableItem(Map.Entry<String, JobVariable> var) {
+        if ("NOT_EMPTY_STRING".equals(var.getValue().getModel()) || "PA:JSON".equals(var.getValue().getModel()) ||
+            "PA:SPEL".equals(var.getValue().getModel()) || "PA:SPEL".equals(var.getValue().getModel())) {
+            return createVariableTextAreaItem(var.getKey(), var.getValue().getValue());
+        } else {
+            return createVariableItem(var.getKey(), var.getValue().getValue());
+        }
+    }
+
+    private TextAreaItem createVariableTextAreaItem(String name, String value) {
+        TextAreaItem t = new TextAreaItem(name, name);
+        t.setValue(value.replaceAll("ENC((.*))", "*******"));
+        t.setWidth("100%");
+        t.setStartRow(true);
+        t.setEndRow(false);
+        return t;
     }
 
     private TextItem createVariableItem(String name, String value) {
