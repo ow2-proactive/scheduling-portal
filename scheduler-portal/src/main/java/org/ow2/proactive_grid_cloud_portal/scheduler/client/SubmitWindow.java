@@ -655,6 +655,7 @@ public class SubmitWindow {
 
     private TextAreaItem createVariableTextAreaItem(Entry<String, JobVariable> var) {
         TextAreaItem t = new TextAreaItem(var.getKey(), var.getKey());
+        t.setValue(var.getValue().getValue());
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);

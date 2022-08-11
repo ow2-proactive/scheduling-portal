@@ -310,6 +310,7 @@ public class ActionsWindow {
 
     private TextAreaItem createVariableTextAreaItem(String name, String value) {
         TextAreaItem t = new TextAreaItem(name, name);
+        t.setValue(value);
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);
