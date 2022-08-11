@@ -39,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsContr
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobVariable;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -94,6 +95,7 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.BlurbItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.TimeItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
@@ -581,7 +583,7 @@ public class SubmitWindow {
         fields[noOfFields++] = groupLabel;
 
         for (Entry<String, JobVariable> var : variablesByGroup.entrySet()) {
-            TextItem variableItem = createVariableItem(var);
+            FormItem variableItem = getVariableItem(var);
             if (var.getValue().getDescription() != null && !var.getValue().getDescription().isEmpty()) {
                 variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
             }
@@ -637,6 +639,27 @@ public class SubmitWindow {
         modelLabel.setStartRow(false);
         modelLabel.setEndRow(true);
         return modelLabel;
+    }
+
+    private FormItem getVariableItem(Entry<String, JobVariable> var) {
+        if (Strings.isNullOrEmpty(var.getValue().getModel()) ||
+            "PA:NOT_EMPTY_STRING".equalsIgnoreCase(var.getValue().getModel()) ||
+            "PA:JSON".equalsIgnoreCase(var.getValue().getModel()) ||
+            "PA:SPEL".equalsIgnoreCase(var.getValue().getModel()) ||
+            "PA:REGEXP".equalsIgnoreCase(var.getValue().getModel())) {
+            return createVariableTextAreaItem(var);
+        } else {
+            return createVariableItem(var);
+        }
+    }
+
+    private TextAreaItem createVariableTextAreaItem(Entry<String, JobVariable> var) {
+        TextAreaItem t = new TextAreaItem(var.getKey(), var.getKey());
+        t.setValue(var.getValue().getValue());
+        t.setWidth("100%");
+        t.setStartRow(true);
+        t.setEndRow(false);
+        return t;
     }
 
     private TextItem createVariableItem(Entry<String, JobVariable> var) {
