@@ -37,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.ActionsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobVariable;
 
+import com.google.common.base.Strings;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
@@ -296,7 +297,7 @@ public class ActionsWindow {
     }
 
     private FormItem getVariableItem(Map.Entry<String, JobVariable> var) {
-        if (var.getValue().getModel() == null || "".equals(var.getValue().getModel()) ||
+        if (Strings.isNullOrEmpty(var.getValue().getModel()) ||
             "PA:NOT_EMPTY_STRING".equalsIgnoreCase(var.getValue().getModel()) ||
             "PA:JSON".equalsIgnoreCase(var.getValue().getModel()) ||
             "PA:SPEL".equalsIgnoreCase(var.getValue().getModel()) ||
@@ -309,7 +310,6 @@ public class ActionsWindow {
 
     private TextAreaItem createVariableTextAreaItem(String name, String value) {
         TextAreaItem t = new TextAreaItem(name, name);
-        t.setValue(value.replaceAll("ENC((.*))", "*******"));
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);

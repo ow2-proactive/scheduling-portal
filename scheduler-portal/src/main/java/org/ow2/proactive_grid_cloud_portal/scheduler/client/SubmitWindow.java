@@ -39,6 +39,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsContr
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobVariable;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -641,7 +642,7 @@ public class SubmitWindow {
     }
 
     private FormItem getVariableItem(Entry<String, JobVariable> var) {
-        if (var.getValue().getModel() == null || "".equals(var.getValue().getModel()) ||
+        if (Strings.isNullOrEmpty(var.getValue().getModel()) ||
             "PA:NOT_EMPTY_STRING".equalsIgnoreCase(var.getValue().getModel()) ||
             "PA:JSON".equalsIgnoreCase(var.getValue().getModel()) ||
             "PA:SPEL".equalsIgnoreCase(var.getValue().getModel()) ||
@@ -654,7 +655,6 @@ public class SubmitWindow {
 
     private TextAreaItem createVariableTextAreaItem(Entry<String, JobVariable> var) {
         TextAreaItem t = new TextAreaItem(var.getKey(), var.getKey());
-        t.setValue(var.getValue().getValue().replaceAll("ENC((.*))", "*******"));
         t.setWidth("100%");
         t.setStartRow(true);
         t.setEndRow(false);
