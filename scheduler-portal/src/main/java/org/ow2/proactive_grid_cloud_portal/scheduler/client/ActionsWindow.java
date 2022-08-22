@@ -299,9 +299,8 @@ public class ActionsWindow {
     private FormItem getVariableItem(Map.Entry<String, JobVariable> var) {
         if (Strings.isNullOrEmpty(var.getValue().getModel()) ||
             "PA:NOT_EMPTY_STRING".equalsIgnoreCase(var.getValue().getModel()) ||
-            "PA:JSON".equalsIgnoreCase(var.getValue().getModel()) ||
-            "PA:SPEL".equalsIgnoreCase(var.getValue().getModel()) ||
-            "PA:REGEXP".equalsIgnoreCase(var.getValue().getModel())) {
+            "PA:JSON".equalsIgnoreCase(var.getValue().getModel()) || var.getValue().getModel().startsWith("PA:SPEL") ||
+            var.getValue().getModel().startsWith("PA:REGEXP")) {
             return createVariableTextAreaItem(var.getKey(), var.getValue().getValue());
         } else {
             return createVariableItem(var.getKey(), var.getValue().getValue());
