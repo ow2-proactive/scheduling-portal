@@ -946,6 +946,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         leftTabSet.removeTab(tasksTab);
         tasksTab = new Tab("Tasks", ImagesUnbundled.MONITORING_16);
         tasksTab.setPane(tasksPane);
+        tasksPane.setDisabled(disabled);
         tasksTab.setDisabled(disabled);
         leftTabSet.addTab(tasksTab, 0);
         leftTabSet.redraw();
