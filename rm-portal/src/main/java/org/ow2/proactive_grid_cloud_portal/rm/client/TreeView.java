@@ -322,9 +322,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         String accessString = nodeSourceDescription.split("user access type ")[1];
         String access = accessString.substring(0, accessString.indexOf(", provider access type"));
 
-        return nsName + " <span style='color:#777;'><i>Infrastructure:</i> " + infrastructureType +
-               ", <i>Policy:</i> " + policy + ", <i>Access type:</i> " + access + ", <i>Owner:</i> " +
-               ns.getNodeSourceAdmin() + "</span>";
+        return nsName + " <span style='color:#777;'>" + infrastructureType + " Infrastructure, " + policy +
+               ", Access: " + access + ", Owner: " + ns.getNodeSourceAdmin() + "</span>";
     }
 
     void expandAll() {
