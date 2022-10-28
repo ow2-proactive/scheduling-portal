@@ -317,10 +317,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     private String getNodeSourceDisplayedDescription(NodeSource ns, String nsName) {
         String nodeSourceDescription = ns.getSourceDescription();
         String infrastructure = nodeSourceDescription.split(" ")[1];
-        String policyString = nodeSourceDescription.split(", Policy: ")[1];
-        String policy = policyString.substring(0, policyString.indexOf(" user access type"));
-        String accessString = nodeSourceDescription.split("user access type ")[1];
-        String access = accessString.substring(0, accessString.indexOf(", provider access type"));
+        if (infrastructure.contains(",")) {
+            infrastructure = infrastructure.substring(0, infrastructure.indexOf(","));
+        }
+        String policy = nodeSourceDescription.split(", Policy: ")[1];
+        policy = policy.substring(0, policy.indexOf(" user access type"));
+        String access = nodeSourceDescription.split("user access type ")[1];
+        access = access.substring(0, access.indexOf(", provider access type"));
 
         return nsName + " <span style='color:#777;'>" + beautifyName(infrastructure) + ", " + policy + ", Access: " +
                access + ", Owner: " + ns.getNodeSourceAdmin() + "</span>";
