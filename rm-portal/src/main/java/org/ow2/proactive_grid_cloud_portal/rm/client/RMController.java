@@ -1064,89 +1064,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     public void checkPermissionOfContextMenuItems(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
-
-        /*
-         * checkStatusOfRemoveItem(contextMenu);
-         * if (!loginModel.userHasPermissionToLockNodes()) {
-         * contextMenu.disableLockMenuItem(contextMenu);
-         * }
-         * if (!loginModel.userHasPermissionToUnLockNodes()) {
-         * contextMenu.disableUnlockMenuItem(contextMenu);
-         * }
-         * 
-         * 
-         * if (!loginModel.userHasPermissionToUndeployNodeSource()) {
-         * contextMenu.disableUndeployItem(contextMenu);
-         * }
-         * if (!loginModel.userHasPermissionToDeployNodeSource()) {
-         * contextMenu.disableDeployItem(contextMenu);
-         * }
-         * checkStatusOfEditButton(contextMenu);
-         * if (!loginModel.userHasPermissionToRemoveNode()) {
-         * contextMenu.disableRemoveMenuItem(contextMenu);
-         * }
-         */
-
         if (!loginModel.userHasPermissionToGetNodeSourceConfiguration()) {
             contextMenu.disableExportInfrastructureItem(contextMenu);
             contextMenu.disableExportPolicyItem(contextMenu);
             contextMenu.disableExportNodeSourceItem(contextMenu);
         }
-
-        /*
-         * if (loginModel.userHasPermissionToLockNodes() ||
-         * loginModel.userHasPermissionToUnLockNodes() ||
-         * loginModel.userHasPermissionToRemoveNode()) {
-         * checkNodePermission(contextMenu, true, null);
-         * }
-         * if ((loginModel.userHasPermissionToUndeployNodeSource() ||
-         * loginModel.userHasPermissionToDeployNodeSource()) &&
-         * model.getSelectedNodeSource() != null) {
-         * checkNodePermission(contextMenu, false, null);
-         * }
-         */
-
         checkNodePermission(contextMenu, true, null);
         if (model.getSelectedNodeSource() != null) {
             checkNodePermission(contextMenu, false, null);
-        }
-    }
-
-    private void checkStatusOfRemoveItem(ContextMenu contextMenu) {
-        LoginModel loginModel = LoginModel.getInstance();
-        if (contextMenu.getNodesource() == null) {
-            if (!loginModel.userHasPermissionToRemoveNode()) {
-                contextMenu.disableRemoveMenuItem(contextMenu);
-            }
-        } else {
-            if (!loginModel.userHasPermissionToRemoveNodeSource()) {
-                contextMenu.disableRemoveMenuItem(contextMenu);
-            }
-        }
-    }
-
-    /**
-     * Checks the method permissions for edit/update button
-     * @param contextMenu the current contextMenu
-     */
-    private void checkStatusOfEditButton(ContextMenu contextMenu) {
-        LoginModel loginModel = LoginModel.getInstance();
-        NodeSource selectedNodeSource = contextMenu.getNodesource();
-        if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
-            if (!loginModel.userHasPermissionToUpdateDynamicParameters()) {
-                contextMenu.disableEditItem(contextMenu);
-            } else if (loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
-                       loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras()) {
-                contextMenu.disableEditItem(contextMenu);
-            }
-        } else if (selectedNodeSource != null &&
-                   selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
-            if (!loginModel.userHasPermissionToEditNodeSource()) {
-                contextMenu.disableEditItem(contextMenu);
-            } else if (loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() ||
-                       loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras()) {
-                contextMenu.disableEditItem(contextMenu);
-            }
         }
     }
 
@@ -1176,9 +1101,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 contextMenu.disableAdminItems(contextMenu, url);
             }
             boolean hadAdminPermissionForNodeSource = loginModel.userHasAdminPermissionForNodeSource(url);
-            //    rmPage.setThreadDumpTabPageDisabled(!hadAdminPermissionForNodeSource ||
-            //                                        !(loginModel.userHasPermissionToGetNodeThreadDump() ||
-            //                                        loginModel.userHasPermissionToGetRmThreadDump()));
             rmPage.setScriptConsoleTabPageDisabled(!hadAdminPermissionForNodeSource ||
                                                    !loginModel.userHasPermissionToExecuteScript());
         } else {
@@ -1209,7 +1131,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             @Override
             public void onSuccess(String result) {
-                handlePermissionsReceived(result, provider, nodeUrl, contextMenu);
+                handleReceivedPermissions(result, provider, nodeUrl, contextMenu);
 
             }
         });
@@ -1234,12 +1156,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
             @Override
             public void onSuccess(String result) {
-                handlePermissionsReceived(result, provider, url, contextMenu);
+                handleReceivedPermissions(result, provider, url, contextMenu);
             }
         });
     }
 
-    private void handlePermissionsReceived(String result, boolean provider, String url, ContextMenu contextMenu) {
+    private void handleReceivedPermissions(String result, boolean provider, String url, ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
         if (provider) {
             loginModel.addRMProviderPermissions(url, Boolean.parseBoolean(result));
@@ -1252,9 +1174,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 contextMenu.disableAdminItems(contextMenu, url);
             }
             boolean hadAdminPermissionForNodeSource = loginModel.userHasAdminPermissionForNodeSource(url);
-            //    rmPage.setThreadDumpTabPageDisabled(!hadAdminPermissionForNodeSource ||
-            //                                       !(loginModel.userHasPermissionToGetNodeThreadDump() ||
-            //                                       loginModel.userHasPermissionToGetRmThreadDump()));
             rmPage.setScriptConsoleTabPageDisabled(!hadAdminPermissionForNodeSource ||
                                                    !loginModel.userHasPermissionToExecuteScript());
         }
