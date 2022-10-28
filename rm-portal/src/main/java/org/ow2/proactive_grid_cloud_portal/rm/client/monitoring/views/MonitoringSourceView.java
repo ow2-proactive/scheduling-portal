@@ -166,6 +166,7 @@ public class MonitoringSourceView extends VLayout implements AsyncCallback<Strin
         });
         chain.reload();
         MonitoringNodeView.previousSelectedNode = null;
+        controller.checkNodePermission(null, false, ns.getSourceName());
     }
 
     public void close() {

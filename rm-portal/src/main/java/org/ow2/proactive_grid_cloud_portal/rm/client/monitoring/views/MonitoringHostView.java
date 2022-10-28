@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -186,6 +185,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         });
         chain.reload();
         MonitoringNodeView.previousSelectedNode = null;
+        controller.checkNodePermission(null, false, node.getSourceName());
     }
 
     public void close() {

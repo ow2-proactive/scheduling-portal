@@ -100,6 +100,8 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING = "org.ow2.proactive.resourcemanager.core.RMCore.getInfrasToPoliciesMapping";
 
+    private static final String PERMISSION_RM_GET_DEFINE_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.defineNodeSource";
+
     public static final String AUTOMATION_DASHBOARD_PORTAL = "automation-dashboard";
 
     public static final String[] AUTOMATION_DASHBOARD_PORTALS = new String[] { "catalog-portal", "workflow-execution",
@@ -128,7 +130,7 @@ public class LoginModel {
     // a map containing the node name and true if the user has the admin or provider permission for the node/nodeSource
     private Map<String, Boolean> RMNodeProviderPermissions = null;
 
-    // a map containing the node name and true if the user has the admin permission for the node/nodeSource
+    // a map containing the node name and true if the user has the admin permission for the nodeSource
     private Map<String, Boolean> RMNodeAdminPermissions = null;
 
     private Map<String, Boolean> portalsAccess = null;
@@ -315,6 +317,7 @@ public class LoginModel {
         methods.add(PERMISSION_RM_GET_NODE_THREAD_DUMP);
         methods.add(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
         methods.add(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
+        methods.add(PERMISSION_RM_GET_DEFINE_NODE_SOURCE);
         return methods;
     }
 
@@ -435,11 +438,15 @@ public class LoginModel {
         return !sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
     }
 
+    public boolean userDoesNotHavePermissionToDefineNodeSource() {
+        return !sessionPermissions.get(PERMISSION_RM_GET_DEFINE_NODE_SOURCE);
+    }
+
     public boolean userProviderPermissionWasReceivedForNode(String node) {
         return RMNodeProviderPermissions.containsKey(node);
     }
 
-    public boolean userAdminPermissionWasReceivedForNode(String node) {
+    public boolean userAdminPermissionWasReceivedForNodeSource(String node) {
         return RMNodeAdminPermissions.containsKey(node);
     }
 
@@ -462,30 +469,30 @@ public class LoginModel {
     }
 
     /**
-     * Add the user admin permissions for the nodes/nodeSources to the cashed map to avoid sending unnecessary requests
+     * Add the user admin permissions for the nodeSources to the cashed map to avoid sending unnecessary requests
      *
-     * @param url the node/nodeSource url
-     * @param permission true/false if the user has or has not  admin permission to the nodeSource
+     * @param url the nodeSource url
+     * @param permission true/false if the user has or not admin permission to the nodeSource
      */
     public void addRMAdminPermissions(String url, boolean permission) {
         instance.RMNodeAdminPermissions.put(url, permission);
     }
 
     /**
-     * Check if the user has admin or provider permissions to all of the given nodes
+     * Check if the user has admin or provider permissions to the given node/nodeSource
      *
      * @param url the url of the node source
-     * @return true if the user has admin or provider permissions to all of the given nodes
+     * @return true if the user has admin or provider permissions to the given node/nodeSource
      */
-    public boolean userHasProviderPermissionForNodeSource(String url) {
+    public boolean userHasProviderPermissionForNode(String url) {
         return RMNodeProviderPermissions.containsKey(url) && RMNodeProviderPermissions.get(url);
     }
 
     /**
-     * Check if the user has admin permissions to all of the given nodes
+     * Check if the user has admin permissions to the given nodeSources
      *
      * @param url the url of the node source
-     * @return true if the user has admin permissions to all of the given nodes
+     * @return true if the user has admin permissions to the given nodeSources
      */
     public boolean userHasAdminPermissionForNodeSource(String url) {
         return RMNodeAdminPermissions.containsKey(url) && RMNodeAdminPermissions.get(url);
