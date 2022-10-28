@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -64,7 +65,12 @@ public class TreeViewTest {
     @Test
     public void testRemoveNodeSource() {
         final List<NodeSource> nodeSourceList = IntStream.range(0, 2).mapToObj(i -> {
-            final NodeSource nodeSource = new NodeSource("sourceName" + i);
+            final NodeSource nodeSource = new NodeSource("sourceName" + i,
+                                                         "Infrastructure: Test, Policy: Test Policy user access type [ALL], provider access type [ALL]",
+                                                         new LinkedHashMap<>(),
+                                                         "",
+                                                         "undeployed",
+                                                         "");
             nodeSource.setNodeSourceStatus(NodeSourceStatus.NODES_DEPLOYED);
             return nodeSource;
         }).collect(Collectors.toList());
