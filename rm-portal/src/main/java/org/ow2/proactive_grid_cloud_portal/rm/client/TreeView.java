@@ -315,8 +315,18 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     private String getNodeSourceDisplayedDescription(NodeSource ns, String nsName) {
-        return nsName + " <span style='color:#777;'>" + ns.getSourceDescription() + ", Owner: " +
-               ns.getNodeSourceAdmin() + "</span>";
+        String nodeSourceDescription = ns.getSourceDescription();
+        String infrastructure = nodeSourceDescription.split(" ")[1];
+        if (infrastructure.contains(",")) {
+            infrastructure = infrastructure.substring(0, infrastructure.indexOf(","));
+        }
+        String policy = nodeSourceDescription.split(", Policy: ")[1];
+        policy = policy.substring(0, policy.indexOf(" user access type"));
+        String access = nodeSourceDescription.split("user access type ")[1];
+        access = access.substring(0, access.indexOf(", provider access type"));
+
+        return nsName + " <span style='color:#777;'>" + beautifyName(infrastructure) + ", " + policy + ", Access: " +
+               access + ", Owner: " + ns.getNodeSourceAdmin() + "</span>";
     }
 
     void expandAll() {
@@ -364,5 +374,31 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TreeNode treeNode = currentNodes.get(id);
         treeGrid.selectRecord(treeNode, true);
         scrollList(treeNode);
+    }
+
+    private String beautifyName(String name) {
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < name.length(); i++) {
+            char ch = name.charAt(i);
+            if (i == 0) {
+                buffer.append(Character.toUpperCase(ch));
+            } else if (i > 0 && (Character.isUpperCase(ch) || Character.isDigit(ch))) {
+                boolean nextCharIsUpperCase = (i < name.length() - 1) && (Character.isUpperCase(name.charAt(i + 1)) ||
+                                                                          Character.isDigit(name.charAt(i + 1)));
+                boolean previousCharIsLowerCase = Character.isLowerCase(name.charAt(i - 1));
+                if (previousCharIsLowerCase) {
+                    buffer.append(" " + ch);
+                } else if (!nextCharIsUpperCase) {
+                    buffer.append(" " + ch);
+                } else {
+                    buffer.append(ch);
+                }
+            } else {
+                buffer.append(ch);
+            }
+        }
+
+        return buffer.toString();
     }
 }
