@@ -100,7 +100,7 @@ public class LoginModel {
 
     private static final String PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING = "org.ow2.proactive.resourcemanager.core.RMCore.getInfrasToPoliciesMapping";
 
-    private static final String PERMISSION_RM_GET_DEFINE_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.defineNodeSource";
+    private static final String PERMISSION_RM_DEFINE_NODE_SOURCE = "org.ow2.proactive.resourcemanager.core.RMCore.defineNodeSource";
 
     public static final String AUTOMATION_DASHBOARD_PORTAL = "automation-dashboard";
 
@@ -317,7 +317,7 @@ public class LoginModel {
         methods.add(PERMISSION_RM_GET_NODE_THREAD_DUMP);
         methods.add(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
         methods.add(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
-        methods.add(PERMISSION_RM_GET_DEFINE_NODE_SOURCE);
+        methods.add(PERMISSION_RM_DEFINE_NODE_SOURCE);
         return methods;
     }
 
@@ -430,16 +430,16 @@ public class LoginModel {
         return sessionPermissions.get(PERMISSION_RM_GET_RM_THREAD_DUMP);
     }
 
-    public boolean userDoesNotHavePermissionToGetInfrasToPoliciesMapping() {
-        return !sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
+    public boolean userHasPermissionToGetInfrasToPoliciesMapping() {
+        return sessionPermissions.get(PERMISSION_RM_GET_INFRAS_TO_POLICIES_MAPPING);
     }
 
-    public boolean userDoesNotHavePermissionToGetSupportedNodeSourceInfras() {
-        return !sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
+    public boolean userHasPermissionToGetSupportedNodeSourceInfras() {
+        return sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
     }
 
     public boolean userDoesNotHavePermissionToDefineNodeSource() {
-        return !sessionPermissions.get(PERMISSION_RM_GET_DEFINE_NODE_SOURCE);
+        return !sessionPermissions.get(PERMISSION_RM_DEFINE_NODE_SOURCE);
     }
 
     public boolean userProviderPermissionWasReceivedForNode(String node) {

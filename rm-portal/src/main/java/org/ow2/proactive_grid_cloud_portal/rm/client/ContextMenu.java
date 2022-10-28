@@ -232,7 +232,7 @@ public class ContextMenu extends Menu {
         if (!permissionForNode || !loginModel.userHasPermissionToUnLockNodes()) {
             disableUnlockMenuItem(menu);
         }
-        if (!permissionForNode || !hasMethodPermissionForRemoveItem(menu)) {
+        if (!permissionForNode || !hasMethodPermissionToRemoveItem(menu)) {
             disableRemoveMenuItem(menu);
         }
     }
@@ -252,12 +252,12 @@ public class ContextMenu extends Menu {
         if (!permissionForNodeSource && !loginModel.userHasPermissionToRemoveNodeSource()) {
             disableRemoveMenuItem(menu);
         }
-        if (!permissionForNodeSource && !hasMethodPermissionForEditItem(menu)) {
+        if (!permissionForNodeSource && !hasMethodPermissionToEditItem(menu)) {
             disableRemoveMenuItem(menu);
         }
     }
 
-    private boolean hasMethodPermissionForRemoveItem(ContextMenu contextMenu) {
+    private boolean hasMethodPermissionToRemoveItem(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
         if (contextMenu.getNodesource() == null) {
             return loginModel.userHasPermissionToRemoveNode();
@@ -270,18 +270,18 @@ public class ContextMenu extends Menu {
      * Checks the method permissions for edit/update button
      * @param contextMenu the current contextMenu
      */
-    private boolean hasMethodPermissionForEditItem(ContextMenu contextMenu) {
+    private boolean hasMethodPermissionToEditItem(ContextMenu contextMenu) {
         LoginModel loginModel = LoginModel.getInstance();
         NodeSource selectedNodeSource = contextMenu.getNodesource();
         if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
             return loginModel.userHasPermissionToUpdateDynamicParameters() &&
-                   !loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() &&
-                   !loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras();
+                   loginModel.userHasPermissionToGetInfrasToPoliciesMapping() &&
+                   loginModel.userHasPermissionToGetSupportedNodeSourceInfras();
         } else if (selectedNodeSource != null &&
                    selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
             return loginModel.userHasPermissionToEditNodeSource() &&
-                   !loginModel.userDoesNotHavePermissionToGetInfrasToPoliciesMapping() &&
-                   !loginModel.userDoesNotHavePermissionToGetSupportedNodeSourceInfras();
+                   loginModel.userHasPermissionToGetInfrasToPoliciesMapping() &&
+                   loginModel.userHasPermissionToGetSupportedNodeSourceInfras();
         }
         return true;
     }

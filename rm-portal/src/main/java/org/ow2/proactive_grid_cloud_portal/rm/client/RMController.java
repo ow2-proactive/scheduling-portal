@@ -1173,8 +1173,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             if (contextMenu != null) {
                 contextMenu.disableAdminItems(contextMenu, url);
             }
-            boolean hadAdminPermissionForNodeSource = loginModel.userHasAdminPermissionForNodeSource(url);
-            rmPage.setScriptConsoleTabPageDisabled(!hadAdminPermissionForNodeSource ||
+            boolean hasAdminPermissionForNodeSource = loginModel.userHasAdminPermissionForNodeSource(url);
+            rmPage.setScriptConsoleTabPageDisabled(!hasAdminPermissionForNodeSource ||
                                                    !loginModel.userHasPermissionToExecuteScript());
         }
     }
