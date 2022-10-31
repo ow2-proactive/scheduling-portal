@@ -438,8 +438,8 @@ public class LoginModel {
         return sessionPermissions.get(PERMISSION_RM_GET_SUPPORTED_NODE_SOURCE_INFRASTRUCTURES);
     }
 
-    public boolean userDoesNotHavePermissionToDefineNodeSource() {
-        return !sessionPermissions.get(PERMISSION_RM_DEFINE_NODE_SOURCE);
+    public boolean userHasPermissionToDefineNodeSource() {
+        return sessionPermissions.get(PERMISSION_RM_DEFINE_NODE_SOURCE);
     }
 
     public boolean userProviderPermissionWasReceivedForNode(String node) {

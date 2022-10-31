@@ -1237,7 +1237,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         LoginModel loginModel = LoginModel.getInstance();
         rmPage.setThreadDumpTabPageDisabled(!loginModel.userHasPermissionToGetRmThreadDump());
         rmPage.setScriptConsoleTabPageDisabled(!loginModel.userHasPermissionToExecuteScript());
-        if (loginModel.userDoesNotHavePermissionToDefineNodeSource()) {
+        if (!loginModel.userHasPermissionToDefineNodeSource()) {
             rmPage.disableNSButton();
         }
     }
