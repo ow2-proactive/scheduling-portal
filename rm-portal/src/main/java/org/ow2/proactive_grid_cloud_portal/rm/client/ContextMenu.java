@@ -244,7 +244,7 @@ public class ContextMenu extends Menu {
 
     public void disableAdminItems(ContextMenu menu, String url) {
         LoginModel loginModel = LoginModel.getInstance();
-        if(!loginModel.userHasAdminPermissionForNodeSource(url)) {
+        if (!loginModel.userHasAdminPermissionForNodeSource(url)) {
             disableDeployItem(menu);
             disableUndeployItem(menu);
             disableEditItem(menu);
