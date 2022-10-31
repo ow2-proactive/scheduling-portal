@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.NodeLabel;
@@ -62,6 +63,8 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
 
     private String nodeHostName;
 
+    private String nodeHostSourceName;
+
     private RMController controller;
 
     public ThreadDumpView(RMController controller) {
@@ -83,6 +86,7 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         this.nodeUrl = null;
         this.nodeSourceName = null;
         this.nodeHostName = null;
+        this.nodeHostSourceName = null;
 
         this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
         this.nodeLabel.setIcon("");
@@ -95,10 +99,19 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         this.nodeUrl = node.getNodeUrl();
         this.nodeSourceName = node.getSourceName();
         this.nodeHostName = node.getHostName();
+        this.nodeHostSourceName = null;
 
         this.nodeLabel.setContents("<h3>" + node.getNodeUrl() + "</h3>");
         this.nodeLabel.setIcon(node.getIcon());
-        this.nodeThreadDumpButton.enable();
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userAdminPermissionWasReceivedForNodeSource(nodeUrl)) {
+            disableThreadDumpButtons();
+        } else {
+            this.controller.getRMService().checkNodePermission(LoginModel.getInstance().getSessionId(),
+                                                               this.nodeUrl,
+                                                               false,
+                                                               checkAdminPermission());
+        }
         resetThreadDumpArea();
     }
 
@@ -106,10 +119,20 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
     public void nodeSourceSelected(NodeSource ns) {
         this.nodeUrl = null;
         this.nodeHostName = null;
+        this.nodeHostSourceName = null;
+        this.nodeSourceName = ns.getSourceName();
 
         this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
         this.nodeLabel.setIcon("");
-        this.nodeThreadDumpButton.disable();
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userAdminPermissionWasReceivedForNodeSource(nodeSourceName)) {
+            disableThreadDumpButtons();
+        } else {
+            this.controller.getRMService().checkNodeSourcePermission(LoginModel.getInstance().getSessionId(),
+                                                                     nodeSourceName,
+                                                                     false,
+                                                                     checkAdminPermission());
+        }
         resetThreadDumpArea();
     }
 
@@ -117,10 +140,19 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
     public void hostSelected(NodeSource.Host h) {
         this.nodeUrl = null;
         this.nodeSourceName = null;
+        this.nodeHostSourceName = h.getSourceName();
 
         this.nodeLabel.setContents(NO_NODE_SELECTED_MESSAGE);
         this.nodeLabel.setIcon("");
-        this.nodeThreadDumpButton.disable();
+        LoginModel loginModel = LoginModel.getInstance();
+        if (loginModel.userAdminPermissionWasReceivedForNodeSource(nodeHostSourceName)) {
+            disableThreadDumpButtons();
+        } else {
+            this.controller.getRMService().checkNodeSourcePermission(LoginModel.getInstance().getSessionId(),
+                                                                     nodeHostSourceName,
+                                                                     false,
+                                                                     checkAdminPermission());
+        }
         resetThreadDumpArea();
     }
 
@@ -191,6 +223,43 @@ public class ThreadDumpView implements RMListeners.NodesListener, RMListeners.No
         threadDumpLayout.addMember(fetchThreadDumpLayout);
         threadDumpLayout.addMember(this.threadDumpArea);
         return threadDumpLayout;
+    }
+
+    public void disableThreadDumpButtons() {
+        LoginModel loginModel = LoginModel.getInstance();
+        String url = getSelectedElementUrl();
+        boolean disableNodeThreadDumpButton = !loginModel.userHasAdminPermissionForNodeSource(url) ||
+                                              !loginModel.userHasPermissionToGetNodeThreadDump() || nodeUrl == null;
+        this.nodeThreadDumpButton.setDisabled(disableNodeThreadDumpButton);
+        boolean disableRmThreadDumpButton = !loginModel.userHasAdminPermissionForNodeSource(url) ||
+                                            !loginModel.userHasPermissionToGetRmThreadDump();
+        this.rmThreadDumpButton.setDisabled(disableRmThreadDumpButton);
+        controller.getRmPage().setThreadDumpTabPageDisabled(disableNodeThreadDumpButton && disableRmThreadDumpButton);
+    }
+
+    private AsyncCallback<String> checkAdminPermission() {
+        return new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String url = getSelectedElementUrl();
+                LogModel.getInstance().logImportantMessage("Failed to check nodes permission for " + url +
+                                                           JSONUtils.getJsonErrorMessage(caught));
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                LoginModel loginModel = LoginModel.getInstance();
+                String url = getSelectedElementUrl();
+                loginModel.addRMAdminPermissions(url, Boolean.parseBoolean(result));
+                disableThreadDumpButtons();
+            }
+        };
+    }
+
+    private String getSelectedElementUrl() {
+        return nodeUrl != null ? nodeUrl
+                               : nodeSourceName != null ? nodeSourceName
+                                                        : nodeHostSourceName != null ? nodeHostSourceName : null;
     }
 
     private AsyncCallback<String> getThreadDumpCallback() {

@@ -225,20 +225,72 @@ public class ContextMenu extends Menu {
 
     public void disableProviderItems(ContextMenu menu, String url) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (!loginModel.userHasProviderPermissionForNodeSource(url)) {
+        if (!loginModel.userHasProviderPermissionForNode(url)) {
             disableLockMenuItem(menu);
             disableUnlockMenuItem(menu);
             disableRemoveMenuItem(menu);
+        } else {
+            if (!loginModel.userHasPermissionToLockNodes()) {
+                disableLockMenuItem(menu);
+            }
+            if (!loginModel.userHasPermissionToUnLockNodes()) {
+                disableUnlockMenuItem(menu);
+            }
+            if (!hasMethodPermissionToRemoveItem(menu)) {
+                disableRemoveMenuItem(menu);
+            }
         }
     }
 
     public void disableAdminItems(ContextMenu menu, String url) {
         LoginModel loginModel = LoginModel.getInstance();
-        if (!loginModel.userHasAdminPermissionForNodeSource(url)) {
+        if(!loginModel.userHasAdminPermissionForNodeSource(url)) {
             disableDeployItem(menu);
             disableUndeployItem(menu);
+            disableEditItem(menu);
             disableRemoveMenuItem(menu);
+        } else {
+            if (!loginModel.userHasPermissionToDeployNodeSource()) {
+                disableDeployItem(menu);
+            }
+            if (!loginModel.userHasPermissionToUndeployNodeSource()) {
+                disableUndeployItem(menu);
+            }
+            if (!hasMethodPermissionToEditItem(menu.getNodesource())) {
+                disableEditItem(menu);
+            }
+            if (!loginModel.userHasPermissionToRemoveNodeSource()) {
+                disableRemoveMenuItem(menu);
+            }
         }
+    }
+
+    private boolean hasMethodPermissionToRemoveItem(ContextMenu contextMenu) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (contextMenu.getNodesource() == null) {
+            return loginModel.userHasPermissionToRemoveNode();
+        } else {
+            return loginModel.userHasPermissionToRemoveNodeSource();
+        }
+    }
+
+    /**
+     * Checks the method permissions for edit/update button
+     * @param selectedNodeSource the current selected nodeSource
+     */
+    private boolean hasMethodPermissionToEditItem(NodeSource selectedNodeSource) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (selectedNodeSource != null && selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_DEPLOYED) {
+            return loginModel.userHasPermissionToUpdateDynamicParameters() &&
+                   loginModel.userHasPermissionToGetInfrasToPoliciesMapping() &&
+                   loginModel.userHasPermissionToGetSupportedNodeSourceInfras();
+        } else if (selectedNodeSource != null &&
+                   selectedNodeSource.getNodeSourceStatus() == NodeSourceStatus.NODES_UNDEPLOYED) {
+            return loginModel.userHasPermissionToEditNodeSource() &&
+                   loginModel.userHasPermissionToGetInfrasToPoliciesMapping() &&
+                   loginModel.userHasPermissionToGetSupportedNodeSourceInfras();
+        }
+        return true;
     }
 
     public void disableLockMenuItem(ContextMenu menu) {

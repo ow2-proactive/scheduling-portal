@@ -427,9 +427,9 @@ public class RMPage implements LogListener {
         return tools;
     }
 
-    public void setNSButtonStatus(boolean disable) {
+    public void disableNSButton() {
         nsButton.setTooltip("User is not authorized to create or add a new Node Source");
-        nsButton.setDisabled(disable);
+        nsButton.setDisabled(true);
     }
 
     public void disableLoggersMenuItem() {

@@ -155,6 +155,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
             }
         });
         chain.reload();
+        controller.checkNodePermission(null, false, node.getNodeUrl());
     }
 
     public void close() {
