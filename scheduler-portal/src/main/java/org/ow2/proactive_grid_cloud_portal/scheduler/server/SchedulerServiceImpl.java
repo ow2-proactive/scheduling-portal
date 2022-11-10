@@ -91,6 +91,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.sun.jersey.api.uri.UriComponent;
 
 
 /**
@@ -639,7 +640,8 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                                     offset,
                                                                                                                     limit,
                                                                                                                     tag,
-                                                                                                                    statusFilter));
+                                                                                                                    UriComponent.encode(statusFilter,
+                                                                                                                                        UriComponent.Type.PATH_SEGMENT)));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
