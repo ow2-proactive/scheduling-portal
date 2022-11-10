@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -634,12 +635,19 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
-                                                                                                                    jobId,
-                                                                                                                    offset,
-                                                                                                                    limit,
-                                                                                                                    tag,
-                                                                                                                    statusFilter));
+        return executeFunctionReturnStreamAsString(restClient -> {
+            try {
+                return restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
+                                                                          jobId,
+                                                                          offset,
+                                                                          limit,
+                                                                          tag,
+                                                                          URLEncoder.encode(statusFilter, "UTF-8"));
+            } catch (UnsupportedEncodingException ignored) {
+                // it will never happen, unless UTF-8 is not supported
+                return null;
+            }
+        });
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,

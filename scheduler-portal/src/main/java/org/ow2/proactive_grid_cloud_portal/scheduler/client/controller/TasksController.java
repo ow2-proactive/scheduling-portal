@@ -47,7 +47,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.AbstractGridIte
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.TasksView;
 
 import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -148,7 +147,7 @@ public class TasksController {
                                                                           offset,
                                                                           limit,
                                                                           tagFilter,
-                                                                          URL.encodePathSegment(statusFilter),
+                                                                          statusFilter,
                                                                           callback);
             }
         }
