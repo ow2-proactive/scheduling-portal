@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -92,6 +91,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.sun.jersey.api.uri.UriComponent;
 
 
 /**
@@ -635,19 +635,13 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     @Override
     public String getTasksByTagAndStatus(String sessionId, String jobId, int offset, int limit, String tag,
             String statusFilter) throws RestServerException, ServiceException {
-        return executeFunctionReturnStreamAsString(restClient -> {
-            try {
-                return restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
-                                                                          jobId,
-                                                                          offset,
-                                                                          limit,
-                                                                          tag,
-                                                                          URLEncoder.encode(statusFilter, "UTF-8"));
-            } catch (UnsupportedEncodingException ignored) {
-                // it will never happen, unless UTF-8 is not supported
-                return null;
-            }
-        });
+        return executeFunctionReturnStreamAsString(restClient -> restClient.getJobTaskStatesByTagAndStatusPaginated(sessionId,
+                                                                                                                    jobId,
+                                                                                                                    offset,
+                                                                                                                    limit,
+                                                                                                                    tag,
+                                                                                                                    UriComponent.encode(statusFilter,
+                                                                                                                                        UriComponent.Type.PATH_SEGMENT)));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
