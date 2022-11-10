@@ -109,6 +109,7 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
         autoRefreshOption.setTitleStyle("navbarOptionTitle");
         autoRefreshOption.setPrintTitleStyle("navBarOptionPrintTitle");
         autoRefreshOption.setValue(true);
+        autoRefreshOption.setWidth(50);
         autoRefreshOption.addChangedHandler(event -> controller.setTaskAutoRefreshOption(autoRefreshOption.getValueAsBoolean()));
 
         DynamicForm autoRefreshForm = new DynamicForm();
@@ -121,42 +122,38 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
 
         navTools.addMember(tagSearchTextBox);
         navTools.addMember(btnFilter);
-        navTools.addMember(autoRefreshForm);
 
         Label filterLabel = new Label("Filters: ");
-        filterLabel.setWidth("50");
-        navTools.addMember(filterLabel);
+        filterLabel.setWidth("10");
 
         DynamicForm statusesForm = new DynamicForm();
         statusesForm.addStyleName("form");
         statusesForm.setNumCols(10);
 
-        List<CheckboxItem> statusBoxes = Stream.of("Finished",
-                                                   "Terminated",
-                                                   "Submitted",
-                                                   "Pending",
-                                                   "Current",
-                                                   "Running",
-                                                   "Active",
-                                                   "Past",
-                                                   "Error")
-                                               .map(status -> {
-                                                   CheckboxItem checkboxItem = new CheckboxItem(status, status);
-                                                   checkboxItem.setValue(true);
-                                                   checkboxItem.setWidth("9%");
-                                                   checkboxItem.addChangeHandler(event -> {
-                                                       String allFilters = setOneFilterValueReturnAll(status,
-                                                                                                      (Boolean) event.getValue());
-                                                       controller.fitlerByStatuses(allFilters);
-                                                   });
-                                                   setOneFilterValueReturnAll(status, true);
-                                                   return checkboxItem;
-                                               })
-                                               .collect(Collectors.toList());
+        List<CheckboxItem> statusBoxes = Stream.of("Submitted", "Pending", "Current", "Past", "Error").map(status -> {
+            CheckboxItem checkboxItem = new CheckboxItem(status, status);
+            checkboxItem.setValue(true);
+            checkboxItem.setWidth("9%");
+            checkboxItem.addChangeHandler(event -> {
+                String allFilters = setOneFilterValueReturnAll(status, (Boolean) event.getValue());
+                controller.fitlerByStatuses(allFilters);
+            });
+            setOneFilterValueReturnAll(status, true);
+            return checkboxItem;
+        }).collect(Collectors.toList());
 
         statusesForm.setItems(statusBoxes.toArray(new CheckboxItem[0]));
 
-        navTools.addMember(statusesForm);
+        HLayout filterLayout = new HLayout();
+        filterLayout.addMember(filterLabel);
+        filterLayout.addMember(statusesForm);
+
+        HLayout leftLayout = new HLayout();
+        leftLayout.setMembersMargin(40);
+        leftLayout.addMember(autoRefreshForm);
+        leftLayout.addMember(filterLayout);
+
+        navTools.addMember(leftLayout);
 
         controller.getModel().setStatusFilter(returnAllFilters());
 
