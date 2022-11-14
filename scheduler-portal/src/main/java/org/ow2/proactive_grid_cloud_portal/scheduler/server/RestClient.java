@@ -32,6 +32,7 @@ import java.util.Set;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
@@ -307,7 +308,7 @@ public interface RestClient {
     InputStream getJobTaskStatesByTagAndStatusPaginated(@HeaderParam("sessionid") String sessionId,
             @PathParam("jobid") String jobId, @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("50") int limit, @PathParam("tasktag") String taskTag,
-            @PathParam("statusFilter") String statusFilter);
+            @PathParam("statusFilter") PathSegment statusFilter);
 
     /**
      * Returns a paginated list of <code>TaskStateData</code> regarding the given parameters (decoupled from the associated jobs).

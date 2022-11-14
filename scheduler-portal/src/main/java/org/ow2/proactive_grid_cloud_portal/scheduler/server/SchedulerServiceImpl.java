@@ -69,6 +69,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.interceptors.encoding.AcceptEncodingGZIPFilter;
 import org.jboss.resteasy.plugins.interceptors.encoding.GZIPDecodingInterceptor;
 import org.jboss.resteasy.plugins.interceptors.encoding.GZIPEncodingInterceptor;
+import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.ow2.proactive.http.HttpClientBuilder;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
 import org.ow2.proactive.scheduling.api.graphql.client.SchedulingApiClientGwt;
@@ -640,8 +641,9 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
                                                                                                                     offset,
                                                                                                                     limit,
                                                                                                                     tag,
-                                                                                                                    UriComponent.encode(statusFilter,
-                                                                                                                                        UriComponent.Type.PATH_SEGMENT)));
+                                                                                                                    new PathSegmentImpl(UriComponent.encode(statusFilter,
+                                                                                                                                                            UriComponent.Type.PATH_SEGMENT),
+                                                                                                                                        false)));
     }
 
     public String getTaskCentric(final String sessionId, final long fromDate, final long toDate, final boolean myTasks,
