@@ -122,7 +122,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             super(name);
             NodeSourceDisplayedDescription nodeSourceDisplayedDescription = new NodeSourceDisplayedDescription(ns.getSourceDescription());
             super.setAttribute(" ", name);
-            super.setAttribute(INFRASTRUCTURE_FIELD, beautifyName(nodeSourceDisplayedDescription.getInfrastructure()));
+            super.setAttribute(INFRASTRUCTURE_FIELD, nodeSourceDisplayedDescription.getInfrastructure());
             super.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
             super.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
             super.setAttribute(OWNER_FIELD, ns.getNodeSourceAdmin());
