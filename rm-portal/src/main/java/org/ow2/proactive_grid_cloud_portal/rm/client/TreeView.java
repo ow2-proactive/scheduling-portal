@@ -153,6 +153,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
             policy = policy.substring(0, policy.indexOf(USER_ACCESS_TYPE_));
             policy = policy.replace(POLICY_FIELD, "");
+            policy = beautifyName(policy);
             access = access.substring(0, access.indexOf(PROVIDER_ACCESS_TYPE_));
         }
 
