@@ -140,24 +140,20 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         NodeSourceDisplayedDescription(String description) {
 
-            infrastructure = beautifyName(description.substring(description.indexOf(" ") + 1,
-                                                                description.indexOf(POLICY)));
+            infrastructure = description.split(" ")[1];
+            policy = description.split(POLICY)[1];
+            access = description.split(USER_ACCESS_TYPE_)[1];
+
             if (infrastructure.contains(",")) {
                 infrastructure = infrastructure.substring(0, infrastructure.indexOf(","));
             }
-            if (infrastructure.contains(INFRASTRUCTURE_FIELD)) {
-                infrastructure = infrastructure.substring(0, infrastructure.indexOf(INFRASTRUCTURE_FIELD));
-            }
-            if (infrastructure.contains("Manager")) {
-                infrastructure = infrastructure.substring(0, infrastructure.indexOf("Manager"));
-            }
-            policy = description.substring(description.indexOf(POLICY) + (POLICY).length(),
-                                           description.indexOf(USER_ACCESS_TYPE_));
-            if (policy.contains("Policy")) {
-                policy = policy.substring(0, policy.indexOf("Policy"));
-            }
-            access = description.substring(description.indexOf(USER_ACCESS_TYPE_) + (USER_ACCESS_TYPE_).length(),
-                                           description.indexOf(PROVIDER_ACCESS_TYPE_));
+            infrastructure = infrastructure.replace(INFRASTRUCTURE_FIELD, "");
+            infrastructure = infrastructure.replace("Manager", "");
+            infrastructure = beautifyName(infrastructure);
+
+            policy = policy.substring(0, policy.indexOf(USER_ACCESS_TYPE_));
+            policy = policy.replace(POLICY_FIELD, "");
+            access = access.substring(0, access.indexOf(PROVIDER_ACCESS_TYPE_));
         }
 
         public String getInfrastructure() {
