@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -71,6 +73,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String OWNER_FIELD = "Owner";
 
+    //specifies the variable name of the node source grid view state in the local storage
+    private static final String NS_GRID_VIEW_STATE = "NSGridViewState";
+
     private RMController controller = null;
 
     /**
@@ -98,7 +103,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         TNode(String name, Node node) {
             super(name);
-            super.setAttribute(" ", name);
+            super.setAttribute("Node Sources", name);
             this.rmNode = node;
             this.setAttribute(NODE_ID, node.getNodeUrl());
         }
@@ -109,7 +114,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         THost(String name, Host h) {
             super(name);
-            super.setAttribute(" ", name);
+            super.setAttribute("Node Sources", name);
             this.rmHost = h;
             this.setAttribute(NODE_ID, h.getId());
         }
@@ -121,7 +126,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TNS(String name, NodeSource ns) {
             super(name);
             NodeSourceDisplayedDescription nodeSourceDisplayedDescription = new NodeSourceDisplayedDescription(ns.getSourceDescription());
-            super.setAttribute(" ", name);
+            super.setAttribute("Node Sources", name);
             super.setAttribute(INFRASTRUCTURE_FIELD, nodeSourceDisplayedDescription.getInfrastructure());
             super.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
             super.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
@@ -186,11 +191,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.setShowHeader(true);
         treeGrid.setSelectionType(SelectionStyle.SINGLE);
 
-        TreeGridField field = new TreeGridField(" ");
+        TreeGridField field = new TreeGridField("Node Sources");
         field.setCanSort(true);
-        field.setFrozen(true);
         field.setSortByDisplayField(true);
-        field.setWidth("40%");
+        field.setWidth("35%");
+        field.setAlign(Alignment.CENTER);
 
         TreeGridField infrastructureField = new TreeGridField(INFRASTRUCTURE_FIELD);
         infrastructureField.setCanSort(true);
@@ -198,22 +203,23 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         infrastructureField.setAlign(Alignment.CENTER);
         TreeGridField policyField = new TreeGridField(POLICY_FIELD);
         policyField.setCanSort(true);
-        policyField.setWidth("20%");
+        policyField.setWidth("15%");
         policyField.setAlign(Alignment.CENTER);
         TreeGridField accessField = new TreeGridField(ACCESS_FIELD);
         accessField.setCanSort(true);
-        accessField.setWidth("10%");
+        accessField.setWidth("20%");
         accessField.setAlign(Alignment.CENTER);
         TreeGridField ownerField = new TreeGridField(OWNER_FIELD);
         ownerField.setAlign(Alignment.CENTER);
         ownerField.setCanSort(true);
         ownerField.setWidth("15%");
         treeGrid.setFields(field, infrastructureField, policyField, accessField, ownerField);
-        treeGrid.setSortField(" ");
+        treeGrid.setSortField("Node Sources");
+        treeGrid.setCanDragSelectText(true);
 
         this.tree = new Tree();
         tree.setModelType(TreeModelType.PARENT);
-        tree.setNameProperty(" ");
+        tree.setNameProperty("Node Sources");
         tree.setIdField(NODE_ID);
 
         this.treeGrid.setData(this.tree);
@@ -253,6 +259,23 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             final Menu menu = ContextMenu.createContextMenuFromTreeView(controller, related, tree);
 
             treeGrid.setContextMenu(menu);
+        });
+
+        this.treeGrid.addFieldStateChangedHandler(fieldStateChangedEvent -> {
+            //save the view state in the local storage
+            Settings.get().setSetting(NS_GRID_VIEW_STATE, this.treeGrid.getViewState());
+        });
+
+        this.treeGrid.addDrawHandler(drawEvent -> {
+            try {
+                final String viewState = Settings.get().getSetting(NS_GRID_VIEW_STATE);
+                if (viewState != null) {
+                    // restore any previously saved view state for this grid
+                    this.treeGrid.setViewState(viewState);
+                }
+            } catch (Exception e) {
+                LogModel.getInstance().logImportantMessage("Failed to restore node source grid view state " + e);
+            }
         });
 
         vl.addMember(treeGrid);
