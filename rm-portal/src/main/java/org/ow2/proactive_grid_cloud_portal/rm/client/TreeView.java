@@ -372,6 +372,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     removeNodeSource(nodeSource);
                 } else {
                     addNodeSourceIfNotExists(nodeSource);
+                    updateNodeSourceDescriptionIfChanged(nodeSource);
                     changeNodeSourceStatusIfChanged(nodeSource);
                 }
             }
@@ -394,7 +395,24 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             tree.add(nsTreeNode, this.tree.getRoot());
             currentNodes.put(nodeSource.getSourceName(), nsTreeNode);
         }
+    }
 
+    private void updateNodeSourceDescriptionIfChanged(NodeSource nodeSource) {
+        TNS currentNs = (TNS) currentNodes.get(nodeSource.getSourceName());
+        NodeSourceDisplayedDescription nodeSourceDisplayedDescription = new NodeSourceDisplayedDescription(nodeSource.getSourceDescription());
+
+        if (!currentNs.getAttribute(INFRASTRUCTURE_FIELD).equals(nodeSourceDisplayedDescription.getInfrastructure())) {
+            currentNs.setAttribute(INFRASTRUCTURE_FIELD, nodeSourceDisplayedDescription.getInfrastructure());
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
+        if (!currentNs.getAttribute(POLICY_FIELD).equals(nodeSourceDisplayedDescription.getPolicy())) {
+            currentNs.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
+        if (!currentNs.getAttribute(ACCESS_FIELD).equals(nodeSourceDisplayedDescription.getAccess())) {
+            currentNs.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
     }
 
     void removeNodeSource(NodeSource nodeSource) {
