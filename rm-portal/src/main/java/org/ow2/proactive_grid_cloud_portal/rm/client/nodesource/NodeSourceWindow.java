@@ -687,7 +687,7 @@ public abstract class NodeSourceWindow {
                 formItemsForField.add(new TextAreaItem(plugin.getPluginName() + pluginField.getName(),
                                                        pluginField.getName()) {
                     {
-                        setWrap(TextAreaWrap.HARD);
+                        setWrap(TextAreaWrap.SOFT);
                     }
                 });
             } else if (pluginField.isCheckbox()) {
