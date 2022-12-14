@@ -690,6 +690,16 @@ public abstract class NodeSourceWindow {
                         setWrap(TextAreaWrap.SOFT);
                     }
                 });
+            } else if (pluginField.isTextareaOneLine()) {
+                TextAreaItem textAreaItem = new TextAreaItem(plugin.getPluginName() + pluginField.getName(),
+                                                             pluginField.getName());
+                textAreaItem.setWrap(TextAreaWrap.SOFT);
+                textAreaItem.addKeyDownHandler(keyDownEvent -> {
+                    if (keyDownEvent.getKeyName().equalsIgnoreCase("Enter")) {
+                        keyDownEvent.cancel();
+                    }
+                });
+                formItemsForField.add(textAreaItem);
             } else if (pluginField.isCheckbox()) {
                 // We use radio buttons insread of checkbox
                 // because we cannot figure out how to keep checkbox value

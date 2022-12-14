@@ -180,6 +180,7 @@ public class NodeSourceConfigurationParser {
             boolean credentials = false;
             boolean file = false;
             boolean textArea = false;
+            boolean textAreaOneLine = false;
             boolean checkbox = false;
 
             if (metaType.equalsIgnoreCase("password")) {
@@ -190,6 +191,8 @@ public class NodeSourceConfigurationParser {
                 credentials = true;
             } else if (metaType.equalsIgnoreCase("textArea")) {
                 textArea = true;
+            } else if (metaType.equalsIgnoreCase("textAreaOneLine")) {
+                textAreaOneLine = true;
             } else if (metaType.equalsIgnoreCase("checkbox")) {
                 checkbox = true;
             }
@@ -201,6 +204,7 @@ public class NodeSourceConfigurationParser {
                                                                   credentials,
                                                                   file,
                                                                   textArea,
+                                                                  textAreaOneLine,
                                                                   checkbox,
                                                                   dynamic,
                                                                   sectionSelector,
