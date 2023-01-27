@@ -34,7 +34,7 @@ public class CatalogUrlRmClientBuilder {
 
     public String getCatalogUrl() {
         if (this.catalogUrl == null) {
-            String catalogUrlFromConfig = RMConfig.get().getCatalogUrl();
+            String catalogUrlFromConfig = RMConfig.get().getCatalogPublicUrl();
 
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
                 this.catalogUrl = com.google.gwt.user.client.Window.Location.getHref().replace("/rm/", "/") + "catalog";
