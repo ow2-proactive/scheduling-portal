@@ -127,6 +127,8 @@ public class RMConfig extends Config {
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "rm.catalog.url";
 
+    public static final String CATALOG_PUBLIC_URL = "rm.catalog.public.url";
+
     private static RMConfig instance = null;
 
     /**
@@ -266,6 +268,13 @@ public class RMConfig extends Config {
      */
     public String getCatalogUrl() {
         return properties.get(CATALOG_URL);
+    }
+
+    /**
+     * @return the catalog url or null if none has been defined
+     */
+    public String getCatalogPublicUrl() {
+        return properties.get(CATALOG_PUBLIC_URL);
     }
 
     public Optional<String> getHelpLink(String pluginName) {

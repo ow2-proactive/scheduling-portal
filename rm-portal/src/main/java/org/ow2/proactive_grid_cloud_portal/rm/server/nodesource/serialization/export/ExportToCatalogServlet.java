@@ -77,7 +77,8 @@ public class ExportToCatalogServlet extends HttpServlet {
                                                          catalogObjectAction.getCatalogObjectName(),
                                                          catalogObjectAction.getCommitMessage(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
-                                                         catalogObjectAction.getProjectName());
+                                                         catalogObjectAction.getProjectName(),
+                                                         null);
                 LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectName() +
                             " in bucket " + catalogObjectAction.getBucketName());
             } else {
@@ -89,7 +90,8 @@ public class ExportToCatalogServlet extends HttpServlet {
                                                          catalogObjectAction.getObjectContentType(),
                                                          catalogObjectAction.getCatalogObjectJsonFile(),
                                                          catalogObjectAction.getCatalogObjectName(),
-                                                         catalogObjectAction.getProjectName());
+                                                         catalogObjectAction.getProjectName(),
+                                                         null);
                 LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectName() + " in bucket " +
                             catalogObjectAction.getBucketName());
             }

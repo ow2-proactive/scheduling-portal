@@ -112,6 +112,8 @@ public class SchedulerConfig extends Config {
     /** Workflow Catalog URL **/
     public static final String CATALOG_URL = "sched.catalog.url";
 
+    public static final String CATALOG_PUBLIC_URL = "sched.catalog.public.url";
+
     private static SchedulerConfig instance = null;
 
     /**
@@ -290,6 +292,13 @@ public class SchedulerConfig extends Config {
      */
     public String getCatalogUrl() {
         return properties.get(CATALOG_URL);
+    }
+
+    /**
+     * @return the catalog public url or null if none has been defined
+     */
+    public String getCatalogPublicUrl() {
+        return properties.get(CATALOG_PUBLIC_URL);
     }
 
     /**

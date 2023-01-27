@@ -34,7 +34,7 @@ public class CatalogUrlSchedulerClientBuilder {
 
     public String getCatalogUrl() {
         if (this.catalogUrl == null) {
-            String catalogUrlFromConfig = SchedulerConfig.get().getCatalogUrl();
+            String catalogUrlFromConfig = SchedulerConfig.get().getCatalogPublicUrl();
 
             if (catalogUrlFromConfig == null || catalogUrlFromConfig.isEmpty()) {
                 this.catalogUrl = com.google.gwt.user.client.Window.Location.getHref().replace("/scheduler/", "/") +
