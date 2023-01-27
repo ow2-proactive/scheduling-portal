@@ -51,6 +51,22 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
 
     public static GridColumns IN_ERROR_TIME_ATTR = new GridColumns("inErrorTime", "In error time", 50, true, false);
 
+    public static GridColumns CUMULATED_CORE_TIME = new GridColumns("cumulatedCoreTime",
+                                                                    "Cumulated core time",
+                                                                    50,
+                                                                    true,
+                                                                    false);
+
+    public static GridColumns PARENT_ID = new GridColumns("parentId", "Parent id", 50, true, false);
+
+    public static GridColumns CHILDREN_COUNT = new GridColumns("childrenCount", "Children count", 50, true, false);
+
+    public static GridColumns NUMBER_OF_NODES = new GridColumns("numberOfNodes",
+                                                                "Number of used nodes",
+                                                                50,
+                                                                true,
+                                                                false);
+
     public static GridColumns PENDING_DURATION_ATTR = new GridColumns("pendingDuration",
                                                                       "Pending duration",
                                                                       50,
@@ -66,7 +82,8 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         return new GridColumns[] { ID_ATTR, STATE_ATTR, NAME_ATTR, PRIORITY_ATTR, USER_ATTR, TENANT_ATTR,
                                    PENDING_TASKS_ATTR, RUNNING_TASKS_ATTR, FINISHED_TASKS_ATTR, TOTAL_TASKS_ATTR,
                                    SUBMITTED_TIME_ATTR, STARTED_TIME_ATTR, FINISHED_TIME_ATTR, IN_ERROR_TIME_ATTR,
-                                   PENDING_DURATION_ATTR, DURATION_ATTR, TOTAL_DURATION_ATTR, DESCRIPTION_ATTR };
+                                   CUMULATED_CORE_TIME, PENDING_DURATION_ATTR, DURATION_ATTR, TOTAL_DURATION_ATTR,
+                                   DESCRIPTION_ATTR, PARENT_ID, CHILDREN_COUNT, NUMBER_OF_NODES };
     }
 
     @Override
@@ -77,7 +94,10 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         long startTime = item.getStartTime();
         long finishTime = item.getFinishTime();
         long inErrorTime = item.getInErrorTime();
-
+        String cumulatedCoreTime = Job.formatDuration(item.getCumulatedCoreTime());
+        long parentId = item.getParentId();
+        int childrenCount = item.getChildrenCount();
+        int numberOfNodes = item.getNumberOfNodes();
         String pendingDuration = "";
         if (startTime > submitTime)
             pendingDuration = Job.formatDuration(startTime - submitTime);
@@ -97,6 +117,10 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(STARTED_TIME_ATTR.getName(), (startTime > submitTime) ? JSUtil.getTime(startTime) : "");
         record.setAttribute(FINISHED_TIME_ATTR.getName(), (finishTime > startTime) ? JSUtil.getTime(finishTime) : "");
         record.setAttribute(IN_ERROR_TIME_ATTR.getName(), JSUtil.getTime(inErrorTime));
+        record.setAttribute(CUMULATED_CORE_TIME.getName(), cumulatedCoreTime);
+        record.setAttribute(PARENT_ID.getName(), parentId);
+        record.setAttribute(CHILDREN_COUNT.getName(), childrenCount);
+        record.setAttribute(NUMBER_OF_NODES.getName(), numberOfNodes);
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
         record.setAttribute(DESCRIPTION_ATTR.getName(), StringUtil.asHTML(item.getDescription()));

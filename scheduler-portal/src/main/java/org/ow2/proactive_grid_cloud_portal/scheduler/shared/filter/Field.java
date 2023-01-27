@@ -49,7 +49,11 @@ public enum Field implements IsSerializable {
     NUMBER_OF_FINISHED_TASKS("Finished tasks"),
     NUMBER_OF_FAULTY_TASKS("Faulty tasks"),
     NUMBER_OF_FAILED_TASKS("Failed tasks"),
-    NUMBER_OF_IN_ERROR_TASKS("In-error tasks"),;
+    NUMBER_OF_IN_ERROR_TASKS("In-error tasks"),
+    CUMULATED_CORE_TIME("Cumulated core time"),
+    PARENT_ID("Parent id"),
+    CHILDREN_COUNT("Children count"),
+    NUMBER_OF_NODES("Number of used nodes");
 
     private String name;
 
