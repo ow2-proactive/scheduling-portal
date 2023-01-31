@@ -189,6 +189,14 @@ public final class GraphQLQueries {
         String beforeNumberOfFailedTask = null;
         String afterNumberOfInErrorTask = null;
         String beforeNumberOfInErrorTask = null;
+        String afterCumulatedCoreTime = null;
+        String beforeCumulatedCoreTime = null;
+        String afterParentId = null;
+        String beforeParentId = null;
+        String afterChildrenCount = null;
+        String beforeChildrenCount = null;
+        String afterNumberOfNodes = null;
+        String beforeNumberOfNodes = null;
 
         int valueAsInteger;
         String filter;
@@ -477,6 +485,104 @@ public final class GraphQLQueries {
                         }
                         break;
                     }
+                    case CUMULATED_CORE_TIME: {
+                        // Consider only parseable numbers.
+                        try {
+                            dateInMs = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing CUMULATED_CORE_TIME filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterCumulatedCoreTime == null ||
+                                    dateInMs > Integer.valueOf(afterCumulatedCoreTime))
+                                    afterCumulatedCoreTime = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeCumulatedCoreTime == null ||
+                                    dateInMs < Integer.valueOf(beforeCumulatedCoreTime))
+                                    beforeCumulatedCoreTime = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case PARENT_ID: {
+                        // Consider only parseable numbers.
+                        try {
+                            dateInMs = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing PARENT_ID filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterParentId == null || dateInMs > Integer.valueOf(afterParentId))
+                                    afterParentId = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeParentId == null || dateInMs < Integer.valueOf(beforeParentId))
+                                    beforeParentId = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case CHILDREN_COUNT: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing CHILDREN_COUNT filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterChildrenCount == null || valueAsInteger > Integer.valueOf(afterChildrenCount))
+                                    afterChildrenCount = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeChildrenCount == null ||
+                                    valueAsInteger < Integer.valueOf(beforeChildrenCount))
+                                    beforeChildrenCount = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_NODES: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing NUMBER_OF_NODES filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfNodes == null || valueAsInteger > Integer.valueOf(afterNumberOfNodes))
+                                    afterNumberOfNodes = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfNodes == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfNodes))
+                                    beforeNumberOfNodes = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     case NUMBER_OF_FAULTY_TASKS: {
                         // Consider only parseable numbers.
                         try {
@@ -615,6 +721,14 @@ public final class GraphQLQueries {
             input.afterNumberOfFailedTasks(afterNumberOfFailedTask);
         if (afterNumberOfInErrorTask != null)
             input.afterNumberOfInErrorTasks(afterNumberOfInErrorTask);
+        if (afterCumulatedCoreTime != null)
+            input.afterCumulatedCoreTime(afterCumulatedCoreTime);
+        if (afterParentId != null)
+            input.afterParentId(afterParentId);
+        if (afterChildrenCount != null)
+            input.afterChildrenCount(afterChildrenCount);
+        if (afterNumberOfNodes != null)
+            input.afterNumberOfNodes(afterNumberOfNodes);
         if (beforeNumberOfPendingTask != null)
             input.beforeNumberOfPendingTasks(beforeNumberOfPendingTask);
         if (beforeNumberOfRunningTask != null)
@@ -627,6 +741,14 @@ public final class GraphQLQueries {
             input.beforeNumberOfFailedTasks(beforeNumberOfFailedTask);
         if (beforeNumberOfInErrorTask != null)
             input.beforeNumberOfInErrorTasks(beforeNumberOfInErrorTask);
+        if (beforeCumulatedCoreTime != null)
+            input.beforeCumulatedCoreTime(beforeCumulatedCoreTime);
+        if (beforeParentId != null)
+            input.beforeParentId(beforeParentId);
+        if (beforeChildrenCount != null)
+            input.beforeChildrenCount(beforeChildrenCount);
+        if (beforeNumberOfNodes != null)
+            input.beforeNumberOfNodes(beforeNumberOfNodes);
 
         return input.build();
     }
