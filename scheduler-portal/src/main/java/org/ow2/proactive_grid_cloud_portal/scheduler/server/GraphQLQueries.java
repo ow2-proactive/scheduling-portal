@@ -189,10 +189,18 @@ public final class GraphQLQueries {
         String beforeNumberOfFailedTask = null;
         String afterNumberOfInErrorTask = null;
         String beforeNumberOfInErrorTask = null;
+        String afterCumulatedCoreTime = null;
+        String beforeCumulatedCoreTime = null;
+        String afterParentId = null;
+        String beforeParentId = null;
+        String afterChildrenCount = null;
+        String beforeChildrenCount = null;
+        String afterNumberOfNodes = null;
+        String beforeNumberOfNodes = null;
 
         int valueAsInteger;
         String filter;
-        long dateInMs;
+        long valueAsLong;
 
         for (Constraint constraint : constraints) {
 
@@ -301,7 +309,7 @@ public final class GraphQLQueries {
 
                     case SUBMITTED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field SUBMITTED_TIME : \"" + value + "\" is not a long int",
@@ -311,12 +319,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterSubmittedTime == -1 || dateInMs > afterSubmittedTime)
-                                    afterSubmittedTime = dateInMs;
+                                if (afterSubmittedTime == -1 || valueAsLong > afterSubmittedTime)
+                                    afterSubmittedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime)
-                                    beforeSubmittedTime = dateInMs;
+                                if (beforeSubmittedTime == -1 || valueAsLong < beforeSubmittedTime)
+                                    beforeSubmittedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -325,7 +333,7 @@ public final class GraphQLQueries {
                     }
                     case START_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field START_TIME : \"" + value + "\" is not a long int",
@@ -335,12 +343,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterStartTime == -1 || dateInMs > afterStartTime)
-                                    afterStartTime = dateInMs;
+                                if (afterStartTime == -1 || valueAsLong > afterStartTime)
+                                    afterStartTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeStartTime == -1 || dateInMs < beforeStartTime)
-                                    beforeStartTime = dateInMs;
+                                if (beforeStartTime == -1 || valueAsLong < beforeStartTime)
+                                    beforeStartTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -349,7 +357,7 @@ public final class GraphQLQueries {
                     }
                     case LAST_UPDATED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field LAST_UPDATED_TIME : \"" + value +
@@ -360,12 +368,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterLastUpdatedTime == -1 || dateInMs > afterLastUpdatedTime)
-                                    afterLastUpdatedTime = dateInMs;
+                                if (afterLastUpdatedTime == -1 || valueAsLong > afterLastUpdatedTime)
+                                    afterLastUpdatedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeLastUpdatedTime == -1 || dateInMs < beforeLastUpdatedTime)
-                                    beforeLastUpdatedTime = dateInMs;
+                                if (beforeLastUpdatedTime == -1 || valueAsLong < beforeLastUpdatedTime)
+                                    beforeLastUpdatedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -374,7 +382,7 @@ public final class GraphQLQueries {
                     }
                     case FINISHED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field FINISHED_TIME : \"" + value + "\" is not a long int",
@@ -384,12 +392,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterFinishedTime == -1 || dateInMs > afterFinishedTime)
-                                    afterFinishedTime = dateInMs;
+                                if (afterFinishedTime == -1 || valueAsLong > afterFinishedTime)
+                                    afterFinishedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeFinishedTime == -1 || dateInMs < beforeFinishedTime)
-                                    beforeFinishedTime = dateInMs;
+                                if (beforeFinishedTime == -1 || valueAsLong < beforeFinishedTime)
+                                    beforeFinishedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -471,6 +479,104 @@ public final class GraphQLQueries {
                                 if (beforeNumberOfFinishedTask == null ||
                                     valueAsInteger < Integer.valueOf(beforeNumberOfFinishedTask))
                                     beforeNumberOfFinishedTask = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case CUMULATED_CORE_TIME: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsLong = Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing CUMULATED_CORE_TIME filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterCumulatedCoreTime == null ||
+                                    valueAsLong > Integer.valueOf(afterCumulatedCoreTime))
+                                    afterCumulatedCoreTime = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeCumulatedCoreTime == null ||
+                                    valueAsLong < Integer.valueOf(beforeCumulatedCoreTime))
+                                    beforeCumulatedCoreTime = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case PARENT_ID: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsLong = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing PARENT_ID filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterParentId == null || valueAsLong > Integer.valueOf(afterParentId))
+                                    afterParentId = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeParentId == null || valueAsLong < Integer.valueOf(beforeParentId))
+                                    beforeParentId = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case CHILDREN_COUNT: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing CHILDREN_COUNT filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterChildrenCount == null || valueAsInteger > Integer.valueOf(afterChildrenCount))
+                                    afterChildrenCount = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeChildrenCount == null ||
+                                    valueAsInteger < Integer.valueOf(beforeChildrenCount))
+                                    beforeChildrenCount = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case NUMBER_OF_NODES: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE, "Error when parsing NUMBER_OF_NODES filter \"" + value + "\"", e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfNodes == null || valueAsInteger > Integer.valueOf(afterNumberOfNodes))
+                                    afterNumberOfNodes = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfNodes == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfNodes))
+                                    beforeNumberOfNodes = value;
                                 break;
                             default:
                                 break;
@@ -615,6 +721,14 @@ public final class GraphQLQueries {
             input.afterNumberOfFailedTasks(afterNumberOfFailedTask);
         if (afterNumberOfInErrorTask != null)
             input.afterNumberOfInErrorTasks(afterNumberOfInErrorTask);
+        if (afterCumulatedCoreTime != null)
+            input.afterCumulatedCoreTime(afterCumulatedCoreTime);
+        if (afterParentId != null)
+            input.afterParentId(afterParentId);
+        if (afterChildrenCount != null)
+            input.afterChildrenCount(afterChildrenCount);
+        if (afterNumberOfNodes != null)
+            input.afterNumberOfNodes(afterNumberOfNodes);
         if (beforeNumberOfPendingTask != null)
             input.beforeNumberOfPendingTasks(beforeNumberOfPendingTask);
         if (beforeNumberOfRunningTask != null)
@@ -627,6 +741,14 @@ public final class GraphQLQueries {
             input.beforeNumberOfFailedTasks(beforeNumberOfFailedTask);
         if (beforeNumberOfInErrorTask != null)
             input.beforeNumberOfInErrorTasks(beforeNumberOfInErrorTask);
+        if (beforeCumulatedCoreTime != null)
+            input.beforeCumulatedCoreTime(beforeCumulatedCoreTime);
+        if (beforeParentId != null)
+            input.beforeParentId(beforeParentId);
+        if (beforeChildrenCount != null)
+            input.beforeChildrenCount(beforeChildrenCount);
+        if (beforeNumberOfNodes != null)
+            input.beforeNumberOfNodes(beforeNumberOfNodes);
 
         return input.build();
     }

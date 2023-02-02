@@ -86,6 +86,14 @@ public class Job implements Serializable, Comparable<Job> {
 
     private long finishTime;
 
+    private long cumulatedCoreTime;
+
+    private long parentId;
+
+    private int childrenCount;
+
+    private int numberOfNodes;
+
     private final ImmutableMap<String, String> genericInformation;
 
     private final Map<String, String> variables;
@@ -136,12 +144,17 @@ public class Job implements Serializable, Comparable<Job> {
      * @param inErrorTime in error time
      * @param finishTime finish time
      * @param description job description
+     * @param cumulatedCoreTime job cumulated core time
+     * @param parentId job parent id
+     * @param childrenCount job children count
+     * @param numberOfNodes job total number of used nodes
      */
     public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
             String tenant, Map<String, String> genericInformation, Map<String, String> variables,
             Map<String, Map<String, String>> detailedVariables, Map<String, String> resultMap, int pending, int running,
             int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime, String description) {
+            long inErrorTime, long finishTime, String description, long cumulatedCoreTime, long parentId,
+            int childrenCount, int numberOfNodes) {
         this.id = id;
         this.name = name;
         this.projectName = projectName;
@@ -170,6 +183,10 @@ public class Job implements Serializable, Comparable<Job> {
         });
         this.resultMap = ImmutableMap.copyOf(resultMap);
         this.description = description;
+        this.cumulatedCoreTime = cumulatedCoreTime;
+        this.parentId = parentId;
+        this.childrenCount = childrenCount;
+        this.numberOfNodes = numberOfNodes;
     }
 
     /**
@@ -352,6 +369,50 @@ public class Job implements Serializable, Comparable<Job> {
         return this.totalTasks;
     }
 
+    /**
+     * @return cumulated core time for this job
+     */
+    public long getCumulatedCoreTime() {
+        return cumulatedCoreTime;
+    }
+
+    public void setCumulatedCoreTime(long cumulatedCoreTime) {
+        this.cumulatedCoreTime = cumulatedCoreTime;
+    }
+
+    /**
+     * @return parent id of this job
+     */
+    public long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(long parentId) {
+        this.parentId = parentId;
+    }
+
+    /**
+     * @return children count for this job
+     */
+    public int getChildrenCount() {
+        return childrenCount;
+    }
+
+    public void setChildrenCount(int childrenCount) {
+        this.childrenCount = childrenCount;
+    }
+
+    /**
+     * @return number of nodes used by this job
+     */
+    public int getNumberOfNodes() {
+        return numberOfNodes;
+    }
+
+    public void setNumberOfNodes(int numberOfNodes) {
+        this.numberOfNodes = numberOfNodes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Job))
@@ -375,7 +436,9 @@ public class Job implements Serializable, Comparable<Job> {
                this.status.equals(job.getStatus()) && this.user.equals(job.getUser()) &&
                pendingTasks == job.pendingTasks && runningTasks == job.runningTasks &&
                finishedTasks == job.finishedTasks && failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
-               inErrorTasks == job.inErrorTasks && finishTime == job.finishTime && inErrorTime == job.inErrorTime;
+               inErrorTasks == job.inErrorTasks && finishTime == job.finishTime && inErrorTime == job.inErrorTime &&
+               cumulatedCoreTime == job.cumulatedCoreTime && parentId == job.parentId &&
+               childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes;
     }
 
     public int compareTo(Job job) {
@@ -424,6 +487,19 @@ public class Job implements Serializable, Comparable<Job> {
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
+        long cumulatedCoreTime = jsonJobInfo.get("cumulatedCoreTime") == null ? 0
+                                                                              : (long) jsonJobInfo.get("cumulatedCoreTime")
+                                                                                                  .isNumber()
+                                                                                                  .doubleValue();
+        long parentId = jsonJobInfo.get("parentId") == null ? 0 : (long) jsonJobInfo.get("parentId")
+                                                                                    .isNumber()
+                                                                                    .doubleValue();
+        int childrenCount = (int) (jsonJobInfo.get("childrenCount") == null ? 0 : jsonJobInfo.get("childrenCount")
+                                                                                             .isNumber()
+                                                                                             .doubleValue());
+        int numberOfNodes = (int) (jsonJobInfo.get("numberOfNodes") == null ? 0 : jsonJobInfo.get("numberOfNodes")
+                                                                                             .isNumber()
+                                                                                             .doubleValue());
         String description = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("description"));
 
         Map<String, String> genericInformation = SchedulerJSONUtils.extractMap(jsonJobInfo.get("genericInformation"));
@@ -456,7 +532,11 @@ public class Job implements Serializable, Comparable<Job> {
                        startTime,
                        inErrorTime,
                        finishedTime,
-                       description);
+                       description,
+                       cumulatedCoreTime,
+                       parentId,
+                       childrenCount,
+                       numberOfNodes);
     }
 
     public static Map<String, Map<String, String>> parseJSONDetailedVariables(JSONObject jsonJobInfo) {

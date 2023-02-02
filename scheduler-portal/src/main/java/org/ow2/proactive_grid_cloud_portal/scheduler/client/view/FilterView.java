@@ -138,6 +138,8 @@ public class FilterView extends VStack {
             case NUMBER_OF_FAILED_TASKS:
             case NUMBER_OF_FAULTY_TASKS:
             case NUMBER_OF_IN_ERROR_TASKS:
+            case CHILDREN_COUNT:
+            case NUMBER_OF_NODES:
                 try {
                     Integer.parseInt(value);
                 } catch (NumberFormatException e) {
@@ -152,6 +154,15 @@ public class FilterView extends VStack {
                     return "" + getMillisFromDate(value, field.getName());
                 } catch (IllegalArgumentException e) {
                     displayErrorMessage(e.getMessage());
+                }
+                break;
+            case CUMULATED_CORE_TIME:
+            case PARENT_ID:
+                try {
+                    Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                    displayErrorMessage("Invalid value for field " + field + " : \"" + value +
+                                        "\" is not a long integer.");
                 }
                 break;
             default:
@@ -582,7 +593,11 @@ public class FilterView extends VStack {
                 case NUMBER_OF_PENDING_TASKS:
                 case NUMBER_OF_RUNNING_TASKS:
                 case NUMBER_OF_FINISHED_TASKS:
+                case PARENT_ID:
+                case CHILDREN_COUNT:
                 case NUMBER_OF_FAULTY_TASKS:
+                case CUMULATED_CORE_TIME:
+                case NUMBER_OF_NODES:
                 case NUMBER_OF_FAILED_TASKS:
                 case NUMBER_OF_IN_ERROR_TASKS: {
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
