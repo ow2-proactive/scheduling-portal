@@ -200,7 +200,7 @@ public final class GraphQLQueries {
 
         int valueAsInteger;
         String filter;
-        long dateInMs;
+        long valueAsLong;
 
         for (Constraint constraint : constraints) {
 
@@ -309,7 +309,7 @@ public final class GraphQLQueries {
 
                     case SUBMITTED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field SUBMITTED_TIME : \"" + value + "\" is not a long int",
@@ -319,12 +319,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterSubmittedTime == -1 || dateInMs > afterSubmittedTime)
-                                    afterSubmittedTime = dateInMs;
+                                if (afterSubmittedTime == -1 || valueAsLong > afterSubmittedTime)
+                                    afterSubmittedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeSubmittedTime == -1 || dateInMs < beforeSubmittedTime)
-                                    beforeSubmittedTime = dateInMs;
+                                if (beforeSubmittedTime == -1 || valueAsLong < beforeSubmittedTime)
+                                    beforeSubmittedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -333,7 +333,7 @@ public final class GraphQLQueries {
                     }
                     case START_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field START_TIME : \"" + value + "\" is not a long int",
@@ -343,12 +343,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterStartTime == -1 || dateInMs > afterStartTime)
-                                    afterStartTime = dateInMs;
+                                if (afterStartTime == -1 || valueAsLong > afterStartTime)
+                                    afterStartTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeStartTime == -1 || dateInMs < beforeStartTime)
-                                    beforeStartTime = dateInMs;
+                                if (beforeStartTime == -1 || valueAsLong < beforeStartTime)
+                                    beforeStartTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -357,7 +357,7 @@ public final class GraphQLQueries {
                     }
                     case LAST_UPDATED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field LAST_UPDATED_TIME : \"" + value +
@@ -368,12 +368,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterLastUpdatedTime == -1 || dateInMs > afterLastUpdatedTime)
-                                    afterLastUpdatedTime = dateInMs;
+                                if (afterLastUpdatedTime == -1 || valueAsLong > afterLastUpdatedTime)
+                                    afterLastUpdatedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeLastUpdatedTime == -1 || dateInMs < beforeLastUpdatedTime)
-                                    beforeLastUpdatedTime = dateInMs;
+                                if (beforeLastUpdatedTime == -1 || valueAsLong < beforeLastUpdatedTime)
+                                    beforeLastUpdatedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -382,7 +382,7 @@ public final class GraphQLQueries {
                     }
                     case FINISHED_TIME: {
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Invalid value for field FINISHED_TIME : \"" + value + "\" is not a long int",
@@ -392,12 +392,12 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterFinishedTime == -1 || dateInMs > afterFinishedTime)
-                                    afterFinishedTime = dateInMs;
+                                if (afterFinishedTime == -1 || valueAsLong > afterFinishedTime)
+                                    afterFinishedTime = valueAsLong;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeFinishedTime == -1 || dateInMs < beforeFinishedTime)
-                                    beforeFinishedTime = dateInMs;
+                                if (beforeFinishedTime == -1 || valueAsLong < beforeFinishedTime)
+                                    beforeFinishedTime = valueAsLong;
                                 break;
                             default:
                                 break;
@@ -488,7 +488,7 @@ public final class GraphQLQueries {
                     case CUMULATED_CORE_TIME: {
                         // Consider only parseable numbers.
                         try {
-                            dateInMs = Long.parseLong(value);
+                            valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE,
                                        "Error when parsing CUMULATED_CORE_TIME filter \"" + value + "\"",
@@ -499,12 +499,12 @@ public final class GraphQLQueries {
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
                                 if (afterCumulatedCoreTime == null ||
-                                    dateInMs > Integer.valueOf(afterCumulatedCoreTime))
+                                    valueAsLong > Integer.valueOf(afterCumulatedCoreTime))
                                     afterCumulatedCoreTime = value;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
                                 if (beforeCumulatedCoreTime == null ||
-                                    dateInMs < Integer.valueOf(beforeCumulatedCoreTime))
+                                    valueAsLong < Integer.valueOf(beforeCumulatedCoreTime))
                                     beforeCumulatedCoreTime = value;
                                 break;
                             default:
@@ -515,7 +515,7 @@ public final class GraphQLQueries {
                     case PARENT_ID: {
                         // Consider only parseable numbers.
                         try {
-                            dateInMs = Integer.parseInt(value);
+                            valueAsLong = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
                             LOGGER.log(Level.SEVERE, "Error when parsing PARENT_ID filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
@@ -523,11 +523,11 @@ public final class GraphQLQueries {
 
                         switch (constraint.getAction()) {
                             case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterParentId == null || dateInMs > Integer.valueOf(afterParentId))
+                                if (afterParentId == null || valueAsLong > Integer.valueOf(afterParentId))
                                     afterParentId = value;
                                 break;
                             case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeParentId == null || dateInMs < Integer.valueOf(beforeParentId))
+                                if (beforeParentId == null || valueAsLong < Integer.valueOf(beforeParentId))
                                     beforeParentId = value;
                                 break;
                             default:
