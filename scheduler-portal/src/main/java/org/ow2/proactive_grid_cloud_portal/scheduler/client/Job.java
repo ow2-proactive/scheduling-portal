@@ -491,9 +491,11 @@ public class Job implements Serializable, Comparable<Job> {
                                                                               : (long) jsonJobInfo.get("cumulatedCoreTime")
                                                                                                   .isNumber()
                                                                                                   .doubleValue();
-        long parentId = jsonJobInfo.get("parentId") == null ? 0 : (long) jsonJobInfo.get("parentId")
-                                                                                    .isNumber()
-                                                                                    .doubleValue();
+        JSONValue parentIdValue = jsonJobInfo.get("parentId");
+        long parentId = parentIdValue == null ? 0
+                                              : parentIdValue.isNumber() == null ? 0
+                                                                                 : (long) parentIdValue.isNumber()
+                                                                                                       .doubleValue();
         int childrenCount = (int) (jsonJobInfo.get("childrenCount") == null ? 0 : jsonJobInfo.get("childrenCount")
                                                                                              .isNumber()
                                                                                              .doubleValue());
