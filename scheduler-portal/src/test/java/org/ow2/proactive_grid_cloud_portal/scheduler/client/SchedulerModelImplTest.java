@@ -166,7 +166,7 @@ public class SchedulerModelImplTest {
     }
 
     private void addJob(int jobId) {
-        Job job = new Job(jobId);
+        Job job = new JobBuilder().id(jobId).build();
         job.setStatus(JobStatus.RUNNING);
         this.jobsModel.setJobs(new LinkedHashMap<Integer, Job>(Collections.singletonMap(jobId, job)));
     }

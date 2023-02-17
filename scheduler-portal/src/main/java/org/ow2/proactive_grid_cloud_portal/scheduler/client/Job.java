@@ -54,6 +54,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String projectName;
 
+    private String bucketName;
+
     private JobStatus status;
 
     private JobPriority priority;
@@ -94,6 +96,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private int numberOfNodes;
 
+    private int numberOfNodesInParallel;
+
     private final ImmutableMap<String, String> genericInformation;
 
     private final Map<String, String> variables;
@@ -112,81 +116,39 @@ public class Job implements Serializable, Comparable<Job> {
         this.resultMap = ImmutableMap.of();
     }
 
-    /**
-     * Creates a new instance of Job
-     *
-     * @param id Job id
-     */
-    public Job(int id) {
-        this();
-        this.id = id;
-    }
+    public Job(JobBuilder builder) {
+        this.id = builder.getId();
+        this.name = builder.getName();
+        this.projectName = builder.getProjectName();
+        this.bucketName = builder.getBucketName();
+        this.setStatus(builder.getStatus());
+        this.setPriority(builder.getPriority());
+        this.setUser(builder.getUser());
+        this.setTenant(builder.getTenant());
+        this.pendingTasks = builder.getPendingTasks();
+        this.runningTasks = builder.getRunningTasks();
+        this.finishedTasks = builder.getFinishedTasks();
+        this.totalTasks = builder.getTotalTasks();
 
-    /**
-     * Creates a new instance of the Job class.
-     * @param id the job ID
-     * @param name the job name
-     * @param name the project
-     * @param status the job status
-     * @param priority the job priority
-     * @param user the username of the user that submitted the job
-     * @param tenant the tenant associated with the user that submitted the job
-     * @param genericInformation the job generic information
-     * @param pending number of pending tasks
-     * @param running number of running tasks
-     * @param finished number of finished tasks
-     * @param total total number of tasks
-     * @param failed number of failed tasks
-     * @param faulty number of faulty tasks
-     * @param inError number of in error tasks
-     * @param submitTime submission time
-     * @param startTime start time
-     * @param inErrorTime in error time
-     * @param finishTime finish time
-     * @param description job description
-     * @param cumulatedCoreTime job cumulated core time
-     * @param parentId job parent id
-     * @param childrenCount job children count
-     * @param numberOfNodes job total number of used nodes
-     */
-    public Job(int id, String name, String projectName, JobStatus status, JobPriority priority, String user,
-            String tenant, Map<String, String> genericInformation, Map<String, String> variables,
-            Map<String, Map<String, String>> detailedVariables, Map<String, String> resultMap, int pending, int running,
-            int finished, int total, int failed, int faulty, int inError, long submitTime, long startTime,
-            long inErrorTime, long finishTime, String description, long cumulatedCoreTime, long parentId,
-            int childrenCount, int numberOfNodes) {
-        this.id = id;
-        this.name = name;
-        this.projectName = projectName;
-        this.setStatus(status);
-        this.setPriority(priority);
-        this.setUser(user);
-        this.setTenant(tenant);
-        this.pendingTasks = pending;
-        this.runningTasks = running;
-        this.finishedTasks = finished;
-        this.totalTasks = total;
+        this.failedTasks = builder.getFailedTasks();
+        this.faultyTasks = builder.getFaultyTasks();
+        this.inErrorTasks = builder.getInErrorTasks();
 
-        this.failedTasks = failed;
-        this.faultyTasks = faulty;
-        this.inErrorTasks = inError;
-
-        this.submitTime = submitTime;
-        this.startTime = startTime;
-        this.inErrorTime = inErrorTime;
-        this.finishTime = finishTime;
-        this.genericInformation = ImmutableMap.copyOf(genericInformation);
-        this.variables = variables;
-        this.detailedVariables = detailedVariables;
-        this.variables.replaceAll((key, value) -> {
-            return value.toString().matches("ENC((.*))") ? "*******" : value;
-        });
-        this.resultMap = ImmutableMap.copyOf(resultMap);
-        this.description = description;
-        this.cumulatedCoreTime = cumulatedCoreTime;
-        this.parentId = parentId;
-        this.childrenCount = childrenCount;
-        this.numberOfNodes = numberOfNodes;
+        this.submitTime = builder.getSubmitTime();
+        this.startTime = builder.getStartTime();
+        this.inErrorTime = builder.getInErrorTime();
+        this.finishTime = builder.getFinishTime();
+        this.genericInformation = ImmutableMap.copyOf(builder.getGenericInformation());
+        this.variables = builder.getVariables();
+        this.detailedVariables = builder.getDetailedVariables();
+        this.variables.replaceAll((key, value) -> value.matches("ENC((.*))") ? "*******" : value);
+        this.resultMap = ImmutableMap.copyOf(builder.getResultMap());
+        this.description = builder.getDescription();
+        this.cumulatedCoreTime = builder.getCumulatedCoreTime();
+        this.parentId = builder.getParentId();
+        this.childrenCount = builder.getChildrenCount();
+        this.numberOfNodes = builder.getNumberOfNodes();
+        this.numberOfNodesInParallel = builder.getNumberOfNodesInParallel();
     }
 
     /**
@@ -239,10 +201,26 @@ public class Job implements Serializable, Comparable<Job> {
 
     /**
      * Getter for the projectName of the job.
-     * @return the username.
+     * @return the projectName.
      */
     public String getProjectName() {
         return projectName;
+    }
+
+    /**
+     * Getter for the bucketName of the job.
+     * @return the bucketName.
+     */
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    /**
+     * Setter of the job bucketName.
+     * @param bucketName the bucket name of the job.
+     */
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     /**
@@ -413,6 +391,17 @@ public class Job implements Serializable, Comparable<Job> {
         this.numberOfNodes = numberOfNodes;
     }
 
+    /**
+     * @return number of nodes in parallel used by this job
+     */
+    public int getNumberOfNodesInParallel() {
+        return numberOfNodesInParallel;
+    }
+
+    public void setNumberOfNodesInParallel(int numberOfNodesInParallel) {
+        this.numberOfNodesInParallel = numberOfNodesInParallel;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Job))
@@ -432,13 +421,16 @@ public class Job implements Serializable, Comparable<Job> {
      * are equal to those of <code>this</code>
      */
     public boolean isEqual(Job job) {
-        return this.id == job.getId() && this.name.equals(job.getName()) && this.priority.equals(job.getPriority()) &&
-               this.status.equals(job.getStatus()) && this.user.equals(job.getUser()) &&
-               pendingTasks == job.pendingTasks && runningTasks == job.runningTasks &&
-               finishedTasks == job.finishedTasks && failedTasks == job.failedTasks && faultyTasks == job.faultyTasks &&
-               inErrorTasks == job.inErrorTasks && finishTime == job.finishTime && inErrorTime == job.inErrorTime &&
+        return this.id == job.getId() && this.name.equals(job.getName()) &&
+               this.projectName.equals(job.getProjectName()) && this.bucketName.equals(job.getBucketName()) &&
+               this.priority.equals(job.getPriority()) && this.status.equals(job.getStatus()) &&
+               this.user.equals(job.getUser()) && pendingTasks == job.pendingTasks &&
+               runningTasks == job.runningTasks && finishedTasks == job.finishedTasks &&
+               failedTasks == job.failedTasks && faultyTasks == job.faultyTasks && inErrorTasks == job.inErrorTasks &&
+               finishTime == job.finishTime && inErrorTime == job.inErrorTime &&
                cumulatedCoreTime == job.cumulatedCoreTime && parentId == job.parentId &&
-               childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes;
+               childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes &&
+               numberOfNodesInParallel == job.numberOfNodesInParallel;
     }
 
     public int compareTo(Job job) {
@@ -502,6 +494,10 @@ public class Job implements Serializable, Comparable<Job> {
         int numberOfNodes = (int) (jsonJobInfo.get("numberOfNodes") == null ? 0 : jsonJobInfo.get("numberOfNodes")
                                                                                              .isNumber()
                                                                                              .doubleValue());
+        int numberOfNodesInParallel = (int) (jsonJobInfo.get("numberOfNodesInParallel") == null ? 0
+                                                                                                : jsonJobInfo.get("numberOfNodesInParallel")
+                                                                                                             .isNumber()
+                                                                                                             .doubleValue());
         String description = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("description"));
 
         Map<String, String> genericInformation = SchedulerJSONUtils.extractMap(jsonJobInfo.get("genericInformation"));
@@ -510,35 +506,40 @@ public class Job implements Serializable, Comparable<Job> {
 
         String name = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("name"));
         String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
+        String bucketName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("bucketName"));
         int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
-        return new Job(id,
-                       name,
-                       projectName,
-                       JobStatus.valueOf(status),
-                       JobPriority.findPriority(priority),
-                       user,
-                       tenant,
-                       genericInformation,
-                       variables,
-                       new HashMap<>(),
-                       resultMap,
-                       pending,
-                       running,
-                       finished,
-                       total,
-                       failed,
-                       faulty,
-                       inError,
-                       submittedTime,
-                       startTime,
-                       inErrorTime,
-                       finishedTime,
-                       description,
-                       cumulatedCoreTime,
-                       parentId,
-                       childrenCount,
-                       numberOfNodes);
+        return new JobBuilder().id(id)
+                               .name(name)
+                               .projectName(projectName)
+                               .bucketName(bucketName)
+                               .status(JobStatus.valueOf(status))
+                               .priority(JobPriority.findPriority(priority))
+                               .user(user)
+                               .tenant(tenant)
+                               .genericInformation(genericInformation)
+                               .variables(variables)
+                               .detailedVariables(new HashMap<>())
+                               .resultMap(resultMap)
+                               .pendingTasks(pending)
+                               .runningTasks(running)
+                               .finishedTasks(finished)
+                               .totalTasks(total)
+                               .failedTasks(failed)
+                               .faultyTasks(faulty)
+                               .inErrorTasks(inError)
+                               .submitTime(submittedTime)
+                               .startTime(startTime)
+                               .inErrorTime(inErrorTime)
+                               .finishTime(finishedTime)
+                               .description(description)
+                               .cumulatedCoreTime(cumulatedCoreTime)
+                               .parentId(parentId)
+                               .childrenCount(childrenCount)
+                               .numberOfNodes(numberOfNodes)
+                               .numberOfNodesInParallel(numberOfNodesInParallel)
+                               .build();
+
     }
 
     public static Map<String, Map<String, String>> parseJSONDetailedVariables(JSONObject jsonJobInfo) {
