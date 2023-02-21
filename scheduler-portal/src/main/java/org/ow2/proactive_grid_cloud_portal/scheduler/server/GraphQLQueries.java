@@ -169,6 +169,7 @@ public final class GraphQLQueries {
         String tenantFilter = null;
         String name = null;
         String projectName = null;
+        String bucketName = null;
         long afterSubmittedTime = -1;
         long beforeSubmittedTime = -1;
         long afterLastUpdatedTime = -1;
@@ -197,6 +198,8 @@ public final class GraphQLQueries {
         String beforeChildrenCount = null;
         String afterNumberOfNodes = null;
         String beforeNumberOfNodes = null;
+        String afterNumberOfNodesInParallel = null;
+        String beforeNumberOfNodesInParallel = null;
 
         int valueAsInteger;
         String filter;
@@ -304,6 +307,17 @@ public final class GraphQLQueries {
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             projectName = filter;
+                        break;
+                    }
+                    case BUCKET_NAME: {
+
+                        if (constraint.getAction() == Action.EQUALS) {
+                            if (bucketName == null)
+                                bucketName = value;
+                            else if (!value.equals(bucketName))
+                                return input.jobName(RETURN_NOTHING_FILTER).build();
+                        } else if ((filter = getFilter(constraint, value)) != null)
+                            bucketName = filter;
                         break;
                     }
 
@@ -583,6 +597,33 @@ public final class GraphQLQueries {
                         }
                         break;
                     }
+                    case NUMBER_OF_NODES_IN_PARALLEL: {
+                        // Consider only parseable numbers.
+                        try {
+                            valueAsInteger = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.SEVERE,
+                                       "Error when parsing NUMBER_OF_NODES_IN_PARALLEL filter \"" + value + "\"",
+                                       e);
+                            return input.jobName(RETURN_NOTHING_FILTER).build();
+                        }
+
+                        switch (constraint.getAction()) {
+                            case GREATER_THAN_OR_EQUAL_TO:
+                                if (afterNumberOfNodesInParallel == null ||
+                                    valueAsInteger > Integer.valueOf(afterNumberOfNodesInParallel))
+                                    afterNumberOfNodesInParallel = value;
+                                break;
+                            case LESS_THAN_OR_EQUAL_TO:
+                                if (beforeNumberOfNodesInParallel == null ||
+                                    valueAsInteger < Integer.valueOf(beforeNumberOfNodesInParallel))
+                                    beforeNumberOfNodesInParallel = value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     case NUMBER_OF_FAULTY_TASKS: {
                         // Consider only parseable numbers.
                         try {
@@ -693,6 +734,8 @@ public final class GraphQLQueries {
             input.jobName(name);
         if (projectName != null)
             input.projectName(projectName);
+        if (bucketName != null)
+            input.bucketName(bucketName);
         if (afterSubmittedTime != -1)
             input.afterSubmittedTime("" + afterSubmittedTime);
         if (beforeSubmittedTime != -1)
@@ -729,6 +772,8 @@ public final class GraphQLQueries {
             input.afterChildrenCount(afterChildrenCount);
         if (afterNumberOfNodes != null)
             input.afterNumberOfNodes(afterNumberOfNodes);
+        if (afterNumberOfNodesInParallel != null)
+            input.afterNumberOfNodesInParallel(afterNumberOfNodesInParallel);
         if (beforeNumberOfPendingTask != null)
             input.beforeNumberOfPendingTasks(beforeNumberOfPendingTask);
         if (beforeNumberOfRunningTask != null)
@@ -749,7 +794,8 @@ public final class GraphQLQueries {
             input.beforeChildrenCount(beforeChildrenCount);
         if (beforeNumberOfNodes != null)
             input.beforeNumberOfNodes(beforeNumberOfNodes);
-
+        if (beforeNumberOfNodesInParallel != null)
+            input.beforeNumberOfNodesInParallel(beforeNumberOfNodesInParallel);
         return input.build();
     }
 

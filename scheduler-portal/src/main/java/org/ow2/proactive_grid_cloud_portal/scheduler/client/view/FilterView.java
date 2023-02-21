@@ -140,6 +140,7 @@ public class FilterView extends VStack {
             case NUMBER_OF_IN_ERROR_TASKS:
             case CHILDREN_COUNT:
             case NUMBER_OF_NODES:
+            case NUMBER_OF_NODES_IN_PARALLEL:
                 try {
                     Integer.parseInt(value);
                 } catch (NumberFormatException e) {
@@ -557,6 +558,7 @@ public class FilterView extends VStack {
                     break;
                 }
                 case PROJECT_NAME:
+                case BUCKET_NAME:
                 case USER:
                 case TENANT:
                 case NAME: {
@@ -598,6 +600,7 @@ public class FilterView extends VStack {
                 case NUMBER_OF_FAULTY_TASKS:
                 case CUMULATED_CORE_TIME:
                 case NUMBER_OF_NODES:
+                case NUMBER_OF_NODES_IN_PARALLEL:
                 case NUMBER_OF_FAILED_TASKS:
                 case NUMBER_OF_IN_ERROR_TASKS: {
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());

@@ -40,6 +40,7 @@ public enum Field implements IsSerializable {
     TENANT("tenant"),
     STATE("status"),
     PROJECT_NAME("project"),
+    BUCKET_NAME("bucket"),
     SUBMITTED_TIME("Submitted time"),
     START_TIME("Start time"),
     LAST_UPDATED_TIME("Last-updated time"),
@@ -53,7 +54,8 @@ public enum Field implements IsSerializable {
     CUMULATED_CORE_TIME("Cumulated core time"),
     PARENT_ID("Parent id"),
     CHILDREN_COUNT("Children count"),
-    NUMBER_OF_NODES("Number of nodes");
+    NUMBER_OF_NODES("Number of nodes"),
+    NUMBER_OF_NODES_IN_PARALLEL("Number of nodes in parallel");
 
     private String name;
 

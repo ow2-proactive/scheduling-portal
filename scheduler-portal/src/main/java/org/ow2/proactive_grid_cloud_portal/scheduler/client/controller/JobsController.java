@@ -496,33 +496,37 @@ public class JobsController {
      * @param name name of the job
      */
     public void addSubmittingJob(int jobId, String name) {
-        Job j = new Job(jobId,
-                        name,
-                        "",
-                        JobStatus.PENDING,
-                        JobPriority.NORMAL,
-                        LoginModel.getInstance().getLogin(),
-                        "",
-                        new HashMap<>(),
-                        new HashMap<>(),
-                        new HashMap<>(),
-                        new HashMap<>(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        -1,
-                        -1,
-                        -1,
-                        -1,
-                        "",
-                        0,
-                        0,
-                        0,
-                        0);
+        Job j = new JobBuilder().id(jobId)
+                                .name(name)
+                                .projectName("")
+                                .bucketName("")
+                                .status(JobStatus.PENDING)
+                                .priority(JobPriority.NORMAL)
+                                .user(LoginModel.getInstance().getLogin())
+                                .tenant("")
+                                .genericInformation(new HashMap<>())
+                                .variables(new HashMap<>())
+                                .detailedVariables(new HashMap<>())
+                                .resultMap(new HashMap<>())
+                                .pendingTasks(0)
+                                .runningTasks(0)
+                                .finishedTasks(0)
+                                .totalTasks(0)
+                                .failedTasks(0)
+                                .faultyTasks(0)
+                                .inErrorTasks(0)
+                                .submitTime(-1)
+                                .startTime(-1)
+                                .inErrorTime(-1)
+                                .finishTime(-1)
+                                .description("")
+                                .cumulatedCoreTime(0)
+                                .parentId(0)
+                                .childrenCount(0)
+                                .numberOfNodes(0)
+                                .numberOfNodesInParallel(0)
+                                .build();
+
         this.model.getJobs().put(jobId, j);
         this.model.jobSubmitted(j);
     }
