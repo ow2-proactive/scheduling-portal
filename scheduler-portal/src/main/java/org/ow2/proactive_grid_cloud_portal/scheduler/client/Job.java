@@ -138,11 +138,21 @@ public class Job implements Serializable, Comparable<Job> {
         this.startTime = builder.getStartTime();
         this.inErrorTime = builder.getInErrorTime();
         this.finishTime = builder.getFinishTime();
-        this.genericInformation = ImmutableMap.copyOf(builder.getGenericInformation());
+        if (builder.getGenericInformation() != null) {
+            this.genericInformation = ImmutableMap.copyOf(builder.getGenericInformation());
+        } else {
+            this.genericInformation = ImmutableMap.copyOf(new HashMap<>());
+        }
         this.variables = builder.getVariables();
+        if (this.variables != null) {
+            this.variables.replaceAll((key, value) -> value.matches("ENC((.*))") ? "*******" : value);
+        }
         this.detailedVariables = builder.getDetailedVariables();
-        this.variables.replaceAll((key, value) -> value.matches("ENC((.*))") ? "*******" : value);
-        this.resultMap = ImmutableMap.copyOf(builder.getResultMap());
+        if (builder.getResultMap() != null) {
+            this.resultMap = ImmutableMap.copyOf(builder.getResultMap());
+        } else {
+            this.resultMap = ImmutableMap.copyOf(new HashMap<>());
+        }
         this.description = builder.getDescription();
         this.cumulatedCoreTime = builder.getCumulatedCoreTime();
         this.parentId = builder.getParentId();
