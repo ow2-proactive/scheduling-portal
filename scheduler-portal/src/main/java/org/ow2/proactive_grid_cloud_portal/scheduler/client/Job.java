@@ -459,7 +459,8 @@ public class Job implements Serializable, Comparable<Job> {
                finishTime == job.finishTime && inErrorTime == job.inErrorTime &&
                cumulatedCoreTime == job.cumulatedCoreTime && parentId == job.parentId &&
                childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes &&
-               numberOfNodesInParallel == job.numberOfNodesInParallel && submissionMode.equals(job.submissionMode);
+               numberOfNodesInParallel == job.numberOfNodesInParallel &&
+               submissionMode != null ? submissionMode.equals(job.submissionMode) : job.submissionMode == null;
     }
 
     public int compareTo(Job job) {
