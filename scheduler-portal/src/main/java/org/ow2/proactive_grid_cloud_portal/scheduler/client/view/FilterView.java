@@ -559,6 +559,7 @@ public class FilterView extends VStack {
                 }
                 case PROJECT_NAME:
                 case BUCKET_NAME:
+                case SUBMISSION_MODE:
                 case USER:
                 case TENANT:
                 case NAME: {

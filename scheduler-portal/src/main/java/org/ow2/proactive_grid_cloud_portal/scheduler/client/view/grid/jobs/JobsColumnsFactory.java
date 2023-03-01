@@ -66,6 +66,13 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
 
     public static final GridColumns BUCKET_NAME_ATTR = new GridColumns("bucket", "Bucket", -1, true, false, true);
 
+    public static final GridColumns SUBMISSION_MODE_ATTRIBUTE = new GridColumns("submissionMode",
+                                                                                "Submission mode",
+                                                                                -1,
+                                                                                true,
+                                                                                false,
+                                                                                true);
+
     public static final GridColumns SUBMIT_TIME_ATTR = new GridColumns("submitTime",
                                                                        "Submitted at",
                                                                        120,
@@ -91,7 +98,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                      TENANT_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
                                                                      DURATION_ATTR, NAME_ATTR, PROJECT_NAME_ATTR,
                                                                      BUCKET_NAME_ATTR, SUBMIT_TIME_ATTR,
-                                                                     START_TIME_ATTR, FINISHED_TIME_ATTR };
+                                                                     START_TIME_ATTR, FINISHED_TIME_ATTR,
+                                                                     SUBMISSION_MODE_ATTRIBUTE };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, TENANT_ATTR, PROGRESS_ATTR,
@@ -135,6 +143,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         record.setAttribute(NAME_ATTR.getName(), item.getName());
         record.setAttribute(PROJECT_NAME_ATTR.getName(), item.getProjectName());
         record.setAttribute(BUCKET_NAME_ATTR.getName(), item.getBucketName());
+        record.setAttribute(SUBMISSION_MODE_ATTRIBUTE.getName(), item.getSubmissionMode());
 
         if (item.getStatus() != JobStatus.IN_ERROR) {
             if (item.getFinishTime() > 0 && item.getStartTime() > 0) {

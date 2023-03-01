@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -53,6 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -104,6 +107,10 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     public static final int LIMIT_QUERY_PARAMS_NUMBER = 500;
 
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
+
+    public static final String SUBMISSION_MODE = "submission.mode";
+
+    public static final String SUBMISSION_MODE_SCHEDULER_PORTAL = "scheduler/portal";
 
     private CloseableHttpClient httpClient;
 
@@ -165,8 +172,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
      * @param file      the XML file that is submitted
      * @return an error message upon failure, "id=<jobId>" upon success
      */
-    public String submitXMLFile(String sessionId, File file) throws RestServerException, ServiceException {
+    public String submitXMLFile(String sessionId, File file)
+            throws RestServerException, ServiceException, URISyntaxException {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/submit");
+        URI uri = new URIBuilder(method.getURI()).addParameter(SUBMISSION_MODE, SUBMISSION_MODE_SCHEDULER_PORTAL)
+                                                 .build();
+        method.setURI(uri);
         method.addHeader("sessionId", sessionId);
 
         boolean isJar = isJarFile(file);
