@@ -170,6 +170,7 @@ public final class GraphQLQueries {
         String name = null;
         String projectName = null;
         String bucketName = null;
+        String submissionMode = null;
         long afterSubmittedTime = -1;
         long beforeSubmittedTime = -1;
         long afterLastUpdatedTime = -1;
@@ -318,6 +319,17 @@ public final class GraphQLQueries {
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
                         } else if ((filter = getFilter(constraint, value)) != null)
                             bucketName = filter;
+                        break;
+                    }
+                    case SUBMISSION_MODE: {
+
+                        if (constraint.getAction() == Action.EQUALS) {
+                            if (submissionMode == null)
+                                submissionMode = value;
+                            else if (!value.equals(submissionMode))
+                                return input.jobName(RETURN_NOTHING_FILTER).build();
+                        } else if ((filter = getFilter(constraint, value)) != null)
+                            submissionMode = filter;
                         break;
                     }
 
@@ -736,6 +748,8 @@ public final class GraphQLQueries {
             input.projectName(projectName);
         if (bucketName != null)
             input.bucketName(bucketName);
+        if (submissionMode != null)
+            input.submissionMode(submissionMode);
         if (afterSubmittedTime != -1)
             input.afterSubmittedTime("" + afterSubmittedTime);
         if (beforeSubmittedTime != -1)

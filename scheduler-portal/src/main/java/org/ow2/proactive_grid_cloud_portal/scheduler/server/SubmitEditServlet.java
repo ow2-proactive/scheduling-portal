@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.server;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -248,6 +249,8 @@ public class SubmitEditServlet extends HttpServlet {
             } catch (ServiceException e2) {
                 String msg = e2.getMessage().replace("<", "&lt;").replace(">", "&gt;");
                 response.getWriter().print(ERROR + msg);
+            } catch (URISyntaxException ex) {
+                response.getWriter().print(ERROR + ex.getMessage());
             }
 
         } catch (IOException e1) {

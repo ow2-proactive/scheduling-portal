@@ -55,7 +55,8 @@ public enum Field implements IsSerializable {
     PARENT_ID("Parent id"),
     CHILDREN_COUNT("Children count"),
     NUMBER_OF_NODES("Number of nodes"),
-    NUMBER_OF_NODES_IN_PARALLEL("Number of nodes in parallel");
+    NUMBER_OF_NODES_IN_PARALLEL("Number of nodes in parallel"),
+    SUBMISSION_MODE("Submission mode");
 
     private String name;
 

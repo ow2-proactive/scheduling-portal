@@ -50,6 +50,8 @@ public class JobBuilder {
 
     private String description;
 
+    private String submissionMode;
+
     private int pendingTasks;
 
     private int runningTasks;
@@ -206,6 +208,10 @@ public class JobBuilder {
         return resultMap;
     }
 
+    public String getSubmissionMode() {
+        return submissionMode;
+    }
+
     public JobBuilder id(int id) {
         this.id = id;
         return this;
@@ -348,6 +354,11 @@ public class JobBuilder {
 
     public JobBuilder resultMap(Map<String, String> resultMap) {
         this.resultMap = ImmutableMap.copyOf(resultMap);
+        return this;
+    }
+
+    public JobBuilder submissionMode(String submissionMode) {
+        this.submissionMode = submissionMode;
         return this;
     }
 

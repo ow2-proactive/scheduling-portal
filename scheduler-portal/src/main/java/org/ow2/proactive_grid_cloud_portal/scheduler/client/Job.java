@@ -56,6 +56,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String bucketName;
 
+    private String submissionMode;
+
     private JobStatus status;
 
     private JobPriority priority;
@@ -121,6 +123,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.name = builder.getName();
         this.projectName = builder.getProjectName();
         this.bucketName = builder.getBucketName();
+        this.submissionMode = builder.getSubmissionMode();
         this.setStatus(builder.getStatus());
         this.setPriority(builder.getPriority());
         this.setUser(builder.getUser());
@@ -231,6 +234,22 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public void setBucketName(String bucketName) {
         this.bucketName = bucketName;
+    }
+
+    /**
+     * Getter for the submission mode of the job.
+     * @return the submission mode.
+     */
+    public String getSubmissionMode() {
+        return submissionMode;
+    }
+
+    /**
+     * Setter of the job submission mode.
+     * @param submissionMode the submission mode of the job.
+     */
+    public void setSubmissionMode(String submissionMode) {
+        this.submissionMode = submissionMode;
     }
 
     /**
@@ -440,7 +459,8 @@ public class Job implements Serializable, Comparable<Job> {
                finishTime == job.finishTime && inErrorTime == job.inErrorTime &&
                cumulatedCoreTime == job.cumulatedCoreTime && parentId == job.parentId &&
                childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes &&
-               numberOfNodesInParallel == job.numberOfNodesInParallel;
+               numberOfNodesInParallel == job.numberOfNodesInParallel &&
+               submissionMode != null ? submissionMode.equals(job.submissionMode) : job.submissionMode == null;
     }
 
     public int compareTo(Job job) {
@@ -517,6 +537,7 @@ public class Job implements Serializable, Comparable<Job> {
         String name = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("name"));
         String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
         String bucketName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("bucketName"));
+        String submissionMode = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("submissionMode"));
         int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
         return new JobBuilder().id(id)
@@ -548,6 +569,7 @@ public class Job implements Serializable, Comparable<Job> {
                                .childrenCount(childrenCount)
                                .numberOfNodes(numberOfNodes)
                                .numberOfNodesInParallel(numberOfNodesInParallel)
+                               .submissionMode(submissionMode)
                                .build();
 
     }

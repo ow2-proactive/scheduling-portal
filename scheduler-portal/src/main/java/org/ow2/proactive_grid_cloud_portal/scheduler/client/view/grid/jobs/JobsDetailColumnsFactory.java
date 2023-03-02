@@ -86,7 +86,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
                                    TOTAL_TASKS_ATTR, SUBMITTED_TIME_ATTR, STARTED_TIME_ATTR, FINISHED_TIME_ATTR,
                                    IN_ERROR_TIME_ATTR, CUMULATED_CORE_TIME, PENDING_DURATION_ATTR, DURATION_ATTR,
                                    TOTAL_DURATION_ATTR, DESCRIPTION_ATTR, PARENT_ID, CHILDREN_COUNT, NUMBER_OF_NODES,
-                                   NUMBER_OF_NODES_IN_PARALLEL };
+                                   NUMBER_OF_NODES_IN_PARALLEL, SUBMISSION_MODE_ATTRIBUTE };
     }
 
     @Override
@@ -130,5 +130,6 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(PENDING_DURATION_ATTR.getName(), pendingDuration);
         record.setAttribute(TOTAL_DURATION_ATTR.getName(), totalDuration);
         record.setAttribute(DESCRIPTION_ATTR.getName(), StringUtil.asHTML(item.getDescription()));
+        record.setAttribute(SUBMISSION_MODE_ATTRIBUTE.getName(), item.getSubmissionMode());
     }
 }

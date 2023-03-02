@@ -525,6 +525,7 @@ public class JobsController {
                                 .childrenCount(0)
                                 .numberOfNodes(0)
                                 .numberOfNodesInParallel(0)
+                                .submissionMode("")
                                 .build();
 
         this.model.getJobs().put(jobId, j);
