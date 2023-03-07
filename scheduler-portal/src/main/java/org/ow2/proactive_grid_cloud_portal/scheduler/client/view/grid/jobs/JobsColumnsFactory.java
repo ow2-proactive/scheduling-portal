@@ -67,7 +67,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
     public static final GridColumns BUCKET_NAME_ATTR = new GridColumns("bucket", "Bucket", -1, true, false, true);
 
     public static final GridColumns SUBMISSION_MODE_ATTRIBUTE = new GridColumns("submissionMode",
-                                                                                "Submission mode",
+                                                                                "Submitted from",
                                                                                 -1,
                                                                                 true,
                                                                                 false,
@@ -98,8 +98,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                      TENANT_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
                                                                      DURATION_ATTR, NAME_ATTR, PROJECT_NAME_ATTR,
                                                                      BUCKET_NAME_ATTR, SUBMIT_TIME_ATTR,
-                                                                     START_TIME_ATTR, FINISHED_TIME_ATTR,
-                                                                     SUBMISSION_MODE_ATTRIBUTE };
+                                                                     SUBMISSION_MODE_ATTRIBUTE, START_TIME_ATTR,
+                                                                     FINISHED_TIME_ATTR };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, TENANT_ATTR, PROGRESS_ATTR,

@@ -110,7 +110,7 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     public static final String SUBMISSION_MODE = "submission.mode";
 
-    public static final String SUBMISSION_MODE_SCHEDULER_PORTAL = "scheduler/portal";
+    public static final String SUBMISSION_MODE_SCHEDULER_PORTAL = "scheduler-portal";
 
     private CloseableHttpClient httpClient;
 
