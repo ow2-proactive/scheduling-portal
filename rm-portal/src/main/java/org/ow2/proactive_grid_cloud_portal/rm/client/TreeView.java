@@ -25,9 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -73,8 +77,16 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String OWNER_FIELD = "Owner";
 
+    public static final String NUMBER_OF_NODES = "Number of nodes";
+
+    public static final String NUMBER_OF_BUSY_NODES = "Number of busy nodes";
+
+    public static final String PERCENTAGE_OF_BUSY_NODES = "Percentage of busy nodes";
+
     //specifies the variable name of the node source grid view state in the local storage
     private static final String NS_GRID_VIEW_STATE = "NSGridViewState";
+
+    public static final String NODE_SOURCES = "Node Sources";
 
     private RMController controller = null;
 
@@ -98,12 +110,14 @@ public class TreeView implements NodesListener, NodeSelectedListener {
      */
     private boolean ignoreNodeSelectedEvent = false;
 
+    private List<NodeSource> currentNodeSources = new LinkedList<>();
+
     private class TNode extends TreeNode {
         Node rmNode = null;
 
         TNode(String name, Node node) {
             super(name);
-            super.setAttribute("Node Sources", name);
+            super.setAttribute(NODE_SOURCES, name);
             this.rmNode = node;
             this.setAttribute(NODE_ID, node.getNodeUrl());
         }
@@ -114,7 +128,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         THost(String name, Host h) {
             super(name);
-            super.setAttribute("Node Sources", name);
+            super.setAttribute(NODE_SOURCES, name);
             this.rmHost = h;
             this.setAttribute(NODE_ID, h.getId());
         }
@@ -126,13 +140,52 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TNS(String name, NodeSource ns) {
             super(name);
             NodeSourceDisplayedDescription nodeSourceDisplayedDescription = new NodeSourceDisplayedDescription(ns.getSourceDescription());
-            super.setAttribute("Node Sources", name);
+            super.setAttribute(NODE_SOURCES, name);
             super.setAttribute(INFRASTRUCTURE_FIELD, nodeSourceDisplayedDescription.getInfrastructure());
             super.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
             super.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
             super.setAttribute(OWNER_FIELD, ns.getNodeSourceAdmin());
             this.rmNS = ns;
             this.setAttribute(NODE_ID, ns.getSourceName());
+
+            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(ns.getHosts()
+                                                                                                                       .values());
+            super.setAttribute(NUMBER_OF_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfNodes());
+            super.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
+            super.setAttribute(PERCENTAGE_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes());
+
+        }
+    }
+
+    private static class NodeSourceDisplayedNumberOfNodes {
+        private int numberOfNodes = 0;
+
+        private int numberOfBusyNodes = 0;
+
+        private String percentageOfBusyNodes;
+
+        NodeSourceDisplayedNumberOfNodes(Collection<Host> hosts) {
+            List<Node> nodes = new ArrayList<>();
+            hosts.forEach(host -> nodes.addAll(host.getNodes().values()));
+            if (!nodes.isEmpty()) {
+                numberOfNodes = nodes.size();
+                numberOfBusyNodes = (int) nodes.stream()
+                                               .filter(node -> node.getNodeState().equals(NodeState.BUSY))
+                                               .count();
+                percentageOfBusyNodes = (numberOfBusyNodes * 100 / nodes.size()) + "%";
+            }
+        }
+
+        public int getNumberOfNodes() {
+            return numberOfNodes;
+        }
+
+        public int getNumberOfBusyNodes() {
+            return numberOfBusyNodes;
+        }
+
+        public String getPercentageOfBusyNodes() {
+            return percentageOfBusyNodes;
         }
     }
 
@@ -191,35 +244,54 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.setShowHeader(true);
         treeGrid.setSelectionType(SelectionStyle.SINGLE);
 
-        TreeGridField field = new TreeGridField("Node Sources");
+        TreeGridField field = new TreeGridField(NODE_SOURCES);
         field.setCanSort(true);
         field.setSortByDisplayField(true);
-        field.setWidth("35%");
+        field.setWidth("25%");
         field.setAlign(Alignment.CENTER);
 
         TreeGridField infrastructureField = new TreeGridField(INFRASTRUCTURE_FIELD);
         infrastructureField.setCanSort(true);
-        infrastructureField.setWidth("15%");
+        infrastructureField.setWidth("10%");
         infrastructureField.setAlign(Alignment.CENTER);
         TreeGridField policyField = new TreeGridField(POLICY_FIELD);
         policyField.setCanSort(true);
-        policyField.setWidth("15%");
+        policyField.setWidth("10%");
         policyField.setAlign(Alignment.CENTER);
         TreeGridField accessField = new TreeGridField(ACCESS_FIELD);
         accessField.setCanSort(true);
-        accessField.setWidth("20%");
+        accessField.setWidth("10%");
         accessField.setAlign(Alignment.CENTER);
         TreeGridField ownerField = new TreeGridField(OWNER_FIELD);
         ownerField.setAlign(Alignment.CENTER);
         ownerField.setCanSort(true);
-        ownerField.setWidth("15%");
-        treeGrid.setFields(field, infrastructureField, policyField, accessField, ownerField);
-        treeGrid.setSortField("Node Sources");
+        ownerField.setWidth("10%");
+        TreeGridField numberOfNodesField = new TreeGridField(NUMBER_OF_NODES);
+        numberOfNodesField.setAlign(Alignment.CENTER);
+        numberOfNodesField.setCanSort(true);
+        numberOfNodesField.setWidth("10%");
+        TreeGridField numberOfBusyNodesField = new TreeGridField(NUMBER_OF_BUSY_NODES);
+        numberOfBusyNodesField.setAlign(Alignment.CENTER);
+        numberOfBusyNodesField.setCanSort(true);
+        numberOfBusyNodesField.setWidth("10%");
+        TreeGridField percentageOfBusyNodesField = new TreeGridField(PERCENTAGE_OF_BUSY_NODES);
+        percentageOfBusyNodesField.setAlign(Alignment.CENTER);
+        percentageOfBusyNodesField.setCanSort(true);
+        percentageOfBusyNodesField.setWidth("10%");
+        treeGrid.setFields(field,
+                           infrastructureField,
+                           policyField,
+                           accessField,
+                           ownerField,
+                           numberOfNodesField,
+                           numberOfBusyNodesField,
+                           percentageOfBusyNodesField);
+        treeGrid.setSortField(NODE_SOURCES);
         treeGrid.setCanDragSelectText(true);
 
         this.tree = new Tree();
         tree.setModelType(TreeModelType.PARENT);
-        tree.setNameProperty("Node Sources");
+        tree.setNameProperty(NODE_SOURCES);
         tree.setIdField(NODE_ID);
 
         this.treeGrid.setData(this.tree);
@@ -284,7 +356,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        processNodeSources(nodeSources);
+        processNodeSources(nodeSources, nodes);
 
         treeGrid.refreshFields();
 
@@ -314,6 +386,14 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             treeNode.setAttribute("nodeState", node.getNodeState().toString());
             treeNode.rmNode = node;
             treeNode.setIcon(node.getIcon());
+            List<NodeSource> nodeSources = currentNodeSources.stream()
+                                                             .filter(nodeSource -> nodeSource.getSourceName()
+                                                                                             .equals(node.getSourceName()))
+                                                             .collect(Collectors.toList());
+            if (!nodeSources.isEmpty()) {
+                nodeSources.get(0).getHosts().get(node.getHostName()).getNodes().put(node.getNodeUrl(), node);
+                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSources.get(0));
+            }
         }
     }
 
@@ -356,6 +436,25 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             final TreeNode parent = tree.getParent(toRemove);
             tree.remove(toRemove);
             currentNodes.remove(node.getNodeUrl());
+            currentNodeSources.forEach(ns -> {
+                List<Host> hosts = ns.getHosts()
+                                     .values()
+                                     .stream()
+                                     .filter(host -> host.getNodes().containsKey(node.getNodeUrl()))
+                                     .collect(Collectors.toList());
+                if (!hosts.isEmpty()) {
+                    Host h = hosts.get(0);
+                    if (h != null) {
+                        h.getNodes().remove(node.getNodeUrl());
+                    }
+                }
+            });
+            NodeSource currentNodeSource = currentNodeSources.stream()
+                                                             .filter(nodeSource -> nodeSource.getSourceName()
+                                                                                             .equals(node.getSourceName()))
+                                                             .collect(Collectors.toList())
+                                                             .get(0);
+            updateNodeSourceDisplayedNumberOfNodesIfChanged(currentNodeSource);
 
             if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
@@ -365,7 +464,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     }
 
-    void processNodeSources(List<NodeSource> nodeSources) {
+    void processNodeSources(List<NodeSource> nodeSources, List<Node> nodes) {
+
+        addNodesToNodeSources(nodeSources, nodes);
+        if (!nodeSources.isEmpty()) {
+            currentNodeSources = new LinkedList<>(nodeSources);
+        }
         if (!nodeSources.isEmpty()) {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
@@ -373,7 +477,41 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 } else {
                     addNodeSourceIfNotExists(nodeSource);
                     updateNodeSourceDescriptionIfChanged(nodeSource);
+                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
                     changeNodeSourceStatusIfChanged(nodeSource);
+                }
+            }
+        }
+    }
+
+    private void addNodesToNodeSources(List<NodeSource> nodeSources, List<Node> nodes) {
+        nodeSources.forEach(nodeSource -> {
+            List<Node> filteredNodes = nodes.stream()
+                                            .filter(node -> node.getSourceName().equals(nodeSource.getSourceName()))
+                                            .collect(Collectors.toList());
+            addNodeToNodeSource(filteredNodes, nodeSource);
+        });
+    }
+
+    private void addNodeToNodeSource(List<Node> nodes, NodeSource nodeSource) {
+        for (Node node : nodes) {
+            // as deploying node
+            if (node.isDeployingNode()) {
+
+                nodeSource.getDeploying().put(node.getNodeUrl(), node);
+
+            } else { // as already deployed node
+                Host host = nodeSource.getHosts().get(node.getHostName());
+
+                if (host == null) { // create host if there is no host
+                    host = new Host(node.getHostName(), node.getSourceName());
+                    nodeSource.getHosts().put(node.getHostName(), host);
+                }
+
+                host.getNodes().put(node.getNodeUrl(), node);
+
+                if (node.isVirtual()) {
+                    host.setVirtual(true);
                 }
             }
         }
@@ -411,6 +549,31 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
         if (!currentNs.getAttribute(ACCESS_FIELD).equals(nodeSourceDisplayedDescription.getAccess())) {
             currentNs.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
+
+    }
+
+    private void updateNodeSourceDisplayedNumberOfNodesIfChanged(NodeSource nodeSource) {
+        TNS currentNs = (TNS) currentNodes.get(nodeSource.getSourceName());
+        NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource.getHosts()
+                                                                                                                           .values());
+        if (!currentNs.getAttribute(NUMBER_OF_NODES)
+                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()))) {
+            currentNs.setAttribute(NUMBER_OF_NODES,
+                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()));
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
+        if (!currentNs.getAttribute(NUMBER_OF_BUSY_NODES)
+                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()))) {
+            currentNs.setAttribute(NUMBER_OF_BUSY_NODES,
+                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()));
+            currentNodes.put(nodeSource.getSourceName(), currentNs);
+        }
+        if (!currentNs.getAttribute(PERCENTAGE_OF_BUSY_NODES)
+                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()))) {
+            currentNs.setAttribute(PERCENTAGE_OF_BUSY_NODES,
+                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()));
             currentNodes.put(nodeSource.getSourceName(), currentNs);
         }
     }

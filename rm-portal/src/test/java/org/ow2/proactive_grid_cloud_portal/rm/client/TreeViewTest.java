@@ -33,7 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,8 +74,6 @@ public class TreeViewTest {
             nodeSource.setNodeSourceStatus(NodeSourceStatus.NODES_DEPLOYED);
             return nodeSource;
         }).collect(Collectors.toList());
-        treeView.processNodeSources(nodeSourceList);
-        verify(treeView.tree, times(2)).add(any(TreeNode.class), any(TreeNode.class));
 
         final List<NodeSource.Host.Node> nodeList = IntStream.range(0, 30).mapToObj(i -> {
             final NodeSource.Host.Node node = new NodeSource.Host.Node(nodeSourceList.get(0).getSourceName(),
@@ -85,6 +83,11 @@ public class TreeViewTest {
             node.setNodeState(NodeState.FREE);
             return node;
         }).collect(Collectors.toList());
+
+        treeView.processNodeSources(nodeSourceList, nodeList);
+
+        verify(treeView.tree, times(2)).add(any(TreeNode.class), any(TreeNode.class));
+
         treeView.processNodes(nodeList);
 
         verify(treeView.tree, times(33)).add(any(TreeNode.class), any(TreeNode.class));
@@ -104,7 +107,7 @@ public class TreeViewTest {
         allValues.remove(0);
         when(treeView.tree.getAllNodes(any(TreeNode.class))).thenReturn(allValues.toArray(new TreeNode[allValues.size()]));
 
-        treeView.processNodeSources(Arrays.asList(nodeSource));
+        treeView.processNodeSources(Collections.singletonList(nodeSource), nodeList);
 
         assertEquals(1, treeView.currentNodes.size());
 
