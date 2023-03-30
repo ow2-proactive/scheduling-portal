@@ -77,11 +77,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String OWNER_FIELD = "Owner";
 
-    public static final String NUMBER_OF_NODES = "Number of nodes";
+    public static final String NUMBER_OF_NODES = "#Nodes";
 
-    public static final String NUMBER_OF_BUSY_NODES = "Number of busy nodes";
+    public static final String NUMBER_OF_BUSY_NODES = "#Busy";
 
-    public static final String PERCENTAGE_OF_BUSY_NODES = "Percentage of busy nodes";
+    public static final String PERCENTAGE_OF_BUSY_NODES = "%Busy";
 
     //specifies the variable name of the node source grid view state in the local storage
     private static final String NS_GRID_VIEW_STATE = "NSGridViewState";
@@ -252,11 +252,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         TreeGridField infrastructureField = new TreeGridField(INFRASTRUCTURE_FIELD);
         infrastructureField.setCanSort(true);
-        infrastructureField.setWidth("10%");
+        infrastructureField.setWidth("13%");
         infrastructureField.setAlign(Alignment.CENTER);
         TreeGridField policyField = new TreeGridField(POLICY_FIELD);
         policyField.setCanSort(true);
-        policyField.setWidth("10%");
+        policyField.setWidth("13%");
         policyField.setAlign(Alignment.CENTER);
         TreeGridField accessField = new TreeGridField(ACCESS_FIELD);
         accessField.setCanSort(true);
@@ -269,23 +269,23 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TreeGridField numberOfNodesField = new TreeGridField(NUMBER_OF_NODES);
         numberOfNodesField.setAlign(Alignment.CENTER);
         numberOfNodesField.setCanSort(true);
-        numberOfNodesField.setWidth("10%");
+        numberOfNodesField.setWidth("8%");
         TreeGridField numberOfBusyNodesField = new TreeGridField(NUMBER_OF_BUSY_NODES);
         numberOfBusyNodesField.setAlign(Alignment.CENTER);
         numberOfBusyNodesField.setCanSort(true);
-        numberOfBusyNodesField.setWidth("10%");
+        numberOfBusyNodesField.setWidth("8%");
         TreeGridField percentageOfBusyNodesField = new TreeGridField(PERCENTAGE_OF_BUSY_NODES);
         percentageOfBusyNodesField.setAlign(Alignment.CENTER);
         percentageOfBusyNodesField.setCanSort(true);
-        percentageOfBusyNodesField.setWidth("10%");
+        percentageOfBusyNodesField.setWidth("8%");
         treeGrid.setFields(field,
+                           numberOfNodesField,
+                           numberOfBusyNodesField,
+                           percentageOfBusyNodesField,
                            infrastructureField,
                            policyField,
                            accessField,
-                           ownerField,
-                           numberOfNodesField,
-                           numberOfBusyNodesField,
-                           percentageOfBusyNodesField);
+                           ownerField);
         treeGrid.setSortField(NODE_SOURCES);
         treeGrid.setCanDragSelectText(true);
 
