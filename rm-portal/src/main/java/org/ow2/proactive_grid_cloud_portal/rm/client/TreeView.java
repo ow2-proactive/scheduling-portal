@@ -162,7 +162,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
         private int numberOfBusyNodes = 0;
 
-        private String percentageOfBusyNodes;
+        private String percentageOfBusyNodes = "0%";
 
         NodeSourceDisplayedNumberOfNodes(Collection<Host> hosts) {
             List<Node> nodes = new ArrayList<>();
