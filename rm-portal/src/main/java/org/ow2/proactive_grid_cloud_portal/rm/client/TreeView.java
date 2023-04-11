@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -391,7 +392,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                                                                                              .equals(node.getSourceName()))
                                                              .collect(Collectors.toList());
             if (!nodeSources.isEmpty()) {
-                nodeSources.get(0).getHosts().get(node.getHostName()).getNodes().put(node.getNodeUrl(), node);
+                addNodeToNodeSource(Collections.singletonList(node), nodeSources.get(0));
+                if (nodeSources.get(0).getHosts() != null &&
+                    nodeSources.get(0).getHosts().get(node.getHostName()) != null &&
+                    nodeSources.get(0).getHosts().get(node.getHostName()).getNodes() != null) {
+                    nodeSources.get(0).getHosts().get(node.getHostName()).getNodes().put(node.getNodeUrl(), node);
+                }
                 updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSources.get(0));
             }
         }
@@ -449,13 +455,18 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     }
                 }
             });
-            NodeSource currentNodeSource = currentNodeSources.stream()
-                                                             .filter(nodeSource -> nodeSource.getSourceName()
-                                                                                             .equals(node.getSourceName()))
-                                                             .collect(Collectors.toList())
-                                                             .get(0);
-            updateNodeSourceDisplayedNumberOfNodesIfChanged(currentNodeSource);
-
+            List<NodeSource> filteredNodeSources = currentNodeSources.stream()
+                                                                     .filter(nodeSource -> nodeSource.getSourceName()
+                                                                                                     .equals(node.getSourceName()))
+                                                                     .collect(Collectors.toList());
+            if (!filteredNodeSources.isEmpty()) {
+                if (filteredNodeSources.get(0).getHosts() != null &&
+                    filteredNodeSources.get(0).getHosts().get(node.getHostName()) != null &&
+                    filteredNodeSources.get(0).getHosts().get(node.getHostName()).getNodes() != null) {
+                    filteredNodeSources.get(0).getHosts().get(node.getHostName()).getNodes().remove(node.getNodeUrl());
+                }
+                updateNodeSourceDisplayedNumberOfNodesIfChanged(filteredNodeSources.get(0));
+            }
             if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
                 currentNodes.remove(parent.getAttribute(NODE_ID));
