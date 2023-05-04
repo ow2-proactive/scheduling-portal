@@ -92,7 +92,7 @@ public class TreeViewTest {
 
         verify(treeView.tree, times(33)).add(any(TreeNode.class), any(TreeNode.class));
 
-        assertEquals(33, treeView.currentNodes.size());
+        assertEquals(33, treeView.currentTreeNodes.size());
 
         final NodeSource nodeSource = nodeSourceList.get(0);
         nodeSource.setEventType("NODESOURCE_REMOVED");
@@ -109,7 +109,7 @@ public class TreeViewTest {
 
         treeView.processNodeSources(Collections.singletonList(nodeSource), nodeList);
 
-        assertEquals(1, treeView.currentNodes.size());
+        assertEquals(1, treeView.currentTreeNodes.size());
 
     }
 

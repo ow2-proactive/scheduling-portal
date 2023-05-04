@@ -88,8 +88,6 @@ public class CompactFlowPanel extends FlowPanel {
 
     public void drawNodeSource(Tile nsTile) {
         model.add(new HierarchyNodeSource(nsTile.getNodesource()));
-        model.sort(Comparator.comparing(a -> a.getNodeSource().getSourceName()));
-
         this.insert(nsTile, indexOf(nsTile.getNodesource()).get());
     }
 
