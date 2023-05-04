@@ -444,11 +444,11 @@ public class RMPage implements LogListener {
         this.treeView = new TreeView(controller);
         this.compactView = new CompactView(controller);
 
-        Canvas treeCanvas = this.treeView.build();
+        Canvas compactCanvas = this.compactView.build(treeView);
+        compactCanvas.setWidth("50%");
+        Canvas treeCanvas = this.treeView.build(compactView);
         treeCanvas.setWidth("50%");
         treeCanvas.setShowResizeBar(true);
-        Canvas compactCanvas = this.compactView.build();
-        compactCanvas.setWidth("50%");
 
         hl.addMember(treeCanvas);
         hl.addMember(compactCanvas);

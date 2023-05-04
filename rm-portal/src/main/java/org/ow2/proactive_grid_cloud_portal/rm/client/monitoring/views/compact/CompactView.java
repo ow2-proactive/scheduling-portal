@@ -25,6 +25,10 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.TreeView.NODE_SOURCES;
+
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,10 +40,12 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMEventDispatcher;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
+import org.ow2.proactive_grid_cloud_portal.rm.client.TreeView;
 
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.WidgetCanvas;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 
@@ -75,6 +81,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     /* canvas for myNodesCompactPanel (used to remove myNodesCompactPanel from Layout) */
     private WidgetCanvas myNodesCompactPanelCanvas;
 
+    private TreeView treeView;
+
+    private NodeSource previousSelectedNs;
+
+    private Host previousSelectedHost;
+
+    private Node previousSelectedNode;
+
     public CompactView(RMController controller) {
         this.controller = controller;
         RMEventDispatcher eventDispatcher = controller.getEventDispatcher();
@@ -82,11 +96,12 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         eventDispatcher.addNodeSelectedListener(this);
     }
 
-    public Canvas build() {
+    public Canvas build(TreeView treeView) {
         this.root = new HLayout();
         root.setWidth100();
         root.setHeight100();
         root.setOverflow(Overflow.AUTO);
+        this.treeView = treeView;
         return root;
     }
 
@@ -122,18 +137,27 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     public void nodeSourceSelected(NodeSource ns) {
         compactPanel.indexOf(ns).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(ns).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        previousSelectedNs = ns;
+        previousSelectedHost = null;
+        previousSelectedNode = null;
     }
 
     @Override
     public void hostSelected(Host h) {
         compactPanel.indexOf(h).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(h).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        previousSelectedNs = null;
+        previousSelectedHost = h;
+        previousSelectedNode = null;
     }
 
     @Override
     public void nodeSelected(Node node) {
         compactPanel.indexOf(node).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(node).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        previousSelectedNs = null;
+        previousSelectedHost = null;
+        previousSelectedNode = node;
     }
 
     private void changeSelection(CompactFlowPanel flow, int id) {
@@ -166,17 +190,60 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
         /* first call : create the components */
+        if (nodeSourceAdded(nodeSources)) {
+            treeView.sortCompactView(this);
+        }
+        List<NodeSource> currentNodeSources = nodeSourceDeleted(nodeSources) ? nodeSources
+                                                                             : getSortedNodeSourceList(nodeSources);
         if (this.compactPanel == null) {
             initializePanel();
         }
-        updateCompactPanel(nodeSources, nodes);
+        updateCompactPanel(currentNodeSources, nodes);
+        updateMyNodesCompactPanel(currentNodeSources, nodes);
+        updateSelection();
+    }
 
-        updateMyNodesCompactPanel(nodeSources, nodes);
+    private void updateSelection() {
+        if (previousSelectedNs != null) {
+            nodeSourceSelected(previousSelectedNs);
+        } else if (previousSelectedHost != null) {
+            hostSelected(previousSelectedHost);
+        } else if (previousSelectedNode != null) {
+            nodeSelected(previousSelectedNode);
+        }
+    }
+
+    private List<NodeSource> getSortedNodeSourceList(List<NodeSource> nodeSources) {
+        List<NodeSource> sortedNodeSources = new LinkedList<>();
+        ListGridRecord[] sortedRecords = treeView.getTreeGrid().getRecords();
+        if (!nodeSources.isEmpty()) {
+            Arrays.asList(sortedRecords)
+                  .forEach(record -> nodeSources.stream()
+                                                .filter(nodeSource -> nodeSource.getSourceName()
+                                                                                .equals(record.getAttribute(NODE_SOURCES)))
+                                                .findFirst()
+                                                .ifPresent(sortedNodeSources::add));
+        }
+        return sortedNodeSources;
+    }
+
+    private boolean nodeSourceDeleted(List<NodeSource> nodeSources) {
+        return nodeSources == null || nodeSources.isEmpty() || nodeSources.stream().allMatch(NodeSource::isRemoved);
+    }
+
+    private boolean nodeSourceAdded(List<NodeSource> nodeSources) {
+        return nodeSources != null && nodeSources.size() == 1 && nodeSources.get(0).getDeploying().size() != 0;
     }
 
     private void updateCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
         processNodeSources(compactPanel, nodeSources);
         processNodes(compactPanel, nodes);
+    }
+
+    public void removeNodeSources(List<NodeSource> currentNodeSources) {
+        if (currentNodeSources != null) {
+            currentNodeSources.forEach(nodeSource -> removeNodeSource(compactPanel, nodeSource));
+        }
     }
 
     private void updateMyNodesCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
