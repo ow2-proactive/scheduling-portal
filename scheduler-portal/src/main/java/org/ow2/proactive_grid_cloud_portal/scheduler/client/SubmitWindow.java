@@ -1142,9 +1142,9 @@ public class SubmitWindow {
               .forEach(field -> Arrays.stream(_fields)
                                       .filter(_field -> ("var_" + field.getName()).equals(_field.getName()))
                                       .findAny()
-                                      .ifPresent(_field -> _field.setValue(field.getValue().toString()))
-
-        );
+                                      .ifPresent(_field -> _field.setValue(field.getValue() != null ? field.getValue()
+                                                                                                           .toString()
+                                                                                                    : null)));
     }
 
     private void setVariablesOnFields() {
