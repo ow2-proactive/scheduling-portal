@@ -41,6 +41,7 @@ public enum Field implements IsSerializable {
     STATE("status"),
     PROJECT_NAME("project"),
     BUCKET_NAME("bucket"),
+    LABEL("Label"),
     SUBMITTED_TIME("Submitted time"),
     START_TIME("Start time"),
     LAST_UPDATED_TIME("Last-updated time"),

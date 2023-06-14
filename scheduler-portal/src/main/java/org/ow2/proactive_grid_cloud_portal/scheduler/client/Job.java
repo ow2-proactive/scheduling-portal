@@ -58,6 +58,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private String submissionMode;
 
+    private String label;
+
     private JobStatus status;
 
     private JobPriority priority;
@@ -124,6 +126,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.projectName = builder.getProjectName();
         this.bucketName = builder.getBucketName();
         this.submissionMode = builder.getSubmissionMode();
+        this.label = builder.getLabel();
         this.setStatus(builder.getStatus());
         this.setPriority(builder.getPriority());
         this.setUser(builder.getUser());
@@ -250,6 +253,22 @@ public class Job implements Serializable, Comparable<Job> {
      */
     public void setSubmissionMode(String submissionMode) {
         this.submissionMode = submissionMode;
+    }
+
+    /**
+     * Getter for the label of the job.
+     * @return the label.
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    /**
+     * Setter of the job label.
+     * @param label the label of the job.
+     */
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     /**
@@ -460,7 +479,9 @@ public class Job implements Serializable, Comparable<Job> {
                cumulatedCoreTime == job.cumulatedCoreTime && parentId == job.parentId &&
                childrenCount == job.childrenCount && numberOfNodes == job.numberOfNodes &&
                numberOfNodesInParallel == job.numberOfNodesInParallel &&
-               submissionMode != null ? submissionMode.equals(job.submissionMode) : job.submissionMode == null;
+               submissionMode != null ? submissionMode.equals(job.submissionMode)
+                                      : job.submissionMode == null && label != null ? label.equals(job.label)
+                                                                                    : job.label == null;
     }
 
     public int compareTo(Job job) {
@@ -538,6 +559,7 @@ public class Job implements Serializable, Comparable<Job> {
         String projectName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("projectName"));
         String bucketName = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("bucketName"));
         String submissionMode = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("submissionMode"));
+        String label = SchedulerJSONUtils.getStringOrDefault(jsonJobInfo.get("label"));
         int id = Integer.valueOf(jsonJobInfo.get("id").isString().stringValue());
 
         return new JobBuilder().id(id)
@@ -570,6 +592,7 @@ public class Job implements Serializable, Comparable<Job> {
                                .numberOfNodes(numberOfNodes)
                                .numberOfNodesInParallel(numberOfNodesInParallel)
                                .submissionMode(submissionMode)
+                               .label(label)
                                .build();
 
     }

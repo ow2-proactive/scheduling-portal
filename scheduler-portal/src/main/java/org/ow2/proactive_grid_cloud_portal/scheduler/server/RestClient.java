@@ -816,4 +816,29 @@ public interface RestClient {
     String validateJobSignal(@HeaderParam("sessionid") String sessionId, @QueryParam("signal") String signal,
             @PathParam("jobid") String jobId, Map<String, String> updatedVariables);
 
+    @GET
+    @Path("labels")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getLabels(@HeaderParam("sessionid") String sessionId);
+
+    @PUT
+    @Path("labels/jobs/setlabel")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    void setLabelOnJobs(@HeaderParam("sessionid") String sessionId, @QueryParam("labelId") String labelId,
+            List<String> jobIds);
+
+    @PUT
+    @Path("labels/jobs/removelabel")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    void removeJobLabel(@HeaderParam("sessionid") String sessionId, List<String> jobIds);
+
+    @POST
+    @Path("labels/set")
+    @Consumes(value = MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream setLabels(@HeaderParam("sessionid") String sessionId, List<String> labels);
+
 }

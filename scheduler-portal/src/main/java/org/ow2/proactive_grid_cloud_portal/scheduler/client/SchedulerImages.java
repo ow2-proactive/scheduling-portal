@@ -143,4 +143,10 @@ public interface SchedulerImages extends ClientBundle {
     @Source("images/open_16.png")
     ImageResource open();
 
+    @Source("images/label.png")
+    ImageResource label();
+
+    @Source("images/remove_label.png")
+    ImageResource remove_label();
+
 }

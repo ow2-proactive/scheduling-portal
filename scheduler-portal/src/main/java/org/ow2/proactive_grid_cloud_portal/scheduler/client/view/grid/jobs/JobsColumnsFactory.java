@@ -73,6 +73,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                                 false,
                                                                                 true);
 
+    public static final GridColumns LABEL_ATTRIBUTE = new GridColumns("label", "Label", -1, true, false, true);
+
     public static final GridColumns SUBMIT_TIME_ATTR = new GridColumns("submitTime",
                                                                        "Submitted at",
                                                                        120,
@@ -99,7 +101,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                      DURATION_ATTR, NAME_ATTR, PROJECT_NAME_ATTR,
                                                                      BUCKET_NAME_ATTR, SUBMIT_TIME_ATTR,
                                                                      SUBMISSION_MODE_ATTRIBUTE, START_TIME_ATTR,
-                                                                     FINISHED_TIME_ATTR };
+                                                                     FINISHED_TIME_ATTR, LABEL_ATTRIBUTE };
 
     protected static final GridColumns[] COLUMNS_TO_ALIGN = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR,
                                                                                 USER_ATTR, TENANT_ATTR, PROGRESS_ATTR,
@@ -144,6 +146,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
         record.setAttribute(PROJECT_NAME_ATTR.getName(), item.getProjectName());
         record.setAttribute(BUCKET_NAME_ATTR.getName(), item.getBucketName());
         record.setAttribute(SUBMISSION_MODE_ATTRIBUTE.getName(), item.getSubmissionMode());
+        record.setAttribute(LABEL_ATTRIBUTE.getName(), item.getLabel());
 
         if (item.getStatus() != JobStatus.IN_ERROR) {
             if (item.getFinishTime() > 0 && item.getStartTime() > 0) {

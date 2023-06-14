@@ -135,6 +135,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private static final String SHUTDOWN = "Shutdown";
 
+    private static final String MANAGE_LABELS = "Manage labels";
+
     /* Actions descriptions */
     private static final String DESCRIPTION = "description";
 
@@ -151,6 +153,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private static final String SCHED_KILL_BUTTON_DESCRIPTION = "Kill Scheduler Server";
 
     private static final String SCHED_SHUTDOWN_BUTTON_DESCRIPTION = "Shutdown Scheduler Server (Running Tasks terminate)";
+
+    private static final String MANAGE_LABELS_BUTTON_DESCRIPTION = "Manage job labels";
 
     /** root layout: parent to all widgets of this view */
     private Layout rootLayout = null;
@@ -181,6 +185,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     /** client settings */
     private SettingsWindow settingsWindow = null;
+
+    private ManageLabelsWindow manageLabelsWindow = null;
 
     private Menu adminMenu = null;
 
@@ -257,6 +263,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
+        this.manageLabelsWindow = new ManageLabelsWindow(controller);
 
         Canvas tools = buildTools();
 
@@ -307,6 +314,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     private MenuItem schedKillButton;
 
     private MenuItem schedShutdownButton;
+
+    private MenuItem manageLabelsButton;
 
     private ToolStrip buildLogoStrip() {
 
@@ -543,6 +552,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                                                     if (value)
                                                                         SchedulerPage.this.controller.shutdownScheduler();
                                                                 }));
+        manageLabelsButton = new MenuItem(MANAGE_LABELS);
+        manageLabelsButton.setIcon(SchedulerImages.instance.label().getSafeUri().asString());
+        manageLabelsButton.setAttribute(DESCRIPTION, MANAGE_LABELS_BUTTON_DESCRIPTION);
+        manageLabelsButton.addClickHandler(event -> this.manageLabelsWindow.show());
 
         ToolStripMenuButton adminMenuButton = new ToolStripMenuButton("Admin");
         this.adminMenu = new Menu();
@@ -551,6 +564,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                 schedFreezeButton,
                                 schedResumeButton,
                                 schedPauseButton,
+                                manageLabelsButton,
                                 schedKillButton,
                                 schedShutdownButton);
         // Adding tooltips on Admin actions
@@ -847,6 +861,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.logWindow.destroy();
         this.aboutWindow.destroy();
         this.settingsWindow.destroy();
+        this.manageLabelsWindow.destroy();
 
         this.rootLayout = null;
         this.jobInfo = null;

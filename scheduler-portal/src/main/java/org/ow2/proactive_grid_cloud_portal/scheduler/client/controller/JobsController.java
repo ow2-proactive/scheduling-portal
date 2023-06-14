@@ -297,6 +297,68 @@ public class JobsController {
     }
 
     /**
+     * Gets the job labels
+     *
+     * @param jobsListGrid the current listGrid
+     * @param ids the selected job ids
+     */
+    public void getJobLabels(JobsListGrid jobsListGrid, ArrayList<String> ids) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.getLabels(LoginModel.getInstance().getSessionId(), new AsyncCallback<Map<String, String>>() {
+            public void onSuccess(Map<String, String> result) {
+                jobsListGrid.addLabelsMenu(result, ids);
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage("getJobLabels fail");
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get job labels : " + message);
+            }
+        });
+    }
+
+    /**
+     * Sets the label on given jobs
+     *
+     * @param labelId the label
+     * @param jobIds the selected job ids
+     */
+    public void setLabelOnJobs(String labelId, List<String> jobIds) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.setLabelOnJobs(LoginModel.getInstance().getSessionId(), labelId, jobIds, new AsyncCallback<Void>() {
+            public void onSuccess(Void result) {
+                LogModel.getInstance().logMessage("Successfully added label  " + labelId + " on jobs " + jobIds + ".");
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage("setLabelOnJobs fail");
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to set label on jobs : " + message);
+            }
+        });
+    }
+
+    /**
+     * Removes the label on given jobs
+     *
+     * @param jobIds the selected job ids
+     */
+    public void removeJobLabel(List<String> jobIds) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.removeJobLabel(LoginModel.getInstance().getSessionId(), jobIds, new AsyncCallback<Void>() {
+            public void onSuccess(Void result) {
+                LogModel.getInstance().logMessage("Successfully removed the label  from jobs " + jobIds + ".");
+            }
+
+            public void onFailure(Throwable caught) {
+                LogModel.getInstance().logCriticalMessage("removeJobLabel fail");
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to remove label from jobs : " + message);
+            }
+        });
+    }
+
+    /**
      * Kills a list of jobs
      *
      * @param jobId id of the job
@@ -526,6 +588,7 @@ public class JobsController {
                                 .numberOfNodes(0)
                                 .numberOfNodesInParallel(0)
                                 .submissionMode("")
+                                .label("")
                                 .build();
 
         this.model.getJobs().put(jobId, j);

@@ -473,4 +473,36 @@ public interface SchedulerServiceAsync {
     Request checkJobsPermissionMethods(String sessionId, List<String> jobId, List<String> methods,
             AsyncCallback<Map<String, Map<String, Boolean>>> asyncCallback);
 
+    /**
+     * Gets all the job labels.
+     * @param sessionId the session id of the user which is logged in
+     * @param asyncCallback the result returned
+     */
+    void getLabels(String sessionId, AsyncCallback<Map<String, String>> asyncCallback);
+
+    /**
+     * Sets a label on the given jobs
+     * @param sessionId the session id of the user which is logged in
+     * @param labelId the id of the label to set
+     * @param jobIds the job ids
+     * @param callback the result returned
+     */
+    void setLabelOnJobs(String sessionId, String labelId, List<String> jobIds, AsyncCallback<Void> callback);
+
+    /**
+     * Remove the label from the given jobs
+     * @param sessionId the session id of the user which is logged in
+     * @param jobIds the job ids
+     * @param callback the result returned
+     */
+    void removeJobLabel(String sessionId, List<String> jobIds, AsyncCallback<Void> callback);
+
+    /**
+     * Sets the labels
+     * @param sessionId the session id of the user which is logged in
+     * @param labels the labels to set
+     * @param callback the result returned
+     */
+    void setLabels(String sessionId, List<String> labels, AsyncCallback<Map<String, String>> callback);
+
 }
