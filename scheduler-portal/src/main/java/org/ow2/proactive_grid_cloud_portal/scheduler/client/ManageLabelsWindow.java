@@ -52,6 +52,10 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ManageLabelsWindow {
 
+    public static final String LABEL_REGEX = "^[a-zA-Z0-9_/-]*$";
+
+    public static final int LABEL_MAX_LENGTH = 20;
+
     private Window window;
 
     private final SchedulerController controller;
@@ -79,9 +83,6 @@ public class ManageLabelsWindow {
         labelsListGrid.setAlternateRecordStyles(true);
         labelsListGrid.setShowAllRecords(true);
 
-        ListGridField idField = new ListGridField("id", "Id", 80);
-        idField.setCanEdit(false);
-
         ListGridField labelField = new ListGridField("label", "Label", 390);
         Validator requiredValidator = new CustomValidator() {
             @Override
@@ -93,14 +94,14 @@ public class ManageLabelsWindow {
         Validator lengthValidator = new CustomValidator() {
             @Override
             protected boolean condition(Object value) {
-                return value == null || value.toString().length() < 20;
+                return value == null || value.toString().length() < LABEL_MAX_LENGTH;
             }
         };
         lengthValidator.setErrorMessage("The maximum length is 20 characters");
         Validator regexpValidator = new CustomValidator() {
             @Override
             protected boolean condition(Object value) {
-                return value == null || value.toString().matches("^[a-zA-Z0-9_/-]*$");
+                return value == null || value.toString().matches(LABEL_REGEX);
             }
         };
         regexpValidator.setErrorMessage("Field should contain only numbers, letters and [/-_]");
@@ -202,7 +203,6 @@ public class ManageLabelsWindow {
         int i = 0;
         for (String id : labels.keySet()) {
             ListGridRecord labelRecord = new ListGridRecord();
-            //    labelRecord.setAttribute("id", id);
             labelRecord.setAttribute("label", labels.get(id));
             labelRecord.setAttribute(" ", Images.instance.remove().getSafeUri().asString());
             labelRecords[i] = labelRecord;
