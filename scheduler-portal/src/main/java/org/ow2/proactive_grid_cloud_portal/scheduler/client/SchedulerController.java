@@ -1120,12 +1120,12 @@ public class SchedulerController extends Controller implements UncaughtException
         scheduler.setLabels(LoginModel.getInstance().getSessionId(), labels, new AsyncCallback<Map<String, String>>() {
             public void onSuccess(Map<String, String> result) {
                 window.setData(result);
+                window.hide();
             }
 
             public void onFailure(Throwable caught) {
-                LogModel.getInstance().logCriticalMessage("setLabels fail");
                 String message = JSONUtils.getJsonErrorMessage(caught);
-                LogModel.getInstance().logImportantMessage("Failed to set job labels : " + message);
+                LogModel.getInstance().logCriticalMessage("Failed to set job labels : " + message);
             }
         });
     }

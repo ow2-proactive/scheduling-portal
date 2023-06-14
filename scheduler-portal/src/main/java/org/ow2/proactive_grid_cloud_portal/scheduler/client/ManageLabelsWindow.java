@@ -52,10 +52,6 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ManageLabelsWindow {
 
-    public static final String LABEL_REGEX = "^[a-zA-Z0-9_/-]*$";
-
-    public static final int LABEL_MAX_LENGTH = 20;
-
     private Window window;
 
     private final SchedulerController controller;
@@ -91,21 +87,7 @@ public class ManageLabelsWindow {
             }
         };
         requiredValidator.setErrorMessage("Field is required");
-        Validator lengthValidator = new CustomValidator() {
-            @Override
-            protected boolean condition(Object value) {
-                return value == null || value.toString().length() < LABEL_MAX_LENGTH;
-            }
-        };
-        lengthValidator.setErrorMessage("The maximum length is 20 characters");
-        Validator regexpValidator = new CustomValidator() {
-            @Override
-            protected boolean condition(Object value) {
-                return value == null || value.toString().matches(LABEL_REGEX);
-            }
-        };
-        regexpValidator.setErrorMessage("Field should contain only numbers, letters and [/-_]");
-        labelField.setValidators(requiredValidator, lengthValidator, regexpValidator);
+        labelField.setValidators(requiredValidator);
         labelField.setValidateOnChange(true);
         labelField.setCanEdit(true);
 
@@ -160,8 +142,6 @@ public class ManageLabelsWindow {
                     labels.add(labelsListGrid.getRecord(j).getAttribute("label"));
                 }
                 controller.setLabels(this, labels);
-                labelsListGrid.redraw();
-                window.hide();
             }
         });
 
@@ -209,6 +189,10 @@ public class ManageLabelsWindow {
             i++;
         }
         labelsListGrid.setData(labelRecords);
+    }
+
+    public void hide() {
+        window.hide();
     }
 
 }
