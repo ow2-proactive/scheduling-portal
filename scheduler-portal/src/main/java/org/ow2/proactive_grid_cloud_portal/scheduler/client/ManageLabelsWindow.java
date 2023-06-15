@@ -84,55 +84,8 @@ public class ManageLabelsWindow {
         labelsListGrid.setAlternateRecordStyles(true);
         labelsListGrid.setShowAllRecords(true);
 
-        ListGridField labelField = new ListGridField("label", "Label", 390);
-        Validator requiredValidator = new CustomValidator() {
-            @Override
-            protected boolean condition(Object value) {
-                return value != null && !value.toString().trim().isEmpty();
-            }
-        };
-        requiredValidator.setErrorMessage("Field is required");
-
-        Validator lengthValidator = null;
-        if (properties.get(LABEL_MAX_LENGTH_PROPERTY) != null) {
-            int labelMaxLength = Integer.parseInt(properties.get(LABEL_MAX_LENGTH_PROPERTY).toString());
-            lengthValidator = new CustomValidator() {
-                @Override
-                protected boolean condition(Object value) {
-                    return value == null || value.toString().length() < labelMaxLength;
-                }
-            };
-            lengthValidator.setErrorMessage("The maximum length is  " + labelMaxLength + " characters");
-        }
-        Validator regexpValidator = null;
-        if (properties.get(LABEL_REGEX_PROPERTY) != null) {
-            String labelRegex = properties.get(LABEL_REGEX_PROPERTY).toString();
-            regexpValidator = new CustomValidator() {
-                @Override
-                protected boolean condition(Object value) {
-                    return value == null || value.toString().matches(labelRegex);
-                }
-            };
-            regexpValidator.setErrorMessage("Field does not matched regex " + labelRegex);
-        }
-        if (lengthValidator != null && regexpValidator != null) {
-            labelField.setValidators(requiredValidator, lengthValidator, regexpValidator);
-        } else if (lengthValidator != null) {
-            labelField.setValidators(requiredValidator, lengthValidator);
-        } else if (regexpValidator != null) {
-            labelField.setValidators(requiredValidator, regexpValidator);
-        } else {
-            labelField.setValidators(requiredValidator);
-        }
-        labelField.setValidateOnChange(true);
-        labelField.setCanEdit(true);
-
-        ListGridField removeField = new ListGridField(" ", 30);
-        removeField.setType(ListGridFieldType.IMAGE);
-        removeField.setCanEdit(false);
-        removeField.setCanSort(false);
-        removeField.setDefaultValue(Images.instance.remove().getSafeUri().asString());
-        removeField.addRecordClickHandler(event -> labelsListGrid.removeData(labelsListGrid.getRecord(event.getRecordNum())));
+        ListGridField labelField = getLabelField(properties);
+        ListGridField removeField = getRemoveField();
 
         labelsListGrid.setFields(labelField, removeField);
         labelsListGrid.setCanResizeFields(true);
@@ -140,55 +93,10 @@ public class ManageLabelsWindow {
 
         controller.getJobLabels(this);
 
-        IButton addRecordButton = new IButton("Add");
-        addRecordButton.setTooltip("Add a new label");
-        addRecordButton.addClickHandler(event -> {
-            ListGridRecord newRecord = new ListGridRecord();
-            labelsListGrid.addData(newRecord);
-            newRecord.setAttribute(" ", Images.instance.remove().getSafeUri().asString());
-            newRecord.set_canEdit(true);
-            labelsListGrid.startEditing(labelsListGrid.getRowNum(newRecord));
-            newRecord.setAttribute("label", "");
-        });
-
-        IButton resetGridButton = new IButton("Reset");
-        resetGridButton.setTooltip("Cancel the current modifications and keep previous configuration");
-        resetGridButton.addClickHandler(event -> {
-            controller.getJobLabels(this);
-            labelsListGrid.redraw();
-        });
-
-        IButton applyChangesButton = new IButton("Apply");
-        applyChangesButton.setTooltip("Apply modifications");
-        applyChangesButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
-        applyChangesButton.addClickHandler(event -> {
-            labelsListGrid.endEditing();
-            if (labelsListGrid.hasErrors()) {
-                for (int j = 0; j < labelsListGrid.getTotalRows(); j++) {
-                    if (!labelsListGrid.validateRow(j)) {
-                        labelsListGrid.startEditing(j);
-                        return;
-                    }
-                }
-            } else {
-                labelsListGrid.saveEdits();
-                labelsListGrid.redraw();
-                List<String> labels = new ArrayList<>();
-                for (int j = 0; j < labelsListGrid.getTotalRows(); j++) {
-                    labels.add(labelsListGrid.getRecord(j).getAttribute("label"));
-                }
-                controller.setLabels(this, labels);
-            }
-        });
-
-        IButton cancelChangesButton = new IButton("Cancel");
-        cancelChangesButton.setTooltip("Cancel the current modifications and close window");
-        cancelChangesButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
-        cancelChangesButton.addClickHandler(event -> {
-            controller.getJobLabels(this);
-            labelsListGrid.redraw();
-            window.hide();
-        });
+        IButton addRecordButton = getAddRecordButton();
+        IButton resetGridButton = getResetGridButton();
+        IButton applyChangesButton = getApplyChangesButton();
+        IButton cancelChangesButton = getCancelChangesButton();
 
         HLayout hLayout = new HLayout(15);
         hLayout.setHeight(20);
@@ -212,6 +120,145 @@ public class ManageLabelsWindow {
         this.window.setCanDragResize(true);
         this.window.centerInPage();
 
+    }
+
+    private IButton getCancelChangesButton() {
+        IButton cancelChangesButton = new IButton("Cancel");
+        cancelChangesButton.setTooltip("Cancel the current modifications and close window");
+        cancelChangesButton.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        cancelChangesButton.addClickHandler(event -> {
+            resetGrid();
+            window.hide();
+        });
+        return cancelChangesButton;
+    }
+
+    private IButton getApplyChangesButton() {
+        IButton applyChangesButton = new IButton("Apply");
+        applyChangesButton.setTooltip("Apply modifications");
+        applyChangesButton.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        applyChangesButton.addClickHandler(event -> {
+            labelsListGrid.endEditing();
+            if (labelsListGrid.hasErrors()) {
+                for (int j = 0; j < labelsListGrid.getTotalRows(); j++) {
+                    if (!labelsListGrid.validateRow(j)) {
+                        labelsListGrid.startEditing(j);
+                        return;
+                    }
+                }
+            } else {
+                applyChanges();
+            }
+        });
+        return applyChangesButton;
+    }
+
+    private void applyChanges() {
+        labelsListGrid.saveEdits();
+        labelsListGrid.redraw();
+        List<String> labels = new ArrayList<>();
+        for (int j = 0; j < labelsListGrid.getTotalRows(); j++) {
+            labels.add(labelsListGrid.getRecord(j).getAttribute("label"));
+        }
+        controller.setLabels(this, labels);
+    }
+
+    private IButton getResetGridButton() {
+        IButton resetGridButton = new IButton("Reset");
+        resetGridButton.setTooltip("Cancel the current modifications and keep previous configuration");
+        resetGridButton.addClickHandler(event -> resetGrid());
+        return resetGridButton;
+    }
+
+    private void resetGrid() {
+        controller.getJobLabels(this);
+        labelsListGrid.redraw();
+    }
+
+    private IButton getAddRecordButton() {
+        IButton addRecordButton = new IButton("Add");
+        addRecordButton.setTooltip("Add a new label");
+        addRecordButton.addClickHandler(event -> addNewRecord());
+        return addRecordButton;
+    }
+
+    private void addNewRecord() {
+        ListGridRecord newRecord = new ListGridRecord();
+        labelsListGrid.addData(newRecord);
+        newRecord.setAttribute(" ", Images.instance.remove().getSafeUri().asString());
+        newRecord.set_canEdit(true);
+        labelsListGrid.startEditing(labelsListGrid.getRowNum(newRecord));
+        newRecord.setAttribute("label", "");
+    }
+
+    private ListGridField getRemoveField() {
+        ListGridField removeField = new ListGridField(" ", 30);
+        removeField.setType(ListGridFieldType.IMAGE);
+        removeField.setCanEdit(false);
+        removeField.setCanSort(false);
+        removeField.setDefaultValue(Images.instance.remove().getSafeUri().asString());
+        removeField.addRecordClickHandler(event -> labelsListGrid.removeData(labelsListGrid.getRecord(event.getRecordNum())));
+        return removeField;
+    }
+
+    private ListGridField getLabelField(Map<String, Object> properties) {
+        ListGridField labelField = new ListGridField("label", "Label", 390);
+        Validator requiredValidator = getRequiredValidator();
+        Validator lengthValidator = getLengthValidator(properties);
+        Validator regexpValidator = getRegexValidator(properties);
+        if (lengthValidator != null && regexpValidator != null) {
+            labelField.setValidators(requiredValidator, lengthValidator, regexpValidator);
+        } else if (lengthValidator != null) {
+            labelField.setValidators(requiredValidator, lengthValidator);
+        } else if (regexpValidator != null) {
+            labelField.setValidators(requiredValidator, regexpValidator);
+        } else {
+            labelField.setValidators(requiredValidator);
+        }
+        labelField.setValidateOnChange(true);
+        labelField.setCanEdit(true);
+        return labelField;
+    }
+
+    private Validator getRegexValidator(Map<String, Object> properties) {
+        if (properties.get(LABEL_REGEX_PROPERTY) != null) {
+            String labelRegex = properties.get(LABEL_REGEX_PROPERTY).toString();
+            Validator regexpValidator = new CustomValidator() {
+                @Override
+                protected boolean condition(Object value) {
+                    return value == null || value.toString().matches(labelRegex);
+                }
+            };
+            regexpValidator.setErrorMessage("Field does not matched regex " + labelRegex);
+            return regexpValidator;
+        }
+        return null;
+    }
+
+    private Validator getLengthValidator(Map<String, Object> properties) {
+        if (properties.get(LABEL_MAX_LENGTH_PROPERTY) != null) {
+            int labelMaxLength = Integer.parseInt(properties.get(LABEL_MAX_LENGTH_PROPERTY).toString());
+            Validator lengthValidator = new CustomValidator() {
+                @Override
+                protected boolean condition(Object value) {
+                    return value == null || value.toString().length() < labelMaxLength;
+                }
+            };
+            lengthValidator.setErrorMessage("The maximum length is  " + labelMaxLength + " characters");
+            return lengthValidator;
+        }
+        return null;
+    }
+
+    private Validator getRequiredValidator() {
+        Validator requiredValidator = new CustomValidator() {
+            @Override
+            protected boolean condition(Object value) {
+                return value != null && !value.toString().trim().isEmpty();
+            }
+        };
+        requiredValidator.setErrorMessage("Field is required");
+        return requiredValidator;
     }
 
     public void setData(Map<String, String> labels) {
