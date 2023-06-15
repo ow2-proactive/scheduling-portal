@@ -551,4 +551,11 @@ public interface SchedulerService extends RemoteService {
      * @throws RestServerException exception thrown if problems occurred during the setLabels process.
      */
     Map<String, String> setLabels(String sessionId, List<String> labels) throws RestServerException, ServiceException;
+
+    /**
+     * Returns scheduler properties and web properties in a single map
+     *
+     * @param sessionId the current session id
+     */
+    Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId);
 }

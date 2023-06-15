@@ -505,4 +505,11 @@ public interface SchedulerServiceAsync {
      */
     void setLabels(String sessionId, List<String> labels, AsyncCallback<Map<String, String>> callback);
 
+    /**
+     * Returns scheduler properties and web properties in a single map
+     * @param sessionId the session id of the user which is logged in
+     * @param callback the result returned
+     */
+    void getSchedulerPropertiesFromSessionId(String sessionId, AsyncCallback<Map<String, Object>> callback);
+
 }

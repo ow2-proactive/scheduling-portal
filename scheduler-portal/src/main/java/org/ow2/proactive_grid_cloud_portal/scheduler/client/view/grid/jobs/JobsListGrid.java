@@ -123,7 +123,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private MenuItem openItem;
 
-    private MenuItem applyLabels;
+    private MenuItem editLabels;
+
+    private MenuItem removeLabels;
 
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
@@ -524,11 +526,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         actionsItem = new MenuItem("Actions");
         actionsItem.setEnabled(false);
 
-        applyLabels = new MenuItem("Edit label", SchedulerImages.instance.label().getSafeUri().asString());
-        applyLabels.setEnabled(true);
+        editLabels = new MenuItem("Edit label", SchedulerImages.instance.label().getSafeUri().asString());
+        editLabels.setEnabled(true);
 
-        MenuItem removeLabels = new MenuItem("Remove label",
-                                             SchedulerImages.instance.remove_label().getSafeUri().asString());
+        removeLabels = new MenuItem("Remove label", SchedulerImages.instance.remove_label().getSafeUri().asString());
         removeLabels.addClickHandler(event -> controller.removeJobLabel(ids));
         removeLabels.setEnabled(true);
 
@@ -544,7 +545,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                            openItem,
                            exportXmlItem,
                            removeItem,
-                           applyLabels,
+                           editLabels,
                            removeLabels);
 
         controller.getJobSignals(ids.get(0), this);
@@ -591,7 +592,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             item.addClickHandler(event -> controller.setLabelOnJobs(labelKey, ids));
             labelsMenu.addItem(item);
         }
-        applyLabels.setSubmenu(labelsMenu);
+        editLabels.setSubmenu(labelsMenu);
         menu.redraw();
     }
 
@@ -629,6 +630,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         if (loginModel.userDoesNotHavePermissionToRemoveJobs(jobIds)) {
             removeItem.setEnabled(false);
             menu.redraw();
+        }
+        if (loginModel.userDoesNotHavePermissionToSetLabelOnJobs(jobIds)) {
+            editLabels.setEnabled(false);
+            removeLabels.setEnabled(false);
         }
         menu.redraw();
     }

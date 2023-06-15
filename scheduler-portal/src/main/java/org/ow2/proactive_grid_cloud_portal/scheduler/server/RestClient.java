@@ -841,4 +841,10 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     InputStream setLabels(@HeaderParam("sessionid") String sessionId, List<String> labels);
 
+    @GET
+    @Path("properties")
+    @Produces(MediaType.APPLICATION_JSON)
+    Map<String, Object> getSchedulerPropertiesFromSessionId(@HeaderParam("sessionid")
+    final String sessionId);
+
 }

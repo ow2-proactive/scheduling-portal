@@ -1115,6 +1115,25 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
+    public void getSchedulerProperties(ManageLabelsWindow window) {
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        scheduler.getSchedulerPropertiesFromSessionId(LoginModel.getInstance().getSessionId(),
+                                                      new AsyncCallback<Map<String, Object>>() {
+                                                          public void onSuccess(Map<String, Object> result) {
+                                                              window.build(result);
+                                                          }
+
+                                                          public void onFailure(Throwable caught) {
+                                                              LogModel.getInstance()
+                                                                      .logCriticalMessage("getSchedulerPropertiesFromSessionId fail");
+                                                              String message = JSONUtils.getJsonErrorMessage(caught);
+                                                              LogModel.getInstance().logImportantMessage(
+                                                                                                         "Failed to get scheduler properties : " +
+                                                                                                         message);
+                                                          }
+                                                      });
+    }
+
     public void setLabels(ManageLabelsWindow window, List<String> labels) {
         SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
         scheduler.setLabels(LoginModel.getInstance().getSessionId(), labels, new AsyncCallback<Map<String, String>>() {

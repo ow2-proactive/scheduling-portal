@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
@@ -52,6 +53,10 @@ import com.smartgwt.client.widgets.layout.VLayout;
  */
 public class ManageLabelsWindow {
 
+    private static final String LABEL_REGEX_PROPERTY = "pa.scheduler.label.regex";
+
+    private static final String LABEL_MAX_LENGTH_PROPERTY = "pa.scheduler.label.max.length";
+
     private Window window;
 
     private final SchedulerController controller;
@@ -60,7 +65,7 @@ public class ManageLabelsWindow {
 
     public ManageLabelsWindow(SchedulerController controller) {
         this.controller = controller;
-        this.build();
+        controller.getSchedulerProperties(this);
     }
 
     public void show() {
@@ -71,7 +76,7 @@ public class ManageLabelsWindow {
         this.window.destroy();
     }
 
-    private void build() {
+    public void build(Map<String, Object> properties) {
 
         labelsListGrid = new ListGrid();
         labelsListGrid.setWidth(440);
@@ -87,7 +92,38 @@ public class ManageLabelsWindow {
             }
         };
         requiredValidator.setErrorMessage("Field is required");
-        labelField.setValidators(requiredValidator);
+
+        Validator lengthValidator = null;
+        if (properties.get(LABEL_MAX_LENGTH_PROPERTY) != null) {
+            int labelMaxLength = Integer.parseInt(properties.get(LABEL_MAX_LENGTH_PROPERTY).toString());
+            lengthValidator = new CustomValidator() {
+                @Override
+                protected boolean condition(Object value) {
+                    return value == null || value.toString().length() < labelMaxLength;
+                }
+            };
+            lengthValidator.setErrorMessage("The maximum length is  " + labelMaxLength + " characters");
+        }
+        Validator regexpValidator = null;
+        if (properties.get(LABEL_REGEX_PROPERTY) != null) {
+            String labelRegex = properties.get(LABEL_REGEX_PROPERTY).toString();
+            regexpValidator = new CustomValidator() {
+                @Override
+                protected boolean condition(Object value) {
+                    return value == null || value.toString().matches(labelRegex);
+                }
+            };
+            regexpValidator.setErrorMessage("Field does not matched regex " + labelRegex);
+        }
+        if (lengthValidator != null && regexpValidator != null) {
+            labelField.setValidators(requiredValidator, lengthValidator, regexpValidator);
+        } else if (lengthValidator != null) {
+            labelField.setValidators(requiredValidator, lengthValidator);
+        } else if (regexpValidator != null) {
+            labelField.setValidators(requiredValidator, regexpValidator);
+        } else {
+            labelField.setValidators(requiredValidator);
+        }
         labelField.setValidateOnChange(true);
         labelField.setCanEdit(true);
 

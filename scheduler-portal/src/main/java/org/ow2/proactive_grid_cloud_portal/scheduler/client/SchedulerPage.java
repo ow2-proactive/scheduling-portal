@@ -315,7 +315,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private MenuItem schedShutdownButton;
 
-    private MenuItem manageLabelsButton;
+    private MenuItem schedManageLabelsButton;
 
     private ToolStrip buildLogoStrip() {
 
@@ -552,10 +552,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                                                     if (value)
                                                                         SchedulerPage.this.controller.shutdownScheduler();
                                                                 }));
-        manageLabelsButton = new MenuItem(MANAGE_LABELS);
-        manageLabelsButton.setIcon(SchedulerImages.instance.label().getSafeUri().asString());
-        manageLabelsButton.setAttribute(DESCRIPTION, MANAGE_LABELS_BUTTON_DESCRIPTION);
-        manageLabelsButton.addClickHandler(event -> this.manageLabelsWindow.show());
+        schedManageLabelsButton = new MenuItem(MANAGE_LABELS);
+        schedManageLabelsButton.setIcon(SchedulerImages.instance.label().getSafeUri().asString());
+        schedManageLabelsButton.setAttribute(DESCRIPTION, MANAGE_LABELS_BUTTON_DESCRIPTION);
+        schedManageLabelsButton.addClickHandler(event -> this.manageLabelsWindow.show());
 
         ToolStripMenuButton adminMenuButton = new ToolStripMenuButton("Admin");
         this.adminMenu = new Menu();
@@ -564,7 +564,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                                 schedFreezeButton,
                                 schedResumeButton,
                                 schedPauseButton,
-                                manageLabelsButton,
+                                schedManageLabelsButton,
                                 schedKillButton,
                                 schedShutdownButton);
         // Adding tooltips on Admin actions
@@ -635,6 +635,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(false);
                 schedShutdownButton.setEnabled(false);
+                schedManageLabelsButton.setEnabled(false);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.loading().getSafeUri().asString());
                 break;
             case SHUTTING_DOWN:
@@ -645,6 +646,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(false);
                 schedShutdownButton.setEnabled(false);
+                schedManageLabelsButton.setEnabled(false);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_shutdown_16().getSafeUri().asString());
                 break;
             case KILLED:
@@ -655,6 +657,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(false);
                 schedShutdownButton.setEnabled(false);
+                schedManageLabelsButton.setEnabled(false);
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
                 break;
             case FROZEN:
@@ -665,6 +668,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(loginModel.userHasPermissionToResumeScheduler());
                 schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
                 schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
+                schedManageLabelsButton.setEnabled(loginModel.userHasPermissionToSetLabels());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_freeze_16().getSafeUri().asString());
                 break;
             case PAUSED:
@@ -675,6 +679,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(loginModel.userHasPermissionToResumeScheduler());
                 schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
                 schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
+                schedManageLabelsButton.setEnabled(loginModel.userHasPermissionToSetLabels());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
                 break;
             case STARTED:
@@ -686,6 +691,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
                 schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
+                schedManageLabelsButton.setEnabled(loginModel.userHasPermissionToSetLabels());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_start_16().getSafeUri().asString());
                 break;
             case STOPPED:
@@ -696,6 +702,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
                 schedResumeButton.setEnabled(false);
                 schedKillButton.setEnabled(loginModel.userHasPermissionToKillScheduler());
                 schedShutdownButton.setEnabled(loginModel.userHasPermissionToShutDownScheduler());
+                schedManageLabelsButton.setEnabled(loginModel.userHasPermissionToSetLabels());
                 schedulerStatusLabel.setIcon(SchedulerImages.instance.scheduler_stop_16().getSafeUri().asString());
                 break;
             default:

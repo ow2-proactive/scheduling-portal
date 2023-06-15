@@ -1542,6 +1542,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
     }
 
     @Override
+    public Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId) {
+        RestClient restClientProxy = getRestClientProxy();
+        return restClientProxy.getSchedulerPropertiesFromSessionId(sessionId);
+    }
+
+    @Override
     public Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobIds,
             List<String> methods) throws RestServerException, ServiceException {
         HttpPost method = new HttpPost(SchedulerConfig.get().getRestUrl() + "/scheduler/jobs/permission/methods");
