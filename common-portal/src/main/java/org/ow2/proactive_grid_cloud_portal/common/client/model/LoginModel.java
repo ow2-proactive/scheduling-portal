@@ -52,6 +52,8 @@ public class LoginModel {
 
     private static final String PERMISSION_SCHEDULER_FRONTEND_KILL = "org.ow2.proactive.scheduler.core.SchedulerFrontend.kill";
 
+    private static final String PERMISSION_SCHEDULER_FRONTEND_SET_LABELS = "org.ow2.proactive.scheduler.core.SchedulerFrontend.setLabels";
+
     private static final String PERMISSION_PAUSE_JOB = "pauseJob";
 
     private static final String PERMISSION_RESTART_ALL_IN_ERROR_TASKS = "restartAllInErrorTasks";
@@ -71,6 +73,8 @@ public class LoginModel {
     private static final String PERMISSION_GET_JOB_STATE = "getJobState";
 
     private static final String PERMISSION_GET_JOB_RESULT = "getJobResult";
+
+    private static final String PERMISSION_SET_LABEL_ON_JOBS = "setLabelOnJobs";
 
     private static final String PERMISSION_RM_EXECUTE_SCRIPT = "org.ow2.proactive.resourcemanager.core.RMCore.executeScript";
 
@@ -251,6 +255,10 @@ public class LoginModel {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_GET_JOB_RESULT);
     }
 
+    public boolean userDoesNotHavePermissionToSetLabelOnJobs(List<String> jobIds) {
+        return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_SET_LABEL_ON_JOBS);
+    }
+
     private boolean userDoesNotHavePermissionToMethod(List<String> jobIds, String method) {
         for (String jobId : jobIds) {
             Map<String, Boolean> permissionForJob = instance.schedulerPermissions.get(jobId);
@@ -286,6 +294,7 @@ public class LoginModel {
         methods.add(PERMISSION_GET_JOB_SERVER_LOGS);
         methods.add(PERMISSION_GET_JOB_STATE);
         methods.add(PERMISSION_GET_JOB_RESULT);
+        methods.add(PERMISSION_SET_LABEL_ON_JOBS);
         return methods;
     }
 
@@ -298,6 +307,7 @@ public class LoginModel {
         methods.add(PERMISSION_SCHEDULER_FRONTEND_RESUME);
         methods.add(PERMISSION_SCHEDULER_FRONTEND_SHUTDOWN);
         methods.add(PERMISSION_SCHEDULER_FRONTEND_KILL);
+        methods.add(PERMISSION_SCHEDULER_FRONTEND_SET_LABELS);
         return methods;
     }
 
@@ -380,6 +390,11 @@ public class LoginModel {
     public boolean userHasPermissionToKillScheduler() {
         return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_KILL) &&
                sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_KILL);
+    }
+
+    public boolean userHasPermissionToSetLabels() {
+        return sessionPermissions.containsKey(PERMISSION_SCHEDULER_FRONTEND_SET_LABELS) &&
+               sessionPermissions.get(PERMISSION_SCHEDULER_FRONTEND_SET_LABELS);
     }
 
     public boolean userHasPermissionToLockNodes() {

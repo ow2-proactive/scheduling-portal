@@ -499,7 +499,7 @@ public interface SchedulerService extends RemoteService {
      * Check if user has permission to access given methods
      *
      * @param sessionId the current session id
-     * @param methods the the list of methods to be checked
+     * @param methods the list of methods to be checked
      * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
      */
     Map<String, Boolean> checkMethodsPermissions(final String sessionId, List<String> methods)
@@ -515,4 +515,47 @@ public interface SchedulerService extends RemoteService {
      */
     Map<String, Map<String, Boolean>> checkJobsPermissionMethods(final String sessionId, List<String> jobId,
             List<String> methods) throws RestServerException, ServiceException;
+
+    /**
+     * Gets all the job labels.
+     *
+     * @param sessionId the current session id
+     * @throws RestServerException exception thrown if problems occurred during the getLabels process.
+     */
+    Map<String, String> getLabels(String sessionId) throws RestServerException, ServiceException;
+
+    /**
+     * Sets a label on the given jobs
+     *
+     * @param sessionId the current session id
+     * @param labelId the id of the label to set
+     * @param jobIds the job ids
+     * @throws RestServerException exception thrown if problems occurred during the setLabelOnJobs process.
+     */
+    void setLabelOnJobs(String sessionId, String labelId, List<String> jobIds) throws RestServerException;
+
+    /**
+     * Remove the label from the given jobs
+     *
+     * @param sessionId the current session id
+     * @param jobIds the job ids
+     * @throws RestServerException exception thrown if problems occurred during the removeJobLabels process.
+     */
+    void removeJobLabel(String sessionId, List<String> jobIds) throws RestServerException;
+
+    /**
+     * Remove the label from the given jobs
+     *
+     * @param sessionId the current session id
+     * @param labels the labels to set
+     * @throws RestServerException exception thrown if problems occurred during the setLabels process.
+     */
+    Map<String, String> setLabels(String sessionId, List<String> labels) throws RestServerException, ServiceException;
+
+    /**
+     * Returns scheduler properties and web properties in a single map
+     *
+     * @param sessionId the current session id
+     */
+    Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId);
 }

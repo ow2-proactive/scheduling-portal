@@ -123,6 +123,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private MenuItem openItem;
 
+    private MenuItem editLabels;
+
+    private MenuItem removeLabels;
+
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
@@ -522,6 +526,13 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         actionsItem = new MenuItem("Actions");
         actionsItem.setEnabled(false);
 
+        editLabels = new MenuItem("Edit label", SchedulerImages.instance.label().getSafeUri().asString());
+        editLabels.setEnabled(true);
+
+        removeLabels = new MenuItem("Remove label", SchedulerImages.instance.remove_label().getSafeUri().asString());
+        removeLabels.addClickHandler(event -> controller.removeJobLabel(ids));
+        removeLabels.setEnabled(true);
+
         this.menu.setItems(actionsItem,
                            pauseItem,
                            restartInErrorTaskItem,
@@ -533,11 +544,13 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                            resubmitItem,
                            openItem,
                            exportXmlItem,
-                           removeItem);
+                           removeItem,
+                           editLabels,
+                           removeLabels);
 
         controller.getJobSignals(ids.get(0), this);
         controller.checkJobsPermissionMethods(ids, this);
-
+        controller.getJobLabels(this, ids);
     }
 
     public void addActionsMenu(String jobId, Map<String, Map<String, Map<String, String>>> detailedSignals) {
@@ -569,6 +582,17 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         actionsItem.setSubmenu(signalsMenu);
         actionsItem.setEnabled(selSingleSelected && selPauseOrRunning && !detailedSignals.keySet().isEmpty());
+        menu.redraw();
+    }
+
+    public void addLabelsMenu(Map<String, String> labels, ArrayList<String> ids) {
+        Menu labelsMenu = new Menu();
+        for (String labelKey : labels.keySet()) {
+            MenuItem item = new MenuItem(labels.get(labelKey));
+            item.addClickHandler(event -> controller.setLabelOnJobs(labelKey, ids));
+            labelsMenu.addItem(item);
+        }
+        editLabels.setSubmenu(labelsMenu);
         menu.redraw();
     }
 
@@ -606,6 +630,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         if (loginModel.userDoesNotHavePermissionToRemoveJobs(jobIds)) {
             removeItem.setEnabled(false);
             menu.redraw();
+        }
+        if (loginModel.userDoesNotHavePermissionToSetLabelOnJobs(jobIds)) {
+            editLabels.setEnabled(false);
+            removeLabels.setEnabled(false);
         }
         menu.redraw();
     }

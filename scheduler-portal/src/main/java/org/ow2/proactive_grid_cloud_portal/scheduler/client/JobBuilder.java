@@ -52,6 +52,8 @@ public class JobBuilder {
 
     private String submissionMode;
 
+    private String label;
+
     private int pendingTasks;
 
     private int runningTasks;
@@ -212,6 +214,10 @@ public class JobBuilder {
         return submissionMode;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public JobBuilder id(int id) {
         this.id = id;
         return this;
@@ -359,6 +365,11 @@ public class JobBuilder {
 
     public JobBuilder submissionMode(String submissionMode) {
         this.submissionMode = submissionMode;
+        return this;
+    }
+
+    public JobBuilder label(String label) {
+        this.label = label;
         return this;
     }
 

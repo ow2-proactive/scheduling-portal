@@ -65,6 +65,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -1437,6 +1438,20 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         throw new RestServerException(e.getResponse().getStatus(), e.getMessage());
     }
 
+    public Map<String, String> convertLabelsToString(String jsonString) throws ServiceException {
+        Map<String, String> labels = new LinkedHashMap<>();
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jobUsageAsJson = jsonArray.getJSONObject(i);
+                labels.put(jobUsageAsJson.getString("id"), jobUsageAsJson.getString("label"));
+            }
+        } catch (JSONException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return labels;
+    }
+
     @Override
     public Set<String> addJobSignal(final String sessionId, String signal, String jobId) throws RestServerException {
         RestClient restClientProxy = getRestClientProxy();
@@ -1490,6 +1505,46 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
             throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsMapCommon(restClient -> restClient.checkMethodsPermissions(sessionId,
                                                                                                        methods));
+    }
+
+    @Override
+    public Map<String, String> getLabels(String sessionId) throws ServiceException, RestServerException {
+        return convertLabelsToString(executeFunctionReturnStreamAsString(restClient -> restClient.getLabels(sessionId),
+                                                                         false));
+    }
+
+    @Override
+    public void setLabelOnJobs(String sessionId, String labelId, List<String> jobIds) throws RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+        try {
+            restClientProxy.setLabelOnJobs(sessionId, labelId, jobIds);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+        }
+    }
+
+    @Override
+    public void removeJobLabel(String sessionId, List<String> jobIds) throws RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+        try {
+            restClientProxy.removeJobLabel(sessionId, jobIds);
+        } catch (WebApplicationException e) {
+            rethrowRestServerException(e);
+        }
+    }
+
+    @Override
+    public Map<String, String> setLabels(String sessionId, List<String> labels)
+            throws RestServerException, ServiceException {
+        return convertLabelsToString(executeFunctionReturnStreamAsString(restClient -> restClient.setLabels(sessionId,
+                                                                                                            labels),
+                                                                         false));
+    }
+
+    @Override
+    public Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId) {
+        RestClient restClientProxy = getRestClientProxy();
+        return restClientProxy.getSchedulerPropertiesFromSessionId(sessionId);
     }
 
     @Override
