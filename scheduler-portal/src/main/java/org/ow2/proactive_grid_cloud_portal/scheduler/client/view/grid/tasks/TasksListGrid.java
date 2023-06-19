@@ -448,12 +448,18 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
             case NOT_RESTARTED:
             case NOT_STARTED:
             case PAUSED:
-            case PENDING:
             case SKIPPED:
             case SUBMITTED:
+                enableKill = false;
+                enablePreempt = false;
+                enableRestartInErrorTask = false;
+                enableRestartRunningTask = false;
+                enableMarkAsFinishedAndResume = false;
+                break;
             case WAITING_ON_ERROR:
             case WAITING_ON_FAILURE:
-                enableKill = false;
+            case PENDING:
+                enableKill = true;
                 enablePreempt = false;
                 enableRestartInErrorTask = false;
                 enableRestartRunningTask = false;
