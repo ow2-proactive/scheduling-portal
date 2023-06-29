@@ -523,7 +523,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeItem.addClickHandler(event -> controller.removeJob(ids));
         removeItem.setEnabled(selFinished);
 
-        actionsItem = new MenuItem("Actions");
+        actionsItem = new MenuItem("Signals");
         actionsItem.setEnabled(false);
 
         editLabels = new MenuItem("Edit label", SchedulerImages.instance.label().getSafeUri().asString());
