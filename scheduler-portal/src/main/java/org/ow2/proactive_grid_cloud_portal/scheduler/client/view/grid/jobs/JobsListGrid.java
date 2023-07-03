@@ -31,6 +31,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -510,7 +511,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             resubmitItem.addClickHandler(event -> controller.resubmitJob(ids.get(0)));
         }
 
-        openItem = new MenuItem("Open in Studio", SchedulerImages.instance.pa_16().getSafeUri().asString());
+        openItem = new MenuItem("Open in Studio", Images.instance.studio_30().getSafeUri().asString());
         openItem.addClickHandler(event -> controller.openStudio(ids.get(0)));
         openItem.setEnabled(selSingleSelected);
 
