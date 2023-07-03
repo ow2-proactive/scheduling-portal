@@ -593,6 +593,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             labelsMenu.addItem(item);
         }
         editLabels.setSubmenu(labelsMenu);
+        editLabels.setEnabled(!labels.isEmpty());
         menu.redraw();
     }
 
