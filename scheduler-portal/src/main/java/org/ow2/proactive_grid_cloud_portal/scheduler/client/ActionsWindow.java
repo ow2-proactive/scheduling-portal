@@ -162,7 +162,7 @@ public class ActionsWindow {
         rootPage.setMembers(varsLayout, messageLayout, buttonsLayout);
 
         this.window = new Window();
-        this.window.setTitle("Actions");
+        this.window.setTitle("Signals");
         this.window.setShowMinimizeButton(false);
         this.window.setIsModal(true);
         this.window.setShowModalMask(true);
