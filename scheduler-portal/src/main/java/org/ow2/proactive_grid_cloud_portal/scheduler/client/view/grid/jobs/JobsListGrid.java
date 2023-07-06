@@ -554,10 +554,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         controller.getJobSignals(ids.get(0), this);
         controller.checkJobsPermissionMethods(ids, this);
         controller.getJobLabels(this, ids);
-        checkIfLabelsAreNotEmpty(menu, jobLabels);
+        checkIfLabelsAreEmpty(menu, jobLabels);
     }
 
-    private void checkIfLabelsAreNotEmpty(Menu menu, List<String> jobLabels) {
+    private void checkIfLabelsAreEmpty(Menu menu, List<String> jobLabels) {
         if (jobLabels.stream().anyMatch(String::isEmpty)) {
             removeLabels.setEnabled(false);
             menu.redraw();
