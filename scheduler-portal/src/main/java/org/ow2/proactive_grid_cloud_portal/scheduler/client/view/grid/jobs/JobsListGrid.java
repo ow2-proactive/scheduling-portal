@@ -558,7 +558,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     }
 
     private void checkIfLabelsAreEmpty(Menu menu, List<String> jobLabels) {
-        if (jobLabels.stream().anyMatch(String::isEmpty)) {
+        if (jobLabels.stream().allMatch(String::isEmpty)) {
             removeLabels.setEnabled(false);
             menu.redraw();
         }
