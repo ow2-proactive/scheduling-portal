@@ -424,6 +424,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         selSingleSelected = this.getSelectedRecords().length == 1;
         this.menu = menu;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
+        final ArrayList<String> jobLabels = new ArrayList<>(this.getSelectedRecords().length);
         for (ListGridRecord rec : this.getSelectedRecords()) {
             JobStatus status = getJobStatus(rec);
 
@@ -455,6 +456,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
 
             ids.add(rec.getAttribute(ID_ATTR.getName()));
+            jobLabels.add(rec.getAttribute(LABEL_ATTRIBUTE.getName()));
         }
 
         pauseItem = new MenuItem("Pause", SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
@@ -552,6 +554,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         controller.getJobSignals(ids.get(0), this);
         controller.checkJobsPermissionMethods(ids, this);
         controller.getJobLabels(this, ids);
+        checkIfLabelsAreNotEmpty(menu, jobLabels);
+    }
+
+    private void checkIfLabelsAreNotEmpty(Menu menu, List<String> jobLabels) {
+        if (jobLabels.stream().anyMatch(String::isEmpty)) {
+            removeLabels.setEnabled(false);
+            menu.redraw();
+        }
     }
 
     public void addActionsMenu(String jobId, Map<String, Map<String, Map<String, String>>> detailedSignals) {
