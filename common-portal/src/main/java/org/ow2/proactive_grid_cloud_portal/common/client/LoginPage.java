@@ -118,6 +118,9 @@ public class LoginPage {
     /** displays error messages when login fails */
     private Label errorLabel = null;
 
+    /** the username of the logged user*/
+    private static String username;
+
     /**
      * Default constructor
      *
@@ -498,6 +501,7 @@ public class LoginPage {
                 String pw = form.getValueAsString("password");
                 hiddenUser.setValue(login);
                 hiddenPass.setValue(pw);
+                username = login;
 
                 okButton.setIcon("loading.gif");
                 okButton.setTitle("Connecting...");
@@ -531,11 +535,7 @@ public class LoginPage {
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        String userName = null;
-                        if (obj.containsKey("username")) {
-                            userName = obj.isObject().get("username").isString().stringValue();
-                        }
-                        controller.login(sess, userName);
+                        controller.login(sess, username);
                     } else {
                         fail = true;
                     }
@@ -637,11 +637,7 @@ public class LoginPage {
                     JSONObject obj = val.isObject();
                     if (obj != null && obj.containsKey("sessionId")) {
                         String sess = obj.isObject().get("sessionId").isString().stringValue();
-                        String userName = null;
-                        if (obj.containsKey("username")) {
-                            userName = obj.isObject().get("username").isString().stringValue();
-                        }
-                        controller.login(sess, userName);
+                        controller.login(sess, username);
                     } else {
                         fail = true;
                     }
