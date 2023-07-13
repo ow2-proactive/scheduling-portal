@@ -257,6 +257,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private void setLoggedUser(String sessionId, String login) {
         LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setLogin(login);
         if (this.loginPage != null) {
             this.loginPage.destroy();
             this.loginPage = null;
@@ -307,7 +308,6 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 String username = String.valueOf(json.get("userName")).replace("\"", "");
                 String domain = String.valueOf(json.get("domain")).replace("\"", "");
                 String login = domain.isEmpty() || domain.equals("null") ? username : domain + "\\" + username;
-                loginModel.setLogin(login);
                 setLoggedUser(sessionId, login);
                 LogModel.getInstance().logMessage("Successfully fetched current user data ");
             }
