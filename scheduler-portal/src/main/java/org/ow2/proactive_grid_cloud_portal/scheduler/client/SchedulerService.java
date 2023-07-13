@@ -37,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.common.shared.ServiceException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
+import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -558,4 +559,16 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the current session id
      */
     Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId);
+
+    /**
+     * Returns a UserData object associated to a session.
+     *
+     * <br> NOTE: <br>
+     * In case the given sessionId doesn't have an associated login (session id expired, or invalid),
+     * this endpoint will return null
+     *
+     * @param sessionId id of a session
+     * @return a UserData object or null
+     */
+    String getCurrentUserData(String sessionId) throws RestServerException, ServiceException;
 }
