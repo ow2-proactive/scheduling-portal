@@ -1586,6 +1586,12 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    @Override
+    public String getCurrentUserData(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.getCurrentUserData(sessionId), false);
+
+    }
+
     private StringEntity getEntityForPermission(List<String> jobIds, List<String> methods)
             throws UnsupportedEncodingException {
 

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.tools.ant.util.CollectionUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
@@ -364,9 +365,12 @@ public class SchedulerController extends Controller implements UncaughtException
     private void __login(String sessionId, String login) {
         LoginModel loginModel = LoginModel.getInstance();
         loginModel.setLoggedIn(true);
-        loginModel.setLogin(login);
         loginModel.setSessionId(sessionId);
+        setCurrentUserName();
+    }
 
+    private void setLoggedUser(String sessionId, String login) {
+        LoginModel loginModel = LoginModel.getInstance();
         if (loginView != null)
             SchedulerController.this.loginView.destroy();
         this.loginView = null;
@@ -397,6 +401,29 @@ public class SchedulerController extends Controller implements UncaughtException
         setSessionPermissions();
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ", login=" + loginModel.getLogin() + ")");
+    }
+
+    public void setCurrentUserName() {
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = LoginModel.getInstance().getSessionId();
+        scheduler.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = parseJSON(userData).isObject();
+                String username = String.valueOf(json.get("userName")).replace("\"", "");
+                String domain = String.valueOf(json.get("domain")).replace("\"", "");
+                String login = domain.isEmpty() || domain.equals("null") ? username : domain + "\\" + username;
+                loginModel.setLogin(login);
+                setLoggedUser(sessionId, login);
+                LogModel.getInstance().logMessage("Successfully fetched current user data ");
+            }
+        });
     }
 
     public void checkPortalsPermissions() {

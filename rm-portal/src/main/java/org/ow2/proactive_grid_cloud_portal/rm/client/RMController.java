@@ -251,9 +251,12 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     private void __login(String sessionId, String login) {
         LoginModel loginModel = LoginModel.getInstance();
         loginModel.setLoggedIn(true);
-        loginModel.setLogin(login);
         loginModel.setSessionId(sessionId);
+        setCurrentUserName();
+    }
 
+    private void setLoggedUser(String sessionId, String login) {
+        LoginModel loginModel = LoginModel.getInstance();
         if (this.loginPage != null) {
             this.loginPage.destroy();
             this.loginPage = null;
@@ -286,6 +289,29 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ")");
+    }
+
+    public void setCurrentUserName() {
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = LoginModel.getInstance().getSessionId();
+        rm.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = parseJSON(userData).isObject();
+                String username = String.valueOf(json.get("userName")).replace("\"", "");
+                String domain = String.valueOf(json.get("domain")).replace("\"", "");
+                String login = domain.isEmpty() || domain.equals("null") ? username : domain + "\\" + username;
+                loginModel.setLogin(login);
+                setLoggedUser(sessionId, login);
+                LogModel.getInstance().logMessage("Successfully fetched current user data ");
+            }
+        });
     }
 
     @Override

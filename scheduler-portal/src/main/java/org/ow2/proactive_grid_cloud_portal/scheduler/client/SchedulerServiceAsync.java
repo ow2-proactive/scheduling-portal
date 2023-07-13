@@ -25,10 +25,13 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.ws.rs.HeaderParam;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.RestServerException;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.TasksCentricController;
@@ -512,4 +515,15 @@ public interface SchedulerServiceAsync {
      */
     void getSchedulerPropertiesFromSessionId(String sessionId, AsyncCallback<Map<String, Object>> callback);
 
+    /**
+     * Get a UserData object associated to a session.
+     *
+     * <br> NOTE: <br>
+     * In case the given sessionId doesn't have an associated login (session id expired, or invalid),
+     * this endpoint will return null
+     *
+     * @param sessionId id of a session
+     * @param callback the result returned
+     */
+    void getCurrentUserData(String sessionId, AsyncCallback<String> callback);
 }
