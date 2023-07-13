@@ -416,10 +416,14 @@ public class SchedulerController extends Controller implements UncaughtException
 
             @Override
             public void onSuccess(String userData) {
-                JSONObject json = parseJSON(userData).isObject();
-                String username = String.valueOf(json.get("userName")).replace("\"", "");
-                String domain = String.valueOf(json.get("domain")).replace("\"", "");
-                String login = domain.isEmpty() || domain.equals("null") ? username : domain + "\\" + username;
+                JSONObject json = JSONParser.parseStrict(userData).isObject();
+                String username = json.get("userName").isString() != null ? json.get("userName")
+                                                                                .isString()
+                                                                                .stringValue()
+                                                                          : null;
+                String domain = json.get("domain").isString() != null ? json.get("domain").isString().stringValue()
+                                                                      : null;
+                String login = domain != null ? domain + "\\" + username : username;
                 setLoggedUser(sessionId, login);
                 LogModel.getInstance().logMessage("Successfully fetched current user data ");
             }
