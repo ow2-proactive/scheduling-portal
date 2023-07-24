@@ -161,6 +161,8 @@ public class SchedulerController extends Controller implements UncaughtException
 
     private boolean myAccountUpdated = false;
 
+    private ArrayList<String> domains;
+
     /**
      * Default constructor
      *
@@ -184,7 +186,11 @@ public class SchedulerController extends Controller implements UncaughtException
             loadingMessage.draw();
             tryLogin(session, loadingMessage);
         } else {
-            this.loginView = new LoginPage(this, null);
+            if (domains == null || domains.isEmpty()) {
+                getDomains(null);
+            } else {
+                this.loginView = new LoginPage(this, null, domains);
+            }
             tryToLoginIfLoggedInRm();
         }
     }
@@ -204,8 +210,29 @@ public class SchedulerController extends Controller implements UncaughtException
                     loadingMessage.destroy();
                 }
                 Settings.get().clearSetting(SESSION_SETTING);
-                SchedulerController.this.loginView = new LoginPage(SchedulerController.this, null);
+                if (domains == null || domains.isEmpty()) {
+                    getDomains(null);
+                } else {
+                    SchedulerController.this.loginView = new LoginPage(SchedulerController.this, null, domains);
+                }
                 tryToLoginIfLoggedInRm();
+            }
+        });
+    }
+
+    private void getDomains(String message) {
+        this.scheduler.getDomains(new AsyncCallback<List<String>>() {
+            public void onSuccess(List<String> result) {
+                domains = new ArrayList<>();
+                if (!result.isEmpty()) {
+                    domains.add("");
+                    domains.addAll(result);
+                }
+                SchedulerController.this.loginView = new LoginPage(SchedulerController.this, message, domains);
+            }
+
+            public void onFailure(Throwable caught) {
+                error("Failed to get domains. " + JSONUtils.getJsonErrorMessage(caught));
             }
         });
     }
@@ -341,7 +368,7 @@ public class SchedulerController extends Controller implements UncaughtException
                                     Config.get().set(SchedulerConfig.SCHED_VERSION, schedVer);
                                     Config.get().set(SchedulerConfig.REST_VERSION, restVer);
 
-                                    __login(sessionId, login);
+                                    __login(sessionId);
                                 }
 
                                 public void onFailure(Throwable caught) {
@@ -351,8 +378,14 @@ public class SchedulerController extends Controller implements UncaughtException
                                 }
                             });
                         } else {
-                            SchedulerController.this.loginView = new LoginPage(SchedulerController.this,
-                                                                               "You do not have rights to access Scheduling portal");
+                            String message = "You do not have rights to access Scheduling portal";
+                            if (domains == null || domains.isEmpty()) {
+                                getDomains(message);
+                            } else {
+                                SchedulerController.this.loginView = new LoginPage(SchedulerController.this,
+                                                                                   message,
+                                                                                   null);
+                            }
                         }
                     }
                 });
@@ -361,12 +394,16 @@ public class SchedulerController extends Controller implements UncaughtException
 
     }
 
-    private void __login(String sessionId, String login) {
+    private void __login(String sessionId) {
         LoginModel loginModel = LoginModel.getInstance();
         loginModel.setLoggedIn(true);
-        loginModel.setLogin(login);
         loginModel.setSessionId(sessionId);
+        setCurrentUserName();
+    }
 
+    private void setLoggedUser(String sessionId, String login) {
+        LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setLogin(login);
         if (loginView != null)
             SchedulerController.this.loginView.destroy();
         this.loginView = null;
@@ -397,6 +434,31 @@ public class SchedulerController extends Controller implements UncaughtException
         setSessionPermissions();
         LogModel.getInstance().logMessage("Connected to " + SchedulerConfig.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ", login=" + loginModel.getLogin() + ")");
+    }
+
+    public void setCurrentUserName() {
+        String sessionId = LoginModel.getInstance().getSessionId();
+        scheduler.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = JSONParser.parseStrict(userData).isObject();
+                String username = json.get("userName").isString() != null ? json.get("userName")
+                                                                                .isString()
+                                                                                .stringValue()
+                                                                          : null;
+                String domain = json.get("domain").isString() != null ? json.get("domain").isString().stringValue()
+                                                                      : null;
+                String login = domain != null ? domain + "\\" + username : username;
+                setLoggedUser(sessionId, login);
+                LogModel.getInstance().logMessage("Successfully fetched current user data ");
+            }
+        });
     }
 
     public void checkPortalsPermissions() {
@@ -940,8 +1002,7 @@ public class SchedulerController extends Controller implements UncaughtException
 
         SchedulerController.this.schedulerView.destroy();
         SchedulerController.this.schedulerView = null;
-
-        this.loginView = new LoginPage(this, message);
+        getDomains(message);
     }
 
     /**

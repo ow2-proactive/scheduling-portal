@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
-import java.util.logging.Logger;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -83,8 +83,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Page shown when the user is not logged in
  * <p>
  * Allows plain and credentials authentication through a specific servlet
- * 
- * 
+ *
+ *
  * @author mschnoor
  *
  */
@@ -118,14 +118,17 @@ public class LoginPage {
     /** displays error messages when login fails */
     private Label errorLabel = null;
 
+    private final List<String> domains;
+
     /**
      * Default constructor
      *
      * @param controller Controller that created this page
      * @param initialErrorMessage error message to display at the creation of the page, or null
      */
-    public LoginPage(Controller controller, String initialErrorMessage) {
+    public LoginPage(Controller controller, String initialErrorMessage, List<String> domains) {
         this.controller = controller;
+        this.domains = domains;
         buildAndShow();
 
         if (initialErrorMessage != null && initialErrorMessage.length() > 0) {
@@ -148,7 +151,7 @@ public class LoginPage {
         auth.setWidth(350);
         auth.setHeight(140);
         auth.setAlign(VerticalAlignment.CENTER);
-        auth.setPadding(10);
+        auth.setPadding(18);
 
         authSelLayout = new HLayout();
         authSelLayout.setAlign(Alignment.CENTER);
@@ -364,6 +367,11 @@ public class LoginPage {
          * the pretty widgets and the nice features
          */
 
+        final SelectItem domainItem = new SelectItem("Domain");
+        if (domains != null && !domains.isEmpty()) {
+            domainItem.setValueMap(domains.toArray(new String[0]));
+            domainItem.setValue(domains.get(0));
+        }
         TextItem loginField = new TextItem("login", "Username");
         loginField.setRequired(true);
 
@@ -376,8 +384,11 @@ public class LoginPage {
         // smartGWT form: only used to input the data before filling the hidden fields
         // in the other form with it
         final DynamicForm form = new DynamicForm();
-        form.setFields(loginField, passwordField, moreField);
-
+        if (domains != null && !domains.isEmpty()) {
+            form.setFields(domainItem, loginField, passwordField, moreField);
+        } else {
+            form.setFields(loginField, passwordField, moreField);
+        }
         form.hideItem("useSSH");
 
         // pure GWT form for uploading, will be used to contact the servlet
@@ -478,10 +489,16 @@ public class LoginPage {
         // if not, the login input text is set to the cacheLogin
         if (getCookieUserName() == null) {
             if (cacheLogin != null) {
-                form.setValue("login", cacheLogin);
+                String username = cacheLogin.split("\\\\")[1];
+                form.setValue("login", username != null ? username : cacheLogin);
             }
         } else {
-            form.setValue("login", cacheLogin != null ? cacheLogin : "");
+            if (cacheLogin != null) {
+                String username = cacheLogin.split("\\\\")[1];
+                form.setValue("login", username != null ? username : cacheLogin);
+            } else {
+                form.setValue("login", "");
+            }
         }
 
         final IButton okButton = new IButton();
@@ -496,7 +513,11 @@ public class LoginPage {
 
                 String login = form.getValueAsString("login");
                 String pw = form.getValueAsString("password");
-                hiddenUser.setValue(login);
+                String domain = domainItem.getValue() != null && !domainItem.getValue().toString().isEmpty()
+                                                                                                             ? domainItem.getValue()
+                                                                                                                         .toString()
+                                                                                                             : null;
+                hiddenUser.setValue(domain != null ? domain + "\\" + login : login);
                 hiddenPass.setValue(pw);
 
                 okButton.setIcon("loading.gif");

@@ -1408,6 +1408,30 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         }
     }
 
+    private List<String>
+            executeFunctionReturnStreamAsList(java.util.function.Function<RestClient, InputStream> function)
+                    throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToList(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            List list = new ArrayList<String>();
+            list.add(rethrowRestServerException(e));
+            return list;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
     private RestClient getRestClientProxy() {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         builder.register(AcceptEncodingGZIPFilter.class);
@@ -1584,6 +1608,18 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
         } finally {
             method.releaseConnection();
         }
+    }
+
+    @Override
+    public String getCurrentUserData(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.getCurrentUserData(sessionId), false);
+
+    }
+
+    @Override
+    public List<String> getDomains() throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsList(RestClient::getDomains);
+
     }
 
     private StringEntity getEntityForPermission(List<String> jobIds, List<String> methods)

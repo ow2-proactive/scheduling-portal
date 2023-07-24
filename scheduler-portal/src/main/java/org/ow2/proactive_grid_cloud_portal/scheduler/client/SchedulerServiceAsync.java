@@ -512,4 +512,22 @@ public interface SchedulerServiceAsync {
      */
     void getSchedulerPropertiesFromSessionId(String sessionId, AsyncCallback<Map<String, Object>> callback);
 
+    /**
+     * Get a UserData object associated to a session.
+     *
+     * <br> NOTE: <br>
+     * In case the given sessionId doesn't have an associated login (session id expired, or invalid),
+     * this endpoint will return null
+     *
+     * @param sessionId id of a session
+     * @param callback the result returned
+     */
+    void getCurrentUserData(String sessionId, AsyncCallback<String> callback);
+
+    /**
+     * Returns the domains configured on the scheduler server.
+     *
+     * @param callback the result returned
+     */
+    void getDomains(AsyncCallback<List<String>> callback);
 }

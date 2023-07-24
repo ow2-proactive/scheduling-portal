@@ -558,4 +558,22 @@ public interface SchedulerService extends RemoteService {
      * @param sessionId the current session id
      */
     Map<String, Object> getSchedulerPropertiesFromSessionId(String sessionId);
+
+    /**
+     * Returns a UserData object associated to a session.
+     *
+     * <br> NOTE: <br>
+     * In case the given sessionId doesn't have an associated login (session id expired, or invalid),
+     * this endpoint will return null
+     *
+     * @param sessionId id of a session
+     * @return a UserData object or null
+     */
+    String getCurrentUserData(String sessionId) throws RestServerException, ServiceException;
+
+    /**
+     * Returns the domains configured on the scheduler server.
+     *
+     */
+    List<String> getDomains() throws RestServerException, ServiceException;
 }

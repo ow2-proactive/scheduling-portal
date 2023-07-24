@@ -847,4 +847,9 @@ public interface RestClient {
     Map<String, Object> getSchedulerPropertiesFromSessionId(@HeaderParam("sessionid")
     final String sessionId);
 
+    @GET
+    @Path("domains")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getDomains();
+
 }

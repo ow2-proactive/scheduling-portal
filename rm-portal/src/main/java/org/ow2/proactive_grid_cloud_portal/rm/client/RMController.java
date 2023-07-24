@@ -134,6 +134,8 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private NodeSourceConfigurationParser nodeSourceConfigurationParser;
 
+    private ArrayList<String> domains;
+
     /**
      * Default constructor
      *
@@ -157,9 +159,30 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             loadingMessage.draw();
             tryLogin(session, loadingMessage);
         } else {
-            this.loginPage = new LoginPage(this, null);
+            if (domains == null || domains.isEmpty()) {
+                getDomains(null);
+            } else {
+                this.loginPage = new LoginPage(this, null, domains);
+            }
             tryToLoginIfLoggedInScheduler();
         }
+    }
+
+    private void getDomains(String message) {
+        this.rm.getDomains(new AsyncCallback<List<String>>() {
+            public void onSuccess(List<String> result) {
+                domains = new ArrayList<>();
+                if (!result.isEmpty()) {
+                    domains.add("");
+                    domains.addAll(result);
+                }
+                RMController.this.loginPage = new LoginPage(RMController.this, message, domains);
+            }
+
+            public void onFailure(Throwable caught) {
+                error("Failed to get domains. " + JSONUtils.getJsonErrorMessage(caught));
+            }
+        });
     }
 
     private void tryLogin(final String session, final VLayout loadingMessage) {
@@ -170,7 +193,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         loadingMessage.destroy();
                     }
                     Settings.get().clearSetting(SESSION_SETTING);
-                    RMController.this.loginPage = new LoginPage(RMController.this, null);
+                    if (domains == null || domains.isEmpty()) {
+                        getDomains(null);
+                    } else {
+                        RMController.this.loginPage = new LoginPage(RMController.this, null, null);
+                    }
                     tryToLoginIfLoggedInScheduler();
                 } else {
                     if (loadingMessage != null) {
@@ -186,7 +213,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     loadingMessage.destroy();
                 }
                 Settings.get().clearSetting(SESSION_SETTING);
-                RMController.this.loginPage = new LoginPage(RMController.this, null);
+                if (domains == null || domains.isEmpty()) {
+                    getDomains(null);
+                } else {
+                    RMController.this.loginPage = new LoginPage(RMController.this, null, null);
+                }
                 tryToLoginIfLoggedInScheduler();
             }
         });
@@ -232,7 +263,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                             Config.get().set(RMConfig.RM_VERSION, rmVer);
                             Config.get().set(RMConfig.REST_VERSION, restVer);
 
-                            __login(sessionId, login);
+                            __login(sessionId);
                         }
 
                         public void onFailure(Throwable caught) {
@@ -241,19 +272,27 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                         }
                     });
                 } else {
-                    RMController.this.loginPage = new LoginPage(RMController.this,
-                                                                "You do not have rights to access Resource Manager portal");
+                    String message = "You do not have rights to access Resource Manager portal";
+                    if (domains == null || domains.isEmpty()) {
+                        getDomains(message);
+                    } else {
+                        RMController.this.loginPage = new LoginPage(RMController.this, message, null);
+                    }
                 }
             }
         });
     }
 
-    private void __login(String sessionId, String login) {
+    private void __login(String sessionId) {
         LoginModel loginModel = LoginModel.getInstance();
         loginModel.setLoggedIn(true);
-        loginModel.setLogin(login);
         loginModel.setSessionId(sessionId);
+        setCurrentUserName();
+    }
 
+    private void setLoggedUser(String sessionId, String login) {
+        LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setLogin(login);
         if (this.loginPage != null) {
             this.loginPage.destroy();
             this.loginPage = null;
@@ -286,6 +325,31 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         LogModel.getInstance().logMessage("Connected to " + Config.get().getRestUrl() + lstr + " (sessionId=" +
                                           loginModel.getSessionId() + ")");
+    }
+
+    public void setCurrentUserName() {
+        String sessionId = LoginModel.getInstance().getSessionId();
+        rm.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = JSONParser.parseStrict(userData).isObject();
+                String username = json.get("userName").isString() != null ? json.get("userName")
+                                                                                .isString()
+                                                                                .stringValue()
+                                                                          : null;
+                String domain = json.get("domain").isString() != null ? json.get("domain").isString().stringValue()
+                                                                      : null;
+                String login = domain != null ? domain + "\\" + username : username;
+                setLoggedUser(sessionId, login);
+                LogModel.getInstance().logMessage("Successfully fetched current user data ");
+            }
+        });
     }
 
     @Override
@@ -1666,7 +1730,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.rmPage = null;
 
         this.model = new RMModelImpl();
-        this.loginPage = new LoginPage(this, message);
+        getDomains(message);
     }
 
     /**
