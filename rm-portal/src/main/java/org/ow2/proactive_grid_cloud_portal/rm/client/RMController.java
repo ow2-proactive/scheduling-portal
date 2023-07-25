@@ -173,7 +173,9 @@ public class RMController extends Controller implements UncaughtExceptionHandler
             public void onSuccess(List<String> result) {
                 domains = new ArrayList<>();
                 if (!result.isEmpty()) {
-                    domains.add("");
+                    if (!result.contains("")) {
+                        result.add(0, "");
+                    }
                     domains.addAll(result);
                 }
                 RMController.this.loginPage = new LoginPage(RMController.this, message, domains);

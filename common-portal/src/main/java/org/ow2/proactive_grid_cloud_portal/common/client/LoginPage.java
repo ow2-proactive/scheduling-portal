@@ -489,13 +489,21 @@ public class LoginPage {
         // if not, the login input text is set to the cacheLogin
         if (getCookieUserName() == null) {
             if (cacheLogin != null) {
-                String username = cacheLogin.split("\\\\")[1];
-                form.setValue("login", username != null ? username : cacheLogin);
+                if (cacheLogin.contains("\\")) {
+                    form.setValue("Domain", cacheLogin.split("\\\\")[0]);
+                    form.setValue("login", cacheLogin.split("\\\\")[1]);
+                } else {
+                    form.setValue("login", cacheLogin);
+                }
             }
         } else {
             if (cacheLogin != null) {
-                String username = cacheLogin.split("\\\\")[1];
-                form.setValue("login", username != null ? username : cacheLogin);
+                if (cacheLogin.contains("\\")) {
+                    form.setValue("Domain", cacheLogin.split("\\\\")[0]);
+                    form.setValue("login", cacheLogin.split("\\\\")[1]);
+                } else {
+                    form.setValue("login", cacheLogin);
+                }
             } else {
                 form.setValue("login", "");
             }

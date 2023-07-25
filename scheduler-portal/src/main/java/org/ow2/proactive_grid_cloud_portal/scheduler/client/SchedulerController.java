@@ -225,7 +225,9 @@ public class SchedulerController extends Controller implements UncaughtException
             public void onSuccess(List<String> result) {
                 domains = new ArrayList<>();
                 if (!result.isEmpty()) {
-                    domains.add("");
+                    if (!result.contains("")) {
+                        result.add(0, "");
+                    }
                     domains.addAll(result);
                 }
                 SchedulerController.this.loginView = new LoginPage(SchedulerController.this, message, domains);
