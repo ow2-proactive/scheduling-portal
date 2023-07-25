@@ -488,23 +488,10 @@ public class LoginPage {
         // check if username cookie variable is set
         // if not, the login input text is set to the cacheLogin
         if (getCookieUserName() == null) {
-            if (cacheLogin != null) {
-                if (cacheLogin.contains("\\")) {
-                    form.setValue("Domain", cacheLogin.split("\\\\")[0]);
-                    form.setValue("login", cacheLogin.split("\\\\")[1]);
-                } else {
-                    form.setValue("login", cacheLogin);
-                }
-            }
+            setCachedLogin(form, cacheLogin);
         } else {
-            if (cacheLogin != null) {
-                if (cacheLogin.contains("\\")) {
-                    form.setValue("Domain", cacheLogin.split("\\\\")[0]);
-                    form.setValue("login", cacheLogin.split("\\\\")[1]);
-                } else {
-                    form.setValue("login", cacheLogin);
-                }
-            } else {
+            setCachedLogin(form, cacheLogin);
+            if (cacheLogin == null) {
                 form.setValue("login", "");
             }
         }
@@ -611,6 +598,18 @@ public class LoginPage {
         formLayout.addMember(buttonBar);
 
         return formLayout;
+    }
+
+    private void setCachedLogin(DynamicForm form, String cacheLogin) {
+        if (cacheLogin != null) {
+            if (cacheLogin.contains("\\")) {
+                String[] domainUsername = cacheLogin.split("\\\\");
+                form.setValue("Domain", domainUsername[0]);
+                form.setValue("login", domainUsername[1]);
+            } else {
+                form.setValue("login", cacheLogin);
+            }
+        }
     }
 
     /**
