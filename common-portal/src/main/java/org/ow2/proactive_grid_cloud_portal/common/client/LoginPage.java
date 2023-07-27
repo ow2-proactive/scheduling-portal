@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
-import java.util.logging.Logger;
+import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
@@ -83,8 +83,8 @@ import com.smartgwt.client.widgets.layout.VLayout;
  * Page shown when the user is not logged in
  * <p>
  * Allows plain and credentials authentication through a specific servlet
- * 
- * 
+ *
+ *
  * @author mschnoor
  *
  */
@@ -99,7 +99,7 @@ public class LoginPage {
     private DynamicForm authTypeSelectForm = null;
 
     // some ui fields kept global for convenience
-    private HLayout authSelLayout = null;
+    private VLayout authSelLayout = null;
 
     private Label optsLabel = null;
 
@@ -118,14 +118,17 @@ public class LoginPage {
     /** displays error messages when login fails */
     private Label errorLabel = null;
 
+    private final List<String> domains;
+
     /**
      * Default constructor
      *
      * @param controller Controller that created this page
      * @param initialErrorMessage error message to display at the creation of the page, or null
      */
-    public LoginPage(Controller controller, String initialErrorMessage) {
+    public LoginPage(Controller controller, String initialErrorMessage, List<String> domains) {
         this.controller = controller;
+        this.domains = domains;
         buildAndShow();
 
         if (initialErrorMessage != null && initialErrorMessage.length() > 0) {
@@ -147,20 +150,28 @@ public class LoginPage {
         auth.setBorder("1px solid #ccc");
         auth.setWidth(350);
         auth.setHeight(140);
-        auth.setAlign(VerticalAlignment.CENTER);
-        auth.setPadding(10);
+        auth.setPadding(50);
 
-        authSelLayout = new HLayout();
-        authSelLayout.setAlign(Alignment.CENTER);
+        authSelLayout = new VLayout();
         authSelLayout.setWidth100();
         authSelLayout.setHeight(20);
 
         final SelectItem sl = new SelectItem("Mode");
-        sl.setValueMap("Basic", "Credentials");
-        sl.setValue("Basic");
+        sl.setValueMap("Standard", "Credentials");
+        sl.setValue("Standard");
         authTypeSelectForm = new DynamicForm();
         authTypeSelectForm.setNumCols(1);
-        authTypeSelectForm.setFields(sl);
+
+        if (domains != null && !domains.isEmpty()) {
+            auth.setAlign(VerticalAlignment.CENTER);
+            authSelLayout.setAlign(Alignment.CENTER);
+            authTypeSelectForm.setFields(sl);
+        } else {
+            final SelectItem domainItem = new SelectItem("Domain | Tenant");
+            domainItem.setValue("");
+            domainItem.disable();
+            authTypeSelectForm.setFields(sl, domainItem);
+        }
         authSelLayout.addMember(authTypeSelectForm);
         authSelLayout.setVisible(false);
 
@@ -271,7 +282,7 @@ public class LoginPage {
         switchPlainCredForm = new Runnable() {
             @Override
             public void run() {
-                if (sl.getValueAsString().equals("Basic")) {
+                if (sl.getValueAsString().equals("Standard")) {
                     plainLayout.animateShow(AnimationEffect.FLY);
                     credLayout.animateHide(AnimationEffect.FLY);
                 } else {
@@ -364,6 +375,11 @@ public class LoginPage {
          * the pretty widgets and the nice features
          */
 
+        final SelectItem domainItem = new SelectItem("Domain | Tenant");
+        if (domains != null && !domains.isEmpty()) {
+            domainItem.setValueMap(domains.toArray(new String[0]));
+            domainItem.setValue(domains.get(0));
+        }
         TextItem loginField = new TextItem("login", "Username");
         loginField.setRequired(true);
 
@@ -376,8 +392,11 @@ public class LoginPage {
         // smartGWT form: only used to input the data before filling the hidden fields
         // in the other form with it
         final DynamicForm form = new DynamicForm();
-        form.setFields(loginField, passwordField, moreField);
-
+        if (domains != null && !domains.isEmpty()) {
+            form.setFields(domainItem, loginField, passwordField, moreField);
+        } else {
+            form.setFields(loginField, passwordField, moreField);
+        }
         form.hideItem("useSSH");
 
         // pure GWT form for uploading, will be used to contact the servlet
@@ -453,7 +472,7 @@ public class LoginPage {
                     optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;" +
                                           "cursor:pointer'>less options</nobr>");
                 } else {
-                    authTypeSelectForm.setValue("Mode", "Basic");
+                    authTypeSelectForm.setValue("Mode", "Standard");
                     switchPlainCredForm.run();
                     authSelLayout.setVisible(false);
                     form.hideItem("useSSH");
@@ -477,11 +496,12 @@ public class LoginPage {
         // check if username cookie variable is set
         // if not, the login input text is set to the cacheLogin
         if (getCookieUserName() == null) {
-            if (cacheLogin != null) {
-                form.setValue("login", cacheLogin);
-            }
+            setCachedLogin(form, cacheLogin);
         } else {
-            form.setValue("login", cacheLogin != null ? cacheLogin : "");
+            setCachedLogin(form, cacheLogin);
+            if (cacheLogin == null) {
+                form.setValue("login", "");
+            }
         }
 
         final IButton okButton = new IButton();
@@ -496,7 +516,11 @@ public class LoginPage {
 
                 String login = form.getValueAsString("login");
                 String pw = form.getValueAsString("password");
-                hiddenUser.setValue(login);
+                String domain = domainItem.getValue() != null && !domainItem.getValue().toString().isEmpty()
+                                                                                                             ? domainItem.getValue()
+                                                                                                                         .toString()
+                                                                                                             : null;
+                hiddenUser.setValue(domain != null ? domain + "\\" + login : login);
                 hiddenPass.setValue(pw);
 
                 okButton.setIcon("loading.gif");
@@ -582,6 +606,18 @@ public class LoginPage {
         formLayout.addMember(buttonBar);
 
         return formLayout;
+    }
+
+    private void setCachedLogin(DynamicForm form, String cacheLogin) {
+        if (cacheLogin != null) {
+            if (cacheLogin.contains("\\")) {
+                String[] domainUsername = cacheLogin.split("\\\\");
+                form.setValue("Domain | Tenant", domainUsername[0]);
+                form.setValue("login", domainUsername[1]);
+            } else {
+                form.setValue("login", cacheLogin);
+            }
+        }
     }
 
     /**

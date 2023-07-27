@@ -49,4 +49,8 @@ public interface CommonRestClient {
     @Produces(MediaType.APPLICATION_JSON)
     InputStream checkMethodsPermissions(@HeaderParam("sessionid") String sessionId, List<String> methods);
 
+    @GET
+    @Path("currentuserdata")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getCurrentUserData(@HeaderParam("sessionid") String sessionId);
 }

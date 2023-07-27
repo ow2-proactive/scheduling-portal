@@ -278,4 +278,9 @@ public interface RestClient {
     InputStream checkNodeSourcePermission(@HeaderParam("sessionid") String sessionId,
             @HeaderParam("nodeSourceName") String nodeSourceName, @QueryParam("provider") boolean provider);
 
+    @GET
+    @Path("/rm/domains")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream getDomains();
+
 }

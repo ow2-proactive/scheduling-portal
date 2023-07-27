@@ -531,6 +531,17 @@ public class RMServiceImpl extends Service implements RMService {
                                                                                                        methods));
     }
 
+    @Override
+    public String getCurrentUserData(String sessionId) throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringCommon(restClient -> restClient.getCurrentUserData(sessionId));
+    }
+
+    @Override
+    public List<String> getDomains() throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsList(RestClient::getDomains);
+
+    }
+
     private Map<String, Boolean>
             executeFunctionReturnStreamAsMapCommon(java.util.function.Function<CommonRestClient, InputStream> function)
                     throws ServiceException, RestServerException {
@@ -559,6 +570,30 @@ public class RMServiceImpl extends Service implements RMService {
             executeFunctionReturnStreamAsListCommon(java.util.function.Function<CommonRestClient, InputStream> function)
                     throws ServiceException, RestServerException {
         CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToList(inputStream);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            List list = new ArrayList<String>();
+            list.add(rethrowRestServerException(e));
+            return list;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private List<String>
+            executeFunctionReturnStreamAsList(java.util.function.Function<RestClient, InputStream> function)
+                    throws ServiceException, RestServerException {
+        RestClient restClientProxy = getRestClientProxy();
 
         InputStream inputStream = null;
 
@@ -668,6 +703,27 @@ public class RMServiceImpl extends Service implements RMService {
 
             try {
                 return convertToString(inputStream, true);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage());
+            }
+        } catch (WebApplicationException e) {
+            return rethrowRestServerException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    private String executeFunctionReturnStreamAsStringCommon(
+            java.util.function.Function<CommonRestClient, InputStream> function)
+            throws ServiceException, RestServerException {
+        CommonRestClient restClientProxy = getCommonRestClient();
+
+        InputStream inputStream = null;
+        try {
+            inputStream = function.apply(restClientProxy);
+
+            try {
+                return convertToString(inputStream);
             } catch (IOException e) {
                 throw new ServiceException(e.getMessage());
             }
