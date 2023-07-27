@@ -99,7 +99,7 @@ public class LoginPage {
     private DynamicForm authTypeSelectForm = null;
 
     // some ui fields kept global for convenience
-    private HLayout authSelLayout = null;
+    private VLayout authSelLayout = null;
 
     private Label optsLabel = null;
 
@@ -150,20 +150,28 @@ public class LoginPage {
         auth.setBorder("1px solid #ccc");
         auth.setWidth(350);
         auth.setHeight(140);
-        auth.setAlign(VerticalAlignment.CENTER);
-        auth.setPadding(18);
+        auth.setPadding(50);
 
-        authSelLayout = new HLayout();
-        authSelLayout.setAlign(Alignment.CENTER);
+        authSelLayout = new VLayout();
         authSelLayout.setWidth100();
         authSelLayout.setHeight(20);
 
         final SelectItem sl = new SelectItem("Mode");
-        sl.setValueMap("Basic", "Credentials");
-        sl.setValue("Basic");
+        sl.setValueMap("Standard", "Credentials");
+        sl.setValue("Standard");
         authTypeSelectForm = new DynamicForm();
         authTypeSelectForm.setNumCols(1);
-        authTypeSelectForm.setFields(sl);
+
+        if (domains != null && !domains.isEmpty()) {
+            auth.setAlign(VerticalAlignment.CENTER);
+            authSelLayout.setAlign(Alignment.CENTER);
+            authTypeSelectForm.setFields(sl);
+        } else {
+            final SelectItem domainItem = new SelectItem("Domain | Tenant");
+            domainItem.setValue("");
+            domainItem.disable();
+            authTypeSelectForm.setFields(sl, domainItem);
+        }
         authSelLayout.addMember(authTypeSelectForm);
         authSelLayout.setVisible(false);
 
@@ -274,7 +282,7 @@ public class LoginPage {
         switchPlainCredForm = new Runnable() {
             @Override
             public void run() {
-                if (sl.getValueAsString().equals("Basic")) {
+                if (sl.getValueAsString().equals("Standard")) {
                     plainLayout.animateShow(AnimationEffect.FLY);
                     credLayout.animateHide(AnimationEffect.FLY);
                 } else {
@@ -367,7 +375,7 @@ public class LoginPage {
          * the pretty widgets and the nice features
          */
 
-        final SelectItem domainItem = new SelectItem("Domain");
+        final SelectItem domainItem = new SelectItem("Domain | Tenant");
         if (domains != null && !domains.isEmpty()) {
             domainItem.setValueMap(domains.toArray(new String[0]));
             domainItem.setValue(domains.get(0));
@@ -464,7 +472,7 @@ public class LoginPage {
                     optsLabel.setContents("<nobr style='color:#003168;font-size: 1.2em;" +
                                           "cursor:pointer'>less options</nobr>");
                 } else {
-                    authTypeSelectForm.setValue("Mode", "Basic");
+                    authTypeSelectForm.setValue("Mode", "Standard");
                     switchPlainCredForm.run();
                     authSelLayout.setVisible(false);
                     form.hideItem("useSSH");
@@ -604,7 +612,7 @@ public class LoginPage {
         if (cacheLogin != null) {
             if (cacheLogin.contains("\\")) {
                 String[] domainUsername = cacheLogin.split("\\\\");
-                form.setValue("Domain", domainUsername[0]);
+                form.setValue("Domain | Tenant", domainUsername[0]);
                 form.setValue("login", domainUsername[1]);
             } else {
                 form.setValue("login", cacheLogin);
