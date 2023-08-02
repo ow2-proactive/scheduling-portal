@@ -51,6 +51,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.AnimationEffect;
 import com.smartgwt.client.types.VerticalAlignment;
@@ -167,9 +169,16 @@ public class LoginPage {
             authSelLayout.setAlign(Alignment.CENTER);
             authTypeSelectForm.setFields(sl);
         } else {
-            final SelectItem domainItem = new SelectItem("Domain | Tenant");
+            final SelectItem domainItem = new SelectItem();
+            domainItem.setTitle("Domain | Tenant");
             domainItem.setValue("");
-            domainItem.disable();
+            DataSource dataSource = new DataSource();
+            dataSource.setClientOnly(true);
+            Record record = new Record();
+            record.setAttribute("Domain | Tenant", "");
+            dataSource.addData(record);
+            domainItem.setOptionDataSource(dataSource);
+            domainItem.setCanEdit(false);
             authTypeSelectForm.setFields(sl, domainItem);
         }
         authSelLayout.addMember(authTypeSelectForm);
