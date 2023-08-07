@@ -138,11 +138,12 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.nsDetails.setHeight100();
         this.nsDetails.setCanSelectText(true);
         DetailViewerField n1 = new DetailViewerField("sourceName", "Node Source");
-        DetailViewerField n2 = new DetailViewerField("description", "Description");
-        DetailViewerField n3 = new DetailViewerField("nodeProvider", "Owner");
-        DetailViewerField n4 = new DetailViewerField("hosts", "Hosts");
-        DetailViewerField n5 = new DetailViewerField("nodes", "Nodes");
-        this.nsDetails.setFields(n1, n2, n3, n4, n5);
+        DetailViewerField n2 = new DetailViewerField("infrastructure", "Infrastructure");
+        DetailViewerField n3 = new DetailViewerField("policy", "Policy");
+        DetailViewerField n4 = new DetailViewerField("nodeProvider", "Owner");
+        DetailViewerField n5 = new DetailViewerField("hosts", "Hosts");
+        DetailViewerField n6 = new DetailViewerField("nodes", "Nodes");
+        this.nsDetails.setFields(n1, n2, n3, n4, n5, n6);
         // Define node source canvas and append sections
         this.nsCanvas = new VLayout();
         this.nsCanvas.setWidth100();
@@ -373,8 +374,23 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         for (Host h : ns.getHosts().values()) {
             numNodes += h.getNodes().size();
         }
+
+        // Infrastructure and policy description
+        String infrastructure = "NO INFRASTRUCTURE DESCRIPTION";
+        String policy = "NO POLICY DESCRIPTION";
+        String[] NSPolicyAndInfra = ns.getSourceDescription().split("Infrastructure: |, Policy: ");
+        if (NSPolicyAndInfra.length == 3) {
+            infrastructure = NSPolicyAndInfra[1].trim();
+            policy = NSPolicyAndInfra[2].trim();
+        } else if (NSPolicyAndInfra.length == 2) {
+            infrastructure = NSPolicyAndInfra[1].trim();
+        } else if (NSPolicyAndInfra.length == 1) {
+            policy = NSPolicyAndInfra[0].trim();
+        }
+
+        dv.setAttribute("infrastructure", infrastructure);
+        dv.setAttribute("policy", policy);
         dv.setAttribute("sourceName", ns.getSourceName());
-        dv.setAttribute("description", ns.getSourceDescription());
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
