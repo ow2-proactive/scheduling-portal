@@ -143,8 +143,6 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         if (!(chart instanceof PieChart)) {
             LineChart lineChart = (LineChart) chart;
 
-            addMember(getTimeSlotSelector());
-
             CartesianCategoryAxis xAxis = new CartesianCategoryAxis(chart);
             xAxis.getGrideLines().setDisplay(false);
             lineChart.getOptions().getScales().setXAxes(xAxis);
@@ -435,33 +433,11 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
         this.onFinish = onFinish;
     }
 
-    public DynamicForm getTimeSlotSelector() {
-        DynamicForm form = new DynamicForm();
-
-        final SelectItem selectedRange = new SelectItem("statRange", "");
-        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<String, String>();
-        for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
-            nodeLineValues.put("" + r.getChar(), r.getString());
-        }
-        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
-        selectedRange.setValueMap(nodeLineValues);
-
-        selectedRange.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-                chart.getData().setDatasets();
-                xLabels = new LinkedList<>();
-                reload();
-            }
-        });
-
-        form.setItems(selectedRange);
-        form.setHeight(24);
-        form.setWidth(40);
-        form.setPadding(10);
-
-        return form;
+    public void selectRange(Model.StatHistory.Range timeRange) {
+        this.timeRange = timeRange;
+        chart.getData().setDatasets();
+        xLabels = new LinkedList<>();
+        this.reload();
     }
 
     public void setColors(String... colors) {

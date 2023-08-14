@@ -25,6 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import java.util.LinkedHashMap;
+
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
@@ -40,6 +43,8 @@ import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
@@ -80,6 +85,10 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         this.controller = controller;
     }
 
+    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
+
+    private static VLayout selectedRangeLayout;
+
     public void init(Host host) {
 
         // selecting the node that will be used as an entry point to the host
@@ -115,7 +124,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         if (status != null) {
             removeMember(status);
         }
-
+        removeMember(selectedRangeLayout);
         status = new Label("Retreiving data");
         status.setWidth100();
         status.setAlign(Alignment.CENTER);
@@ -188,6 +197,36 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         controller.checkNodePermission(null, false, node.getSourceName());
     }
 
+    public VLayout getTimeSlotSelector() {
+        selectedRangeLayout = new VLayout();
+        DynamicForm dynamicForm = new DynamicForm();
+
+        final SelectItem selectedRange = new SelectItem("statRange", "");
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
+        for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
+            nodeLineValues.put("" + r.getChar(), r.getString());
+        }
+        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
+        selectedRange.setValueMap(nodeLineValues);
+
+        selectedRange.addChangedHandler(event -> {
+            timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
+            overview.selectRange(timeRange);
+            cpuView.selectRange(timeRange);
+            memoryView.selectRange(timeRange);
+            networkView.selectRange(timeRange);
+        });
+
+        dynamicForm.setItems(selectedRange);
+        dynamicForm.setHeight(20);
+        dynamicForm.setWidth(40);
+        selectedRangeLayout.addMember(dynamicForm);
+        selectedRangeLayout.setHeight(20);
+        selectedRangeLayout.setDefaultLayoutAlign(Alignment.RIGHT);
+
+        return selectedRangeLayout;
+    }
+
     public void close() {
         try {
             if (updater != null) {
@@ -212,12 +251,16 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         status.setContents("Monitoring is unavailable on this host. <br>" +
                            "Either monitoring was disabled with the disableMonitoring option or an error occurred. <br>" +
                            "More information are available inside the node logs.");
+        removeMember(selectedRangeLayout);
+        selectedRangeLayout.destroy();
         controller.getRmPage().setMonitoringTabPageDisabled(true);
     }
 
     @Override
     public void onSuccess(String result) {
         removeMember(status);
+        status.destroy();
+        addMember(getTimeSlotSelector());
         if (tabs != null) {
             addMember(tabs);
             tabs.show();
