@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -36,6 +37,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanDetailedView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.NetworkDetailedAreaChart;
 
@@ -58,6 +60,8 @@ public class NetworkView extends VLayout implements Reloadable {
     private Runnable onFinish;
 
     private ReloadableChain chain;
+
+    private final List<MBeanChart> networkCharts;
 
     public NetworkView(final RMController controller, final String url) {
         setWidth100();
@@ -83,6 +87,7 @@ public class NetworkView extends VLayout implements Reloadable {
         addMember(label);
 
         final List<String> interfacesAttrs = new ArrayList<String>();
+        networkCharts = new LinkedList<>();
 
         interfacesAttrs.add("Name");
         interfacesAttrs.add("Address");
@@ -147,6 +152,7 @@ public class NetworkView extends VLayout implements Reloadable {
                                                                                                            network);
                                              chart.setWidth("45%");
                                              charts.add(chart);
+                                             networkCharts.add(chart);
                                              pane.addMember(chart);
                                              addMember(pane);
                                          }
@@ -168,6 +174,10 @@ public class NetworkView extends VLayout implements Reloadable {
                                  }
                              });
 
+    }
+
+    public void selectRange(Model.StatHistory.Range timeRange) {
+        networkCharts.forEach(networkChart -> networkChart.selectRange(timeRange));
     }
 
     @Override

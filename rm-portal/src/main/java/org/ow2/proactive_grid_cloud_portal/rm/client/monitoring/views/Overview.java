@@ -27,6 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Arrays;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
+import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.CpuUsageAreaChart;
@@ -98,6 +100,13 @@ public class Overview extends VLayout implements Reloadable {
     @Override
     public void reload() {
         chain.reload();
+    }
+
+    public void selectRange(Model.StatHistory.Range timeRange) {
+        cpuUsage.selectRange(timeRange);
+        memory.selectRange(timeRange);
+        network.selectRange(timeRange);
+        this.reload();
     }
 
     @Override

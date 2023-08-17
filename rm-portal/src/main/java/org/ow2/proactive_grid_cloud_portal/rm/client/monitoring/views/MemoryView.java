@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.MBeanChart;
@@ -55,6 +56,11 @@ public class MemoryView extends VLayout implements Reloadable {
         setWidth100();
         addMember(ram);
         addMember(swap);
+    }
+
+    public void selectRange(Model.StatHistory.Range timeRange) {
+        ram.selectRange(timeRange);
+        swap.selectRange(timeRange);
     }
 
     @Override

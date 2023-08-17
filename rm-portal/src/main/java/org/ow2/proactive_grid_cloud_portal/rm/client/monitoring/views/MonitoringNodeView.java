@@ -26,7 +26,9 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeState;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
@@ -42,6 +44,8 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -72,6 +76,18 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
     public static Node previousSelectedNode = null;
 
+    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
+
+    private MBeanChart heapMemory;
+
+    private MBeanChart threads;
+
+    private MBeanChart classes;
+
+    private MBeanChart cpuUsage;
+
+    private static VLayout selectedRangeLayout;
+
     public void init(Node node) {
 
         if (node.getNodeState() == NodeState.BUSY || node.getNodeState() == NodeState.FREE) {
@@ -87,10 +103,10 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
             nodeUrl = node.getProactiveJMXUrl();
         }
 
-        final MBeanChart heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
-        final MBeanChart threads = new ThreadsAreaChart(controller, nodeUrl);
-        final MBeanChart classes = new ClassesAreaChart(controller, nodeUrl);
-        final MBeanChart cpuUsage = new CpuUsageAreaChart(controller, nodeUrl);
+        heapMemory = new JVMMemoryAreaChart(controller, nodeUrl);
+        threads = new ThreadsAreaChart(controller, nodeUrl);
+        classes = new ClassesAreaChart(controller, nodeUrl);
+        cpuUsage = new CpuUsageAreaChart(controller, nodeUrl);
 
         if (!node.checkNodeDetailsEquals(previousSelectedNode)) {
             t2 = new Tab("JVM Summary");
@@ -122,7 +138,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         if (status != null) {
             removeMember(status);
         }
-
+        removeMember(selectedRangeLayout);
         status = new Label("Retreiving data");
         status.setWidth100();
         status.setAlign(Alignment.CENTER);
@@ -158,6 +174,35 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         controller.checkNodePermission(null, false, node.getNodeUrl());
     }
 
+    public VLayout getTimeSlotSelector() {
+        selectedRangeLayout = new VLayout();
+        DynamicForm dynamicForm = new DynamicForm();
+
+        final SelectItem selectedRange = new SelectItem("statRange", "");
+        LinkedHashMap<String, String> nodeLineValues = new LinkedHashMap<>();
+        for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
+            nodeLineValues.put("" + r.getChar(), r.getString());
+        }
+        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
+        selectedRange.setValueMap(nodeLineValues);
+
+        selectedRange.addChangedHandler(event -> {
+            timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
+            heapMemory.selectRange(timeRange);
+            threads.selectRange(timeRange);
+            classes.selectRange(timeRange);
+            cpuUsage.selectRange(timeRange);
+        });
+
+        dynamicForm.setItems(selectedRange);
+        dynamicForm.setHeight(20);
+        dynamicForm.setWidth(40);
+        selectedRangeLayout.addMember(dynamicForm);
+        selectedRangeLayout.setDefaultLayoutAlign(Alignment.RIGHT);
+
+        return selectedRangeLayout;
+    }
+
     public void close() {
         try {
             if (updater != null) {
@@ -182,6 +227,8 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         status.setContents("Monitoring is unavailable on this node. <br>" +
                            "Either monitoring was disabled with the disableMonitoring option or an error occurred. <br>" +
                            "More information are available inside the node logs.");
+        removeMember(selectedRangeLayout);
+        selectedRangeLayout.destroy();
         controller.getRmPage().setMonitoringTabPageDisabled(true);
     }
 
@@ -189,6 +236,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
     public void onSuccess(String result) {
         removeMember(status);
         status.destroy();
+        addMember(getTimeSlotSelector());
         if (tabs != null) {
             addMember(tabs);
             tabs.show();

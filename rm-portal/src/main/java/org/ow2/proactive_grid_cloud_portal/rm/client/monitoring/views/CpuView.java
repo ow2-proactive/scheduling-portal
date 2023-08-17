@@ -28,6 +28,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.Model;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.Reloadable;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.charts.CpusUsageLineChart;
@@ -82,6 +83,10 @@ public class CpuView extends VLayout implements Reloadable {
         attrs.add("Wait");
 
         overview.load(controller, nodeUrl, "sigar:Type=Cpu", attrs);
+    }
+
+    public void selectRange(Model.StatHistory.Range timeRange) {
+        cpusUsage.selectRange(timeRange);
     }
 
     @Override
