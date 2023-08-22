@@ -473,19 +473,6 @@ public class InfoView implements NodeSelectedListener, NodesListener {
     }
 
     private String[] splitAndExtractNameAndParamsFromDescription(String input) {
-        String[] elements = input.split("[,\\s]+");
-        String infraOrPolicyName = elements[0];
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i < elements.length; i += 2) {
-            sb.append(elements[i]).append(" ").append(elements[i + 1]).append(", ");
-        }
-
-        String infraOrPolicyParams = sb.toString().trim();
-        if (infraOrPolicyParams.endsWith(",")) {
-            infraOrPolicyParams = infraOrPolicyParams.substring(0, infraOrPolicyParams.length() - 1);
-        }
-
-        return new String[] { infraOrPolicyName, infraOrPolicyParams };
+        return input.split("[,\\s]+", 2);
     }
 }
