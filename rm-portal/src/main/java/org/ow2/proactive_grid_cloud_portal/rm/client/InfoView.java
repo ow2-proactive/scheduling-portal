@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -139,11 +140,13 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.nsDetails.setCanSelectText(true);
         DetailViewerField n1 = new DetailViewerField("sourceName", "Node Source");
         DetailViewerField n2 = new DetailViewerField("infrastructure", "Infrastructure");
-        DetailViewerField n3 = new DetailViewerField("policy", "Policy");
-        DetailViewerField n4 = new DetailViewerField("nodeProvider", "Owner");
-        DetailViewerField n5 = new DetailViewerField("hosts", "Hosts");
-        DetailViewerField n6 = new DetailViewerField("nodes", "Nodes");
-        this.nsDetails.setFields(n1, n2, n3, n4, n5, n6);
+        DetailViewerField n3 = new DetailViewerField("infrastructureParameters", "Infrastructure Params");
+        DetailViewerField n4 = new DetailViewerField("policy", "Policy");
+        DetailViewerField n5 = new DetailViewerField("policyParameters", "Policy Params");
+        DetailViewerField n6 = new DetailViewerField("nodeProvider", "Owner");
+        DetailViewerField n7 = new DetailViewerField("hosts", "Hosts");
+        DetailViewerField n8 = new DetailViewerField("nodes", "Nodes");
+        this.nsDetails.setFields(n1, n2, n3, n4, n5, n6, n7, n8);
         // Define node source canvas and append sections
         this.nsCanvas = new VLayout();
         this.nsCanvas.setWidth100();
@@ -375,10 +378,13 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             numNodes += h.getNodes().size();
         }
 
-        // Infrastructure and policy description
-        String infrastructure = "NO INFRASTRUCTURE DESCRIPTION";
-        String policy = "NO POLICY DESCRIPTION";
+        String infrastructure = null;
+        String infrastructureParams = null;
+        String policy = null;
+        String policyParams = null;
+
         String[] NSPolicyAndInfra = ns.getSourceDescription().split("Infrastructure: |, Policy: ");
+
         if (NSPolicyAndInfra.length == 3) {
             infrastructure = NSPolicyAndInfra[1].trim();
             policy = NSPolicyAndInfra[2].trim();
@@ -388,8 +394,22 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             policy = NSPolicyAndInfra[0].trim();
         }
 
+        if (infrastructure != null) {
+            String[] result = splitAndExtractNameAndParamsFromDescription(infrastructure);
+            infrastructure = result[0];
+            infrastructureParams = result[1];
+        }
+
+        if (policy != null) {
+            String[] result = splitAndExtractNameAndParamsFromDescription(policy);
+            policy = result[0];
+            policyParams = result[1];
+        }
+
         dv.setAttribute("infrastructure", infrastructure);
+        dv.setAttribute("infrastructureParameters", infrastructureParams);
         dv.setAttribute("policy", policy);
+        dv.setAttribute("policyParameters", policyParams);
         dv.setAttribute("sourceName", ns.getSourceName());
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
@@ -450,5 +470,9 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         this.selHost = h;
         this.selNS = null;
         this.selNode = null;
+    }
+
+    private String[] splitAndExtractNameAndParamsFromDescription(String input) {
+        return input.split("[,\\s]+", 2);
     }
 }
