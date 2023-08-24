@@ -378,13 +378,12 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             numNodes += h.getNodes().size();
         }
 
-        String infrastructure = null;
-        String infrastructureParams = null;
-        String policy = null;
-        String policyParams = null;
+        String infrastructure = "";
+        String infrastructureParams = "";
+        String policy = "";
+        String policyParams = "";
 
         String[] NSPolicyAndInfra = ns.getSourceDescription().split("Infrastructure: |, Policy: ");
-
         if (NSPolicyAndInfra.length == 3) {
             infrastructure = NSPolicyAndInfra[1].trim();
             policy = NSPolicyAndInfra[2].trim();
@@ -394,15 +393,15 @@ public class InfoView implements NodeSelectedListener, NodesListener {
             policy = NSPolicyAndInfra[0].trim();
         }
 
-        if (infrastructure != null) {
-            String[] result = splitAndExtractNameAndParamsFromDescription(infrastructure);
-            infrastructure = result[0];
+        String[] result = splitAndExtractNameAndParamsFromDescription(infrastructure);
+        infrastructure = result[0];
+        if (result.length > 1) {
             infrastructureParams = result[1];
         }
 
-        if (policy != null) {
-            String[] result = splitAndExtractNameAndParamsFromDescription(policy);
-            policy = result[0];
+        result = splitAndExtractNameAndParamsFromDescription(policy);
+        policy = result[0];
+        if (result.length > 1) {
             policyParams = result[1];
         }
 
@@ -414,6 +413,7 @@ public class InfoView implements NodeSelectedListener, NodesListener {
         dv.setAttribute("nodeProvider", ns.getNodeSourceAdmin());
         dv.setAttribute("nodes", numNodes);
         dv.setAttribute("hosts", ns.getHosts().size());
+
         this.nsDetails.setData(new DetailViewerRecord[] { dv });
 
         // Update additional information -----------
