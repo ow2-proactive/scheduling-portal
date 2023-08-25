@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.TreeView.USER_ACCESS_TYPE_;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -644,7 +646,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
     }
 
     private String retrieveUserAccessType(NodeSource nodeSource) {
-        final String iHopeItNeverChange = "user access type [";
+        final String iHopeItNeverChange = USER_ACCESS_TYPE_ + "[";
         String sourceDescription = nodeSource.getSourceDescription();
         if (sourceDescription.contains(iHopeItNeverChange)) {
             int begin = sourceDescription.indexOf(iHopeItNeverChange) + iHopeItNeverChange.length();
