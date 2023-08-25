@@ -69,6 +69,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String USER_ACCESS_TYPE_ = "userAccessType: ";
 
+    public static final String PROVIDER_ACCESS_TYPE_ = ", providerAccessType: ";
+
     public static final String INFRASTRUCTURE_FIELD = "Infrastructure";
 
     public static final String POLICY_FIELD = "Policy";
@@ -214,7 +216,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             policy = policy.substring(0, policy.indexOf(USER_ACCESS_TYPE_));
             policy = policy.replace(POLICY_FIELD, "");
             policy = beautifyName(policy);
-            access = access.split(", ", 2)[0];
+            access = access.substring(0, access.indexOf(PROVIDER_ACCESS_TYPE_));
         }
 
         public String getInfrastructure() {
