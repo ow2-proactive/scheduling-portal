@@ -66,7 +66,7 @@ public class TreeViewTest {
     public void testRemoveNodeSource() {
         final List<NodeSource> nodeSourceList = IntStream.range(0, 2).mapToObj(i -> {
             final NodeSource nodeSource = new NodeSource("sourceName" + i,
-                                                         "Infrastructure: Test, Policy: Test Policy user access type [ALL], provider access type [ALL]",
+                                                         "Infrastructure: AzureInfrastructure, Policy: TestPolicy userAccessType: [ALL], providerAccessType: [ALL]",
                                                          new LinkedHashMap<>(),
                                                          "",
                                                          "undeployed",
