@@ -58,7 +58,9 @@ subprojects {
 
     dependencies {
 
-        def jacksonVersion = "2.7.9"
+        def jacksonVersion = "2.13.4"
+
+        def jacksonDatabindVersion = "2.13.4.2"
 
         providedCompile 'com.google.gwt:gwt-user:2.8.2'
         providedCompile 'com.google.gwt:gwt-dev:2.8.2'
@@ -87,7 +89,7 @@ subprojects {
         compile("org.ow2.proactive:scheduling-api-graphql-client-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:catalog-client:${schedulingPortalVersion}")
 
-        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        compile "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
         compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
         compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
         compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jacksonVersion}"
