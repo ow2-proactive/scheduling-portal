@@ -215,6 +215,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     private ToolStrip logoStrip = null;
 
+    private Label errorLabel = null;
+
     /**
      * Default constructor
      *
@@ -597,6 +599,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         HLayout schedulerStatusLabelLayout = new HLayout();
         schedulerStatusLabelLayout.addMember(schedulerStatusLabel);
 
+        errorLabel = new Label();
+        errorLabel.setWidth100();
+        errorLabel.hide();
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -606,6 +612,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addButton(planButton);
         tools.addSeparator();
         tools.addButton(errorButton);
+        tools.addMember(errorLabel);
         tools.addFill();
         tools.addMember(schedulerStatusLabelLayout);
 
@@ -613,6 +620,12 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.statusChanged(SchedulerStatus.LOADING);
 
         return tools;
+    }
+
+    public void showErrorLabel(String message) {
+        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:13px; padding-left:4px;'> " +
+                               message + "</span>");
+        errorLabel.show();
     }
 
     /*
