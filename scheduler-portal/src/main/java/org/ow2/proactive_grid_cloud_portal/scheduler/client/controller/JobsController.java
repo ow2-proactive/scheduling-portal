@@ -769,6 +769,15 @@ public class JobsController {
                 if (JSONUtils.getJsonErrorCode(caught) == Response.SC_UNAUTHORIZED) {
                     parentController.getParentController().teardown("You have been disconnected from the server.");
                 }
+                if (caught.getMessage().contains("HTTP 401 Unauthorized")) {
+                    parentController.getParentController()
+                                    .getSchedulerPage()
+                                    .showErrorLabel("You have been disconnected from the server. Reload the page and log into the portal.");
+                } else {
+                    parentController.getParentController()
+                                    .getSchedulerPage()
+                                    .showErrorLabel("The server cannot be reached. Check the server status and your network connection.");
+                }
                 LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " +
                                                           JSONUtils.getJsonErrorMessage(caught));
                 parentController.getParentController().setExecutionsUpdated(true);

@@ -47,6 +47,7 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.ImgButton;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.layout.*;
@@ -146,6 +147,8 @@ public class RMPage implements LogListener {
     private ToolStrip paShortcutsStrip;
 
     private ToolStrip logoStrip;
+
+    private Label errorLabel = null;
 
     RMPage(RMController controller) {
         this.controller = controller;
@@ -418,13 +421,23 @@ public class RMPage implements LogListener {
         errorButton.addClickHandler(e -> showLogWindow());
         errorButton.hide();
 
+        errorLabel = new Label();
+        errorLabel.setWidth100();
+        errorLabel.hide();
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
         tools.addButton(errorButton);
+        tools.addMember(errorLabel);
 
         return tools;
+    }
+
+    public void showErrorLabel(String message) {
+        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:14px;'> " + message + "</span>");
+        errorLabel.show();
     }
 
     public void disableNSButton() {
