@@ -436,7 +436,8 @@ public class RMPage implements LogListener {
     }
 
     public void showErrorLabel(String message) {
-        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:14px;'> " + message + "</span>");
+        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:14px; padding-left:4px;'> " +
+                               message + "</span>");
         errorLabel.show();
     }
 
