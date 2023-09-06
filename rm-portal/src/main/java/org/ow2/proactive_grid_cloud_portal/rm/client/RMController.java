@@ -573,7 +573,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                     error("Failed to fetch RM State: " + JSONUtils.getJsonErrorMessage(caught));
                 }
                 if (caught.getMessage().contains("HTTP 401 Unauthorized")) {
-                    rmPage.showErrorLabel("You have been disconnected from the server. Reload the page and log into the portal.");
+                    rmPage.showErrorLabel("You have been disconnected from the server. Reload the page in order to log into the portal again.");
                 } else {
                     rmPage.showErrorLabel("The server cannot be reached. Check the server status and your network connection.");
                 }

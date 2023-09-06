@@ -772,7 +772,7 @@ public class JobsController {
                 if (caught.getMessage().contains("HTTP 401 Unauthorized")) {
                     parentController.getParentController()
                                     .getSchedulerPage()
-                                    .showErrorLabel("You have been disconnected from the server. Reload the page and log into the portal.");
+                                    .showErrorLabel("You have been disconnected from the server. Reload the page in order to log into the portal again.");
                 } else {
                     parentController.getParentController()
                                     .getSchedulerPage()
