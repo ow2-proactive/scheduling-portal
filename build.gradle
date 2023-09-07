@@ -99,8 +99,8 @@ subprojects {
         compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
         compile "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
 
-        compile 'com.google.guava:guava:21.0'
-        compile 'com.google.guava:guava-gwt:21.0'
+        compile 'com.google.guava:guava:32.0.1-jre'
+        compile 'com.google.guava:guava-gwt:32.0.1-jre'
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.26.Final'
         compile 'org.apache.httpcomponents:httpmime:4.3.6'
