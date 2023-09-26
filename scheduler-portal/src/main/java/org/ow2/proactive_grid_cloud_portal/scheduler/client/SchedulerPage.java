@@ -623,7 +623,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     }
 
     public void showErrorLabel(String message) {
-        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:13px; padding-left:4px;'> " +
+        errorLabel.setContents("<span style='color:red; font-weight: bold; font-size:14px; padding-left:4px;'> " +
                                message + "</span>");
         errorLabel.show();
     }
