@@ -313,8 +313,8 @@ public class LoginPage {
         //errorLabel.setMargin(5);
         errorLabel.setPadding(5);
         errorLabel.setMargin(10);
-        errorLabel.setHeight(50);
-        errorLabel.setWidth(420);
+        errorLabel.setHeight(60);
+        errorLabel.setWidth(430);
         errorLabel.setAlign(Alignment.CENTER);
 
         HLayout accountCreationLayout = new HLayout();
