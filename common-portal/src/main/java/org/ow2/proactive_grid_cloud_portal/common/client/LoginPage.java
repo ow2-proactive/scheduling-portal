@@ -134,7 +134,7 @@ public class LoginPage {
         buildAndShow();
 
         if (initialErrorMessage != null && initialErrorMessage.length() > 0) {
-            errorLabel.setContents("<span style='color:red;'>" + initialErrorMessage + "</span>");
+            errorLabel.setContents("<span style='color:red; width:100%'>" + initialErrorMessage + "</span>");
             errorLabel.animateShow(AnimationEffect.FLY);
         }
     }
@@ -312,7 +312,9 @@ public class LoginPage {
         errorLabel.setBackgroundColor("#fff0f0");
         //errorLabel.setMargin(5);
         errorLabel.setPadding(5);
-        errorLabel.setHeight(30);
+        errorLabel.setMargin(10);
+        errorLabel.setHeight(60);
+        errorLabel.setWidth(430);
         errorLabel.setAlign(Alignment.CENTER);
 
         HLayout accountCreationLayout = new HLayout();
@@ -346,13 +348,22 @@ public class LoginPage {
         vlayout.setShadowSoftness(8);
         vlayout.setShadowOffset(3);
 
-        vlayout.addMember(logo);
-        vlayout.addMember(errorLabel);
+        VLayout logoLayout = new VLayout();
+        logoLayout.setDefaultLayoutAlign(Alignment.CENTER);
+        logoLayout.setWidth(420);
+        logoLayout.addMembers(logo);
+
+        VLayout headerLayout = new VLayout();
+        headerLayout.setAlign(Alignment.CENTER);
+        headerLayout.setWidth100();
+        headerLayout.addMembers(logoLayout);
+        headerLayout.addMembers(errorLabel);
+        headerLayout.hideMember(errorLabel);
+
+        vlayout.addMember(headerLayout);
         vlayout.addMember(auth);
         if (shouldDisplayLink)
             vlayout.addMember(accountCreationLayout);
-
-        vlayout.hideMember(errorLabel);
 
         // dummy box for horizontal centering
         HLayout hlayout = new HLayout();

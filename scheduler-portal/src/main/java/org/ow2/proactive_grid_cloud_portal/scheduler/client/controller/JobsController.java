@@ -771,12 +771,11 @@ public class JobsController {
                 }
                 if (caught.getMessage().contains("HTTP 401 Unauthorized")) {
                     parentController.getParentController()
-                                    .getSchedulerPage()
-                                    .showErrorLabel("You have been disconnected from the server. Reload the page in order to log into the portal again.");
+                                    .teardown("You are logged out of the server. Please log into the portal again.");
                 } else {
                     parentController.getParentController()
                                     .getSchedulerPage()
-                                    .showErrorLabel("The server cannot be reached. Check the server status and your network connection.");
+                                    .showErrorLabel("The server cannot be reached. Check first your network connection, and potentially the server status.");
                 }
                 LogModel.getInstance().logCriticalMessage("Failed to get Scheduler Revision: " +
                                                           JSONUtils.getJsonErrorMessage(caught));
