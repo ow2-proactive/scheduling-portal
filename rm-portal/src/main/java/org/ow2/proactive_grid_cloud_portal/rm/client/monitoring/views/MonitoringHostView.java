@@ -89,6 +89,8 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
 
     private static VLayout selectedRangeLayout;
 
+    private static Model.StatHistory.Range previousRange = Model.StatHistory.Range.MINUTE_1;
+
     public void init(Host host) {
 
         // selecting the node that will be used as an entry point to the host
@@ -206,7 +208,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
             nodeLineValues.put("" + r.getChar(), r.getString());
         }
-        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
+        selectedRange.setDefaultValue("" + previousRange.getChar());
         selectedRange.setValueMap(nodeLineValues);
 
         selectedRange.addChangedHandler(event -> {
@@ -215,6 +217,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
             cpuView.selectRange(timeRange);
             memoryView.selectRange(timeRange);
             networkView.selectRange(timeRange);
+            previousRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
         });
 
         dynamicForm.setItems(selectedRange);
@@ -266,5 +269,13 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
             tabs.show();
         }
         controller.getRmPage().setMonitoringTabPageDisabled(false);
+    }
+
+    public static Model.StatHistory.Range getPreviousRange() {
+        return previousRange;
+    }
+
+    public static void setPreviousRange(Model.StatHistory.Range previousRange) {
+        MonitoringHostView.previousRange = previousRange;
     }
 }
