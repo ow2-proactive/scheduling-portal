@@ -183,7 +183,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         for (Model.StatHistory.Range r : Model.StatHistory.Range.values()) {
             nodeLineValues.put("" + r.getChar(), r.getString());
         }
-        selectedRange.setDefaultValue("" + Model.StatHistory.Range.MINUTE_1.getChar());
+        selectedRange.setDefaultValue("" + MonitoringHostView.getPreviousRange().getChar());
         selectedRange.setValueMap(nodeLineValues);
 
         selectedRange.addChangedHandler(event -> {
@@ -192,6 +192,8 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
             threads.selectRange(timeRange);
             classes.selectRange(timeRange);
             cpuUsage.selectRange(timeRange);
+            MonitoringHostView.setPreviousRange(Model.StatHistory.Range.create(selectedRange.getValueAsString()
+                                                                                            .charAt(0)));
         });
 
         dynamicForm.setItems(selectedRange);
