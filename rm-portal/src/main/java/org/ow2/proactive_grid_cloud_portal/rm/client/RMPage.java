@@ -29,6 +29,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.*;
 import org.ow2.proactive_grid_cloud_portal.common.client.Listeners.LogListener;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.MonitoringHostView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.NodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.creation.CreateNodeSourceWindow;
@@ -257,6 +258,7 @@ public class RMPage implements LogListener {
         rl.addMember(stack);
 
         this.logWindow = new LogWindow(controller);
+        MonitoringHostView.setPreviousRange(Model.StatHistory.Range.MINUTE_1);
 
         this.rootLayout.draw();
     }
