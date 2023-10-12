@@ -161,4 +161,8 @@ public class TasksNavigationController {
         parentController.resetPendingTasksRequests();
         paginationController.firstPage();
     }
+
+    public TasksController getParentController() {
+        return parentController;
+    }
 }

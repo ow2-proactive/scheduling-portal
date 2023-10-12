@@ -32,6 +32,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobsUpdatedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsPaginationController;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ItemsListGrid;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
 
@@ -140,6 +141,10 @@ public class JobsView extends FilteringGridItemView<Job> implements JobsUpdatedL
         Label label = new Label("Use filters to restrict the number of jobs currently displayed.");
         label.setHeight(10);
         return label;
+    }
+
+    public ItemsListGrid<Job> getItemsGrid() {
+        return this.itemsGrid;
     }
 
 }

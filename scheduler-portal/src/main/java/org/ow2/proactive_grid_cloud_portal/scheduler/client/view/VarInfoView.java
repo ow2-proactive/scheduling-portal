@@ -36,6 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.Execution
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
 
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -243,6 +244,11 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
         variablesGrids.forEach(Canvas::hide);
         variablesGrids.clear();
         genericInformationGrid.hide();
+        JobsListGrid itemsGrid = (JobsListGrid) (this.controller.getExecutionController()
+                                                                .getJobsController()
+                                                                .getView()
+                                                                .getItemsGrid());
+        itemsGrid.deselectAllRecords();
     }
 
     @Override
