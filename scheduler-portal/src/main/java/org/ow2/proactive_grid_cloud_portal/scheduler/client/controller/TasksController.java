@@ -320,4 +320,7 @@ public class TasksController {
 
     }
 
+    public AbstractGridItemsView<Task> getView() {
+        return view;
+    }
 }

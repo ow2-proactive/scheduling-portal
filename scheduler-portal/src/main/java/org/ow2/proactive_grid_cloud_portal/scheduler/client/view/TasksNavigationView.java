@@ -212,8 +212,9 @@ public class TasksNavigationView implements TasksUpdatedListener, TagSuggestionL
     public void jobUnselected() {
         this.tagSearchTextBox.setText("");
         this.tagSearchTextBox.setEnabled(false);
+        TasksView taskView = (TasksView) this.controller.getParentController().getView();
+        taskView.itemsGrid.build();
         this.controller.stopNavigation();
-
     }
 
     /**
