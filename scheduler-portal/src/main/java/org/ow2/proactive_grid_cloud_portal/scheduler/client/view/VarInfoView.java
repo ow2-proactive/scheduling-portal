@@ -160,7 +160,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
             Map<String, String> variables = new LinkedHashMap<>();
             variablesByGroup.get(group)
                             .forEach(variableName -> variables.put(variableName, job.getVariables().get(variableName)));
-            variablesGrid.buildEntries(variables);
+            variablesGrid.buildEntries(job.getDetailedVariables(), variables);
             variablesGrid.setVariableDescription(job.getDetailedVariables());
             variablesGrid.show();
         });
@@ -298,6 +298,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
             advanced = advancedCheckBox.getValue();
             buildVariablesEntries(selectedJob);
         });
+        advancedCheckBox.addStyleName("color-orange");
         advancedCheckBoxLayout.addMember(advancedCheckBox);
         checkBoxLayout.addMember(advancedCheckBoxLayout);
 
@@ -313,6 +314,7 @@ public class VarInfoView implements JobSelectedListener, ExecutionDisplayModeLis
             hidden = hiddenCheckBox.getValue();
             buildVariablesEntries(selectedJob);
         });
+        hiddenCheckBox.addStyleName("color-light-grey");
         hiddenCheckBoxLayout.addMember(hiddenCheckBox);
         checkBoxLayout.addMember(hiddenCheckBoxLayout);
         checkBoxLayout.hide();

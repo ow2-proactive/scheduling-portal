@@ -122,8 +122,40 @@ public class KeyValueGrid extends VStack {
             records[index] = record;
             index++;
         }
-
         keyValueGrid.setData(records);
+    }
+
+    /**
+     * Display job variables as grid rows. Colors the row if the variable is advanced or hidden.
+     * @param jobDetailedVariables Detailed job variables
+     * @param entries the list of key-value data to display
+     */
+    public void buildEntries(Map<String, Map<String, String>> jobDetailedVariables, Map<String, String> entries) {
+        Set<Map.Entry<String, String>> entrySet = entries.entrySet();
+        ListGridRecord[] records = new ListGridRecord[entrySet.size()];
+
+        int index = 0;
+        for (Map.Entry<String, String> entry : entrySet) {
+            ListGridRecord record = new ListGridRecord();
+            this.keyValueColumnsFactory.buildRecord(entry, record);
+            applyAdvancedOrHiddenColor(jobDetailedVariables, record);
+            records[index] = record;
+            index++;
+        }
+        keyValueGrid.setData(records);
+    }
+
+    public void applyAdvancedOrHiddenColor(Map<String, Map<String, String>> jobVarDetails, ListGridRecord record) {
+        boolean isAdvancedVar = Boolean.parseBoolean(jobVarDetails.get(record.getAttribute(KEY_ATTR.getName()))
+                                                                  .get("advanced"));
+        boolean isHiddenVar = Boolean.parseBoolean(jobVarDetails.get(record.getAttribute(KEY_ATTR.getName()))
+                                                                .get("hidden"));
+        if (isAdvancedVar) {
+            record.setCustomStyle("color-orange");
+        } else if (isHiddenVar) {
+            record.setCustomStyle("color-light-grey");
+        }
+        keyValueGrid.redraw();
     }
 
     /**
