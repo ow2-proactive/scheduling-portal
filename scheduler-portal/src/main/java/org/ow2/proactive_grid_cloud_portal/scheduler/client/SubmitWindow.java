@@ -460,6 +460,7 @@ public class SubmitWindow {
         });
         checkBoxLayout.addMember(advancedCheckBox);
         checkBoxLayout.setAlign(Alignment.RIGHT);
+        advancedCheckBox.addStyleName("color-orange");
         return checkBoxLayout;
     }
 
@@ -586,6 +587,12 @@ public class SubmitWindow {
             FormItem variableItem = getVariableItem(var);
             if (var.getValue().getDescription() != null && !var.getValue().getDescription().isEmpty()) {
                 variableItem.setTooltip("<div class='tooltipStyle'>" + var.getValue().getDescription() + "</div>");
+            }
+            if (var.getValue().isAdvanced()) {
+                variableItem.setTitleStyle("color-orange");
+            }
+            if (var.getValue().isHidden()) {
+                variableItem.setTitleStyle("color-light-grey");
             }
             fields[noOfFields++] = variableItem;
             String model = var.getValue().getModel();
