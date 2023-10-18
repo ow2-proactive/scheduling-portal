@@ -239,7 +239,7 @@ public class SchedulerController extends Controller implements UncaughtException
         });
     }
 
-    private void tryToLoginIfLoggedInRm() {
+    public void tryToLoginIfLoggedInRm() {
         autoLoginTimer = new Timer() {
             @Override
             public void run() {
