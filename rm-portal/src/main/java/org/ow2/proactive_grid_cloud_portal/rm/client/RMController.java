@@ -574,6 +574,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                 }
                 if (caught.getMessage().contains("HTTP 401 Unauthorized")) {
                     teardown("You are logged out of the server. Please log into the portal again.");
+                    tryToLoginIfLoggedInScheduler();
                 } else {
                     rmPage.showErrorLabel("The server cannot be reached. Check first your network connection, and potentially the server status.");
                 }
