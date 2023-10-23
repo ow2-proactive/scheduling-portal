@@ -107,8 +107,6 @@ subprojects {
 
         compile 'org.pepstock:charba:2.4'
 
-        runtime 'com.google.gwt:gwt-servlet:2.8.2'
-
         testCompile 'junit:junit:4.12'
         testCompile 'org.mockito:mockito-core:1.10.19'
         testCompile 'com.google.gwt.gwtmockito:gwtmockito:1.1.6'
@@ -156,6 +154,7 @@ project(':rm-portal') {
         }
         filesMatching('**/portal.html', replaceTokens)
         filesMatching('**/rm.conf', replaceTokens)
+        classpath fileTree('lib')
     }
 }
 
@@ -183,6 +182,7 @@ project(':scheduler-portal') {
         }
         filesMatching('**/portal.html', replaceTokens)
         filesMatching('**/scheduler.conf', replaceTokens)
+        classpath fileTree('lib')
     }
 }
 

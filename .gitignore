@@ -11,6 +11,8 @@ common-portal/out/
 scheduler-portal/out/
 
 /lib/
+!/lib/*.jar
+
 /.settings/
 /classes/
 gradle/ext/
