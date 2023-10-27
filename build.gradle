@@ -83,6 +83,7 @@ subprojects {
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
         compile("org.ow2.proactive:common-http:${schedulingPortalVersion}") {
             exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
         }
         compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
