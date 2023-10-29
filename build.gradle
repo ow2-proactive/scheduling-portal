@@ -76,13 +76,14 @@ subprojects {
         // Specify two artifacts as workaround for GRADLE-1934
         compile('javax.validation:validation-api:1.0.0.GA')
         compile('javax.validation:validation-api:1.0.0.GA:sources')
-        compile 'org.slf4j:slf4j-api:1.7.25'
+        compile 'org.slf4j:slf4j-api:1.7.36'
         compile 'commons-io:commons-io:2.7.0'
         compile 'commons-fileupload:commons-fileupload:1.5'
         compile 'org.apache.httpcomponents:httpclient:4.5.13'
         compile 'org.apache.commons:gwt-commons-patricia-trie:4.0'
         compile("org.ow2.proactive:common-http:${schedulingPortalVersion}") {
             exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            exclude group: 'org.slf4j', module: 'slf4j-reload4j'
         }
         compile("org.ow2.proactive:scheduling-api-graphql-beans-input-gwt:${schedulingPortalVersion}")
         compile("org.ow2.proactive:scheduling-api-graphql-common-gwt:${schedulingPortalVersion}")
@@ -143,7 +144,7 @@ project(':rm-portal') {
 
         runtime 'org.apache.logging.log4j:log4j-web:2.17.1'
         runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
-        testRuntime 'org.slf4j:slf4j-simple:1.7.25'
+        testRuntime 'org.slf4j:slf4j-simple:1.7.36'
         compile 'org.codehaus.jettison:jettison:1.5.4'
         compile project(':common-portal')
     }
@@ -169,7 +170,7 @@ project(':scheduler-portal') {
         compile project(':common-portal')
         runtime 'org.apache.logging.log4j:log4j-web:2.17.1'
         runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
-        testRuntime 'org.slf4j:slf4j-simple:1.7.25'
+        testRuntime 'org.slf4j:slf4j-simple:1.7.36'
     }
 
     war {
