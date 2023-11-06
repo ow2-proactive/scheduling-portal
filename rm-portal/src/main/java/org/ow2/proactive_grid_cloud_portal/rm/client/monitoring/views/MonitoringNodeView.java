@@ -76,8 +76,6 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
 
     public static Node previousSelectedNode = null;
 
-    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
-
     private MBeanChart heapMemory;
 
     private MBeanChart threads;
@@ -185,16 +183,7 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         }
         selectedRange.setDefaultValue("" + MonitoringHostView.getPreviousRange().getChar());
         selectedRange.setValueMap(nodeLineValues);
-
-        selectedRange.addChangedHandler(event -> {
-            timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-            heapMemory.selectRange(timeRange);
-            threads.selectRange(timeRange);
-            classes.selectRange(timeRange);
-            cpuUsage.selectRange(timeRange);
-            MonitoringHostView.setPreviousRange(Model.StatHistory.Range.create(selectedRange.getValueAsString()
-                                                                                            .charAt(0)));
-        });
+        selectedRange.addChangedHandler(event -> selectTimeRange(selectedRange));
 
         dynamicForm.setItems(selectedRange);
         dynamicForm.setHeight(20);
@@ -203,6 +192,15 @@ public class MonitoringNodeView extends VLayout implements AsyncCallback<String>
         selectedRangeLayout.setDefaultLayoutAlign(Alignment.RIGHT);
 
         return selectedRangeLayout;
+    }
+
+    private void selectTimeRange(SelectItem selectedRange) {
+        Model.StatHistory.Range timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
+        heapMemory.selectRange(timeRange);
+        threads.selectRange(timeRange);
+        classes.selectRange(timeRange);
+        cpuUsage.selectRange(timeRange);
+        MonitoringHostView.setPreviousRange(Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0)));
     }
 
     public void close() {

@@ -161,7 +161,7 @@ public class NetworkAreaChart extends MBeansTimeAreaChart {
 
                 double[] slice = getJsonSlice(json, i);
 
-                if (i == 1) {
+                if (i == 1 || time == null || txBytes == null) {
                     time = new long[slice.length];
                     txBytes = new long[slice.length];
                 }

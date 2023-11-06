@@ -101,7 +101,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
 
     protected AbstractChart chart;
 
-    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
+    protected static Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
 
     protected Runnable onFinish;
 
@@ -434,7 +434,7 @@ public abstract class MBeanChart extends VLayout implements Reloadable {
     }
 
     public void selectRange(Model.StatHistory.Range timeRange) {
-        this.timeRange = timeRange;
+        MBeanChart.timeRange = timeRange;
         chart.getData().setDatasets();
         xLabels = new LinkedList<>();
         this.reload();
