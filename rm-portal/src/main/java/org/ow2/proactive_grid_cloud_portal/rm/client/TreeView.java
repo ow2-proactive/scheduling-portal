@@ -213,6 +213,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             infrastructure = infrastructure.replace("Manager", "");
             infrastructure = beautifyName(infrastructure);
 
+            if (infrastructure.equals("AWSEC 2")) {
+                infrastructure = "AWS EC2";
+            } else if (infrastructure.equals("SSHV 2")) {
+                infrastructure = "SSH V2";
+            }
             policy = policy.substring(0, policy.indexOf(USER_ACCESS_TYPE_));
             policy = policy.replace(POLICY_FIELD, "");
             policy = beautifyName(policy);
