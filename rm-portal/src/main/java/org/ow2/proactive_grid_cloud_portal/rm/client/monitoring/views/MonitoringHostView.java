@@ -85,8 +85,6 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         this.controller = controller;
     }
 
-    protected Model.StatHistory.Range timeRange = Model.StatHistory.Range.MINUTE_1;
-
     private static VLayout selectedRangeLayout;
 
     private static Model.StatHistory.Range previousRange = Model.StatHistory.Range.MINUTE_1;
@@ -210,15 +208,7 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         }
         selectedRange.setDefaultValue("" + previousRange.getChar());
         selectedRange.setValueMap(nodeLineValues);
-
-        selectedRange.addChangedHandler(event -> {
-            timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-            overview.selectRange(timeRange);
-            cpuView.selectRange(timeRange);
-            memoryView.selectRange(timeRange);
-            networkView.selectRange(timeRange);
-            previousRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
-        });
+        selectedRange.addChangedHandler(event -> selectTimeRange(selectedRange));
 
         dynamicForm.setItems(selectedRange);
         dynamicForm.setHeight(20);
@@ -228,6 +218,15 @@ public class MonitoringHostView extends VLayout implements AsyncCallback<String>
         selectedRangeLayout.setDefaultLayoutAlign(Alignment.RIGHT);
 
         return selectedRangeLayout;
+    }
+
+    private void selectTimeRange(SelectItem selectedRange) {
+        Model.StatHistory.Range timeRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
+        overview.selectRange(timeRange);
+        cpuView.selectRange(timeRange);
+        memoryView.selectRange(timeRange);
+        networkView.selectRange(timeRange);
+        previousRange = Model.StatHistory.Range.create(selectedRange.getValueAsString().charAt(0));
     }
 
     public void close() {
