@@ -212,7 +212,6 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             infrastructure = infrastructure.replace(INFRASTRUCTURE_FIELD, "");
             infrastructure = infrastructure.replace("Manager", "");
             infrastructure = beautifyName(infrastructure);
-
             if (infrastructure.equals("AWSEC 2")) {
                 infrastructure = "AWS EC2";
             } else if (infrastructure.equals("SSHV 2")) {
