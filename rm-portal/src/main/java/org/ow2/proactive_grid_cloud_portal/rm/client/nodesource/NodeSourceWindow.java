@@ -259,6 +259,7 @@ public abstract class NodeSourceWindow {
         createNodeSourceLayout.setPadding(5);
         createNodeSourceLayout.setWidth("95%");
         this.nodeSourceNameText = new TextItem(NS_NAME_FORM_KEY, "Name");
+        this.nodeSourceNameText.setWidth(300);
         Layout importNodeSourceLayout = new ImportNodeSourceLayout(this,
                                                                    "or Import Node Source (Infrastructure+Policy)",
                                                                    getNodeSourceAction());
@@ -761,6 +762,7 @@ public abstract class NodeSourceWindow {
             linkItem.setTitle("");
             linkItem.setValue(helpLink.get());
             linkItem.setLinkTitle(getShortName(plugin.getPluginName()) + " documentation");
+            linkItem.setAttribute(IMPORTANT_ITEM_ATTR, true);
             linkItem.hide();
             allFormItems.add(linkItem);
         }
@@ -773,8 +775,10 @@ public abstract class NodeSourceWindow {
             elasticInfra.setTitleStyle("important-message");
             elasticInfra.setTextBoxStyle("grey-message");
             elasticInfra.setValue("Elastic");
+            elasticInfra.setAttribute(IMPORTANT_ITEM_ATTR, true);
 
             FormItemIcon icon = new FormItemIcon();
+            icon.setAttribute(IMPORTANT_ITEM_ATTR, true);
             icon.setSrc(RMImages.instance.good().getSafeUri().asString());
             elasticInfra.setIcons(icon);
             allFormItems.add(elasticInfra);
