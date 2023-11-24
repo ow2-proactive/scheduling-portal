@@ -81,6 +81,12 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     /* canvas for myNodesCompactPanel (used to remove myNodesCompactPanel from Layout) */
     private WidgetCanvas myNodesCompactPanelCanvas;
 
+    /* displays only not empty node sources */
+    private CompactFlowPanelOwn notEmptyNodeSourcesPanel;
+
+    /* canvas for notEmptyNodeSourcesPanel (used to remove notEmptyNodeSourcesPanel from Layout) */
+    private WidgetCanvas notEmptyNodeSourcesPanelCanvas;
+
     private TreeView treeView;
 
     private NodeSource previousSelectedNs;
@@ -107,17 +113,23 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     /**
      * Switches which canvas should be displayed in root
-     * @param value true to show only canvas with my nodes, false to show all nodes
+     * @param myNodes true to show only canvas with my nodes, false to show all nodes
+     * @param notEmptyNs true to show only canvas with not empty node sources, false to show all node sources
      */
-    public void setViewMyNodes(boolean value) {
-        if (value) {
+    public void setViewMyNodes(boolean myNodes, boolean notEmptyNs) {
+        if (myNodes) {
+            root.removeMember(notEmptyNodeSourcesPanelCanvas);
             root.removeMember(campactPanelCanvas);
             root.addMember(myNodesCompactPanelCanvas);
+        } else if (notEmptyNs) {
+            root.removeMember(campactPanelCanvas);
+            root.removeMember(myNodesCompactPanelCanvas);
+            root.addMember(notEmptyNodeSourcesPanelCanvas);
         } else {
             root.removeMember(myNodesCompactPanelCanvas);
+            root.removeMember(notEmptyNodeSourcesPanelCanvas);
             root.addMember(campactPanelCanvas);
         }
-
     }
 
     @Override
@@ -130,13 +142,17 @@ public class CompactView implements NodesListener, NodeSelectedListener {
             myNodesCompactPanel.getCurrentSelectedTile().setSelectedTile(false);
             myNodesCompactPanel.setCurrentSelectedTile(null);
         }
-
+        if (notEmptyNodeSourcesPanel.getCurrentSelectedTile() != null) {
+            notEmptyNodeSourcesPanel.getCurrentSelectedTile().setSelectedTile(false);
+            notEmptyNodeSourcesPanel.setCurrentSelectedTile(null);
+        }
     }
 
     @Override
     public void nodeSourceSelected(NodeSource ns) {
         compactPanel.indexOf(ns).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(ns).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        notEmptyNodeSourcesPanel.indexOf(ns).ifPresent(integer -> changeSelection(notEmptyNodeSourcesPanel, integer));
         previousSelectedNs = ns;
         previousSelectedHost = null;
         previousSelectedNode = null;
@@ -146,6 +162,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     public void hostSelected(Host h) {
         compactPanel.indexOf(h).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(h).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        notEmptyNodeSourcesPanel.indexOf(h).ifPresent(integer -> changeSelection(notEmptyNodeSourcesPanel, integer));
         previousSelectedNs = null;
         previousSelectedHost = h;
         previousSelectedNode = null;
@@ -155,6 +172,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     public void nodeSelected(Node node) {
         compactPanel.indexOf(node).ifPresent(integer -> changeSelection(compactPanel, integer));
         myNodesCompactPanel.indexOf(node).ifPresent(integer -> changeSelection(myNodesCompactPanel, integer));
+        notEmptyNodeSourcesPanel.indexOf(node).ifPresent(integer -> changeSelection(notEmptyNodeSourcesPanel, integer));
         previousSelectedNs = null;
         previousSelectedHost = null;
         previousSelectedNode = node;
@@ -195,11 +213,12 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         }
         List<NodeSource> currentNodeSources = nodeSourceDeleted(nodeSources) ? nodeSources
                                                                              : getSortedNodeSourceList(nodeSources);
-        if (this.compactPanel == null) {
+        if (this.compactPanel == null || this.notEmptyNodeSourcesPanel == null) {
             initializePanel();
         }
         updateCompactPanel(currentNodeSources, nodes);
         updateMyNodesCompactPanel(currentNodeSources, nodes);
+        updateNotEmptyNsCompactPanel(currentNodeSources, nodes);
         updateSelection();
     }
 
@@ -241,8 +260,14 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     public void removeNodeSources(List<NodeSource> currentNodeSources) {
+        if (this.compactPanel == null || this.notEmptyNodeSourcesPanel == null) {
+            initializePanel();
+        }
         if (currentNodeSources != null) {
-            currentNodeSources.forEach(nodeSource -> removeNodeSource(compactPanel, nodeSource));
+            currentNodeSources.forEach(nodeSource -> {
+                removeNodeSource(compactPanel, nodeSource);
+                removeNodeSource(notEmptyNodeSourcesPanel, nodeSource);
+            });
         }
     }
 
@@ -253,7 +278,15 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         processNodes(myNodesCompactPanel,
                      nodes.stream().filter(node -> usedBy(node, username)).collect(Collectors.toList()));
         removeNodesWhichIsNotUsedAnymore(nodes, username);
+    }
 
+    private void updateNotEmptyNsCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
+        List<NodeSource> collect = nodeSources.stream()
+                                              .filter(nodeSource -> !nodeSource.getHosts().isEmpty() ||
+                                                                    !nodeSource.getDeploying().isEmpty())
+                                              .collect(Collectors.toList());
+        processNodeSources(notEmptyNodeSourcesPanel, collect);
+        processNodes(notEmptyNodeSourcesPanel, nodes);
     }
 
     /**
@@ -336,15 +369,19 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private void initializePanel() {
         compactPanel = new CompactFlowPanel();
         myNodesCompactPanel = new CompactFlowPanelOwn();
+        notEmptyNodeSourcesPanel = new CompactFlowPanelOwn();
 
         campactPanelCanvas = new WidgetCanvas(compactPanel);
         myNodesCompactPanelCanvas = new WidgetCanvas(myNodesCompactPanel);
+        notEmptyNodeSourcesPanelCanvas = new WidgetCanvas(notEmptyNodeSourcesPanel);
 
         root.addMember(campactPanelCanvas);
 
         addResizeHandler(compactPanel);
 
         addResizeHandler(myNodesCompactPanel);
+
+        addResizeHandler(notEmptyNodeSourcesPanel);
     }
 
     private void addResizeHandler(CompactFlowPanel panel) {
