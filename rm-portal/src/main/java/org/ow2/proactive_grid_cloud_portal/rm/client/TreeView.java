@@ -119,7 +119,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private static final List<NodeSource> currentNodeSources = new LinkedList<>();
 
-    CompactView compactView;
+    private CompactView compactView;
 
     private class TNode extends TreeNode {
         Node rmNode = null;
