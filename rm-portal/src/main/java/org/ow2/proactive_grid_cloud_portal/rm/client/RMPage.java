@@ -203,7 +203,6 @@ public class RMPage implements LogListener {
 
         final CheckboxItem c1 = new CheckboxItem("mynodes", "My nodes");
         c1.setValue(false);
-        c1.addChangedHandler(event -> compactView.setViewMyNodes(c1.getValueAsBoolean()));
 
         // for some reason IE9 standards fails to detect the right width
         if (SC.isIE()) {
@@ -213,6 +212,20 @@ public class RMPage implements LogListener {
         DynamicForm checkBoxes = new DynamicForm();
         checkBoxes.setNumCols(8);
         checkBoxes.setItems(c1);
+
+        final CheckboxItem hideEmpty = new CheckboxItem("emptyNs", "Hide Empty Node Sources");
+        hideEmpty.setValue(false);
+        hideEmpty.addChangedHandler(event -> {
+            treeView.setNotEmptyNsView(hideEmpty.getValueAsBoolean());
+            compactView.setViewMyNodes(c1.getValueAsBoolean(), hideEmpty.getValueAsBoolean());
+        });
+        c1.addChangedHandler(event -> compactView.setViewMyNodes(c1.getValueAsBoolean(),
+                                                                 hideEmpty.getValueAsBoolean()));
+
+        DynamicForm hideEmptyForm = new DynamicForm();
+        hideEmptyForm.setNumCols(8);
+        hideEmptyForm.setTop(20);
+        hideEmptyForm.setItems(hideEmpty);
 
         ImgButton closeButton = new ImgButton();
         closeButton.setWidth(16);
@@ -229,6 +242,7 @@ public class RMPage implements LogListener {
         final HLayout controls = new HLayout();
         controls.addMember(expandButton);
         controls.addMember(closeButton);
+        controls.addMember(hideEmptyForm);
         controls.addMember(new LayoutSpacer());
         controls.addMember(checkBoxes);
         controls.setLayoutAlign(VerticalAlignment.CENTER);

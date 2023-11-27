@@ -198,6 +198,10 @@ public class NodeSource {
         }
     }
 
+    public void resetDeploying() {
+        deploying = new HashMap<>();
+    }
+
     public static class Host {
 
         /** all nodes deployed on this host for one specific nodesource*/

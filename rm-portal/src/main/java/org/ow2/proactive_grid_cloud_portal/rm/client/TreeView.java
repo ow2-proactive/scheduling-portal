@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,6 +82,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String NUMBER_OF_NODES = "#Nodes";
 
+    public static final String NUMBER_OF_DEPLOYING_NODES = "#Depl";
+
     public static final String NUMBER_OF_BUSY_NODES = "#Busy";
 
     public static final String PERCENTAGE_OF_BUSY_NODES = "%Busy";
@@ -114,7 +117,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
      */
     private boolean ignoreNodeSelectedEvent = false;
 
-    private final List<NodeSource> currentNodeSources = new LinkedList<>();
+    private static final List<NodeSource> currentNodeSources = new LinkedList<>();
+
+    private CompactView compactView;
 
     private class TNode extends TreeNode {
         Node rmNode = null;
@@ -157,6 +162,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             super.setAttribute(NUMBER_OF_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfNodes());
             super.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
             super.setAttribute(PERCENTAGE_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes());
+            super.setAttribute(NUMBER_OF_DEPLOYING_NODES, ns.getDeploying().size());
 
         }
     }
@@ -287,10 +293,15 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         percentageOfBusyNodesField.setAlign(Alignment.CENTER);
         percentageOfBusyNodesField.setCanSort(true);
         percentageOfBusyNodesField.setWidth("8%");
+        TreeGridField numberOfDeplNodesField = new TreeGridField(NUMBER_OF_DEPLOYING_NODES);
+        numberOfDeplNodesField.setAlign(Alignment.CENTER);
+        numberOfDeplNodesField.setCanSort(true);
+        numberOfDeplNodesField.setWidth("8%");
         treeGrid.setFields(field,
                            numberOfNodesField,
                            numberOfBusyNodesField,
                            percentageOfBusyNodesField,
+                           numberOfDeplNodesField,
                            infrastructureField,
                            policyField,
                            accessField,
@@ -358,10 +369,21 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 LogModel.getInstance().logImportantMessage("Failed to restore node source grid view state " + e);
             }
         });
-
+        this.compactView = compactView;
         treeGrid.addSortChangedHandler(sortEvent -> sortCompactView(compactView));
         vl.addMember(treeGrid);
         return vl;
+    }
+
+    public void setNotEmptyNsView(boolean value) {
+        if (value) {
+            currentNodeSources.stream()
+                              .filter(this::isHidden)
+                              .collect(Collectors.toList())
+                              .forEach(this::hideNodeSource);
+        } else {
+            currentNodeSources.forEach(this::showNodeSource);
+        }
     }
 
     public void sortCompactView(CompactView compactView) {
@@ -601,6 +623,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                       .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()))) {
             currentNs.setAttribute(NUMBER_OF_NODES,
                                    String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()));
+            if (nodeSourceDisplayedNumberOfNodes.getNumberOfNodes() != 0) {
+                currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, 0);
+            }
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
@@ -617,6 +642,14 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                       .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()))) {
             currentNs.setAttribute(PERCENTAGE_OF_BUSY_NODES,
                                    String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()));
+            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
+            currentNodeSources.remove(nodeSource);
+            currentNodeSources.add(nodeSource);
+        }
+        if (!currentNs.getAttribute(NUMBER_OF_DEPLOYING_NODES)
+                      .equals(String.valueOf(nodeSource.getDeploying().size())) &&
+            currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(0))) {
+            currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, String.valueOf(nodeSource.getDeploying().size()));
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
@@ -643,8 +676,41 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             tree.remove(treeNodeSource);
             currentTreeNodes.remove(nodeSource.getSourceName());
             removeCurrentNodeSource(nodeSource);
-            ;
         }
+    }
+
+    void hideNodeSource(NodeSource nodeSource) {
+        final TreeNode treeNodeSource = currentTreeNodes.get(nodeSource.getSourceName());
+        tree.remove(treeNodeSource);
+    }
+
+    void showNodeSource(NodeSource nodeSource) {
+        final TreeNode treeNodeSource = currentTreeNodes.get(nodeSource.getSourceName());
+        if (Arrays.stream(tree.getDescendants(tree.getRoot()))
+                  .noneMatch(treeNode -> treeNode.getAttribute(NODE_SOURCES)
+                                                 .equals(treeNodeSource.getAttribute(NODE_SOURCES)))) {
+            tree.add(treeNodeSource, this.tree.getRoot());
+        }
+    }
+
+    public static void undeploy(String nodeSourceName) {
+        NodeSource nodeSource = currentNodeSources.stream()
+                                                  .filter(nodeSource1 -> nodeSource1.getSourceName()
+                                                                                    .equals(nodeSourceName))
+                                                  .findFirst()
+                                                  .orElse(null);
+        if (nodeSource != null) {
+            currentNodeSources.remove(nodeSource);
+            nodeSource.setNodeSourceStatus(NodeSourceStatus.NODES_UNDEPLOYED);
+            nodeSource.resetDeploying();
+            currentNodeSources.add(nodeSource);
+        }
+    }
+
+    private boolean isHidden(NodeSource nodeSource) {
+        return currentTreeNodes.containsKey(nodeSource.getSourceName()) &&
+               ((nodeSource.getHosts().isEmpty() && nodeSource.getDeploying().isEmpty()) ||
+                nodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED));
     }
 
     private void removeCurrentNodeSource(NodeSource nodeSource) {
