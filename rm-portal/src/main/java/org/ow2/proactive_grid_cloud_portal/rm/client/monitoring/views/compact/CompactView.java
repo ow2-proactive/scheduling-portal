@@ -189,10 +189,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
      */
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        /* first call : create the components */
-        if (nodeSourceAdded(nodeSources)) {
-            treeView.sortCompactView(this);
-        }
         List<NodeSource> currentNodeSources = nodeSourceDeleted(nodeSources) ? nodeSources
                                                                              : getSortedNodeSourceList(nodeSources);
         if (this.compactPanel == null) {
