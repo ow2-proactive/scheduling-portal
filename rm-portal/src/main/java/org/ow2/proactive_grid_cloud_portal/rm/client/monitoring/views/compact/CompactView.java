@@ -227,10 +227,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         return nodeSources == null || nodeSources.isEmpty() || nodeSources.stream().allMatch(NodeSource::isRemoved);
     }
 
-    private boolean nodeSourceAdded(List<NodeSource> nodeSources) {
-        return nodeSources != null && nodeSources.size() == 1 && nodeSources.get(0).getDeploying().size() != 0;
-    }
-
     private void updateCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
         processNodeSources(compactPanel, nodeSources);
         processNodes(compactPanel, nodes);
