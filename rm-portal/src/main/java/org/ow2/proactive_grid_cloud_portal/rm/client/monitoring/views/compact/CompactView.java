@@ -189,10 +189,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
      */
     @Override
     public void updateByDelta(List<NodeSource> nodeSources, List<Node> nodes) {
-        /* first call : create the components */
-        if (nodeSourceAdded(nodeSources)) {
-            treeView.sortCompactView(this);
-        }
         List<NodeSource> currentNodeSources = nodeSourceDeleted(nodeSources) ? nodeSources
                                                                              : getSortedNodeSourceList(nodeSources);
         if (this.compactPanel == null) {
@@ -229,10 +225,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private boolean nodeSourceDeleted(List<NodeSource> nodeSources) {
         return nodeSources == null || nodeSources.isEmpty() || nodeSources.stream().allMatch(NodeSource::isRemoved);
-    }
-
-    private boolean nodeSourceAdded(List<NodeSource> nodeSources) {
-        return nodeSources != null && nodeSources.size() == 1 && nodeSources.get(0).getDeploying().size() != 0;
     }
 
     private void updateCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {

@@ -499,13 +499,15 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     void processNodeSources(List<NodeSource> nodeSources, List<Node> nodes) {
-
         addNodesToNodeSources(nodeSources, nodes);
         if (!nodeSources.isEmpty()) {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
                     removeNodeSource(nodeSource);
                 } else {
+                    if (nodeSource.isUndeployed() || nodeSource.isDeployed()) {
+                        removeNodeSource(nodeSource);
+                    }
                     addNodeSourceIfNotExists(nodeSource);
                     updateNodeSourceDescriptionIfChanged(nodeSource);
                     updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);

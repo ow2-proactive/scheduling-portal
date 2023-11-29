@@ -146,6 +146,14 @@ public class NodeSource {
         return "NODESOURCE_DEFINED".equalsIgnoreCase(eventType);
     }
 
+    public boolean isUndeployed() {
+        return "NODESOURCE_SHUTDOWN".equalsIgnoreCase(eventType);
+    }
+
+    public boolean isDeployed() {
+        return "NODESOURCE_CREATED".equalsIgnoreCase(eventType);
+    }
+
     public boolean isChanged() {
         return !isAdded() && !isRemoved();
     }
