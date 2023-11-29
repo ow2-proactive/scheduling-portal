@@ -504,15 +504,15 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             for (NodeSource nodeSource : nodeSources) {
                 if (nodeSource.isRemoved()) {
                     removeNodeSource(nodeSource);
-                    continue;
+                } else {
+                    if (nodeSource.isUndeployed() || nodeSource.isDeployed()) {
+                        removeNodeSource(nodeSource);
+                    }
+                    addNodeSourceIfNotExists(nodeSource);
+                    updateNodeSourceDescriptionIfChanged(nodeSource);
+                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                    changeNodeSourceStatusIfChanged(nodeSource);
                 }
-                if (nodeSource.isUndeployed() || nodeSource.isDeployed()) {
-                    removeNodeSource(nodeSource);
-                }
-                addNodeSourceIfNotExists(nodeSource);
-                updateNodeSourceDescriptionIfChanged(nodeSource);
-                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
-                changeNodeSourceStatusIfChanged(nodeSource);
             }
         }
     }
