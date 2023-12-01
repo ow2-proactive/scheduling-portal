@@ -214,6 +214,15 @@ public class RMPage implements LogListener {
         checkBoxes.setNumCols(8);
         checkBoxes.setItems(c1);
 
+        final CheckboxItem hideEmpty = new CheckboxItem("emptyNs", "Hide Empty Node Sources");
+        hideEmpty.setValue(false);
+        hideEmpty.addChangedHandler(event -> treeView.setNotEmptyNsView(hideEmpty.getValueAsBoolean()));
+
+        DynamicForm hideEmptyForm = new DynamicForm();
+        hideEmptyForm.setNumCols(8);
+        hideEmptyForm.setTop(20);
+        hideEmptyForm.setItems(hideEmpty);
+
         ImgButton closeButton = new ImgButton();
         closeButton.setWidth(16);
         closeButton.setHeight(16);
@@ -229,6 +238,7 @@ public class RMPage implements LogListener {
         final HLayout controls = new HLayout();
         controls.addMember(expandButton);
         controls.addMember(closeButton);
+        controls.addMember(hideEmptyForm);
         controls.addMember(new LayoutSpacer());
         controls.addMember(checkBoxes);
         controls.setLayoutAlign(VerticalAlignment.CENTER);

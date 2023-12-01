@@ -109,9 +109,11 @@ public class CompactFlowPanel extends FlowPanel {
     }
 
     public void redrawNode(NodeSource.Host.Node node) {
-        int index = indexOf(node).get();
-        Tile nt = ((Tile) this.getWidget(index));
-        nt.refresh(node);
+        if (indexOf(node).isPresent()) {
+            int index = indexOf(node).get();
+            Tile nt = ((Tile) this.getWidget(index));
+            nt.refresh(node);
+        }
     }
 
     public void drawNode(Tile nodeTile, Tile hostTile) {
