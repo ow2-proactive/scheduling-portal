@@ -1438,6 +1438,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                                                                 LogModel.getInstance()
                                                                                         .logMessage("Successfully undeployed node source " +
                                                                                                     nodeSourceName);
+                                                                                TreeView.undeploy(nodeSourceName);
                                                                             }
                                                                         });
                                               }

@@ -146,8 +146,12 @@ public class NodeSource {
         return "NODESOURCE_DEFINED".equalsIgnoreCase(eventType);
     }
 
-    public boolean isUndeployed() {
+    public boolean isShutdown() {
         return "NODESOURCE_SHUTDOWN".equalsIgnoreCase(eventType);
+    }
+
+    public boolean isUndeployed() {
+        return nodeSourceStatus.equals(NodeSourceStatus.NODES_UNDEPLOYED);
     }
 
     public boolean isDeployed() {
@@ -204,6 +208,10 @@ public class NodeSource {
         } else {
             return RMImages.instance.nodesource_undeployed().getSafeUri().asString();
         }
+    }
+
+    public void resetDeploying() {
+        deploying = new HashMap<>();
     }
 
     public static class Host {
