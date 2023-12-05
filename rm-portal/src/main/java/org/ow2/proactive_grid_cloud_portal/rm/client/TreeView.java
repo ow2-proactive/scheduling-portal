@@ -548,8 +548,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 updateNodeSourceDisplayedNumberOfNodesIfChanged(filteredNodeSources.get(0));
             }
             NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
-            nodeSource.getDeploying().remove(node.getNodeUrl());
-            updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+            if (nodeSource != null) {
+                nodeSource.getDeploying().remove(node.getNodeUrl());
+                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+            }
             if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
                 currentTreeNodes.remove(parent.getAttribute(NODE_ID));
