@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
 
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TreeModelType;
 import com.smartgwt.client.widgets.Canvas;
@@ -285,10 +286,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         ownerField.setWidth("10%");
         TreeGridField numberOfNodesField = new TreeGridField(NUMBER_OF_NODES);
         numberOfNodesField.setAlign(Alignment.CENTER);
+        numberOfNodesField.setType(ListGridFieldType.INTEGER);
         numberOfNodesField.setCanSort(true);
         numberOfNodesField.setWidth("8%");
         TreeGridField numberOfBusyNodesField = new TreeGridField(NUMBER_OF_BUSY_NODES);
         numberOfBusyNodesField.setAlign(Alignment.CENTER);
+        numberOfBusyNodesField.setType(ListGridFieldType.INTEGER);
         numberOfBusyNodesField.setCanSort(true);
         numberOfBusyNodesField.setWidth("8%");
         TreeGridField percentageOfBusyNodesField = new TreeGridField(PERCENTAGE_OF_BUSY_NODES);
@@ -297,6 +300,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         percentageOfBusyNodesField.setWidth("8%");
         TreeGridField numberOfDeplNodesField = new TreeGridField(NUMBER_OF_DEPLOYING_NODES);
         numberOfDeplNodesField.setAlign(Alignment.CENTER);
+        numberOfDeplNodesField.setType(ListGridFieldType.INTEGER);
         numberOfDeplNodesField.setCanSort(true);
         numberOfDeplNodesField.setWidth("8%");
         treeGrid.setFields(field,
@@ -667,9 +671,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TNS currentNs = (TNS) currentTreeNodes.get(nodeSource.getSourceName());
         NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource.getHosts()
                                                                                                                            .values());
-        String numberOfNodes = nodeSource.isUndeployed() ? "0"
-                                                         : String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes());
-        if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(numberOfNodes)) {
+        int numberOfNodes = nodeSource.isUndeployed() ? 0 : nodeSourceDisplayedNumberOfNodes.getNumberOfNodes();
+        if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(numberOfNodes))) {
             currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
             if (nodeSourceDisplayedNumberOfNodes.getNumberOfNodes() != 0) {
                 currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, 0);
@@ -680,8 +683,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
         if (!currentNs.getAttribute(NUMBER_OF_BUSY_NODES)
                       .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()))) {
-            currentNs.setAttribute(NUMBER_OF_BUSY_NODES,
-                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()));
+            currentNs.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
@@ -697,7 +699,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         if (!currentNs.getAttribute(NUMBER_OF_DEPLOYING_NODES)
                       .equals(String.valueOf(nodeSource.getDeploying().size())) &&
             currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(0))) {
-            currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, String.valueOf(nodeSource.getDeploying().size()));
+            currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, nodeSource.getDeploying().size());
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
