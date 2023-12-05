@@ -451,13 +451,21 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
             if (nodeSource != null && node.isDeployingNode() &&
                 !nodeSource.getDeploying().containsKey(node.getNodeUrl())) {
-                nodeSource.getDeploying().put(node.getNodeUrl(), node);
-                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                addDeployingNode(nodeSource, node);
             } else if (nodeSource != null && !node.isDeployingNode()) {
-                nodeSource.getDeploying().remove(node.getNodeUrl());
-                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                removeDeployingNode(nodeSource, node);
             }
         }
+    }
+
+    private void addDeployingNode(NodeSource nodeSource, Node node) {
+        nodeSource.getDeploying().put(node.getNodeUrl(), node);
+        updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+    }
+
+    private void removeDeployingNode(NodeSource nodeSource, Node node) {
+        nodeSource.getDeploying().remove(node.getNodeUrl());
+        updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
     }
 
     private NodeSource getNodeSourceBySourceName(String sourceName) {
@@ -478,8 +486,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 currentNodes.remove(node);
                 currentNodes.add(node);
                 if (nodeSource != null && !nodeSource.getDeploying().containsKey(node.getNodeUrl())) {
-                    nodeSource.getDeploying().put(node.getNodeUrl(), node);
-                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                    addDeployingNode(nodeSource, node);
                 }
             } else {
                 final Host host = new Host(node.getHostName(), node.getSourceName());
@@ -507,8 +514,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 currentNodes.remove(node);
                 currentNodes.add(node);
                 if (nodeSource != null) {
-                    nodeSource.getDeploying().remove(node.getNodeUrl());
-                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                    removeDeployingNode(nodeSource, node);
                 }
             }
         }
@@ -549,8 +555,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             }
             NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
             if (nodeSource != null) {
-                nodeSource.getDeploying().remove(node.getNodeUrl());
-                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                removeDeployingNode(nodeSource, node);
             }
             if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
