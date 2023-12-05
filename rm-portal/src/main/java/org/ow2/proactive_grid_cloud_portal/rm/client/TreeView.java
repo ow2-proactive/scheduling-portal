@@ -448,11 +448,28 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 }
                 updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSources.get(0));
             }
+            NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
+            if (nodeSource != null && node.isDeployingNode() &&
+                !nodeSource.getDeploying().containsKey(node.getNodeUrl())) {
+                nodeSource.getDeploying().put(node.getNodeUrl(), node);
+                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+            } else if (nodeSource != null && !node.isDeployingNode()) {
+                nodeSource.getDeploying().remove(node.getNodeUrl());
+                updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+            }
         }
+    }
+
+    private NodeSource getNodeSourceBySourceName(String sourceName) {
+        return currentNodeSources.stream()
+                                 .filter(nodeSource -> nodeSource.getSourceName().equals(sourceName))
+                                 .findFirst()
+                                 .orElse(null);
     }
 
     void addNodeIfNotExists(Node node) {
         if (!currentTreeNodes.containsKey(node.getNodeUrl())) { // if there is no node
+            NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
             if (node.isDeployingNode()) {
                 TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
                 nodeTreeNode.setIcon(node.getIcon());
@@ -460,6 +477,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 currentTreeNodes.put(node.getNodeUrl(), nodeTreeNode);
                 currentNodes.remove(node);
                 currentNodes.add(node);
+                if (nodeSource != null && !nodeSource.getDeploying().containsKey(node.getNodeUrl())) {
+                    nodeSource.getDeploying().put(node.getNodeUrl(), node);
+                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                }
             } else {
                 final Host host = new Host(node.getHostName(), node.getSourceName());
 
@@ -485,6 +506,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 currentTreeNodes.put(node.getNodeUrl(), nodeTreeNode);
                 currentNodes.remove(node);
                 currentNodes.add(node);
+                if (nodeSource != null) {
+                    nodeSource.getDeploying().remove(node.getNodeUrl());
+                    updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
+                }
             }
         }
     }
@@ -522,6 +547,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 }
                 updateNodeSourceDisplayedNumberOfNodesIfChanged(filteredNodeSources.get(0));
             }
+            NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
+            nodeSource.getDeploying().remove(node.getNodeUrl());
+            updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
             if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
                 currentTreeNodes.remove(parent.getAttribute(NODE_ID));
@@ -562,9 +590,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         for (Node node : nodes) {
             // as deploying node
             if (node.isDeployingNode()) {
-
-                nodeSource.getDeploying().put(node.getNodeUrl(), node);
-
+                if (!nodeSource.getDeploying().containsKey(node.getNodeUrl())) {
+                    nodeSource.getDeploying().put(node.getNodeUrl(), node);
+                }
             } else { // as already deployed node
                 Host host = nodeSource.getHosts().get(node.getHostName());
 
@@ -578,6 +606,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 if (node.isVirtual()) {
                     host.setVirtual(true);
                 }
+                nodeSource.getDeploying().remove(node.getNodeUrl());
             }
         }
     }
@@ -631,10 +660,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TNS currentNs = (TNS) currentTreeNodes.get(nodeSource.getSourceName());
         NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource.getHosts()
                                                                                                                            .values());
-        if (!currentNs.getAttribute(NUMBER_OF_NODES)
-                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()))) {
-            currentNs.setAttribute(NUMBER_OF_NODES,
-                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes()));
+        String numberOfNodes = nodeSource.isUndeployed() ? "0"
+                                                         : String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfNodes());
+        if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(numberOfNodes)) {
+            currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
             if (nodeSourceDisplayedNumberOfNodes.getNumberOfNodes() != 0) {
                 currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, 0);
             }
@@ -666,8 +695,18 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
         }
-        if (notEmptyNsView && nodeSource.isUndeployed()) {
+        sortNotEmptyNsView(nodeSource);
+    }
+
+    private void sortNotEmptyNsView(NodeSource nodeSource) {
+        if (notEmptyNsView && isHidden(nodeSource)) {
             hideNodeSource(nodeSource);
+            sortCompactView(compactView,
+                            currentNodeSources.stream()
+                                              .filter(ns -> !ns.getHosts().isEmpty() || !ns.getDeploying().isEmpty())
+                                              .collect(Collectors.toList()));
+        } else if (notEmptyNsView) {
+            showNodeSource(nodeSource);
             sortCompactView(compactView,
                             currentNodeSources.stream()
                                               .filter(ns -> !ns.getHosts().isEmpty() || !ns.getDeploying().isEmpty())
