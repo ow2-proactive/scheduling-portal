@@ -203,11 +203,23 @@ public class NodeSource {
     }
 
     public String getIcon() {
-        if (nodeSourceStatus.equals(NodeSourceStatus.NODES_DEPLOYED)) {
-            return RMImages.instance.nodesource_deployed().getSafeUri().asString();
-        } else {
-            return RMImages.instance.nodesource_undeployed().getSafeUri().asString();
+        String keyword = "Infrastructure: ";
+        String infrastructureName = "";
+
+        int keywordIndex = sourceDescription.indexOf(keyword);
+
+        if (keywordIndex != -1) {
+            infrastructureName = sourceDescription.substring(keywordIndex + keyword.length());
+            int endIndex = infrastructureName.indexOf(" ");
+
+            if (endIndex == -1) {
+                endIndex = infrastructureName.length();
+            }
+            
+            infrastructureName = infrastructureName.substring(0, endIndex);
         }
+
+        return NodeSourceIconProvider.getIconUri(infrastructureName, this.nodeSourceStatus);
     }
 
     public void resetDeploying() {
