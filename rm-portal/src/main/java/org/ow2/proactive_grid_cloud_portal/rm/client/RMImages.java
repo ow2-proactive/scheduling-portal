@@ -133,4 +133,87 @@ public interface RMImages extends ClientBundle {
     @Source("images/padlock.png")
     ImageResource padlock();
 
+    @Source("images/Azure_VM.png")
+    ImageResource azureVm();
+
+    @Source("images/Azure_VM_undeployed.png")
+    ImageResource azureVmUndeployed();
+
+    @Source("images/Azure_Scale_Set.png")
+    ImageResource azureScaleSet();
+
+    @Source("images/Azure_Scale_Set_undeployed.png")
+    ImageResource azureScaleSetUndeployed();
+
+    @Source("images/ssh.png")
+    ImageResource sshv2();
+
+    @Source("images/ssh_undeployed.png")
+    ImageResource sshv2Undeployed();
+
+    @Source("images/EC2_vm.png")
+    ImageResource awsEc2Vm();
+
+    @Source("images/EC2_vm_undeployed.png")
+    ImageResource awsEc2Vmundeployed();
+
+    @Source("images/EC2_autoscaling.png")
+    ImageResource awsEc2Autoscaling();
+
+    @Source("images/EC2_autoscaling_undeployed.png")
+    ImageResource awsEc2AutoscalingUndeployed();
+
+    @Source("images/CLI.png")
+    ImageResource CLI();
+
+    @Source("images/CLI_undeployed.png")
+    ImageResource CLIUndeployed();
+
+    @Source("images/generic_batch.png")
+    ImageResource genericBatch();
+
+    @Source("images/generic_batch_undeployed.png")
+    ImageResource genericBatchUndeployed();
+
+    @Source("images/Vmware.png")
+    ImageResource vmWare();
+
+    @Source("images/Vmware_undeployed.png")
+    ImageResource vmWareUndeployed();
+
+    @Source("images/local.png")
+    ImageResource local();
+
+    @Source("images/local_undeployed.png")
+    ImageResource localUndeployed();
+
+    @Source("images/kubernetes.png")
+    ImageResource kubernetes();
+
+    @Source("images/kubernetes_undeployed.png")
+    ImageResource kubernetesUndeployed();
+
+    @Source("images/openstack.png")
+    ImageResource openStack();
+
+    @Source("images/openstack_undeployed.png")
+    ImageResource openStackUndeployed();
+
+    @Source("images/native_scheduler.png")
+    ImageResource nativeScheduler();
+
+    @Source("images/native_scheduler_undeployed.png")
+    ImageResource nativeSchedulerUndeployed();
+
+    @Source("images/ibm_LSF.png")
+    ImageResource ibmLsf();
+
+    @Source("images/ibm_LSF_undeployed.png")
+    ImageResource ibmLsfUndeployed();
+
+    @Source("images/google_compute_engine.png")
+    ImageResource gce();
+
+    @Source("images/google_compute_engine_undeployed.png")
+    ImageResource gceUndeployed();
 }
