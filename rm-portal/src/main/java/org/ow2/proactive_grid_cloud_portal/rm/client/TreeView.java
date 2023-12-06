@@ -676,9 +676,6 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         int numberOfNodes = nodeSource.isUndeployed() ? 0 : nodeSourceDisplayedNumberOfNodes.getNumberOfNodes();
         if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(numberOfNodes))) {
             currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
-            if (nodeSourceDisplayedNumberOfNodes.getNumberOfNodes() != 0 && nodeSource.getDeploying().isEmpty()) {
-                currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, 0);
-            }
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
