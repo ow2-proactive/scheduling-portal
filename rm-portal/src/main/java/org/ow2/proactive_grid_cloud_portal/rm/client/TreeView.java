@@ -98,7 +98,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private final List<Node> currentNodes;
 
-    private static boolean notEmptyNsView = false;
+    private static boolean hideEmptyNs = false;
 
     /**
      * tree view
@@ -382,7 +382,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     public void setNotEmptyNsView(boolean value) {
-        notEmptyNsView = value;
+        hideEmptyNs = value;
         if (value) {
             currentNodeSources.stream()
                               .filter(this::isHidden)
@@ -412,6 +412,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.refreshFields();
 
         processNodes(nodes);
+
+        treeGrid.refreshFields();
 
         treeGrid.markForRedraw();
     }
@@ -674,9 +676,6 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         int numberOfNodes = nodeSource.isUndeployed() ? 0 : nodeSourceDisplayedNumberOfNodes.getNumberOfNodes();
         if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(numberOfNodes))) {
             currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
-            if (nodeSourceDisplayedNumberOfNodes.getNumberOfNodes() != 0) {
-                currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, 0);
-            }
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
@@ -697,8 +696,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentNodeSources.add(nodeSource);
         }
         if (!currentNs.getAttribute(NUMBER_OF_DEPLOYING_NODES)
-                      .equals(String.valueOf(nodeSource.getDeploying().size())) &&
-            currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(0))) {
+                      .equals(String.valueOf(nodeSource.getDeploying().size()))) {
             currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, nodeSource.getDeploying().size());
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
@@ -708,13 +706,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     private void sortNotEmptyNsView(NodeSource nodeSource) {
-        if (notEmptyNsView && isHidden(nodeSource)) {
+        if (hideEmptyNs && isHidden(nodeSource)) {
             hideNodeSource(nodeSource);
             sortCompactView(compactView,
                             currentNodeSources.stream()
                                               .filter(ns -> !ns.getHosts().isEmpty() || !ns.getDeploying().isEmpty())
                                               .collect(Collectors.toList()));
-        } else if (notEmptyNsView) {
+        } else if (hideEmptyNs) {
             showNodeSource(nodeSource);
             sortCompactView(compactView,
                             currentNodeSources.stream()
@@ -776,7 +774,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private boolean isHidden(NodeSource nodeSource) {
         return currentTreeNodes.containsKey(nodeSource.getSourceName()) &&
-               ((nodeSource.getHosts().isEmpty() && nodeSource.getDeploying().isEmpty()) || nodeSource.isUndeployed());
+               (((nodeSource.getHosts().isEmpty() ||
+                  nodeSource.getHosts().values().stream().allMatch(host -> host.getNodes().isEmpty())) &&
+                 nodeSource.getDeploying().isEmpty()) ||
+                nodeSource.isUndeployed());
     }
 
     private void removeCurrentNodeSource(NodeSource nodeSource) {
