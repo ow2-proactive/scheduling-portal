@@ -215,7 +215,7 @@ public class NodeSource {
             if (endIndex == -1) {
                 endIndex = infrastructureName.length();
             }
-            
+
             infrastructureName = infrastructureName.substring(0, endIndex);
         }
 
