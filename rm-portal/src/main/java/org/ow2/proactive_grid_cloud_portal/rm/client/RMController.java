@@ -388,11 +388,11 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.updater = new Timer() {
             @Override
             public void run() {
+                if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
+                    teardown("Duplicate session detected!<br>" +
+                             "Another tab or window in this browser is accessing this page.");
+                }
                 try {
-                    if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
-                        teardown("Duplicate session detected!<br>" +
-                                 "Another tab or window in this browser is accessing this page.");
-                    }
                     fetchRMMonitoring();
                 } catch (Exception e) {
                     if (e.getStackTrace().length == 0) {
