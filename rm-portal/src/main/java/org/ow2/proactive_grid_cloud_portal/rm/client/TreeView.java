@@ -563,7 +563,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             if (nodeSource != null) {
                 removeDeployingNode(nodeSource, node);
             }
-            if (!node.isDeployingNode() && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
+            if (!node.isDeployingNode() && parent != null && tree.contains(parent) && !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
                 tree.remove(parent);
                 currentTreeNodes.remove(parent.getAttribute(NODE_ID));
             }
