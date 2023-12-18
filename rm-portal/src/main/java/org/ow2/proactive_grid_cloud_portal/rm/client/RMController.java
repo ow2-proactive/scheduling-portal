@@ -388,13 +388,19 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.updater = new Timer() {
             @Override
             public void run() {
-
                 if (!localSessionNum.equals(Cookies.getCookie(LOCAL_SESSION_COOKIE))) {
                     teardown("Duplicate session detected!<br>" +
                              "Another tab or window in this browser is accessing this page.");
                 }
-                fetchRMMonitoring();
-
+                try {
+                    fetchRMMonitoring();
+                } catch (Exception e) {
+                    if (e.getStackTrace().length == 0) {
+                        e.fillInStackTrace();
+                    }
+                    LogModel.getInstance()
+                            .logImportantMessage("Exception thrown while Autorefresh fetch RMMonitoring" + e);
+                }
             }
         };
         this.updater.schedule(RMConfig.get().getClientRefreshTime());
@@ -402,7 +408,15 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         this.statsUpdater = new Timer() {
             @Override
             public void run() {
-                fetchStatHistory();
+                try {
+                    fetchStatHistory();
+                } catch (Exception e) {
+                    if (e.getStackTrace().length == 0) {
+                        e.fillInStackTrace();
+                    }
+                    LogModel.getInstance()
+                            .logImportantMessage("Exception thrown while Autorefresh fetch StatHistory." + e);
+                }
             }
         };
         this.statsUpdater.scheduleRepeating(RMConfig.get().getStatisticsRefreshTime());
@@ -643,7 +657,16 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         model.setNodes(newNodeSources);
         model.nodesUpdate(newNodeSources);
-        model.updateByDelta(nodeSourceList, nodeList);
+        try {
+            model.updateByDelta(nodeSourceList, nodeList);
+        } catch (Exception e) {
+            if (e.getStackTrace().length == 0) {
+                e.fillInStackTrace();
+            }
+            LogModel.getInstance()
+                    .logImportantMessage("An Error occurred while the Controller tried to update NodeSources after HTTP request");
+            throw e;
+        }
 
         recalculatePhysicalVirtualHosts();
 
