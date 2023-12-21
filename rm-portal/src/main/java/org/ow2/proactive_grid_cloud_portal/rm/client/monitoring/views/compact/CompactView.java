@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
@@ -225,8 +224,6 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                                                 .findFirst()
                                                 .ifPresent(sortedNodeSources::add));
         }
-        LogModel.getInstance().logCriticalMessage("sorted last compact " +
-                                                  sortedNodeSources.get(sortedNodeSources.size() - 1).getSourceName());
         return sortedNodeSources;
     }
 
