@@ -65,6 +65,8 @@ public class CompactFlowPanel extends FlowPanel {
 
     private NodeRemover nodeRemover;
 
+    private int tileIndex = 0;
+
     public CompactFlowPanel() {
         super();
         this.setWidth("100%");
@@ -88,7 +90,8 @@ public class CompactFlowPanel extends FlowPanel {
 
     public void drawNodeSource(Tile nsTile) {
         model.add(new HierarchyNodeSource(nsTile.getNodesource()));
-        this.insert(nsTile, indexOf(nsTile.getNodesource()).get());
+        this.insert(nsTile, tileIndex);
+        tileIndex++;
     }
 
     public void redrawNodeSource(NodeSource nodeSource) {
@@ -186,6 +189,10 @@ public class CompactFlowPanel extends FlowPanel {
                 index += hierarchyNodeSource.getTilesNumber();
             }
         }
+    }
+
+    public void resetIndex() {
+        tileIndex = 0;
     }
 
     public void remove(NodeSource nodeSource) {

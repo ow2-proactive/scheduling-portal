@@ -28,8 +28,10 @@ package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 import static org.ow2.proactive_grid_cloud_portal.rm.client.TreeView.NODE_SOURCES;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
@@ -88,6 +90,8 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private Host previousSelectedHost;
 
     private Node previousSelectedNode;
+
+    private final Map<NodeSource, NodeSource> nodeSourceTile = new HashMap<>();
 
     public CompactView(RMController controller) {
         this.controller = controller;
@@ -236,6 +240,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         if (currentNodeSources != null) {
             currentNodeSources.forEach(nodeSource -> removeNodeSource(compactPanel, nodeSource));
         }
+        compactPanel.resetIndex();
     }
 
     private void updateMyNodesCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
@@ -314,14 +319,27 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private void addNodeSourceIfNotExists(CompactFlowPanel flow, NodeSource nodeSource) {
         if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
-            Tile nsTile = new Tile(this, flow, nodeSource);
+            Tile nsTile = new Tile(this, flow, nodeSource, false);
             flow.drawNodeSource(nsTile);
+            nodeSourceTile.put(nsTile.getNodesource(), drawEmptySpace(flow));
         }
+    }
+
+    private NodeSource drawEmptySpace(CompactFlowPanel flow) {
+        NodeSource emptyNs = new NodeSource("");
+        Tile emptyTile = new Tile(this, flow, emptyNs, true);
+        flow.drawNodeSource(emptyTile);
+        return emptyNs;
     }
 
     private void removeNodeSource(CompactFlowPanel flow, NodeSource nodeSource) {
         if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
             flow.remove(nodeSource);
+            NodeSource emptyNs = nodeSourceTile.get(nodeSource);
+            if (flow.isNodeSourceDrawn(emptyNs.getSourceName())) {
+                flow.remove(emptyNs);
+            }
+            nodeSourceTile.remove(nodeSource);
         }
     }
 

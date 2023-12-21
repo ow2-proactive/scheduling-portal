@@ -216,4 +216,7 @@ public interface RMImages extends ClientBundle {
 
     @Source("images/google_compute_engine_undeployed.png")
     ImageResource gceUndeployed();
+
+    @Source("images/ns_space.png")
+    ImageResource ns_space();
 }

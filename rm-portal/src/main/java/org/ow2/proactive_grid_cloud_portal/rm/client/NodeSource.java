@@ -63,6 +63,8 @@ public class NodeSource {
 
     public NodeSource(String sourceName) {
         this.sourceName = sourceName;
+        this.hosts = new HashMap<>();
+        this.deploying = new HashMap<>();
     }
 
     NodeSource(String sourceName, String sourceDescription, LinkedHashMap<String, String> additionalInformation,
@@ -203,6 +205,9 @@ public class NodeSource {
     }
 
     public String getIcon() {
+        if (sourceName.equals("")) {
+            return RMImages.instance.ns_space().getSafeUri().asString();
+        }
         String keyword = "Infrastructure: ";
         String infrastructureName = "";
 
