@@ -25,14 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
@@ -127,10 +120,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     private class TNode extends TreeNode {
         Node rmNode = null;
 
-        TNode(String name, Node node) {
+        String hostKey = null;
+
+        TNode(String name, Node node, String hostKey) {
             super(name);
             super.setAttribute(NODE_SOURCES, name);
             this.rmNode = node;
+            this.hostKey = hostKey;
             this.setAttribute(NODE_ID, node.getNodeUrl());
         }
     }
@@ -485,7 +481,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         if (!currentTreeNodes.containsKey(node.getNodeUrl())) { // if there is no node
             NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
             if (node.isDeployingNode()) {
-                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
+                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node, null);
                 nodeTreeNode.setIcon(node.getIcon());
                 tree.add(nodeTreeNode, this.currentTreeNodes.get(node.getSourceName()));
                 currentTreeNodes.put(node.getNodeUrl(), nodeTreeNode);
@@ -505,21 +501,41 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     } else {
                         hostTreeNode.setIcon(RMImages.instance.host_16().getSafeUri().asString());
                     }
+                    TreeNode tnodeNS = currentTreeNodes.get(node.getSourceName());
 
-                    tree.add(hostTreeNode, currentTreeNodes.get(node.getSourceName()));
+                    /*
+                     * ONLY If Hide empty NS is TRUE and if the node is the first node of the NS to
+                     * be free
+                     * , then the NS TreeNode was removed from the Tree.
+                     * We first need to add the NS node in the tree.
+                     * 
+                     * Explanation. At start, NS is empty.
+                     * 
+                     * First node deploying:
+                     * - Tree is empty -> first node deploys -> Tree contains NS + deploying node
+                     * First node becomes available:
+                     * - Deploying node is removed -> NS is now empty and removed from Tree -> Tree
+                     * is now empty.
+                     * - Same node, now free, is added to NS -> First add again NS TreeNode -> Add
+                     * free node in Tree
+                     */
+                    if (Arrays.stream(tree.getAllNodes()).noneMatch(pNode -> pNode == tnodeNS)) {
+                        tree.add(tnodeNS, tree.getRoot());
+                    }
+                    tree.add(hostTreeNode, tnodeNS);
                     currentTreeNodes.put(host.getId(), hostTreeNode);
                     currentNodes.remove(node);
                     currentNodes.add(node);
                 }
 
-                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node);
+                TNode nodeTreeNode = new TNode(node.getNodeUrl(), node, host.getId());
                 nodeTreeNode.setAttribute("nodeState", node.getNodeState().toString());
                 nodeTreeNode.setIcon(node.getIcon());
                 tree.add(nodeTreeNode, currentTreeNodes.get(host.getId()));
                 currentTreeNodes.put(node.getNodeUrl(), nodeTreeNode);
                 currentNodes.remove(node);
                 currentNodes.add(node);
-                if (nodeSource != null) {
+                if (nodeSource != null && node.isDeployingNode()) {
                     removeDeployingNode(nodeSource, node);
                 }
             }
@@ -560,16 +576,27 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                 updateNodeSourceDisplayedNumberOfNodesIfChanged(filteredNodeSources.get(0));
             }
             NodeSource nodeSource = getNodeSourceBySourceName(node.getSourceName());
-            if (nodeSource != null) {
+            if (nodeSource != null && node.isDeployingNode()) {
                 removeDeployingNode(nodeSource, node);
             }
-            if (node != null && parent != null && !node.isDeployingNode() && tree.contains(parent) &&
-                !tree.hasChildren(parent)) { // thus this node has a host, which might be removed
-                tree.remove(parent);
-                currentTreeNodes.remove(parent.getAttribute(NODE_ID));
-            }
-        }
 
+            currentTreeNodes.put(node.getNodeUrl(), toRemove);
+
+            if (!node.isDeployingNode() && isLastNodeInHost((TNode) toRemove)) { // thus this node has a host, which might be removed
+                tree.remove(parent);
+                currentTreeNodes.remove(((TNode) toRemove).hostKey);
+            }
+            currentTreeNodes.remove(node.getNodeUrl());
+        }
+    }
+
+    private boolean isLastNodeInHost(TNode toRemove) {
+        final String hostKey = toRemove.hostKey;
+        return currentTreeNodes.values()
+                               .stream()
+                               .filter(tNode -> tNode instanceof TNode)
+                               .filter(tNode -> hostKey.equals(((TNode) tNode).hostKey))
+                               .count() == 1;
     }
 
     void processNodeSources(List<NodeSource> nodeSources, List<Node> nodes) {
