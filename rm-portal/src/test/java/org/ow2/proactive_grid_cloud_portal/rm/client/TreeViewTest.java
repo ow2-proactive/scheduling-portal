@@ -87,10 +87,10 @@ public class TreeViewTest {
         treeView.processNodeSources(nodeSourceList, nodeList);
 
         verify(treeView.tree, times(2)).add(any(TreeNode.class), any(TreeNode.class));
-
+        when(treeView.tree.getAllNodes()).thenReturn(new TreeNode[0]);
         treeView.processNodes(nodeList);
 
-        verify(treeView.tree, times(33)).add(any(TreeNode.class), any(TreeNode.class));
+        verify(treeView.tree, times(34)).add(any(TreeNode.class), any(TreeNode.class));
 
         assertEquals(33, treeView.currentTreeNodes.size());
 
@@ -98,9 +98,9 @@ public class TreeViewTest {
         nodeSource.setEventType("NODESOURCE_REMOVED");
 
         ArgumentCaptor<TreeNode> captor = ArgumentCaptor.forClass(TreeNode.class);
-        verify(treeView.tree, times(33)).add(captor.capture(), any(TreeNode.class));
+        verify(treeView.tree, times(34)).add(captor.capture(), any(TreeNode.class));
 
-        assertEquals(33, captor.getAllValues().size());
+        assertEquals(34, captor.getAllValues().size());
 
         final List<TreeNode> allValues = captor.getAllValues();
         allValues.remove(0);
