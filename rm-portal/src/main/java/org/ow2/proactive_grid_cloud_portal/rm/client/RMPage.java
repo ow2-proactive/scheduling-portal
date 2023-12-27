@@ -151,6 +151,8 @@ public class RMPage implements LogListener {
 
     private Label errorLabel = null;
 
+    public static final String NOT_EMPTY_NS_VIEW = "not.empty.ns.view";
+
     RMPage(RMController controller) {
         this.controller = controller;
         LogModel.getInstance().addLogListener(this);
@@ -215,8 +217,11 @@ public class RMPage implements LogListener {
         checkBoxes.setItems(c1);
 
         final CheckboxItem hideEmpty = new CheckboxItem("emptyNs", "Hide Empty Node Sources");
-        hideEmpty.setValue(false);
-        hideEmpty.addChangedHandler(event -> treeView.setNotEmptyNsView(hideEmpty.getValueAsBoolean()));
+        hideEmpty.setValue(Boolean.parseBoolean(Settings.get().getSetting(NOT_EMPTY_NS_VIEW)));
+        hideEmpty.addChangedHandler(event -> {
+            Settings.get().setSetting(NOT_EMPTY_NS_VIEW, String.valueOf(hideEmpty.getValueAsBoolean()));
+            treeView.setNotEmptyNsView(hideEmpty.getValueAsBoolean());
+        });
 
         DynamicForm hideEmptyForm = new DynamicForm();
         hideEmptyForm.setNumCols(8);

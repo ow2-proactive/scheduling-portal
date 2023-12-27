@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
+import static org.ow2.proactive_grid_cloud_portal.rm.client.RMPage.NOT_EMPTY_NS_VIEW;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,6 +94,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     private final List<Node> currentNodes;
 
     private static boolean hideEmptyNs = false;
+
+    private boolean restoreView;
 
     /**
      * tree view
@@ -374,6 +378,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         this.compactView = compactView;
         treeGrid.addSortChangedHandler(sortEvent -> sortCompactView(compactView, currentNodeSources));
         vl.addMember(treeGrid);
+        restoreView = true;
         return vl;
     }
 
@@ -412,6 +417,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.refreshFields();
 
         treeGrid.markForRedraw();
+    }
+
+    public void restoreLocalStorageView() {
+        if (restoreView && Boolean.parseBoolean(Settings.get().getSetting(NOT_EMPTY_NS_VIEW))) {
+            restoreView = false;
+            setNotEmptyNsView(true);
+        }
     }
 
     void processNodes(List<Node> nodes) {
@@ -687,6 +699,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
         }
         if (!currentNs.getAttribute(ACCESS_FIELD).equals(nodeSourceDisplayedDescription.getAccess())) {
             currentNs.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
@@ -701,28 +714,13 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         TNS currentNs = (TNS) currentTreeNodes.get(nodeSource.getSourceName());
         NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource.getHosts()
                                                                                                                            .values());
-        int numberOfNodes = nodeSource.isUndeployed() ? 0 : nodeSourceDisplayedNumberOfNodes.getNumberOfNodes();
-        if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(numberOfNodes))) {
-            currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
-            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
-            currentNodeSources.remove(nodeSource);
-            currentNodeSources.add(nodeSource);
-        }
-        if (!currentNs.getAttribute(NUMBER_OF_BUSY_NODES)
-                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()))) {
-            currentNs.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
-            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
-            currentNodeSources.remove(nodeSource);
-            currentNodeSources.add(nodeSource);
-        }
-        if (!currentNs.getAttribute(PERCENTAGE_OF_BUSY_NODES)
-                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()))) {
-            currentNs.setAttribute(PERCENTAGE_OF_BUSY_NODES,
-                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()));
-            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
-            currentNodeSources.remove(nodeSource);
-            currentNodeSources.add(nodeSource);
-        }
+        updateNodeSourceNumberOfNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
+        updateNodeSourceNumberOfBusyNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
+        updateNodeSourcePercentageOfBusyNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
+        updateNodeSourceNumberOfDeployingNodesIfChanged(nodeSource, currentNs);
+    }
+
+    private void updateNodeSourceNumberOfDeployingNodesIfChanged(NodeSource nodeSource, TNS currentNs) {
         if (!currentNs.getAttribute(NUMBER_OF_DEPLOYING_NODES)
                       .equals(String.valueOf(nodeSource.getDeploying().size()))) {
             currentNs.setAttribute(NUMBER_OF_DEPLOYING_NODES, nodeSource.getDeploying().size());
@@ -730,7 +728,43 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
         }
-        sortNotEmptyNsView(nodeSource);
+    }
+
+    private void updateNodeSourcePercentageOfBusyNodesIfChanged(NodeSource nodeSource, TNS currentNs,
+            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes) {
+        if (!currentNs.getAttribute(PERCENTAGE_OF_BUSY_NODES)
+                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()))) {
+            currentNs.setAttribute(PERCENTAGE_OF_BUSY_NODES,
+                                   String.valueOf(nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes()));
+            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
+            currentNodeSources.remove(nodeSource);
+            currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
+        }
+    }
+
+    private void updateNodeSourceNumberOfBusyNodesIfChanged(NodeSource nodeSource, TNS currentNs,
+            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes) {
+        if (!currentNs.getAttribute(NUMBER_OF_BUSY_NODES)
+                      .equals(String.valueOf(nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes()))) {
+            currentNs.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
+            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
+            currentNodeSources.remove(nodeSource);
+            currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
+        }
+    }
+
+    private void updateNodeSourceNumberOfNodesIfChanged(NodeSource nodeSource, TNS currentNs,
+            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes) {
+        int numberOfNodes = nodeSource.isUndeployed() ? 0 : nodeSourceDisplayedNumberOfNodes.getNumberOfNodes();
+        if (!currentNs.getAttribute(NUMBER_OF_NODES).equals(String.valueOf(numberOfNodes))) {
+            currentNs.setAttribute(NUMBER_OF_NODES, numberOfNodes);
+            currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
+            currentNodeSources.remove(nodeSource);
+            currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
+        }
     }
 
     private void sortNotEmptyNsView(NodeSource nodeSource) {
@@ -746,6 +780,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                             currentNodeSources.stream()
                                               .filter(ns -> !ns.getHosts().isEmpty() || !ns.getDeploying().isEmpty())
                                               .collect(Collectors.toList()));
+        }
+        if (!hideEmptyNs) {
+            treeGrid.sort();
+            sortCompactView(compactView, currentNodeSources);
         }
     }
 

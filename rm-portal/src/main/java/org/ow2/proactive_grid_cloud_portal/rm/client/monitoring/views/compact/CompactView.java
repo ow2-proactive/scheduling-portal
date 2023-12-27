@@ -201,6 +201,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         updateCompactPanel(currentNodeSources, nodes);
         updateMyNodesCompactPanel(currentNodeSources, nodes);
         updateSelection();
+        treeView.restoreLocalStorageView();
     }
 
     private void updateSelection() {
