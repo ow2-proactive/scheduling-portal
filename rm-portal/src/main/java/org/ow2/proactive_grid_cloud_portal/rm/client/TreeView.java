@@ -416,7 +416,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.markForRedraw();
 
         if (isExpandAll) {
-            expandAll();
+            tree.openAll();
         }
     }
 
