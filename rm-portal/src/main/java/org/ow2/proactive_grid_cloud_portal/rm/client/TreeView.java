@@ -621,7 +621,9 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                     if (nodeSource.isShutdown() || nodeSource.isDeployed()) {
                         removeNodeSource(nodeSource);
                     }
-                    addNodeSourceIfNotExists(nodeSource);
+                    boolean newNodeSource = !currentTreeNodes.containsKey(nodeSource.getSourceName());
+                    addNodeSourceIfNotExists(nodeSource, newNodeSource);
+                    sortTreeIfNewNodeSource(nodeSource, newNodeSource, nodeSources.size());
                     updateNodeSourceDescriptionIfChanged(nodeSource);
                     updateNodeSourceDisplayedNumberOfNodesIfChanged(nodeSource);
                     changeNodeSourceStatusIfChanged(nodeSource);
@@ -673,8 +675,14 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         }
     }
 
-    void addNodeSourceIfNotExists(NodeSource nodeSource) {
-        if (!currentTreeNodes.containsKey(nodeSource.getSourceName())) {
+    void sortTreeIfNewNodeSource(NodeSource nodeSource, boolean newNodeSource, int numberOfNs) {
+        if (numberOfNs == 1 && newNodeSource) {
+            sortNotEmptyNsView(nodeSource);
+        }
+    }
+
+    void addNodeSourceIfNotExists(NodeSource nodeSource, boolean newNodeSource) {
+        if (newNodeSource) {
             TNS nsTreeNode = new TNS(nodeSource.getSourceName(), nodeSource);
             nsTreeNode.setIcon(nodeSource.getIcon());
             tree.add(nsTreeNode, this.tree.getRoot());
@@ -693,6 +701,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
         }
         if (!currentNs.getAttribute(POLICY_FIELD).equals(nodeSourceDisplayedDescription.getPolicy())) {
             currentNs.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
@@ -706,6 +715,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
         }
 
     }
@@ -727,6 +737,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             currentTreeNodes.put(nodeSource.getSourceName(), currentNs);
             currentNodeSources.remove(nodeSource);
             currentNodeSources.add(nodeSource);
+            sortNotEmptyNsView(nodeSource);
         }
     }
 
