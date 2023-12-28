@@ -97,6 +97,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private boolean restoreView;
 
+    private boolean isExpandAll = false;
+
     /**
      * tree view
      */
@@ -417,6 +419,10 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         treeGrid.refreshFields();
 
         treeGrid.markForRedraw();
+
+        if (isExpandAll) {
+            tree.openAll();
+        }
     }
 
     public void restoreLocalStorageView() {
@@ -866,10 +872,12 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     void expandAll() {
+        isExpandAll = true;
         tree.openAll();
     }
 
     void closeAll() {
+        isExpandAll = false;
         tree.closeAll();
     }
 
