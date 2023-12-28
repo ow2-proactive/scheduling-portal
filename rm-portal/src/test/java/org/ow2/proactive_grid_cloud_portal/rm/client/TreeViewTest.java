@@ -45,8 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
