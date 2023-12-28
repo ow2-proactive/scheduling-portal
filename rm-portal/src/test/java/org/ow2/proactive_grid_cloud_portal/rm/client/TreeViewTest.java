@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,9 +45,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact.CompactView;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.smartgwt.client.widgets.tree.Tree;
+import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeNode;
 
 
@@ -83,7 +89,8 @@ public class TreeViewTest {
             node.setNodeState(NodeState.FREE);
             return node;
         }).collect(Collectors.toList());
-
+        when(treeView.getTreeGrid()).thenReturn(new TreeGrid());
+        doNothing().when(treeView).sortCompactView(any(CompactView.class), any(LinkedList.class));
         treeView.processNodeSources(nodeSourceList, nodeList);
 
         verify(treeView.tree, times(2)).add(any(TreeNode.class), any(TreeNode.class));

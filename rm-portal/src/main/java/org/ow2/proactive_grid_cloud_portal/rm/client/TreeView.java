@@ -793,7 +793,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                                               .collect(Collectors.toList()));
         }
         if (!hideEmptyNs) {
-            treeGrid.sort();
+            getTreeGrid().sort();
             sortCompactView(compactView, currentNodeSources);
         }
     }
