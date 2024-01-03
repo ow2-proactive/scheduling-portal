@@ -91,7 +91,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private Node previousSelectedNode;
 
-    private final Map<NodeSource, NodeSource> nodeSourceTile = new HashMap<>();
+    private final Map<NodeSource, NodeSource> nodeSourceTiles = new HashMap<>();
 
     public CompactView(RMController controller) {
         this.controller = controller;
@@ -238,10 +238,10 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     }
 
     public void removeNodeSources(List<NodeSource> currentNodeSources) {
-        if (currentNodeSources != null) {
+        if (currentNodeSources != null && !nodeSourceTiles.isEmpty()) {
             currentNodeSources.forEach(nodeSource -> removeNodeSource(compactPanel, nodeSource));
+            compactPanel.resetIndex();
         }
-        compactPanel.resetIndex();
     }
 
     private void updateMyNodesCompactPanel(List<NodeSource> nodeSources, List<Node> nodes) {
@@ -322,7 +322,7 @@ public class CompactView implements NodesListener, NodeSelectedListener {
         if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
             Tile nsTile = new Tile(this, flow, nodeSource, false);
             flow.drawNodeSource(nsTile);
-            nodeSourceTile.put(nsTile.getNodesource(), drawEmptySpace(flow));
+            nodeSourceTiles.put(nsTile.getNodesource(), drawEmptySpace(flow));
         }
     }
 
@@ -336,11 +336,11 @@ public class CompactView implements NodesListener, NodeSelectedListener {
     private void removeNodeSource(CompactFlowPanel flow, NodeSource nodeSource) {
         if (flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
             flow.remove(nodeSource);
-            NodeSource emptyNs = nodeSourceTile.get(nodeSource);
+            NodeSource emptyNs = nodeSourceTiles.get(nodeSource);
             if (flow.isNodeSourceDrawn(emptyNs.getSourceName())) {
                 flow.remove(emptyNs);
             }
-            nodeSourceTile.remove(nodeSource);
+            nodeSourceTiles.remove(nodeSource);
         }
     }
 
