@@ -38,6 +38,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
 import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
+import org.ow2.proactive_grid_cloud_portal.rm.client.NodeSourceStatus;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMController;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMEventDispatcher;
 import org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodeSelectedListener;
@@ -320,15 +321,24 @@ public class CompactView implements NodesListener, NodeSelectedListener {
 
     private void addNodeSourceIfNotExists(CompactFlowPanel flow, NodeSource nodeSource) {
         if (!flow.isNodeSourceDrawn(nodeSource.getSourceName())) {
-            Tile nsTile = new Tile(this, flow, nodeSource, false);
+            Tile nsTile = new Tile(this, flow, nodeSource, false, false);
             flow.drawNodeSource(nsTile);
-            nodeSourceTiles.put(nsTile.getNodesource(), drawEmptySpace(flow));
+            boolean isSmallSpace = (nodeSource.getHosts().isEmpty() && nodeSource.getDeploying().isEmpty()) ||
+                                   nodeSource.getNodeSourceStatus().equals(NodeSourceStatus.NODES_UNDEPLOYED);
+            nodeSourceTiles.put(nsTile.getNodesource(), drawEmptySpace(flow, isSmallSpace));
         }
+    }
+
+    private NodeSource drawEmptySpace(CompactFlowPanel flow, boolean isSmallSpace) {
+        NodeSource emptyNs = new NodeSource("");
+        Tile emptyTile = new Tile(this, flow, emptyNs, true, isSmallSpace);
+        flow.drawNodeSource(emptyTile);
+        return emptyNs;
     }
 
     private NodeSource drawEmptySpace(CompactFlowPanel flow) {
         NodeSource emptyNs = new NodeSource("");
-        Tile emptyTile = new Tile(this, flow, emptyNs, true);
+        Tile emptyTile = new Tile(this, flow, emptyNs, true, false);
         flow.drawNodeSource(emptyTile);
         return emptyNs;
     }
