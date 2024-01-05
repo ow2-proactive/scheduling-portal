@@ -65,14 +65,18 @@ public class Tile extends Image {
 
     private CompactFlowPanel panel;
 
-    Tile(CompactView compactView, CompactFlowPanel panel, NodeSource ns, boolean isEmptySpace) {
+    Tile(CompactView compactView, CompactFlowPanel panel, NodeSource ns, boolean isEmptySpace, boolean isSmallSpace) {
         super(ns.getIcon());
         this.nodesource = ns;
         this.related = ns;
         this.compactView = compactView;
         this.panel = panel;
         if (isEmptySpace) {
-            initEmptySpace();
+            if (isSmallSpace) {
+                initSmallEmptySpace();
+            } else {
+                initEmptySpace();
+            }
         } else {
             init();
         }
@@ -139,6 +143,10 @@ public class Tile extends Image {
 
     private void initEmptySpace() {
         setSize("16px", "16px");
+    }
+
+    private void initSmallEmptySpace() {
+        setSize("6px", "6px");
     }
 
     private void addDomHandler() {
