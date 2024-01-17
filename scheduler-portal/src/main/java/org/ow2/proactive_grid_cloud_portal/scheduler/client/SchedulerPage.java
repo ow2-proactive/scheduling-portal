@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AboutWindow;
+import org.ow2.proactive_grid_cloud_portal.common.client.AccountInfoWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.CredentialsWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
@@ -186,6 +187,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
     /** client settings */
     private SettingsWindow settingsWindow = null;
 
+    /** about this app */
+    private AccountInfoWindow accountInfoWindow = null;
+
     private ManageLabelsWindow manageLabelsWindow = null;
 
     private Menu adminMenu = null;
@@ -266,6 +270,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.aboutWindow = new AboutWindow();
         this.settingsWindow = new SettingsWindow(controller);
         this.manageLabelsWindow = new ManageLabelsWindow(controller);
+        this.accountInfoWindow = new AccountInfoWindow(controller);
 
         Canvas tools = buildTools();
 
@@ -603,6 +608,10 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         errorLabel.setWidth100();
         errorLabel.hide();
 
+        ToolStripButton accountInfoButton = new ToolStripButton("Account Info");
+        accountInfoButton.setTooltip("User's account Info");
+        accountInfoButton.addClickHandler(event -> SchedulerPage.this.accountInfoWindow.show());
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(adminMenuButton);
         tools.addMenuButton(helpMenuButton);
@@ -615,6 +624,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tools.addMember(errorLabel);
         tools.addFill();
         tools.addMember(schedulerStatusLabelLayout);
+        tools.addFill();
+        tools.addMember(accountInfoButton);
 
         // disable all controls at first, next event will sort it out
         this.statusChanged(SchedulerStatus.LOADING);
@@ -882,6 +893,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.aboutWindow.destroy();
         this.settingsWindow.destroy();
         this.manageLabelsWindow.destroy();
+        this.accountInfoWindow.destroy();
 
         this.rootLayout = null;
         this.jobInfo = null;
@@ -889,6 +901,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         this.controller = null;
         this.logWindow = null;
         this.aboutWindow = null;
+        this.accountInfoWindow = null;
     }
 
     @Override

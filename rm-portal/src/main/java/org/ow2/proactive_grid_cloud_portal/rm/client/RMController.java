@@ -356,6 +356,24 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         });
     }
 
+    public void setCurrentUserData(AccountInfoWindow window) {
+        String sessionId = LoginModel.getInstance().getSessionId();
+        rm.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = JSONParser.parseStrict(userData).isObject();
+                window.setCurrentUserData(json);
+                LogModel.getInstance().logImportantMessage("Successfully fetched current user data ");
+            }
+        });
+    }
+
     @Override
     public void logout() {
         LoginModel loginModel = LoginModel.getInstance();
