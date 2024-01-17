@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.AccountInfoWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoadingMessage;
 import org.ow2.proactive_grid_cloud_portal.common.client.LoginPage;
@@ -459,6 +460,24 @@ public class SchedulerController extends Controller implements UncaughtException
                 String login = domain != null ? domain + "\\" + username : username;
                 setLoggedUser(sessionId, login);
                 LogModel.getInstance().logMessage("Successfully fetched current user data ");
+            }
+        });
+    }
+
+    public void setCurrentUserData(AccountInfoWindow window) {
+        String sessionId = LoginModel.getInstance().getSessionId();
+        scheduler.getCurrentUserData(sessionId, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                String msg = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Failed to get current user data " + ": " + msg);
+            }
+
+            @Override
+            public void onSuccess(String userData) {
+                JSONObject json = JSONParser.parseStrict(userData).isObject();
+                window.setCurrentUserData(json);
+                LogModel.getInstance().logImportantMessage("Successfully fetched current user data ");
             }
         });
     }

@@ -124,6 +124,9 @@ public class RMPage implements LogListener {
     /** displayed when critical log events occur */
     private ToolStripButton errorButton = null;
 
+    /** user's account information */
+    private AccountInfoWindow accountInfoWindow = null;
+
     private long lastCriticalMessage = 0;
 
     // Logo strip properties
@@ -172,6 +175,7 @@ public class RMPage implements LogListener {
         this.settingsWindow = new SettingsWindow(controller);
         this.loggersWindow = new LoggersWindow(controller);
         this.credentialsWindow = new CredentialsWindow();
+        this.accountInfoWindow = new AccountInfoWindow(controller);
 
         final Canvas header = buildTools();
         HorizontalPanel panel = new HorizontalPanel();
@@ -442,12 +446,18 @@ public class RMPage implements LogListener {
         errorLabel.setWidth100();
         errorLabel.hide();
 
+        ToolStripButton accountInfoButton = new ToolStripButton("Account Info");
+        accountInfoButton.setTooltip("User's account info");
+        accountInfoButton.addClickHandler(event -> RMPage.this.accountInfoWindow.show());
+
         tools.addMenuButton(portalMenuButton);
         tools.addMenuButton(helpMenuButton);
         tools.addSeparator();
         tools.addButton(nsButton);
         tools.addButton(errorButton);
         tools.addMember(errorLabel);
+        tools.addFill();
+        tools.addMember(accountInfoButton);
 
         return tools;
     }
@@ -573,6 +583,7 @@ public class RMPage implements LogListener {
         this.loggersWindow.destroy();
         this.aboutWindow.destroy();
         this.addNodeWindow.destroy();
+        this.accountInfoWindow.destroy();
         this.destroyNodeSourceWindow();
     }
 

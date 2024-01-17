@@ -80,6 +80,11 @@ public abstract class Controller {
     public abstract void logout();
 
     /**
+     * Receives information about the current user
+     */
+    public abstract void setCurrentUserData(AccountInfoWindow window);
+
+    /**
      * Parse a JSON string
      * <p>
      * If the input is not valid JSON or parsing fails for some reason,
