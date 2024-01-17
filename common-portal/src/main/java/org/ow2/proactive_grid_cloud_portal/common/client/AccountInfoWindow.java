@@ -56,7 +56,7 @@ public class AccountInfoWindow {
     private void build() {
         HLayout pane = new HLayout();
         pane.setWidth100();
-        pane.setHeight(220);
+        pane.setHeight(200);
         pane.setBackgroundColor("#ffffff");
 
         text = new HTMLPane();
@@ -92,7 +92,7 @@ public class AccountInfoWindow {
         this.window.setShowModalMask(true);
         this.window.addItem(root);
         this.window.setWidth(600);
-        this.window.setHeight(293);
+        this.window.setHeight(273);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
     }
@@ -101,18 +101,15 @@ public class AccountInfoWindow {
         StringBuilder userData = new StringBuilder();
         setUsername(json, userData);
 
-        setStringProperty(json, "domain", userData, "<br><br><b>Domain:</b> ");
+        setStringProperty(json, "domain", userData, "<br><b>Domain:</b> ");
 
-        setStringProperty(json, "tenant", userData, "<br><br><b>Tenant:</b>  ");
+        setStringProperty(json, "tenant", userData, "<b>  Tenant:</b>  ");
 
         setArrayProperty(userData, "<br><br><b>Groups:</b>  ", json, "groups");
 
         setArrayProperty(userData, "<br><br><b>Admin roles:</b>  ", json, "adminRoles");
 
-        setArrayProperty(userData,
-                         "<br><br><b>Portal Access Permission Display:</b>  ",
-                         json,
-                         "portalAccessPermissionDisplay");
+        setArrayProperty(userData, "<br><br><b>Portal Access:</b>  ", json, "portalAccessPermissionDisplay");
         text.setContents(userData.toString());
     }
 
@@ -129,7 +126,7 @@ public class AccountInfoWindow {
 
     private void setStringProperty(JSONObject json, String key, StringBuilder userData, String str) {
         String property = json.get(key).isString() != null ? json.get(key).isString().stringValue() : null;
-        userData.append(str).append(property == null ? "" : property);
+        userData.append(str).append(property == null ? " " : property);
     }
 
     private void setUsername(JSONObject json, StringBuilder userData) {
