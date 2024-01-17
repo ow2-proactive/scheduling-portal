@@ -92,7 +92,7 @@ public class AccountInfoWindow {
         this.window.setShowModalMask(true);
         this.window.addItem(root);
         this.window.setWidth(600);
-        this.window.setHeight(285);
+        this.window.setHeight(293);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
     }
