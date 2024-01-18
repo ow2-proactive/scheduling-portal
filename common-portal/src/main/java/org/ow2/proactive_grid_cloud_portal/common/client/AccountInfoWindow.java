@@ -103,7 +103,7 @@ public class AccountInfoWindow {
 
         setStringProperty(json, "domain", userData, "<br><b>Domain:</b> ");
 
-        setStringProperty(json, "tenant", userData, "<b>  Tenant:</b>  ");
+        setStringProperty(json, "tenant", userData, "<b>&nbsp&nbsp&nbspTenant:</b>  ");
 
         setArrayProperty(userData, "<br><br><b>Groups:</b>  ", json, "groups");
 
@@ -126,7 +126,7 @@ public class AccountInfoWindow {
 
     private void setStringProperty(JSONObject json, String key, StringBuilder userData, String str) {
         String property = json.get(key).isString() != null ? json.get(key).isString().stringValue() : null;
-        userData.append(str).append(property == null ? "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" : property);
+        userData.append(str).append(property == null ? "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" : property);
     }
 
     private void setUsername(JSONObject json, StringBuilder userData) {
