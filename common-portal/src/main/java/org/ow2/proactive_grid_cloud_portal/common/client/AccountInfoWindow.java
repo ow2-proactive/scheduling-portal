@@ -126,7 +126,7 @@ public class AccountInfoWindow {
 
     private void setStringProperty(JSONObject json, String key, StringBuilder userData, String str) {
         String property = json.get(key).isString() != null ? json.get(key).isString().stringValue() : null;
-        userData.append(str).append(property == null ? " " : property);
+        userData.append(str).append(property == null ? "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" : property);
     }
 
     private void setUsername(JSONObject json, StringBuilder userData) {
