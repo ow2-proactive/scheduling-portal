@@ -35,7 +35,6 @@ subprojects {
         if (project.hasProperty('local')) {
            mavenLocal()
         }
-        mavenLocal()
         mavenCentral()
         maven { url 'http://repository.activeeon.com/content/groups/proactive/' }
         maven { url 'http://repository.sonatype.org/content/groups/forge/' }
