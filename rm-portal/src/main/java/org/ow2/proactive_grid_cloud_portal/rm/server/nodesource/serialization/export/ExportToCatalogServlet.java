@@ -72,26 +72,26 @@ public class ExportToCatalogServlet extends HttpServlet {
             apiClient.setBasePath(new CatalogUrlRmServerBuilder().getCatalogUrl());
             if (catalogObjectAction.isRevised()) {
                 CatalogObjectRevisionControllerApi catalogObjectController = new CatalogObjectRevisionControllerApi(apiClient);
-                catalogObjectController.createUsingPOST2(catalogObjectAction.getSessionId(),
-                                                         catalogObjectAction.getBucketName(),
-                                                         catalogObjectAction.getCatalogObjectName(),
-                                                         catalogObjectAction.getCommitMessage(),
-                                                         catalogObjectAction.getCatalogObjectJsonFile(),
-                                                         catalogObjectAction.getProjectName(),
-                                                         null);
+                catalogObjectController.create2(catalogObjectAction.getSessionId(),
+                                                catalogObjectAction.getBucketName(),
+                                                catalogObjectAction.getCatalogObjectName(),
+                                                catalogObjectAction.getCommitMessage(),
+                                                catalogObjectAction.getCatalogObjectJsonFile(),
+                                                catalogObjectAction.getProjectName(),
+                                                null);
                 LOGGER.info("Post new revision of catalog object " + catalogObjectAction.getCatalogObjectName() +
                             " in bucket " + catalogObjectAction.getBucketName());
             } else {
                 CatalogObjectControllerApi catalogObjectController = new CatalogObjectControllerApi(apiClient);
-                catalogObjectController.createUsingPOST1(catalogObjectAction.getSessionId(),
-                                                         catalogObjectAction.getBucketName(),
-                                                         catalogObjectAction.getKind(),
-                                                         catalogObjectAction.getCommitMessage(),
-                                                         catalogObjectAction.getObjectContentType(),
-                                                         catalogObjectAction.getCatalogObjectJsonFile(),
-                                                         catalogObjectAction.getCatalogObjectName(),
-                                                         catalogObjectAction.getProjectName(),
-                                                         null);
+                catalogObjectController.create1(catalogObjectAction.getSessionId(),
+                                                catalogObjectAction.getBucketName(),
+                                                catalogObjectAction.getKind(),
+                                                catalogObjectAction.getCommitMessage(),
+                                                catalogObjectAction.getObjectContentType(),
+                                                catalogObjectAction.getCatalogObjectJsonFile(),
+                                                catalogObjectAction.getCatalogObjectName(),
+                                                catalogObjectAction.getProjectName(),
+                                                null);
                 LOGGER.info("Post new catalog object " + catalogObjectAction.getCatalogObjectName() + " in bucket " +
                             catalogObjectAction.getBucketName());
             }
