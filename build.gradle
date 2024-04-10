@@ -58,9 +58,9 @@ subprojects {
 
     dependencies {
 
-        def jacksonVersion = "2.13.4"
+        def jacksonVersion = "2.16.1"
 
-        def jacksonDatabindVersion = "2.13.4.2"
+        def jacksonDatabindVersion = "2.16.1"
 
         providedCompile 'com.google.gwt:gwt-user:2.8.2'
         providedCompile 'com.google.gwt:gwt-dev:2.8.2'
@@ -100,11 +100,13 @@ subprojects {
         compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:${jacksonVersion}"
         compile "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
 
+        compile 'jakarta.activation:jakarta.activation-api:2.1.2'
+
         compile 'com.google.guava:guava:32.0.1-jre'
         compile 'com.google.guava:guava-gwt:32.0.1-jre'
 
         compile 'org.jboss.resteasy:resteasy-jaxrs:3.15.6.Final'
-        compile 'org.apache.httpcomponents:httpmime:4.3.6'
+        compile 'org.apache.httpcomponents:httpmime:4.5.14'
 
         compile 'org.pepstock:charba:2.4'
 
