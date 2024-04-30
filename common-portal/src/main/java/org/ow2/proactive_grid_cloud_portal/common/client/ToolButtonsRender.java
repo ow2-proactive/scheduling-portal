@@ -25,6 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.util.SC;
@@ -34,36 +35,38 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
 
+    private static final String BASE_MODULE_PATH = "/rm";
+
     public ToolStripButton getSchedulerLinkButton() {
-        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler/");
+        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "scheduler/");
     }
 
     public ToolStripButton getSchedulerHighlightedLinkButton() {
         return getToolStripButtonHighlighted(Images.instance.scheduler_30(),
                                              "Scheduling & Orchestration",
-                                             "/scheduler/");
+                                             "scheduler/");
     }
 
     public ToolStripButton getStudioLinkButton() {
         ImageResource imageResource = Images.instance.studio_30();
         String title = "Workflow Studio";
-        String url = "/studio/";
+        String url = "studio/#workflows";
 
         return getToolStripButton(imageResource, title, url);
     }
 
     public ToolStripButton getResourceManagerLinkButton() {
-        return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "/rm/");
+        return getToolStripButton(Images.instance.rm_30(), "Resource Manager", "rm/");
     }
 
     public ToolStripButton getResourceManagerHighlightedLinkButton() {
-        return getToolStripButtonHighlighted(Images.instance.rm_30(), "Resource Manager", "/rm/");
+        return getToolStripButtonHighlighted(Images.instance.rm_30(), "Resource Manager", "rm/");
     }
 
     public ToolStripButton getAutomationDashboardLinkButton() {
         return getToolStripButton(Images.instance.automation_dashboard_30(),
                                   "Automation Dashboard",
-                                  "/automation-dashboard/");
+                                  "automation-dashboard/#/workflow-execution");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
@@ -101,8 +104,9 @@ public class ToolButtonsRender {
     private ToolStripButton getToolStripButtonWithoutBorder(ImageResource imageResource, String title,
             final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
-
-        toolStripButton.addClickHandler(event -> Window.open(url, url, ""));
+        String baseUrl = GWT.getHostPageBaseURL().replace(BASE_MODULE_PATH, "");
+        String absoluteUrl = baseUrl + url;
+        toolStripButton.addClickHandler(event -> Window.open(absoluteUrl, absoluteUrl, ""));
         return toolStripButton;
     }
 
