@@ -119,8 +119,6 @@ public class ToolButtonsRender {
     }
 
     private String getUrlFromRelativePath(String path) {
-        String baseUrl = GWT.getHostPageBaseURL().replace(BASE_RM_MODULE_PATH, "").replace(BASE_SCHEDULER_MODULE_PATH,
-                                                                                           "");
-        return baseUrl + path;
+        return GWT.getHostPageBaseURL().replace(BASE_RM_MODULE_PATH, "").replace(BASE_SCHEDULER_MODULE_PATH, "") + path;
     }
 }
