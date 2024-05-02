@@ -529,8 +529,8 @@ public class JobsController {
      * @param jobId id of the job
      */
     public void openStudio(String jobId) {
-
-        com.google.gwt.user.client.Window.open(STUDIO_URL + jobId, "_blank", "");
+        String studioUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "") + STUDIO_URL;
+        com.google.gwt.user.client.Window.open(studioUrl + jobId, "_blank", "");
 
     }
 

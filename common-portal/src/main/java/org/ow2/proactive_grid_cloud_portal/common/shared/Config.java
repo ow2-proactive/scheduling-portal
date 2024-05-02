@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DefaultDateTimeFormatInfo;
 
@@ -142,11 +143,7 @@ public abstract class Config {
     public String getRestPublicUrlOrGuessRestUrl() {
         String restPublicUrl = getRestPublicUrlIfDefinedOrOverridden();
         if (restPublicUrl == null || restPublicUrl.isEmpty()) {
-            String restUrlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
-            restUrlFromCurrentLocation = restUrlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(),
-                                                                            "");
-            restUrlFromCurrentLocation += "/rest";
-            return restUrlFromCurrentLocation;
+            return GWT.getHostPageBaseURL().replace("rm/", "").replace("scheduler/", "") + "rest";
         }
         return restPublicUrl;
     }
@@ -176,8 +173,8 @@ public abstract class Config {
      */
     public abstract String getMotdUrl();
 
-    public String getAboutText() {
-        return fillTemplate(properties.get(ABOUT));
+    public String getAboutText(String restUrl) {
+        return fillTemplate(properties.get(ABOUT), restUrl);
     }
 
     private static final String ABOUT = "about";
@@ -205,10 +202,10 @@ public abstract class Config {
         return dateTimeFormat.format(new Date());
     }
 
-    private String fillTemplate(String template) {
+    private String fillTemplate(String template, String restUrl) {
         return template.replace("@application_name@", getApplicationName())
                        .replace("@version@", getVersion())
-                       .replace("@rest_public_url@", getRestPublicUrlOrGuessRestUrl())
+                       .replace("@rest_public_url@", restUrl)
                        .replace("@rest_version@", getRestVersion())
                        .replace("@application_version@", getApplicationVersion());
     }

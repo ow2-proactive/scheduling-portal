@@ -52,18 +52,18 @@ public class AboutWindow {
     /**
      * Default constructor
      */
-    public AboutWindow() {
-        this.build();
+    public AboutWindow(String restUrl) {
+        this.build(restUrl);
     }
 
-    private void build() {
+    private void build(String restUrl) {
         HLayout pane = new HLayout();
         pane.setWidth100();
         pane.setHeight(240);
         pane.setBackgroundColor("#ffffff");
 
         HTMLPane text = new HTMLPane();
-        text.setContents(Config.get().getAboutText());
+        text.setContents(Config.get().getAboutText(restUrl));
         text.setWidth100();
         text.setStyleName("paddingLeftAndRight");
 

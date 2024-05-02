@@ -48,6 +48,7 @@ import org.ow2.proactive_grid_cloud_portal.rm.shared.CatalogKind;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.json.client.*;
@@ -1935,6 +1936,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                                      syncCallBack.onSuccess(parseAllScriptResults(result));
                                  }
                              });
+    }
+
+    public String getAbsoluteUrlFromRelativePath(String path) {
+        return GWT.getHostPageBaseURL().replace("/rm", "") + path;
     }
 
     private void reportScriptExecutionFailure(Throwable caught, String script, String scriptTarget,

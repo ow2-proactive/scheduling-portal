@@ -31,6 +31,7 @@ import java.util.List;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
@@ -224,7 +225,9 @@ public class VisualizationViewHtml implements VisualizationView {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                com.google.gwt.user.client.Window.open(JobsController.STUDIO_URL + job.getId().toString(),
+                com.google.gwt.user.client.Window.open(GWT.getHostPageBaseURL().replace("/scheduler/",
+                                                                                        JobsController.STUDIO_URL +
+                                                                                                       job.getId()),
                                                        "_blank",
                                                        "");
             }
