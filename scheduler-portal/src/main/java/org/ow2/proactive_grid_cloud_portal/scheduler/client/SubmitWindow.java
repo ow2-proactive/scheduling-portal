@@ -514,7 +514,7 @@ public class SubmitWindow {
         }
 
         if (documentation != null) {
-            widgetDocumentation = "<b>Documentation :</b> <a href=/doc/" + documentation + " target=_blank>" +
+            widgetDocumentation = "<b>Documentation :</b> <a href=" + documentation + " target=_blank>" +
                                   documentation + " </a><br>";
         }
 
@@ -566,12 +566,11 @@ public class SubmitWindow {
                 existBucketName = false;
             }
             if (existDocumentation) {
-                documentation = GWT.getHostPageBaseURL().replace("/scheduler", attribute.getNodeValue());
+                documentation = GWT.getHostPageBaseURL().replace("/scheduler", "/doc/" + attribute.getNodeValue());
                 existDocumentation = false;
             }
             if (existIcon) {
-                icon = GWT.getHostPageBaseURL().replace("/scheduler/",
-                                                        attribute.getAttributes().getNamedItem("href").getNodeValue());
+                icon = GWT.getHostPageBaseURL().replace("/scheduler/", attribute.getNodeValue());
                 existIcon = false;
             }
         }
