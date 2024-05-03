@@ -159,10 +159,10 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.setSize(width, height);
 
         task2Dom = new HashMap<String, Element>();
-        NodeList<Element> elements = htmlPanel.getElement().getElementsByTagName("div");
-        if (elements != null) {
-            for (int i = 0; i < elements.getLength(); i++) {
-                Element elem = elements.getItem(i);
+        NodeList<Element> divElements = htmlPanel.getElement().getElementsByTagName("div");
+        if (divElements != null) {
+            for (int i = 0; i < divElements.getLength(); i++) {
+                Element elem = divElements.getItem(i);
                 if (elem.getClassName().contains("task")) {
                     // task div - finding it's name
                     String taskName = elem.getInnerText();
@@ -171,6 +171,26 @@ public class VisualizationViewHtml implements VisualizationView {
                     taskName = taskName.trim();
                     task2Dom.put(taskName, elem);
                 }
+            }
+        }
+
+        String basePath = GWT.getHostPageBaseURL().replace("/scheduler/", "");
+
+        NodeList<Element> imgElements = htmlPanel.getElement().getElementsByTagName("img");
+        if (imgElements != null) {
+            for (int i = 0; i < imgElements.getLength(); i++) {
+                Element imgElem = imgElements.getItem(i);
+                String relativeUrl = imgElem.getAttribute("src");
+                imgElem.setAttribute("src", basePath + relativeUrl);
+            }
+        }
+
+        NodeList<Element> linkElements = htmlPanel.getElement().getElementsByTagName("link");
+        if (linkElements != null) {
+            for (int i = 0; i < linkElements.getLength(); i++) {
+                Element linkElem = linkElements.getItem(i);
+                String relativeUrl = linkElem.getAttribute("href");
+                linkElem.setAttribute("href", basePath + relativeUrl);
             }
         }
 

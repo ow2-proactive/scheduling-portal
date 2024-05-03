@@ -566,11 +566,12 @@ public class SubmitWindow {
                 existBucketName = false;
             }
             if (existDocumentation) {
-                documentation = attribute.getNodeValue();
+                documentation = GWT.getHostPageBaseURL().replace("/scheduler", attribute.getNodeValue());
                 existDocumentation = false;
             }
             if (existIcon) {
-                icon = attribute.getNodeValue();
+                icon = GWT.getHostPageBaseURL().replace("/scheduler/",
+                                                        attribute.getAttributes().getNamedItem("href").getNodeValue());
                 existIcon = false;
             }
         }
@@ -759,7 +760,9 @@ public class SubmitWindow {
         firstPart.getElement().getStyle().setProperty("margin-left", "15px");
         planJobPanel.add(firstPart);
         Anchor jobPlannerPortalLink = new Anchor("Job Planner Portal",
-                                                 "/automation-dashboard/#/portal/job-planner-calendar-def-workflows",
+                                                 GWT.getHostPageBaseURL()
+                                                    .replace("/scheduler/",
+                                                             "/automation-dashboard/#/portal/job-planner-calendar-def-workflows"),
                                                  "_blank");
         planJobPanel.add(jobPlannerPortalLink);
         planJobPanel.add(new InlineLabel(" to schedule the workflow execution periodically"));

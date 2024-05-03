@@ -32,9 +32,12 @@ import java.util.Map.Entry;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.Node;
 import com.hydro4ge.raphaelgwt.client.Raphael;
 import com.hydro4ge.raphaelgwt.client.Raphael.Rect;
 import com.smartgwt.client.types.Alignment;
@@ -279,8 +282,9 @@ public class VisualizationViewImage implements VisualizationView {
         if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 
+        String baseUrl = GWT.getHostPageBaseURL().replace("/scheduler/", "");
         this.imgPath = path;
-        this.imgLoader = new Image("images/" + this.imgPath);
+        this.imgLoader = new Image(baseUrl + "/images/" + this.imgPath);
         this.imgLoader.addLoadHandler(this);
         this.message.setContents("Fetching image...");
 
