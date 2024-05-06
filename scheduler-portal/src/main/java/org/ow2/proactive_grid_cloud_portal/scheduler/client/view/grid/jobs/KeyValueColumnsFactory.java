@@ -31,6 +31,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.util.JobColumnsUtil;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.ColumnsFactory;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.GridColumns;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Anchor;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.util.StringUtil;
@@ -58,7 +59,10 @@ public class KeyValueColumnsFactory implements ColumnsFactory<Map.Entry<String, 
         if (JobColumnsUtil.START_AT.equals(item.getKey()))
             record.setAttribute(VALUE_ATTR.getName(), JobColumnsUtil.getFormattedDateString(item.getValue()));
         else if (JobColumnsUtil.DOCUMENTATION.equals(item.getKey()))
-            record.setAttribute(VALUE_ATTR.getName(), new Anchor(item.getValue(), "/doc/" + item.getValue(), "_blank"));
+            record.setAttribute(VALUE_ATTR.getName(),
+                                new Anchor(item.getValue(),
+                                           GWT.getHostPageBaseURL().replace("/scheduler/", "/doc/" + item.getValue()),
+                                           "_blank"));
         else
             record.setAttribute(VALUE_ATTR.getName(), StringUtil.asHTML(item.getValue()));
     }
