@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerListeners.JobSelectedListener;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
 
 
 public class TasksCentricModel extends TasksModel {

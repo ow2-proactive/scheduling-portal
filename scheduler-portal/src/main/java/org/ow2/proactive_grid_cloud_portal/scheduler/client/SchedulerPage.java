@@ -267,7 +267,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         contentLayout.setHeight100();
         contentLayout.setBackgroundColor(logoStripBackgroundColor);
 
-        this.aboutWindow = new AboutWindow();
+        this.aboutWindow = new AboutWindow(SchedulerConfig.get().getRestPublicUrlOrGuessRestUrl());
         this.settingsWindow = new SettingsWindow(controller);
         this.manageLabelsWindow = new ManageLabelsWindow(controller);
         this.accountInfoWindow = new AccountInfoWindow(controller);
@@ -488,7 +488,9 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(event -> Window.open("/doc/", "Documentation", ""));
+        documentationMenuItem.addClickHandler(event -> Window.open(controller.getAbsoluteUrlFromRelativePath("/doc/"),
+                                                                   "Documentation",
+                                                                   ""));
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> SchedulerPage.this.aboutWindow.show());

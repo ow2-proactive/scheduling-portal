@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.user.client.ui.Image;
@@ -46,14 +47,7 @@ import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.WidgetCanvas;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.MouseStillDownEvent;
-import com.smartgwt.client.widgets.events.MouseStillDownHandler;
-import com.smartgwt.client.widgets.events.ResizedEvent;
-import com.smartgwt.client.widgets.events.ResizedHandler;
-import com.smartgwt.client.widgets.events.ScrolledEvent;
-import com.smartgwt.client.widgets.events.ScrolledHandler;
+import com.smartgwt.client.widgets.events.*;
 import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.menu.Menu;
 
@@ -279,8 +273,9 @@ public class VisualizationViewImage implements VisualizationView {
         if (!jobsModel.getSelectedJob().getId().toString().equals(jobId))
             return;
 
+        String baseUrl = SchedulerConfig.get().getAbsoluteUrlWithPath("");
         this.imgPath = path;
-        this.imgLoader = new Image("images/" + this.imgPath);
+        this.imgLoader = new Image(baseUrl + "/images/" + this.imgPath);
         this.imgLoader.addLoadHandler(this);
         this.message.setContents("Fetching image...");
 

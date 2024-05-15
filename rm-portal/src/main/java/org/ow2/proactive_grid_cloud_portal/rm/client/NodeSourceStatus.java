@@ -27,8 +27,6 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.Arrays;
 
-import javax.ws.rs.NotFoundException;
-
 
 /**
  * Indicate the status of a node source.

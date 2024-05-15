@@ -25,7 +25,6 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;

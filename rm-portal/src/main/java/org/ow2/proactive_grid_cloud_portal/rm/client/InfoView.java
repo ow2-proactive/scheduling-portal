@@ -26,7 +26,6 @@
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

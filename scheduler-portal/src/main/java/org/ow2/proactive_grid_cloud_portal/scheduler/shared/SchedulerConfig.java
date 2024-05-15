@@ -27,6 +27,8 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.shared;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
+import com.google.gwt.core.client.GWT;
+
 
 /**
  * Scheduler specific configuration
@@ -190,9 +192,7 @@ public class SchedulerConfig extends Config {
     public String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
         if (restPublicUrl == null) {
-            String restUrlFromCurrentLocation = getWindowsLocationUrl();
-            restUrlFromCurrentLocation += "/rest";
-            return restUrlFromCurrentLocation;
+            return GWT.getHostPageBaseURL().replace("/scheduler/", "/rest");
         }
         return restPublicUrl;
     }
@@ -244,6 +244,11 @@ public class SchedulerConfig extends Config {
     @Override
     public String getMotdUrl() {
         return properties.get(MOTD_URL);
+    }
+
+    @Override
+    public String getAbsoluteUrlWithPath(String path) {
+        return GWT.getHostPageBaseURL().replace("/scheduler/", path);
     }
 
     /**

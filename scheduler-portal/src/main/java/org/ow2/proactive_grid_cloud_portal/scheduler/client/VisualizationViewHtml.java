@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.JobVisuMap;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
@@ -158,10 +159,10 @@ public class VisualizationViewHtml implements VisualizationView {
         wrapper.setSize(width, height);
 
         task2Dom = new HashMap<String, Element>();
-        NodeList<Element> elements = htmlPanel.getElement().getElementsByTagName("div");
-        if (elements != null) {
-            for (int i = 0; i < elements.getLength(); i++) {
-                Element elem = elements.getItem(i);
+        NodeList<Element> divElements = htmlPanel.getElement().getElementsByTagName("div");
+        if (divElements != null) {
+            for (int i = 0; i < divElements.getLength(); i++) {
+                Element elem = divElements.getItem(i);
                 if (elem.getClassName().contains("task")) {
                     // task div - finding it's name
                     String taskName = elem.getInnerText();
@@ -170,6 +171,26 @@ public class VisualizationViewHtml implements VisualizationView {
                     taskName = taskName.trim();
                     task2Dom.put(taskName, elem);
                 }
+            }
+        }
+
+        String basePath = SchedulerConfig.get().getAbsoluteUrlWithPath("");
+
+        NodeList<Element> imgElements = htmlPanel.getElement().getElementsByTagName("img");
+        if (imgElements != null) {
+            for (int i = 0; i < imgElements.getLength(); i++) {
+                Element imgElem = imgElements.getItem(i);
+                String relativeUrl = imgElem.getAttribute("src");
+                imgElem.setAttribute("src", basePath + relativeUrl);
+            }
+        }
+
+        NodeList<Element> linkElements = htmlPanel.getElement().getElementsByTagName("link");
+        if (linkElements != null) {
+            for (int i = 0; i < linkElements.getLength(); i++) {
+                Element linkElem = linkElements.getItem(i);
+                String relativeUrl = linkElem.getAttribute("href");
+                linkElem.setAttribute("href", basePath + relativeUrl);
             }
         }
 
@@ -224,7 +245,9 @@ public class VisualizationViewHtml implements VisualizationView {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                com.google.gwt.user.client.Window.open(JobsController.STUDIO_URL + job.getId().toString(),
+                com.google.gwt.user.client.Window.open(SchedulerConfig.get()
+                                                                      .getAbsoluteUrlWithPath(JobsController.STUDIO_URL +
+                                                                                              job.getId()),
                                                        "_blank",
                                                        "");
             }

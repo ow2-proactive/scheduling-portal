@@ -1937,6 +1937,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
                              });
     }
 
+    public String getAbsoluteUrlFromRelativePath(String path) {
+        return RMConfig.get().getAbsoluteUrlWithPath(path);
+    }
+
     private void reportScriptExecutionFailure(Throwable caught, String script, String scriptTarget,
             Callback<String, String> syncCallBack) {
         String msg = JSONUtils.getJsonErrorMessage(caught);

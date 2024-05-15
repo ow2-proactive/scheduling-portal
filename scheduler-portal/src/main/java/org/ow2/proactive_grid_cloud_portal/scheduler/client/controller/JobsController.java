@@ -44,6 +44,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobResultView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.JobsView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.KeyValueGrid;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.jobs.JobsListGrid;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -529,8 +530,8 @@ public class JobsController {
      * @param jobId id of the job
      */
     public void openStudio(String jobId) {
-
-        com.google.gwt.user.client.Window.open(STUDIO_URL + jobId, "_blank", "");
+        String studioUrl = SchedulerConfig.get().getAbsoluteUrlWithPath(STUDIO_URL);
+        com.google.gwt.user.client.Window.open(studioUrl + jobId, "_blank", "");
 
     }
 

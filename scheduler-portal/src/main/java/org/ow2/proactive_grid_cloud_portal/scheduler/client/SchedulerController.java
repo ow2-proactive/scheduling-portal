@@ -1267,4 +1267,8 @@ public class SchedulerController extends Controller implements UncaughtException
     public SchedulerPage getSchedulerPage() {
         return schedulerView;
     }
+
+    public String getAbsoluteUrlFromRelativePath(String path) {
+        return SchedulerConfig.get().getAbsoluteUrlWithPath(path);
+    }
 }

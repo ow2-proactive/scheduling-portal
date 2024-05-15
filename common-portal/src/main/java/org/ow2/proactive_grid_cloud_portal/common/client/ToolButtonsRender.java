@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.util.SC;
@@ -35,7 +37,7 @@ public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
 
     public ToolStripButton getSchedulerLinkButton() {
-        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler/");
+        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "scheduler/");
     }
 
     public ToolStripButton getSchedulerHighlightedLinkButton() {
@@ -47,7 +49,7 @@ public class ToolButtonsRender {
     public ToolStripButton getStudioLinkButton() {
         ImageResource imageResource = Images.instance.studio_30();
         String title = "Workflow Studio";
-        String url = "/studio/";
+        String url = "/studio/#workflows";
 
         return getToolStripButton(imageResource, title, url);
     }
@@ -63,7 +65,7 @@ public class ToolButtonsRender {
     public ToolStripButton getAutomationDashboardLinkButton() {
         return getToolStripButton(Images.instance.automation_dashboard_30(),
                                   "Automation Dashboard",
-                                  "/automation-dashboard/");
+                                  "/automation-dashboard/#/workflow-execution");
     }
 
     public ToolStripButton getLogoutButton(String login, final Controller controller) {
@@ -101,8 +103,8 @@ public class ToolButtonsRender {
     private ToolStripButton getToolStripButtonWithoutBorder(ImageResource imageResource, String title,
             final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
-
-        toolStripButton.addClickHandler(event -> Window.open(url, url, ""));
+        String absoluteUrl = Config.get().getAbsoluteUrlWithPath(url);
+        toolStripButton.addClickHandler(event -> Window.open(absoluteUrl, absoluteUrl, ""));
         return toolStripButton;
     }
 

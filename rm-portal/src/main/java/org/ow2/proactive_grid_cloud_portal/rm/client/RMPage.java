@@ -170,7 +170,7 @@ public class RMPage implements LogListener {
         rl.setHeight100();
         rl.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
 
-        this.aboutWindow = new AboutWindow();
+        this.aboutWindow = new AboutWindow(RMConfig.get().getRestPublicUrlOrGuessRestUrl());
         this.addNodeWindow = new AddNodeWindow();
         this.settingsWindow = new SettingsWindow(controller);
         this.loggersWindow = new LoggersWindow(controller);
@@ -414,7 +414,9 @@ public class RMPage implements LogListener {
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(event -> Window.open("/doc/", "Documentation", ""));
+        documentationMenuItem.addClickHandler(event -> Window.open(controller.getAbsoluteUrlFromRelativePath("/doc/"),
+                                                                   "Documentation",
+                                                                   ""));
 
         MenuItem aboutMenuItem = new MenuItem("About", Images.instance.about_16().getSafeUri().asString());
         aboutMenuItem.addClickHandler(event -> RMPage.this.aboutWindow.show());
@@ -634,5 +636,4 @@ public class RMPage implements LogListener {
         RMPage.this.logWindow.show();
         errorButton.hide();
     }
-
 }

@@ -140,15 +140,7 @@ public abstract class Config {
      * @return the {@link #getRestPublicUrlIfDefinedOrOverridden()} or guessed from current location if not set
      */
     public String getRestPublicUrlOrGuessRestUrl() {
-        String restPublicUrl = getRestPublicUrlIfDefinedOrOverridden();
-        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
-            String restUrlFromCurrentLocation = com.google.gwt.user.client.Window.Location.getHref();
-            restUrlFromCurrentLocation = restUrlFromCurrentLocation.replace(com.google.gwt.user.client.Window.Location.getPath(),
-                                                                            "");
-            restUrlFromCurrentLocation += "/rest";
-            return restUrlFromCurrentLocation;
-        }
-        return restPublicUrl;
+        return getRestPublicUrlIfDefinedOrOverridden();
     }
 
     /**
@@ -176,8 +168,13 @@ public abstract class Config {
      */
     public abstract String getMotdUrl();
 
-    public String getAboutText() {
-        return fillTemplate(properties.get(ABOUT));
+    /**
+     * @return An Absolute URL of the server with the appended path
+     */
+    public abstract String getAbsoluteUrlWithPath(String path);
+
+    public String getAboutText(String restUrl) {
+        return fillTemplate(properties.get(ABOUT), restUrl);
     }
 
     private static final String ABOUT = "about";
@@ -205,10 +202,10 @@ public abstract class Config {
         return dateTimeFormat.format(new Date());
     }
 
-    private String fillTemplate(String template) {
+    private String fillTemplate(String template, String restUrl) {
         return template.replace("@application_name@", getApplicationName())
                        .replace("@version@", getVersion())
-                       .replace("@rest_public_url@", getRestPublicUrlOrGuessRestUrl())
+                       .replace("@rest_public_url@", restUrl)
                        .replace("@rest_version@", getRestVersion())
                        .replace("@application_version@", getApplicationVersion());
     }

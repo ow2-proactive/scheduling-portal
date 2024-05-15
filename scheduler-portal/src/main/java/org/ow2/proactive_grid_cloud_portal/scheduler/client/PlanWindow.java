@@ -25,23 +25,11 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import org.ow2.proactive_grid_cloud_portal.common.client.Images;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
-import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 
@@ -125,7 +113,8 @@ public class PlanWindow {
 
         yesButton = new IButton("Yes");
         yesButton.addClickHandler(clickEvent -> {
-            com.google.gwt.user.client.Window.open(JPP_URL, JPP_URL, "");
+            String path = controller.getAbsoluteUrlFromRelativePath(JPP_URL);
+            com.google.gwt.user.client.Window.open(path, path, "");
             PlanWindow.this.window.hide();
             PlanWindow.this.destroy();
         });

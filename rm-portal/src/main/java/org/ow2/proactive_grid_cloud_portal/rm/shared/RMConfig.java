@@ -29,6 +29,8 @@ import java.util.Optional;
 
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 
+import com.google.gwt.core.client.GWT;
+
 
 /**
  * RM specific configuration
@@ -171,10 +173,15 @@ public class RMConfig extends Config {
     }
 
     @Override
+    public String getAbsoluteUrlWithPath(String path) {
+        return GWT.getHostPageBaseURL().replace("/rm/", path);
+    }
+
+    @Override
     protected String getRestPublicUrlIfDefinedOrOverridden() {
         String restPublicUrl = properties.get(REST_PUBLIC_URL);
-        if ((restPublicUrl == null || restPublicUrl.isEmpty()) && !getRestUrl().equals(DEFAULT_REST_URL)) {
-            return getRestUrl();
+        if (restPublicUrl == null) {
+            return GWT.getHostPageBaseURL().replace("/rm/", "/rest");
         }
         return restPublicUrl;
     }
