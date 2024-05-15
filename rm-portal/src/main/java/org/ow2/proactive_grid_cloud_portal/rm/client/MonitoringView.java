@@ -25,7 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.RMListeners.NodesListener;
 
 import java.util.Map;
 

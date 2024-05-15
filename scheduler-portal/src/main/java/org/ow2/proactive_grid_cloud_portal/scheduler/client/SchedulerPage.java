@@ -267,7 +267,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         contentLayout.setHeight100();
         contentLayout.setBackgroundColor(logoStripBackgroundColor);
 
-        this.aboutWindow = new AboutWindow(GWT.getHostPageBaseURL().replace("/scheduler/", "/rest/"));
+        this.aboutWindow = new AboutWindow(SchedulerConfig.get().getRestPublicUrlOrGuessRestUrl());
         this.settingsWindow = new SettingsWindow(controller);
         this.manageLabelsWindow = new ManageLabelsWindow(controller);
         this.accountInfoWindow = new AccountInfoWindow(controller);

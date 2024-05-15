@@ -25,7 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.common.client;
 
-import com.google.gwt.core.client.GWT;
+import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
+
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.util.SC;
@@ -34,10 +35,6 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
-
-    private static final String BASE_RM_MODULE_PATH = "/rm/";
-
-    private static final String BASE_SCHEDULER_MODULE_PATH = "/scheduler/";
 
     public ToolStripButton getSchedulerLinkButton() {
         return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "scheduler/");
@@ -106,7 +103,7 @@ public class ToolButtonsRender {
     private ToolStripButton getToolStripButtonWithoutBorder(ImageResource imageResource, String title,
             final String url) {
         ToolStripButton toolStripButton = getSimpleToolStripButton(imageResource, title);
-        String absoluteUrl = getUrlFromRelativePath(url);
+        String absoluteUrl = Config.get().getAbsoluteUrlWithPath(url);
         toolStripButton.addClickHandler(event -> Window.open(absoluteUrl, absoluteUrl, ""));
         return toolStripButton;
     }
@@ -116,9 +113,5 @@ public class ToolButtonsRender {
         toolStripButton.setIcon(imageResource.getSafeUri().asString());
         toolStripButton.setIconSize(25);
         return toolStripButton;
-    }
-
-    private String getUrlFromRelativePath(String path) {
-        return GWT.getHostPageBaseURL().replace(BASE_RM_MODULE_PATH, "").replace(BASE_SCHEDULER_MODULE_PATH, "") + path;
     }
 }

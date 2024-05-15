@@ -38,6 +38,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.JobVariable;
 import org.ow2.proactive_grid_cloud_portal.scheduler.server.SubmitEditServlet;
+import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -45,44 +46,16 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.NamedNodeMap;
-import com.google.gwt.xml.client.Node;
-import com.google.gwt.xml.client.NodeList;
-import com.google.gwt.xml.client.XMLParser;
+import com.google.gwt.xml.client.*;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.DateUtil;
@@ -93,11 +66,7 @@ import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.BlurbItem;
-import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.fields.TimeItem;
+import com.smartgwt.client.widgets.form.fields.*;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.Layout;
@@ -566,11 +535,11 @@ public class SubmitWindow {
                 existBucketName = false;
             }
             if (existDocumentation) {
-                documentation = GWT.getHostPageBaseURL().replace("/scheduler", "/doc/" + attribute.getNodeValue());
+                documentation = SchedulerConfig.get().getAbsoluteUrlWithPath("/doc/" + attribute.getNodeValue());
                 existDocumentation = false;
             }
             if (existIcon) {
-                icon = GWT.getHostPageBaseURL().replace("/scheduler/", attribute.getNodeValue());
+                icon = SchedulerConfig.get().getAbsoluteUrlWithPath(attribute.getNodeValue());
                 existIcon = false;
             }
         }
@@ -759,9 +728,8 @@ public class SubmitWindow {
         firstPart.getElement().getStyle().setProperty("margin-left", "15px");
         planJobPanel.add(firstPart);
         Anchor jobPlannerPortalLink = new Anchor("Job Planner Portal",
-                                                 GWT.getHostPageBaseURL()
-                                                    .replace("/scheduler/",
-                                                             "/automation-dashboard/#/portal/job-planner-calendar-def-workflows"),
+                                                 SchedulerConfig.get()
+                                                                .getAbsoluteUrlWithPath("/automation-dashboard/#/portal/job-planner-calendar-def-workflows"),
                                                  "_blank");
         planJobPanel.add(jobPlannerPortalLink);
         planJobPanel.add(new InlineLabel(" to schedule the workflow execution periodically"));

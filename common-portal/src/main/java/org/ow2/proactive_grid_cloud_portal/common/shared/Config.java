@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.i18n.shared.DefaultDateTimeFormatInfo;
 
@@ -141,11 +140,7 @@ public abstract class Config {
      * @return the {@link #getRestPublicUrlIfDefinedOrOverridden()} or guessed from current location if not set
      */
     public String getRestPublicUrlOrGuessRestUrl() {
-        String restPublicUrl = getRestPublicUrlIfDefinedOrOverridden();
-        if (restPublicUrl == null || restPublicUrl.isEmpty()) {
-            return GWT.getHostPageBaseURL().replace("rm/", "").replace("scheduler/", "") + "rest";
-        }
-        return restPublicUrl;
+        return getRestPublicUrlIfDefinedOrOverridden();
     }
 
     /**
@@ -172,6 +167,11 @@ public abstract class Config {
      * @return URL of the service to GET for the MOTD
      */
     public abstract String getMotdUrl();
+
+    /**
+     * @return An Absolute URL of the server with the appended path
+     */
+    public abstract String getAbsoluteUrlWithPath(String path);
 
     public String getAboutText(String restUrl) {
         return fillTemplate(properties.get(ABOUT), restUrl);

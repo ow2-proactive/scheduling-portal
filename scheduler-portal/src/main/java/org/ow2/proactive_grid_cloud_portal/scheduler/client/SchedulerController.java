@@ -54,7 +54,6 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.view.VarInfoView;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONException;
@@ -1270,6 +1269,6 @@ public class SchedulerController extends Controller implements UncaughtException
     }
 
     public String getAbsoluteUrlFromRelativePath(String path) {
-        return GWT.getHostPageBaseURL().replace("/scheduler/", "") + path;
+        return SchedulerConfig.get().getAbsoluteUrlWithPath(path);
     }
 }

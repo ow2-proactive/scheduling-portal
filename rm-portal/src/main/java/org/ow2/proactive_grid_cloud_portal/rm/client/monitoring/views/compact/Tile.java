@@ -25,8 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.rm.client.monitoring.views.compact;
 
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.*;
-import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.*;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host;
+import static org.ow2.proactive_grid_cloud_portal.rm.client.NodeSource.Host.Node;
 
 import java.util.Optional;
 

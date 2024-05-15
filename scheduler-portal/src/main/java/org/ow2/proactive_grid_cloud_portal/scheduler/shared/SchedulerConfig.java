@@ -246,6 +246,11 @@ public class SchedulerConfig extends Config {
         return properties.get(MOTD_URL);
     }
 
+    @Override
+    public String getAbsoluteUrlWithPath(String path) {
+        return GWT.getHostPageBaseURL().replace("/scheduler/", path);
+    }
+
     /**
      * @return the client refresh rate in millis
      */

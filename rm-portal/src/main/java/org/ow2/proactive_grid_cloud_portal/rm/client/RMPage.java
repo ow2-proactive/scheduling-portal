@@ -37,7 +37,6 @@ import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditDyna
 import org.ow2.proactive_grid_cloud_portal.rm.client.nodesource.edition.EditNodeSourceWindow;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -171,7 +170,7 @@ public class RMPage implements LogListener {
         rl.setHeight100();
         rl.setBackgroundColor(LOGO_STRIP_BACKGROUND_COLOR);
 
-        this.aboutWindow = new AboutWindow(GWT.getHostPageBaseURL().replace("/rm/", "/rest/"));
+        this.aboutWindow = new AboutWindow(RMConfig.get().getRestPublicUrlOrGuessRestUrl());
         this.addNodeWindow = new AddNodeWindow();
         this.settingsWindow = new SettingsWindow(controller);
         this.loggersWindow = new LoggersWindow(controller);
@@ -415,7 +414,7 @@ public class RMPage implements LogListener {
 
         MenuItem documentationMenuItem = new MenuItem("Documentation",
                                                       Images.instance.icon_manual().getSafeUri().asString());
-        documentationMenuItem.addClickHandler(event -> Window.open(controller.getAbsoluteUrlFromRelativePath("doc/"),
+        documentationMenuItem.addClickHandler(event -> Window.open(controller.getAbsoluteUrlFromRelativePath("/doc/"),
                                                                    "Documentation",
                                                                    ""));
 
