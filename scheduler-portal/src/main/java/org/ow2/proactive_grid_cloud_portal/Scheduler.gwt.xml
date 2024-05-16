@@ -15,7 +15,6 @@
 	<inherits name="org.ow2.proactive.scheduling.api.graphql.common.Common"/>
 	<inherits name="org.ow2.proactive.scheduling.api.graphql.beans.input.Input"/>
 	<inherits name="org.ow2.proactive.scheduling.api.graphql.client.Client"/>
-	<inherits name="com.google.gwt.logging.Logging"/>
 
 	<entry-point class='org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerPortal' />
 	
