@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
+import org.ow2.proactive_grid_cloud_portal.common.client.WindowUtils;
+
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -145,5 +147,6 @@ public class PlanWindow {
         this.window.setHeight(HEIGHT);
         this.window.centerInPage();
         this.window.setCanDragResize(true);
+        WindowUtils.setWindowAsClosableWhenEscapeKeyPressed(this.window);
     }
 }

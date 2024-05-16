@@ -105,6 +105,7 @@ public class AboutWindow {
         this.window.setHeight(319);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
+        WindowUtils.setWindowAsClosableWhenEscapeKeyPressed(this.window);
     }
 
     /**
