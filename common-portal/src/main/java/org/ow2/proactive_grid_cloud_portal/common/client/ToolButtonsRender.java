@@ -37,7 +37,7 @@ public class ToolButtonsRender {
     private static final String GREY_BUTTON_BORDER = "1px solid #858585";
 
     public ToolStripButton getSchedulerLinkButton() {
-        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "scheduler/");
+        return getToolStripButton(Images.instance.scheduler_30(), "Scheduling & Orchestration", "/scheduler/");
     }
 
     public ToolStripButton getSchedulerHighlightedLinkButton() {
