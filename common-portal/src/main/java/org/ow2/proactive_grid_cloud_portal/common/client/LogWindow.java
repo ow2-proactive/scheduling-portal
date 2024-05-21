@@ -238,5 +238,6 @@ public class LogWindow implements LogListener {
         this.window.setLeft(winLeft);
         this.window.setCanDragReposition(true);
         this.window.setCanDragResize(true);
+        WindowUtils.setWindowAsClosableWhenEscapeKeyPressed(this.window);
     }
 }

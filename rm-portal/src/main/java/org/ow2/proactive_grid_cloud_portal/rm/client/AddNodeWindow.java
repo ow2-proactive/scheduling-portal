@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.rm.client;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.ImagesUnbundled;
+import org.ow2.proactive_grid_cloud_portal.common.client.WindowUtils;
 import org.ow2.proactive_grid_cloud_portal.common.shared.Config;
 import org.ow2.proactive_grid_cloud_portal.rm.shared.RMConfig;
 
@@ -112,6 +113,7 @@ public class AddNodeWindow {
         this.window.setHeight(220);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
+        WindowUtils.setWindowAsClosableWhenEscapeKeyPressed(this.window);
     }
 
     /**

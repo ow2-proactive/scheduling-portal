@@ -95,6 +95,7 @@ public class AccountInfoWindow {
         this.window.setHeight(273);
         this.window.centerInPage();
         this.window.setCanDragReposition(false);
+        WindowUtils.setWindowAsClosableWhenEscapeKeyPressed(this.window);
     }
 
     public void setCurrentUserData(JSONObject json) {
