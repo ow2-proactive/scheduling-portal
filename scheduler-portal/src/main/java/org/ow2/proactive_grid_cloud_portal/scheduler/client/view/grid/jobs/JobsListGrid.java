@@ -30,6 +30,7 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
@@ -111,6 +112,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     private MenuItem resumeAndRestartItemTask;
 
     private MenuItem priorityItem;
+
+    private Menu priorityMenu;
 
     private MenuItem exportXmlItem;
 
@@ -482,7 +485,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         resumeAndRestartItemTask.setEnabled(selInError || selPause);
 
         priorityItem = new MenuItem("Priority");
-        Menu priorityMenu = new Menu();
+        priorityMenu = new Menu();
         for (final JobPriority p : JobPriority.values()) {
             MenuItem item = new MenuItem(p.toString());
             if (!selPauseOrRunning) {
@@ -628,6 +631,17 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         if (loginModel.userDoesNotHavePermissionToChangeJobsPriority(jobIds)) {
             priorityItem.setEnabled(false);
+        } else {
+            /*
+             * If the change priority action is authorized for a user,
+             * we need to check the specific priorities the user is allowed to set
+             */
+            List<String> userPrioritiesPermission = loginModel.getUserPrioritiesPermission();
+            Stream.of(priorityMenu.getItems()).forEach(priorityMenuItem -> {
+                if (!userPrioritiesPermission.contains(priorityMenuItem.getTitle())) {
+                    priorityMenuItem.setEnabled(false);
+                }
+            });
         }
         if (loginModel.userDoesNotHavePermissionToKillJobs(jobIds)) {
             killItem.setEnabled(false);
