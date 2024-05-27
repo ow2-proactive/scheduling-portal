@@ -25,14 +25,9 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.AccountInfoWindow;
 import org.ow2.proactive_grid_cloud_portal.common.client.Controller;
@@ -55,11 +50,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerConfig;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.SchedulerPortalDisplayConfig;
 
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -457,11 +448,29 @@ public class SchedulerController extends Controller implements UncaughtException
                                                                           : null;
                 String domain = json.get("domain").isString() != null ? json.get("domain").isString().stringValue()
                                                                       : null;
+
+                List<String> userPrioritiesPermission = Optional.of(json)
+                                                                .flatMap(obj -> Optional.ofNullable(obj.get(LoginModel.CHANGE_PRIORITIES_PERMISSION))
+                                                                                        .map(JSONValue::isArray))
+                                                                .map(array -> IntStream.range(0, array.size())
+                                                                                       .mapToObj(array::get)
+                                                                                       .map(JSONValue::isString)
+                                                                                       .filter(Objects::nonNull)
+                                                                                       .map(JSONString::stringValue)
+                                                                                       .collect(Collectors.toList()))
+                                                                .orElseGet(Collections::emptyList);
+
                 String login = domain != null ? domain + "\\" + username : username;
                 setLoggedUser(sessionId, login);
+                setUserPrioritiesPermission(userPrioritiesPermission);
                 LogModel.getInstance().logMessage("Successfully fetched current user data ");
             }
         });
+    }
+
+    private void setUserPrioritiesPermission(List<String> userPrioritiesPermission) {
+        LoginModel loginModel = LoginModel.getInstance();
+        loginModel.setUserPrioritiesPermission(userPrioritiesPermission);
     }
 
     public void setCurrentUserData(AccountInfoWindow window) {

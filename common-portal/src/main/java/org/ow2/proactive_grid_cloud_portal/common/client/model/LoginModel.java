@@ -108,6 +108,8 @@ public class LoginModel {
 
     public static final String AUTOMATION_DASHBOARD_PORTAL = "automation-dashboard";
 
+    public static final String CHANGE_PRIORITIES_PERMISSION = "prioritiesPermission";
+
     public static final String[] AUTOMATION_DASHBOARD_PORTALS = new String[] { "catalog-portal", "workflow-execution",
                                                                                "service-automation", "job-analytics",
                                                                                "job-gantt", "node-gantt",
@@ -138,6 +140,8 @@ public class LoginModel {
     private Map<String, Boolean> RMNodeAdminPermissions = null;
 
     private Map<String, Boolean> portalsAccess = null;
+
+    private List<String> userPrioritiesPermission = null;
 
     public static LoginModel getInstance() {
         if (instance == null) {
@@ -178,6 +182,17 @@ public class LoginModel {
 
     public void setLogin(String login) {
         this.login = login;
+    }
+
+    /**
+     * @return The authorized priorities the user can set for a job regarding his user role
+     */
+    public List<String> getUserPrioritiesPermission() {
+        return this.userPrioritiesPermission;
+    }
+
+    public void setUserPrioritiesPermission(List<String> userPrioritiesPermission) {
+        this.userPrioritiesPermission = userPrioritiesPermission;
     }
 
     /**
