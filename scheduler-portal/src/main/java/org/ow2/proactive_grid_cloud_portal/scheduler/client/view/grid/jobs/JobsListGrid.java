@@ -616,6 +616,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         return JobStatus.from(jobStatusName);
     }
 
+    private JobPriority getJobPriority(ListGridRecord rec) {
+        return JobPriority.findPriority(rec.getAttribute(PRIORITY_ATTR.getName()));
+    }
+
     public void setMenuItemsStatus(List<String> jobIds) {
         LoginModel loginModel = LoginModel.getInstance();
         if (loginModel.userDoesNotHavePermissionToPauseJobs(jobIds)) {
@@ -636,10 +640,19 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
              * If the change priority action is authorized for a user,
              * we need to check the specific priorities the user is allowed to set
              */
+            boolean isSingleSelection = this.getSelectedRecords().length == 1;
+            boolean allSelectedRecordsHaveSamePriority = Arrays.stream(this.getSelectedRecords())
+                                                               .map(this::getJobPriority)
+                                                               .distinct()
+                                                               .count() == 1;
             List<String> userPrioritiesPermission = loginModel.getUserPrioritiesPermission();
             Stream.of(priorityMenu.getItems()).forEach(priorityMenuItem -> {
                 if (!userPrioritiesPermission.contains(priorityMenuItem.getTitle())) {
                     priorityMenuItem.setEnabled(false);
+                }
+                if ((isSingleSelection || allSelectedRecordsHaveSamePriority) &&
+                    priorityMenuItem.getTitle().equals(getJobPriority(this.getSelectedRecord()).toString())) {
+                    priorityMenuItem.setIcon(Images.instance.ok_16().getSafeUri().asString());
                 }
             });
         }
