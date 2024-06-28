@@ -162,8 +162,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             this.rmNS = ns;
             this.setAttribute(NODE_ID, ns.getSourceName());
 
-            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(ns.getHosts()
-                                                                                                                       .values());
+            NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(ns,
+                                                                                                                     currentNodes);
             super.setAttribute(NUMBER_OF_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfNodes());
             super.setAttribute(NUMBER_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getNumberOfBusyNodes());
             super.setAttribute(PERCENTAGE_OF_BUSY_NODES, nodeSourceDisplayedNumberOfNodes.getPercentageOfBusyNodes());
@@ -173,15 +173,26 @@ public class TreeView implements NodesListener, NodeSelectedListener {
     }
 
     private static class NodeSourceDisplayedNumberOfNodes {
+
         private int numberOfNodes = 0;
 
         private int numberOfBusyNodes = 0;
 
         private String percentageOfBusyNodes = "0%";
 
-        NodeSourceDisplayedNumberOfNodes(Collection<Host> hosts) {
-            List<Node> nodes = new ArrayList<>();
-            hosts.forEach(host -> nodes.addAll(host.getNodes().values()));
+        NodeSourceDisplayedNumberOfNodes(NodeSource nodeSource, List<Node> currentNodes) {
+            // Process nodes from the delta = nodes that have changed
+            List<Node> nodes = nodeSource.getHosts()
+                                         .values()
+                                         .stream()
+                                         .flatMap(host -> host.getNodes().values().stream())
+                                         .collect(Collectors.toList());
+
+            // Process currentNodes, needed for a dynamic update a NS. Nodes don't change so they are not part of the delta
+            nodes.addAll(currentNodes.stream()
+                                     .filter(node -> node.getSourceName().equals(nodeSource.getSourceName()) &&
+                                                     !nodes.contains(node))
+                                     .collect(Collectors.toList()));
             if (!nodes.isEmpty()) {
                 numberOfNodes = nodes.size();
                 numberOfBusyNodes = (int) nodes.stream()
@@ -730,8 +741,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     private void updateNodeSourceDisplayedNumberOfNodesIfChanged(NodeSource nodeSource) {
         TNS currentNs = (TNS) currentTreeNodes.get(nodeSource.getSourceName());
-        NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource.getHosts()
-                                                                                                                           .values());
+        NodeSourceDisplayedNumberOfNodes nodeSourceDisplayedNumberOfNodes = new NodeSourceDisplayedNumberOfNodes(nodeSource,
+                                                                                                                 currentNodes);
         updateNodeSourceNumberOfNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
         updateNodeSourceNumberOfBusyNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
         updateNodeSourcePercentageOfBusyNodesIfChanged(nodeSource, currentNs, nodeSourceDisplayedNumberOfNodes);
