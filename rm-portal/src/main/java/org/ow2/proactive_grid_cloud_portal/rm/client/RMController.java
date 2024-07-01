@@ -640,36 +640,45 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
         // process nodes
         JSONArray jsNodes = obj.get("nodesEvents").isArray();
-        for (int i = 0; i < jsNodes.size(); i++) {
-            try {
-                JSONObject jsNode = jsNodes.get(i).isObject();
+        if (jsNodes.size() > 0) {
+            for (int i = 0; i < jsNodes.size(); i++) {
+                try {
+                    JSONObject jsNode = jsNodes.get(i).isObject();
 
-                final Node node = parseNode(jsNode);
+                    final Node node = parseNode(jsNode);
 
-                nodeList.add(node);
+                    nodeList.add(node);
 
-                final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
+                    final NodeSource nodeSource = newNodeSources.get(node.getSourceName());
 
-                // if node source was not deleted
-                if (nodeSource != null) {
+                    // if node source was not deleted
+                    if (nodeSource != null) {
+                        String userAccessType = retrieveUserAccessType(nodeSource);
+                        node.setUserAccessType(userAccessType);
 
-                    String userAccessType = retrieveUserAccessType(nodeSource);
-                    node.setUserAccessType(userAccessType);
-
-                    if (!node.isRemoved()) {
-                        addNodeToNodeSource(node, nodeSource);
-                    } else {
-                        removeNodeFromNodeSource(node, nodeSource);
+                        if (!node.isRemoved()) {
+                            addNodeToNodeSource(node, nodeSource);
+                        } else {
+                            removeNodeFromNodeSource(node, nodeSource);
+                        }
                     }
+
+                } catch (Throwable t) {
+                    System.out.println("Failed to parse node : ");
+                    System.out.println(jsNodes.get(i).toString());
+                    t.printStackTrace();
+
+                    LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
+                                                              " for input: " + jsNodes.get(i).toString());
                 }
-
-            } catch (Throwable t) {
-                System.out.println("Failed to parse node : ");
-                System.out.println(jsNodes.get(i).toString());
-                t.printStackTrace();
-
-                LogModel.getInstance().logCriticalMessage(t.getClass().getName() + ": " + t.getMessage() +
-                                                          " for input: " + jsNodes.get(i).toString());
+            }
+        } else {
+            // There are no node events which means that their state didn't change. We copy the nodes from the previous NS data
+            for (NodeSource nodeSource : newNodeSources.values()) {
+                // We copy only if there are nodes to be copied = it is not a NODESOURCE_ADDED
+                if (model.getNodeSources().get(nodeSource.getSourceName()) != null) {
+                    nodeSource.getHosts().putAll(model.getNodeSources().get(nodeSource.getSourceName()).getHosts());
+                }
             }
         }
 
