@@ -188,7 +188,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                                          .flatMap(host -> host.getNodes().values().stream())
                                          .collect(Collectors.toList());
 
-            // Process currentNodes, needed for a dynamic update a NS. Nodes don't change so they are not part of the delta
+            // Process currentNodes, needed for a dynamic update of a NS where nodes haven't changed. Nodes don't change so they are not part of the delta
             nodes.addAll(currentNodes.stream()
                                      .filter(node -> node.getSourceName().equals(nodeSource.getSourceName()) &&
                                                      !nodes.contains(node))
