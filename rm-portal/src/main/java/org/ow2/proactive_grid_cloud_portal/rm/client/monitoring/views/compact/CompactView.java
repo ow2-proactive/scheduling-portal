@@ -351,6 +351,9 @@ public class CompactView implements NodesListener, NodeSelectedListener {
                 flow.remove(emptyNs);
             }
             nodeSourceTiles.remove(nodeSource);
+            if (controller.getModel().getNodeSources().isEmpty()) {
+                compactPanel.resetIndex();
+            }
         }
     }
 
