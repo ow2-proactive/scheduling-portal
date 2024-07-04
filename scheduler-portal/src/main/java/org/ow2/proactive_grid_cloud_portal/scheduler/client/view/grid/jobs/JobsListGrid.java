@@ -601,11 +601,17 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     public void addLabelsMenu(Map<String, String> labels, ArrayList<String> ids) {
         Menu labelsMenu = new Menu();
+        boolean isSingleSelection = this.getSelectedRecords().length == 1;
+        boolean allSelectedRecordsHaveSamePriority = Arrays.stream(this.getSelectedRecords())
+                                                           .map(this::getJobLabel)
+                                                           .distinct()
+                                                           .count() == 1;
         for (String labelKey : labels.keySet()) {
             MenuItem item = new MenuItem(labels.get(labelKey));
             item.addClickHandler(event -> controller.setLabelOnJobs(labelKey, ids));
             labelsMenu.addItem(item);
-            if (labels.get(labelKey).equals(getJobLabel(this.getSelectedRecord()))) {
+            if ((isSingleSelection || allSelectedRecordsHaveSamePriority) &&
+                labels.get(labelKey).equals(getJobLabel(this.getSelectedRecord()))) {
                 item.setIcon(Images.instance.ok_16().getSafeUri().asString());
             }
         }
