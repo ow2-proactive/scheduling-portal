@@ -605,6 +605,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             MenuItem item = new MenuItem(labels.get(labelKey));
             item.addClickHandler(event -> controller.setLabelOnJobs(labelKey, ids));
             labelsMenu.addItem(item);
+            if (labels.get(labelKey).equals(getJobLabel(this.getSelectedRecord()))) {
+                item.setIcon(Images.instance.ok_16().getSafeUri().asString());
+            }
         }
         editLabels.setSubmenu(labelsMenu);
         editLabels.setEnabled(!labels.isEmpty());
@@ -618,6 +621,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private JobPriority getJobPriority(ListGridRecord rec) {
         return JobPriority.findPriority(rec.getAttribute(PRIORITY_ATTR.getName()));
+    }
+
+    private String getJobLabel(ListGridRecord rec) {
+        return rec.getAttribute(LABEL_ATTRIBUTE.getName());
     }
 
     public void setMenuItemsStatus(List<String> jobIds) {
