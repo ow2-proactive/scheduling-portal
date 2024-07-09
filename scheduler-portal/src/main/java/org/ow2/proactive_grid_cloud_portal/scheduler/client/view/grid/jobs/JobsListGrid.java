@@ -484,18 +484,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         });
         resumeAndRestartItemTask.setEnabled(selInError || selPause);
 
-        priorityItem = new MenuItem("Priority");
-        priorityMenu = new Menu();
-        for (final JobPriority p : JobPriority.values()) {
-            MenuItem item = new MenuItem(p.toString());
-            if (!selPauseOrRunning) {
-                item.setEnabled(false);
-            } else {
-                item.addClickHandler(event -> controller.setJobPriority(ids, p));
-            }
-            priorityMenu.addItem(item);
-        }
-        priorityItem.setSubmenu(priorityMenu);
+        createPriorityMenu(ids);
 
         killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(event -> controller.killJobs(ids));
@@ -560,6 +549,32 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         checkIfLabelsAreEmpty(menu, jobLabels);
     }
 
+    private void createPriorityMenu(List<String> ids) {
+        priorityItem = new MenuItem("Priority");
+        priorityMenu = new Menu();
+        for (final JobPriority p : JobPriority.values()) {
+            MenuItem item = new MenuItem(p.toString());
+            if (!selPauseOrRunning) {
+                item.setEnabled(false);
+            } else {
+                item.addClickHandler(event -> controller.setJobPriority(ids, p));
+            }
+
+            boolean isSingleSelection = this.getSelectedRecords().length == 1;
+            boolean allSelectedRecordsHaveSamePriority = Arrays.stream(this.getSelectedRecords())
+                                                               .map(this::getJobPriority)
+                                                               .distinct()
+                                                               .count() == 1;
+
+            if ((isSingleSelection || allSelectedRecordsHaveSamePriority) &&
+                item.getTitle().equals(getJobPriority(this.getSelectedRecord()).toString())) {
+                item.setIcon(Images.instance.ok_16().getSafeUri().asString());
+            }
+            priorityMenu.addItem(item);
+        }
+        priorityItem.setSubmenu(priorityMenu);
+    }
+
     private void checkIfLabelsAreEmpty(Menu menu, List<String> jobLabels) {
         if (jobLabels.stream().allMatch(String::isEmpty)) {
             removeLabels.setEnabled(false);
@@ -601,10 +616,19 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     public void addLabelsMenu(Map<String, String> labels, ArrayList<String> ids) {
         Menu labelsMenu = new Menu();
+        boolean isSingleSelection = this.getSelectedRecords().length == 1;
+        boolean allSelectedRecordsHaveSamePriority = Arrays.stream(this.getSelectedRecords())
+                                                           .map(this::getJobLabel)
+                                                           .distinct()
+                                                           .count() == 1;
         for (String labelKey : labels.keySet()) {
             MenuItem item = new MenuItem(labels.get(labelKey));
             item.addClickHandler(event -> controller.setLabelOnJobs(labelKey, ids));
             labelsMenu.addItem(item);
+            if ((isSingleSelection || allSelectedRecordsHaveSamePriority) &&
+                labels.get(labelKey).equals(getJobLabel(this.getSelectedRecord()))) {
+                item.setIcon(Images.instance.ok_16().getSafeUri().asString());
+            }
         }
         editLabels.setSubmenu(labelsMenu);
         editLabels.setEnabled(!labels.isEmpty());
@@ -618,6 +642,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private JobPriority getJobPriority(ListGridRecord rec) {
         return JobPriority.findPriority(rec.getAttribute(PRIORITY_ATTR.getName()));
+    }
+
+    private String getJobLabel(ListGridRecord rec) {
+        return rec.getAttribute(LABEL_ATTRIBUTE.getName());
     }
 
     public void setMenuItemsStatus(List<String> jobIds) {
@@ -635,26 +663,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         if (loginModel.userDoesNotHavePermissionToChangeJobsPriority(jobIds)) {
             priorityItem.setEnabled(false);
-        } else {
-            /*
-             * If the change priority action is authorized for a user,
-             * we need to check the specific priorities the user is allowed to set
-             */
-            boolean isSingleSelection = this.getSelectedRecords().length == 1;
-            boolean allSelectedRecordsHaveSamePriority = Arrays.stream(this.getSelectedRecords())
-                                                               .map(this::getJobPriority)
-                                                               .distinct()
-                                                               .count() == 1;
-            List<String> userPrioritiesPermission = loginModel.getUserPrioritiesPermission();
-            Stream.of(priorityMenu.getItems()).forEach(priorityMenuItem -> {
-                if (!userPrioritiesPermission.contains(priorityMenuItem.getTitle())) {
-                    priorityMenuItem.setEnabled(false);
-                }
-                if ((isSingleSelection || allSelectedRecordsHaveSamePriority) &&
-                    priorityMenuItem.getTitle().equals(getJobPriority(this.getSelectedRecord()).toString())) {
-                    priorityMenuItem.setIcon(Images.instance.ok_16().getSafeUri().asString());
-                }
-            });
         }
         if (loginModel.userDoesNotHavePermissionToKillJobs(jobIds)) {
             killItem.setEnabled(false);
