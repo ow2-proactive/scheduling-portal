@@ -25,9 +25,7 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 
@@ -55,6 +53,8 @@ public class ManageLabelsWindow {
     private static final String LABEL_REGEX_PROPERTY = "pa.scheduler.label.regex";
 
     private static final String LABEL_MAX_LENGTH_PROPERTY = "pa.scheduler.label.max.length";
+
+    private static final String LABEL_ATTRIBUTE_NAME = "label";
 
     private Window window;
 
@@ -157,7 +157,7 @@ public class ManageLabelsWindow {
         labelsListGrid.redraw();
         List<String> labels = new ArrayList<>();
         for (int j = 0; j < labelsListGrid.getTotalRows(); j++) {
-            labels.add(labelsListGrid.getRecord(j).getAttribute("label"));
+            labels.add(labelsListGrid.getRecord(j).getAttribute(LABEL_ATTRIBUTE_NAME));
         }
         controller.setLabels(this, labels);
     }
@@ -187,7 +187,7 @@ public class ManageLabelsWindow {
         newRecord.setAttribute(" ", Images.instance.remove().getSafeUri().asString());
         newRecord.set_canEdit(true);
         labelsListGrid.startEditing(labelsListGrid.getRowNum(newRecord));
-        newRecord.setAttribute("label", "");
+        newRecord.setAttribute(LABEL_ATTRIBUTE_NAME, "");
     }
 
     private ListGridField getRemoveField() {
@@ -201,18 +201,19 @@ public class ManageLabelsWindow {
     }
 
     private ListGridField getLabelField(Map<String, Object> properties) {
-        ListGridField labelField = new ListGridField("label", "Label", 390);
+        ListGridField labelField = new ListGridField(LABEL_ATTRIBUTE_NAME, "Label", 390);
         Validator requiredValidator = getRequiredValidator();
+        Validator uniqueValidator = getUniqueLabelValidator();
         Validator lengthValidator = getLengthValidator(properties);
         Validator regexpValidator = getRegexValidator(properties);
         if (lengthValidator != null && regexpValidator != null) {
-            labelField.setValidators(requiredValidator, lengthValidator, regexpValidator);
+            labelField.setValidators(requiredValidator, lengthValidator, regexpValidator, uniqueValidator);
         } else if (lengthValidator != null) {
-            labelField.setValidators(requiredValidator, lengthValidator);
+            labelField.setValidators(requiredValidator, lengthValidator, uniqueValidator);
         } else if (regexpValidator != null) {
-            labelField.setValidators(requiredValidator, regexpValidator);
+            labelField.setValidators(requiredValidator, regexpValidator, uniqueValidator);
         } else {
-            labelField.setValidators(requiredValidator);
+            labelField.setValidators(requiredValidator, uniqueValidator);
         }
         labelField.setValidateOnChange(true);
         labelField.setCanEdit(true);
@@ -258,6 +259,21 @@ public class ManageLabelsWindow {
         };
         requiredValidator.setErrorMessage("Field is required");
         return requiredValidator;
+    }
+
+    private Validator getUniqueLabelValidator() {
+        Validator uniqueLabelValidator = new CustomValidator() {
+            @Override
+            protected boolean condition(Object value) {
+                return Arrays.stream(labelsListGrid.getRecords())
+                             .noneMatch(listGridRecord -> value.toString()
+                                                               .toLowerCase(Locale.ROOT)
+                                                               .equals(listGridRecord.getAttribute("label")
+                                                                                     .toLowerCase(Locale.ROOT)));
+            }
+        };
+        uniqueLabelValidator.setErrorMessage("Label already exists");
+        return uniqueLabelValidator;
     }
 
     public void setData(Map<String, String> labels) {
