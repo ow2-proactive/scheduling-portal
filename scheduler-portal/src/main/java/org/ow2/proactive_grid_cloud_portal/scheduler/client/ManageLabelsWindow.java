@@ -267,9 +267,7 @@ public class ManageLabelsWindow {
             protected boolean condition(Object value) {
                 return Arrays.stream(labelsListGrid.getRecords())
                              .noneMatch(listGridRecord -> value.toString()
-                                                               .toLowerCase(Locale.ROOT)
-                                                               .equals(listGridRecord.getAttribute("label")
-                                                                                     .toLowerCase(Locale.ROOT)));
+                                                               .equals(listGridRecord.getAttribute("label")));
             }
         };
         uniqueLabelValidator.setErrorMessage("Label already exists");
