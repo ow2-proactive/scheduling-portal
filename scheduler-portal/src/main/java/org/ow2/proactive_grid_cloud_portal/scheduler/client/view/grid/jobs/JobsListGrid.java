@@ -544,9 +544,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                            removeLabels);
 
         controller.getJobSignals(ids.get(0), this);
-        controller.checkJobsPermissionMethods(ids, this);
         controller.getJobLabels(this, ids);
         checkIfLabelsAreEmpty(menu, jobLabels);
+        controller.checkJobsPermissionMethods(ids, this);
     }
 
     private void createPriorityMenu(List<String> ids) {
@@ -631,7 +631,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             }
         }
         editLabels.setSubmenu(labelsMenu);
-        editLabels.setEnabled(!labels.isEmpty());
+        if (labels.isEmpty()) {
+            editLabels.setEnabled(false);
+        }
         menu.redraw();
     }
 
