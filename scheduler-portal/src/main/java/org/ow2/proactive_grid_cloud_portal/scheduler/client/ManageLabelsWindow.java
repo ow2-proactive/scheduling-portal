@@ -266,7 +266,8 @@ public class ManageLabelsWindow {
             @Override
             protected boolean condition(Object value) {
                 return Arrays.stream(labelsListGrid.getRecords())
-                             .noneMatch(listGridRecord -> value.toString()
+                             .noneMatch(listGridRecord -> value != null &&
+                                                          value.toString()
                                                                .equals(listGridRecord.getAttribute("label")));
             }
         };
