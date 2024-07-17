@@ -768,15 +768,15 @@ public interface RestClient {
             @QueryParam("startdate") String startDate, @QueryParam("enddate") String endDate);
 
     @POST
-    @Path("/credentials/{key}")
+    @Path("/credentials/")
     @Produces(MediaType.APPLICATION_JSON)
-    void putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key,
+    void putThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @FormParam("key") String key,
             @FormParam("value") String value);
 
     @DELETE
-    @Path("/credentials/{key}")
+    @Path("/credentials/")
     @Produces(MediaType.APPLICATION_JSON)
-    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @PathParam("key") @Encoded String key);
+    void removeThirdPartyCredential(@HeaderParam("sessionid") String sessionId, @QueryParam("key") String key);
 
     @GET
     @Path("/credentials/")
