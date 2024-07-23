@@ -39,7 +39,9 @@ public enum Action implements IsSerializable {
     NOT_CONTAIN("Not contain"),
     STARTS_WITH("Starts with"),
     LESS_THAN_OR_EQUAL_TO("Less than or equal to"),
-    GREATER_THAN_OR_EQUAL_TO("Greater than or equal to");
+    GREATER_THAN_OR_EQUAL_TO("Greater than or equal to"),
+    IS_EMPTY("Is empty"),
+    IS_NOT_EMPTY("Is not empty");
 
     private String name;
 
