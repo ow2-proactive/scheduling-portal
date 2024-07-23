@@ -27,6 +27,7 @@ package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
 import java.util.Date;
 
+import org.ow2.proactive.scheduling.api.graphql.common.NullStatus;
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -129,7 +130,7 @@ public class FilterView extends VStack {
         filterPanel.reflow();
     }
 
-    private String validateField(Field field, String value) {
+    private String validateField(Field field, String value, Action action) {
         switch (field) {
             case ID:
             case NUMBER_OF_PENDING_TASKS:
@@ -159,11 +160,17 @@ public class FilterView extends VStack {
                 break;
             case CUMULATED_CORE_TIME:
             case PARENT_ID:
-                try {
-                    Long.parseLong(value);
-                } catch (NumberFormatException e) {
-                    displayErrorMessage("Invalid value for field " + field + " : \"" + value +
-                                        "\" is not a long integer.");
+                if (action.equals(Action.IS_NOT_EMPTY)) {
+                    return NullStatus.NOT_NULL.toString();
+                } else if (action.equals(Action.IS_EMPTY)) {
+                    return NullStatus.NULL.toString();
+                } else {
+                    try {
+                        Long.parseLong(value);
+                    } catch (NumberFormatException e) {
+                        displayErrorMessage("Invalid value for field " + field + " : \"" + value +
+                                            "\" is not a long integer.");
+                    }
                 }
                 break;
             default:
@@ -186,7 +193,7 @@ public class FilterView extends VStack {
             Action action = Action.get(row.actionList.getSelectedValue());
             String value = row.getValue();
 
-            value = validateField(field, value);
+            value = validateField(field, value, action);
 
             model.addConstraint(field, action, value);
         }
@@ -260,7 +267,7 @@ public class FilterView extends VStack {
             newRow.setActionsAccordingToSelectedField();
             newRow.actionList.setSelectedIndex(getSelectedValueIndex(newRow.actionList,
                                                                      field.get("action").isString().stringValue()));
-            newRow.setValue(field.get("value").isString().stringValue());
+            newRow.setValue(field.get("value").isString().stringValue(), field.get("action").isString().stringValue());
             filterPanel.addMember(newRow);
             updateRemoveButtonStatus();
         }
@@ -509,6 +516,7 @@ public class FilterView extends VStack {
             addMember(actionList);
             valuePanel.setWidget(textBox);
             addMember(valuePanel);
+            addChangeHandlerForActions();
         }
 
         @Override
@@ -534,7 +542,7 @@ public class FilterView extends VStack {
             return textBox.getText();
         }
 
-        public void setValue(String value) {
+        public void setValue(String value, String action) {
             Widget valueWidget = valuePanel.getWidget();
             if (valueWidget == priorityList)
                 priorityList.setSelectedIndex(getSelectedValueIndex(priorityList, value));
@@ -542,13 +550,77 @@ public class FilterView extends VStack {
                 stateList.setSelectedIndex(getSelectedValueIndex(stateList, value));
             if (valueWidget == dateTextBox)
                 dateTextBox.setText(value);
-            if (valueWidget == textBox)
+            if (valueWidget == textBox) {
                 textBox.setText(value);
+                if (action.equals(Action.IS_EMPTY.getName()) || action.equals(Action.IS_NOT_EMPTY.getName())) {
+                    textBox.setEnabled(false);
+                }
+            }
+        }
+
+        private void addChangeHandlerForActions() {
+            actionList.addChangeHandler(changeHandler -> {
+                int selectedIndex = actionList.getSelectedIndex();
+                String selectedItem = actionList.getItemText(selectedIndex);
+                if (selectedItem.equalsIgnoreCase(Action.IS_EMPTY.getName()) ||
+                    selectedItem.equalsIgnoreCase(Action.IS_NOT_EMPTY.getName())) {
+                    textBox.setText("");
+                    textBox.setEnabled(false);
+                } else {
+                    textBox.setEnabled(true);
+                    setWidgetAccordingToSelectedField();
+                }
+            });
+        }
+
+        private void setWidgetAccordingToSelectedField() {
+            Field field = Field.get(fieldsList.getSelectedValue());
+            switch (field) {
+                case ID:
+                case PROJECT_NAME:
+                case BUCKET_NAME:
+                case SUBMISSION_MODE:
+                case LABEL:
+                case USER:
+                case TENANT:
+                case NAME:
+                case NUMBER_OF_PENDING_TASKS:
+                case NUMBER_OF_RUNNING_TASKS:
+                case NUMBER_OF_FINISHED_TASKS:
+                case PARENT_ID:
+                case CHILDREN_COUNT:
+                case NUMBER_OF_FAULTY_TASKS:
+                case CUMULATED_CORE_TIME:
+                case NUMBER_OF_NODES:
+                case NUMBER_OF_NODES_IN_PARALLEL:
+                case NUMBER_OF_FAILED_TASKS:
+                case NUMBER_OF_IN_ERROR_TASKS: {
+                    valuePanel.setWidget(textBox);
+                    break;
+                }
+                case PRIORITY: {
+                    valuePanel.setWidget(priorityList);
+                    break;
+                }
+                case STATE: {
+                    valuePanel.setWidget(stateList);
+                    break;
+                }
+                case SUBMITTED_TIME:
+                case START_TIME:
+                case LAST_UPDATED_TIME:
+                case FINISHED_TIME: {
+                    dateTextBox.getElement().setPropertyString("placeholder", "yyyy-MM-dd HH:mm:ss");
+                    valuePanel.setWidget(dateTextBox);
+                    break;
+                }
+            }
         }
 
         private void setActionsAccordingToSelectedField() {
             Field field = Field.get(fieldsList.getSelectedValue());
             actionList.clear();
+            textBox.setEnabled(true);
             switch (field) {
                 case ID: {
                     actionList.addItem(Action.EQUALS.getName());
@@ -597,7 +669,14 @@ public class FilterView extends VStack {
                 case NUMBER_OF_PENDING_TASKS:
                 case NUMBER_OF_RUNNING_TASKS:
                 case NUMBER_OF_FINISHED_TASKS:
-                case PARENT_ID:
+                case PARENT_ID: {
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.IS_EMPTY.getName());
+                    actionList.addItem(Action.IS_NOT_EMPTY.getName());
+                    valuePanel.setWidget(textBox);
+                    break;
+                }
                 case CHILDREN_COUNT:
                 case NUMBER_OF_FAULTY_TASKS:
                 case CUMULATED_CORE_TIME:
