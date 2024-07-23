@@ -29,17 +29,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ow2.proactive.scheduling.api.graphql.beans.input.JobInput;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Jobs;
 import org.ow2.proactive.scheduling.api.graphql.beans.input.Query;
+import org.ow2.proactive.scheduling.api.graphql.common.NullStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Action;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Constraint;
 import org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.FilterModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -56,7 +58,7 @@ public final class GraphQLQueries {
     /**
      * Logger
      */
-    private static final Logger LOGGER = Logger.getLogger(GraphQLQueries.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphQLQueries.class);
 
     private static List<String> PAST_JOB_STATUSES = Stream.of(JobStatus.CANCELED,
                                                               JobStatus.FAILED,
@@ -106,14 +108,12 @@ public final class GraphQLQueries {
             } else {
                 jobsBuilder.last(pageSize);
             }
-
             List<JobInput> input = getJobInputs(user, pending, running, finished, filterModel);
             jobsBuilder.input(input);
 
             Query.Builder queryBuilder = new Query.Builder().query(jobsBuilder.build().getQueryString());
             return queryBuilder.build();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
             return null;
         }
     }
@@ -155,7 +155,6 @@ public final class GraphQLQueries {
     private JobInput getJobInput(List<String> statusNames, String user, List<Constraint> constraints) {
         JobInput.Builder input = new JobInput.Builder();
         input.status(statusNames);
-
         if (statusNames.isEmpty()) {
             return input.jobName(RETURN_NOTHING_FILTER).build();
         }
@@ -196,6 +195,7 @@ public final class GraphQLQueries {
         String beforeCumulatedCoreTime = null;
         String afterParentId = null;
         String beforeParentId = null;
+        String parentIdNullStatus = null;
         String afterChildrenCount = null;
         String beforeChildrenCount = null;
         String afterNumberOfNodes = null;
@@ -220,7 +220,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE, "Error when parsing id filter \"" + value + "\"", e);
+                            LOGGER.error("Error when parsing id filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -350,9 +350,8 @@ public final class GraphQLQueries {
                         try {
                             valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Invalid value for field SUBMITTED_TIME : \"" + value + "\" is not a long int",
-                                       e);
+                            LOGGER.error("Invalid value for field SUBMITTED_TIME : \"" + value + "\" is not a long int",
+                                         e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -374,9 +373,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Invalid value for field START_TIME : \"" + value + "\" is not a long int",
-                                       e);
+                            LOGGER.error("Invalid value for field START_TIME : \"" + value + "\" is not a long int", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -398,10 +395,8 @@ public final class GraphQLQueries {
                         try {
                             valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Invalid value for field LAST_UPDATED_TIME : \"" + value +
-                                                     "\" is not a long int",
-                                       e);
+                            LOGGER.error("Invalid value for field LAST_UPDATED_TIME : \"" + value +
+                                         "\" is not a long int", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -423,9 +418,8 @@ public final class GraphQLQueries {
                         try {
                             valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Invalid value for field FINISHED_TIME : \"" + value + "\" is not a long int",
-                                       e);
+                            LOGGER.error("Invalid value for field FINISHED_TIME : \"" + value + "\" is not a long int",
+                                         e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -448,9 +442,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_PENDING_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_PENDING_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -475,9 +467,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_RUNNING_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_RUNNING_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -502,9 +492,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_FINISHED_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_FINISHED_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -529,9 +517,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsLong = Long.parseLong(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing CUMULATED_CORE_TIME filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing CUMULATED_CORE_TIME filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -552,25 +538,29 @@ public final class GraphQLQueries {
                         break;
                     }
                     case PARENT_ID: {
-                        // Consider only parseable numbers.
-                        try {
-                            valueAsLong = Integer.parseInt(value);
-                        } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE, "Error when parsing PARENT_ID filter \"" + value + "\"", e);
-                            return input.jobName(RETURN_NOTHING_FILTER).build();
-                        }
+                        if (value.equals(NullStatus.NOT_NULL.toString()) || value.equals(NullStatus.NULL.toString())) {
+                            parentIdNullStatus = value;
+                        } else {
+                            // Consider only parseable numbers.
+                            try {
+                                valueAsLong = Integer.parseInt(value);
+                            } catch (NumberFormatException e) {
+                                LOGGER.error("Error when parsing PARENT_ID filter \"" + value + "\"", e);
+                                return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
 
-                        switch (constraint.getAction()) {
-                            case GREATER_THAN_OR_EQUAL_TO:
-                                if (afterParentId == null || valueAsLong > Integer.valueOf(afterParentId))
-                                    afterParentId = value;
-                                break;
-                            case LESS_THAN_OR_EQUAL_TO:
-                                if (beforeParentId == null || valueAsLong < Integer.valueOf(beforeParentId))
-                                    beforeParentId = value;
-                                break;
-                            default:
-                                break;
+                            switch (constraint.getAction()) {
+                                case GREATER_THAN_OR_EQUAL_TO:
+                                    if (afterParentId == null || valueAsLong > Integer.valueOf(afterParentId))
+                                        afterParentId = value;
+                                    break;
+                                case LESS_THAN_OR_EQUAL_TO:
+                                    if (beforeParentId == null || valueAsLong < Integer.valueOf(beforeParentId))
+                                        beforeParentId = value;
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                         break;
                     }
@@ -579,7 +569,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE, "Error when parsing CHILDREN_COUNT filter \"" + value + "\"", e);
+                            LOGGER.error("Error when parsing CHILDREN_COUNT filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -603,7 +593,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE, "Error when parsing NUMBER_OF_NODES filter \"" + value + "\"", e);
+                            LOGGER.error("Error when parsing NUMBER_OF_NODES filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -627,9 +617,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_NODES_IN_PARALLEL filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_NODES_IN_PARALLEL filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -654,9 +642,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_FAULTY_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_FAULTY_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -681,9 +667,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_FAILED_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_FAILED_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -708,9 +692,7 @@ public final class GraphQLQueries {
                         try {
                             valueAsInteger = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
-                            LOGGER.log(Level.SEVERE,
-                                       "Error when parsing NUMBER_OF_IN_ERROR_TASKS filter \"" + value + "\"",
-                                       e);
+                            LOGGER.error("Error when parsing NUMBER_OF_IN_ERROR_TASKS filter \"" + value + "\"", e);
                             return input.jobName(RETURN_NOTHING_FILTER).build();
                         }
 
@@ -825,6 +807,8 @@ public final class GraphQLQueries {
             input.beforeNumberOfNodes(beforeNumberOfNodes);
         if (beforeNumberOfNodesInParallel != null)
             input.beforeNumberOfNodesInParallel(beforeNumberOfNodesInParallel);
+        if (parentIdNullStatus != null)
+            input.parentIdNullStatus(parentIdNullStatus);
         return input.build();
     }
 
