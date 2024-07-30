@@ -1622,6 +1622,26 @@ public class SchedulerServiceImpl extends Service implements SchedulerService {
 
     }
 
+    @Override
+    public boolean changeStartAt(String sessionId, String jobId, String startAt)
+            throws RestServerException, ServiceException {
+        String response = executeFunctionReturnStreamAsString(restClient -> restClient.changeStartAt(sessionId,
+                                                                                                     jobId,
+                                                                                                     startAt),
+                                                              false);
+        return Boolean.parseBoolean(response);
+    }
+
+    @Override
+    public boolean changeStartAtMultiple(String sessionId, String startAt, List<String> jobIds)
+            throws RestServerException, ServiceException {
+        String response = executeFunctionReturnStreamAsString(restClient -> restClient.changeStartAtMultiple(sessionId,
+                                                                                                             startAt,
+                                                                                                             jobIds),
+                                                              false);
+        return Boolean.parseBoolean(response);
+    }
+
     private StringEntity getEntityForPermission(List<String> jobIds, List<String> methods)
             throws UnsupportedEncodingException {
 

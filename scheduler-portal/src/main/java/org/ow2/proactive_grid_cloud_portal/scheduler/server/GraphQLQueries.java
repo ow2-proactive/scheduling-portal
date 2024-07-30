@@ -196,6 +196,9 @@ public final class GraphQLQueries {
         String afterParentId = null;
         String beforeParentId = null;
         String parentIdNullStatus = null;
+        String startAtNullStatus = null;
+        Long beforeStartAtTime = null;
+        Long afterStartAtTime = null;
         String afterChildrenCount = null;
         String beforeChildrenCount = null;
         String afterNumberOfNodes = null;
@@ -391,6 +394,33 @@ public final class GraphQLQueries {
                         }
                         break;
                     }
+                    case START_AT: {
+                        if (value.equals(NullStatus.NOT_NULL.toString()) || value.equals(NullStatus.NULL.toString())) {
+                            startAtNullStatus = value;
+                        } else {
+                            // Consider only parseable numbers.
+                            try {
+                                valueAsLong = Long.parseLong(value);
+                            } catch (NumberFormatException e) {
+                                LOGGER.error("Error when parsing START_AT filter \"" + value + "\"", e);
+                                return input.jobName(RETURN_NOTHING_FILTER).build();
+                            }
+
+                            switch (constraint.getAction()) {
+                                case GREATER_THAN_OR_EQUAL_TO:
+                                    if (afterStartAtTime == null || valueAsLong > afterStartAtTime)
+                                        afterStartAtTime = valueAsLong;
+                                    break;
+                                case LESS_THAN_OR_EQUAL_TO:
+                                    if (beforeStartAtTime == null || valueAsLong < beforeStartAtTime)
+                                        beforeStartAtTime = valueAsLong;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    }
                     case LAST_UPDATED_TIME: {
                         try {
                             valueAsLong = Long.parseLong(value);
@@ -543,7 +573,7 @@ public final class GraphQLQueries {
                         } else {
                             // Consider only parseable numbers.
                             try {
-                                valueAsLong = Integer.parseInt(value);
+                                valueAsLong = Long.parseLong(value);
                             } catch (NumberFormatException e) {
                                 LOGGER.error("Error when parsing PARENT_ID filter \"" + value + "\"", e);
                                 return input.jobName(RETURN_NOTHING_FILTER).build();
@@ -551,11 +581,11 @@ public final class GraphQLQueries {
 
                             switch (constraint.getAction()) {
                                 case GREATER_THAN_OR_EQUAL_TO:
-                                    if (afterParentId == null || valueAsLong > Integer.valueOf(afterParentId))
+                                    if (afterParentId == null || valueAsLong > Long.valueOf(afterParentId))
                                         afterParentId = value;
                                     break;
                                 case LESS_THAN_OR_EQUAL_TO:
-                                    if (beforeParentId == null || valueAsLong < Integer.valueOf(beforeParentId))
+                                    if (beforeParentId == null || valueAsLong < Long.valueOf(beforeParentId))
                                         beforeParentId = value;
                                     break;
                                 default:
@@ -809,6 +839,12 @@ public final class GraphQLQueries {
             input.beforeNumberOfNodesInParallel(beforeNumberOfNodesInParallel);
         if (parentIdNullStatus != null)
             input.parentIdNullStatus(parentIdNullStatus);
+        if (beforeStartAtTime != null)
+            input.beforeStartAt("" + beforeStartAtTime);
+        if (afterStartAtTime != null)
+            input.afterStartAt("" + afterStartAtTime);
+        if (startAtNullStatus != null)
+            input.startAtNullStatus(startAtNullStatus);
         return input.build();
     }
 

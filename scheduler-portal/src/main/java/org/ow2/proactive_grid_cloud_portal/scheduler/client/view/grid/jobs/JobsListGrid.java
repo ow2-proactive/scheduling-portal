@@ -30,7 +30,6 @@ import static org.ow2.proactive_grid_cloud_portal.scheduler.client.view.grid.job
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
 import org.ow2.proactive_grid_cloud_portal.common.client.Settings;
@@ -97,6 +96,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private boolean selInError;
 
+    private boolean selPending;
+
     private boolean selSingleSelected;
 
     private Menu menu;
@@ -104,6 +105,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
     private MenuItem actionsItem;
 
     private MenuItem killItem;
+
+    private MenuItem updateStartAtItem;
 
     private MenuItem pauseItem;
 
@@ -424,6 +427,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         selFinished = true;
         selPauseOrRunning = true;
         selInError = false;
+        selPending = false;
         selSingleSelected = this.getSelectedRecords().length == 1;
         this.menu = menu;
         final ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
@@ -433,6 +437,8 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
             switch (status) {
                 case PENDING:
+                    selPending = true;
+                    break;
                 case STALLED:
                     selPause = false;
                     selFinished = false;
@@ -486,6 +492,11 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
         createPriorityMenu(ids);
 
+        updateStartAtItem = new MenuItem("Update Start At",
+                                         SchedulerImages.instance.clock_16().getSafeUri().asString());
+        updateStartAtItem.addClickHandler(event -> new StartAtUpdateWindow(controller, this.getSelectedRecords()));
+        updateStartAtItem.setEnabled(selPauseOrRunning);
+
         killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(event -> controller.killJobs(ids));
         killItem.setEnabled(selPauseOrRunning);
@@ -534,6 +545,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
                            resumeItem,
                            resumeAndRestartItemTask,
                            priorityItem,
+                           updateStartAtItem,
                            killItem,
                            killAndResubmitItem,
                            resubmitItem,

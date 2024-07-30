@@ -576,4 +576,17 @@ public interface SchedulerService extends RemoteService {
      *
      */
     List<String> getDomains() throws RestServerException, ServiceException;
+
+    /**
+     * Returns the domains configured on the scheduler server.
+     *
+     */
+    boolean changeStartAt(String sessionId, String jobId, String startAt) throws RestServerException, ServiceException;
+
+    /**
+     * Returns the domains configured on the scheduler server.
+     *
+     */
+    boolean changeStartAtMultiple(String sessionId, String startAt, List<String> jobIdList)
+            throws RestServerException, ServiceException;
 }

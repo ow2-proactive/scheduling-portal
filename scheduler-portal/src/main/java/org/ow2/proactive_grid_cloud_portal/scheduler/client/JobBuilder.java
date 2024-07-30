@@ -72,6 +72,8 @@ public class JobBuilder {
 
     private long startTime;
 
+    private Long startAtTime = null;
+
     private long inErrorTime;
 
     private long finishTime;
@@ -160,6 +162,10 @@ public class JobBuilder {
 
     public long getSubmitTime() {
         return submitTime;
+    }
+
+    public Long getStartAtTime() {
+        return startAtTime;
     }
 
     public long getStartTime() {
@@ -300,6 +306,11 @@ public class JobBuilder {
 
     public JobBuilder submitTime(long submitTime) {
         this.submitTime = submitTime;
+        return this;
+    }
+
+    public JobBuilder startAtTime(Long startAtTime) {
+        this.startAtTime = startAtTime;
         return this;
     }
 
