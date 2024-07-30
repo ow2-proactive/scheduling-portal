@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.Images;
+import org.ow2.proactive_grid_cloud_portal.common.client.JSUtil;
 import org.ow2.proactive_grid_cloud_portal.common.client.WindowUtils;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.controller.JobsController;
 
@@ -85,8 +86,7 @@ public class StartAtUpdateWindow {
         String initialLabelContent = "";
         if (jobIds.size() == 1) {
             initialLabelContent = CURRENT_START_AT_LABEL_CONTENT + "<b>" +
-                                  controller.getModel().getJob(jobIds.get(0)).getGenericInformation().get(START_AT) +
-                                  "</b>";
+                                  JSUtil.getTime(controller.getModel().getJob(jobIds.get(0)).getStartAtTime()) + "</b>";
         } else {
             initialLabelContent = "You are about to change the Start At value of jobs " +
                                   jobIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ".";
