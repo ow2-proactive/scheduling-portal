@@ -98,6 +98,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         long finishTime = item.getFinishTime();
         long inErrorTime = item.getInErrorTime();
         String cumulatedCoreTime = Job.formatDuration(item.getCumulatedCoreTime());
+        String startAt = item.getStartAtTime() != null ? JSUtil.getTime(item.getStartAtTime()) : "";
         long parentId = item.getParentId();
         int childrenCount = item.getChildrenCount();
         int numberOfNodes = item.getNumberOfNodes();
@@ -124,7 +125,7 @@ public class JobsDetailColumnsFactory extends JobsColumnsFactory {
         record.setAttribute(IN_ERROR_TIME_ATTR.getName(), JSUtil.getTime(inErrorTime));
         record.setAttribute(CUMULATED_CORE_TIME.getName(), cumulatedCoreTime);
         record.setAttribute(PARENT_ID.getName(), parentId);
-        record.setAttribute(START_AT_ATTR.getName(), JSUtil.getTime(item.getStartAtTime()));
+        record.setAttribute(START_AT_ATTR.getName(), startAt);
         record.setAttribute(CHILDREN_COUNT.getName(), childrenCount);
         record.setAttribute(NUMBER_OF_NODES.getName(), numberOfNodes);
         record.setAttribute(NUMBER_OF_NODES_IN_PARALLEL.getName(), numberOfNodesInParallel);
