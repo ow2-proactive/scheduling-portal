@@ -532,7 +532,7 @@ public interface SchedulerServiceAsync {
     void getDomains(AsyncCallback<List<String>> callback);
 
     /**
-     * Update the Start At for given job Ids
+     * Update the Start At for the given job Id
      *
      * @param sessionId the current session id
      * @param jobId the id of job
