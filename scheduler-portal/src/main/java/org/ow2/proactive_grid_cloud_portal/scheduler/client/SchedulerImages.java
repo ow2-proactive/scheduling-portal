@@ -151,4 +151,7 @@ public interface SchedulerImages extends ClientBundle {
 
     @Source("images/ok_16.png")
     ImageResource ok_16();
+
+    @Source("images/clock_16.png")
+    ImageResource clock_16();
 }

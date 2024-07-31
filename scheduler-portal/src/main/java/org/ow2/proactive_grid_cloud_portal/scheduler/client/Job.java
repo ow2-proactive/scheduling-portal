@@ -86,6 +86,8 @@ public class Job implements Serializable, Comparable<Job> {
 
     private long submitTime;
 
+    private Long startAtTime;
+
     private long startTime;
 
     private long inErrorTime;
@@ -141,6 +143,7 @@ public class Job implements Serializable, Comparable<Job> {
         this.inErrorTasks = builder.getInErrorTasks();
 
         this.submitTime = builder.getSubmitTime();
+        this.startAtTime = builder.getStartAtTime();
         this.startTime = builder.getStartTime();
         this.inErrorTime = builder.getInErrorTime();
         this.finishTime = builder.getFinishTime();
@@ -368,6 +371,13 @@ public class Job implements Serializable, Comparable<Job> {
     }
 
     /**
+     * @return time at which the job is scheduled
+     */
+    public Long getStartAtTime() {
+        return startAtTime;
+    }
+
+    /**
      * @return time at which the job was started
      */
     public long getStartTime() {
@@ -528,6 +538,10 @@ public class Job implements Serializable, Comparable<Job> {
         int inError = (int) jsonJobInfo.get("numberOfInErrorTasks").isNumber().doubleValue();
         long submittedTime = (long) jsonJobInfo.get("submittedTime").isNumber().doubleValue();
         long startTime = (long) jsonJobInfo.get("startTime").isNumber().doubleValue();
+        Long startAtTime = null;
+        if (jsonJobInfo.get("startAt").isNumber() != null) {
+            startAtTime = (long) jsonJobInfo.get("startAt").isNumber().doubleValue();
+        }
         long inErrorTime = (long) jsonJobInfo.get("inErrorTime").isNumber().doubleValue();
         long finishedTime = (long) jsonJobInfo.get("finishedTime").isNumber().doubleValue();
         long cumulatedCoreTime = jsonJobInfo.get("cumulatedCoreTime") == null ? 0
@@ -582,6 +596,7 @@ public class Job implements Serializable, Comparable<Job> {
                                .faultyTasks(faulty)
                                .inErrorTasks(inError)
                                .submitTime(submittedTime)
+                               .startAtTime(startAtTime)
                                .startTime(startTime)
                                .inErrorTime(inErrorTime)
                                .finishTime(finishedTime)
