@@ -82,6 +82,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                                                                        false,
                                                                        true);
 
+    public static final GridColumns START_AT_ATTR = new GridColumns("startAtTime", "Start at", 120, true, false, false);
+
     public static final GridColumns START_TIME_ATTR = new GridColumns("startTime",
                                                                       "Started at",
                                                                       120,
@@ -99,7 +101,7 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
     private static final GridColumns[] COLUMNS = new GridColumns[] { ID_ATTR, STATE_ATTR, ISSUES_ATTR, USER_ATTR,
                                                                      TENANT_ATTR, PROGRESS_ATTR, PRIORITY_ATTR,
                                                                      DURATION_ATTR, NAME_ATTR, PROJECT_NAME_ATTR,
-                                                                     BUCKET_NAME_ATTR, SUBMIT_TIME_ATTR,
+                                                                     START_AT_ATTR, BUCKET_NAME_ATTR, SUBMIT_TIME_ATTR,
                                                                      SUBMISSION_MODE_ATTRIBUTE, START_TIME_ATTR,
                                                                      FINISHED_TIME_ATTR, LABEL_ATTRIBUTE };
 
@@ -162,6 +164,8 @@ public class JobsColumnsFactory implements ColumnsFactory<Job> {
                             (item.getStartTime() > item.getSubmitTime()) ? JSUtil.getTime(item.getStartTime()) : "");
         record.setAttribute(FINISHED_TIME_ATTR.getName(),
                             (item.getFinishTime() > item.getStartTime()) ? JSUtil.getTime(item.getFinishTime()) : "");
+        record.setAttribute(START_AT_ATTR.getName(),
+                            item.getStartAtTime() == null ? "" : JSUtil.getTime(item.getStartAtTime()));
         for (GridColumns extraColumn : EXTRA_COLUMNS) {
             String columnName = extraColumn.getName();
             //Fetch value associated to a column

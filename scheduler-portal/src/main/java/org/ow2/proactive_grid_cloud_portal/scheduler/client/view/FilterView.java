@@ -25,6 +25,8 @@
  */
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.view;
 
+import static org.ow2.proactive_grid_cloud_portal.scheduler.shared.filter.Field.START_AT;
+
 import java.util.Date;
 
 import org.ow2.proactive.scheduling.api.graphql.common.NullStatus;
@@ -150,6 +152,19 @@ public class FilterView extends VStack {
                 break;
             case SUBMITTED_TIME:
             case START_TIME:
+            case START_AT:
+                if (action.equals(Action.IS_NOT_EMPTY)) {
+                    return NullStatus.NOT_NULL.toString();
+                } else if (action.equals(Action.IS_EMPTY)) {
+                    return NullStatus.NULL.toString();
+                } else {
+                    try {
+                        return "" + getMillisFromDate(value, field.getName());
+                    } catch (IllegalArgumentException e) {
+                        displayErrorMessage(e.getMessage());
+                    }
+                }
+                break;
             case LAST_UPDATED_TIME:
             case FINISHED_TIME:
                 try {
@@ -560,14 +575,20 @@ public class FilterView extends VStack {
 
         private void addChangeHandlerForActions() {
             actionList.addChangeHandler(changeHandler -> {
-                int selectedIndex = actionList.getSelectedIndex();
-                String selectedItem = actionList.getItemText(selectedIndex);
-                if (selectedItem.equalsIgnoreCase(Action.IS_EMPTY.getName()) ||
-                    selectedItem.equalsIgnoreCase(Action.IS_NOT_EMPTY.getName())) {
-                    textBox.setText("");
-                    textBox.setEnabled(false);
+                String selectedAction = actionList.getSelectedValue();
+                String selectedField = fieldsList.getSelectedValue();
+                if (selectedAction.equalsIgnoreCase(Action.IS_EMPTY.getName()) ||
+                    selectedAction.equalsIgnoreCase(Action.IS_NOT_EMPTY.getName())) {
+                    if (selectedField.equals(START_AT.getName())) {
+                        dateTextBox.setText("");
+                        dateTextBox.setEnabled(false);
+                    } else {
+                        textBox.setText("");
+                        textBox.setEnabled(false);
+                    }
                 } else {
                     textBox.setEnabled(true);
+                    dateTextBox.setEnabled(true);
                     setWidgetAccordingToSelectedField();
                 }
             });
@@ -609,6 +630,7 @@ public class FilterView extends VStack {
                 case SUBMITTED_TIME:
                 case START_TIME:
                 case LAST_UPDATED_TIME:
+                case START_AT:
                 case FINISHED_TIME: {
                     dateTextBox.getElement().setPropertyString("placeholder", "yyyy-MM-dd HH:mm:ss");
                     valuePanel.setWidget(dateTextBox);
@@ -657,6 +679,15 @@ public class FilterView extends VStack {
                 case SUBMITTED_TIME:
                 case START_TIME:
                 case LAST_UPDATED_TIME:
+                case START_AT:
+                    actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());
+                    actionList.addItem(Action.IS_EMPTY.getName());
+                    actionList.addItem(Action.IS_NOT_EMPTY.getName());
+                    dateTextBox.getElement().setPropertyString("placeholder", "yyyy-MM-dd HH:mm:ss");
+
+                    valuePanel.setWidget(dateTextBox);
+                    break;
                 case FINISHED_TIME: {
                     actionList.addItem(Action.LESS_THAN_OR_EQUAL_TO.getName());
                     actionList.addItem(Action.GREATER_THAN_OR_EQUAL_TO.getName());

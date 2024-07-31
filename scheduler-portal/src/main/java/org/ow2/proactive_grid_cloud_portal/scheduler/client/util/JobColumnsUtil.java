@@ -109,11 +109,7 @@ public class JobColumnsUtil {
         startType += FIELDS_SEPARATOR;
         if (columnName.startsWith(startType)) {
             String key = columnName.replace(startType, "");
-            String value = allItemsMap.get(key);
-            if (value != null && START_AT.equals(key)) {
-                value = JobColumnsUtil.getFormattedDateString(value);
-            }
-            return value;
+            return allItemsMap.get(key);
         }
         return null;
     }

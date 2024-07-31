@@ -852,4 +852,19 @@ public interface RestClient {
     @Produces(MediaType.APPLICATION_JSON)
     InputStream getDomains();
 
+    @PUT
+    @Path("jobs/{jobid}/startat/{startAt}")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream changeStartAt(@HeaderParam("sessionid")
+    final String sessionId, @PathParam("jobid")
+    final String jobId, @PathParam("startAt")
+    final String startAt);
+
+    @PUT
+    @Path("jobs/startat/{startAt}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream changeStartAtMultiple(@HeaderParam("sessionid")
+    final String sessionId, @PathParam("startAt")
+    final String startAt, List<String> jobIdList);
 }

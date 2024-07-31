@@ -530,4 +530,25 @@ public interface SchedulerServiceAsync {
      * @param callback the result returned
      */
     void getDomains(AsyncCallback<List<String>> callback);
+
+    /**
+     * Update the Start At for the given job Id
+     *
+     * @param sessionId the current session id
+     * @param jobId the id of job
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    Request changeStartAt(String sessionId, String jobId, String startAt, AsyncCallback<Boolean> asyncCallback);
+
+    /**
+     * Update the Start At for given job Ids
+     *
+     * @param sessionId the current session id
+     * @param jobIds the list of job ids
+     * @throws RestServerException exception thrown if problems occurred during the addJobSignal process.
+     * @param asyncCallback the object used for notifying the caller when the asynchronous call is completed
+     */
+    Request changeStartAtMultiple(String sessionId, String startAt, List<String> jobIds,
+            AsyncCallback<Boolean> asyncCallback);
 }

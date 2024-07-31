@@ -579,6 +579,7 @@ public class JobsController {
                                 .faultyTasks(0)
                                 .inErrorTasks(0)
                                 .submitTime(-1)
+                                .startAtTime(null)
                                 .startTime(-1)
                                 .inErrorTime(-1)
                                 .finishTime(-1)
@@ -826,6 +827,42 @@ public class JobsController {
                                                                                                 message);
                                                  }
                                              });
+    }
+
+    /**
+     * Updates the Start At value of given jobIds
+     * @param jobIds the selected job ids
+     */
+    public void updateStartAt(String startAt, List<String> jobIds, StartAtUpdateWindow startAtUpdateWindow) {
+        LoginModel loginModel = LoginModel.getInstance();
+        String sessionId = loginModel.getSessionId();
+
+        AsyncCallback callBack = new AsyncCallback<Boolean>() {
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    LogModel.getInstance().logMessage("Successfully updated Start At value for jobs(s) " + jobIds);
+                    startAtUpdateWindow.clearAfterSuccess();
+                } else {
+                    LogModel.getInstance().logImportantMessage("Start At has not been updated for job(s) " + jobIds);
+                }
+            }
+
+            public void onFailure(Throwable caught) {
+                String message = JSONUtils.getJsonErrorMessage(caught);
+                LogModel.getInstance().logImportantMessage("Request failed to update Start At value for jobs: " +
+                                                           jobIds + "\n" + message);
+                startAtUpdateWindow.displayFailureMessage(message);
+            }
+        };
+
+        SchedulerServiceAsync scheduler = Scheduler.getSchedulerService();
+        if (!jobIds.isEmpty()) {
+            if (jobIds.size() == 1) {
+                scheduler.changeStartAt(sessionId, jobIds.get(0), startAt, callBack);
+            } else {
+                scheduler.changeStartAtMultiple(sessionId, startAt, jobIds, callBack);
+            }
+        }
     }
 
     private void setTabsStatus(List<String> jobIds, JobsListGrid jobsListGrid) {
