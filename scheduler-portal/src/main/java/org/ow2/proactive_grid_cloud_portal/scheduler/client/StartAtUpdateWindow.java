@@ -85,8 +85,12 @@ public class StartAtUpdateWindow {
         jobIds = controller.getModel().getSelectedJobsIds();
         String initialLabelContent = "";
         if (jobIds.size() == 1) {
-            initialLabelContent = CURRENT_START_AT_LABEL_CONTENT + "<b>" +
-                                  JSUtil.getTime(controller.getModel().getJob(jobIds.get(0)).getStartAtTime()) + "</b>";
+            Long currentStartAt = controller.getModel().getJob(jobIds.get(0)).getStartAtTime();
+            String formattedStartAt = null;
+            if (currentStartAt != null) {
+                formattedStartAt = JSUtil.getTime(currentStartAt);
+            }
+            initialLabelContent = CURRENT_START_AT_LABEL_CONTENT + "<b>" + formattedStartAt + "</b>";
         } else {
             initialLabelContent = "You are about to change the Start At value of jobs " +
                                   jobIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ".";
