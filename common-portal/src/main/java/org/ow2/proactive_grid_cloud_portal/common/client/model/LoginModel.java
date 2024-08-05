@@ -68,6 +68,8 @@ public class LoginModel {
 
     private static final String PERMISSION_REMOVE_JOB = "removeJob";
 
+    private static final String PERMISSION_CHANGE_START_AT = "changeStartAt";
+
     private static final String PERMISSION_GET_JOB_SERVER_LOGS = "getJobServerLogs";
 
     private static final String PERMISSION_GET_JOB_STATE = "getJobState";
@@ -274,6 +276,10 @@ public class LoginModel {
         return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_SET_LABEL_ON_JOBS);
     }
 
+    public boolean userDoesNotHavePermissionToChangeStartAtValue(List<String> jobIds) {
+        return userDoesNotHavePermissionToMethod(jobIds, PERMISSION_CHANGE_START_AT);
+    }
+
     private boolean userDoesNotHavePermissionToMethod(List<String> jobIds, String method) {
         for (String jobId : jobIds) {
             Map<String, Boolean> permissionForJob = instance.schedulerPermissions.get(jobId);
@@ -310,6 +316,7 @@ public class LoginModel {
         methods.add(PERMISSION_GET_JOB_STATE);
         methods.add(PERMISSION_GET_JOB_RESULT);
         methods.add(PERMISSION_SET_LABEL_ON_JOBS);
+        methods.add(PERMISSION_CHANGE_START_AT);
         return methods;
     }
 
