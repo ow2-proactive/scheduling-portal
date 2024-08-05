@@ -63,9 +63,14 @@ public class JobColumnsUtil {
     private static final String DATE_FORMAT_OUTPUT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * Output date format
+     * Output date and time format
      */
-    private static final String DATE_FORMAT_INPUT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
+    private static final String FULL_DATETIME_FORMAT_INPUT = "yyyy-MM-dd'T'HH:mm:ssZZZ";
+
+    /**
+     * Output for date format only
+     */
+    private static final String DATE_ONLY_FORMAT_INPUT = "yyyy-MM-dd";
 
     /**
      * Logger
@@ -216,15 +221,23 @@ public class JobColumnsUtil {
      * @return the date with custom format
      */
     public static String getFormattedDateString(String timeZoneDate) {
-        try {
-            Date date = DateTimeFormat.getFormat(DATE_FORMAT_INPUT).parse(timeZoneDate);
-            return DateTimeFormat.getFormat(DATE_FORMAT_OUTPUT).format(date);
-        } catch (IllegalArgumentException e) {
+        String formattedDate = tryFormatDate(timeZoneDate, FULL_DATETIME_FORMAT_INPUT);
+        if (formattedDate == null) {
+            formattedDate = tryFormatDate(timeZoneDate, DATE_ONLY_FORMAT_INPUT);
+        }
+        if (formattedDate == null) {
             LOGGER.log(Level.SEVERE, "Error in date format " + timeZoneDate);
             return timeZoneDate;
-        } catch (Exception e) {
-            return timeZoneDate;
         }
+        return formattedDate;
     }
 
+    private static String tryFormatDate(String dateTime, String inputFormat) {
+        try {
+            Date date = DateTimeFormat.getFormat(inputFormat).parse(dateTime);
+            return DateTimeFormat.getFormat(DATE_FORMAT_OUTPUT).format(date);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 }
