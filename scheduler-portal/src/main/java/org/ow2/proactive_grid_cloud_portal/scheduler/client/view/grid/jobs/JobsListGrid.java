@@ -696,6 +696,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             editLabels.setEnabled(false);
             removeLabels.setEnabled(false);
         }
+        if (loginModel.userDoesNotHavePermissionToChangeStartAtValue(jobIds)) {
+            updateStartAtItem.setEnabled(false);
+        }
         menu.redraw();
     }
 }
