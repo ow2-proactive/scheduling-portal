@@ -495,7 +495,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         updateStartAtItem = new MenuItem("Update Start At",
                                          SchedulerImages.instance.clock_16().getSafeUri().asString());
         updateStartAtItem.addClickHandler(event -> new StartAtUpdateWindow(controller, this.getSelectedRecords()));
-        updateStartAtItem.setEnabled(selPauseOrRunning);
+        updateStartAtItem.setEnabled(selPending);
 
         killItem = new MenuItem("Kill", SchedulerImages.instance.scheduler_kill_16().getSafeUri().asString());
         killItem.addClickHandler(event -> controller.killJobs(ids));
