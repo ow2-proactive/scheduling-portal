@@ -910,7 +910,7 @@ public class SubmitWindow {
         bucketsListBox.addChangeHandler(event -> {
             String selectedBucket = bucketsListBox.getSelectedValue();
             if (!CATALOG_SELECT_BUCKET.equals(selectedBucket)) {
-                String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=workflow";
+                String workflowUrl = CATALOG_URL + "/buckets/" + selectedBucket + "/resources?kind=Workflow%2Fstandard";
                 RequestBuilder req = new RequestBuilder(RequestBuilder.GET, workflowUrl);
                 req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
                 req.setCallback(new RequestCallback() {
@@ -952,7 +952,7 @@ public class SubmitWindow {
             }
         });
 
-        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=workflow");
+        RequestBuilder req = new RequestBuilder(RequestBuilder.GET, CATALOG_URL + "/buckets?kind=Workflow%2Fstandard");
         req.setHeader(SESSION_ID_PARAMETER_NAME, LoginModel.getInstance().getSessionId());
         req.setCallback(new RequestCallback() {
             @Override
