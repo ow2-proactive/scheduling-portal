@@ -66,8 +66,14 @@ public class AddNodeWindow {
                      "<li><a target='_blank' href='" + Config.get().getRestPublicUrlOrGuessRestUrl() +
                      "/node.jar'>Download</a> the node's JAR file</li>" +
                      "<li>Create credential file (Portal->Create Credentials) </li>" +
-                     "<li>Run from command line:<br/><br/><input type='text' value='java -jar node.jar -f <CREDENTIAL_FILE> -r " +
-                     RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>";
+                     "<li>Run from command line:<br/><input type='text' value='java -jar node.jar -f <CREDENTIAL_FILE> -r " +
+                     RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>" +
+                     "<br/><li>Other supported platforms: <a target='_blank' href='" +
+                     Config.get().getRestPublicUrlOrGuessRestUrl() +
+                     "/node-amd-64.jar'>AMD 64 (smaller)</a>, <a target='_blank' href='" +
+                     Config.get().getRestPublicUrlOrGuessRestUrl() +
+                     "/node-arm-v7.jar'>ARM V7</a>, <a target='_blank' href='" +
+                     Config.get().getRestPublicUrlOrGuessRestUrl() + "/node-arm-v8.jar'>ARM V8</a></li><ul/>";
 
         HTMLPane text = new HTMLPane();
         text.setContents(str);
