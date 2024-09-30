@@ -70,7 +70,7 @@ public class AddNodeWindow {
                      RMConfig.get().getRMUrl() + "' style='width:270px;border-style:none' disabled></li>" +
                      "<br/><li>Other supported platforms: <a target='_blank' href='" +
                      Config.get().getRestPublicUrlOrGuessRestUrl() +
-                     "/node-amd-64.jar'>AMD 64</a>, <a target='_blank' href='" +
+                     "/node-amd-64.jar'>AMD 64 (smaller)</a>, <a target='_blank' href='" +
                      Config.get().getRestPublicUrlOrGuessRestUrl() +
                      "/node-arm-v7.jar'>ARM V7</a>, <a target='_blank' href='" +
                      Config.get().getRestPublicUrlOrGuessRestUrl() + "/node-arm-v8.jar'>ARM V8</a></li><ul/>";
