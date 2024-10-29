@@ -78,6 +78,26 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
     }
 
+    public void clickRefreshButton(boolean isRunning) {
+        this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
+        outModeChangedHandler();
+        this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        targetSelectChangedHandler();
+
+        if (isRunning) {
+            liveCheck.setValue(true);
+            liveLogCheckChanged();
+            this.targetSelect.enable();
+        } else {
+            liveCheck.setValue(false);
+            liveLogCheckChanged();
+            this.targetSelect.disable();
+            this.refreshButton.show();
+            this.refreshButton.enable();
+            refreshButtonHandler();
+        }
+    }
+
     /**
      * build the output
      * @return the Widget to display, ready to be added in a container

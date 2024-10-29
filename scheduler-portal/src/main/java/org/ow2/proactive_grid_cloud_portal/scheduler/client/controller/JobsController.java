@@ -880,6 +880,9 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(false);
             parentController.getParentController().getSchedulerPage().disableTasksTab(false);
             parentController.getParentController().getSchedulerPage().disableTaskInfoTab(false);
+            parentController.getParentController()
+                            .getSchedulerPage()
+                            .selectOutputTab(JobStatus.RUNNING.equals(model.getSelectedJob().getStatus()));
         }
         if (loginModel.userDoesNotHavePermissionToGetJobsResult(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);

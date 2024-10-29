@@ -99,6 +99,8 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
 
     protected TabSet leftTabSet;
 
+    protected TabSet rightTabSet;
+
     protected Tab tasksTab;
 
     protected Layout tasksPane;
@@ -839,7 +841,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
             }
         });
 
-        TabSet rightTabSet = new TabSet();
+        rightTabSet = new TabSet();
         rightTabSet.setWidth("50%");
         rightTabSet.setHeight100();
         rightTabSet.setTabBarPosition(Side.TOP);
@@ -1000,6 +1002,11 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         tasksTab.setDisabled(disabled);
         leftTabSet.addTab(tasksTab, 0);
         leftTabSet.redraw();
+    }
+
+    public void selectOutputTab(boolean isRunning) {
+        rightTabSet.selectTab(outputTab);
+        this.controller.clickRefreshButton(isRunning);
     }
 
     public void disableVarInfoTab(boolean disabled) {

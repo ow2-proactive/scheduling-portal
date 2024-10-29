@@ -599,6 +599,10 @@ public class SchedulerController extends Controller implements UncaughtException
         return this.resultController.buildView();
     }
 
+    public void clickRefreshButton(boolean isRunning) {
+        this.outputController.clickRefreshButton(isRunning);
+    }
+
     void setVisuFetchEnabled(boolean b) {
         this.visuFetchEnabled = b;
     }
