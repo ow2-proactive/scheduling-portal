@@ -880,9 +880,6 @@ public class JobsController {
             parentController.getParentController().getSchedulerPage().disableVarInfoTab(false);
             parentController.getParentController().getSchedulerPage().disableTasksTab(false);
             parentController.getParentController().getSchedulerPage().disableTaskInfoTab(false);
-            parentController.getParentController()
-                            .getSchedulerPage()
-                            .selectOutputTab(JobStatus.RUNNING.equals(model.getSelectedJob().getStatus()));
         }
         if (loginModel.userDoesNotHavePermissionToGetJobsResult(jobIds)) {
             parentController.getParentController().getSchedulerPage().disableJobResultsTab(true);
@@ -896,6 +893,15 @@ public class JobsController {
                         .disableVisualizationTab(loginModel.userDoesNotHavePermissionToGetJobsContent(jobIds));
         if (jobsListGrid != null) {
             jobsListGrid.setMenuItemsStatus(jobIds);
+        }
+    }
+
+    public void selectOutputTab(List<String> jobIds) {
+        LoginModel loginModel = LoginModel.getInstance();
+        if (!loginModel.userDoesNotHavePermissionToGetJobsState(jobIds)) {
+            parentController.getParentController()
+                            .getSchedulerPage()
+                            .selectOutputTab(JobStatus.RUNNING.equals(model.getSelectedJob().getStatus()));
         }
     }
 

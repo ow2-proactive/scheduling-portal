@@ -559,6 +559,7 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         controller.getJobLabels(this, ids);
         checkIfLabelsAreEmpty(menu, jobLabels);
         controller.checkJobsPermissionMethods(ids, this);
+        controller.selectOutputTab(ids);
     }
 
     private void createPriorityMenu(List<String> ids) {
