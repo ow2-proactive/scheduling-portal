@@ -71,6 +71,10 @@ public class ResultController {
         }
     }
 
+    public void openInBrowser() {
+        this.view.openInBrowser();
+    }
+
     public SchedulerController getParentController() {
         return parentController;
     }

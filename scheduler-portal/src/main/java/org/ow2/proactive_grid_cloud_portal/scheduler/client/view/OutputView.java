@@ -78,6 +78,44 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
     }
 
+    public void resetOutputTab() {
+        this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
+        this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        targetSelectChangedHandler();
+    }
+
+    public void clickRefreshButton(boolean isRunning, boolean isJob) {
+        this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
+        outModeChangedHandler();
+        if (isJob) {
+            this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        } else {
+            this.targetSelect.setValue(SelectionTarget.TASK_TARGET.label);
+        }
+        targetSelectChangedHandler();
+
+        if (isRunning) {
+            selectStreamingOutput();
+        } else {
+            selectFinishedTaskOutput();
+        }
+    }
+
+    private void selectFinishedTaskOutput() {
+        liveCheck.setValue(false);
+        liveLogCheckChanged();
+        this.targetSelect.disable();
+        this.refreshButton.show();
+        this.refreshButton.enable();
+        refreshButtonHandler();
+    }
+
+    private void selectStreamingOutput() {
+        liveCheck.setValue(true);
+        liveLogCheckChanged();
+        this.targetSelect.enable();
+    }
+
     /**
      * build the output
      * @return the Widget to display, ready to be added in a container
