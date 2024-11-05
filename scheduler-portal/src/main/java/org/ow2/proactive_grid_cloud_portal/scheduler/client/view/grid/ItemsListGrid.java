@@ -139,6 +139,8 @@ public abstract class ItemsListGrid<I> extends ListGrid {
             }
         });
 
+        this.addDoubleClickHandler(doubleClickEvent -> showOutput());
+
         this.addCellOutHandler(new CellOutHandler() {
             public void onCellOut(CellOutEvent event) {
                 // cancel contextual menu when moving the mouse away to
@@ -215,6 +217,11 @@ public abstract class ItemsListGrid<I> extends ListGrid {
      * @param menu
      */
     protected abstract void buildCellContextualMenu(Menu menu);
+
+    /**
+     * Shows the output of the job/task
+     */
+    protected abstract void showOutput();
 
     /**
      * Called when the selection in the grid changed.

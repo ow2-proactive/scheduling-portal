@@ -36,6 +36,7 @@ import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LoginModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Job;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobOutput;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.JobStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.OutputMode;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Scheduler;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
@@ -82,6 +83,14 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
     public Layout buildView() {
         this.view = new OutputView(this);
         return this.view.build();
+    }
+
+    public void clickRefreshButton(boolean isRunning, boolean isJob) {
+        this.view.clickRefreshButton(isRunning, isJob);
+    }
+
+    public void resetOutputTab() {
+        this.view.resetOutputTab();
     }
 
     public void refreshOutput() {

@@ -389,10 +389,23 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
     }
 
     @Override
+    protected void showOutput() {
+        controller.selectOutputTab();
+    }
+
+    @Override
     protected void buildCellContextualMenu(Menu menu) {
         final String taskName = this.getSelectedRecord().getAttributeAsString(NAME_ATTR.getName());
         final String taskStatusName = this.getSelectedRecord().getAttributeAsString(STATUS_ATTR.getName());
         final Integer jobId = (int) getTask(this.getSelectedRecord()).getJobId();
+
+        MenuItem showOutput = new MenuItem("Show Output");
+        showOutput.addClickHandler(event -> controller.selectOutputTab());
+        showOutput.setEnabled(controller.userHasPermissionToSeeOutput());
+
+        MenuItem showResults = new MenuItem("Show Results");
+        showResults.addClickHandler(event -> controller.selectTaskResultsTab());
+        showResults.setEnabled(controller.userHasPermissionToSeeResults());
 
         MenuItem restartInErrorTask = new MenuItem("Restart In-Error Task");
         restartInErrorTask.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
@@ -493,7 +506,13 @@ public class TasksListGrid extends ItemsListGrid<Task> implements TasksUpdatedLi
         restartRunningTask.setEnabled(enableRestartRunningTask);
         markAsFinishedAndResume.setEnabled(enableMarkAsFinishedAndResume);
 
-        menu.setItems(restartInErrorTask, restartRunningTask, preempt, kill, markAsFinishedAndResume);
+        menu.setItems(showOutput,
+                      showResults,
+                      restartInErrorTask,
+                      restartRunningTask,
+                      preempt,
+                      kill,
+                      markAsFinishedAndResume);
     }
 
     @Override
