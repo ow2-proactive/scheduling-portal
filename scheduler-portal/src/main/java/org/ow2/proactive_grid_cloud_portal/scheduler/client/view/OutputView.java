@@ -95,17 +95,25 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
         targetSelectChangedHandler();
 
         if (isRunning) {
-            liveCheck.setValue(true);
-            liveLogCheckChanged();
-            this.targetSelect.enable();
+            selectStreamingOutput();
         } else {
-            liveCheck.setValue(false);
-            liveLogCheckChanged();
-            this.targetSelect.disable();
-            this.refreshButton.show();
-            this.refreshButton.enable();
-            refreshButtonHandler();
+            selectFinishedTaskOutput();
         }
+    }
+
+    private void selectFinishedTaskOutput() {
+        liveCheck.setValue(false);
+        liveLogCheckChanged();
+        this.targetSelect.disable();
+        this.refreshButton.show();
+        this.refreshButton.enable();
+        refreshButtonHandler();
+    }
+
+    private void selectStreamingOutput() {
+        liveCheck.setValue(true);
+        liveLogCheckChanged();
+        this.targetSelect.enable();
     }
 
     /**
