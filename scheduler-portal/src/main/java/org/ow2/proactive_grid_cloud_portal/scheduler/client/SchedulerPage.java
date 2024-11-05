@@ -864,7 +864,7 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         serverLogsTab = new Tab("Server Logs", ImagesUnbundled.OUTPUT_16);
         serverLogsTab.setPane(this.controller.buildServerLogsView());
 
-        taskResultTab = new Tab("Task Preview", ImagesUnbundled.SEARCH_16);
+        taskResultTab = new Tab("Task Results", ImagesUnbundled.SEARCH_16);
         taskResultTab.setPane(this.controller.buildPreviewView());
 
         jobResultTab = new Tab("Job Results", ImagesUnbundled.SEARCH_16);
@@ -1004,9 +1004,22 @@ public class SchedulerPage implements SchedulerStatusListener, LogListener, Exec
         leftTabSet.redraw();
     }
 
-    public void selectOutputTab(boolean isRunning) {
+    public void selectOutputTab(boolean isRunning, boolean isJob) {
         rightTabSet.selectTab(outputTab);
-        this.controller.clickRefreshButton(isRunning);
+        this.controller.clickRefreshButton(isRunning, isJob);
+    }
+
+    public void selectTaskResultsTab() {
+        rightTabSet.selectTab(taskResultTab);
+        this.controller.openInBrowser();
+    }
+
+    public void selectJobResultsTab() {
+        rightTabSet.selectTab(jobResultTab);
+    }
+
+    public void resetOutputTab() {
+        this.controller.resetOutputTab();
     }
 
     public void disableVarInfoTab(boolean disabled) {

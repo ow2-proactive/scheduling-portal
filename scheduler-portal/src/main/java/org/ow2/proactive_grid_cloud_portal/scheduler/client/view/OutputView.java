@@ -78,10 +78,20 @@ public class OutputView extends AbstractOutputDisplayView<OutputModel, OutputCon
 
     }
 
-    public void clickRefreshButton(boolean isRunning) {
+    public void resetOutputTab() {
+        this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
+        this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        targetSelectChangedHandler();
+    }
+
+    public void clickRefreshButton(boolean isRunning, boolean isJob) {
         this.outSelect.setValue(OutputMode.LOG_OUT_ERR.label);
         outModeChangedHandler();
-        this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        if (isJob) {
+            this.targetSelect.setValue(SelectionTarget.JOB_TARGET.label);
+        } else {
+            this.targetSelect.setValue(SelectionTarget.TASK_TARGET.label);
+        }
         targetSelectChangedHandler();
 
         if (isRunning) {

@@ -134,6 +134,10 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
 
     private MenuItem removeLabels;
 
+    private MenuItem showOutput;
+
+    private MenuItem showResults;
+
     public JobsListGrid(final JobsController controller) {
         super(new JobsColumnsFactory(), "jobsDS_");
         this.emptyMessage = "No jobs to show. You can find workflows to submit in the samples/workflows folder where the Scheduler is installed.";
@@ -420,6 +424,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         };
     }
 
+    protected void showOutput() {
+        ArrayList<String> ids = new ArrayList<>(this.getSelectedRecords().length);
+        for (ListGridRecord rec : this.getSelectedRecords()) {
+            ids.add(rec.getAttribute(ID_ATTR.getName()));
+        }
+        controller.selectOutputTab(ids);
+    }
+
     protected void buildCellContextualMenu(Menu menu) {
 
         selPause = true;
@@ -467,6 +479,14 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
             ids.add(rec.getAttribute(ID_ATTR.getName()));
             jobLabels.add(rec.getAttribute(LABEL_ATTRIBUTE.getName()));
         }
+
+        showOutput = new MenuItem("Show output");
+        showOutput.addClickHandler(event -> controller.selectOutputTab());
+        showOutput.setEnabled(true);
+
+        showResults = new MenuItem("Show results");
+        showResults.addClickHandler(event -> controller.selectPreviewTab());
+        showResults.setEnabled(true);
 
         pauseItem = new MenuItem("Pause", SchedulerImages.instance.scheduler_pause_16().getSafeUri().asString());
         pauseItem.addClickHandler(event -> controller.pauseJobs(ids));
@@ -539,7 +559,9 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         removeLabels.addClickHandler(event -> controller.removeJobLabel(ids));
         removeLabels.setEnabled(true);
 
-        this.menu.setItems(actionsItem,
+        this.menu.setItems(showOutput,
+                           showResults,
+                           actionsItem,
                            pauseItem,
                            restartInErrorTaskItem,
                            resumeItem,
@@ -559,7 +581,6 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         controller.getJobLabels(this, ids);
         checkIfLabelsAreEmpty(menu, jobLabels);
         controller.checkJobsPermissionMethods(ids, this);
-        controller.selectOutputTab(ids);
     }
 
     private void createPriorityMenu(List<String> ids) {
@@ -699,6 +720,12 @@ public class JobsListGrid extends ItemsListGrid<Job> implements JobsUpdatedListe
         }
         if (loginModel.userDoesNotHavePermissionToChangeStartAtValue(jobIds)) {
             updateStartAtItem.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobsServerLogs(jobIds)) {
+            showOutput.setEnabled(false);
+        }
+        if (loginModel.userDoesNotHavePermissionToGetJobsResult(jobIds)) {
+            showResults.setEnabled(false);
         }
         menu.redraw();
     }

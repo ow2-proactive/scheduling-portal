@@ -85,8 +85,12 @@ public class OutputController extends AbstractSelectedTargetController<OutputMod
         return this.view.build();
     }
 
-    public void clickRefreshButton(boolean isRunning) {
-        this.view.clickRefreshButton(isRunning);
+    public void clickRefreshButton(boolean isRunning, boolean isJob) {
+        this.view.clickRefreshButton(isRunning, isJob);
+    }
+
+    public void resetOutputTab() {
+        this.view.resetOutputTab();
     }
 
     public void refreshOutput() {

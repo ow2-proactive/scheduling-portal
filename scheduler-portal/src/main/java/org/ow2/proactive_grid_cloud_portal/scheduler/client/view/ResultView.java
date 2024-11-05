@@ -203,6 +203,12 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
         }
     }
 
+    public void openInBrowser() {
+        if (!openInBrowser.isDisabled()) {
+            controller.doDownload(downloadForm, "browser", "_blank");
+        }
+    }
+
     private void decideButtonsStatus(Task task) {
         switch (task.getStatus()) {
             case FAULTY:

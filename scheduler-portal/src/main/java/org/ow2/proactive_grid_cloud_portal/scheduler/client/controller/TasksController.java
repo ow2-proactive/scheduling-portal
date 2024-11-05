@@ -26,6 +26,7 @@
 package org.ow2.proactive_grid_cloud_portal.scheduler.client.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.ow2.proactive_grid_cloud_portal.common.client.json.JSONUtils;
 import org.ow2.proactive_grid_cloud_portal.common.client.model.LogModel;
@@ -37,9 +38,9 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerController;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerModelImpl;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.SchedulerServiceAsync;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.Task;
+import org.ow2.proactive_grid_cloud_portal.scheduler.client.TaskStatus;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.JSONPaginatedTasks;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.json.SchedulerJSONUtils;
-import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksNavigationModel;
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksPaginationModel;
@@ -200,6 +201,27 @@ public class TasksController {
                                          taskName,
                                          callbackHandlerForRestartTask(taskName, jobId, false));
         }
+    }
+
+    public void selectOutputTab() {
+        parentController.getSchedulerPage()
+                        .selectOutputTab(TaskStatus.RUNNING.equals(model.getSelectedTask().getStatus()), false);
+    }
+
+    public void selectTaskResultsTab() {
+        parentController.getSchedulerPage().selectTaskResultsTab();
+    }
+
+    public boolean userHasPermissionToSeeOutput() {
+        LoginModel loginModel = LoginModel.getInstance();
+        String jobId = String.valueOf(model.getSelectedTask().getJobId());
+        return !loginModel.userDoesNotHavePermissionToGetJobsState(Collections.singletonList(jobId));
+    }
+
+    public boolean userHasPermissionToSeeResults() {
+        LoginModel loginModel = LoginModel.getInstance();
+        String jobId = String.valueOf(model.getSelectedTask().getJobId());
+        return !loginModel.userDoesNotHavePermissionToGetJobsResult(Collections.singletonList(jobId));
     }
 
     private AsyncCallback<Boolean> callbackHandlerForRestartTask(final String taskName, final Integer jobId,
