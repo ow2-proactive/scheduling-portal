@@ -40,6 +40,7 @@ import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.ExecutionsMode
 import org.ow2.proactive_grid_cloud_portal.scheduler.client.model.TasksCentricModel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -204,9 +205,15 @@ public class ResultView implements TaskSelectedListener, TasksUpdatedListener, J
     }
 
     public void openInBrowser() {
-        if (!openInBrowser.isDisabled()) {
-            controller.doDownload(downloadForm, "browser", "_blank");
-        }
+        Timer timer = new Timer() {
+            @Override
+            public void run() {
+                if (!openInBrowser.isDisabled()) {
+                    controller.doDownload(downloadForm, "browser", "_blank");
+                }
+            }
+        };
+        timer.schedule(200);
     }
 
     private void decideButtonsStatus(Task task) {
