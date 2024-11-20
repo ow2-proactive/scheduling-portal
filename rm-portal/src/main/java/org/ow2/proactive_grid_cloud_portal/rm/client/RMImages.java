@@ -70,6 +70,9 @@ public interface RMImages extends ClientBundle {
     @Source("images/nodesource_undeployed.png")
     ImageResource nodesource_undeployed();
 
+    @Source("images/nodesource_redeploy.png")
+    ImageResource nodesource_redeploy();
+
     @Source("images/nodesource_edit.png")
     ImageResource nodesource_edit();
 

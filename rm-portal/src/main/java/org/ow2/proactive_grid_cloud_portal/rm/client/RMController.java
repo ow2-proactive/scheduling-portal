@@ -1498,6 +1498,40 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         }
     }
 
+    public void redeployNodeSource() {
+        if (model.getSelectedNodeSource() != null) {
+            String nodeSourceName = model.getSelectedNodeSource().getSourceName();
+
+            if (model.getSelectedNodeSource() != null) {
+                confirmRedeployNodeSource("Confirm redeployment of <strong>" + "NodeSource " + nodeSourceName +
+                                          "</strong>", new NodeRemovalCallback() {
+                                              public void run(boolean force) {
+                                                  rm.redeployNodeSource(LoginModel.getInstance().getSessionId(),
+                                                                        model.getSelectedNodeSource().getSourceName(),
+                                                                        new AsyncCallback<String>() {
+                                                                            @Override
+                                                                            public void onFailure(Throwable caught) {
+                                                                                LogModel.getInstance()
+                                                                                        .logImportantMessage("Failed to redeploy node source " +
+                                                                                                             nodeSourceName +
+                                                                                                             JSONUtils.getJsonErrorMessage(caught));
+
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onSuccess(String result) {
+                                                                                LogModel.getInstance()
+                                                                                        .logMessage("Successfully redeployed node source " +
+                                                                                                    nodeSourceName);
+                                                                            }
+                                                                        });
+                                              }
+                                          });
+            }
+
+        }
+    }
+
     public void editNodeSource(String nodeSourceName, NodeSourceStatus nodeSourceStatus) {
         if (nodeSourceStatus.equals(NodeSourceStatus.NODES_UNDEPLOYED)) {
             this.rmPage.showEditNodeSourceWindow(nodeSourceName);
@@ -1627,6 +1661,54 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         public abstract void run(boolean force);
     }
 
+    private void confirmRedeploy(String message, final NodeRemovalCallback callback) {
+        final Window win = new Window();
+        win.setTitle("Confirm node source redeployment");
+        win.setShowMinimizeButton(false);
+        win.setIsModal(true);
+        win.setShowModalMask(true);
+        win.setWidth(420);
+        win.setHeight(170);
+        win.setCanDragResize(false);
+        win.setCanDragReposition(false);
+        win.centerInPage();
+
+        Label label = new Label(message);
+        label.setHeight(40);
+
+        Label warningLabel = new Label("<b>Warning:</b> this will forcefully terminate all nodes, even nodes currently busy.");
+        warningLabel.setHeight(40);
+
+        Canvas fill = new Canvas();
+        fill.setHeight100();
+
+        HLayout buttons = new HLayout();
+        buttons.setMembersMargin(5);
+        buttons.setAlign(Alignment.RIGHT);
+        buttons.setHeight(25);
+
+        IButton ok = new IButton("OK", event -> {
+            callback.run(true);
+            win.hide();
+            win.destroy();
+        });
+        ok.setIcon(Images.instance.ok_16().getSafeUri().asString());
+        IButton cancel = new IButton("Cancel", event -> {
+            win.hide();
+            win.destroy();
+        });
+        cancel.setIcon(Images.instance.cancel_16().getSafeUri().asString());
+        buttons.setMembers(ok, cancel);
+
+        VLayout layout = new VLayout();
+        layout.setMembersMargin(5);
+        layout.setMargin(5);
+        layout.setMembers(label, warningLabel, fill, buttons);
+
+        win.addItem(layout);
+        win.show();
+    }
+
     private void confirmRemove(String title, String message, final NodeRemovalCallback callback) {
         final Window win = new Window();
         win.setTitle(title);
@@ -1687,6 +1769,10 @@ public class RMController extends Controller implements UncaughtExceptionHandler
 
     private void confirmUndeployNodeSource(String message, final NodeRemovalCallback callback) {
         confirmRemove("Confirm node source undeployment", message, callback);
+    }
+
+    private void confirmRedeployNodeSource(String message, final NodeRemovalCallback callback) {
+        confirmRedeploy(message, callback);
     }
 
     public RMServiceAsync getRMService() {
