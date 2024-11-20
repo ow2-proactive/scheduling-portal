@@ -51,6 +51,8 @@ public class ContextMenu extends Menu {
 
     private String undeployItemImageResource = RMImages.instance.nodesource_undeployed().getSafeUri().asString();
 
+    private String redeployItemImageResource = RMImages.instance.nodesource_redeploy().getSafeUri().asString();
+
     private String editItemImageResource = RMImages.instance.nodesource_edit().getSafeUri().asString();
 
     private String exportItemImageResource = RMImages.instance.nodesource_deployed().getSafeUri().asString();
@@ -70,6 +72,8 @@ public class ContextMenu extends Menu {
     private MenuItem deployItem;
 
     private MenuItem undeployItem;
+
+    private MenuItem redeployItem;
 
     private MenuItem editItem;
 
@@ -135,6 +139,7 @@ public class ContextMenu extends Menu {
         menu.editItem = nodeSourceMenu.getEditItem();
         menu.undeployItem = nodeSourceMenu.getUndeployItem();
         menu.deployItem = nodeSourceMenu.getDeployItem();
+        menu.redeployItem = nodeSourceMenu.getRedeployItem();
 
         ExportMenu exportMenu = new ExportMenu(controller, menu, nodeSourceName).build();
         menu.exportNodeSourceItem = exportMenu.getExportNodeSourceItem();
@@ -168,19 +173,22 @@ public class ContextMenu extends Menu {
                 case NODES_DEPLOYED:
                     menu.editItem.setTitle(EditDynamicParametersWindow.WINDOW_TITLE);
                     menu.enableItems(menu.undeployItem);
+                    menu.enableItems(menu.redeployItem);
                     menu.disableItems(menu.deployItem);
                     break;
                 case NODES_UNDEPLOYED:
                     menu.editItem.setTitle(EditNodeSourceWindow.WINDOW_TITLE);
                     menu.enableItems(menu.deployItem);
                     menu.disableItems(menu.undeployItem);
+                    menu.disableItems(menu.redeployItem);
                     break;
                 default:
-                    menu.disableItems(menu.deployItem, menu.undeployItem, menu.editItem);
+                    menu.disableItems(menu.deployItem, menu.undeployItem, menu.redeployItem, menu.editItem);
             }
         } else {
             menu.disableItems(menu.deployItem,
                               menu.undeployItem,
+                              menu.redeployItem,
                               menu.editItem,
                               menu.exportNodeSourceItem,
                               menu.exportInfrastructureItem,
@@ -196,6 +204,7 @@ public class ContextMenu extends Menu {
         if (menu.nodesource != null) {
             items.add(menu.deployItem);
             items.add(menu.undeployItem);
+            items.add(menu.redeployItem);
             items.add(menu.editItem);
             items.add(new MenuItemSeparator());
         }
@@ -247,14 +256,17 @@ public class ContextMenu extends Menu {
         if (!loginModel.userHasAdminPermissionForNodeSource(url)) {
             disableDeployItem(menu);
             disableUndeployItem(menu);
+            disableRedeployItem(menu);
             disableEditItem(menu);
             disableRemoveMenuItem(menu);
         } else {
             if (!loginModel.userHasPermissionToDeployNodeSource()) {
                 disableDeployItem(menu);
+                disableRedeployItem(menu);
             }
             if (!loginModel.userHasPermissionToUndeployNodeSource()) {
                 disableUndeployItem(menu);
+                disableRedeployItem(menu);
             }
             if (!hasMethodPermissionToEditItem(menu.getNodesource())) {
                 disableEditItem(menu);
@@ -315,6 +327,11 @@ public class ContextMenu extends Menu {
 
     public void disableUndeployItem(ContextMenu menu) {
         menu.undeployItem.setEnabled(false);
+        menu.redraw();
+    }
+
+    public void disableRedeployItem(ContextMenu menu) {
+        menu.redeployItem.setEnabled(false);
         menu.redraw();
     }
 
@@ -456,6 +473,8 @@ public class ContextMenu extends Menu {
 
         private MenuItem undeployItem;
 
+        private MenuItem redeployItem;
+
         private MenuItem editItem;
 
         private NodeSourceMenu(RMController controller, ContextMenu menu, String nodeSourceName) {
@@ -472,6 +491,10 @@ public class ContextMenu extends Menu {
             return this.undeployItem;
         }
 
+        private MenuItem getRedeployItem() {
+            return this.redeployItem;
+        }
+
         private MenuItem getEditItem() {
             return this.editItem;
         }
@@ -482,6 +505,9 @@ public class ContextMenu extends Menu {
 
             this.undeployItem = new MenuItem("Undeploy", this.menu.undeployItemImageResource);
             this.undeployItem.addClickHandler(onClick -> this.controller.undeployNodeSource());
+
+            this.redeployItem = new MenuItem("Redeploy", this.menu.redeployItemImageResource);
+            this.redeployItem.addClickHandler(onClick -> this.controller.redeployNodeSource());
 
             this.editItem = new MenuItem("Edit", this.menu.editItemImageResource);
             NodeSourceStatus nodeSourceStatus = this.menu.nodesource == null ? null

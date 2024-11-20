@@ -151,6 +151,12 @@ public interface RestClient {
     InputStream undeployNodeSource(@HeaderParam("sessionid") String sessionId,
             @FormParam("nodeSourceName") String nodeSourceName, @FormParam("preempt") boolean preempt);
 
+    @PUT
+    @Path("/rm/nodesource/redeploy")
+    @Produces(MediaType.APPLICATION_JSON)
+    InputStream redeployNodeSource(@HeaderParam("sessionid") String sessionId,
+            @FormParam("nodeSourceName") String nodeSourceName);
+
     @POST
     @Path("/rm/node/lock")
     @Produces(MediaType.APPLICATION_JSON)

@@ -213,6 +213,16 @@ public interface RMServiceAsync {
     void undeployNodeSource(String sessionId, String nodeSourceName, boolean force, AsyncCallback<String> callback);
 
     /**
+     * Redeploys a node source
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to redeploy
+     * @param callback  @throws RestServerException
+     * @throws ServiceException
+     */
+    void redeployNodeSource(String sessionId, String nodeSourceName, AsyncCallback<String> callback);
+
+    /**
      * Lock a set of nodes
      * @param sessionId current session
      * @param nodeUrls urls of nodes to lock

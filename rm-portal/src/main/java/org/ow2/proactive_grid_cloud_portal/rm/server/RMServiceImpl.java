@@ -330,6 +330,13 @@ public class RMServiceImpl extends Service implements RMService {
     }
 
     @Override
+    public String redeployNodeSource(String sessionId, String nodeSourceName)
+            throws RestServerException, ServiceException {
+        return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.redeployNodeSource(sessionId,
+                                                                                                              nodeSourceName));
+    }
+
+    @Override
     public String getInfrastructures(String sessionId) throws RestServerException, ServiceException {
         return executeFunctionReturnStreamAsStringWithoutNewLines(restClient -> restClient.infrastructures(sessionId));
     }
