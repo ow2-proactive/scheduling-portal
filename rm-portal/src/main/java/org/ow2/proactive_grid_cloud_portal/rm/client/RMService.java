@@ -235,6 +235,17 @@ public interface RMService extends RemoteService {
             throws RestServerException, ServiceException;
 
     /**
+     * Redeploys a node source
+     *
+     * @param sessionId current session
+     * @param nodeSourceName name of the node source to redeploy
+    
+     * @throws RestServerException
+     * @throws ServiceException
+     */
+    String redeployNodeSource(String sessionId, String nodeSourceName) throws RestServerException, ServiceException;
+
+    /**
      * lock a set of nodes
      * @param sessionId current session
      * @param nodeUrls nodes to lock
