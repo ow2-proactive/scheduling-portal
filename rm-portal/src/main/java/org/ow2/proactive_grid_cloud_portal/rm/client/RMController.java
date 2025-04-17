@@ -885,12 +885,14 @@ public class RMController extends Controller implements UncaughtExceptionHandler
         String sourceDescription = getJsonStringNullable(nsObj, "sourceDescription");
         LinkedHashMap<String, String> additionalInformation = getJsonMapNullable(nsObj, "additionalInformation");
         String nodeSourceAdmin = nsObj.get("nodeSourceAdmin").isString().stringValue();
+        String tenant = nsObj.get("tenant").isString() != null ? nsObj.get("tenant").isString().stringValue() : null;
         String nodeSourceStatus = getJsonStringNullable(nsObj, "nodeSourceStatus");
         String eventType = getJsonStringNullable(nsObj, "eventType");
         return new NodeSource(sourceName,
                               sourceDescription,
                               additionalInformation,
                               nodeSourceAdmin,
+                              tenant,
                               nodeSourceStatus,
                               eventType);
     }

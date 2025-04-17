@@ -76,6 +76,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
 
     public static final String OWNER_FIELD = "Owner";
 
+    public static final String TENANT_FIELD = "Tenant";
+
     public static final String NUMBER_OF_NODES = "#Nodes";
 
     public static final String NUMBER_OF_DEPLOYING_NODES = "#Depl";
@@ -159,6 +161,7 @@ public class TreeView implements NodesListener, NodeSelectedListener {
             super.setAttribute(POLICY_FIELD, nodeSourceDisplayedDescription.getPolicy());
             super.setAttribute(ACCESS_FIELD, nodeSourceDisplayedDescription.getAccess());
             super.setAttribute(OWNER_FIELD, ns.getNodeSourceAdmin());
+            super.setAttribute(TENANT_FIELD, ns.getTenant());
             this.rmNS = ns;
             this.setAttribute(NODE_ID, ns.getSourceName());
 
@@ -299,6 +302,11 @@ public class TreeView implements NodesListener, NodeSelectedListener {
         ownerField.setAlign(Alignment.CENTER);
         ownerField.setCanSort(true);
         ownerField.setWidth("10%");
+        TreeGridField tenantField = new TreeGridField(TENANT_FIELD);
+        tenantField.setHidden(true);
+        tenantField.setAlign(Alignment.CENTER);
+        tenantField.setCanSort(true);
+        tenantField.setWidth("10%");
         TreeGridField numberOfNodesField = new TreeGridField(NUMBER_OF_NODES);
         numberOfNodesField.setAlign(Alignment.CENTER);
         numberOfNodesField.setType(ListGridFieldType.INTEGER);
@@ -326,7 +334,8 @@ public class TreeView implements NodesListener, NodeSelectedListener {
                            infrastructureField,
                            policyField,
                            accessField,
-                           ownerField);
+                           ownerField,
+                           tenantField);
         treeGrid.setSortField(NODE_SOURCES);
         treeGrid.setCanDragSelectText(true);
 

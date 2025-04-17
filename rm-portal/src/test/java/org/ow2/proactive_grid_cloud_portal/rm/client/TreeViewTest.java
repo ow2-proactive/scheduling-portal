@@ -73,6 +73,7 @@ public class TreeViewTest {
                                                          "Infrastructure: AzureInfrastructure, Policy: TestPolicy userAccessType: [ALL], providerAccessType: [ALL]",
                                                          new LinkedHashMap<>(),
                                                          "",
+                                                         "",
                                                          "undeployed",
                                                          "");
             nodeSource.setNodeSourceStatus(NodeSourceStatus.NODES_DEPLOYED);
