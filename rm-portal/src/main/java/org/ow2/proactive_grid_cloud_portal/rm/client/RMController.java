@@ -622,6 +622,7 @@ public class RMController extends Controller implements UncaughtExceptionHandler
      */
     private void updateModelBasedOnResponse(String json) {
         JSONObject obj = this.parseJSON(json).isObject();
+
         final long currentCounter = model.getMaxCounter();
 
         final Long latestCounter = Long.valueOf(obj.get("latestCounter").isNumber().toString());
