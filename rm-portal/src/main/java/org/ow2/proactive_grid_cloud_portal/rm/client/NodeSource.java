@@ -54,6 +54,9 @@ public class NodeSource {
     /** login of the user that created the NS */
     private String nodeSourceAdmin;
 
+    /** tenant of the user that created the NS */
+    private String tenant;
+
     /** if the node source is not deployed, it has no node */
     private NodeSourceStatus nodeSourceStatus;
 
@@ -68,11 +71,12 @@ public class NodeSource {
     }
 
     NodeSource(String sourceName, String sourceDescription, LinkedHashMap<String, String> additionalInformation,
-            String nodeSourceAdmin, String nodeSourceStatus, String eventType) {
+            String nodeSourceAdmin, String tenant, String nodeSourceStatus, String eventType) {
         this.sourceName = sourceName;
         this.sourceDescription = sourceDescription;
         this.additionalInformation = new LinkedHashMap<>(additionalInformation);
         this.nodeSourceAdmin = nodeSourceAdmin;
+        this.tenant = tenant;
         this.nodeSourceStatus = NodeSourceStatus.getEnum(nodeSourceStatus);
         this.eventType = eventType;
 
@@ -85,6 +89,7 @@ public class NodeSource {
         this.additionalInformation = new LinkedHashMap<>(t.additionalInformation);
         this.sourceName = t.sourceName;
         this.nodeSourceAdmin = t.nodeSourceAdmin;
+        this.tenant = t.tenant;
         this.nodeSourceStatus = t.nodeSourceStatus;
         this.eventType = t.eventType;
 
@@ -190,6 +195,10 @@ public class NodeSource {
 
     public String getNodeSourceAdmin() {
         return nodeSourceAdmin;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 
     public NodeSourceStatus getNodeSourceStatus() {
